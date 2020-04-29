@@ -20,6 +20,7 @@
 			"contactName": "Kevin Mayfield",
 			"contactEmail": "Kevin.mayfield@mayfield-is.co.uk",
 			"link": "https://data.developer.nhs.uk/ccri/exp",
+            "city": "UK",
 			"lat": 55.378052,
 			"lon": -3.435973,
 			"added": "2019-08-19"
@@ -29,6 +30,7 @@
 			"contactName": "David Hay",
 			"contactEmail": "david.hay25@gmail.com",
 			"link": "http://clinfhir.com",
+            "city": "New Zealand",
 			"lat": -42.651737,
 			"lon": 171.926909,
 			"added": "2019-08-18"
@@ -324,6 +326,17 @@
 			"city": "Germany",
 			"lat": 51.165691,
 			"lon": 10.451526
+		},
+		{
+			"title": "VEIG",
+			"description": "Vietnam Ehealth Innovation Group",
+			"link": "http://emr.com.vn",
+			"contactName": "Nguyen Hai Phong",
+			"contactEmail": "haiphong.nguyen@gmail.com",
+			"city": "Hanoi,Vietnam",
+			"lat": 21.026058,
+			"lon": 105.822715,
+			"added": "2020-03-06"
 		}
 
 	]

@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -20,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -1053,6 +1056,48 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		assertThat(foundResources, contains(patId.getValue()));
 
 	}
+
+	@Test
+	public void testProgramaticallyContainedByReferenceAreStillResolvable() {
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique");
+		sp.setName("MEDICATIONADMINISTRATION-INGREDIENT-MEDICATION");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("medicationadministration-ingredient-medication");
+		sp.addBase("MedicationAdministration");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("MedicationAdministration.medication.resolve().ingredient.item.as(Reference).resolve().code");
+		mySearchParameterDao.create(sp);
+		mySearchParamRegistry.forceRefresh();
+
+		Medication ingredient = new Medication();
+		ingredient.getCode().addCoding().setSystem("system").setCode("code");
+
+		Medication medication = new Medication();
+		medication.addIngredient().setItem(new Reference(ingredient));
+
+		MedicationAdministration medAdmin = new MedicationAdministration();
+		medAdmin.setMedication(new Reference(medication));
+
+		myMedicationAdministrationDao.create(medAdmin);
+		
+		runInTransaction(()->{
+			List<ResourceIndexedSearchParamToken> tokens = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().equals("medicationadministration-ingredient-medication"))
+				.collect(Collectors.toList());
+			ourLog.info("Tokens: {}", tokens);
+			assertEquals(tokens.toString(), 1, tokens.size());
+
+		});
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("medicationadministration-ingredient-medication", new TokenParam("system","code"));
+		assertEquals(1, myMedicationAdministrationDao.search(map).size().intValue());
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

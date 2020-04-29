@@ -1,31 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r5.model.*;
-import org.hl7.fhir.r5.utils.FHIRLexer;
-import org.hl7.fhir.r5.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
@@ -49,9 +34,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FhirResourceDaoSearchParameterR5 extends BaseHapiFhirResourceDao<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
-	public static final DefaultProfileValidationSupport VALIDATION_SUPPORT = new DefaultProfileValidationSupport();
-	@Autowired
-	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
@@ -86,11 +68,12 @@ public class FhirResourceDaoSearchParameterR5 extends BaseHapiFhirResourceDao<Se
 
 		Enum<?> status = theResource.getStatus();
 		List<CodeType> base = theResource.getBase();
+		String code = theResource.getCode();
 		String expression = theResource.getExpression();
 		FhirContext context = getContext();
 		Enum<?> type = theResource.getType();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamExtractor, type, status, base, expression, context, getConfig());
+		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamRegistry, mySearchParamExtractor, code, type, status, base, expression, context, getConfig());
 	}
 
 

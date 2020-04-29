@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -38,7 +38,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -180,61 +179,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		param = map.get("gender");
 		assertNull(param);
-
-	}
-
-	@Test
-	public void testConformanceOverrideNotAllowed() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
-
-		CapabilityStatement conformance = ourClient
-			.fetchConformance()
-			.ofType(CapabilityStatement.class)
-			.execute();
-		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
-
-		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
-		assertNull(param);
-
-		param = map.get("gender");
-		assertNotNull(param);
-
-		// Add a custom search parameter
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("foo");
-		fooSp.setName("foo");
-		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Patient.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(fooSp, mySrd);
-
-		// Disable an existing parameter
-		fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("gender");
-		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("Gender");
-		fooSp.setExpression("Patient.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.RETIRED);
-		mySearchParameterDao.create(fooSp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
-		conformance = ourClient
-			.fetchConformance()
-			.ofType(CapabilityStatement.class)
-			.execute();
-		map = extractSearchParams(conformance, "Patient");
-
-		param = map.get("foo");
-		assertEquals("foo", param.getName());
-
-		param = map.get("gender");
-		assertNotNull(param);
 
 	}
 

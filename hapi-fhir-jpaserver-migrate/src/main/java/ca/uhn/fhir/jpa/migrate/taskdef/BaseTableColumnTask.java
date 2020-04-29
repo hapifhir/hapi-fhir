@@ -27,7 +27,7 @@ import org.thymeleaf.util.StringUtils;
 
 import java.util.Locale;
 
-public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends BaseTableTask<T> {
+public abstract class BaseTableColumnTask extends BaseTableTask {
 
 	private String myColumnName;
 	//If a concrete class decides to, they can define a custom WHERE clause for the task.
@@ -37,10 +37,9 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends Ba
 		super(theProductVersion, theSchemaVersion);
 	}
 
-	@SuppressWarnings("unchecked")
-	public T setColumnName(String theColumnName) {
+	public BaseTableColumnTask setColumnName(String theColumnName) {
 		myColumnName = StringUtils.toUpperCase(theColumnName, Locale.US);
-		return (T) this;
+		return this;
 	}
 
 	public String getColumnName() {
@@ -65,8 +64,8 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask<T>> extends Ba
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject) {
-		BaseTableColumnTask<T> otherObject = (BaseTableColumnTask<T>) theOtherObject;
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		BaseTableColumnTask otherObject = (BaseTableColumnTask) theOtherObject;
 		super.generateEquals(theBuilder, otherObject);
 		theBuilder.append(myColumnName, otherObject.myColumnName);
 	}

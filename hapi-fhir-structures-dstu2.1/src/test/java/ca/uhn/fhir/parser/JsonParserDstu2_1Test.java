@@ -13,6 +13,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -1098,8 +1099,8 @@ public class JsonParserDstu2_1Test {
 		assertEquals(null, parsed.getGenderElement().getValueAsString());
 		
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq(""), msgCaptor.capture());
-		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
+		verify(errorHandler, times(1)).invalidValue(any(IParseLocation.class), eq(""), msgCaptor.capture());
+		assertEquals("Attribute value must not be empty (\"\")", msgCaptor.getValue());
 		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		assertEquals("{\"resourceType\":\"Patient\"}", encoded);
@@ -1118,7 +1119,7 @@ public class JsonParserDstu2_1Test {
 		assertEquals("foo", parsed.getGenderElement().getValueAsString());
 		
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(any(IParseLocation.class), eq("foo"), msgCaptor.capture());
 		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
 		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1138,7 +1139,7 @@ public class JsonParserDstu2_1Test {
 		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
 		
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(any(IParseLocation.class), eq("foo"), msgCaptor.capture());
 		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
 		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1518,13 +1519,13 @@ public class JsonParserDstu2_1Test {
 			ourCtx.newJsonParser().parseResource("FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
 		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());

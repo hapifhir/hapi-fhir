@@ -1,17 +1,17 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -19,7 +19,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -52,30 +51,28 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.Assert.fail;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
-	protected static JpaValidationSupportChainR4 myValidationSupport;
+	protected static IValidationSupport myValidationSupport;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
 	protected static String ourServerBase;
 	protected static SearchParamRegistryImpl ourSearchParamRegistry;
-	private static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	protected static Server ourServer;
+	private static DatabaseBackedPagingProvider ourPagingProvider;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
-	protected static Server ourServer;
 	protected IGenericClient ourClient;
-	ResourceCountCache myResourceCountsCache;
-	private TerminologyUploaderProvider myTerminologyUploaderProvider;
-	private boolean ourRestHookSubscriptionInterceptorRequested;
-
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+	ResourceCountCache myResourceCountsCache;
+	private TerminologyUploaderProvider myTerminologyUploaderProvider;
+	private boolean ourRestHookSubscriptionInterceptorRequested;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -108,10 +105,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
-
-			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(ourRestServer, mySystemDao, myDaoConfig);
-			confProvider.setImplementationDescription("THIS IS THE DESC");
-			ourRestServer.setServerConformanceProvider(confProvider);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 
@@ -155,18 +148,24 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			ourRestServer.registerInterceptor(corsInterceptor);
 
+			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
+			confProvider.setImplementationDescription("THIS IS THE DESC");
+			ourRestServer.setServerConformanceProvider(confProvider);
+
 			server.setHandler(proxyHandler);
 			JettyUtil.startServer(server);
-            ourPort = JettyUtil.getPortForStartedServer(server);
-            ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
+			ourPort = JettyUtil.getPortForStartedServer(server);
+			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
-			myValidationSupport = wac.getBean(JpaValidationSupportChainR4.class);
+			myValidationSupport = wac.getBean(IValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
-			ourSubscriptionMatcherInterceptor.start();
 
+			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
+
+			myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
@@ -203,18 +202,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	}
 
 	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
-		for (int i = 0; ; i++) {
-			if (i == 10) {
-				fail("Failed to init subscriptions");
-			}
-			try {
-				mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
-				break;
-			} catch (ResourceVersionConflictException e) {
-				Thread.sleep(250);
-			}
-		}
-
 		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
 		Thread.sleep(500);
 	}
@@ -225,7 +212,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;
-		myValidationSupport.flush();
+		myValidationSupport.invalidateCaches();
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;

@@ -27,7 +27,12 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Value for {@link Hook#value()}
@@ -60,12 +65,16 @@ public enum Pointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the request
 	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * Hook methods must return <code>void</code>.
 	 */
 	CLIENT_REQUEST(void.class,
-		"ca.uhn.fhir.rest.client.api.IHttpRequest"
+		"ca.uhn.fhir.rest.client.api.IHttpRequest",
+		"ca.uhn.fhir.rest.client.api.IRestfulClient"
 	),
 
 	/**
@@ -77,7 +86,12 @@ public enum Pointcut {
 	 * <ul>
 	 * <li>
 	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the request
-	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the response
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.client.api.IHttpResponse - The details of the response
+	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -85,7 +99,8 @@ public enum Pointcut {
 	 */
 	CLIENT_RESPONSE(void.class,
 		"ca.uhn.fhir.rest.client.api.IHttpRequest",
-		"ca.uhn.fhir.rest.client.api.IHttpResponse"
+		"ca.uhn.fhir.rest.client.api.IHttpResponse",
+		"ca.uhn.fhir.rest.client.api.IRestfulClient"
 	),
 
 	/**
@@ -374,6 +389,44 @@ public enum Pointcut {
 	),
 
 
+	/**
+	 * <b>Server Hook:</b>
+	 * This method is called when a stream writer is generated that will be used to stream a non-binary response to
+	 * a client. Hooks may return a wrapped writer which adds additional functionality as needed.
+	 *
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * java.io.Writer - The response writing Writer. Typically a hook will wrap this writer and layer additional functionality
+	 * into the wrapping writer.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hook methods should return a {@link Writer} instance that will be used to stream the response. Hook methods
+	 * should not throw any exception.
+	 * </p>
+	 *
+	 * @since 5.0.0
+	 */
+	SERVER_OUTGOING_WRITER_CREATED(Writer.class,
+		"java.io.Writer",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		),
+
 
 	/**
 	 * <b>Server Hook:</b>
@@ -551,7 +604,7 @@ public enum Pointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
@@ -560,7 +613,7 @@ public enum Pointcut {
 	 * returns <code>false</code>, subscription processing will not proceed for the given resource;
 	 * </p>
 	 */
-	SUBSCRIPTION_RESOURCE_MODIFIED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	SUBSCRIPTION_RESOURCE_MODIFIED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
 
 
 	/**
@@ -574,8 +627,8 @@ public enum Pointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
 	 * <li>ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult</li>
 	 * </ul>
 	 * <p>
@@ -584,7 +637,7 @@ public enum Pointcut {
 	 * returns <code>false</code>, delivery will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_RESOURCE_MATCHED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult"),
+	SUBSCRIPTION_RESOURCE_MATCHED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -593,14 +646,14 @@ public enum Pointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - Hooks should not modify this parameter as changes will not have any effect.</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - Hooks should not modify this parameter as changes will not have any effect.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS(void.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -613,8 +666,8 @@ public enum Pointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
 	 * </ul>
 	 * <p>
 	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
@@ -622,7 +675,7 @@ public enum Pointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+	SUBSCRIPTION_BEFORE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -632,14 +685,14 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * </p>
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+	SUBSCRIPTION_AFTER_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
 
 
 	/**
@@ -651,7 +704,7 @@ public enum Pointcut {
 	 * </p>
 	 * <ul>
 	 * <li>java.lang.Exception - The exception that caused the failure.  Note this could be an exception thrown by a SUBSCRIPTION_BEFORE_DELIVERY or SUBSCRIPTION_AFTER_DELIVERY interceptor</li>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage - the message that triggered the exception</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage - the message that triggered the exception</li>
 	 * <li>java.lang.Exception</li>
 	 * </ul>
 	 * <p>
@@ -663,7 +716,7 @@ public enum Pointcut {
 	 * taken for the delivery.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_DELIVERY_FAILED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage", "java.lang.Exception"),
+	SUBSCRIPTION_AFTER_DELIVERY_FAILED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "java.lang.Exception"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -674,14 +727,14 @@ public enum Pointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+	SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -693,8 +746,8 @@ public enum Pointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
 	 * </ul>
 	 * <p>
 	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
@@ -702,7 +755,7 @@ public enum Pointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -712,7 +765,7 @@ public enum Pointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
@@ -721,7 +774,7 @@ public enum Pointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
 
 
 	/**
@@ -732,14 +785,14 @@ public enum Pointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
 
 
 	/**
@@ -753,13 +806,13 @@ public enum Pointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED(void.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription"),
+	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription"),
 
 
 	/**
@@ -804,7 +857,7 @@ public enum Pointcut {
 		void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.delete.DeleteConflictList",
+		"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
 		"org.hl7.fhir.instance.model.api.IBaseResource"
 	),
 
@@ -1205,13 +1258,13 @@ public enum Pointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a resource delete operation is about to fail due to referential integrity conflicts.
+	 * Invoked when a resource delete operation is about to fail due to referential integrity hcts.
 	 * <p>
 	 * Hooks will have access to the list of resources that have references to the resource being deleted.
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.jpa.delete.DeleteConflictList - The list of delete conflicts</li>
+	 * <li>ca.uhn.fhir.jpa.api.model.DeleteConflictList - The list of delete conflicts</li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1236,7 +1289,7 @@ public enum Pointcut {
 		// Return type
 		"ca.uhn.fhir.jpa.delete.DeleteConflictOutcome",
 		// Params
-		"ca.uhn.fhir.jpa.delete.DeleteConflictList",
+		"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
@@ -1317,6 +1370,83 @@ public enum Pointcut {
 		void.class,
 		// Params
 		"java.util.concurrent.atomic.AtomicInteger",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before FHIR <b>create</b> operation to request the identification of the partition ID to be associated
+	 * with the resource being created. This hook will only be called if partitioning is enabled in the JPA
+	 * server.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseResource - The resource that will be created and needs a tenant ID assigned.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.RequestPartitionId</code> or <code>null</code>.
+	 * </p>
+	 */
+	STORAGE_PARTITION_IDENTIFY_CREATE(
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before FHIR read/access operation (e.g. <b>read/vread</b>, <b>search</b>, <b>history</b>, etc.) operation to request the
+	 * identification of the partition ID to be associated with the resource(s) being searched for, read, etc.
+	 * <p>
+	 * This hook will only be called if
+	 * partitioning is enabled in the JPA server.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.RequestPartitionId</code> or <code>null</code>.
+	 * </p>
+	 */
+	STORAGE_PARTITION_IDENTIFY_READ(
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
@@ -1643,12 +1773,12 @@ public enum Pointcut {
 	 * </p>
 	 * <p>
 	 * THIS IS AN EXPERIMENTAL HOOK AND MAY BE REMOVED OR CHANGED WITHOUT WARNING.
-	 *	</p>
-	 *	<p>
+	 * </p>
+	 * <p>
 	 * Note that this is a performance tracing hook. Use with caution in production
 	 * systems, since calling it may (or may not) carry a cost.
-	 *	</p>
-	 *	<p>
+	 * </p>
+	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
 	 * <ul>
@@ -1722,9 +1852,7 @@ public enum Pointcut {
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
-	TEST_RO(BaseServerResponseException.class, String.class.getName(), String.class.getName())
-
-	;
+	TEST_RO(BaseServerResponseException.class, String.class.getName(), String.class.getName());
 
 	private final List<String> myParameterTypes;
 	private final Class<?> myReturnType;

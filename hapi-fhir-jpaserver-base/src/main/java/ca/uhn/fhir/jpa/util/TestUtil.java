@@ -28,6 +28,7 @@ import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.annotations.Subselect;
 import org.hibernate.validator.constraints.Length;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
@@ -39,7 +40,11 @@ import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Ascii.toUpperCase;
@@ -96,7 +101,10 @@ public class TestUtil {
 	private static void scanClass(Set<String> theNames, Class<?> theClazz, boolean theIsSuperClass) {
 		ourLog.info("Scanning: {}", theClazz.getSimpleName());
 
-		scan(theClazz, theNames, theIsSuperClass);
+		Subselect subselect = theClazz.getAnnotation(Subselect.class);
+		boolean isView = (subselect != null);
+
+		scan(theClazz, theNames, theIsSuperClass, isView);
 
 		for (Field nextField : theClazz.getDeclaredFields()) {
 			if (Modifier.isStatic(nextField.getModifiers())) {
@@ -104,7 +112,7 @@ public class TestUtil {
 			}
 
 			ourLog.info(" * Scanning field: {}", nextField.getName());
-			scan(nextField, theNames, theIsSuperClass);
+			scan(nextField, theNames, theIsSuperClass, isView);
 
 			Lob lobClass = nextField.getAnnotation(Lob.class);
 			if (lobClass != null) {
@@ -118,11 +126,13 @@ public class TestUtil {
 				boolean hasColumn = nextField.getAnnotation(Column.class) != null;
 				boolean hasJoinColumn = nextField.getAnnotation(JoinColumn.class) != null;
 				boolean hasEmbeddedId = nextField.getAnnotation(EmbeddedId.class) != null;
+				boolean hasEmbedded = nextField.getAnnotation(Embedded.class) != null;
 				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
 				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
 				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
 				boolean isOtherSideOfOneToOneMapping = oneToOne != null && isNotBlank(oneToOne.mappedBy());
 				Validate.isTrue(
+					hasEmbedded ||
 					hasColumn ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||
@@ -140,7 +150,7 @@ public class TestUtil {
 		scanClass(theNames, theClazz.getSuperclass(), true);
 	}
 
-	private static void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass) {
+	private static void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {
 		Table table = theAnnotatedElement.getAnnotation(Table.class);
 		if (table != null) {
 
@@ -198,7 +208,7 @@ public class TestUtil {
 			 */
 			if (field.getType().equals(String.class)) {
 				if (!hasLob) {
-					if (column.length() == 255) {
+					if (!theIsView && column.length() == 255) {
 						throw new IllegalStateException("Field does not have an explicit maximum length specified: " + field);
 					}
 					if (column.length() > MAX_COL_LENGTH) {

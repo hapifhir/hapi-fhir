@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -36,7 +35,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
@@ -66,7 +65,6 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -164,7 +162,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testExtensionUrlWithHl7UrlPost() throws IOException {
 
-		ValueSet vs = myValidationSupport.fetchResource(myFhirCtx, ValueSet.class, "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode");
+		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode");
 		myValueSetDao.create(vs);
 
 
@@ -348,7 +346,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.returnBundle(Bundle.class)
 				.execute();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid resource type: FOO", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: Invalid/unsupported resource type: \"FOO\"", e.getMessage());
 		}
 
 	}
@@ -816,15 +814,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		myDaoConfig.setAllowMultipleDelete(true);
 
-		//@formatter:off
-		IBaseOperationOutcome response = ourClient
+		MethodOutcome response = ourClient
 			.delete()
 			.resourceConditionalByType(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().code(methodName))
 			.execute();
-		//@formatter:on
 
-		String encoded = myFhirCtx.newXmlParser().encodeResourceToString(response);
+		String encoded = myFhirCtx.newXmlParser().encodeResourceToString(response.getOperationOutcome());
 		ourLog.info(encoded);
 		assertThat(encoded, containsString(
 			"<issue><severity value=\"information\"/><code value=\"informational\"/><diagnostics value=\"Successfully deleted 2 resource(s) in "));
@@ -1030,8 +1026,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p.addName().setFamily("FAM");
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		IBaseOperationOutcome resp = ourClient.delete().resourceById(id).execute();
-		OperationOutcome oo = (OperationOutcome) resp;
+		MethodOutcome resp = ourClient.delete().resourceById(id).execute();
+		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
 	}
 
@@ -4276,55 +4272,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
-		}
-
-	}
-
-	@Test
-	public void testNearSearchApproximate() {
-		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_UHN;
-		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
-		loc.setPosition(position);
-		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
-
-		{ // In the box
-			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
-			String url = "/Location?" +
-				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTest.LONGITUDE_CHIN +
-				"&" +
-				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
-
-			Bundle actual = ourClient
-				.search()
-				.byUrl(ourServerBase + "/" + url)
-				.encodedJson()
-				.prettyPrint()
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertEquals(1, actual.getEntry().size());
-			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
-		}
-		{ // Outside the box
-			double tooSmallDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN / 2;
-			String url = "/Location?" +
-				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTest.LONGITUDE_CHIN +
-				"&" +
-				Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
-
-			myCaptureQueriesListener.clear();
-			Bundle actual = ourClient
-				.search()
-				.byUrl(ourServerBase + "/" + url)
-				.encodedJson()
-				.prettyPrint()
-				.returnBundle(Bundle.class)
-				.execute();
-			myCaptureQueriesListener.logSelectQueries();
-
-			assertEquals(0, actual.getEntry().size());
 		}
 
 	}

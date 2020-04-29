@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -241,48 +241,6 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(appId.getValue(), p2id.getValue(), p1id.getValue()));
 
-	}
-
-	@Test
-	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingDisabled() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
-
-		SearchParameter memberSp = new SearchParameter();
-		memberSp.setCode("member");
-		memberSp.setBase(ResourceTypeEnum.GROUP);
-		memberSp.setType(SearchParamTypeEnum.REFERENCE);
-		memberSp.setXpath("Group.member.entity");
-		memberSp.setXpathUsage(XPathUsageTypeEnum.NORMAL);
-		memberSp.setStatus(ConformanceResourceStatusEnum.RETIRED);
-		mySearchParameterDao.create(memberSp, mySrd);
-
-		SearchParameter identifierSp = new SearchParameter();
-		identifierSp.setCode("identifier");
-		identifierSp.setBase(ResourceTypeEnum.GROUP);
-		identifierSp.setType(SearchParamTypeEnum.TOKEN);
-		identifierSp.setXpath("Group.identifier");
-		identifierSp.setXpathUsage(XPathUsageTypeEnum.NORMAL);
-		identifierSp.setStatus(ConformanceResourceStatusEnum.RETIRED);
-		mySearchParameterDao.create(identifierSp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
-		Patient p = new Patient();
-		p.addName().addGiven("G");
-		IIdType pid = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-
-		Group g = new Group();
-		g.addIdentifier().setSystem("urn:foo").setValue("bar");
-		g.addMember().getEntity().setReference(pid);
-		myGroupDao.create(g);
-
-		assertThat(myResourceLinkDao.findAll(), not(empty()));
-		assertThat(ListUtil.filter(myResourceIndexedSearchParamTokenDao.findAll(), new ListUtil.Filter<ResourceIndexedSearchParamToken>() {
-			@Override
-			public boolean isOut(ResourceIndexedSearchParamToken object) {
-				return !object.getResourceType().equals("Group") || object.isMissing();
-			}
-		}), not(empty()));
 	}
 
 	@Test

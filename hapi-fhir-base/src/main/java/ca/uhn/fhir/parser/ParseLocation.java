@@ -54,6 +54,13 @@ class ParseLocation implements IParseLocation {
 
 	@Override
 	public String toString() {
-		return defaultString(myParentElementName);
+		return "[element=\"" + defaultString(myParentElementName) + "\"]";
+	}
+
+	/**
+	 * Factory method
+	 */
+	static ParseLocation fromElementName(String theChildName) {
+		return new ParseLocation(theChildName);
 	}
 }

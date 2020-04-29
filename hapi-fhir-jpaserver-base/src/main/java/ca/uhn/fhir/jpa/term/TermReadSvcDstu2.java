@@ -20,13 +20,16 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -63,11 +66,6 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	}
 
 	@Override
-	public CodeSystem getCodeSystemFromContext(String theSystem) {
-		return null;
-	}
-
-	@Override
 	protected ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
 		throw new UnsupportedOperationException();
 	}
@@ -78,22 +76,17 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	}
 
 	@Override
-	public IBaseResource expandValueSet(IBaseResource theValueSetToExpand) {
+	protected CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IBaseResource expandValueSet(IBaseResource theValueSetToExpand, int theOffset, int theCount) {
+	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -107,7 +100,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		org.hl7.fhir.dstu2.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		org.hl7.fhir.dstu2.model.ValueSet system = (org.hl7.fhir.dstu2.model.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -132,7 +125,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		org.hl7.fhir.dstu2.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		org.hl7.fhir.dstu2.model.ValueSet system = (org.hl7.fhir.dstu2.model.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -140,7 +133,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	}
 
 	@Override
-	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+	public IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInPreExpandedValueSet(ValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		throw new UnsupportedOperationException();
 	}
 

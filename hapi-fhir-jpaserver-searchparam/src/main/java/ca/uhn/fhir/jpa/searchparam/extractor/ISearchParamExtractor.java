@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -41,6 +42,8 @@ public interface ISearchParamExtractor {
 	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource);
 
 	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource);
+
+	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, RuntimeSearchParam theSearchParam);
 
 	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource);
 

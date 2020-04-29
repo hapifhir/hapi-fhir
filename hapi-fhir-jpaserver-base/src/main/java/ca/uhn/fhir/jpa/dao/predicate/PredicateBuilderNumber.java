@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -53,16 +54,19 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 	public Predicate addPredicate(String theResourceName,
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation) {
+											SearchFilterParser.CompareOperation operation,
+											RequestPartitionId theRequestPartitionId) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = createJoin(SearchBuilderJoinEnum.NUMBER, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
+		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
+
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof NumberParam) {
@@ -94,8 +98,8 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 
 				String invalidMessageName = "invalidNumberPrefix";
 
-				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, nextOr, prefix, value, fromObj, invalidMessageName);
-				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric);
+				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myCriteriaBuilder, nextOr, prefix, value, fromObj, invalidMessageName, theRequestPartitionId);
+				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric, theRequestPartitionId);
 				codePredicates.add(predicateOuter);
 
 			} else {
@@ -104,7 +108,8 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 
 		}
 
-		Predicate predicate = myBuilder.or(toArray(codePredicates));
+		Predicate predicate = myCriteriaBuilder.or(toArray(codePredicates));
+		myQueryRoot.setHasIndexJoins();
 		myQueryRoot.addPredicate(predicate);
 		return predicate;
 	}

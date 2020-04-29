@@ -1,10 +1,26 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.IJpaDao;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -13,18 +29,17 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -75,7 +90,11 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -84,7 +103,12 @@ import javax.xml.stream.events.XMLEvent;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /*
  * #%L
@@ -165,6 +189,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
@@ -199,6 +225,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				retVal.setResourceType(theEntity.getResourceType());
 				retVal.setForcedId(theId.getIdPart());
 				retVal.setResource(theEntity);
+				retVal.setPartitionId(theEntity.getPartitionId());
 				theEntity.setForcedId(retVal);
 			}
 		}
@@ -392,8 +419,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		search = mySearchCacheSvc.save(search);
 
-		return new PersistedJpaBundleProvider(theRequest, search.getUuid(), this, mySearchBuilderFactory);
+		return myPersistedJpaBundleProviderFactory.newInstance(theRequest, search.getUuid());
 	}
+
+	@Autowired
+	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
 		String newVersion;
@@ -410,16 +441,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		IIdType newId = theResourceId.withVersion(newVersion);
 		theResource.getIdElement().setValue(newId.getValue());
 		theSavedEntity.setVersion(newVersionLong);
-	}
-
-	@Override
-	public void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider) {
-		theProvider.setContext(getContext());
-		theProvider.setEntityManager(myEntityManager);
-		theProvider.setPlatformTransactionManager(myPlatformTransactionManager);
-		theProvider.setSearchCacheSvc(mySearchCacheSvc);
-		theProvider.setSearchCoordinatorSvc(mySearchCoordinatorSvc);
-		theProvider.setInterceptorBroadcaster(myInterceptorBroadcaster);
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
@@ -617,6 +638,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
+
 		return retVal;
 	}
 
@@ -678,6 +700,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 		}
+
 		return retVal;
 	}
 
@@ -853,8 +876,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// 4. parse the text to FHIR
 		R retVal;
 		if (resourceEncoding != ResourceEncodingEnum.DEL) {
-			IParser parser = resourceEncoding.newParser(getContext(theEntity.getFhirVersion()));
-			parser.setParserErrorHandler(new LenientErrorHandler(false).setErrorOnInvalidValue(false));
+
+			LenientErrorHandler errorHandler = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
+			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler);
 
 			try {
 				retVal = parser.parseResource(resourceType, resourceText);
@@ -1072,6 +1096,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
 				provenance.setResourceHistoryTable(historyEntry);
 				provenance.setResourceTable(entity);
+				provenance.setPartitionId(entity.getPartitionId());
 				if (haveRequestId) {
 					provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
 				}
@@ -1146,7 +1171,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 				}
 
-				// Syncrhonize composite params
+				// Synchronize composite params
 				mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, entity, existingParams);
 			}
 		}
@@ -1360,11 +1385,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		validateMetaCount(totalMetaCount);
 
-	}
-
-	@Override
-	public ISearchParamRegistry getSearchParamRegistry() {
-		return mySearchParamRegistry;
 	}
 
 	@PostConstruct

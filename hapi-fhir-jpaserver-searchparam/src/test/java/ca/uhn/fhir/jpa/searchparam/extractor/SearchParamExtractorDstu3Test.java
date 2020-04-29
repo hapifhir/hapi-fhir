@@ -3,7 +3,18 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -12,15 +23,23 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Duration;
+import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.Normalizer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -40,6 +59,7 @@ public class SearchParamExtractorDstu3Test {
 		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.setPartitionConfigForUnitTest(new PartitionSettings());
 		extractor.start();
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
 		assertEquals(1, tokens.size());
@@ -113,9 +133,9 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
-			Patient resource = new Patient();
-			extractor.extractSearchParamStrings(resource);
+		searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+		Patient resource = new Patient();
+		extractor.extractSearchParamStrings(resource);
 
 		searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", null, RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
 		extractor.extractSearchParamStrings(resource);
@@ -144,6 +164,7 @@ public class SearchParamExtractorDstu3Test {
 
 		MySearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.setPartitionConfigForUnitTest(new PartitionSettings());
 		extractor.start();
 
 		{
@@ -281,7 +302,7 @@ public class SearchParamExtractorDstu3Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourValidationSupport = new DefaultProfileValidationSupport();
+		ourValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	}
 
 }

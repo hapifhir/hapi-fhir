@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -426,7 +426,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource contains reference to Organization/" + id1.getIdPart() + " but resource with ID " + id1.getIdPart() + " is actually of type Observation", e.getMessage());
+			assertEquals("Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
 		}
 
 		// Now with a forced ID

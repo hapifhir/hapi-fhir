@@ -58,6 +58,8 @@ public abstract class BaseQueryParameter implements IParameter {
 		return null;
 	}
 
+	protected abstract boolean supportsRepetition();
+
 	/**
 	 * Parameter should return true if {@link #parse(FhirContext, List)} should be called even if the query string
 	 * contained no values for the given parameter

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 
 import javax.annotation.Nullable;
@@ -31,5 +32,6 @@ public interface IPredicateBuilder {
 	Predicate addPredicate(String theResourceName,
 								  String theParamName,
 								  List<? extends IQueryParameterType> theList,
-								  SearchFilterParser.CompareOperation operation);
+								  SearchFilterParser.CompareOperation operation,
+								  RequestPartitionId theRequestPartitionId);
 }

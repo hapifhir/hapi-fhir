@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -157,7 +157,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidatorDstu3());
+		requestValidator.addValidatorModule(instanceValidator());
 
 		return requestValidator;
 	}

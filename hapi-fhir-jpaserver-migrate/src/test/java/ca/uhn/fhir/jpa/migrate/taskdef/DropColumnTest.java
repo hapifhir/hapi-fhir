@@ -4,11 +4,16 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
 public class DropColumnTest extends BaseTest {
+
+	public DropColumnTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testDropColumn() throws SQLException {

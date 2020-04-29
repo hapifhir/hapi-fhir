@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -26,7 +27,6 @@ import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -116,7 +116,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	@Qualifier("myOrganizationDaoR4")
 	private IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChainR4")
+	@Qualifier("myJpaValidationSupportChain")
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
@@ -309,10 +309,10 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	 */
 	@Test
 	public void testExpandValueSetContainingSystemIncludeWithNoCodes() throws IOException {
-		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/dstu3/iar/CodeSystem-iar-citizenship-status.xml");
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/r4/iar/CodeSystem-iar-citizenship-status.xml");
 		myCodeSystemDao.create(cs);
 
-		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/dstu3/iar/ValueSet-iar-citizenship-status.xml");
+		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/r4/iar/ValueSet-iar-citizenship-status.xml");
 		myValueSetDao.create(vs);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);

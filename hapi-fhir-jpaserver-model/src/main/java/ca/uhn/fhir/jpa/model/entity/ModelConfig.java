@@ -30,7 +30,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+// TODO: move this to ca.uhn.fhir.jpa.model.config
 public class ModelConfig {
+
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
 	 * values:
@@ -55,10 +57,9 @@ public class ModelConfig {
 	private boolean myAllowExternalReferences = false;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
-	private boolean myDefaultSearchParamsCanBeOverridden = false;
+	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
-	private boolean mySubscriptionMatchingEnabled = true;
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 	/**
 	 * Update setter javadoc if default changes.
@@ -81,7 +82,7 @@ public class ModelConfig {
 	 * the behaviour of the default search parameters.
 	 * </p>
 	 * <p>
-	 * The default value for this setting is {@code false}
+	 * The default value for this setting is {@code true}
 	 * </p>
 	 */
 	public boolean isDefaultSearchParamsCanBeOverridden() {
@@ -97,7 +98,7 @@ public class ModelConfig {
 	 * the behaviour of the default search parameters.
 	 * </p>
 	 * <p>
-	 * The default value for this setting is {@code false}
+	 * The default value for this setting is {@code true}
 	 * </p>
 	 */
 	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
@@ -331,26 +332,6 @@ public class ModelConfig {
 	 */
 	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
 		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
-	}
-
-	/**
-	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
-	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
-	 * @since 3.7.0
-	 */
-
-	public boolean isSubscriptionMatchingEnabled() {
-		return mySubscriptionMatchingEnabled;
-	}
-
-
-	/**
-	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
-	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
-	 * @since 3.7.0
-	 */
-	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
-		mySubscriptionMatchingEnabled = theSubscriptionMatchingEnabled;
 	}
 
 	@VisibleForTesting

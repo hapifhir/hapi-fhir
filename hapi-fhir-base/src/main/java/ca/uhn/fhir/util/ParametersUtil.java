@@ -30,6 +30,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 /**
  * Utilities for dealing with parameters resources in a version indepenedent way
@@ -37,12 +40,26 @@ import java.util.Optional;
 public class ParametersUtil {
 
 	public static List<String> getNamedParameterValuesAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
+		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
+	}
+
+	public static List<Integer> getNamedParameterValuesAsInteger(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		Function<IPrimitiveType<?>, Integer> mapper = t -> (Integer)t.getValue();
+		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
+	}
+
+	public static Optional<Integer> getNamedParameterValueAsInteger(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream().findFirst();
+	}
+
+	private static <T> List<T> extractNamedParameters(FhirContext theCtx, IBaseParameters theParameters, String theParameterName, Function<IPrimitiveType<?>, T> theMapper) {
 		Validate.notNull(theParameters, "theParameters must not be null");
 		RuntimeResourceDefinition resDef = theCtx.getResourceDefinition(theParameters.getClass());
 		BaseRuntimeChildDefinition parameterChild = resDef.getChildByName("parameter");
 		List<IBase> parameterReps = parameterChild.getAccessor().getValues(theParameters);
 
-		List<String> retVal = new ArrayList<>();
+		List<T> retVal = new ArrayList<>();
 
 		for (IBase nextParameter : parameterReps) {
 			BaseRuntimeElementCompositeDefinition<?> nextParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
@@ -62,12 +79,12 @@ public class ParametersUtil {
 			valueValues
 				.stream()
 				.filter(t -> t instanceof IPrimitiveType<?>)
-				.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
-				.filter(StringUtils::isNotBlank)
+				.map(t->((IPrimitiveType<?>) t))
+				.map(theMapper)
+				.filter(t -> t != null)
 				.forEach(retVal::add);
 
 		}
-
 		return retVal;
 	}
 
@@ -238,7 +255,7 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, coding);
 	}
 
-	private static void addPart(FhirContext theContext, IBase theParameter, String theName, IBase theValue) {
+	public static void addPart(FhirContext theContext, IBase theParameter, String theName, IBase theValue) {
 		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
 		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
 
@@ -251,5 +268,20 @@ public class ParametersUtil {
 		partChildElem.getChildByName("name").getMutator().addValue(part, name);
 
 		partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+	}
+
+	public static void addPartResource(FhirContext theContext, IBase theParameter, String theName, IBaseResource theValue) {
+		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
+		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
+
+		BaseRuntimeElementCompositeDefinition<?> partChildElem = (BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+		IBase part = partChildElem.newInstance();
+		partChild.getMutator().addValue(theParameter, part);
+
+		IPrimitiveType<String> name = (IPrimitiveType<String>) theContext.getElementDefinition("string").newInstance();
+		name.setValue(theName);
+		partChildElem.getChildByName("name").getMutator().addValue(part, name);
+
+		partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
 	}
 }

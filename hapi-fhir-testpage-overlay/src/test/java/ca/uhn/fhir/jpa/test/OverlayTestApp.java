@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.IResourceRetriever;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;

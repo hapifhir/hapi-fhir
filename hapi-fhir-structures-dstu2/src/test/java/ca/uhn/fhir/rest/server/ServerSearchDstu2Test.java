@@ -156,53 +156,47 @@ public class ServerSearchDstu2Test {
 
 	public static class DummyPatientResourceProvider {
 
-		//@formatter:off
 		@Search(allowUnknownParams=true)
 		public List<IBaseResource> searchParam1(
 				@RequiredParam(name = "param1") StringParam theParam) {
 			ourLastMethod = "searchParam1";
 			ourLastRef = theParam;
 			
-			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
 			patient.addName().addGiven("GIVEN");
 			retVal.add(patient);
 			return retVal;
 		}
-		//@formatter:on
 
-		//@formatter:off
 		@Search(allowUnknownParams=true)
 		public List<IBaseResource> searchParam2(
 				@RequiredParam(name = "param2") StringParam theParam) {
 			ourLastMethod = "searchParam2";
 			ourLastRef = theParam;
 			
-			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
 			patient.addName().addGiven("GIVEN");
 			retVal.add(patient);
 			return retVal;
 		}
-		//@formatter:on
 
-		//@formatter:off
 		@Search(allowUnknownParams=true)
 		public List<IBaseResource> searchParam3(
 				@RequiredParam(name = "param3") ReferenceParam theParam) {
 			ourLastMethod = "searchParam3";
 			ourLastRef2 = theParam;
 			
-			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
 			patient.addName().addGiven("GIVEN");
 			retVal.add(patient);
 			return retVal;
 		}
-		//@formatter:on
 
 	}
 

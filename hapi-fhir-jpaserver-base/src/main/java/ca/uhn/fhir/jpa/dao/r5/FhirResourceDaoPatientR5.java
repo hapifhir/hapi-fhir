@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.rest.api.CacheControlDirective;

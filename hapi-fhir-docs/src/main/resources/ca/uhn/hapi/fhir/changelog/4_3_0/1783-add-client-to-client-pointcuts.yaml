@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1783
+title: "The client interceptor pointcuts `CLIENT_REQUEST` and `CLIENT_RESPONSE` now allow a parameter of type `IRestfulClient` to be
+   injected, containing a reference to the client making the request. In addition, CLIENT_REQUEST interceptors are now able to
+   modify the URL of the request before it is performed."

@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
@@ -23,7 +22,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.Date;
 import java.util.UUID;
@@ -34,6 +32,7 @@ import static org.junit.Assert.*;
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImplR4Test.class);
+	public static final String TEST_FILTER = "Patient?gender=female";
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
 	@Autowired
@@ -134,13 +133,13 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		createResources();
 
 		// Create a bulk job
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, Sets.newHashSet(TEST_FILTER));
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
-		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient", status.getRequest());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter="+TEST_FILTER, status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();

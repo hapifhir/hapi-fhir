@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
@@ -56,9 +56,11 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
 	public static final long SEARCH_CLEANUP_JOB_INTERVAL_MILLIS = 10 * DateUtils.MILLIS_PER_SECOND;
+	public static final int DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND = 2000;
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseSearchCacheSvcImpl.class);
 	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
 	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
+	private static int ourMaximumSearchesToCheckForDeletionCandidacy = DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
 	private static Long ourNowForUnitTests;
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
@@ -66,7 +68,6 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	 * the result is to be deleted
 	 */
 	private long myCutoffSlack = SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
-
 	@Autowired
 	private ISearchDao mySearchDao;
 	@Autowired
@@ -104,7 +105,6 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		Validate.notBlank(theUuid);
 		return mySearchDao.findByUuidAndFetchIncludes(theUuid);
 	}
-
 
 	void setSearchDaoForUnitTest(ISearchDao theSearchDao) {
 		mySearchDao = theSearchDao;
@@ -166,18 +166,27 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
 		TransactionTemplate tt = new TransactionTemplate(myTxManager);
-		final Slice<Long> toDelete = tt.execute(theStatus ->
-			mySearchDao.findWhereCreatedBefore(cutoff, new Date(), PageRequest.of(0, 2000))
-		);
-		assert toDelete != null;
 
-		for (final Long nextSearchToDelete : toDelete) {
+		// Mark searches as deleted if they should be
+		final Slice<Long> toMarkDeleted = tt.execute(theStatus ->
+			mySearchDao.findWhereCreatedBefore(cutoff, new Date(), PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy))
+		);
+		assert toMarkDeleted != null;
+		for (final Long nextSearchToDelete : toMarkDeleted) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
 			tt.execute(t -> {
 				mySearchDao.updateDeleted(nextSearchToDelete, true);
 				return null;
 			});
+		}
 
+		// Delete searches that are marked as deleted
+		final Slice<Long> toDelete = tt.execute(theStatus ->
+			mySearchDao.findDeleted(PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy))
+		);
+		assert toDelete != null;
+		for (final Long nextSearchToDelete : toDelete) {
+			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
 			tt.execute(t -> {
 				deleteSearch(nextSearchToDelete);
 				return null;
@@ -192,7 +201,6 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			}
 		}
 	}
-
 
 	private void deleteSearch(final Long theSearchPid) {
 		mySearchDao.findById(theSearchPid).ifPresent(searchToDelete -> {
@@ -224,6 +232,11 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 				ourLog.debug("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
 			}
 		});
+	}
+
+	@VisibleForTesting
+	public static void setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(int theMaximumSearchesToCheckForDeletionCandidacy) {
+		ourMaximumSearchesToCheckForDeletionCandidacy = theMaximumSearchesToCheckForDeletionCandidacy;
 	}
 
 	@VisibleForTesting

@@ -22,9 +22,9 @@ package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 
 public class ValidatorExamplesDstu3 {
 
@@ -43,7 +43,7 @@ public class ValidatorExamplesDstu3 {
       // FhirInstanceValidator is the validation module that handles 
       // profile validation. So, create an InstanceValidator module 
       // and register it to the validator.
-      FhirInstanceValidator instanceVal = new FhirInstanceValidator();
+      FhirInstanceValidator instanceVal = new FhirInstanceValidator(ctx);
       validator.registerValidatorModule(instanceVal);
 
       // FhirInstanceValidator requires an instance of "IValidationSupport" in
@@ -59,7 +59,7 @@ public class ValidatorExamplesDstu3 {
       // the DefaultProfileValidationSupport, which supplies the "built-in" FHIR
       // StructureDefinitions and ValueSets
       ValidationSupportChain validationSupportChain = new ValidationSupportChain();
-      validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport());
+      validationSupportChain.addValidationSupport((ca.uhn.fhir.context.support.IValidationSupport) new DefaultProfileValidationSupport(ctx));
       instanceVal.setValidationSupport(validationSupportChain);
       
       // END SNIPPET: validateFiles

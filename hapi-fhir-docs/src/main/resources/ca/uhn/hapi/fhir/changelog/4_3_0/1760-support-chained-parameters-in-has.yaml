@@ -1,0 +1,9 @@
+---
+type: add
+issue: 1760
+title: "Adds support for chained parameters in a _has query. For example
+   `GET /Patient?_has:Observation:subject:device.identifier=1234-5`. Adds a performance warning on any queries that use
+    an unqualified resource in a chain which ends up resolving to 2 or more candidate target types. Thanks to Jean-Francois Briere
+    for the patch."
+
+

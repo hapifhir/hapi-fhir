@@ -23,12 +23,11 @@ package ca.uhn.fhir.model.dstu2;
 import java.io.InputStream;
 import java.util.Date;
 
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.*;
 import ca.uhn.fhir.model.dstu2.composite.*;
@@ -43,15 +42,10 @@ public class FhirDstu2 implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
 		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
 	}
 
-
-	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-		throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
-	}
 
 	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {

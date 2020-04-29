@@ -1,15 +1,22 @@
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.parser.*;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.IParserErrorHandler;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.parser.RDFParser;
+import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -20,7 +27,6 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.jena.riot.Lang;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -97,7 +103,7 @@ public class FhirContext {
 	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	private IContextValidationSupport<?, ?, ?, ?, ?, ?> myValidationSupport;
+	private IValidationSupport myValidationSupport;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 
 	/**
@@ -372,14 +378,26 @@ public class FhirContext {
 	}
 
 	/**
+	 * Sets the configured performance options
+	 *
+	 * @see PerformanceOptionsEnum for a list of available options
+	 */
+	public void setPerformanceOptions(final PerformanceOptionsEnum... thePerformanceOptions) {
+		Collection<PerformanceOptionsEnum> asList = null;
+		if (thePerformanceOptions != null) {
+			asList = Arrays.asList(thePerformanceOptions);
+		}
+		setPerformanceOptions(asList);
+	}
+
+	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(final Class<? extends IBaseResource> theResourceType) {
 		validateInitialized();
-		if (theResourceType == null) {
-			throw new NullPointerException("theResourceType can not be null");
-		}
+		Validate.notNull(theResourceType, "theResourceType can not be null");
+
 		if (Modifier.isAbstract(theResourceType.getModifiers())) {
 			throw new IllegalArgumentException("Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
 		}
@@ -544,16 +562,37 @@ public class FhirContext {
 
 	/**
 	 * Returns the validation support module configured for this context, creating a default
-	 * implementation if no module has been passed in via the {@link #setValidationSupport(IContextValidationSupport)}
+	 * implementation if no module has been passed in via the {@link #setValidationSupport(IValidationSupport)}
 	 * method
 	 *
-	 * @see #setValidationSupport(IContextValidationSupport)
+	 * @see #setValidationSupport(IValidationSupport)
 	 */
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> getValidationSupport() {
-		if (myValidationSupport == null) {
-			myValidationSupport = myVersion.createValidationSupport();
+	public IValidationSupport getValidationSupport() {
+		IValidationSupport retVal = myValidationSupport;
+		if (retVal == null) {
+			retVal = new DefaultProfileValidationSupport(this);
+
+			/*
+			 * If hapi-fhir-validation is on the classpath, we can create a much more robust
+			 * validation chain using the classes found in that package
+			 */
+			String inMemoryTermSvcType = "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport";
+			String commonCodeSystemsSupportType = "org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService";
+			if (ReflectionUtil.typeExists(inMemoryTermSvcType)) {
+				IValidationSupport inMemoryTermSvc = ReflectionUtil.newInstanceOrReturnNull(inMemoryTermSvcType, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				IValidationSupport commonCodeSystemsSupport = ReflectionUtil.newInstanceOrReturnNull(commonCodeSystemsSupportType, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain", IValidationSupport.class, new Class<?>[]{IValidationSupport[].class}, new Object[]{new IValidationSupport[]{
+					retVal,
+					inMemoryTermSvc,
+					commonCodeSystemsSupport
+				}});
+				assert retVal != null : "Failed to instantiate " + "org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain";
+			}
+
+
+			myValidationSupport = retVal;
 		}
-		return myValidationSupport;
+		return retVal;
 	}
 
 	/**
@@ -561,7 +600,7 @@ public class FhirContext {
 	 * is used to supply underlying infrastructure such as conformance resources (StructureDefinition, ValueSet, etc)
 	 * as well as to provide terminology services to modules such as the validator and FluentPath executor
 	 */
-	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?, ?, ?> theValidationSupport) {
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -586,12 +625,21 @@ public class FhirContext {
 	}
 
 	/**
-	 * Creates a new FluentPath engine which can be used to exvaluate
+	 * @since 2.2
+	 * @deprecated Deprecated in HAPI FHIR 5.0.0. Use {@link #newFhirPath()} instead.
+	 */
+	@Deprecated
+	public IFhirPath newFluentPath() {
+		return newFhirPath();
+	}
+
+	/**
+	 * Creates a new FhirPath engine which can be used to evaluate
 	 * path expressions over FHIR resources. Note that this engine will use the
-	 * {@link IContextValidationSupport context validation support} module which is
+	 * {@link IValidationSupport context validation support} module which is
 	 * configured on the context at the time this method is called.
 	 * <p>
-	 * In other words, call {@link #setValidationSupport(IContextValidationSupport)} before
+	 * In other words, you may wish to call {@link #setValidationSupport(IValidationSupport)} before
 	 * calling {@link #newFluentPath()}
 	 * </p>
 	 * <p>
@@ -601,10 +649,10 @@ public class FhirContext {
 	 * {@link UnsupportedOperationException}
 	 * </p>
 	 *
-	 * @since 2.2
+	 * @since 5.0.0
 	 */
-	public IFluentPath newFluentPath() {
-		return myVersion.createFluentPathExecutor(this);
+	public IFhirPath newFhirPath() {
+		return myVersion.createFhirPathExecutor(this);
 	}
 
 	/**
@@ -642,13 +690,12 @@ public class FhirContext {
 		return new RDFParser(this, myParserErrorHandler, Lang.TURTLE);
 	}
 
-
 	/**
 	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use
 	 * cases to contain methods for each of the RESTful operations you wish to implement (e.g. "read ImagingStudy",
 	 * "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its
 	 * sub-interface {@link IBasicClient}). See the <a
-	 * href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more
+	 * href="https://hapifhir.io/hapi-fhir/docs/client/introduction.html">RESTful Client</a> documentation for more
 	 * information on how to define this interface.
 	 *
 	 * <p>
@@ -860,19 +907,6 @@ public class FhirContext {
 	public void setParserErrorHandler(final IParserErrorHandler theParserErrorHandler) {
 		Validate.notNull(theParserErrorHandler, "theParserErrorHandler must not be null");
 		myParserErrorHandler = theParserErrorHandler;
-	}
-
-	/**
-	 * Sets the configured performance options
-	 *
-	 * @see PerformanceOptionsEnum for a list of available options
-	 */
-	public void setPerformanceOptions(final PerformanceOptionsEnum... thePerformanceOptions) {
-		Collection<PerformanceOptionsEnum> asList = null;
-		if (thePerformanceOptions != null) {
-			asList = Arrays.asList(thePerformanceOptions);
-		}
-		setPerformanceOptions(asList);
 	}
 
 	@SuppressWarnings({"cast"})

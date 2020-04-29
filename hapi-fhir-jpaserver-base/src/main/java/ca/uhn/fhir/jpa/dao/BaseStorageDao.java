@@ -26,6 +26,8 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -169,6 +171,10 @@ public abstract class BaseStorageDao {
 		JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
 	}
 
+	protected Object doCallHooksAndReturnObject(RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+		return JpaInterceptorBroadcaster.doCallHooksAndReturnObject(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
+	}
+
 	protected abstract IInterceptorBroadcaster getInterceptorBroadcaster();
 
 	public IBaseOperationOutcome createErrorOperationOutcome(String theMessage, String theCode) {
@@ -222,7 +228,7 @@ public abstract class BaseStorageDao {
 
 		Set<String> paramNames = theSource.keySet();
 		for (String nextParamName : paramNames) {
-			QualifierDetails qualifiedParamName = SearchMethodBinding.extractQualifiersFromParameterName(nextParamName);
+			QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(nextParamName);
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), new TreeSet<>(searchParams.keySet()));

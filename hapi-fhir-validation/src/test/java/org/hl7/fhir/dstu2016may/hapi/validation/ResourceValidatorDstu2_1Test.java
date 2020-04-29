@@ -11,15 +11,27 @@ import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.dstu2016may.model.CodeableConcept;
+import org.hl7.fhir.dstu2016may.model.Coding;
+import org.hl7.fhir.dstu2016may.model.DateType;
+import org.hl7.fhir.dstu2016may.model.OperationOutcome;
+import org.hl7.fhir.dstu2016may.model.Patient;
+import org.hl7.fhir.dstu2016may.model.Reference;
+import org.hl7.fhir.dstu2016may.model.StringType;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ResourceValidatorDstu2_1Test {
 
@@ -60,7 +72,7 @@ public class ResourceValidatorDstu2_1Test {
 			parser.parseResource(encoded);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
 
@@ -103,7 +115,7 @@ public class ResourceValidatorDstu2_1Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = val.validateWithResult(messageString);
 
@@ -124,7 +136,7 @@ public class ResourceValidatorDstu2_1Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/questionnaire_jon_z_20160506.xml"));
 
 		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = val.validateWithResult(input);
 
@@ -170,7 +182,7 @@ public class ResourceValidatorDstu2_1Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
 		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
 		ValidationResult result = val.validateWithResult(messageString);
 

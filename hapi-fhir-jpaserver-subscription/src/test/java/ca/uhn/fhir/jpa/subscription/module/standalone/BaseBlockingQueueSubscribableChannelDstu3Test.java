@@ -4,18 +4,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.test.concurrency.IPointcutLatch;
-import ca.uhn.test.concurrency.PointcutLatch;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
-import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -25,13 +23,18 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.test.concurrency.IPointcutLatch;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -40,6 +43,8 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,20 +54,30 @@ import java.util.List;
 
 public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends BaseSubscriptionDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
+	public static final ChannelConsumerSettings CONSUMER_OPTIONS = new ChannelConsumerSettings().setConcurrentConsumers(1);
 	protected static ObservationListener ourObservationListener;
 
 	@Autowired
 	FhirContext myFhirContext;
+
+	// Caused by: java.lang.IllegalStateException: Unable to register mock bean org.springframework.messaging.MessageHandler expected a single matching bean to replace but found [subscriptionActivatingSubscriber, subscriptionDeliveringEmailSubscriber, subscriptionDeliveringRestHookSubscriber, subscriptionMatchingSubscriber, subscriptionRegisteringSubscriber]
+	
 	@Autowired
-	StandaloneSubscriptionMessageHandler myStandaloneSubscriptionMessageHandler;
+	@Qualifier("subscriptionActivatingSubscriber")
+	MessageHandler mySubscriptionActivatingSubscriber;
+	@Autowired
+	@Qualifier("subscriptionRegisteringSubscriber")
+	MessageHandler subscriptionRegisteringSubscriber;
+	@Autowired
+	@Qualifier("subscriptionMatchingSubscriber")
+	MessageHandler subscriptionMatchingSubscriber;
+
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
 	IInterceptorService myInterceptorRegistry;
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	private MockFhirClientSubscriptionProvider myMockFhirClientSubscriptionProvider;
 	@Autowired
 	private SubscriptionLoader mySubscriptionLoader;
 	@Autowired
@@ -90,8 +105,10 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		canonicalSubscription.setIdElement(new IdDt("test"));
 		canonicalSubscription.setChannelType(CanonicalSubscriptionChannelType.RESTHOOK);
 		mySubscriptionRegistry.unregisterAllSubscriptions();
-		ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel(mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalSubscription));
-		ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
+		ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryReceivingChannel(mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalSubscription), CONSUMER_OPTIONS);
+		ourSubscribableChannel.subscribe(mySubscriptionActivatingSubscriber);
+		ourSubscribableChannel.subscribe(subscriptionMatchingSubscriber);
+		ourSubscribableChannel.subscribe(subscriptionRegisteringSubscriber);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
 	}
@@ -115,7 +132,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	}
 
 	protected void initSubscriptionLoader(List<Subscription> subscriptions, String uuid) throws InterruptedException {
-		myMockFhirClientSubscriptionProvider.setBundleProvider(new SimpleBundleProvider(new ArrayList<>(subscriptions), uuid));
+//		myMockFhirClientSubscriptionProvider.setBundleProvider(new SimpleBundleProvider(new ArrayList<>(subscriptions), uuid));
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 
@@ -165,7 +182,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 		FhirContext context = ourListenerRestServer.getFhirContext();
 		//Preload structure definitions so the load doesn't happen during the test (first load can be a little slow)
-		context.getValidationSupport().fetchAllStructureDefinitions(context);
+		context.getValidationSupport().fetchAllStructureDefinitions();
 	}
 
 	@AfterClass

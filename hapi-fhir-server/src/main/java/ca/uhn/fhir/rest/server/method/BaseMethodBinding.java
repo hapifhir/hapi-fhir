@@ -26,47 +26,44 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.BundleProviders;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public abstract class BaseMethodBinding<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
+	private final List<BaseQueryParameter> myQueryParameters;
 	private FhirContext myContext;
 	private Method myMethod;
 	private List<IParameter> myParameters;
 	private Object myProvider;
 	private boolean mySupportsConditional;
 	private boolean mySupportsConditionalMultiple;
-
 	public BaseMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		assert theMethod != null;
 		assert theContext != null;
@@ -75,6 +72,11 @@ public abstract class BaseMethodBinding<T> {
 		myContext = theContext;
 		myProvider = theProvider;
 		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider, getRestOperationType());
+		myQueryParameters = myParameters
+			.stream()
+			.filter(t -> t instanceof BaseQueryParameter)
+			.map(t -> (BaseQueryParameter) t)
+			.collect(Collectors.toList());
 
 		for (IParameter next : myParameters) {
 			if (next instanceof ConditionalParamBinder) {
@@ -88,6 +90,10 @@ public abstract class BaseMethodBinding<T> {
 
 		// This allows us to invoke methods on private classes
 		myMethod.setAccessible(true);
+	}
+
+	protected List<BaseQueryParameter> getQueryParameters() {
+		return myQueryParameters;
 	}
 
 	protected Object[] createMethodParams(RequestDetails theRequest) {
@@ -211,7 +217,7 @@ public abstract class BaseMethodBinding<T> {
 		return getRestOperationType();
 	}
 
-	public abstract boolean incomingServerRequestMatchesMethod(RequestDetails theRequest);
+	public abstract MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest);
 
 	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
 

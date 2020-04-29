@@ -1,20 +1,16 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
@@ -28,11 +24,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -57,6 +52,7 @@ import static org.junit.Assert.fail;
 	"max_db_connections=10"
 })
 @DirtiesContext
+@Ignore
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	static {
@@ -91,7 +87,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		super.before();
 
 		myRequestValidatingInterceptor = new RequestValidatingInterceptor();
-		FhirInstanceValidator module = new FhirInstanceValidator();
+		FhirInstanceValidator module = new FhirInstanceValidator(myFhirCtx);
 		module.setValidationSupport(myValidationSupport);
 		myRequestValidatingInterceptor.addValidatorModule(module);
 
@@ -591,8 +587,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 					getResp = ourHttpClient.execute(get);
 					try {
-						assertEquals(200, getResp.getStatusLine().getStatusCode());
 						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
+						assertEquals(respBundleString, 200, getResp.getStatusLine().getStatusCode());
 						respBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {

@@ -22,13 +22,19 @@ package ca.uhn.fhir.jpa.graphql;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.SpecialParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -39,19 +45,40 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
 
 public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements IGraphQLStorageServices {
 
 	private static final int MAX_SEARCH_SIZE = 500;
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageServices.class);
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
 		return myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
+	}
+
+	private String graphqlArgumentToSearchParam(String name) {
+		if (name.startsWith("_")) {
+			return name;
+		} else {
+			return name.replaceAll("_", "-");
+		}
+	}
+
+	private String searchParamToGraphqlArgument(String name) {
+		return name.replaceAll("-", "_");
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -64,9 +91,25 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
 
+		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(typeDef.getName());
+
 		for (Argument nextArgument : theSearchParams) {
 
-			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
+			if (nextArgument.getName().equals(PARAM_FILTER)) {
+				String value = nextArgument.getValues().get(0).getValue();
+				params.add(PARAM_FILTER, new StringParam(value));
+				continue;
+			}
+
+			String searchParamName = graphqlArgumentToSearchParam(nextArgument.getName());
+			RuntimeSearchParam searchParam = searchParams.get(searchParamName);
+			if (searchParam == null) {
+				Set<String> graphqlArguments = searchParams.keySet().stream()
+					.map(this::searchParamToGraphqlArgument)
+					.collect(Collectors.toSet());
+				String msg = getContext().getLocalizer().getMessageSanitized(JpaStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
+				throw new InvalidRequestException(msg);
+			}
 
 			for (Value nextValue : nextArgument.getValues()) {
 				String value = nextValue.getValue();
@@ -102,7 +145,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 						break;
 				}
 
-				params.add(nextArgument.getName(), param);
+				params.add(searchParamName, param);
 			}
 		}
 

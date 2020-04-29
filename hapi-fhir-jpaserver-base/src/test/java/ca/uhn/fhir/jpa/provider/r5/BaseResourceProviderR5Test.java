@@ -1,17 +1,17 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -56,7 +56,7 @@ import static org.junit.Assert.fail;
 
 public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
-	protected static JpaValidationSupportChainR5 myValidationSupport;
+	protected static IValidationSupport myValidationSupport;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
@@ -109,7 +109,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 
-			JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(ourRestServer, mySystemDao, myDaoConfig);
+			JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 
@@ -162,13 +162,13 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
             ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
-			myValidationSupport = wac.getBean(JpaValidationSupportChainR5.class);
+			myValidationSupport = wac.getBean(IValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
-			ourSubscriptionMatcherInterceptor.start();
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
+			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -226,7 +226,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;
-		myValidationSupport.flush();
+		myValidationSupport.invalidateCaches();
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;

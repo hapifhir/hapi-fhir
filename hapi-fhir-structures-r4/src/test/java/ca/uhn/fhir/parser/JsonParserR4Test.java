@@ -26,8 +26,10 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
@@ -150,6 +152,25 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
+	@Test
+	public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
+		String text = loadResource("/bundle-with-two-patient-resources.json");
+
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, text);
+		assertEquals(Boolean.TRUE, bundle.getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
+		assertEquals(Boolean.TRUE, bundle.getEntry().get(0).getResource().getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
+		assertEquals(Boolean.TRUE, bundle.getEntry().get(1).getResource().getUserData(BaseParser.RESOURCE_CREATED_BY_PARSER));
+
+		assertEquals("12346", getPatientIdValue(bundle, 0));
+		assertEquals("12345", getPatientIdValue(bundle, 1));
+	}
+
+	private String getPatientIdValue(Bundle input, int entry) {
+		final DocumentReference documentReference = (DocumentReference)input.getEntry().get(entry).getResource();
+		final Patient patient = (Patient) documentReference.getSubject().getResource();
+		return patient.getIdentifier().get(0).getValue();
+	}
+
 	/**
 	 * See #814
 	 */
@@ -248,6 +269,12 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
+	@Test
+	public void testParseSingleQuotes() {
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, "{ 'resourceType': 'Bundle', 'id': '123' }");
+		assertEquals("123", bundle.getIdElement().getIdPart());
+	}
+
 
 	@Test
 	public void testEncodeBinary() {
@@ -258,6 +285,18 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(false);
 		String output = parser.encodeResourceToString(b);
 		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"application/octet-stream\",\"data\":\"AAECAwQ=\"}", output);
+	}
+
+
+	@Test
+	public void testAlwaysUseUnixNewlines() {
+		Patient p = new Patient();
+		p.setId("1");
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		assertEquals("{\n" +
+			"  \"resourceType\": \"Patient\",\n" +
+			"  \"id\": \"1\"\n" +
+			"}", encoded);
 	}
 
 	@Test
@@ -311,7 +350,7 @@ public class JsonParserR4Test extends BaseTest {
 			parser.encodeResourceToString(p);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Extension contains both a value and nested extensions: Patient(res).extension", e.getMessage());
+			assertEquals("[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
 	}
@@ -530,6 +569,32 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
+	/**
+	 * See #1793
+	 */
+	@Test
+	public void testParseEmptyAttribute() {
+		String input = "{\n" +
+			"  \"resourceType\": \"Patient\",\n" +
+			"  \"identifier\": [\n" +
+			"    {\n" +
+			"      \"system\": \"https://example.com\",\n" +
+			"      \"value\": \"\"\n" +
+			"    }\n" +
+			"  ]\n" +
+			"}";
+
+		IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setParserErrorHandler(new StrictErrorHandler());
+		try {
+			jsonParser.parseResource(Patient.class, input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("[element=\"value\"] Invalid attribute value \"\": Attribute value must not be empty (\"\")", e.getMessage());
+		}
+
+	}
+
 	@Test
 	public void testParseExtensionOnPrimitive() throws IOException {
 		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"), Constants.CHARSET_UTF8);
@@ -586,6 +651,14 @@ public class JsonParserR4Test extends BaseTest {
 	 * 15:20:41.708 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1200 passes - 28ms / pass - 34.5 / second
 	 * 15:20:44.722 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1300 passes - 29ms / pass - 34.4 / second
 	 * 15:20:47.716 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1400 passes - 29ms / pass - 34.4 / second
+	 *
+	 * 2020-02-27 - Post #1673
+	 * 21:27:25.817 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1100 passes - 28ms / pass - 35.5 / second
+	 * 21:27:28.598 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1200 passes - 28ms / pass - 35.5 / second
+	 * 21:27:31.436 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1300 passes - 28ms / pass - 35.5 / second
+	 * 21:27:34.246 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1400 passes - 28ms / pass - 35.5 / second
+	 * 21:27:37.013 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1500 passes - 28ms / pass - 35.6 / second
+	 * 21:27:39.874 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1600 passes - 28ms / pass - 35.5 / second
 	 */
 	@Test
 	@Ignore
@@ -655,6 +728,12 @@ public class JsonParserR4Test extends BaseTest {
 	 * 15:22:40.699 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2500 passes - 12ms / pass - 79.7 / second
 	 * 15:22:42.135 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2600 passes - 12ms / pass - 79.3 / second
 	 *
+	 * 2020-02-27 - Post #1673
+	 * 21:29:38.157 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2200 passes - 11ms / pass - 83.4 / second
+	 * 21:29:39.374 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2300 passes - 12ms / pass - 83.3 / second
+	 * 21:29:40.576 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2400 passes - 12ms / pass - 83.3 / second
+	 * 21:29:41.778 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2500 passes - 12ms / pass - 83.3 / second
+	 * 21:29:42.999 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2600 passes - 12ms / pass - 83.3 / second
 	 * 
 	 */
 	@Test
@@ -734,6 +813,40 @@ public class JsonParserR4Test extends BaseTest {
 
 		}
 		return b;
+	}
+
+	/**
+	 * Ensure that a contained bundle doesn't cause a crash
+	 */
+	@Test
+	public void testEncodeContainedBundle() {
+		String auditEvent = "{\n" +
+			"  \"resourceType\": \"AuditEvent\",\n" +
+			"  \"contained\": [ {\n" +
+			"    \"resourceType\": \"Bundle\",\n" +
+			"    \"id\": \"REASONS\",\n" +
+			"    \"entry\": [ {\n" +
+			"      \"resource\": {\n" +
+			"        \"resourceType\": \"Condition\",\n" +
+			"        \"id\": \"123\"\n" +
+			"      }\n" +
+			"    } ]\n" +
+			"  }, {\n" +
+			"    \"resourceType\": \"MeasureReport\",\n" +
+			"    \"id\": \"MRPT5000602611RD\",\n" +
+			"    \"evaluatedResource\": [ {\n" +
+			"      \"reference\": \"#REASONS\"\n" +
+			"    } ]\n" +
+			"  } ],\n" +
+			"  \"entity\": [ {\n" +
+			"    \"what\": {\n" +
+			"      \"reference\": \"#MRPT5000602611RD\"\n" +
+			"    }\n" +
+			"  } ]\n" +
+			"}";
+		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
+		String auditEventAsString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
+		assertEquals(auditEvent, auditEventAsString);
 	}
 
 

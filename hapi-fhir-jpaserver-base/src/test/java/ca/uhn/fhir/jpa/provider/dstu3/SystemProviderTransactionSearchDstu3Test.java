@@ -6,7 +6,6 @@ import static org.junit.Assert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +29,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.rp.dstu3.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -39,8 +38,6 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
-
-import javax.validation.constraints.NotNull;
 
 public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -38,7 +39,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -52,7 +60,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 		super(theSearchBuilder);
 	}
 
-	void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName) {
+	void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName, RequestPartitionId theRequestPartitionId) {
 		TagTypeEnum tagType;
 		if (Constants.PARAM_TAG.equals(theParamName)) {
 			tagType = TagTypeEnum.TAG;
@@ -134,8 +142,8 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				subQ.select(subQfrom.get("myResourceId").as(Long.class));
 
 				myQueryRoot.addPredicate(
-					myBuilder.not(
-						myBuilder.in(
+					myCriteriaBuilder.not(
+						myCriteriaBuilder.in(
 							myQueryRoot.get("myId")
 						).value(subQ)
 					)
@@ -147,17 +155,28 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 
 				subQ.where(subQfrom.get("myTagId").as(Long.class).in(defJoin));
 
-				Predicate tagListPredicate = createPredicateTagList(defJoinFrom, myBuilder, tagType, tokens);
+				Predicate tagListPredicate = createPredicateTagList(defJoinFrom, myCriteriaBuilder, tagType, tokens);
 				defJoin.where(tagListPredicate);
 
 				continue;
+
+			} else {
+
+				myQueryRoot.setHasIndexJoins();
+
 			}
 
 			Join<ResourceTable, ResourceTag> tagJoin = myQueryRoot.join("myTags", JoinType.LEFT);
 			From<ResourceTag, TagDefinition> defJoin = tagJoin.join("myTag");
 
-			Predicate tagListPredicate = createPredicateTagList(defJoin, myBuilder, tagType, tokens);
-			myQueryRoot.addPredicate(tagListPredicate);
+			Predicate tagListPredicate = createPredicateTagList(defJoin, myCriteriaBuilder, tagType, tokens);
+			List<Predicate> predicates = Lists.newArrayList(tagListPredicate);
+
+			if (theRequestPartitionId != null) {
+				addPartitionIdPredicate(theRequestPartitionId, tagJoin, predicates);
+			}
+
+			myQueryRoot.addPredicates(predicates);
 
 		}
 

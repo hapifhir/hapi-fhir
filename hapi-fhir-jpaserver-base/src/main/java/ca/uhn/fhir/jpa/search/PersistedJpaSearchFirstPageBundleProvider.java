@@ -20,9 +20,7 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -31,10 +29,14 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -49,16 +51,16 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	private SearchTask mySearchTask;
 	private ISearchBuilder mySearchBuilder;
 	private Search mySearch;
-	private PlatformTransactionManager myTxManager;
 
-	// TODO KHS too many collaborators.  This should be a prototype bean
-	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, IDao theDao, SearchBuilderFactory theSearchBuilderFactory, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, PlatformTransactionManager theTxManager, RequestDetails theRequest) {
-		super(theRequest, theSearch.getUuid(), theDao, theSearchBuilderFactory);
+	/**
+	 * Constructor
+	 */
+	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, RequestDetails theRequest) {
+		super(theRequest, theSearch.getUuid());
 		setSearchEntity(theSearch);
 		mySearchTask = theSearchTask;
 		mySearchBuilder = theSearchBuilder;
 		mySearch = theSearch;
-		myTxManager = theTxManager;
 	}
 
 	@Nonnull

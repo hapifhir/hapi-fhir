@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -254,6 +253,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		MessageHeader messageHeader = new MessageHeader();
 		messageHeader.setId("123");
+		messageHeader.setDefinition("Hello");
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.MESSAGE);
 		bundle.addEntry()
@@ -345,34 +345,12 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		memberSp.setType(Enumerations.SearchParamType.REFERENCE);
 		memberSp.setExpression("Group.member.entity");
 		memberSp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		mySearchParameterDao.create(memberSp, mySrd);
-
-		SearchParameter identifierSp = new SearchParameter();
-		identifierSp.setCode("identifier");
-		identifierSp.addBase("Group");
-		identifierSp.setType(Enumerations.SearchParamType.TOKEN);
-		identifierSp.setExpression("Group.identifier");
-		identifierSp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		mySearchParameterDao.create(identifierSp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
-		Patient p = new Patient();
-		p.addName().addGiven("G");
-		IIdType pid = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-
-		Group g = new Group();
-		g.addIdentifier().setSystem("urn:foo").setValue("bar");
-		g.addMember().getEntity().setReferenceElement(pid);
-		myGroupDao.create(g);
-
-		assertThat(myResourceLinkDao.findAll(), not(empty()));
-		assertThat(ListUtil.filter(myResourceIndexedSearchParamTokenDao.findAll(), new ListUtil.Filter<ResourceIndexedSearchParamToken>() {
-			@Override
-			public boolean isOut(ResourceIndexedSearchParamToken object) {
-				return !object.getResourceType().equals("Group") || object.isMissing();
-			}
-		}), not(empty()));
+		try {
+			mySearchParameterDao.create(memberSp, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not override built-in search parameter Group:member because overriding is disabled on this server", e.getMessage());
+		}
 	}
 
 	@Test
