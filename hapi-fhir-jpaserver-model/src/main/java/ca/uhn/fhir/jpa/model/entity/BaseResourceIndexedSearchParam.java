@@ -33,6 +33,7 @@ import com.google.common.hash.Hashing;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -153,6 +154,12 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public abstract IQueryParameterType toQueryParameterType();
+
+	@Override
+	public void setPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
+		super.setPartitionId(theRequestPartitionId);
+		clearHashes();
+	}
 
 	public boolean matches(IQueryParameterType theParam) {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);

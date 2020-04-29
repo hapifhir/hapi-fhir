@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -919,10 +920,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// 7. Add partition information
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			PartitionablePartitionId partitionId = theEntity.getPartitionId();
+			RequestPartitionId partitionId = theEntity.getPartitionId();
 			if (partitionId != null && partitionId.getPartitionId() != null) {
 				PartitionEntity persistedPartition = myPartitionLookupSvc.getPartitionById(partitionId.getPartitionId());
-				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, persistedPartition.toPersistedPartitionId());
+				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, persistedPartition.toRequestPartitionId());
 			} else {
 				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 			}

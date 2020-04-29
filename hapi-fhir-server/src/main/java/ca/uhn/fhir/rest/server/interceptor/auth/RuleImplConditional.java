@@ -44,10 +44,6 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 		assert !(theInputResource != null && theOutputResource != null);
 
-		if (isOtherTenant(theRequestDetails)) {
-			return null;
-		}
-
 		if (theInputResourceId != null && theInputResourceId.hasIdPart()) {
 			return null;
 		}
@@ -76,17 +72,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 					break;
 			}
 
-			if (getTenantApplicabilityChecker() != null) {
-				if (!getTenantApplicabilityChecker().applies(theRequestDetails)) {
-					return null;
-				}
-			}
-
-			if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
-				return null;
-			}
-
-			return newVerdict();
+			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 		}
 
 		return null;

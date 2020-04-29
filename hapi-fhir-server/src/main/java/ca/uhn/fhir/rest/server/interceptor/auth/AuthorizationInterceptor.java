@@ -224,9 +224,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 *
 	 * @param theDefaultPolicy The policy (must not be <code>null</code>)
 	 */
-	public void setDefaultPolicy(PolicyEnum theDefaultPolicy) {
+	public AuthorizationInterceptor setDefaultPolicy(PolicyEnum theDefaultPolicy) {
 		Validate.notNull(theDefaultPolicy, "theDefaultPolicy must not be null");
 		myDefaultPolicy = theDefaultPolicy;
+		return this;
 	}
 
 	/**

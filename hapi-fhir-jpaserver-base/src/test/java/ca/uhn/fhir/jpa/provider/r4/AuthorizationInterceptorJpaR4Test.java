@@ -33,9 +33,9 @@ import java.util.List;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
-public class AuthorizationInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
+public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorResourceProviderR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorJpaR4Test.class);
 
 	@Override
 	public void before() throws Exception {

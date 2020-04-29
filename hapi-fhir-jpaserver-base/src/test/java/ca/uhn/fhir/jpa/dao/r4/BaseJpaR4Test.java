@@ -102,6 +102,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+
 	@Autowired
 	protected IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
@@ -375,7 +376,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired

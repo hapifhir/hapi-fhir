@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.interceptor;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.BaseGenericClientR4Test;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -66,6 +67,25 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		client.registerInterceptor(new UrlTenantSelectionInterceptor("TENANT-A"));
+
+		client
+			.create()
+			.resource(new Patient().setActive(true))
+			.execute();
+
+		assertEquals("http://example.com/fhir/TENANT-A/Patient", capt.getAllValues().get(0).getURI().toString());
+	}
+
+
+	@Test
+	public void testPagingLinksRetainTenant() throws Exception {
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForCreateResponse();
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		client.registerInterceptor(new UrlTenantSelectionInterceptor("TENANT-A"));
+
+		Bundle bundle = new Bundle();
+		bundle.addLink().setRelation("next").setUrl("http://example.com/fhir/TENANT-A/" + Constants.PARAM_PAGINGACTION + "=123456");
 
 		client
 			.create()

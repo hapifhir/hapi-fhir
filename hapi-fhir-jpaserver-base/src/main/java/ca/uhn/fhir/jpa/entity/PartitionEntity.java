@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PersistedPartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -75,7 +75,7 @@ public class PartitionEntity {
 		myDescription = theDescription;
 	}
 
-	public PersistedPartitionId toPersistedPartitionId() {
-		return new PersistedPartitionId(getName(), getId());
+	public RequestPartitionId toRequestPartitionId() {
+		return RequestPartitionId.fromPartitionIdAndName(getId(), getName());
 	}
 }

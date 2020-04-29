@@ -24,20 +24,25 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 /**
  * @since 5.0.0
  */
-public class RequestPartitionId extends PersistedPartitionId {
+public class RequestPartitionId {
 
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
 	private final LocalDate myPartitionDate;
 	private final boolean myAllPartitions;
+	private final Integer myPartitionId;
+	private final String myPartitionName;
 
 	/**
 	 * Constructor for a single partition
 	 */
 	private RequestPartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		super(thePartitionName, thePartitionId);
+		myPartitionId = thePartitionId;
+		myPartitionName = thePartitionName;
 		myPartitionDate = thePartitionDate;
 		myAllPartitions = false;
 	}
@@ -48,6 +53,8 @@ public class RequestPartitionId extends PersistedPartitionId {
 	private RequestPartitionId() {
 		super();
 		myPartitionDate = null;
+		myPartitionName = null;
+		myPartitionId = null;
 		myAllPartitions = true;
 	}
 
@@ -60,6 +67,28 @@ public class RequestPartitionId extends PersistedPartitionId {
 		return myPartitionDate;
 	}
 
+	@Nullable
+	public String getPartitionName() {
+		return myPartitionName;
+	}
+
+	@Nullable
+	public Integer getPartitionId() {
+		return myPartitionId;
+	}
+
+	@Override
+	public String toString() {
+		return getPartitionIdStringOrNullString();
+	}
+
+	/**
+	 * Returns the partition ID (numeric) as a string, or the string "null"
+	 */
+	public String getPartitionIdStringOrNullString() {
+		return defaultIfNull(getPartitionId(), "null").toString();
+	}
+
 	@Nonnull
 	public static RequestPartitionId fromAllPartitions() {
 		return ALL_PARTITIONS;
@@ -68,6 +97,17 @@ public class RequestPartitionId extends PersistedPartitionId {
 	@Nonnull
 	public static RequestPartitionId fromDefaultPartition() {
 		return fromPartitionId(null);
+	}
+
+	/**
+	 * Create a string representation suitable for use as a cache key. Null aware.
+	 */
+	public static String stringifyForKey(RequestPartitionId theRequestPartitionId) {
+		String retVal = "(null)";
+		if (theRequestPartitionId != null) {
+			retVal = theRequestPartitionId.getPartitionIdStringOrNullString();
+		}
+		return retVal;
 	}
 
 	@Nonnull
@@ -95,4 +135,7 @@ public class RequestPartitionId extends PersistedPartitionId {
 		return new RequestPartitionId(thePartitionName, thePartitionId, thePartitionDate);
 	}
 
+	public static RequestPartitionId fromPartitionIdAndName(@Nullable Integer thePartitionId, @Nullable String thePartitionName) {
+		return new RequestPartitionId(thePartitionName, thePartitionId, null);
+	}
 }
