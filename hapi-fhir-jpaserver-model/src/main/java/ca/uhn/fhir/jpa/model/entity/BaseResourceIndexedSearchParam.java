@@ -86,6 +86,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
 
+	@Transient
+	private transient ModelConfig myModelConfig;
+
 	/**
 	 * Subclasses may override
 	 */
@@ -172,6 +175,15 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	public BaseResourceIndexedSearchParam setPartitionSettings(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
 		return this;
+	}
+
+	public BaseResourceIndexedSearchParam setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
+		return this;
+	}
+
+	public ModelConfig getModelConfig() {
+		return myModelConfig;
 	}
 
 	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {

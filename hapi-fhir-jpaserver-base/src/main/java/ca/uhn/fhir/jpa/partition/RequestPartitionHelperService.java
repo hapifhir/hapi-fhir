@@ -41,6 +41,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 
+import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
 
 public class RequestPartitionHelperService implements IRequestPartitionHelperService {
@@ -96,7 +97,8 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 
 			validatePartition(requestPartitionId, theResourceType, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
-			return normalize(requestPartitionId);
+
+			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
 		}
 
 		return RequestPartitionId.fromAllPartitions();
@@ -126,7 +128,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
 			validatePartition(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
 
-			return normalize(requestPartitionId);
+			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
 		}
 
 		return RequestPartitionId.fromAllPartitions();
@@ -136,39 +138,47 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	 * If the partition only has a name but not an ID, this method resolves the ID
 	 */
 	@Nonnull
-	private RequestPartitionId normalize(@Nonnull RequestPartitionId theRequestPartitionId) {
-		if (theRequestPartitionId.getPartitionName() != null) {
+	private RequestPartitionId normalizeAndNotifyHooks(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest) {
+		RequestPartitionId retVal = theRequestPartitionId;
+
+		if (retVal.getPartitionName() != null) {
 
 			PartitionEntity partition;
 			try {
-				partition = myPartitionConfigSvc.getPartitionByName(theRequestPartitionId.getPartitionName());
+				partition = myPartitionConfigSvc.getPartitionByName(retVal.getPartitionName());
 			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionName", theRequestPartitionId.getPartitionName());
+				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionName", retVal.getPartitionName());
 				throw new ResourceNotFoundException(msg);
 			}
 
-			if (theRequestPartitionId.getPartitionId() != null) {
-				Validate.isTrue(theRequestPartitionId.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", theRequestPartitionId.getPartitionName(), theRequestPartitionId.getPartitionId());
-				return theRequestPartitionId;
+			if (retVal.getPartitionId() != null) {
+				Validate.isTrue(retVal.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", retVal.getPartitionName(), retVal.getPartitionId());
 			} else {
-				return RequestPartitionId.forPartitionNameAndId(theRequestPartitionId.getPartitionName(), partition.getId(), theRequestPartitionId.getPartitionDate());
+				retVal = RequestPartitionId.forPartitionNameAndId(retVal.getPartitionName(), partition.getId(), retVal.getPartitionDate());
 			}
-		}
 
-		if (theRequestPartitionId.getPartitionId() != null) {
+		} else if (retVal.getPartitionId() != null) {
+
 			PartitionEntity partition;
 			try {
-				partition = myPartitionConfigSvc.getPartitionById(theRequestPartitionId.getPartitionId());
+				partition = myPartitionConfigSvc.getPartitionById(retVal.getPartitionId());
 			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionId", theRequestPartitionId.getPartitionId());
+				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionId", retVal.getPartitionId());
 				throw new ResourceNotFoundException(msg);
 			}
-			return RequestPartitionId.forPartitionNameAndId(partition.getName(), partition.getId(), theRequestPartitionId.getPartitionDate());
+			retVal = RequestPartitionId.forPartitionNameAndId(partition.getName(), partition.getId(), retVal.getPartitionDate());
+
 		}
 
-		// It's still possible that the partition only has a date but no name/id,
-		// or it could just be null
-		return theRequestPartitionId;
+		// Note: It's still possible that the partition only has a date but no name/id
+
+		HookParams params = new HookParams()
+			.add(RequestPartitionId.class, retVal)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_SELECTED, params);
+
+		return retVal;
 
 	}
 

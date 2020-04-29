@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -45,6 +47,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.ServletException;
@@ -58,6 +61,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -65,6 +69,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
@@ -1792,7 +1800,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		createUniqueCompositeSp();
 
 		IIdType patientId = createPatient(withPartition(null), withBirthdate("2020-01-01"));
-		IIdType observationId = createObservation(null, withSubject(patientId));
+		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
 
 		addReadDefaultPartition();
 		;
@@ -1866,7 +1874,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		createUniqueCompositeSp();
 
 		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
-		IIdType observationId = createObservation(null, withSubject(patientId));
+		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
 
 		addReadDefaultPartition();
 
@@ -2025,7 +2033,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 			mySystemDao.history(null, null, mySrd).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Type- and Server- level history operation not supported on partitioned server", e.getMessage());
+			assertEquals("Type- and Server- level history operation not supported across partitions on partitioned server", e.getMessage());
 		}
 	}
 
@@ -2107,7 +2115,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 			myPatientDao.history(null, null, mySrd).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Type- and Server- level history operation not supported on partitioned server", e.getMessage());
+			assertEquals("Type- and Server- level history operation not supported across partitions on partitioned server", e.getMessage());
 		}
 	}
 
@@ -2181,6 +2189,25 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
 		assertEquals(1, countMatches(sql, "forcedid0_.PID in"));
 		assertEquals(0, countMatches(sql, "PARTITION_ID is null"));
+	}
+
+	@Test
+	public void testPartitionNotify() {
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PARTITION_SELECTED, interceptor);
+		try {
+			createPatient(withPartition(1), withBirthdate("2020-01-01"));
+
+			ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
+			verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
+
+			RequestPartitionId partitionId = captor.getValue().get(RequestPartitionId.class);
+			assertEquals(1, partitionId.getPartitionId().intValue());
+			assertEquals("PART-1", partitionId.getPartitionName());
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	private void createUniqueCompositeSp() {

@@ -21,7 +21,10 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -41,6 +44,10 @@ public class DaoSearchParamSynchronizer {
 	protected EntityManager myEntityManager;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
@@ -70,6 +77,11 @@ public class DaoSearchParamSynchronizer {
 		}
 		for (T next : quantitiesToAdd) {
 			next.setPartitionId(theEntity.getPartitionId());
+			if (next instanceof BaseResourceIndexedSearchParam) {
+				BaseResourceIndexedSearchParam searchParam = (BaseResourceIndexedSearchParam) next;
+				searchParam.setPartitionSettings(myPartitionSettings);
+				searchParam.setModelConfig(myModelConfig);
+			}
 		}
 		theParams.calculateHashes(theNewParms);
 		for (T next : quantitiesToAdd) {

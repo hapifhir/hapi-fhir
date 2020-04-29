@@ -107,8 +107,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	 */
 	@Column(name = "HASH_EXACT", nullable = true)
 	private Long myHashExact;
-	@Transient
-	private transient ModelConfig myModelConfig;
 
 	public ResourceIndexedSearchParamString() {
 		super();
@@ -143,7 +141,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String paramName = getParamName();
 			String valueNormalized = getValueNormalized();
 			String valueExact = getValueExact();
-			setHashNormalizedPrefix(calculateHashNormalized(getPartitionSettings(), getPartitionId(), myModelConfig, resourceType, paramName, valueNormalized));
+			setHashNormalizedPrefix(calculateHashNormalized(getPartitionSettings(), getPartitionId(), getModelConfig(), resourceType, paramName, valueNormalized));
 			setHashExact(calculateHashExact(getPartitionSettings(), getPartitionId(), resourceType, paramName, valueExact));
 			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 		}
@@ -247,11 +245,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getParamName());
 		b.append(getValueExact());
 		return b.toHashCode();
-	}
-
-	public BaseResourceIndexedSearchParam setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
-		return this;
 	}
 
 	@Override
