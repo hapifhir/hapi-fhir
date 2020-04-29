@@ -132,7 +132,6 @@ public class SubscriptionValidatingInterceptor {
 		}
 	}
 
-	// FIXME test
 	public void validateMessageSubscriptionEndpoint(String theEndpointUrl) {
 		if (theEndpointUrl == null) {
 			throw new UnprocessableEntityException("No endpoint defined for message subscription");

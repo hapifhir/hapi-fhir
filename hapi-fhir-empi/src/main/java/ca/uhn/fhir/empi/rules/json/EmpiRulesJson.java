@@ -87,7 +87,7 @@ public class EmpiRulesJson implements IModelJson {
 	}
 
 	/**
-	 * must call initialize() before calling getMatchResult()
+	 * Must call initialize() before calling getMatchResult(Long)
 	 */
 	public void initialize() {
 		myVectorMatchResultMap = new VectorMatchResultMap(this);
