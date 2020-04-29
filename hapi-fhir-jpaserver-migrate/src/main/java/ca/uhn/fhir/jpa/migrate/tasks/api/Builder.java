@@ -208,12 +208,13 @@ public class Builder {
 			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, this);
 		}
 
-		public void dropColumn(String theVersion, String theColumnName) {
+		public BuilderCompleteTask dropColumn(String theVersion, String theColumnName) {
 			Validate.notBlank(theColumnName);
 			DropColumnTask task = new DropColumnTask(myRelease, theVersion);
 			task.setTableName(myTableName);
 			task.setColumnName(theColumnName);
 			addTask(task);
+			return new BuilderCompleteTask(task);
 		}
 
 		@Override
