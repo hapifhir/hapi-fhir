@@ -73,7 +73,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		}
 
 		boolean retVal = false;
-		String resourceName = theFhirContext.getResourceName(theResource);
+		String resourceName = theFhirContext.getResourceType(theResource);
 		String contextPath = defaultIfEmpty(theTemplate.getContextPath(), resourceName);
 
 		// Narrative templates define a path within the resource that they apply to. Here, we're

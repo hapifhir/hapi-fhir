@@ -172,7 +172,7 @@ public class SearchParamExtractorService {
 	}
 
 	private void extractResourceLinks(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, boolean theFailOnInvalidReference, RequestDetails theRequest) {
-		String resourceName = myContext.getResourceName(theResource);
+		String resourceName = myContext.getResourceType(theResource);
 
 		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource);
 		SearchParamExtractorService.handleWarnings(theRequest, myInterceptorBroadcaster, refs);

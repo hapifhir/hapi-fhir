@@ -288,7 +288,7 @@ public class RDFParser extends BaseParser {
 				}
 				case RESOURCE: {
 					IBaseResource baseResource = (IBaseResource) element;
-					String resourceName = this.context.getResourceName(baseResource);
+					String resourceName = this.context.getResourceType(baseResource);
 					if (!super.shouldEncodeResource(resourceName)) {
 						break;
 					}

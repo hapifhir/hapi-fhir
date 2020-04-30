@@ -105,7 +105,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			localReference = true;
 		}
 
-		String resourceName = myFhirContext.getResourceName(theClass);
+		String resourceName = myFhirContext.getResourceType(theClass);
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
 			if (localReference) {

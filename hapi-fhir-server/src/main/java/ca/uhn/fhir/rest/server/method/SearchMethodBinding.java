@@ -99,7 +99,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (theResourceProviderResourceType != null) {
-			this.myResourceProviderResourceName = theContext.getResourceName(theResourceProviderResourceType);
+			this.myResourceProviderResourceName = theContext.getResourceType(theResourceProviderResourceType);
 		} else {
 			this.myResourceProviderResourceName = null;
 		}

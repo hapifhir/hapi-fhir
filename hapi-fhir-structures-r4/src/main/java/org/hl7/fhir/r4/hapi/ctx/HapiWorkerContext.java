@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -366,7 +365,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public Set<String> getResourceNamesAsSet() {
-    return myCtx.getResourceNames();
+    return myCtx.getResourceTypes();
   }
 
   @Override

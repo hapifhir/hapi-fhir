@@ -99,7 +99,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					// If we're returning an abstract type, that's ok
 				} else {
 					myResourceType = (Class<? extends IResource>) theReturnResourceType;
-					myResourceName = theContext.getResourceName(myResourceType);
+					myResourceName = theContext.getResourceType(myResourceType);
 				}
 			}
 		}

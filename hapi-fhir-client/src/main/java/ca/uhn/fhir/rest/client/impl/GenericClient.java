@@ -30,7 +30,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -255,7 +254,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private String toResourceName(Class<? extends IBaseResource> theType) {
-		return myContext.getResourceName(theType);
+		return myContext.getResourceType(theType);
 	}
 
 	@Override
@@ -681,7 +680,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType) {
 			Validate.notNull(theResourceType, "theResourceType can not be null");
 			myConditional = true;
-			myResourceType = myContext.getResourceName(theResourceType);
+			myResourceType = myContext.getResourceType(theResourceType);
 			return this;
 		}
 
@@ -797,7 +796,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			String resourceName;
 			String id;
 			if (myType != null) {
-				resourceName = myContext.getResourceName(myType);
+				resourceName = myContext.getResourceType(myType);
 				id = null;
 			} else if (myId != null) {
 				resourceName = myId.getResourceType();
@@ -1167,7 +1166,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			String id;
 			String version;
 			if (myType != null) {
-				resourceName = myContext.getResourceName(myType);
+				resourceName = myContext.getResourceType(myType);
 				id = null;
 				version = null;
 			} else if (myId != null) {
@@ -1436,7 +1435,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IPatchWithQuery conditional(Class<? extends IBaseResource> theClass) {
 			Validate.notNull(theClass, "theClass must not be null");
-			String resourceType = myContext.getResourceName(theClass);
+			String resourceType = myContext.getResourceType(theClass);
 			return conditional(resourceType);
 		}
 

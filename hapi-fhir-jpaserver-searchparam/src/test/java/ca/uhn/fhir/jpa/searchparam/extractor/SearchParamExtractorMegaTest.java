@@ -57,7 +57,7 @@ public class SearchParamExtractorMegaTest {
 	private void process(FhirContext theCtx, BaseSearchParamExtractor theExtractor) throws Exception {
 		AtomicInteger indexesCounter = new AtomicInteger();
 
-		for (String nextResourceName : theCtx.getResourceNames()) {
+		for (String nextResourceName : theCtx.getResourceTypes()) {
 			RuntimeResourceDefinition resourceDefinition = theCtx.getResourceDefinition(nextResourceName);
 
 			List<BaseRuntimeElementDefinition> elementStack = new ArrayList<>();

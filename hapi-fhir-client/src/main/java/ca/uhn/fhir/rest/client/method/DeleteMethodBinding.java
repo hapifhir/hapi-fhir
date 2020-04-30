@@ -53,7 +53,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	@Override
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
 		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(getContext().getResourceName(theResource));
+		urlExtension.append(getContext().getResourceType(theResource));
 
 		return new HttpPostClientInvocation(getContext(), theResource, urlExtension.toString());
 	}

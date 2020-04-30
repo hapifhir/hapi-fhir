@@ -64,7 +64,7 @@ public class CanonicalEID {
 	 *
 	 */
 	private static String buildEidFhirPath(FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
-		return theFhirContext.getResourceName(theBaseResource)
+		return theFhirContext.getResourceType(theBaseResource)
 			+ ".identifier.where(system='"
 			+ theEidSystem
 			+ "')";

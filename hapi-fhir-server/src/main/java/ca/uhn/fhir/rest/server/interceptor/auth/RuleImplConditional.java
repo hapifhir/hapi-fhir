@@ -67,7 +67,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 							return null;
 						}
 					} else {
-						String inputResourceName = theRequestDetails.getFhirContext().getResourceName(theInputResource);
+						String inputResourceName = theRequestDetails.getFhirContext().getResourceType(theInputResource);
 						if (theInputResource == null || !myAppliesToTypes.contains(inputResourceName)) {
 							return null;
 						}

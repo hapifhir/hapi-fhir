@@ -468,7 +468,7 @@ public class FhirContext {
 	 * @param theResourceType
 	 * @return
 	 */
-	public String getResourceName(final Class<? extends IBaseResource> theResourceType) {
+	public String getResourceType(final Class<? extends IBaseResource> theResourceType) {
 		return getResourceDefinition(theResourceType).getName();
 	}
 
@@ -476,12 +476,12 @@ public class FhirContext {
 	 * Returns the name of the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 */
-	public String getResourceName(final IBaseResource theResource) {
+	public String getResourceType(final IBaseResource theResource) {
 		return getResourceDefinition(theResource).getName();
 	}
 
 	/*
-	 * Returns the name of the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * Returns the type of the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 * <p>
 	 * Note that this method is case insensitive!
@@ -489,7 +489,7 @@ public class FhirContext {
 	 *
 	 * @throws DataFormatException If the resource name is not known
 	 */
-	public String getResourceName(final String theResourceName) throws DataFormatException {
+	public String getResourceType(final String theResourceName) throws DataFormatException {
 		return getResourceDefinition(theResourceName).getName();
 	}
 
@@ -522,7 +522,6 @@ public class FhirContext {
 				retVal = scanResourceType(clazz);
 			}
 		}
-
 		return retVal;
 	}
 
@@ -548,7 +547,7 @@ public class FhirContext {
 	 * Returns an unmodifiable set containing all resource names known to this
 	 * context
 	 */
-	public Set<String> getResourceNames() {
+	public Set<String> getResourceTypes() {
 		Set<String> resourceNames = new HashSet<>();
 
 		if (myNameToResourceDefinition.isEmpty()) {

@@ -84,7 +84,7 @@ public class EmpiResourceFieldComparator {
 	}
 
 	private void validate(IBaseResource theResource) {
-		String resourceType = myFhirContext.getResourceName(theResource);
+		String resourceType = myFhirContext.getResourceType(theResource);
 		Validate.notNull(resourceType, "Resource type may not be null");
 		if (ALL_RESOURCE_SEARCH_PARAM_TYPE.equals(myResourceType)) {
 			Validate.isTrue("Patient".equalsIgnoreCase(resourceType) || "Practitioner".equalsIgnoreCase(resourceType),

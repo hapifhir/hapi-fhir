@@ -780,7 +780,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {
 		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
 
-		Set<String> resourceNames = theFhirContext.getResourceNames();
+		Set<String> resourceNames = theFhirContext.getResourceTypes();
 
 		for (String resourceName : resourceNames) {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);

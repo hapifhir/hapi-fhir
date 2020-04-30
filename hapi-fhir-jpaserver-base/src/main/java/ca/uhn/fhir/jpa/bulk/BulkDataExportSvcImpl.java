@@ -377,7 +377,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			// This is probably not a useful default, but having the default be "download the whole
 			// server" seems like a risky default too. We'll deal with that by having the default involve
 			// only returning a small time span
-			resourceTypes = myContext.getResourceNames();
+			resourceTypes = myContext.getResourceTypes();
 			if (since == null) {
 				since = DateUtils.addDays(new Date(), -1);
 			}

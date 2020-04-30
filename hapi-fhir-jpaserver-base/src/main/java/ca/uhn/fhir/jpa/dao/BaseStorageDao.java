@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
@@ -75,7 +74,7 @@ public abstract class BaseStorageDao {
 	 * @param theResource The resource that is about to be stored
 	 */
 	protected void preProcessResourceForStorage(IBaseResource theResource) {
-		String type = getContext().getResourceName(theResource);
+		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
 			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
 		}

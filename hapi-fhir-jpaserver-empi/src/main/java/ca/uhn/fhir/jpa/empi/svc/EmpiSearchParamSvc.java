@@ -51,7 +51,7 @@ public class EmpiSearchParamSvc {
 	}
 
 	public List<String> getValueFromResourceForSearchParam(IBaseResource theResource, EmpiResourceSearchParamJson theFilterSearchParam) {
-		String resourceType = myFhirContext.getResourceName(theResource);
+		String resourceType = myFhirContext.getResourceType(theResource);
 		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, theFilterSearchParam.getSearchParam());
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}

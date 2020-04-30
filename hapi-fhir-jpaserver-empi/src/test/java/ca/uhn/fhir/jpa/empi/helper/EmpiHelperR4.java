@@ -43,7 +43,7 @@ public class EmpiHelperR4 extends BaseEmpiHelper {
 	}
 
 	public DaoMethodOutcome doCreateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
-		String resourceType = myFhirContext.getResourceName(theResource);
+		String resourceType = myFhirContext.getResourceType(theResource);
 
 		switch (resourceType) {
 			case "Patient":
@@ -60,7 +60,7 @@ public class EmpiHelperR4 extends BaseEmpiHelper {
 	}
 
 	public DaoMethodOutcome doUpdateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
-		String resourceType = myFhirContext.getResourceName(theResource);
+		String resourceType = myFhirContext.getResourceType(theResource);
 
 		switch (resourceType) {
 			case "Patient":

@@ -175,7 +175,7 @@ public class BinaryStorageInterceptor {
 		}
 		IIdType resourceId = theResource.getIdElement();
 		if (!resourceId.hasResourceType() && resourceId.hasIdPart()) {
-			String resourceType = myCtx.getResourceName(theResource);
+			String resourceType = myCtx.getResourceType(theResource);
 			resourceId = new IdType(resourceType + "/" + resourceId.getIdPart());
 		}
 

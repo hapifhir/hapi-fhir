@@ -1080,7 +1080,7 @@ class ParserState<T> {
 		}
 
 		private void stitchBundleCrossReferences() {
-			final boolean bundle = "Bundle".equals(myContext.getResourceName(myInstance));
+			final boolean bundle = "Bundle".equals(myContext.getResourceType(myInstance));
 			if (bundle) {
 
 				FhirTerser t = myContext.newTerser();
@@ -1103,7 +1103,7 @@ class ParserState<T> {
 				for (IBaseResource next : myGlobalResources) {
 					IIdType id = next.getIdElement();
 					if (id != null && !id.isEmpty()) {
-						String resName = myContext.getResourceName(next);
+						String resName = myContext.getResourceType(next);
 						IIdType idType = id.withResourceType(resName).toUnqualifiedVersionless();
 						idToResource.put(idType.getValueAsString(), next);
 					}
@@ -1197,7 +1197,7 @@ class ParserState<T> {
 
 			IResource nextResource = (IResource) getCurrentElement();
 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
-			String resourceName = myContext.getResourceName(nextResource);
+			String resourceName = myContext.getResourceType(nextResource);
 			String bundleIdPart = nextResource.getId().getIdPart();
 			if (isNotBlank(bundleIdPart)) {
 				// if (isNotBlank(entryBaseUrl)) {
@@ -1246,7 +1246,7 @@ class ParserState<T> {
 
 			if (getCurrentElement() instanceof IDomainResource) {
 				IDomainResource elem = (IDomainResource) getCurrentElement();
-				String resourceName = myContext.getResourceName(elem);
+				String resourceName = myContext.getResourceType(elem);
 				String versionId = elem.getMeta().getVersionId();
 				if (StringUtils.isBlank(elem.getIdElement().getIdPart())) {
 					// Resource has no ID
