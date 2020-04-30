@@ -25,11 +25,17 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.thymeleaf.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
 
 public abstract class BaseTableColumnTask extends BaseTableTask {
 
-	private String myColumnName;
+	protected Map<String, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>> myCalculators = new HashMap<>();
+	protected String myColumnName;
+	//If a concrete class decides to, they can define a custom WHERE clause for the task.
+	protected String myWhereClause;
 
 	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -40,9 +46,19 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 		return this;
 	}
 
-
 	public String getColumnName() {
 		return myColumnName;
+	}
+
+	protected void setWhereClause(String theWhereClause) {
+		this.myWhereClause = theWhereClause;
+	}
+	protected String getWhereClause() {
+		if (myWhereClause == null) {
+			return getColumnName() + " IS NULL";
+		} else {
+			return myWhereClause;
+		}
 	}
 
 	@Override
@@ -62,5 +78,11 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 	protected void generateHashCode(HashCodeBuilder theBuilder) {
 		super.generateHashCode(theBuilder);
 		theBuilder.append(myColumnName);
+	}
+
+	public BaseTableColumnTask addCalculator(String theColumnName, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object> theConsumer) {
+		Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
+		myCalculators.put(theColumnName, theConsumer);
+		return this;
 	}
 }
