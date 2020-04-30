@@ -381,10 +381,10 @@ public class ModelConfig {
 	 * ordinal {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
 	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
 	 * </p>
-	 * Default is {@literal true} beginning in HAPI FHIR 4.3.
+	 * Default is {@literal true} beginning in HAPI FHIR 5.0
 	 * </p>
 	 *
-	 * @since 4.3
+	 * @since 5.0
 	 */
 	public void setUseOrdinalDatesForDayPrecisionSearches(boolean theUseOrdinalDates) {
 		myUseOrdinalDatesForDayPrecisionSearches = theUseOrdinalDates;
@@ -400,14 +400,15 @@ public class ModelConfig {
 	 *  integer representing the ordinal date {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
 	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
 	 * </p>
-	 * Default is {@literal true} beginning in HAPI FHIR 4.3.
+	 * Default is {@literal true} beginning in HAPI FHIR 5.0
 	 * </p>
 	 *
-	 * @since 4.3
+	 * @since 5.0
 	 */
 	public boolean getUseOrdinalDatesForDayPrecisionSearches() {
 		return myUseOrdinalDatesForDayPrecisionSearches;
 	}
+
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
