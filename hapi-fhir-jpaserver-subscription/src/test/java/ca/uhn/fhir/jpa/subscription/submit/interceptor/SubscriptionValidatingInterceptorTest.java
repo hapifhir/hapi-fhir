@@ -131,35 +131,27 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Only 'jms' protocol is supported for Subscriptions with channel type 'message'"));
+			assertThat(e.getMessage(), is("Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
 		}
 
-		channel.setEndpoint("jms:foo");
+		channel.setEndpoint("channel");
 		try {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Message Subscription endpoint 'jms:foo' does not start with 'jms:queue:'"));
+			assertThat(e.getMessage(), is("Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
 		}
 
-		channel.setEndpoint("jms:queue");
+		channel.setEndpoint("channel:");
 		try {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Message Subscription endpoint 'jms:queue' does not start with 'jms:queue:'"));
-		}
-
-		channel.setEndpoint("jms:queue:");
-		try {
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("A queue name must appear after jms:queue: in a message Subscription endpoint"));
+			assertThat(e.getMessage(), is("Invalid subscription endpoint uri channel:"));
 		}
 
 		// Happy path
-		channel.setEndpoint("jms:queue:my-queue-name");
+		channel.setEndpoint("channel:my-queue-name");
 		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 	}
 }

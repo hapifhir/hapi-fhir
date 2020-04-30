@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -42,14 +41,13 @@ import org.springframework.messaging.MessagingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+// FIXME KHS document this subscription type
 @Scope("prototype")
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
 
 	@Autowired
 	private IChannelFactory myChannelFactory;
-	@Autowired
-	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
 
 	/**
 	 * Constructor
@@ -115,9 +113,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	}
 
 	private String extractQueueNameFromEndpoint(String theEndpointUrl) throws URISyntaxException {
-		mySubscriptionValidatingInterceptor.validateMessageSubscriptionEndpoint(theEndpointUrl);
 		URI uri = new URI(theEndpointUrl);
-		String jmsPath = uri.getSchemeSpecificPart();
-		return jmsPath.substring("queue:".length());
+		return uri.getSchemeSpecificPart();
 	}
 }

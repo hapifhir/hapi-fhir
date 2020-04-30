@@ -140,16 +140,12 @@ public class SubscriptionValidatingInterceptor {
 		try {
 			URI uri = new URI(theEndpointUrl);
 
-			if (!"jms".equals(uri.getScheme())) {
-				throw new UnprocessableEntityException("Only 'jms' protocol is supported for Subscriptions with channel type 'message'");
+			if (!"channel".equals(uri.getScheme())) {
+				throw new UnprocessableEntityException("Only 'channel' protocol is supported for Subscriptions with channel type 'message'");
 			}
-			String jmsPath = uri.getSchemeSpecificPart();
-			if (!jmsPath.startsWith("queue:")) {
-				throw new UnprocessableEntityException("Message Subscription endpoint '" + theEndpointUrl + "' does not start with 'jms:queue:'");
-			}
-			String queueName = jmsPath.substring("queue:".length());
-			if (isBlank(queueName)) {
-				throw new UnprocessableEntityException("A queue name must appear after jms:queue: in a message Subscription endpoint");
+			String channelName = uri.getSchemeSpecificPart();
+			if (isBlank(channelName)) {
+				throw new UnprocessableEntityException("A channel name must appear after channel: in a message Subscription endpoint");
 			}
 		} catch (URISyntaxException e) {
 			throw new UnprocessableEntityException("Invalid subscription endpoint uri " + theEndpointUrl, e);
