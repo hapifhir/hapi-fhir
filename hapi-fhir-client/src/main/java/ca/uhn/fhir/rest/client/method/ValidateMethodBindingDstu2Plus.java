@@ -72,7 +72,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 		IBaseParameters parameters = (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
 		ParametersUtil.addParameterToParameters(theContext, parameters, "resource", theResource);
 		
-		String resourceName = theContext.getResourceDefinition(theResource).getName();
+		String resourceName = theContext.getResourceName(theResource);
 		String resourceId = theResource.getIdElement().getIdPart();
 		
 		BaseHttpClientInvocation retVal = createOperationInvocation(theContext, resourceName, resourceId, null,Constants.EXTOP_VALIDATE, parameters, false);

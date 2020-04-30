@@ -248,7 +248,7 @@ public class PersonHelper {
 	}
 	private void copyR4TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
 		Person person = (Person) thePerson;
-		switch (myFhirContext.getResourceDefinition(theBaseResource).getName()) {
+		switch (myFhirContext.getResourceName(theBaseResource)) {
 			case "Patient":
 				Patient patient = (Patient)theBaseResource;
 				person.setName(patient.getName());
@@ -271,7 +271,7 @@ public class PersonHelper {
 	}
 	private void copyDSTU3TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
 		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person)thePerson;
-		switch (myFhirContext.getResourceDefinition(theBaseResource).getName()) {
+		switch (myFhirContext.getResourceName(theBaseResource)) {
 			case "Patient":
 				org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient)theBaseResource;
 				person.setName(patient.getName());
@@ -291,7 +291,7 @@ public class PersonHelper {
 				person.setPhoto(practitioner.getPhotoFirstRep());
 				break;
 			default:
-				throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceDefinition(theBaseResource).getName());
+				throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceName(theBaseResource));
 		}
 	}
 

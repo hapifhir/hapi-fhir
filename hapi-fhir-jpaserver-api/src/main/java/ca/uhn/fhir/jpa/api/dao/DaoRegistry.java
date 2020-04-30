@@ -122,7 +122,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 
 	@Nullable
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(Class<T> theResourceType) {
-		String resourceName = myContext.getResourceDefinition(theResourceType).getName();
+		String resourceName = myContext.getResourceName(theResourceType);
 		try {
 			return (IFhirResourceDao<T>) getResourceDao(resourceName);
 		} catch (InvalidRequestException e) {
@@ -188,10 +188,10 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 			List<String> supportedResourceNames = myResourceNameToResourceDao
 				.keySet()
 				.stream()
-				.map(t -> myContext.getResourceDefinition(t).getName())
+				.map(t -> myContext.getResourceName(t))
 				.sorted()
 				.collect(Collectors.toList());
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceDefinition(theClass).getName() + " - Can handle: " + supportedResourceNames);
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceName(theClass) + " - Can handle: " + supportedResourceNames);
 		}
 		return retVal;
 	}

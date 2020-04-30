@@ -79,7 +79,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			throw new ConfigurationException("Unable to determine resource type for method: " + theMethod);
 		}
 
-		myResourceName = theContext.getResourceDefinition(myResourceType).getName();
+		myResourceName = theContext.getResourceName(myResourceType);
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParamIndex != null) {
 			myIdParamType = (Class<? extends IIdType>) theMethod.getParameterTypes()[myIdParamIndex];

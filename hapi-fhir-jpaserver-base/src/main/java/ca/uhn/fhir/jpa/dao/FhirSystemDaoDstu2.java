@@ -383,7 +383,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextReqEntry.getRequest().getMethod()));
 			}
 
-			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;
+			String resourceType = res != null ? getContext().getResourceName(res) : null;
 			Entry nextRespEntry = theResponse.getEntry().get(theOriginalRequestOrder.get(nextReqEntry));
 
 			switch (verb) {

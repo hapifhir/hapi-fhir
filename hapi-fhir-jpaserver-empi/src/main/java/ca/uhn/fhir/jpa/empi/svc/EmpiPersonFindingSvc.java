@@ -160,7 +160,7 @@ public class EmpiPersonFindingSvc {
 		//OK, so we have not found any links in the EmpiLink table with us as a target. Next, let's find possible Patient/Practitioner
 		//matches by following EMPI rules.
 		List<Long> unmatchablePersonPids = getNoMatchPersonPids(theBaseResource);
-		List<MatchedTarget> matchedCandidates = myEmpiMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceDefinition(theBaseResource).getName(), theBaseResource);
+		List<MatchedTarget> matchedCandidates = myEmpiMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceName(theBaseResource), theBaseResource);
 
 		//Convert all possible match targets to their equivalent Persons by looking up in the EmpiLink table,
 		//while ensuring that the matches aren't in our NO_MATCH list.

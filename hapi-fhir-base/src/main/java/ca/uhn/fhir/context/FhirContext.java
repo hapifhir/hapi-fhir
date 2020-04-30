@@ -464,6 +464,36 @@ public class FhirContext {
 	}
 
 	/**
+	 * Returns the name of a given resource class.
+	 * @param theResourceType
+	 * @return
+	 */
+	public String getResourceName(final Class<? extends IBaseResource> theResourceType) {
+		return getResourceDefinition(theResourceType).getName();
+	}
+
+	/**
+	 * Returns the name of the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
+	 */
+	public String getResourceName(final IBaseResource theResource) {
+		return getResourceDefinition(theResource).getName();
+	}
+
+	/*
+	 * Returns the name of the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
+	 * <p>
+	 * Note that this method is case insensitive!
+	 * </p>
+	 *
+	 * @throws DataFormatException If the resource name is not known
+	 */
+	public String getResourceName(final String theResourceName) throws DataFormatException {
+		return getResourceDefinition(theResourceName).getName();
+	}
+
+	/*
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 * <p>

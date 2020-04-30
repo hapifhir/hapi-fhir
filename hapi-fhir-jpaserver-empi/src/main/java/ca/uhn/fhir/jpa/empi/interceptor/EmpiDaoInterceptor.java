@@ -109,7 +109,7 @@ public class EmpiDaoInterceptor {
 	}
 
 	private String extractResourceType(IBaseResource theResource) {
-		return myFhirContext.getResourceDefinition(theResource).getName();
+		return myFhirContext.getResourceName(theResource);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)

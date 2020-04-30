@@ -306,7 +306,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 					List<IBaseResource> resources = parseBundle(reader);
 					for (IBaseResource next : resources) {
 
-						String nextType = getFhirContext().getResourceDefinition(next).getName();
+						String nextType = getFhirContext().getResourceName(next);
 						if ("StructureDefinition".equals(nextType)) {
 
 							String url = getConformanceResourceUrl(next);

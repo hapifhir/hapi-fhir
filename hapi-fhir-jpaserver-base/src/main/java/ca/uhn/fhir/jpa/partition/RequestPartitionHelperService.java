@@ -116,7 +116,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
-			String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
+			String resourceName = myFhirContext.getResourceName(theResource);
 			validatePartition(requestPartitionId, resourceName);
 		}
 

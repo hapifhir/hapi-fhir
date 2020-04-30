@@ -621,7 +621,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		EncodeContext encodeContext = new EncodeContext();
-		String resourceName = myContext.getResourceDefinition(theResource).getName();
+		String resourceName = myContext.getResourceName(theResource);
 		encodeContext.pushPath(resourceName, true);
 		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, encodeContext);
 	}

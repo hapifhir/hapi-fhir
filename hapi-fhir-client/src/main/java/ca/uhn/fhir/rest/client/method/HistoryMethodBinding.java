@@ -64,7 +64,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (type != IBaseResource.class && type != IResource.class) {
-			myResourceName = theContext.getResourceDefinition(type).getName();
+			myResourceName = theContext.getResourceName(type);
 		} else {
 			myResourceName = null;
 		}

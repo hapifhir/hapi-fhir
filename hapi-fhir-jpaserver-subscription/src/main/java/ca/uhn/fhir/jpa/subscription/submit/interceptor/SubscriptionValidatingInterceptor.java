@@ -71,7 +71,7 @@ public class SubscriptionValidatingInterceptor {
 	}
 
 	public void validateSubmittedSubscription(IBaseResource theSubscription) {
-		if (!"Subscription".equals(myFhirContext.getResourceDefinition(theSubscription).getName())) {
+		if (!"Subscription".equals(myFhirContext.getResourceName(theSubscription))) {
 			return;
 		}
 

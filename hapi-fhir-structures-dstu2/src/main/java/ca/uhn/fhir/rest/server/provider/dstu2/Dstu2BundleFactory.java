@@ -92,7 +92,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 
 							IdDt id = nextRes.getId();
 							if (id.hasResourceType() == false) {
-								String resName = myContext.getResourceDefinition(nextRes).getName();
+								String resName = myContext.getResourceName(nextRes);
 								id = id.withResourceType(resName);
 							}
 
@@ -207,7 +207,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		} else {
 			if (isNotBlank(myBase) && next.getId().hasIdPart()) {
 				IdDt id = next.getId().toVersionless();
-				id = id.withServerBase(myBase, myContext.getResourceDefinition(next).getName());
+				id = id.withServerBase(myBase, myContext.getResourceName(next));
 				entry.setFullUrl(id.getValue());
 			}
 		}

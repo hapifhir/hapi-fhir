@@ -295,7 +295,7 @@ public class XmlParser extends BaseParser {
 				}
 				case RESOURCE: {
 					IBaseResource resource = (IBaseResource) theElement;
-					String resourceName = myContext.getResourceDefinition(resource).getName();
+					String resourceName = myContext.getResourceName(resource);
 					if (!super.shouldEncodeResource(resourceName)) {
 						break;
 					}

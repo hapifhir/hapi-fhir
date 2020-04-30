@@ -223,7 +223,7 @@ public class BinaryAccessProvider {
 	@Nonnull
 	private IBinaryTarget findAttachmentForRequest(IBaseResource theResource, String thePath, ServletRequestDetails theRequestDetails) {
 		Optional<IBase> type = myCtx.newFluentPath().evaluateFirst(theResource, thePath, IBase.class);
-		String resType = this.myCtx.getResourceDefinition(theResource).getName();
+		String resType = this.myCtx.getResourceName(theResource);
 		if (!type.isPresent()) {
 			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownPath", resType, thePath);
 			throw new InvalidRequestException(msg);
