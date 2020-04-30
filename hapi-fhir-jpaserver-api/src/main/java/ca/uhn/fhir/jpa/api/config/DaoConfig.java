@@ -188,9 +188,32 @@ public class DaoConfig {
 	private boolean myDeleteEnabled = true;
 
 	/**
+	 * If set to an URL resolving to package.tgz, the package and its dependencies
+	 * are installed at startup.
+	 *
 	 * @since 5.0.0
 	 */
 	private String myImplementationGuideURL;
+
+	/**
+	 * If set to an ID of fhir package at package.fhir.org, or the name of a folder
+	 * on disk containing a fhir package, the package and its dependencies are installed
+	 * at startup.
+	 *
+	 * Only one of myImplementationGuideURL or myImplementationGuideID should be set.
+	 *
+	 * @since 5.0.0
+	 */
+	private String myImplementationGuideID;
+
+	/**
+	 * If myImplementationGuideID is set, then myImplementationGuideVersion indicates the version
+	 * of the package to be fetched from package.fhir.org OR the path to the directory on disk
+	 * containing the folder myImplementationGuideID.
+	 *
+	 * @since 5.0.0
+	 */
+	private String myImplementationGuideVersion;
 
 	/**
 	 * Constructor
@@ -250,6 +273,54 @@ public class DaoConfig {
 	 */
 	public void setMyImplementationGuideURL(String myImplementationGuideURL) {
 		this.myImplementationGuideURL = myImplementationGuideURL;
+	}
+
+	/**
+	 * If set to an ID of fhir package at package.fhir.org, or the name of a folder
+	 * on disk containing a fhir package, the package and its dependencies are installed
+	 * at startup.
+	 *
+	 * Only one of myImplementationGuideURL or myImplementationGuideID should be set.
+	 *
+	 * @Since 5.0.0
+	 */
+	public String getMyImplementationGuideID() {
+		return myImplementationGuideID;
+	}
+
+	/**
+	 * If set to an ID of fhir package at package.fhir.org, or the name of a folder
+	 * on disk containing a fhir package, the package and its dependencies are installed
+	 * at startup.
+	 *
+	 * Only one of myImplementationGuideURL or myImplementationGuideID should be set.
+	 *
+	 * @Since 5.0.0
+	 */
+	public void setMyImplementationGuideID(String myImplementationGuideID) {
+		this.myImplementationGuideID = myImplementationGuideID;
+	}
+
+	/**
+	 * If myImplementationGuideID is set, then myImplementationGuideVersion indicates the version
+	 * of the package to be fetched from package.fhir.org OR the path to the directory on disk
+	 * containing the folder myImplementationGuideID.
+	 *
+	 * @Since 5.0.0
+	 */
+	public String getMyImplementationGuideVersion() {
+		return myImplementationGuideVersion;
+	}
+
+	/**
+	 * If myImplementationGuideID is set, then myImplementationGuideVersion indicates the version
+	 * of the package to be fetched from package.fhir.org OR the path to the directory on disk
+	 * containing the folder myImplementationGuideID.
+	 *
+	 * @Since 5.0.0
+	 */
+	public void setMyImplementationGuideVersion(String myImplementationGuideVersion) {
+		this.myImplementationGuideVersion = myImplementationGuideVersion;
 	}
 
 	/**
