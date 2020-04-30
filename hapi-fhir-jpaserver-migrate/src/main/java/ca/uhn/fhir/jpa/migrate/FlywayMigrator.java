@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import com.google.common.annotations.VisibleForTesting;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfoService;
+import org.flywaydb.core.api.callback.Callback;
 import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,11 +80,16 @@ public class FlywayMigrator extends BaseMigrator {
 			.baselineOnMigrate(true)
 			.outOfOrder(isOutOfOrderPermitted())
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
+			.callbacks(callbacks())
 			.load();
 		for (FlywayMigration task : myTasks) {
 			task.setConnectionProperties(theConnectionProperties);
 		}
 		return flyway;
+	}
+
+	protected Callback[] callbacks() {
+		return new Callback[0];
 	}
 
 	@Override
