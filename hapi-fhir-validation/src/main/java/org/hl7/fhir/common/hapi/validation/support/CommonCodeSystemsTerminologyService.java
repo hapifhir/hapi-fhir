@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.FileUtil;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
@@ -119,7 +121,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		if (UCUM_CODESYSTEM_URL.equals(theSystem) && theRootValidationSupport.getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 
-			try (InputStream input = CommonCodeSystemsTerminologyService.class.getResourceAsStream("/ucum-essence.xml")) {
+			InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
+			try {
 				UcumEssenceService svc = new UcumEssenceService(input);
 				String outcome = svc.analyse(theCode);
 				if (outcome != null) {
@@ -132,12 +135,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 					return retVal;
 
 				}
-			} catch (IOException e) {
-				ourLog.warn("Failed to load UCUM Essence File", e);
-				return null;
 			} catch (UcumException e) {
 				ourLog.debug("Failed parse UCUM code: {}", theCode, e);
 				return null;
+			} finally {
+				ClasspathUtil.close(input);
 			}
 
 		}

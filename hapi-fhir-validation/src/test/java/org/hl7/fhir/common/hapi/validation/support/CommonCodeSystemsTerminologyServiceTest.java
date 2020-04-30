@@ -34,6 +34,12 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	}
 
 	@Test
+	public void testUcum_LookupCode_UnknownSystem() {
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(myCtx.getValidationSupport(), "http://foo", "AAAAA");
+		assertNull( outcome);
+	}
+
+	@Test
 	public void testUcum_ValidateCode_Good() {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://hl7.org/fhir/ValueSet/ucum-units");
