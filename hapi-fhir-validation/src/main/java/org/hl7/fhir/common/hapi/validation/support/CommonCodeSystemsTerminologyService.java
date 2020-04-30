@@ -1,13 +1,20 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import org.apache.commons.lang3.Validate;
+import org.fhir.ucum.UcumEssenceService;
+import org.fhir.ucum.UcumException;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,12 +33,13 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String MIMETYPES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/mimetypes";
 	public static final String CURRENCIES_CODESYSTEM_URL = "urn:iso:std:iso:4217";
 	public static final String CURRENCIES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/currencies";
+	public static final String UCUM_CODESYSTEM_URL = "http://unitsofmeasure.org";
 	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
 	private static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
+	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
+	public static final String UCUM_VALUESET_URL = "http://hl7.org/fhir/ValueSet/ucum-units";
 	private static Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
-
-
 	private final FhirContext myFhirContext;
 
 	/**
@@ -71,8 +79,22 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				return new CodeValidationResult()
 					.setCode(theCode)
 					.setDisplay(theDisplay);
-		}
 
+			case UCUM_VALUESET_URL: {
+				String system = theCodeSystem;
+				if (system == null && theOptions.isInferSystem()) {
+					system = UCUM_CODESYSTEM_URL;
+				}
+				LookupCodeResult lookupResult = lookupCode(theRootValidationSupport, system, theCode);
+				if (lookupResult != null) {
+					if (lookupResult.isFound()) {
+						return new CodeValidationResult()
+							.setCode(lookupResult.getSearchedForCode())
+							.setDisplay(lookupResult.getCodeDisplay());
+					}
+				}
+			}
+		}
 
 		if (handlerMap != null) {
 			String display = handlerMap.get(theCode);
@@ -91,6 +113,49 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		return null;
 	}
+
+	@Override
+	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+
+		if (UCUM_CODESYSTEM_URL.equals(theSystem) && theRootValidationSupport.getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+
+			try (InputStream input = CommonCodeSystemsTerminologyService.class.getResourceAsStream("/ucum-essence.xml")) {
+				UcumEssenceService svc = new UcumEssenceService(input);
+				String outcome = svc.analyse(theCode);
+				if (outcome != null) {
+
+					LookupCodeResult retVal = new LookupCodeResult();
+					retVal.setSearchedForCode(theCode);
+					retVal.setSearchedForSystem(theSystem);
+					retVal.setFound(true);
+					retVal.setCodeDisplay(outcome);
+					return retVal;
+
+				}
+			} catch (IOException e) {
+				ourLog.warn("Failed to load UCUM Essence File", e);
+				return null;
+			} catch (UcumException e) {
+				ourLog.debug("Failed parse UCUM code: {}", theCode, e);
+				return null;
+			}
+
+		}
+
+		return null;
+	}
+
+	@Override
+	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+
+		switch (theSystem) {
+			case UCUM_CODESYSTEM_URL:
+				return true;
+		}
+
+		return false;
+	}
+
 
 	public String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
 		String url;

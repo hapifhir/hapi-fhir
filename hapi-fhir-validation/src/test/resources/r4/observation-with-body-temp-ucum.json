@@ -1,0 +1,38 @@
+{
+	"resourceType": "Observation",
+	"id": "bodytemp",
+	"meta": {
+		"profile": [
+			"http://hl7.org/fhir/StructureDefinition/bodytemp"
+		]
+	},
+	"status": "final",
+	"category": [
+		{
+			"coding": [
+				{
+					"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+					"code": "vital-signs"
+				}
+			]
+		}
+	],
+	"code": {
+		"coding": [
+			{
+				"system": "http://loinc.org",
+				"code": "8310-5"
+			}
+		]
+	},
+	"subject": {
+		"reference": "Patient/1"
+	},
+	"effectiveDateTime": "2020-04-30T12:00:00+01:00",
+	"valueQuantity": {
+		"value": 37.5,
+		"unit": "Cel",
+		"system": "http://unitsofmeasure.org",
+		"code": "Cel"
+	}
+}

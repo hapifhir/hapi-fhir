@@ -98,6 +98,17 @@ The following table lists vocabulary that is validated by this module:
                 added in the future, please get in touch if you would like to help.
             </td>
         </tr>
+        <tr>
+            <td>Unified Codes for Units of Measure (UCUM)</td>
+            <td>
+                ValueSet: <code><a href="http://hl7.org/fhir/ValueSet/ucum-units">(...)/ValueSet/ucum-units</a>
+                <br/>
+                CodeSystem: <code>http://unitsofmeasure.org</code>
+            </td>
+            <td>
+                Codes are validated using the UcumEssenceService provided by the <a href="https://github.com/FHIR/Ucum-java">UCUM Java</a> library.
+            </td>
+        </tr>
     </tbody>
 </table>
 
