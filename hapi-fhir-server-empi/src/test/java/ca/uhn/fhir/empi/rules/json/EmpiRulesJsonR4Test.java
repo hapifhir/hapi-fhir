@@ -38,7 +38,7 @@ public class EmpiRulesJsonR4Test extends BaseR4Test {
 	}
 
 	@Test
-	public void testWeightMap() {
+	public void testMatchResultMap() {
 		assertEquals(EmpiMatchResultEnum.MATCH, myRules.getMatchResult(3L));
 	}
 

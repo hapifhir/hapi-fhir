@@ -24,7 +24,7 @@
 		"metric" : "JARO_WINKLER",
 		"matchThreshold" : 0.8
 	}],
-	"weightMap" : {
+	"matchResultMap" : {
 		"given-name" : "POSSIBLE_MATCH",
 		"given-name,last-name" : "MATCH"
 	},

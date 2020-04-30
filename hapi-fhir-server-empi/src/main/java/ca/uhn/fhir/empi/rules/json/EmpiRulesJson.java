@@ -41,7 +41,7 @@ public class EmpiRulesJson implements IModelJson {
 	List<EmpiFilterSearchParamJson> myFilterSearchParams = new ArrayList<>();
 	@JsonProperty("matchFields")
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
-	@JsonProperty("weightMap")
+	@JsonProperty("matchResultMap")
 	Map<String, EmpiMatchResultEnum> myMatchResultMap = new HashMap<>();
 	@JsonProperty(value = "eidSystem")
 	String myEnterpriseEIDSystem;

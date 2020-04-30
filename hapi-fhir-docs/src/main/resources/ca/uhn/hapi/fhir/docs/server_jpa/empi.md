@@ -121,10 +121,10 @@ The following metrics are currently supported:
 
 See [java-string-similarity](https://github.com/tdebatty/java-string-similarity) for a description of the first five metrics.  For the last four, STANDARd means ignore case and accents whereas EXACT must match casing and accents exactly.  Name any order matches first and last names irrespective of order, whereas FIRST_AND_LAST metrics require the name match to be in order.
 
-* **weightMap** A map which converts combinations of successful matchFields into an EMPI Match Result score for overall matching of a given pair of resources.
+* **matchResultMap** A map which converts combinations of successful matchFields into an EMPI Match Result score for overall matching of a given pair of resources.
 
 ```json
-"weightMap" : {
+"matchResultMap" : {
     "given-name-cosine" : "POSSIBLE_MATCH",
     "given-name-jaro, last-name-jaro" : "MATCH"
 }
