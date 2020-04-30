@@ -10,7 +10,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
 import static org.hamcrest.CoreMatchers.equalTo;
