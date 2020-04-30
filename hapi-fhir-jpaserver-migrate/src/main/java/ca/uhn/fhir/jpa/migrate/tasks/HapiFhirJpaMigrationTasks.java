@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
+import javax.persistence.UniqueConstraint;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -167,6 +168,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		empiLink.addColumn("MATCH_RESULT").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		empiLink.addColumn("LINK_SOURCE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		empiLink.addIndex("20200424.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
 	}
 
 	protected void init420() { // 20191015 - 20200217
