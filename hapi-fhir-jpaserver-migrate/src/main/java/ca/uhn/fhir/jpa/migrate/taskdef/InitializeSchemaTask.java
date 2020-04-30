@@ -34,13 +34,14 @@ import java.util.Set;
 
 public class InitializeSchemaTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
+	public static final String DESCRIPTION_PREFIX = "Initialize schema for ";
 
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
 
 	public InitializeSchemaTask(String theProductVersion, String theSchemaVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		super(theProductVersion, theSchemaVersion);
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
-		setDescription("Initialize schema for " + mySchemaInitializationProvider.getSchemaDescription());
+		setDescription(DESCRIPTION_PREFIX + mySchemaInitializationProvider.getSchemaDescription());
 	}
 
 	@Override

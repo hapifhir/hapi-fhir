@@ -101,7 +101,7 @@ The following table lists vocabulary that is validated by this module:
         <tr>
             <td>Unified Codes for Units of Measure (UCUM)</td>
             <td>
-                ValueSet: <code><a href="http://hl7.org/fhir/ValueSet/ucum-units">(...)/ValueSet/ucum-units</a>
+                ValueSet: <code><a href="http://hl7.org/fhir/ValueSet/ucum-units">(...)/ValueSet/ucum-units</a></code>
                 <br/>
                 CodeSystem: <code>http://unitsofmeasure.org</code>
             </td>

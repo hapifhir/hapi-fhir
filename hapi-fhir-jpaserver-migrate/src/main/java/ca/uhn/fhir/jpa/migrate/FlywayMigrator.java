@@ -80,16 +80,12 @@ public class FlywayMigrator extends BaseMigrator {
 			.baselineOnMigrate(true)
 			.outOfOrder(isOutOfOrderPermitted())
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
-			.callbacks(callbacks())
+			.callbacks(getCallbacks().toArray(new Callback[0]))
 			.load();
 		for (FlywayMigration task : myTasks) {
 			task.setConnectionProperties(theConnectionProperties);
 		}
 		return flyway;
-	}
-
-	protected Callback[] callbacks() {
-		return new Callback[0];
 	}
 
 	@Override
