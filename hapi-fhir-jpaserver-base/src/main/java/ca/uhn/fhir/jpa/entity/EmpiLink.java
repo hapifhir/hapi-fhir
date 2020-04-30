@@ -41,7 +41,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "HFJ_EMPI_LINK", uniqueConstraints = {
+@Table(name = "MPI_LINK", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
 })
 public class EmpiLink {

@@ -133,9 +133,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 
 
-		// HFJ_EMPI_LINK
+		// MPI_LINK
 		version.addIdGenerator("20200424.1", "SEQ_EMPI_LINK_ID");
-		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200424.2", "HFJ_EMPI_LINK", "PID");
+		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200424.2", "MPI_LINK", "PID");
 		empiLink.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
 		empiLink.addColumn("PERSON_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);

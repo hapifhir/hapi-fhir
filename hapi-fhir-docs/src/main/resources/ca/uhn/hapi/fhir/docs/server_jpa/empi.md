@@ -154,8 +154,8 @@ The following are rules about EID merging based on matches for new or modified P
 
 When EMPI is enabled, the HAPI FHIR JPA Server does the following things on startup:
 
-1. HAPI EMPI stores the extra link details in a table called `HFJ_EMPI_LINK`.
-1. Each record in an `HFJ_EMPI_LINK` table corresponds to a `link.target` entry on a Person resource.  HAPI EMPI uses the following convention for the Person.link.assurance level:
+1. HAPI EMPI stores the extra link details in a table called `MPI_LINK`.
+1. Each record in an `MPI_LINK` table corresponds to a `link.target` entry on a Person resource.  HAPI EMPI uses the following convention for the Person.link.assurance level:
     1. Level 1: not used
     1. Level 2: POSSIBLE_MATCH
     1. Level 3: AUTO MATCHED
