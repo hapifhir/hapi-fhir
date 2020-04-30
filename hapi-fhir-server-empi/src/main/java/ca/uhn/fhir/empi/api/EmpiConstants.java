@@ -30,7 +30,7 @@ public class EmpiConstants {
 	public static final String DISPLAY_HAPI_EMPI_MANAGED = "This Person can only be modified by Smile CDR's EMPI system.";
 	public static final String CODE_NO_EMPI_MANAGED = "NO-EMPI";
 	public static final String HAPI_ENTERPRISE_IDENTIFIER_SYSTEM = "http://hapifhir.io/fhir/NamingSystem/empi-person-enterprise-id";
-	public static final String ALL_RESOURCE_SEARCH_PARAM_TYPE = "All";
+	public static final String ALL_RESOURCE_SEARCH_PARAM_TYPE = "*";
 
 
 }
