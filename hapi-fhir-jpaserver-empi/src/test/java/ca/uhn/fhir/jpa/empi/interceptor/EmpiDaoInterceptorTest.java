@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.helper.EmpiHelperConfig;
 import ca.uhn.fhir.jpa.empi.helper.EmpiHelperR4;
@@ -50,7 +50,7 @@ public class EmpiDaoInterceptorTest extends BaseEmpiR4Test {
 	@Autowired
 	public EmpiHelperR4 myEmpiHelper;
 	@Autowired
-	private ResourceTablePidHelper myResourceTablePidHelper;
+	private IdHelperService myIdHelperService;
 
 	@Test
 	public void testCreatePatient() throws InterruptedException {
@@ -123,7 +123,7 @@ public class EmpiDaoInterceptorTest extends BaseEmpiR4Test {
 		patient.setId(patientId);
 
 		//Updating a Person who was created via EMPI should fail.
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(patient)).get();
+		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(patient)).get();
 		Long personPid = empiLink.getPersonPid();
 		Person empiPerson= (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
 		empiPerson.setGender(Enumerations.AdministrativeGender.MALE);

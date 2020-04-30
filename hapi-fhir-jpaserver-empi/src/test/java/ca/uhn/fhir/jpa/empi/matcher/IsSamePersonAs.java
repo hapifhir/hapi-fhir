@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.matcher;
 
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,8 +14,8 @@ public class IsSamePersonAs extends BasePersonMatcher {
 	private List<Long> personPidsToMatch;
 	private Long incomingPersonPid;
 
-	public IsSamePersonAs(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		super(theResourceTablePidHelper, theEmpiLinkDaoSvc, theBaseResource);
+	public IsSamePersonAs(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		super(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class IsSamePersonAs extends BasePersonMatcher {
 		mismatchDescription.appendText(" was actually linked to Person/" + incomingPersonPid);
 	}
 
-	public static Matcher<IBaseResource> samePersonAs(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		return new IsSamePersonAs(theResourceTablePidHelper, theEmpiLinkDaoSvc, theBaseResource);
+	public static Matcher<IBaseResource> samePersonAs(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		return new IsSamePersonAs(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
 	}
 }

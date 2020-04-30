@@ -26,9 +26,8 @@ import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -54,7 +53,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	@Autowired
 	private PersonHelper myPersonHelper;
 	@Autowired
-	private ResourceTablePidHelper myResourceTablePidHelper;
+	private IdHelperService myIdHelperService;
 
 	@Override
 	@Transactional
@@ -83,7 +82,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	}
 
 	private void deleteCurrentMatch(IBaseResource theResourceId) {
-		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(theResourceId));
+		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theResourceId));
 		if(matchedLinkForTargetPid.isPresent()) {
 			myEmpiLinkDaoSvc.deleteLink(matchedLinkForTargetPid.get());
 		}
@@ -122,8 +121,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			return null;
 		} else {
 			return myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(
-				myResourceTablePidHelper.getPidOrNull(thePerson),
-				myResourceTablePidHelper.getPidOrNull(theCandidate)
+				myIdHelperService.getPidOrNull(thePerson),
+				myIdHelperService.getPidOrNull(theCandidate)
 			);
 		}
 	}

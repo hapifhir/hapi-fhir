@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
-import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,11 +45,11 @@ public class EmpiLinkDaoSvc {
 	@Autowired
 	private IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
-	private ResourceTablePidHelper myResourceTablePidHelper;
+	private IdHelperService myIdHelperService;
 
 	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages) {
-		Long personPid = myResourceTablePidHelper.getPidOrNull(thePerson);
-		Long resourcePid = myResourceTablePidHelper.getPidOrNull(theResource);
+		Long personPid = myIdHelperService.getPidOrNull(thePerson);
+		Long resourcePid = myIdHelperService.getPidOrNull(theResource);
 
 		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
 		empiLink.setLinkSource(theLinkSource);
@@ -127,7 +127,7 @@ public class EmpiLinkDaoSvc {
 	 }
 
 	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theBaseResource) {
-		EmpiLink empiLink = new EmpiLink().setTargetPid(myResourceTablePidHelper.getPidOrNull(theBaseResource));
+		EmpiLink empiLink = new EmpiLink().setTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findOne(example);
 	}

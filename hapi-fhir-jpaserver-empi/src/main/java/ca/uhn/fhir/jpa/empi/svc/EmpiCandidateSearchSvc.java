@@ -25,7 +25,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,7 +57,7 @@ public class EmpiCandidateSearchSvc {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private ResourceTablePidHelper myResourceTablePidHelper;
+	private IdHelperService myIdHelperService;
 
 	/**
 	 * Given a target resource, search for all resources that are considered an EMPI match based on defined EMPI rules.
@@ -93,7 +93,7 @@ public class EmpiCandidateSearchSvc {
 		//Sometimes, we are running this function on a resource that has not yet been persisted,
 		//so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
-			matchedPidsToResources.remove(myResourceTablePidHelper.getPidOrNull(theResource));
+			matchedPidsToResources.remove(myIdHelperService.getPidOrNull(theResource));
 		}
 
 		return matchedPidsToResources.values();
@@ -129,7 +129,7 @@ public class EmpiCandidateSearchSvc {
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
 		//4.
-		resources.forEach(resource -> theMatchedPidsToResources.put(myResourceTablePidHelper.getPidOrNull(resource), resource));
+		resources.forEach(resource -> theMatchedPidsToResources.put(myIdHelperService.getPidOrNull(resource), resource));
 	}
 
 	/*

@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
-import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.config.EmpiConsumerConfig;
 import ca.uhn.fhir.jpa.empi.config.EmpiSubmitterConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
@@ -71,7 +71,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
-	protected ResourceTablePidHelper myResourceTablePidHelper;
+	protected IdHelperService myIdHelperService;
 	@Autowired
 	protected IEmpiSettings myEmpiConfig;
 	@Autowired
@@ -198,7 +198,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	protected Person getPersonFromTarget(IBaseResource theBaseResource) {
-		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(theBaseResource));
+		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long personPid = matchedLinkForTargetPid.get().getPersonPid();
 			return (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
@@ -236,23 +236,23 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	protected Matcher<IBaseResource> samePersonAs(IBaseResource... theBaseResource) {
-		return IsSamePersonAs.samePersonAs(myResourceTablePidHelper, myEmpiLinkDaoSvc, theBaseResource);
+		return IsSamePersonAs.samePersonAs(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	protected Matcher<IBaseResource> linkedTo(IBaseResource... theBaseResource) {
-		return IsLinkedTo.linkedTo(myResourceTablePidHelper, myEmpiLinkDaoSvc, theBaseResource);
+		return IsLinkedTo.linkedTo(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	protected Matcher<IBaseResource> possibleMatchWith(IBaseResource... theBaseResource) {
-		return IsPossibleMatchWith.possibleMatchWith(myResourceTablePidHelper, myEmpiLinkDaoSvc, theBaseResource);
+		return IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	protected Matcher<IBaseResource> possibleDuplicateOf(IBaseResource...theBaseResource) {
-		return IsPossibleDuplicateOf.possibleDuplicateOf(myResourceTablePidHelper, myEmpiLinkDaoSvc, theBaseResource);
+		return IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	protected Matcher<IBaseResource> matchedToAPerson() {
-		return IsMatchedToAPerson.matchedToAPerson(myResourceTablePidHelper, myEmpiLinkDaoSvc);
+		return IsMatchedToAPerson.matchedToAPerson(myIdHelperService, myEmpiLinkDaoSvc);
 	}
 
 }

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.matcher;
 
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.dao.index.ResourceTablePidHelper;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -12,17 +12,17 @@ import java.util.Optional;
 
 public class IsMatchedToAPerson extends TypeSafeMatcher<IBaseResource> {
 
-	private final ResourceTablePidHelper myResourceTablePidHelper;
+	private final IdHelperService myIdHelperService;
 	private final EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 
-	public IsMatchedToAPerson(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc) {
-		myResourceTablePidHelper = theResourceTablePidHelper;
+	public IsMatchedToAPerson(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc) {
+		myIdHelperService = theIdHelperService;
 		myEmpiLinkDaoSvc = theEmpiLinkDaoSvc;
 	}
 
 	@Override
 	protected boolean matchesSafely(IBaseResource theIncomingResource) {
-		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myResourceTablePidHelper.getPidOrNull(theIncomingResource));
+		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theIncomingResource));
 		return matchedLinkForTargetPid.isPresent();
 	}
 
@@ -31,7 +31,7 @@ public class IsMatchedToAPerson extends TypeSafeMatcher<IBaseResource> {
 		theDescription.appendText("patient/practitioner was not linked to a Person.");
 	}
 
-	public static Matcher<IBaseResource> matchedToAPerson(ResourceTablePidHelper theResourceTablePidHelper, EmpiLinkDaoSvc theEmpiLinkDaoSvc) {
-		return new IsMatchedToAPerson(theResourceTablePidHelper, theEmpiLinkDaoSvc);
+	public static Matcher<IBaseResource> matchedToAPerson(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc) {
+		return new IsMatchedToAPerson(theIdHelperService, theEmpiLinkDaoSvc);
 	}
 }
