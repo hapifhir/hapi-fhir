@@ -61,6 +61,10 @@ public class ModelConfig {
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
+	/**
+	 * Update setter javadoc if default changes.
+	 */
+	private boolean myUseOrdinalDatesForDayPrecisionSearches = true;
 
 	/**
 	 * Constructor
@@ -258,7 +262,6 @@ public class ModelConfig {
 			myTreatReferencesAsLogical = new HashSet<>();
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
-
 	}
 
 	/**
@@ -368,6 +371,43 @@ public class ModelConfig {
 		myWebsocketContextPath = theWebsocketContextPath;
 	}
 
+	/**
+	 * <p>
+	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
+	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
+	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
+	 *
+	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
+	 * ordinal {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
+	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
+	 * </p>
+	 * Default is {@literal true} beginning in HAPI FHIR 4.3.
+	 * </p>
+	 *
+	 * @since 4.3
+	 */
+	public void setUseOrdinalDatesForDayPrecisionSearches(boolean theUseOrdinalDates) {
+		myUseOrdinalDatesForDayPrecisionSearches = theUseOrdinalDates;
+	}
+
+	/**
+	 * <p>
+	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
+	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
+	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
+	 *
+	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
+	 *  integer representing the ordinal date {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
+	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
+	 * </p>
+	 * Default is {@literal true} beginning in HAPI FHIR 4.3.
+	 * </p>
+	 *
+	 * @since 4.3
+	 */
+	public boolean getUseOrdinalDatesForDayPrecisionSearches() {
+		return myUseOrdinalDatesForDayPrecisionSearches;
+	}
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 

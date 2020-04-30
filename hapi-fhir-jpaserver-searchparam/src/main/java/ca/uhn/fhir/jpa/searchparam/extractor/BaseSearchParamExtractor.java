@@ -584,9 +584,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
 		String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
 		Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
+		String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
 
 		if (start != null || end != null) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, end, startAsString);
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings ,theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
 			theParams.add(nextEntity);
 		}
 	}
@@ -595,13 +596,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
 
 		TreeSet<Date> dates = new TreeSet<>();
+		TreeSet<String> dateStrings = new TreeSet<>();
 		String firstValue = null;
+		String finalValue = null;
 		for (IPrimitiveType<Date> nextEvent : values) {
 			if (nextEvent.getValue() != null) {
 				dates.add(nextEvent.getValue());
 				if (firstValue == null) {
 					firstValue = nextEvent.getValueAsString();
 				}
+				finalValue = nextEvent.getValueAsString();
 			}
 		}
 
@@ -613,14 +617,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if ("Period".equals(boundsType)) {
 					Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
 					Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
+					String endString = extractValueAsString(myPeriodEndValueChild, bounds.get());
 					dates.add(start);
 					dates.add(end);
+					//TODO Check if this logic is valid. Does the start of the first period indicate a lower bound??
+					if (firstValue == null) {
+						firstValue = extractValueAsString(myPeriodStartValueChild, bounds.get());
+					}
+					finalValue = endString;
 				}
 			}
 		}
 
 		if (!dates.isEmpty()) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), dates.first(), dates.last(), firstValue);
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), dates.first(), firstValue, dates.last(), finalValue, firstValue);
 			theParams.add(nextEntity);
 		}
 	}
@@ -811,7 +821,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void addDateTimeTypes(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		IPrimitiveType<Date> nextBaseDateTime = (IPrimitiveType<Date>) theValue;
 		if (nextBaseDateTime.getValue() != null) {
-			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString());
+			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(myPartitionSettings ,theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValueAsString());
 			theParams.add(param);
 		}
 	}
