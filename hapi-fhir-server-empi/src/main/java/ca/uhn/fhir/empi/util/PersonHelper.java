@@ -23,6 +23,7 @@ package ca.uhn.fhir.empi.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
@@ -47,11 +48,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 @Service
 public class PersonHelper {
-	private static final Logger ourLog = getLogger(PersonHelper.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private IEmpiSettings myEmpiConfig;
@@ -125,7 +124,7 @@ public class PersonHelper {
 
 	private void handleLinkUpdateDSTU3(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
 		if (theCanonicalAssuranceLevel == null) {
-			ourLog.info("Refusing to update or add a link without an Assurance Level.");
+			ourLog.warn("Refusing to update or add a link without an Assurance Level.");
 			return;
 		}
 
@@ -154,7 +153,7 @@ public class PersonHelper {
 
 	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
 		if (canonicalAssuranceLevel == null) {
-			ourLog.info("Refusing to update or add a link without an Assurance Level.");
+			ourLog.warn("Refusing to update or add a link without an Assurance Level.");
 			return;
 		}
 

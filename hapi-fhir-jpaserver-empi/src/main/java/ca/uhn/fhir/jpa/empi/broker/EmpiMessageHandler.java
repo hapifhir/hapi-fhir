@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.empi.broker;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -30,7 +31,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmpiMessageHandler implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(EmpiMessageHandler.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 	@Autowired
 	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.MatchedTarget;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
@@ -42,11 +43,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 @Service
 public class EmpiPersonFindingSvc {
-	private static final Logger ourLog = getLogger(EmpiPersonFindingSvc.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private FhirContext myFhirContext;

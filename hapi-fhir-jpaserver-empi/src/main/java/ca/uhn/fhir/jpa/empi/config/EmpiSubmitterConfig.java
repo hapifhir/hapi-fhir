@@ -20,21 +20,17 @@ package ca.uhn.fhir.jpa.empi.config;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.empi.interceptor.EmpiDaoInterceptor;
+import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiSubmitterInterceptorLoader;
 import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class EmpiSubmitterConfig {
-	private static final Logger ourLog = LoggerFactory.getLogger(EmpiSubmitterConfig.class);
-
 	@Bean
-	EmpiDaoInterceptor empiDaoInterceptor() {
-		return new EmpiDaoInterceptor();
+    EmpiStorageInterceptor empiDaoInterceptor() {
+		return new EmpiStorageInterceptor();
 	}
 
 	@Bean

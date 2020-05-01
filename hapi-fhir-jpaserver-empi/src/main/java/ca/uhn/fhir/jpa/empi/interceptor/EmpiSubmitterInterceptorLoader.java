@@ -21,25 +21,25 @@ package ca.uhn.fhir.jpa.empi.interceptor;
  */
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 
 public class EmpiSubmitterInterceptorLoader {
-	private static final Logger ourLog = LoggerFactory.getLogger(EmpiSubmitterInterceptorLoader.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private IEmpiSettings myEmpiProperties;
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
-	private EmpiDaoInterceptor myEmpiDaoInterceptor;
+	private EmpiStorageInterceptor myEmpiStorageInterceptor;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	@Autowired
@@ -52,7 +52,7 @@ public class EmpiSubmitterInterceptorLoader {
 		}
 
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
-		myInterceptorService.registerInterceptor(myEmpiDaoInterceptor);
+		myInterceptorService.registerInterceptor(myEmpiStorageInterceptor);
 		ourLog.info("EMPI interceptor registered");
 		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types the first time it was called.
 		mySubscriptionSubmitInterceptorLoader.start();
