@@ -231,9 +231,9 @@ public enum Pointcut {
 	/**
 	 * <b>Server Hook:</b>
 	 * This hook is invoked before an incoming request is processed. Note that this method is called
-	 * after the server has begin preparing the response to the incoming client request.
+	 * after the server has begun preparing the response to the incoming client request.
 	 * As such, it is not able to supply a response to the incoming request in the way that
-	 * SERVER_INCOMING_REQUEST_PRE_HANDLED and
+	 * SERVER_INCOMING_REQUEST_PRE_PROCESSED and
 	 * {@link #SERVER_INCOMING_REQUEST_POST_PROCESSED}
 	 * are.
 	 * <p>
