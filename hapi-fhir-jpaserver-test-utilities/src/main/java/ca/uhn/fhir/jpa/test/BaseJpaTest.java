@@ -27,6 +27,8 @@ import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.After;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestPropertySource;
@@ -46,6 +48,8 @@ import java.util.concurrent.Callable;
 })
 @RunWith(SpringRunner.class)
 public abstract class BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaTest.class);
+
 	static {
 		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
 		System.setProperty("test", "true");
@@ -64,6 +68,7 @@ public abstract class BaseJpaTest {
 
 	@After
 	public void after() {
+		ourLog.info("\n  ---  @After  ---");
 		myExpungeEverythingService.expungeEverything(null);
 	}
 

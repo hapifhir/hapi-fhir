@@ -190,7 +190,7 @@ public class FhirContext {
 		} else {
 			if ("true".equals(System.getProperty("unit_test_mode"))) {
 				String calledAt = ExceptionUtils.getStackFrames(new Throwable())[4];
-				ourLog.info("Creating new FHIR context for FHIR version [{}]\nCalled{}", myVersion.getVersion().name(), calledAt);
+				ourLog.info("Creating new FHIR context for FHIR version [{}]{}", myVersion.getVersion().name(), calledAt);
 			} else {
 				ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
 			}

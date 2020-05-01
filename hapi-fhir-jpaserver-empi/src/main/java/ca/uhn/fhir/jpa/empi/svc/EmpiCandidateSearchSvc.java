@@ -94,7 +94,6 @@ public class EmpiCandidateSearchSvc {
 		if (theResource.getIdElement().getIdPart() != null) {
 			matchedPidsToResources.remove(myIdHelperService.getPidOrNull(theResource));
 		}
-
 		return matchedPidsToResources.values();
 	}
 
@@ -114,7 +113,7 @@ public class EmpiCandidateSearchSvc {
 	private void searchForIdsAndAddToMap(String theResourceType, Map<Long, IBaseResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
 		//1.
 		String resourceCriteria = buildResourceQueryString(theResourceType, theFilterCriteria, resourceSearchParam, theValuesFromResourceForSearchParam);
-		ourLog.debug("About to execute URL query: {}", resourceCriteria);
+		ourLog.debug("Searching for {} candidates with query: {}", theResourceType, resourceCriteria);
 
 		//2.
 		SearchParameterMap searchParameterMap = myEmpiSearchParamSvc.mapFromCriteria(theResourceType, resourceCriteria);
@@ -127,8 +126,16 @@ public class EmpiCandidateSearchSvc {
 		IBundleProvider search = resourceDao.search(searchParameterMap);
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
+		int initialSize = theMatchedPidsToResources.size();
+
 		//4.
 		resources.forEach(resource -> theMatchedPidsToResources.put(myIdHelperService.getPidOrNull(resource), resource));
+
+		int newSize = theMatchedPidsToResources.size();
+
+		if (ourLog.isDebugEnabled()) {
+			ourLog.debug("Search added {} {} candidate(s)", newSize - initialSize, theResourceType);
+		}
 	}
 
 	/*
