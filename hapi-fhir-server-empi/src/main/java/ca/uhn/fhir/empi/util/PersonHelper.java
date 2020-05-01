@@ -225,6 +225,7 @@ public class PersonHelper {
 				eidsToApply.forEach(eid -> personDSTU3.addIdentifier(eid.toDSTU3()));
 				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding)buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3);
+				return personDSTU3;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
@@ -243,6 +244,9 @@ public class PersonHelper {
 				break;
 			case DSTU3:
 				copyDSTU3TargetInformation(theBaseResource, thePerson);
+				break;
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 	private void copyR4TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
@@ -266,6 +270,8 @@ public class PersonHelper {
 				person.setGender(practitioner.getGender());
 				person.setPhoto(practitioner.getPhotoFirstRep());
 				break;
+			default:
+				throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceType(theBaseResource));
 		}
 	}
 	private void copyDSTU3TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {

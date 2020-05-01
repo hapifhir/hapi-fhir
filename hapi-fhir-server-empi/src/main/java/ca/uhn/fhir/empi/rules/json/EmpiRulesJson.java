@@ -117,6 +117,10 @@ public class EmpiRulesJson implements IModelJson {
 	 * Ensure the vector map is initialized after we deserialize
 	 */
 	static class EmpiRulesJsonConverter extends StdConverter<EmpiRulesJson, EmpiRulesJson> {
+
+		/**
+		 * This empty constructor is required by Jackson
+		 */
 		public EmpiRulesJsonConverter() {
 		}
 

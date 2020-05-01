@@ -11,6 +11,10 @@ import org.hl7.fhir.r4.model.Person;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+
 public class EmpiLinkDaoTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
@@ -27,6 +31,7 @@ public class EmpiLinkDaoTest extends BaseEmpiR4Test {
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		empiLink.setPersonPid(myIdHelperService.getPidOrNull(person));
 		empiLink.setTargetPid(myIdHelperService.getPidOrNull(patient));
-		myEmpiLinkDao.save(empiLink);
+		EmpiLink save = myEmpiLinkDao.save(empiLink);
+		assertThat(save, is(notNullValue()));
 	}
 }
