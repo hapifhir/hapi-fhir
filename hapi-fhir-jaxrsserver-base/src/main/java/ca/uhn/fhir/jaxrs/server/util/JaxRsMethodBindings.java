@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -54,7 +55,7 @@ public class JaxRsMethodBindings {
      * @param theProviderClass the class definition contaning the operations 
      */
     public  JaxRsMethodBindings(AbstractJaxRsProvider theProvider, Class<? extends AbstractJaxRsProvider> theProviderClass) {
-	    LinkedHashSet<Method> declaredMethodsForCurrentProvider = ReflectionUtil.getDeclaredMethods(theProviderClass);
+	    List<Method> declaredMethodsForCurrentProvider = ReflectionUtil.getDeclaredMethods(theProviderClass);
 	    declaredMethodsForCurrentProvider.addAll(ReflectionUtil.getDeclaredMethods(theProviderClass.getSuperclass()));
 	    for (final Method m : declaredMethodsForCurrentProvider) {
             final BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, theProvider.getFhirContext(), theProvider);

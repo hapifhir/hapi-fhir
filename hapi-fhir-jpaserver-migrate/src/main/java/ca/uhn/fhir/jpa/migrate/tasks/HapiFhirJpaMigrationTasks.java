@@ -71,25 +71,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init500() { // 20200218 - present
-		Builder version = forVersion(VersionEnum.V4_3_0);
+		Builder version = forVersion(VersionEnum.V5_0_0);
 
 		// Eliminate circular dependency.
 		version.onTable("HFJ_RESOURCE").dropColumn("20200218.1", "FORCED_ID_PID");
 		version.onTable("HFJ_RES_VER").dropColumn("20200218.2", "FORCED_ID_PID");
 		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		//
-
-		// Add support for integer comparisons during day-precision date search.
-		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
-		spidxDate.addColumn("20200225.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		spidxDate.addColumn("20200225.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-
-		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V4_3_0, "20200225.3")
-			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))
-			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
-			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
-		);
 		//
 
 		// Drop unused column
@@ -147,6 +135,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_URI").modifyColumn("20200420.41", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
 		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20200420.42", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
 
+		// Add support for integer comparisons during day-precision date search.
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.addColumn("20200501.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		spidxDate.addColumn("20200501.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+
+		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V5_0_0, "20200501.3")
+			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))
+			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
+			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
+		);
 
 
 		// MPI_LINK
