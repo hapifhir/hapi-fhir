@@ -23,8 +23,8 @@ package ca.uhn.fhir.empi.api;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 
 public interface IEmpiSettings {
-	String EMPI_CHANNEL_NAME = "empi";
-	int EMPI_DEFAULT_CONCURRENT_CONSUMERS = 5;
+	final static String EMPI_CHANNEL_NAME = "empi";
+	final static int EMPI_DEFAULT_CONCURRENT_CONSUMERS = 5;
 
 	boolean isEnabled();
 
