@@ -267,7 +267,7 @@ public class Constants {
 	/**
 	 * {@link org.hl7.fhir.instance.model.api.IBaseResource#getUserData(String) User metadata key} used
 	 * to store the partition ID (if any) associated with the given resource. Value for this
-	 * key will be of type {@link ca.uhn.fhir.interceptor.model.PersistedPartitionId}.
+	 * key will be of type {@link ca.uhn.fhir.interceptor.model.RequestPartitionId}.
 	 */
 	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
 
