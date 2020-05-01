@@ -87,11 +87,6 @@ public class EmpiPersonFindingSvc {
 			return matchedPersonCandidates.get();
 		}
 
-		matchedPersonCandidates =  attemptToFindPersonCandidateFromSimilarPersons(theBaseResource);
-		if (matchedPersonCandidates.isPresent()) {
-			return matchedPersonCandidates.get();
-		}
-
 		matchedPersonCandidates =  attemptToFindPersonCandidateFromSimilarTargetResource(theBaseResource);
 		if (matchedPersonCandidates.isPresent()) {
 			return matchedPersonCandidates.get();
@@ -131,20 +126,6 @@ public class EmpiPersonFindingSvc {
 		}
 	}
 
-	/**
-	 * Attempt to find matching persons by performing EMPI matching between the incoming resource (Patient/Practitioner)
-	 * and the attributes of existing Persons.
-	 *
-	 * @param theBaseResource the {@link IBaseResource} which we want to find candidate Persons for.
-	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
-	 */
-	private Optional<List<MatchedPersonCandidate>> attemptToFindPersonCandidateFromSimilarPersons(IBaseResource theBaseResource) {
-		return Optional.empty();
-		//Collection<IBaseResource> personCandidates = myEmpiCandidateSearchSvc.findCandidates("Person", theBaseResource);
-		//List<EmpiMatchResultEnum> collect = personCandidates.stream()
-	  //	.map(pc -> myEmpiResourceComparatorSvc.getMatchResult(theBaseResource, pc))
-	  //		.collect(Collectors.toList());
-	}
 
 	/**
 	 * Attempt to find matching Persons by resolving them from similar Matching target resources, where target resource

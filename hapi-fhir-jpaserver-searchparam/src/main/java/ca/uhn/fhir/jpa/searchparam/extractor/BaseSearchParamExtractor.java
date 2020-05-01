@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StringNormalizer;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.spatial.impl.Point;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -268,7 +269,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private List<String> refsToStringList(SearchParamSet<PathAndRef> theParams) {
 		return theParams.stream()
-			.map(param -> param.getRef())
+			.map(PathAndRef::getRef)
 			.map(ref -> ref.getReferenceElement().toUnqualifiedVersionless().getValue())
 			.collect(Collectors.toList());
 	}
@@ -1200,7 +1201,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<?>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValueAsString())
+			.map(IPrimitiveType::getValueAsString)
 			.orElse(null);
 	}
 
@@ -1208,7 +1209,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<Date>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValue())
+			.map(IPrimitiveType::getValue)
 			.orElse(null);
 	}
 
@@ -1216,7 +1217,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<BigDecimal>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValue())
+			.map(IPrimitiveType::getValue)
 			.orElse(null);
 	}
 
@@ -1233,8 +1234,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.getValues(theValue)
 			.stream()
 			.map(t -> (IPrimitiveType) t)
-			.map(t -> t.getValueAsString())
-			.filter(t -> isNotBlank(t))
+			.map(IPrimitiveType::getValueAsString)
+			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toList());
 	}
 
