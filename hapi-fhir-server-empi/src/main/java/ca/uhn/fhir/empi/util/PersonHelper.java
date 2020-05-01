@@ -225,6 +225,7 @@ public class PersonHelper {
 				eidsToApply.forEach(eid -> personDSTU3.addIdentifier(eid.toDSTU3()));
 				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding)buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3);
+				return personDSTU3;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
