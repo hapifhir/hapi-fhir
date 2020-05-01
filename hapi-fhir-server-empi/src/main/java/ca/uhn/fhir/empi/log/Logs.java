@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Logs {
-	private static final Logger ourEmpiTroubleshootingLog = LoggerFactory.getLogger("ca.cdr.log.empi_troubleshooting");
+	private static final Logger ourEmpiTroubleshootingLog = LoggerFactory.getLogger("ca.uhn.fhir.log.empi_troubleshooting");
 
 	public static Logger getEmpiTroubleshootingLog() {
 		return ourEmpiTroubleshootingLog;
