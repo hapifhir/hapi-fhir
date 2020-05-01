@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@JsonDeserialize(converter= EmpiRulesJson.EmpiRulesJsonConverter.class)
+@JsonDeserialize(converter = EmpiRulesJson.EmpiRulesJsonConverter.class)
 public class EmpiRulesJson implements IModelJson {
 	@JsonProperty("candidateSearchParams")
 	List<EmpiResourceSearchParamJson> myResourceSearchParams = new ArrayList<>();
@@ -116,7 +116,7 @@ public class EmpiRulesJson implements IModelJson {
 	/**
 	 * Ensure the vector map is initialized after we deserialize
 	 */
-	static class EmpiRulesJsonConverter extends StdConverter<EmpiRulesJson,EmpiRulesJson> {
+	static class EmpiRulesJsonConverter extends StdConverter<EmpiRulesJson, EmpiRulesJson> {
 		public EmpiRulesJsonConverter() {
 		}
 
@@ -125,6 +125,13 @@ public class EmpiRulesJson implements IModelJson {
 			theEmpiRulesJson.initialize();
 			return theEmpiRulesJson;
 		}
+	}
+
+	public String getSummary() {
+		return myResourceSearchParams.size() + " Candidate Search Params, " +
+			myFilterSearchParams.size() + " Filter Search Params, " +
+			myMatchFieldJsonList.size() + " Match Fields, " +
+			myMatchResultMap.size() + " Match Result Entries";
 	}
 
 	@VisibleForTesting
