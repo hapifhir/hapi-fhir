@@ -404,8 +404,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case ALL_RESOURCES:
 				if (appliesToResourceType != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-						// FIXME: why?
-//						return new Verdict(PolicyEnum.ALLOW, this);
 						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 					}
 				}
