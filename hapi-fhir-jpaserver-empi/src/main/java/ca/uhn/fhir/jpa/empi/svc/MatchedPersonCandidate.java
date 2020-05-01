@@ -33,11 +33,6 @@ public class MatchedPersonCandidate {
 		myEmpiMatchResultEnum = theEmpiMatchResultEnum;
 	}
 
-	private MatchedPersonCandidate(ResourcePersistentId theCandidate) {
-		myCandidatePersonPid = theCandidate;
-		myEmpiMatchResultEnum = null;
-	}
-
 	public ResourcePersistentId getCandidatePersonPid() {
 		return myCandidatePersonPid;
 	}

@@ -110,7 +110,7 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 			myEmpiHelper.doUpdateResource(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals(e.getMessage(), "The EMPI status of a Person may not be changed once created.");
+			assertEquals("The EMPI status of a Person may not be changed once created.", e.getMessage() );
 		}
 	}
 
