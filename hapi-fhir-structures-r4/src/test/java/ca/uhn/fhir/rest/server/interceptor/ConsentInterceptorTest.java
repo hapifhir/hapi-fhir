@@ -51,8 +51,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-//import static org.hamcrest.Matchers.any;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ConsentInterceptorTest {
 
