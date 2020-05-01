@@ -10,7 +10,16 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -61,7 +70,6 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -1919,7 +1927,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(2, results.sizeNotNull());
+		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
 
@@ -1980,7 +1988,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		addReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(2, results.sizeNotNull());
+		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
 
@@ -2021,7 +2029,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		addReadAllPartitions();
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(2, results.sizeNotNull());
+		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
 	}
@@ -2050,7 +2058,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = mySystemDao.history(null, null, mySrd);
-		assertEquals(2, results.sizeNotNull());
+		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
 
@@ -2086,7 +2094,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		addReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = mySystemDao.history(null, null, mySrd);
-		assertEquals(2, results.sizeNotNull());
+		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
 
@@ -2132,7 +2140,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(null, null, mySrd);
-		assertEquals(2, results.sizeNotNull());
+		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
 
@@ -2169,7 +2177,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		addReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(null, null, mySrd);
-		assertEquals(2, results.sizeNotNull());
+		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, Matchers.contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
 

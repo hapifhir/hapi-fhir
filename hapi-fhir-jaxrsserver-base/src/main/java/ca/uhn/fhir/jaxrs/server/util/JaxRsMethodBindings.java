@@ -20,17 +20,18 @@ package ca.uhn.fhir.jaxrs.server.util;
  * #L%
  */
 
-import java.lang.reflect.Method;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import ca.uhn.fhir.rest.server.method.*;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
+import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Class that contains the method bindings defined by a ResourceProvider

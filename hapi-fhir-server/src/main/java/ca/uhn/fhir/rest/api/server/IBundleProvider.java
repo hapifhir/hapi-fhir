@@ -167,7 +167,7 @@ public interface IBundleProvider {
 	/**
 	 * Returns the value of {@link #size()} and throws a {@link NullPointerException} of it is null
 	 */
-	default int sizeNotNull() {
+	default int sizeOrThrowNpe() {
 		Integer retVal = size();
 		Validate.notNull(retVal, "size() returned null");
 		return retVal;

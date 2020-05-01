@@ -24,8 +24,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
 /**
  * @since 5.0.0
  */
@@ -86,7 +84,10 @@ public class RequestPartitionId {
 	 * Returns the partition ID (numeric) as a string, or the string "null"
 	 */
 	public String getPartitionIdStringOrNullString() {
-		return defaultIfNull(getPartitionId(), "null").toString();
+		if (myPartitionId == null) {
+			return "null";
+		}
+		return myPartitionId.toString();
 	}
 
 	@Nonnull

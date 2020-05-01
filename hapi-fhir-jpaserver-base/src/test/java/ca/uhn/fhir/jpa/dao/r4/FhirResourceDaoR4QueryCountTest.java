@@ -268,7 +268,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
 			IBundleProvider history = mySystemDao.history(null, null, null);
-			assertEquals(3, history.getResources(0, 3).size());
+			assertEquals(3, history.getResources(0, 99).size());
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		// Perform count, Search history table, resolve forced IDs
@@ -284,7 +284,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
 			IBundleProvider history = mySystemDao.history(null, null, null);
-			assertEquals(3, history.getResources(0, 3).size());
+			assertEquals(3, history.getResources(0, 99).size());
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		// Perform count, Search history table
