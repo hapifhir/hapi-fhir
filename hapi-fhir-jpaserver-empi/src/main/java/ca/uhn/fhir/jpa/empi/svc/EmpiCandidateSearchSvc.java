@@ -123,7 +123,7 @@ public class EmpiCandidateSearchSvc {
 
 		//TODO EMPI this will blow up under large scale i think.
 		//3.
-		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		IBundleProvider search = resourceDao.search(searchParameterMap);
 		List<IBaseResource> resources = search.getResources(0, search.size());
 

@@ -42,9 +42,9 @@ public class EmpiResourceDaoSvc {
 	@Autowired
     IEmpiSettings myEmpiConfig;
 
-	private IFhirResourceDao myPatientDao;
-	private IFhirResourceDao myPersonDao;
-	private IFhirResourceDao myPractitionerDao;
+	private IFhirResourceDao<? extends IBaseResource> myPatientDao;
+	private IFhirResourceDao<? extends IBaseResource> myPersonDao;
+	private IFhirResourceDao<? extends IBaseResource> myPractitionerDao;
 
 	@PostConstruct
 	public void postConstruct() {

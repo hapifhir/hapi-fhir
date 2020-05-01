@@ -82,13 +82,6 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	}
 
-	private void deleteCurrentMatch(IBaseResource theResourceId) {
-		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theResourceId));
-		if(matchedLinkForTargetPid.isPresent()) {
-			myEmpiLinkDaoSvc.deleteLink(matchedLinkForTargetPid.get());
-		}
-	}
-
 	/**
 	 * Helper function which runs various business rules about what types of requests are allowed.
 	 */

@@ -179,18 +179,8 @@ public class EmpiPersonFindingSvc {
 			.collect(Collectors.toList());
 	}
 
-	private boolean hasNoMatchLink(IBaseResource theBaseResource, Long thePersonPid) {
-		Optional<EmpiLink> noMatchLink = myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(thePersonPid, myIdHelperService.getPidOrNull(theBaseResource), EmpiMatchResultEnum.NO_MATCH);
-		return noMatchLink.isPresent();
-	}
-
 	private ResourcePersistentId getResourcePersistentId(Long thePersonPid) {
 		return new ResourcePersistentId(thePersonPid);
-	}
-
-	@Nonnull
-	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theBaseResource) {
-		return myEmpiLinkDaoSvc.findEmpiLinkByTargetId(theBaseResource);
 	}
 
 }
