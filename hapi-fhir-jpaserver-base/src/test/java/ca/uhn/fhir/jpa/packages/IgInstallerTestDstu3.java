@@ -25,11 +25,10 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 	public void before() {
 		daoConfig.addTreatReferencesAsLogical("http://ehealth.sundhed.dk/vs/*");
 		daoConfig.addTreatReferencesAsLogical("http://ehealth.sundhed.dk/cs/*");
-		daoConfig.setMyImplementationGuideURL("https://docs.ehealth.sundhed.dk/latest/ig/package.tgz"); // for Dstu3
 	}
 
 	@Test
 	public void installIgForDstu3() throws IOException {
-		igInstaller.run();
+		assertTrue(igInstaller.install("https://docs.ehealth.sundhed.dk/latest/ig/package.tgz"));
 	}
 }

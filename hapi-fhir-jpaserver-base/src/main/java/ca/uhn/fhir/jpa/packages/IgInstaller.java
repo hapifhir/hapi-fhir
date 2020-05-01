@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.cache.NpmPackage;
@@ -28,13 +27,12 @@ public class IgInstaller {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(IgInstaller.class);
 
-	private boolean enabled = true;
+	boolean enabled = true;
 	private FhirContext fhirContext;
-	private DaoConfig daoConfig;
 	private DaoRegistry daoRegistry;
 	private PackageCacheManager packageCacheManager;
 
-	private static final String[] RESOURCE_TYPES = new String[]
+	private String[] SUPPORTED_RESOURCE_TYPES = new String[]
 		{ "NamingSystem",
 			"CodeSystem",
 			"ValueSet",
@@ -47,9 +45,8 @@ public class IgInstaller {
 	private SnapshotGenerator snapshotGenerator;
 
 	@Autowired
-	public IgInstaller(FhirContext fhirContext, DaoConfig daoConfig, DaoRegistry daoRegistry) {
+	public IgInstaller(FhirContext fhirContext, DaoRegistry daoRegistry) {
 		this.fhirContext = fhirContext;
-		this.daoConfig = daoConfig;
 		this.daoRegistry = daoRegistry;
 
 		IFhirResourceDao structureDefinitionDao = daoRegistry.getResourceDao("StructureDefinition");
@@ -78,45 +75,34 @@ public class IgInstaller {
 		try {
 			packageCacheManager = new PackageCacheManager(true, 1);
 		} catch (IOException e) {
-			ourLog.warn("Unable to initialize PackageCacheManager: {}", e);
+			ourLog.error("Unable to initialize PackageCacheManager: {}", e);
 			enabled = false;
 		}
 	}
 
 	/**
-	 * Listens for the {@link ContextStartedEvent} and installs an IG specified
-	 * by the fields getMyImplementationGuideURL, getMyImplementationGuideID and
-	 * getMyImplementationGuideVersion in {@link DaoConfig}.
+	 * Loads and installs an IG tarball (with its dependencies) from the specified url.
 	 *
-	 * See the specification of {@link DaoConfig}
+	 * Installs the IG by persisting instances of the following types of resources:
+	 *
+	 * - NamingSystem, CodeSystem, ValueSet, StructureDefinition (with snapshots),
+	 *   ConceptMap, SearchParameter, Subscription
+	 *
+	 * Creates the resources if non-existent, updates them otherwise.
+	 *
+	 * @param url of IG tarball
+	 * @return success of the installation
 	 */
-	@EventListener(ContextStartedEvent.class)
-	public void run() throws IOException {
-		if (!enabled) { return; }
-		String url = daoConfig.getMyImplementationGuideURL();
-		String id = daoConfig.getMyImplementationGuideID();
-		String ver = daoConfig.getMyImplementationGuideVersion();
-		NpmPackage ig = null;
-
-		if (url != null) {
-			if (id != null) {
-				ourLog.warn("Only one of myImplementationGuideURL and myImplementationGuideID " +
-					"should be set. Using {} to fetch implementation guide", url);
+	public boolean install(String url) {
+		if (enabled) {
+			try  {
+				return install(NpmPackage.fromPackage(toInputStream(url)));
+			} catch (IOException e) {
+				ourLog.error("Could not load implementation guide from URL {}", url, e);
+				return false;
 			}
-			ig = loadIg(url);
-		} else if (id != null) {
-			ig = loadIg(id, ver);
 		}
-		if (ig != null) {
-			install(ig);
-		}
-	}
-
-	/**
-	 * Loads a package from the WWW.
-	 */
-	private NpmPackage loadIg(String url) throws IOException {
-		return NpmPackage.fromPackage(toInputStream(url));
+		return false;
 	}
 
 	private InputStream toInputStream(String url) throws IOException {
@@ -126,38 +112,55 @@ public class IgInstaller {
 	}
 
 	/**
-	 * Loads a package from a file on disk or the Simplifier repo using the
-	 * {@link PackageCacheManager}.
-	 */
-	private NpmPackage loadIg(String id, String ver) throws IOException {
-		if (packageCacheManager != null) {
-			return packageCacheManager.loadPackage(id, ver);
-		}
-		return null;
-	}
-
-	/**
-	 * Installs a FHIR package and its dependencies by persists instances of the following
-	 * types of resources to the db in the given order:
+	 * Loads and installs an IG from a file on disk or the Simplifier repo using
+	 * the {@link PackageCacheManager}.
+	 *
+	 * Installs the IG by persisting instances of the following types of resources:
 	 *
 	 * - NamingSystem, CodeSystem, ValueSet, StructureDefinition (with snapshots),
 	 *   ConceptMap, SearchParameter, Subscription
 	 *
 	 * Creates the resources if non-existent, updates them otherwise.
+	 *
+	 * @param id of the package, or name of folder in filesystem
+	 * @param version of package, or path to folder in filesystem
+	 * @return success of the installation
 	 */
-	private void install(NpmPackage npmPackage) throws IOException {
+	public boolean install(String id, String version) {
+		if (enabled) {
+			try {
+				return install(packageCacheManager.loadPackage(id, version));
+			} catch (IOException e) {
+				ourLog.error("Could not load implementation guide from packages.fhir.org or " +
+					"file on disk using ID {} and version {}", id, version, e);
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Installs a package and its dependencies.
+	 *
+	 * Fails fast if one of its dependencies could not be installed.
+	 *
+	 * @return success of the installation
+	 */
+	private boolean install(NpmPackage npmPackage) {
 		String name = npmPackage.getNpm().get("name").getAsString();
 		String version = npmPackage.getNpm().get("version").getAsString();
 		String packageFhirVersion = npmPackage.fhirVersion();
 		if (!isCompatibleWithCurrentFhirVersion(packageFhirVersion)) {
 			ourLog.warn("Cannot install package {}#{}, FHIR versions mismatch (expected <={}, package uses {})",
 				name, version, fhirContext.getVersion().getVersion().getFhirVersionString(), packageFhirVersion);
-			return;
+			return false;
 		}
-		fetchAndInstallDependencies(npmPackage);
-
+		boolean success = fetchAndInstallDependencies(npmPackage);
+		if (!success) {
+			ourLog.error("An error occoured when installing dependencies for the package {}#{}", name, version);
+			return false;
+		}
 		ourLog.info("Installing package: {}#{}", name, version);
-		for (String type : RESOURCE_TYPES) {
+		for (String type : SUPPORTED_RESOURCE_TYPES) {
 			Collection<IBaseResource> resources = parseResourcesOfType(type, npmPackage);
 			if (type.equals("StructureDefinition")) {
 				resources = snapshotGenerator.generateFrom(resources);
@@ -167,9 +170,11 @@ public class IgInstaller {
 			resources.stream().forEach(r -> createOrUpdate(r));
 		}
 		ourLog.info(String.format("Finished installation of package: %s#%s", name, version));
+		return true;
 	}
 
-	private void fetchAndInstallDependencies(NpmPackage npmPackage) throws IOException {
+	private boolean fetchAndInstallDependencies(NpmPackage npmPackage) {
+		boolean success = true;
 		if (npmPackage.getNpm().has("dependencies")) {
 			Map<String, String> dependencies = new Gson().fromJson(npmPackage.getNpm().get("dependencies"), HashMap.class);
 			for (Map.Entry<String, String> d : dependencies.entrySet()) {
@@ -179,15 +184,25 @@ public class IgInstaller {
 					continue; // todo : which packages to ignore?
 				}
 				if (packageCacheManager == null) {
-					String name = npmPackage.getNpm().get("name").getAsString();
-					ourLog.warn("Cannot install dependency {}#{} from package {}", id, ver, name);
-					return;
+					ourLog.error("Cannot install dependency {}#{} due to PacketCacheManager initialization error", id, ver);
+					return false;
 				}
-				NpmPackage dependency = packageCacheManager.loadPackage(id, ver); // resolve in local cache or on packages.fhir.org
-				fetchAndInstallDependencies(dependency);                          // recursive call to install children before parent
-				install(dependency);
+				try {
+					// resolve in local cache or on packages.fhir.org
+					NpmPackage dependency = packageCacheManager.loadPackage(id, ver);
+					// recursive call to install dependencies of a package before
+					// installing the package
+					success &= fetchAndInstallDependencies(dependency);
+					if (success) {
+						success &= install(dependency);
+					}
+				} catch (IOException e) {
+					ourLog.error("Cannot install dependency {}#{}", id, ver);
+					return false;
+				}
 			}
 		}
+		return success;
 	}
 
 	/**
@@ -220,18 +235,20 @@ public class IgInstaller {
 	/**
 	 * Utility method
 	 */
-	private Collection<IBaseResource> parseResourcesOfType(String type, NpmPackage pkg)
-		throws IOException {
-
+	private Collection<IBaseResource> parseResourcesOfType(String type, NpmPackage pkg) {
 		if (!pkg.getFolders().containsKey("package")) {
 			return Collections.EMPTY_LIST;
 		}
 		ArrayList<IBaseResource> res = new ArrayList<>();
 		for (String file : pkg.getFolders().get("package").listFiles()) {
 			if (file.startsWith(type)) {
-				byte[] content = pkg.getFolders().get("package").fetchFile(file);
-				IBaseResource r = fhirContext.newJsonParser().parseResource(new String(content));
-				res.add(r);
+				try {
+					byte[] content = pkg.getFolders().get("package").fetchFile(file);
+					IBaseResource r = fhirContext.newJsonParser().parseResource(new String(content));
+					res.add(r);
+				} catch (IOException e) {
+					ourLog.error("Could not fetch file {}", file);
+				}
 			}
 		}
 		return res;
