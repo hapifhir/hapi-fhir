@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
@@ -37,6 +38,8 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
+	@Autowired
+	private ISearchIncludeDao mySearchIncludeDao;
 
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinator;
@@ -54,6 +57,16 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 	public void testDeleteDontMarkPreviouslyMarkedSearchesAsDeleted() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(5);
 		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(10);
+
+		runInTransaction(()->{
+			mySearchResultDao.deleteAll();
+			mySearchIncludeDao.deleteAll();
+			mySearchDao.deleteAll();
+		});
+		runInTransaction(()->{
+			assertEquals(0, mySearchDao.count());
+			assertEquals(0, mySearchResultDao.count());
+		});
 
 		// Create lots of searches
 		runInTransaction(()->{

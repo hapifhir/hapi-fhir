@@ -165,6 +165,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
+			myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);

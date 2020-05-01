@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.registry;
+package ca.uhn.fhir.jpa.partition;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,12 +20,17 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface ISubscriptionProvider {
-	IBundleProvider search(SearchParameterMap theMap);
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-	boolean loadSubscription(IBaseResource theResource);
+public interface IRequestPartitionHelperService {
+	@Nullable
+    RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType);
+
+	@Nullable
+    RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource);
 }

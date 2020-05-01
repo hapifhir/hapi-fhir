@@ -65,12 +65,16 @@ public enum Pointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the request
 	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * Hook methods must return <code>void</code>.
 	 */
 	CLIENT_REQUEST(void.class,
-		"ca.uhn.fhir.rest.client.api.IHttpRequest"
+		"ca.uhn.fhir.rest.client.api.IHttpRequest",
+		"ca.uhn.fhir.rest.client.api.IRestfulClient"
 	),
 
 	/**
@@ -82,7 +86,12 @@ public enum Pointcut {
 	 * <ul>
 	 * <li>
 	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the request
-	 * ca.uhn.fhir.rest.client.api.IHttpRequest - The details of the response
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.client.api.IHttpResponse - The details of the response
+	 * </li>
+	 * <li>
+	 *    ca.uhn.fhir.rest.client.api.IRestfulClient - The client object making the request
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -90,7 +99,8 @@ public enum Pointcut {
 	 */
 	CLIENT_RESPONSE(void.class,
 		"ca.uhn.fhir.rest.client.api.IHttpRequest",
-		"ca.uhn.fhir.rest.client.api.IHttpResponse"
+		"ca.uhn.fhir.rest.client.api.IHttpResponse",
+		"ca.uhn.fhir.rest.client.api.IRestfulClient"
 	),
 
 	/**
@@ -221,9 +231,9 @@ public enum Pointcut {
 	/**
 	 * <b>Server Hook:</b>
 	 * This hook is invoked before an incoming request is processed. Note that this method is called
-	 * after the server has begin preparing the response to the incoming client request.
+	 * after the server has begun preparing the response to the incoming client request.
 	 * As such, it is not able to supply a response to the incoming request in the way that
-	 * SERVER_INCOMING_REQUEST_PRE_HANDLED and
+	 * SERVER_INCOMING_REQUEST_PRE_PROCESSED and
 	 * {@link #SERVER_INCOMING_REQUEST_POST_PROCESSED}
 	 * are.
 	 * <p>
@@ -1248,7 +1258,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a resource delete operation is about to fail due to referential integrity conflicts.
+	 * Invoked when a resource delete operation is about to fail due to referential integrity hcts.
 	 * <p>
 	 * Hooks will have access to the list of resources that have references to the resource being deleted.
 	 * </p>
@@ -1360,6 +1370,83 @@ public enum Pointcut {
 		void.class,
 		// Params
 		"java.util.concurrent.atomic.AtomicInteger",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before FHIR <b>create</b> operation to request the identification of the partition ID to be associated
+	 * with the resource being created. This hook will only be called if partitioning is enabled in the JPA
+	 * server.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseResource - The resource that will be created and needs a tenant ID assigned.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.RequestPartitionId</code> or <code>null</code>.
+	 * </p>
+	 */
+	STORAGE_PARTITION_IDENTIFY_CREATE(
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before FHIR read/access operation (e.g. <b>read/vread</b>, <b>search</b>, <b>history</b>, etc.) operation to request the
+	 * identification of the partition ID to be associated with the resource(s) being searched for, read, etc.
+	 * <p>
+	 * This hook will only be called if
+	 * partitioning is enabled in the JPA server.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.RequestPartitionId</code> or <code>null</code>.
+	 * </p>
+	 */
+	STORAGE_PARTITION_IDENTIFY_READ(
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),

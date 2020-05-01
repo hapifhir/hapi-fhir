@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
-import ca.uhn.fhir.jpa.subscription.match.registry.ISubscriptionProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -31,12 +30,6 @@ public class TestSubscriptionDstu3Config {
 	@Primary
 	public ISearchParamProvider searchParamProvider() {
 		return new MockFhirClientSearchParamProvider();
-	}
-
-	@Bean
-	@Primary
-	public ISubscriptionProvider subscriptionProvider() {
-		return new MockFhirClientSubscriptionProvider();
 	}
 
 	@Bean

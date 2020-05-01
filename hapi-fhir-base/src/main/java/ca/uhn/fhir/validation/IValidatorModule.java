@@ -28,7 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * An individual validation module, which applies validation rules against
  * resources and adds failure/informational messages as it goes.
  * 
- * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_validation.html">Validation</a>
+ * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/introduction.html">Validation</a>
  * for a list of available modules. You may also create your own.
  */
 public interface IValidatorModule {

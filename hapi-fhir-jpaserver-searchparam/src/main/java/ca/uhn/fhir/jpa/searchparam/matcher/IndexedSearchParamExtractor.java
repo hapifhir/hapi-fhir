@@ -39,7 +39,7 @@ public class IndexedSearchParamExtractor {
 		String resourceType = myContext.getResourceDefinition(theResource).getName();
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
-		mySearchParamExtractorService.extractFromResource(theRequest, resourceIndexedSearchParams, entity, theResource, theResource.getMeta().getLastUpdated(), false);
+		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, entity, theResource, theResource.getMeta().getLastUpdated(), false);
 		return resourceIndexedSearchParams;
 	}
 }

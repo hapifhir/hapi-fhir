@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -11,6 +15,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -45,6 +50,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -80,6 +87,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
@@ -983,10 +992,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 				List<ResourceIndexedSearchParamNumber> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
 				ourLog.info(toStringMultiline(results));
 
-				ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber("RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("1.00"));
+				ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("1.00"));
 				expect0.setResource(resource);
 				expect0.calculateHashes();
-				ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber("RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("2.00"));
+				ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("2.00"));
 				expect1.setResource(resource);
 				expect1.calculateHashes();
 
@@ -3506,6 +3515,44 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
+
+	@Test
+	public void testSearchReferenceUntyped() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId("PAT");
+		myPatientDao.update(p);
+
+		AuditEvent audit = new AuditEvent();
+		audit.setId("AUDIT");
+		audit.addEntity().getWhat().setReference("Patient/PAT");
+		myAuditEventDao.update(audit);
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		try {
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_WARNING, interceptor);
+
+			myCaptureQueriesListener.clear();
+
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(AuditEvent.SP_ENTITY, new ReferenceParam("PAT"));
+			IBundleProvider outcome = myAuditEventDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(outcome), contains("AuditEvent/AUDIT"));
+
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+
+		ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
+		verify(interceptor, times(1)).invoke(ArgumentMatchers.eq(Pointcut.JPA_PERFTRACE_WARNING), captor.capture());
+		StorageProcessingMessage message = captor.getValue().get(StorageProcessingMessage.class);
+		assertEquals("This search uses an unqualified resource(a parameter in a chain without a resource type). This is less efficient than using a qualified type. If you know what you're looking for, try qualifying it using the form: 'entity:[resourceType]'", message.getMessage());
+	}
+
+
 	@Test
 	public void testSearchWithDateAndReusesExistingJoin() {
 		// Add a search parameter to Observation.issued, so that between that one
@@ -4306,15 +4353,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, results.getResources(0, 10).size());
 		// We expect a new one because we don't cache the search URL for very long search URLs
 		assertEquals(2, mySearchEntityDao.count());
-
 	}
 
 	@Test
 	public void testDateSearchParametersShouldBeTimezoneIndependent() {
 
-		createObservationWithEffective("NO1", "2011-01-02T23:00:00-11:30");
-		createObservationWithEffective("NO2", "2011-01-03T00:00:00+01:00");
+		createObservationWithEffective("NO1", "2011-01-03T00:00:00+01:00");
 
+		createObservationWithEffective("YES00", "2011-01-02T23:00:00-11:30");
 		createObservationWithEffective("YES01", "2011-01-02T00:00:00-11:30");
 		createObservationWithEffective("YES02", "2011-01-02T00:00:00-10:00");
 		createObservationWithEffective("YES03", "2011-01-02T00:00:00-09:00");
@@ -4347,6 +4393,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> values = toUnqualifiedVersionlessIdValues(results);
 		Collections.sort(values);
 		assertThat(values.toString(), values, contains(
+			"Observation/YES00",
 			"Observation/YES01",
 			"Observation/YES02",
 			"Observation/YES03",
@@ -4370,6 +4417,68 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			"Observation/YES21",
 			"Observation/YES22",
 			"Observation/YES23"
+		));
+	}
+
+	@Test
+	public void testDateSearchParametersShouldBeHourIndependent() {
+
+		createObservationWithEffective("YES01", "2011-01-02T00:00:00");
+		createObservationWithEffective("YES02", "2011-01-02T01:00:00");
+		createObservationWithEffective("YES03", "2011-01-02T02:00:00");
+		createObservationWithEffective("YES04", "2011-01-02T03:00:00");
+		createObservationWithEffective("YES05", "2011-01-02T04:00:00");
+		createObservationWithEffective("YES06", "2011-01-02T05:00:00");
+		createObservationWithEffective("YES07", "2011-01-02T06:00:00");
+		createObservationWithEffective("YES08", "2011-01-02T07:00:00");
+		createObservationWithEffective("YES09", "2011-01-02T08:00:00");
+		createObservationWithEffective("YES10", "2011-01-02T09:00:00");
+		createObservationWithEffective("YES11", "2011-01-02T10:00:00");
+		createObservationWithEffective("YES12", "2011-01-02T11:00:00");
+		createObservationWithEffective("YES13", "2011-01-02T12:00:00");
+		createObservationWithEffective("YES14", "2011-01-02T13:00:00");
+		createObservationWithEffective("YES15", "2011-01-02T14:00:00");
+		createObservationWithEffective("YES16", "2011-01-02T15:00:00");
+		createObservationWithEffective("YES17", "2011-01-02T16:00:00");
+		createObservationWithEffective("YES18", "2011-01-02T17:00:00");
+		createObservationWithEffective("YES19", "2011-01-02T18:00:00");
+		createObservationWithEffective("YES20", "2011-01-02T19:00:00");
+		createObservationWithEffective("YES21", "2011-01-02T20:00:00");
+		createObservationWithEffective("YES22", "2011-01-02T21:00:00");
+		createObservationWithEffective("YES23", "2011-01-02T22:00:00");
+		createObservationWithEffective("YES24", "2011-01-02T23:00:00");
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
+		IBundleProvider results = myObservationDao.search(map);
+		List<String> values = toUnqualifiedVersionlessIdValues(results);
+		Collections.sort(values);
+		assertThat(values.toString(), values, contains(
+			"Observation/YES01",
+			"Observation/YES02",
+			"Observation/YES03",
+			"Observation/YES04",
+			"Observation/YES05",
+			"Observation/YES06",
+			"Observation/YES07",
+			"Observation/YES08",
+			"Observation/YES09",
+			"Observation/YES10",
+			"Observation/YES11",
+			"Observation/YES12",
+			"Observation/YES13",
+			"Observation/YES14",
+			"Observation/YES15",
+			"Observation/YES16",
+			"Observation/YES17",
+			"Observation/YES18",
+			"Observation/YES19",
+			"Observation/YES20",
+			"Observation/YES21",
+			"Observation/YES22",
+			"Observation/YES23",
+			"Observation/YES24"
 		));
 	}
 

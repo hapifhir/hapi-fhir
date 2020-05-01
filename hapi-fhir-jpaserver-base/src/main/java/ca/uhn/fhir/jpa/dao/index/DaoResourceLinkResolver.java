@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -41,7 +42,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
@@ -63,11 +63,11 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	private DaoRegistry myDaoRegistry;
 
 	@Override
-	public IResourceLookup findTargetResource(RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	public IResourceLookup findTargetResource(RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theResourceType, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
 		IResourceLookup resolvedResource;
 		String idPart = theSourceResourceId.getIdPart();
 		try {
-			resolvedResource = myIdHelperService.resolveResourceIdentity(theTypeString, idPart, theRequest);
+			resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart, theRequest);
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
 		} catch (ResourceNotFoundException e) {
 
@@ -88,8 +88,8 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		ourLog.trace("Resolved resource of type {} as PID: {}", resolvedResource.getResourceType(), resolvedResource.getResourceId());
-		if (!theTypeString.equals(resolvedResource.getResourceType())) {
-			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getResourceId(), theTypeString, resolvedResource.getResourceType());
+		if (!theResourceType.equals(resolvedResource.getResourceType())) {
+			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getResourceId(), theResourceType, resolvedResource.getResourceType());
 			throw new UnprocessableEntityException("Resource contains reference to unknown resource ID " + theSourceResourceId.getValue());
 		}
 
@@ -98,7 +98,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			throw new InvalidRequestException("Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theSourcePath);
 		}
 
-		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theTypeString)) {
+		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theResourceType)) {
 			return null;
 		}
 

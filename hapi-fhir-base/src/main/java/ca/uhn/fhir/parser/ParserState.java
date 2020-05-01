@@ -1290,10 +1290,22 @@ class ParserState<T> {
 					ParseLocation location = ParseLocation.fromElementName(myChildName);
 					myErrorHandler.invalidValue(location, value, "Attribute value must not be empty (\"\")");
 				} else {
+
+					/*
+					 * It may be possible to clean this up somewhat once the following PR is hopefully merged:
+					 * https://github.com/FasterXML/jackson-core/pull/611
+					 *
+					 * See TolerantJsonParser
+					 */
 					if ("decimal".equals(myTypeName)) {
-						if (value != null && value.startsWith(".") && NumberUtils.isDigits(value.substring(1))) {
-							value = "0" + value;
-						}
+						if (value != null)
+							if (value.startsWith(".") && NumberUtils.isDigits(value.substring(1))) {
+								value = "0" + value;
+							} else {
+								while (value.startsWith("00")) {
+									value = value.substring(1);
+								}
+							}
 					}
 
 					try {
@@ -1323,17 +1335,6 @@ class ParserState<T> {
 		public void endingElement() {
 			pop();
 		}
-
-		// @Override
-		// public void enteringNewElementExtension(StartElement theElement,
-		// String theUrlAttr) {
-		// if (myInstance instanceof ISupportsUndeclaredExtensions) {
-		// UndeclaredExtension ext = new UndeclaredExtension(theUrlAttr);
-		// ((ISupportsUndeclaredExtensions)
-		// myInstance).getUndeclaredExtensions().add(ext);
-		// push(new ExtensionState(ext));
-		// }
-		// }
 
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
