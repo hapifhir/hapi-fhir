@@ -242,7 +242,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				extractor = createNumberExtractor(theResource);
 				break;
 			case REFERENCE:
-				// FIXME EMPI Add test for this
 				extractor = createReferenceExtractor();
 				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
 			case QUANTITY:
