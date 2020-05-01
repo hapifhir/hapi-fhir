@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1734
+title: The Pointcut JavaDoc had an incorrect link from one pointcut to another and has been fixed. Thanks
+    to Bert Roos for the pull request!

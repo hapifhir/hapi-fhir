@@ -616,6 +616,10 @@
 			<name>Thomas Papke</name>
 			<organization>InterComponentWare AG</organization>
 		</developer>
+		<developer>
+			<id>Bert-R</id>
+			<name>Bert Roos</name>
+		</developer>
 	</developers>
 
 	<licenses>
