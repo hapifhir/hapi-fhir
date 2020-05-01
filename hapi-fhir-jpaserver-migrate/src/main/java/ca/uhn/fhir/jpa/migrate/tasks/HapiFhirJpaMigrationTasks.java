@@ -135,18 +135,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_URI").modifyColumn("20200420.41", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
 		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20200420.42", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
 
-		// Add support for integer comparisons during day-precision date search.
-		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
-		spidxDate.addColumn("20200501.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		spidxDate.addColumn("20200501.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-
-		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V5_0_0, "20200501.3")
-			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))
-			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
-			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
-		);
-
-
 		// MPI_LINK
 		version.addIdGenerator("20200424.1", "SEQ_EMPI_LINK_ID");
 		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200424.2", "MPI_LINK", "PID");
@@ -167,6 +155,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		empiLink.addColumn("MATCH_RESULT").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		empiLink.addColumn("LINK_SOURCE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		empiLink.addIndex("20200424.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
+
+		// Add support for integer comparisons during day-precision date search.
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.addColumn("20200501.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		spidxDate.addColumn("20200501.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+
+		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V5_0_0, "20200501.3")
+			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))
+			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
+			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
+		);
 	}
 
 	protected void init420() { // 20191015 - 20200217
