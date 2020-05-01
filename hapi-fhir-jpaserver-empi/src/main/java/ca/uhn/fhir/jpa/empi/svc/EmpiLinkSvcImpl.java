@@ -73,6 +73,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 				break;
 			case NO_MATCH:
 				myPersonHelper.removeLink(thePerson, resourceId, theTransactionLogMessages);
+				break;
 			case POSSIBLE_DUPLICATE:
 				break;
 		}
