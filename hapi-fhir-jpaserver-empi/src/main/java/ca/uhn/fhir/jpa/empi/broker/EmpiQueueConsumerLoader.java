@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.empi.broker;
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +36,7 @@ import javax.annotation.PreDestroy;
 
 @Service
 public class EmpiQueueConsumerLoader {
-	private Logger ourLog = LoggerFactory.getLogger(EmpiQueueConsumerLoader.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private EmpiMessageHandler myEmpiMessageHandler;

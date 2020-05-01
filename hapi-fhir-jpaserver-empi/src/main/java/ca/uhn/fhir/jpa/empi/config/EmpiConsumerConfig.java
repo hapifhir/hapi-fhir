@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
@@ -39,7 +40,6 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +51,7 @@ import javax.annotation.PostConstruct;
 
 @Configuration
 public class EmpiConsumerConfig {
-	private static final Logger ourLog = LoggerFactory.getLogger(EmpiConsumerConfig.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	public static final String EMPI_CONSUMER_COUNT_DEFAULT = "5";
 

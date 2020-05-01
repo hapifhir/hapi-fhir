@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.empi.svc;
  */
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -43,12 +44,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
-import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
 public class EmpiCandidateSearchSvc {
-
-	private static final Logger ourLog = getLogger(EmpiCandidateSearchSvc.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private IEmpiSettings myEmpiConfig;
@@ -115,7 +114,7 @@ public class EmpiCandidateSearchSvc {
 	private void searchForIdsAndAddToMap(String theResourceType, Map<Long, IBaseResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
 		//1.
 		String resourceCriteria = buildResourceQueryString(theResourceType, theFilterCriteria, resourceSearchParam, theValuesFromResourceForSearchParam);
-		ourLog.warn("About to execute URL query: {}", resourceCriteria);
+		ourLog.debug("About to execute URL query: {}", resourceCriteria);
 
 		//2.
 		SearchParameterMap searchParameterMap = myEmpiSearchParamSvc.mapFromCriteria(theResourceType, resourceCriteria);
