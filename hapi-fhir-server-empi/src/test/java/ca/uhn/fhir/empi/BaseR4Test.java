@@ -16,8 +16,12 @@ public abstract class BaseR4Test {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	public static final String PATIENT_GIVEN = "patient-given";
 	public static final String PATIENT_LAST = "patient-last";
+	public static final String PATIENT_GENERAL_PRACTITIONER= "patient-practitioner";
+
+
 	public static final double NAME_THRESHOLD = 0.8;
 	protected EmpiFieldMatchJson myGivenNameMatchField;
+	protected EmpiFieldMatchJson myParentMatchField;
 	protected String myBothNameFields;
 
 	@Before
@@ -45,6 +49,32 @@ public abstract class BaseR4Test {
 		return patient;
 	}
 
+	protected EmpiRulesJson buildActiveGeneralPractitionerRules() {
+		EmpiFilterSearchParamJson activePatientsBlockingFilter = new EmpiFilterSearchParamJson()
+			.setResourceType("Patient")
+			.setSearchParam(Patient.SP_ACTIVE)
+			.setFixedValue("true");
+
+		EmpiResourceSearchParamJson patientGeneralPractitionerBlocking = new EmpiResourceSearchParamJson()
+			.setResourceType("Patient")
+			.setSearchParam(Patient.SP_BIRTHDATE);
+
+		EmpiFieldMatchJson lastNameMatchField = new EmpiFieldMatchJson()
+			.setName(PATIENT_LAST)
+			.setResourceType("Patient")
+			.setResourcePath("name.family")
+			.setMetric(DistanceMetricEnum.JARO_WINKLER)
+			.setMatchThreshold(NAME_THRESHOLD);
+
+		EmpiRulesJson retval = new EmpiRulesJson();
+		retval.addResourceSearchParam(patientGeneralPractitionerBlocking);
+		retval.addFilterSearchParam(activePatientsBlockingFilter);
+		retval.addMatchField(myGivenNameMatchField);
+		retval.addMatchField(lastNameMatchField);
+		retval.putMatchResult(myBothNameFields, EmpiMatchResultEnum.MATCH);
+		retval.putMatchResult(PATIENT_GIVEN, EmpiMatchResultEnum.POSSIBLE_MATCH);
+		return retval;
+	}
 	protected EmpiRulesJson buildActiveBirthdateIdRules() {
 		EmpiFilterSearchParamJson activePatientsBlockingFilter = new EmpiFilterSearchParamJson()
 			.setResourceType("Patient")

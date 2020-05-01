@@ -244,7 +244,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			case REFERENCE:
 				// FIXME EMPI Add test for this
 				extractor = createReferenceExtractor();
-				break;
+				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
 			case QUANTITY:
 				extractor = createQuantityExtractor(theResource);
 				break;
@@ -259,6 +259,19 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}
 		return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
+	}
+
+	private List<String> extractReferenceParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<PathAndRef> theExtractor) {
+		SearchParamSet<PathAndRef> params = new SearchParamSet<>();
+		extractSearchParam(theSearchParam, theResource, theExtractor, params);
+		return refsToStringList(params);
+	}
+
+	private List<String> refsToStringList(SearchParamSet<PathAndRef> theParams) {
+		return theParams.stream()
+			.map(param -> param.getRef())
+			.map(ref -> ref.getReferenceElement().toUnqualifiedVersionless().getValue())
+			.collect(Collectors.toList());
 	}
 
 	private <T extends BaseResourceIndexedSearchParam> List<String> extractParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<T> theExtractor) {

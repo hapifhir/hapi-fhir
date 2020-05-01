@@ -5,6 +5,9 @@
 	}, {
 		"resourceType" : "*",
 		"searchParam" : "identifier"
+	},{
+		"resourceType" : "Patient",
+		"searchParam" : "general-practitioner"
 	} ],
 	"candidateFilterSearchParams" : [ {
 		"resourceType" : "*",

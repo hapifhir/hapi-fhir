@@ -3,15 +3,21 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertEquals;
 
 public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
+
 	@Autowired
 	EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 
@@ -26,6 +32,7 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 		assertEquals(1, result.size());
 	}
 
+
 	@Test
 	public void findCandidatesMultipleMatchesDoNotCauseDuplicates() {
 		Date today = new Date();
@@ -38,5 +45,22 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 
 		Collection<IBaseResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);
 		assertEquals(1, result.size());
+	}
+	@Test
+	public void testFindCandidatesCorrectlySearchesWithReferenceParams() {
+		Practitioner practitioner = new Practitioner();
+		Practitioner practitionerAndUpdateLinks = createPractitionerAndUpdateLinks(practitioner);
+
+		Patient managedPatient = new Patient();
+		managedPatient.setActive(true);
+		managedPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
+		createPatient(managedPatient);
+
+		Patient incomingPatient = new Patient();
+		incomingPatient.setActive(true);
+		incomingPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
+
+		Collection<IBaseResource> patient = myEmpiCandidateSearchSvc.findCandidates("Patient", incomingPatient);
+		assertThat(patient, hasSize(1));
 	}
 }
