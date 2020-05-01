@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1749
+title: A new constructor has been added to RestfulServer that accepts an InterceptorService. Thanks to gematik FuE for the
+   pull request!

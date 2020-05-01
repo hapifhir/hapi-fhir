@@ -21,9 +21,13 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import org.apache.commons.lang3.Validate;
+import org.flywaydb.core.api.callback.Callback;
 
+import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +38,17 @@ public abstract class BaseMigrator implements IMigrator {
 	private DriverTypeEnum myDriverType;
 	private DataSource myDataSource;
 	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
+	private List<Callback> myCallbacks = Collections.emptyList();
+
+	@Nonnull
+	public List<Callback> getCallbacks() {
+		return myCallbacks;
+	}
+
+	public void setCallbacks(@Nonnull List<Callback> theCallbacks) {
+		Validate.notNull(theCallbacks);
+		myCallbacks = theCallbacks;
+	}
 
 	public DataSource getDataSource() {
 		return myDataSource;

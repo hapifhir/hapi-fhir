@@ -262,7 +262,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	@Override
-	public boolean matches(IQueryParameterType theParam) {
+	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
 		if (!(theParam instanceof QuantityParam)) {
 			return false;
 		}

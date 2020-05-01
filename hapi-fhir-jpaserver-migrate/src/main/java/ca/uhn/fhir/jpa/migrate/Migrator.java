@@ -132,4 +132,6 @@ public class Migrator {
 	public void setNoColumnShrink(boolean theNoColumnShrink) {
 		myNoColumnShrink = theNoColumnShrink;
 	}
+
+
 }

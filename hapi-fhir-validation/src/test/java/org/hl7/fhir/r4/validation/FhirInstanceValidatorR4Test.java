@@ -219,7 +219,16 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(mockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
-				CodeSystem retVal = (CodeSystem) myDefaultValidationSupport.fetchCodeSystem((String) theInvocation.getArguments()[0]);
+				String system = theInvocation.getArgument(0, String.class);
+				if ("http://loinc.org".equals(system)) {
+					CodeSystem retVal = new CodeSystem();
+					retVal.setUrl("http://loinc.org");
+					retVal.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+					ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
+					return retVal;
+				}
+
+				CodeSystem retVal = (CodeSystem) myDefaultValidationSupport.fetchCodeSystem(system);
 				ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}
@@ -239,6 +248,23 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
 				return retVal;
 			}
+		});
+		when(mockSupport.lookupCode(any(), any(), any())).thenAnswer(t -> {
+			String system = t.getArgument(1, String.class);
+			String code = t.getArgument(2, String.class);
+			if (myValidConcepts.contains(system + "___" + code)) {
+				return new IValidationSupport.LookupCodeResult().setFound(true);
+			} else {
+				return null;
+			}
+		});
+		when(mockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
+			String system = t.getArgument(2, String.class);
+			String code = t.getArgument(3, String.class);
+			if (myValidConcepts.contains(system + "___" + code)) {
+				return new IValidationSupport.CodeValidationResult().setCode(code).setDisplay(code);
+			}
+			return null;
 		});
 
 	}
@@ -1260,6 +1286,25 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(all.get(0).getMessage(), containsString("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+	}
+
+
+	@Test
+	public void testValidateWithUcum() throws IOException {
+		addValidConcept("http://loinc.org", "8310-5");
+
+		Observation input = loadResource(ourCtx, Observation.class, "/r4/observation-with-body-temp-ucum.json");
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(all, empty());
+
+		// Change the unit to something not supported
+		input.getValueQuantity().setCode("Heck");
+		output = myVal.validateWithResult(input);
+		all = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(1, all.size());
+		assertThat(all.get(0).getMessage(), containsString("The value provided (\"Heck\") is not in the value set http://hl7.org/fhir/ValueSet/ucum-bodytemp"));
 
 	}
 

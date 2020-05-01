@@ -152,7 +152,7 @@ public final class ResourceIndexedSearchParams {
 		return myPopulatedResourceLinkParameters;
 	}
 
-	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
 		if (theParamDef == null) {
 			return false;
 		}
@@ -189,7 +189,7 @@ public final class ResourceIndexedSearchParams {
 		}
 		Predicate<BaseResourceIndexedSearchParam> namedParamPredicate = param ->
 			param.getParamName().equalsIgnoreCase(theParamName) &&
-				param.matches(theParam);
+				param.matches(theParam, theUseOrdinalDatesForDayComparison);
 
 		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}

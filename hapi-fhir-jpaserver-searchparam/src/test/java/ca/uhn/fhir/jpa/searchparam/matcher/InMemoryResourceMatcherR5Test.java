@@ -151,8 +151,8 @@ public class InMemoryResourceMatcherR5Test {
 
 	@Test
 	public void testDateSupportedOps() {
-		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
 		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN, true, false, false);
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
 		testDateSupportedOp(ParamPrefixEnum.EQUAL, false, true, false);
 		testDateSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, false, true, true);
 		testDateSupportedOp(ParamPrefixEnum.LESSTHAN, false, false, true);
@@ -168,7 +168,7 @@ public class InMemoryResourceMatcherR5Test {
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBSERVATION_DATE, myObservation, mySearchParams);
 			assertTrue(result.getUnsupportedReason(), result.supported());
-			assertEquals(result.matched(), theSame);
+			assertEquals(theSame, result.matched());
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + LATE_DATE, myObservation, mySearchParams);
@@ -211,7 +211,7 @@ public class InMemoryResourceMatcherR5Test {
 	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
 		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
 		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
-		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "date", dateValue.getValue(), dateValue.getValue(), dateValue.getValueAsString());
+		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
 		retval.myDateParams.add(dateParam);
 		return retval;
 	}
