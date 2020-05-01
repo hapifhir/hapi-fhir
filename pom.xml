@@ -625,6 +625,10 @@
 			<name>Zhe Wang</name>
 			<organization>Agfa Healthcare</organization>
 		</developer>
+		<developer>
+			<id>gematik-fue</id>
+			<name>gematik FuE</name>
+		</developer>
 	</developers>
 
 	<licenses>
