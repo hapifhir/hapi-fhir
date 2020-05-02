@@ -7,7 +7,6 @@ import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
-import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -39,9 +38,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	private static final Logger ourLog = getLogger(EmpiMatchLinkSvcTest.class);
-
-	@Autowired
-	IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired

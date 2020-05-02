@@ -24,9 +24,11 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,8 @@ import java.util.List;
 
 @Service
 public class EmpiResourceComparatorSvc {
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
+
 	private final FhirContext myFhirContext;
 	private final IEmpiSettings myEmpiConfig;
 	private EmpiRulesJson myEmpiRulesJson;
@@ -80,7 +84,11 @@ public class EmpiResourceComparatorSvc {
 
 	EmpiMatchResultEnum compare(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long matchVector = getMatchVector(theLeftResource, theRightResource);
-		return myEmpiRulesJson.getMatchResult(matchVector);
+		EmpiMatchResultEnum matchResult = myEmpiRulesJson.getMatchResult(matchVector);
+		if (ourLog.isTraceEnabled() && matchResult == EmpiMatchResultEnum.MATCH || matchResult == EmpiMatchResultEnum.POSSIBLE_MATCH) {
+			ourLog.trace("{} {} with field matchers {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myEmpiRulesJson.getFieldMatchNamesForVector(matchVector));
+		}
+		return matchResult;
 	}
 
 	/**

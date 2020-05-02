@@ -28,7 +28,8 @@ import java.util.Map;
 
 public class VectorMatchResultMap {
 	private final EmpiRulesJson myEmpiRulesJson;
-	private Map<Long, EmpiMatchResultEnum> myMap = new HashMap<>();
+	private Map<Long, EmpiMatchResultEnum> myVectorToMatchResultMap = new HashMap<>();
+	private Map<Long, String> myVectorToFieldMatchNamesMap = new HashMap<>();
 
 	VectorMatchResultMap(EmpiRulesJson theEmpiRulesJson) {
 		myEmpiRulesJson = theEmpiRulesJson;
@@ -43,12 +44,13 @@ public class VectorMatchResultMap {
 	}
 
 	public EmpiMatchResultEnum get(Long theMatchVector) {
-		return myMap.get(theMatchVector);
+		return myVectorToMatchResultMap.get(theMatchVector);
 	}
 
 	private void put(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {
 		long vector = getVector(theFieldMatchNames);
-		myMap.put(vector, theMatchResult);
+		myVectorToFieldMatchNamesMap.put(vector, theFieldMatchNames);
+		myVectorToMatchResultMap.put(vector, theMatchResult);
 	}
 
 	public long getVector(String theFieldMatchNames) {
@@ -76,4 +78,8 @@ public class VectorMatchResultMap {
 		}
 		return -1;
 	}
+
+    public String getFieldMatchNames(long theVector) {
+		return myVectorToFieldMatchNamesMap.get(theVector);
+    }
 }

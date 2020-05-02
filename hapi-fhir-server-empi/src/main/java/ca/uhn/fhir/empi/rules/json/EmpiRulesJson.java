@@ -138,6 +138,10 @@ public class EmpiRulesJson implements IModelJson {
 			myMatchResultMap.size() + " Match Result Entries";
 	}
 
+	public String getFieldMatchNamesForVector(long theVector) {
+		return myVectorMatchResultMap.getFieldMatchNames(theVector);
+	}
+
 	@VisibleForTesting
 	VectorMatchResultMap getVectorMatchResultMapForUnitTest() {
 		return myVectorMatchResultMap;

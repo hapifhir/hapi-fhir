@@ -62,7 +62,7 @@
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n${log.stackfilter.pattern}</pattern>
 		</encoder>
 	</appender>
-	<logger name="ca.uhn.fhir.log.empi_troubleshooting" level="DEBUG">
+	<logger name="ca.uhn.fhir.log.empi_troubleshooting" level="TRACE">
 		<appender-ref ref="EMPI_TROUBLESHOOTING"/>
 	</logger>
 

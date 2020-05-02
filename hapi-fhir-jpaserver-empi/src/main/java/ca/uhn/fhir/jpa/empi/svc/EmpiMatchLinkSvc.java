@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
@@ -30,12 +31,12 @@ import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +46,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class EmpiMatchLinkSvc {
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
+
 	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 	@Autowired
@@ -91,10 +94,10 @@ public class EmpiMatchLinkSvc {
 			.allMatch(candidate -> candidate.getCandidatePersonPid().getIdAsLong().equals(samplePersonPid));
 
 		if (allSamePerson) {
-			TransactionLogMessages.addMessage(theMessages, "EMPI received multiple match candidates, but they are all linked to the same person.");
+			log(theMessages, "EMPI received multiple match candidates, but they are all linked to the same person.");
 			handleEmpiWithSingleCandidate(theResource, thePersonCandidates, theMessages);
 		} else {
-			TransactionLogMessages.addMessage(theMessages, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
+			log(theMessages, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 			//Set them all as POSSIBLE_MATCH
 			List<IBaseResource> persons = thePersonCandidates.stream().map(mpc -> getPersonFromMatchedPersonCandidate(mpc)).collect(Collectors.toList());
 				persons.forEach(person -> {
@@ -111,17 +114,17 @@ public class EmpiMatchLinkSvc {
 	}
 
 	private void handleEmpiWithNoCandidates(IBaseResource theResource, @Nullable TransactionLogMessages theMessages) {
-		TransactionLogMessages.addMessage(theMessages, "There were no matched candidates for EMPI, creating a new Person.");
+		log(theMessages, "There were no matched candidates for EMPI, creating a new Person.");
 		IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
 	}
 
 	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, @Nullable TransactionLogMessages theMessages) {
-		TransactionLogMessages.addMessage(theMessages, "EMPI has narrowed down to one candidate for matching.");
+		log(theMessages, "EMPI has narrowed down to one candidate for matching.");
 		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
 		IBaseResource person = getPersonFromMatchedPersonCandidate(matchedPersonCandidate);
 		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
-			TransactionLogMessages.addMessage(theMessages, "Duplicate detected based on the fact that both resources have different external EIDs.");
+			log(theMessages, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
 			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theMessages);
@@ -143,5 +146,10 @@ public class EmpiMatchLinkSvc {
 		if (!eidFromResource.isEmpty()) {
 			myPersonHelper.updatePersonExternalEidFromEmpiTarget(thePerson, theResource);
 		}
+	}
+
+	private void log(@Nullable TransactionLogMessages theMessages, String theMessage) {
+		TransactionLogMessages.addMessage(theMessages, theMessage);
+		ourLog.debug(theMessage);
 	}
 }

@@ -144,7 +144,7 @@ public class PersonHelper {
 	}
 
 	private void logLinkAddMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
-		TransactionLogMessages.addMessage(theTransactionLogMessages, ("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + theCanonicalAssuranceLevel.name()));
+		TransactionLogMessages.addMessage(theTransactionLogMessages, ("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().toUnqualifiedVersionless().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + theCanonicalAssuranceLevel.name()));
 	}
 
 	private void logLinkUpdateMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages, String theOriginalAssuranceLevel) {
@@ -337,12 +337,12 @@ public class PersonHelper {
 		if (!incomingTargetEid.isEmpty()) {
 			//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
 			if (personOfficialEid.isEmpty()) {
-				ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().getValueAsString(), incomingTargetEid.stream().map(eid -> eid.toString()).collect(Collectors.joining(",")));
+				ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().toUnqualifiedVersionless(), incomingTargetEid.stream().map(eid -> eid.toString()).collect(Collectors.joining(",")));
 				addCanonicalEidsToPersonIfAbsent(thePerson, incomingTargetEid);
 			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)){
 				//FIXME GGG handle multiple new EIDs. What are the rules here?
 				ourLog.debug("incoming resource:{} with EIDs {} does not need to overwrite person, as this EID is already present",
-					theEmpiTarget.getIdElement().getValueAsString(),
+					theEmpiTarget.getIdElement().toUnqualifiedVersionless(),
 					incomingTargetEid.stream().map(eid -> eid.toString()).collect(Collectors.joining(",")));
 			} else {
 				throw new IllegalArgumentException("This would create a duplicate person!");

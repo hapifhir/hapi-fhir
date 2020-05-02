@@ -37,9 +37,12 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
+
 @Service
 public class EmpiMessageHandler implements MessageHandler {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
+
 	@Autowired
 	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
@@ -83,7 +86,7 @@ public class EmpiMessageHandler implements MessageHandler {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
 		}catch (Exception e) {
-			TransactionLogMessages.addMessage(transactionLogMessages, "Failure during EMPI processing: " + e.getMessage());
+			log(transactionLogMessages, "Failure during EMPI processing: " + e.getMessage());
 		} finally {
 			// Interceptor call: EMPI_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()
@@ -105,5 +108,10 @@ public class EmpiMessageHandler implements MessageHandler {
 
 	private TransactionLogMessages handleUpdatePatientOrPractitioner(ResourceModifiedMessage theMsg, TransactionLogMessages theTransactionLogMessages) {
 		return myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext), theTransactionLogMessages);
+	}
+
+	private void log(@Nullable TransactionLogMessages theMessages, String theMessage) {
+		log(theMessages, theMessage);
+		ourLog.debug(theMessage);
 	}
 }

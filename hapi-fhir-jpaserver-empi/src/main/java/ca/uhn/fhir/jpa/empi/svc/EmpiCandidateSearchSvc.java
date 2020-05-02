@@ -113,7 +113,7 @@ public class EmpiCandidateSearchSvc {
 	private void searchForIdsAndAddToMap(String theResourceType, Map<Long, IBaseResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
 		//1.
 		String resourceCriteria = buildResourceQueryString(theResourceType, theFilterCriteria, resourceSearchParam, theValuesFromResourceForSearchParam);
-		ourLog.debug("Searching for {} candidates with query: {}", theResourceType, resourceCriteria);
+		ourLog.debug("Searching for {} candidates with {}", theResourceType, resourceCriteria);
 
 		//2.
 		SearchParameterMap searchParameterMap = myEmpiSearchParamSvc.mapFromCriteria(theResourceType, resourceCriteria);
@@ -134,7 +134,7 @@ public class EmpiCandidateSearchSvc {
 		int newSize = theMatchedPidsToResources.size();
 
 		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("Search added {} {} candidate(s)", newSize - initialSize, theResourceType);
+			ourLog.debug("Candidate search added {} {}s", newSize - initialSize, theResourceType);
 		}
 	}
 
