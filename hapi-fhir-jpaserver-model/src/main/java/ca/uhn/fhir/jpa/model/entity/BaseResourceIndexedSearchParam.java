@@ -125,6 +125,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		myMissing = source.myMissing;
 		myParamName = source.myParamName;
 		myUpdated = source.myUpdated;
+		myModelConfig = source.myModelConfig;
+		myPartitionSettings = source.myPartitionSettings;
+		setPartitionId(source.getPartitionId());
 	}
 
 	public Long getResourcePid() {

@@ -42,7 +42,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -158,7 +157,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
 		if (myHashIdentity == null && getParamName() != null) {
 			String resourceType = getResourceType();
@@ -254,10 +252,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("partitionId", getPartitionId());
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
 		b.append("valueLow", new InstantDt(getValueLow()));
 		b.append("valueHigh", new InstantDt(getValueHigh()));
+		b.append("hashIdentity", myHashIdentity);
 		b.append("missing", isMissing());
 		return b.build();
 	}

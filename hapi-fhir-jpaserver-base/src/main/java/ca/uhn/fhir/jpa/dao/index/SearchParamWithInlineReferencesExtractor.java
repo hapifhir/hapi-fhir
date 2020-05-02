@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
@@ -96,7 +97,14 @@ public class SearchParamWithInlineReferencesExtractor {
 	public void populateFromResource(ResourceIndexedSearchParams theParams, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
 		extractInlineReferences(theResource, theRequest);
 
-		mySearchParamExtractorService.extractFromResource(theEntity.getPartitionId(), theRequest, theParams, theEntity, theResource, theUpdateTime, true);
+		RequestPartitionId partitionId;
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			partitionId = theEntity.getPartitionId();
+		} else {
+			partitionId = RequestPartitionId.fromAllPartitions();
+		}
+
+		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theUpdateTime, true);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {

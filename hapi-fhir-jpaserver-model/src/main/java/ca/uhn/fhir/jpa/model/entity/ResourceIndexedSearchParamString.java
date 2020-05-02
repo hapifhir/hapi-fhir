@@ -47,8 +47,6 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -146,8 +144,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	@Override
-	@PrePersist
-	@PreUpdate
 	public void calculateHashes() {
 		if ((myHashIdentity == null || myHashNormalizedPrefix == null || myHashExact == null) && getParamName() != null) {
 			String resourceType = getResourceType();

@@ -20,6 +20,9 @@ package ca.uhn.fhir.interceptor.model;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
@@ -88,6 +91,36 @@ public class RequestPartitionId {
 			return "null";
 		}
 		return myPartitionId.toString();
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) {
+			return true;
+		}
+
+		if (theO == null || getClass() != theO.getClass()) {
+			return false;
+		}
+
+		RequestPartitionId that = (RequestPartitionId) theO;
+
+		return new EqualsBuilder()
+			.append(myAllPartitions, that.myAllPartitions)
+			.append(myPartitionDate, that.myPartitionDate)
+			.append(myPartitionId, that.myPartitionId)
+			.append(myPartitionName, that.myPartitionName)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myPartitionDate)
+			.append(myAllPartitions)
+			.append(myPartitionId)
+			.append(myPartitionName)
+			.toHashCode();
 	}
 
 	@Nonnull

@@ -25,11 +25,12 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -55,6 +56,7 @@ import static ca.uhn.fhir.jpa.dao.SearchBuilder.toPredicateArray;
  */
 public class HistoryBuilder {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(HistoryBuilder.class);
 	private final String myResourceType;
 	private final Long myResourceId;
 	private final Date myRangeStartInclusive;
@@ -67,7 +69,8 @@ public class HistoryBuilder {
 	private PartitionSettings myPartitionSettings;
 	@Autowired
 	private FhirContext myCtx;
-
+	@Autowired
+	private IdHelperService myIdHelperService;
 
 	/**
 	 * Constructor
@@ -113,16 +116,17 @@ public class HistoryBuilder {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries = Multimaps.index(tables, ResourceHistoryTable::getResourceId);
 
 			Map<Long, Optional<String>> pidToForcedId = myIdHelperService.translatePidsToForcedIds(resourceIdToHistoryEntries.keySet());
+			ourLog.trace("Translated IDs: {}", pidToForcedId);
 
 			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
 				List<ResourceHistoryTable> historyTables = resourceIdToHistoryEntries.get(nextResourceId);
 
-				Optional<String> forcedId = myIdHelperService.translatePidIdToForcedId(new ResourcePersistentId(nextResourceId));
 				String resourceId;
+				Optional<String> forcedId = pidToForcedId.get(nextResourceId);
 				if (forcedId.isPresent()) {
-					resourceId = historyTables.get(0).getResourceType() + '/' + forcedId.get();
+					resourceId = forcedId.get();
 				} else {
-					resourceId = historyTables.get(0).getResourceType() + '/' + nextResourceId;
+					resourceId = nextResourceId.toString();
 				}
 
 				for (ResourceHistoryTable nextHistoryTable : historyTables) {
@@ -133,10 +137,6 @@ public class HistoryBuilder {
 
 		return tables;
 	}
-
-
-	@Autowired
-	private IdHelperService myIdHelperService;
 
 	private void addPredicatesToQuery(CriteriaBuilder theCriteriaBuilder, RequestPartitionId thePartitionId, CriteriaQuery<?> theQuery, Root<ResourceHistoryTable> theFrom) {
 		List<Predicate> predicates = new ArrayList<>();

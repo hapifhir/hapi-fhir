@@ -149,7 +149,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		RequestPartitionId partitionId = getRequestPartitionId();
 		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theFromIndex, theToIndex);
 
-		ArrayList<IBaseResource> retVal = new ArrayList<>();
+		List<IBaseResource> retVal = new ArrayList<>();
 		for (ResourceHistoryTable next : results) {
 			BaseHasResource resource;
 			resource = next;
@@ -183,6 +183,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 				.add(RequestDetails.class, myRequest)
 				.addIfMatchesType(ServletRequestDetails.class, myRequest);
 			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			retVal = showDetails.toList();
 		}
 
 
@@ -369,7 +370,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		List<IBaseResource> resources = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
 
-		InterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
+		resources = InterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
 
 		return resources;
 	}

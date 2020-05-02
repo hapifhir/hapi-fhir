@@ -38,9 +38,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -84,21 +84,25 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
+	@NotNull
 	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_SYS", nullable = true)
+	@NotNull
 	private Long myHashSystem;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_SYS_AND_VALUE", nullable = true)
+	@NotNull
 	private Long myHashSystemAndValue;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_VALUE", nullable = true)
+	@NotNull
 	private Long myHashValue;
 
 
@@ -136,7 +140,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
 		if (myHashSystem == null && getParamName() != null) {
 			String resourceType = getResourceType();
@@ -152,6 +155,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@Override
 	protected void clearHashes() {
+		myHashIdentity = null;
 		myHashSystem = null;
 		myHashSystemAndValue = null;
 		myHashValue = null;
@@ -196,7 +200,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	private void setHashSystemAndValue(Long theHashSystemAndValue) {
-		calculateHashes();
 		myHashSystemAndValue = theHashSystemAndValue;
 	}
 

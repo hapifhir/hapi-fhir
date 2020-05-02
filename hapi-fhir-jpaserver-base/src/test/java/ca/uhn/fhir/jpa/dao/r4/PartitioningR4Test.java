@@ -154,7 +154,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(id).orElseThrow(IllegalArgumentException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertEquals(RequestPartitionId.fromDefaultPartition(), resourceTable.getPartitionId());
 		});
 	}
 
@@ -371,7 +371,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertEquals(RequestPartitionId.fromDefaultPartition(), resourceTable.getPartitionId());
 		});
 	}
 
@@ -589,8 +589,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 			// HFJ_FORCED_ID
 			List<ForcedId> forcedIds = myForcedIdDao.findAll();
 			assertEquals(2, forcedIds.size());
-			assertEquals(null, forcedIds.get(0).getPartitionId());
-			assertEquals(null, forcedIds.get(1).getPartitionId());
+			assertEquals(null, forcedIds.get(0).getPartitionId().getPartitionId());
+			assertEquals(null, forcedIds.get(1).getPartitionId().getPartitionId());
 		});
 
 	}
@@ -1256,12 +1256,15 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 
 		// Date param
 
+		ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-04-20"));
 		map.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, Matchers.contains(patientId1));
 
@@ -2195,8 +2198,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 
 		// Resolve forced IDs
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		assertEquals(1, countMatches(sql, "forcedid0_.PID in"));
-		assertEquals(0, countMatches(sql, "PARTITION_ID is null"));
+		assertEquals(sql, 1, countMatches(sql, "forcedid0_.RESOURCE_PID in"));
+		assertEquals(sql,0, countMatches(sql, "PARTITION_ID is null"));
 	}
 
 	@Test

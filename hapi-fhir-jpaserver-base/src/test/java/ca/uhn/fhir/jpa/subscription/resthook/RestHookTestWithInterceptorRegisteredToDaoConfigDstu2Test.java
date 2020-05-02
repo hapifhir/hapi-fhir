@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.fail;
 
@@ -219,8 +220,20 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
+		ourLog.info("Creating 2 subscriptions");
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+
+
+		runInTransaction(()->{
+			ourLog.info("All token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		myCaptureQueriesListener.clear();
+		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		ourLog.info("Waiting for activation");
 		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");

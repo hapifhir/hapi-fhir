@@ -67,29 +67,23 @@ public class DaoSearchParamSynchronizer {
 		return retVal;
 	}
 
-	private <T extends BaseResourceIndex> void synchronize(ResourceIndexedSearchParams theParams, ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParms, Collection<T> theExistingParms) {
-		List<T> quantitiesToRemove = subtract(theExistingParms, theNewParms);
-		List<T> quantitiesToAdd = subtract(theNewParms, theExistingParms);
-		tryToReuseIndexEntities(quantitiesToRemove, quantitiesToAdd);
-		for (T next : quantitiesToRemove) {
+	private <T extends BaseResourceIndex> void synchronize(ResourceIndexedSearchParams theParams, ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParams, Collection<T> theExistingParams) {
+		List<T> paramsToRemove = subtract(theExistingParams, theNewParams);
+		List<T> paramsToAdd = subtract(theNewParams, theExistingParams);
+		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
+		for (T next : paramsToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
 		}
-		for (T next : quantitiesToAdd) {
+
+		for (T next : paramsToAdd) {
 			next.setPartitionId(theEntity.getPartitionId());
-			if (next instanceof BaseResourceIndexedSearchParam) {
-				BaseResourceIndexedSearchParam searchParam = (BaseResourceIndexedSearchParam) next;
-				searchParam.setPartitionSettings(myPartitionSettings);
-				searchParam.setModelConfig(myModelConfig);
-			}
-		}
-		theParams.calculateHashes(theNewParms);
-		for (T next : quantitiesToAdd) {
+			next.calculateHashes();
 			myEntityManager.merge(next);
 		}
 
-		theAddRemoveCount.addToAddCount(quantitiesToAdd.size());
-		theAddRemoveCount.addToRemoveCount(quantitiesToRemove.size());
+		theAddRemoveCount.addToAddCount(paramsToAdd.size());
+		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
 	}
 
 	/**
@@ -118,6 +112,7 @@ public class DaoSearchParamSynchronizer {
 			// Take a row we were going to remove, and repurpose its ID
 			T entityToReuse = theIndexesToRemove.remove(theIndexesToRemove.size() - 1);
 			entityToReuse.copyMutableValuesFrom(targetEntity);
+			entityToReuse.calculateHashes();
 			theIndexesToAdd.set(addIndex, entityToReuse);
 		}
 	}

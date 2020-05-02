@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.Column;
@@ -108,5 +110,15 @@ public class ForcedId extends BasePartitionable {
 
 	public Long getResourceId() {
 		return myResourcePid;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("pid", myId)
+			.append("resourceType", myResourceType)
+			.append("forcedId", myForcedId)
+			.append("resourcePid", myResourcePid)
+			.toString();
 	}
 }

@@ -84,12 +84,12 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
 		RequestPartitionId requestPartitionId;
 
-		// Handle system requests
-		if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
-			return RequestPartitionId.fromDefaultPartition();
-		}
-
 		if (myPartitionSettings.isPartitioningEnabled()) {
+			// Handle system requests
+			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
+				return RequestPartitionId.fromDefaultPartition();
+			}
+
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 			HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
@@ -112,12 +112,12 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
 		RequestPartitionId requestPartitionId;
 
-		// Handle system requests
-		if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
-			return RequestPartitionId.fromDefaultPartition();
-		}
-
 		if (myPartitionSettings.isPartitioningEnabled()) {
+			// Handle system requests
+			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
+				return RequestPartitionId.fromDefaultPartition();
+			}
+
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 			HookParams params = new HookParams()
 				.add(IBaseResource.class, theResource)

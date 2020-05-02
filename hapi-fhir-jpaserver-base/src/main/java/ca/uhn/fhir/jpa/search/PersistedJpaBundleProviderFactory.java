@@ -38,7 +38,7 @@ public class PersistedJpaBundleProviderFactory {
 	}
 
 	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
-		Object retVal = myApplicationContext.getBean(BaseConfig.PERSISTED_JPA_BUNDLE_PROVIDER, theRequest, theSearch);
+		Object retVal = myApplicationContext.getBean(BaseConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
 		return (PersistedJpaBundleProvider) retVal;
 	}
 

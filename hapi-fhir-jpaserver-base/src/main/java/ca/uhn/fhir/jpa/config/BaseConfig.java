@@ -309,7 +309,7 @@ public abstract class BaseConfig {
 		return new PersistedJpaBundleProvider(theRequest, theUuid);
 	}
 
-	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER)
+	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
 	@Scope("prototype")
 	public PersistedJpaBundleProvider persistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
 		return new PersistedJpaBundleProvider(theRequest, theSearch);

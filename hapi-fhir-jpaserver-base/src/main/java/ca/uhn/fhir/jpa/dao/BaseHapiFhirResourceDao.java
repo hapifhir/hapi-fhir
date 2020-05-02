@@ -1007,11 +1007,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Verify that the resource is for the correct partition
 		if (!requestPartitionId.isAllPartitions()) {
 			if (requestPartitionId.getPartitionId() == null) {
-				if (entity.getPartitionId() != null) {
+				if (entity.getPartitionId().getPartitionId() != null) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
 					entity = null;
 				}
-			} else if (entity.getPartitionId() != null) {
+			} else if (entity.getPartitionId().getPartitionId() != null) {
 				if (!requestPartitionId.getPartitionId().equals(entity.getPartitionId().getPartitionId())) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
 					entity = null;

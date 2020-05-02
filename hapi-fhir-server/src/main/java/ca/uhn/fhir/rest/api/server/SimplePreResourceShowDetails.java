@@ -24,9 +24,11 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 
@@ -77,5 +79,9 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 	@Override
 	public Iterator<IBaseResource> iterator() {
 		return Arrays.asList(myResources).iterator();
+	}
+
+	public List<IBaseResource> toList() {
+		return Lists.newArrayList(myResources);
 	}
 }

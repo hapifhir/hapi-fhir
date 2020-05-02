@@ -39,7 +39,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.math.BigDecimal;
@@ -92,7 +91,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
 		if (myHashIdentity == null && getParamName() != null) {
 			String resourceType = getResourceType();

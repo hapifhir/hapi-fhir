@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -29,10 +30,12 @@ import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.*;
@@ -1051,6 +1054,9 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertGone(org2Id);
 	}
 
+	@Autowired
+	private IForcedIdDao myForcedIdDao;
+
 	@Test
 	public void testHistoryByForcedId() {
 		IIdType idv1;
@@ -1066,6 +1072,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			patient.setId(patient.getId().toUnqualifiedVersionless());
 			idv2 = myPatientDao.update(patient, mySrd).getId();
 		}
+
+		runInTransaction(()->{
+			ourLog.info("Forced IDs:\n{}", myForcedIdDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n")));
+		});
 
 		List<Patient> patients = toList(myPatientDao.history(idv1.toVersionless(), null, null, mySrd));
 		assertTrue(patients.size() == 2);
@@ -1111,7 +1121,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
-			assertEquals(expected, actual);
+			assertEquals("Failure at " + i, expected, actual);
 		}
 
 		// By type

@@ -119,7 +119,7 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public IResourceLookup resolveResourceIdentity(RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
+	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Collection<IResourceLookup> matches = translateForcedIdToPids(theRequestPartitionId, theRequestDetails, Collections.singletonList(id));
@@ -136,7 +136,7 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public ResourcePersistentId resolveResourcePersistentIds(RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
+	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
 		Long retVal;
 		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
@@ -160,7 +160,7 @@ public class IdHelperService {
 	 * are deleted (but note that forced IDs can't change, so the cache can't return incorrect results)
 	 */
 	@Nonnull
-	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, RequestDetails theRequest) {
+	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
 		theIds.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theIds.isEmpty()) {
@@ -237,7 +237,7 @@ public class IdHelperService {
 
 		Optional<String> forcedId = translatePidIdToForcedId(theId);
 		if (forcedId.isPresent()) {
-			retVal.setValue(theResourceType + '/' + forcedId);
+			retVal.setValue(theResourceType + '/' + forcedId.get());
 		} else {
 			retVal.setValue(theResourceType + '/' + theId.toString());
 		}
@@ -292,7 +292,7 @@ public class IdHelperService {
 		return pid.get();
 	}
 
-	private Collection<IResourceLookup> translateForcedIdToPids(RequestPartitionId theRequestPartitionId, RequestDetails theRequest, Collection<IIdType> theId) {
+	private Collection<IResourceLookup> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, Collection<IIdType> theId) {
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {
@@ -363,7 +363,7 @@ public class IdHelperService {
 		return retVal;
 	}
 
-	private void resolvePids(RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, List<IResourceLookup> theTarget) {
+	private void resolvePids(@Nonnull RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, List<IResourceLookup> theTarget) {
 		Collection<Object[]> lookup;
 		if (theRequestPartitionId.isAllPartitions()) {
 			lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
@@ -395,6 +395,7 @@ public class IdHelperService {
 	}
 
 	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
+
 		Map<Long, Optional<String>> retVal = new HashMap<>(myForcedIdCache.getAllPresent(thePids));
 
 		List<Long> remainingPids = thePids
@@ -402,8 +403,9 @@ public class IdHelperService {
 			.filter(t -> !retVal.containsKey(t))
 			.collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(remainingPids, t->{
-			List<ForcedId> forcedIds = myForcedIdDao.findAllById(t);
+		new QueryChunker<Long>().chunk(remainingPids, t -> {
+			List<ForcedId> forcedIds = myForcedIdDao.findAllByResourcePid(t);
+
 			for (ForcedId forcedId : forcedIds) {
 				Long nextResourcePid = forcedId.getResourceId();
 				Optional<String> nextForcedId = Optional.of(forcedId.getForcedId());

@@ -486,8 +486,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
-
-		myIdHelperService.clearCache();
 	}
 
 	@After()

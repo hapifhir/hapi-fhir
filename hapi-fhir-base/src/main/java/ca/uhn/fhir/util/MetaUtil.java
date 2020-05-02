@@ -96,7 +96,7 @@ public class MetaUtil {
 			value.setValue(theValue);
 			sourceExtension.setValue(value);
 		} else {
-			ourLog.error(MetaUtil.class.getSimpleName() + ".setSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
+			ourLog.debug(MetaUtil.class.getSimpleName() + ".setSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
 		}
 	}
 
