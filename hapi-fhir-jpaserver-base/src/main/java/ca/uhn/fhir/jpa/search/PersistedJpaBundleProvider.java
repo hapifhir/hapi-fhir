@@ -195,7 +195,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (myRequestPartitionId == null) {
 			if (mySearchEntity.getResourceId() != null) {
 				// If we have an ID, we've already checked the partition and made sure it's appropriate
-				myRequestPartitionId = RequestPartitionId.fromAllPartitions();
+				myRequestPartitionId = RequestPartitionId.allPartitions();
 			} else {
 				myRequestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType());
 			}

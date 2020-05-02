@@ -124,24 +124,13 @@ public class RequestPartitionId {
 	}
 
 	@Nonnull
-	public static RequestPartitionId fromAllPartitions() {
+	public static RequestPartitionId allPartitions() {
 		return ALL_PARTITIONS;
 	}
 
 	@Nonnull
-	public static RequestPartitionId fromDefaultPartition() {
+	public static RequestPartitionId defaultPartition() {
 		return fromPartitionId(null);
-	}
-
-	/**
-	 * Create a string representation suitable for use as a cache key. Null aware.
-	 */
-	public static String stringifyForKey(RequestPartitionId theRequestPartitionId) {
-		String retVal = "(null)";
-		if (theRequestPartitionId != null) {
-			retVal = theRequestPartitionId.getPartitionIdStringOrNullString();
-		}
-		return retVal;
 	}
 
 	@Nonnull
@@ -165,11 +154,23 @@ public class RequestPartitionId {
 	}
 
 	@Nonnull
-	public static RequestPartitionId forPartitionNameAndId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+	public static RequestPartitionId fromPartitionIdAndName(@Nullable Integer thePartitionId, @Nullable String thePartitionName) {
+		return new RequestPartitionId(thePartitionName, thePartitionId, null);
+	}
+
+	@Nonnull
+	public static RequestPartitionId forPartitionIdAndName(@Nullable Integer thePartitionId, @Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
 		return new RequestPartitionId(thePartitionName, thePartitionId, thePartitionDate);
 	}
 
-	public static RequestPartitionId fromPartitionIdAndName(@Nullable Integer thePartitionId, @Nullable String thePartitionName) {
-		return new RequestPartitionId(thePartitionName, thePartitionId, null);
+	/**
+	 * Create a string representation suitable for use as a cache key. Null aware.
+	 */
+	public static String stringifyForKey(RequestPartitionId theRequestPartitionId) {
+		String retVal = "(null)";
+		if (theRequestPartitionId != null) {
+			retVal = theRequestPartitionId.getPartitionIdStringOrNullString();
+		}
+		return retVal;
 	}
 }

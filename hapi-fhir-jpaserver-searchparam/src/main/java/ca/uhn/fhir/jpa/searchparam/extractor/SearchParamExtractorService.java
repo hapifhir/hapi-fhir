@@ -298,7 +298,7 @@ public class SearchParamExtractorService {
 
 		RequestPartitionId targetRequestPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.getAllowReferencesAcrossPartitions() == PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
-			targetRequestPartitionId = RequestPartitionId.fromAllPartitions();
+			targetRequestPartitionId = RequestPartitionId.allPartitions();
 		}
 
 		String key = RequestPartitionId.stringifyForKey(targetRequestPartitionId) + "/" + theNextId.getValue();

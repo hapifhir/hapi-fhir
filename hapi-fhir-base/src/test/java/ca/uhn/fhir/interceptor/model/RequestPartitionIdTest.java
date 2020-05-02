@@ -10,7 +10,7 @@ public class RequestPartitionIdTest {
 
 	@Test
 	public void testHashCode() {
-		assertEquals(31860737, RequestPartitionId.fromAllPartitions().hashCode());
+		assertEquals(31860737, RequestPartitionId.allPartitions().hashCode());
 	}
 
 	@Test

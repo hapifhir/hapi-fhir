@@ -87,7 +87,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
 			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
-				return RequestPartitionId.fromDefaultPartition();
+				return RequestPartitionId.defaultPartition();
 			}
 
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
@@ -101,7 +101,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
 		}
 
-		return RequestPartitionId.fromAllPartitions();
+		return RequestPartitionId.allPartitions();
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
 			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
-				return RequestPartitionId.fromDefaultPartition();
+				return RequestPartitionId.defaultPartition();
 			}
 
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
@@ -131,7 +131,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
 		}
 
-		return RequestPartitionId.fromAllPartitions();
+		return RequestPartitionId.allPartitions();
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			if (retVal.getPartitionId() != null) {
 				Validate.isTrue(retVal.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", retVal.getPartitionName(), retVal.getPartitionId());
 			} else {
-				retVal = RequestPartitionId.forPartitionNameAndId(retVal.getPartitionName(), partition.getId(), retVal.getPartitionDate());
+				retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), retVal.getPartitionName(), retVal.getPartitionDate());
 			}
 
 		} else if (retVal.getPartitionId() != null) {
@@ -166,7 +166,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionId", retVal.getPartitionId());
 				throw new ResourceNotFoundException(msg);
 			}
-			retVal = RequestPartitionId.forPartitionNameAndId(partition.getName(), partition.getId(), retVal.getPartitionDate());
+			retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), partition.getName(), retVal.getPartitionDate());
 
 		}
 

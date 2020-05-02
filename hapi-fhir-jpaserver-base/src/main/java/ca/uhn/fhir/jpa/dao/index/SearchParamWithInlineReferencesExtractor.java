@@ -101,7 +101,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			partitionId = theEntity.getPartitionId();
 		} else {
-			partitionId = RequestPartitionId.fromAllPartitions();
+			partitionId = RequestPartitionId.allPartitions();
 		}
 
 		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theUpdateTime, true);

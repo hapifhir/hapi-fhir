@@ -154,7 +154,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(id).orElseThrow(IllegalArgumentException::new);
-			assertEquals(RequestPartitionId.fromDefaultPartition(), resourceTable.getPartitionId());
+			assertEquals(RequestPartitionId.defaultPartition(), resourceTable.getPartitionId());
 		});
 	}
 
@@ -371,7 +371,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(RequestPartitionId.fromDefaultPartition(), resourceTable.getPartitionId());
+			assertEquals(RequestPartitionId.defaultPartition(), resourceTable.getPartitionId());
 		});
 	}
 
@@ -2262,7 +2262,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 	}
 
 	private void addCreateDefaultPartition() {
-		myPartitionInterceptor.addCreatePartition(RequestPartitionId.fromDefaultPartition());
+		myPartitionInterceptor.addCreatePartition(RequestPartitionId.defaultPartition());
 	}
 
 	private void addCreateDefaultPartition(LocalDate thePartitionDate) {
@@ -2276,11 +2276,11 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 	}
 
 	private void addReadDefaultPartition() {
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromDefaultPartition());
+		myPartitionInterceptor.addReadPartition(RequestPartitionId.defaultPartition());
 	}
 
 	private void addReadAllPartitions() {
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromAllPartitions());
+		myPartitionInterceptor.addReadPartition(RequestPartitionId.allPartitions());
 	}
 
 	public void createRequestId() {

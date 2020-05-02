@@ -47,7 +47,7 @@ public class BasePartitionable implements Serializable {
 		if (myPartitionId != null) {
 			return myPartitionId.toPartitionId();
 		} else {
-			return RequestPartitionId.fromDefaultPartition();
+			return RequestPartitionId.defaultPartition();
 		}
 	}
 
