@@ -111,7 +111,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	}
 
 	private void log(@Nullable TransactionLogMessages theMessages, String theMessage) {
-		log(theMessages, theMessage);
+		TransactionLogMessages.addMessage(theMessages, theMessage);
 		ourLog.debug(theMessage);
 	}
 }
