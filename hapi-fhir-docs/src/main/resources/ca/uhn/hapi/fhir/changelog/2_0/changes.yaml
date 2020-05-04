@@ -1,0 +1,110 @@
+---
+- item:
+    type: "fix"
+    title: "JSON parsing in HAPI FHIR has been switched from using JSR353 (javax.json) to using Google Gson. For this reason we are bumping the major release number to 2.0. Theoretically this should not affect projects in any major way, but Gson does have subtle differences. Two differences which popped up a fair bit in our own testing: <ul> <ul> A space is placed after the : in keys, e.g. what was previously encoded as <code>\"resourceType\":\"Patient\"</code> is now encoded as <code>\"resourceType\": \"Patient\"</code> (this broke a number of our unit tests with hardcoded resource definitions) </ul> <ul> Trailing content after a valid json resource is rejected by Gson (it was ignored by the Glassfish parser we were previously using even though it was invalid) </ul> </ul>"
+- item:
+    type: "add"
+    title: "STU3 structure definitions have been updated to the STU3 ballot candidate versions (1.6.0 - SVN 9663)"
+- item:
+    type: "add"
+    title: "Both client and server now support the new Content Types decided in <a href=\"http://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_id=677&tracker_item_id=10199\">FHIR #10199</a> . <br/><br/> This means that the server now supports <code>application/fhir+xml</code> and <code>application/fhir+json</code> in addition to the older style <code>application/xml+fhir</code> and <code>application/json+fhir</code> . In order to facilitate migration by implementors, the old style remains the default for now, but the server will respond using the new style if the request contains it. The client now uses an <code>Accept</code> header value which requests both styles with a preference given to the new style when running in DSTU3 mode. <br/><br/> As a part of this change, the server has also been enhanced so that if a request contains a Content-Type header but no Accept header, the response will prefer the encoding specified by the Content-Type header."
+- item:
+    type: "add"
+    title: "Bump the version of a few dependencies to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Logback (used in sample projects): 1.1.5 -&gt; 1.1.7</li> <li>Phloc Commons (used by schematron validator): 4.4.4 -&gt; 4.4.5</li> <li>Commons-IO: 2.4 -&gt; 2.5</li> <li>Apache HTTPClient: 4.5.1 -&gt; 4.5.2</li> <li>Apache HTTPCore: 4.4.4 -&gt; 4.4.5</li> <li>Jersey (JAX-RS tests): 2.22.2 -&gt; 2.23.1</li> <li>Spring (JPA, Web Tester): 4.3.0 -&gt; 4.3.1</li> <!--<li>Hibernate ORM (JPA): 5.1.0 -&gt; 5.2.1</li>--> <li>Hibernate Search (JPA): 5.5.2 -&gt; 5.5.4</li> <li>Thymeleaf (Narrative Generator / Web Tester): 2.1.4 -&gt;3.0.1</li> </ul>"
+- item:
+    type: "fix"
+    title: "Fix issue in DSTU1 Bundle parsing where unexpected elements in the bundle resulted in a failure to parse."
+- item:
+    type: "fix"
+    title: "DSTU2 QuestionnaireResponse validator failed with an exception if the QuestionnaireResponse contained certain groups with no content"
+- item:
+    issue: "150"
+    type: "add"
+    title: "Fluent client should ignore parameter values which are null instead of including them as <code>?foo=null</code>"
+- item:
+    type: "fix"
+    title: "When using <code>_elements</code> parameter on server, the server was not automatically adding the <code>SUBSETTED</code> tag as it should"
+- item:
+    type: "fix"
+    title: "JPA server should now automatically detect if Hibernate Search (Lucene) is configured to be disabled and will not attempt to use it. This prevents a crash for some operations."
+- item:
+    type: "add"
+    title: "A new server interceptor \"BanUnsupprtedHttpMethodsInterceptor\" has been added which causes the server to return an HTTP 405 if an unsupported HTTP verb is received from the client"
+- item:
+    issue: "404"
+    type: "fix"
+    title: "Fix an issue where resource IDs were not correctly set when using DSTU2 HL7org structures with the JAX-RS module. Thanks to Carlo Mion for the pull request!"
+- item:
+    type: "fix"
+    title: "hapi-fhir-testpage-overlay project contained an unneccesary dependency on hapi-fhir-jpaserver-base module, which resulted in projects using the overlay having a large number of unnneded JARs included"
+- item:
+    issue: "403"
+    type: "add"
+    title: "It is not possible to configure both the parser and the context to preserve versions in resource references (default behaviour is to strip versions from references). Thanks to GitHub user @cknaap for the suggestion!"
+- item:
+    issue: "409"
+    type: "fix"
+    title: "<code>Tag#setCode(String)</code> did not actually set the code it was supposed to set. Thanks to Tim Tschampel for reporting!"
+- item:
+    issue: "401"
+    type: "fix"
+    title: "JPA server's <code>/Bundle</code> endpoint cleared the <code>Bundle.entry.fullUrl</code> field on stored bundles, resulting in invalid content being saved. Thanks to Mirjam Baltus for reporting!"
+- item:
+    type: "fix"
+    title: "JPA server now returns HTTP 200 instead of HTTP 404 for conditional deletes which did not find any matches, per FHIR-I decision."
+- item:
+    type: "fix"
+    title: "Client that declares explicitly that it is searching/reading/etc for a custom type did not automatically parse into that type."
+- item:
+    issue: "406"
+    type: "add"
+    title: "Allow servers to specify the authentication realm of their choosing when throwing an AuthenticationException. Thanks to GitHub user @allanbrohansen for the suggestion!"
+- item:
+    issue: "416"
+    type: "add"
+    title: "Add a new client implementation which uses the <a href=\"http://square.github.io/okhttp/\">OkHttp</a> library as the HTTP client implementation (instead of Apache HttpClient). This is particularly useful for Android (where HttpClient is a pain) but could also be useful in other places too. Thanks to Matt Clarke of Orion Health for the contribution!"
+- item:
+    type: "fix"
+    title: "Fix a regression when parsing resources that have contained resources, where the reference in the outer resource which links to the contained resource sometimes did does not get populated with the actual target resource instance. Thanks to Neal Acharya for reporting!"
+- item:
+    type: "add"
+    title: "hapi-fhir-cli upload-terminology command now has an argument \"-b FOO\" that lets you add an authorization header in the form <code>Authorization: Bearer FOO</code>"
+- item:
+    issue: "423"
+    type: "fix"
+    title: "Parser failed to successfully encode a custom resource if it contained custom fields that also used custom types. Thanks to GitHub user @sjanic for reporting!"
+- item:
+    type: "add"
+    title: "Inprove handling of _text and _content searches in JPA server to do better matching on partial strings"
+- item:
+    type: "add"
+    title: "Servers in STU3 mode will now ignore any ID or VersionID found in the resource body provided by the client when processing FHIR <code>update</code> operations. This change has been made because the FHIR specification now requires servers to ignore these values. Note that as a result of this change, resources passed to <code>@Update</code> methods will always have <code>null</code> ID"
+- item:
+    type: "add"
+    title: "Add new methods to <code>AuthorizationInterceptor</code> which allow user code to declare support for conditional create, update, and delete."
+- item:
+    type: "fix"
+    title: "When encoding a resource with a reference to another resource that has a placeholder ID (e.g. urn:uuid:foo), the urn prefix was incorrectly stripped from the reference."
+- item:
+    type: "fix"
+    title: "Servers for STU3 (or newer) will no longer include a <code>Location:</code> header on responses for <code>read</code> operations. This header was required in earlier versions of FHIR but has been removed from the specification."
+- item:
+    issue: "428"
+    type: "fix"
+    title: "Fix NullPointerException when encoding an extension containing CodeableConcept with log level set to TRACE. Thanks to Bill Denton for the report!"
+- item:
+    type: "add"
+    title: "Add two new methods to the parser error handler that let users trap invalid contained resources with no ID, as well as references to contained resource that do not exist."
+- item:
+    type: "add"
+    title: "Improve performance when parsing resources containing contained resources by eliminating a step where references were woven twice"
+- item:
+    issue: "426"
+    type: "fix"
+    title: "Parser failed to parse resources containing an extension with a value type of \"id\". Thanks to Raphael MÃ¤der for reporting!"
+- item:
+    type: "fix"
+    title: "When committing a transaction in JPA server where the transaction contained placeholder IDs for references between bundles, the placeholder IDs were not substituted with viewing resources using the _history operation"
+- item:
+    type: "add"
+    title: "HAPI root pom shouldn't include animal-sniffer plugin, since that causes any projects which extend this to be held to Java 6 compliance."

@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class UnregisterScheduledProcessor implements BeanFactoryPostProcessor {
 			}
 
 			for (String beanName : beanFactory.getBeanNamesForType(ExecutorConfigurationSupport.class)) {
-				ExecutorConfigurationSupport executorConfigSupport = ((DefaultListableBeanFactory) beanFactory).getBean(beanName, ExecutorConfigurationSupport.class);
+				ExecutorConfigurationSupport executorConfigSupport = beanFactory.getBean(beanName, ExecutorConfigurationSupport.class);
 				executorConfigSupport.shutdown();
 			}
 		}

@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -331,7 +331,7 @@ public void deletePatient(@IdParam IdType theId) {
 @Delete()
 public void deletePatientConditional(@IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl) {
    // Only one of theId or theConditionalUrl will have a value depending
-   // on whether the URL receieved was a logical ID, or a conditional
+   // on whether the URL received was a logical ID, or a conditional
    // search string
    if (theId != null) {
       // do a normal delete
@@ -947,7 +947,7 @@ public interface HistoryClient extends IBasicClient {
   Bundle getHistoryPatientInstance(@IdParam IdType theId);
 
   /**
-   * Either (or both) of the "since" and "count" paramaters can
+   * Either (or both) of the "since" and "count" parameters can
    * also be included in any of the methods above.
    */
   @History
@@ -959,7 +959,7 @@ public interface HistoryClient extends IBasicClient {
 
 public void bbbbb() throws DataFormatException, IOException {
 //START SNIPPET: metadataClientUsage
-FhirContext ctx = FhirContext.forDstu2();
+FhirContext ctx = FhirContext.forR4();
 MetadataClient client = ctx.newRestfulClient(MetadataClient.class, "http://spark.furore.com/fhir");
 CapabilityStatement metadata = client.getServerMetadata();
 System.out.println(ctx.newXmlParser().encodeResourceToString(metadata));
@@ -995,7 +995,7 @@ private interface IPatientClient extends IBasicClient
 
 public void clientRead() {
 //START SNIPPET: clientReadTags
-IPatientClient client = FhirContext.forDstu2().newRestfulClient(IPatientClient.class, "http://foo/fhir");
+IPatientClient client = FhirContext.forR4().newRestfulClient(IPatientClient.class, "http://foo/fhir");
 Patient patient = client.readPatient(new IdType("1234"));
   
 // Access the tag list
@@ -1024,8 +1024,8 @@ newPatient.getMeta().addTag("http://personality", "Friendly", "Friendly"); // TO
 @Create
 public MethodOutcome createPatientResource(@ResourceParam Patient thePatient) {
 
-  // ..save the resouce..
-  IdType id = new IdType("123"); // the new databse primary key for this resource
+  // ..save the resource..
+  IdType id = new IdType("123"); // the new database primary key for this resource
 
   // Get the tag list
   List<Coding> tags = thePatient.getMeta().getTag();
@@ -1049,7 +1049,6 @@ public Bundle transaction(@TransactionParam Bundle theInput) {
    return retVal;
 }
 //END SNIPPET: transaction
-
 
 }
 

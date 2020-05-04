@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -604,26 +604,41 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class DeleteInternal extends BaseSearch<IDeleteTyped, IDeleteWithQueryTyped, IBaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
+	private class DeleteInternal extends BaseSearch<IDeleteTyped, IDeleteWithQueryTyped, MethodOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
 
 		private boolean myConditional;
 		private IIdType myId;
 		private String myResourceType;
 		private String mySearchUrl;
+		private DeleteCascadeModeEnum myCascadeMode;
 
 		@Override
-		public IBaseOperationOutcome execute() {
+		public MethodOutcome execute() {
+
+			Map<String, List<String>> additionalParams = new HashMap<>();
+			if (myCascadeMode != null) {
+				switch (myCascadeMode) {
+					case DELETE:
+						addParam(getParamMap(), Constants.PARAMETER_CASCADE_DELETE, Constants.CASCADE_DELETE);
+						break;
+					default:
+					case NONE:
+						break;
+				}
+			}
+
 			HttpDeleteClientInvocation invocation;
 			if (myId != null) {
-				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId, getParamMap());
 			} else if (myConditional) {
 				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myResourceType, getParamMap());
 			} else {
-				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl);
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl, getParamMap());
 			}
-			OperationOutcomeResponseHandler binding = new OperationOutcomeResponseHandler();
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
-			return invoke(params, binding, invocation);
+
+			OutcomeResponseHandler binding = new OutcomeResponseHandler();
+
+			return invoke(additionalParams, binding, invocation);
 		}
 
 		@Override
@@ -687,6 +702,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IDeleteTyped cascade(DeleteCascadeModeEnum theDelete) {
+			myCascadeMode = theDelete;
+			return this;
+		}
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -812,6 +832,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IHistoryUntyped onType(Class<? extends IBaseResource> theResourceType) {
 			myType = theResourceType;
+			return this;
+		}
+
+		@Override
+		public IHistoryUntyped onType(String theResourceType) {
+			myType = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 			return this;
 		}
 
@@ -1224,6 +1250,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IOperationUnnamed onType(String theResourceType) {
+			myType = myContext.getResourceDefinition(theResourceType).getImplementingClass();
+			return this;
+		}
+
+		@Override
 		public IOperationProcessMsg processMessage() {
 			myOperationName = Constants.EXTOP_PROCESS_MESSAGE;
 			return this;
@@ -1354,30 +1386,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			retVal.setResource(response);
 			retVal.setCreatedUsingStatusCode(theResponseStatusCode);
 			retVal.setResponseHeaders(theHeaders);
-			return retVal;
-		}
-	}
-
-	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<IBaseOperationOutcome> {
-
-		@Override
-		public IBaseOperationOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders)
-			throws BaseServerResponseException {
-			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
-			if (respType == null) {
-				return null;
-			}
-			IParser parser = respType.newParser(myContext);
-			IBaseOperationOutcome retVal;
-			try {
-				// TODO: handle if something else than OO comes back
-				retVal = (IBaseOperationOutcome) parser.parseResource(theResponseInputStream);
-			} catch (DataFormatException e) {
-				ourLog.warn("Failed to parse OperationOutcome response", e);
-				return null;
-			}
-			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, retVal);
-
 			return retVal;
 		}
 	}
@@ -1796,11 +1804,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					if (rootSs == null) {
 						rootSs = nextSortSpec;
 					} else {
-						// FIXME lastSs is null never set
-						// TODO unused assignment
 						lastSs.setChain(nextSortSpec);
 					}
-					// TODO unused assignment
 					lastSs = nextSortSpec;
 				}
 				if (rootSs != null) {

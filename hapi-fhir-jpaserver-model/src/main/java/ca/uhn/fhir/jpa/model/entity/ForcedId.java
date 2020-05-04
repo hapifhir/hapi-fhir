@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.hibernate.annotations.ColumnDefault;
 import javax.persistence.*;
 
 @Entity()
-@Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
+@Table(name = ForcedId.HFJ_FORCED_ID, uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
 	@UniqueConstraint(name = ForcedId.IDX_FORCEDID_TYPE_FID, columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
 }, indexes = {
@@ -36,10 +36,11 @@ import javax.persistence.*;
 	 * so don't reuse these names
 	 */
 })
-public class ForcedId {
+public class ForcedId extends BasePartitionable {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
 	public static final String IDX_FORCEDID_TYPE_FID = "IDX_FORCEDID_TYPE_FID";
+	public static final String HFJ_FORCED_ID = "HFJ_FORCED_ID";
 
 	@Column(name = "FORCED_ID", nullable = false, length = MAX_FORCED_ID_LENGTH, updatable = false)
 	private String myForcedId;
@@ -93,4 +94,5 @@ public class ForcedId {
 	public Long getId() {
 		return myId;
 	}
+
 }

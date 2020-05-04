@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,14 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class Constants {
 
@@ -142,6 +149,8 @@ public class Constants {
 	 */
 	public static final String PARAM_BUNDLETYPE = "_bundletype";
 	public static final String PARAM_FILTER = "_filter";
+	public static final String PARAM_CONTAINED = "_contained";
+	public static final String PARAM_CONTAINED_TYPE = "_containedType";
 	public static final String PARAM_CONTENT = "_content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
@@ -252,6 +261,8 @@ public class Constants {
 	 * </p>
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
+	public static final String PARAM_FHIRPATH = "_fhirpath";
+	public static final String PARAM_TYPE = "_type";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
@@ -353,4 +364,7 @@ public class Constants {
 		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
 
+	public static String codeSystemWithDefaultDescription(String theSystem) {
+		return defaultIfBlank(theSystem, "(none)");
+	}
 }

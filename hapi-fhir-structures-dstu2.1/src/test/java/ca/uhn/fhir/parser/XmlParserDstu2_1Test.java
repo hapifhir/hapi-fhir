@@ -45,7 +45,7 @@ import java.util.*;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class XmlParserDstu2_1Test {
@@ -612,8 +612,7 @@ public class XmlParserDstu2_1Test {
 		String out = xmlParser.encodeResourceToString(patient);
 		ourLog.info(out);
 
-		//@formatter:off
-		assertThat(out, stringContainsInOrder("<identifier>", 
+		assertThat(out, stringContainsInOrder("<identifier>",
 				"<type>",
 				"<coding>",
 				"<system value=\"http://hl7.org/fhir/v2/0203\"/>", 
@@ -623,7 +622,6 @@ public class XmlParserDstu2_1Test {
 				"<system value=\"SYS\"/>", 
 				"<value value=\"VAL\"/>", 
 				"</identifier>"));
-		//@formatter:on
 
 		patient = ourCtx.newXmlParser().parseResource(Patient.class, out);
 		assertEquals("http://hl7.org/fhir/v2/0203", patient.getIdentifier().get(0).getType().getCoding().get(0).getSystem());
@@ -643,120 +641,6 @@ public class XmlParserDstu2_1Test {
 
 		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, encoded);
 		assertEquals("2015-10-05", mo.getDateWrittenElement().getValueAsString());
-	}
-
-	@Test
-	public void testEncodeAndParseMetaProfileAndTags() {
-		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
-
-		p.getMeta().addProfile("http://foo/Profile1");
-		p.getMeta().addProfile("http://foo/Profile2");
-
-		p.getMeta().addTag().setSystem("scheme1").setCode("term1").setDisplay("label1");
-		p.getMeta().addTag().setSystem("scheme2").setCode("term2").setDisplay("label2");
-
-		p.getMeta().addSecurity().setSystem("sec_scheme1").setCode("sec_term1").setDisplay("sec_label1");
-		p.getMeta().addSecurity().setSystem("sec_scheme2").setCode("sec_term2").setDisplay("sec_label2");
-
-		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
-		ourLog.info(enc);
-
-		//@formatter:off
-		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
-			"<meta>",
-			"<meta>",
-			"<profile value=\"http://foo/Profile1\"/>",
-			"<profile value=\"http://foo/Profile2\"/>",
-			"<tag>",
-			"<system value=\"scheme1\"/>",
-			"<code value=\"term1\"/>",
-			"<display value=\"label1\"/>",
-			"</tag>",
-			"<tag>",
-			"<system value=\"scheme2\"/>",
-			"<code value=\"term2\"/>",
-			"<display value=\"label2\"/>",
-			"</tag>",
-			"</meta>",
-			"</meta>",
-			"<name>",
-			"<family value=\"FAMILY\"/>",
-			"</name>", 
-			"</Patient>"));
-		//@formatter:on
-
-		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
-		List<UriType> gotLabels = parsed.getMeta().getProfile();
-		assertEquals(2, gotLabels.size());
-		UriType label = gotLabels.get(0);
-		assertEquals("http://foo/Profile1", label.getValue());
-		label = gotLabels.get(1);
-		assertEquals("http://foo/Profile2", label.getValue());
-
-		List<Coding> tagList = parsed.getMeta().getTag();
-		assertEquals(2, tagList.size());
-		assertEquals("scheme1", tagList.get(0).getSystem());
-		assertEquals("term1", tagList.get(0).getCode());
-		assertEquals("label1", tagList.get(0).getDisplay());
-		assertEquals("scheme2", tagList.get(1).getSystem());
-		assertEquals("term2", tagList.get(1).getCode());
-		assertEquals("label2", tagList.get(1).getDisplay());
-
-		tagList = parsed.getMeta().getSecurity();
-		assertEquals(2, tagList.size());
-		assertEquals("sec_scheme1", tagList.get(0).getSystem());
-		assertEquals("sec_term1", tagList.get(0).getCode());
-		assertEquals("sec_label1", tagList.get(0).getDisplay());
-		assertEquals("sec_scheme2", tagList.get(1).getSystem());
-		assertEquals("sec_term2", tagList.get(1).getCode());
-		assertEquals("sec_label2", tagList.get(1).getDisplay());
-	}
-
-	@Test
-	public void testEncodeAndParseMetaProfiles() {
-		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
-
-		p.getMeta().addTag().setSystem("scheme1").setCode("term1").setDisplay("label1");
-		p.getMeta().addTag().setSystem("scheme2").setCode("term2").setDisplay("label2");
-
-		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
-		ourLog.info(enc);
-
-		//@formatter:off
-		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
-			"<meta>",
-			"<meta>",
-			"<tag>",
-			"<system value=\"scheme1\"/>",
-			"<code value=\"term1\"/>",
-			"<display value=\"label1\"/>",
-			"</tag>",
-			"<tag>",
-			"<system value=\"scheme2\"/>",
-			"<code value=\"term2\"/>",
-			"<display value=\"label2\"/>",
-			"</tag>",
-			"</meta>",
-			"</meta>",
-			"<name>",
-			"<family value=\"FAMILY\"/>",
-			"</name>", 
-			"</Patient>"));
-		//@formatter:on
-
-		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
-		assertThat(parsed.getMeta().getProfile(), empty());
-
-		List<Coding> tagList = parsed.getMeta().getTag();
-		assertEquals(2, tagList.size());
-		assertEquals("scheme1", tagList.get(0).getSystem());
-		assertEquals("term1", tagList.get(0).getCode());
-		assertEquals("label1", tagList.get(0).getDisplay());
-		assertEquals("scheme2", tagList.get(1).getSystem());
-		assertEquals("term2", tagList.get(1).getCode());
-		assertEquals("label2", tagList.get(1).getDisplay());
 	}
 
 	/**
@@ -1996,41 +1880,27 @@ public class XmlParserDstu2_1Test {
 
 		assertThat(output, stringContainsInOrder(
 			"{", 
-			"  \"resourceType\": \"Patient\",", 
-			"  \"id\": \"someid\",", 
-			"  \"_id\": {", 
-			"    \"fhir_comments\": [", 
-			"      \" comment 1 \"", 
-			"    ]", 
-			"  },", 
-			"  \"extension\": [", 
-			"    {", 
-			"      \"fhir_comments\": [", 
-			"        \" comment 2 \",", 
-			"        \" comment 7 \"", 
-			"      ],", 
-			"      \"url\": \"urn:patientext:att\",", 
-			"      \"valueAttachment\": {", 
-			"        \"fhir_comments\": [", 
-			"          \" comment 3 \",", 
-			"          \" comment 6 \"", 
-			"        ],", 
-			"        \"contentType\": \"aaaa\",", 
-			"        \"_contentType\": {", 
-			"          \"fhir_comments\": [", 
-			"            \" comment 4 \"", 
-			"          ]", 
-			"        },", 
-			"        \"data\": \"AAAA\",", 
-			"        \"_data\": {", 
-			"          \"fhir_comments\": [", 
-			"            \" comment 5 \"", 
-			"          ]", 
-			"        }", 
-			"      }", 
-			"    }", 
-			"  ]", 
-			"}" 
+				"  \"resourceType\": \"Patient\",", 
+				"  \"id\": \"someid\",", 
+				"  \"_id\": {", 
+				"    \"fhir_comments\": [ \" comment 1 \" ]", 
+				"  },", 
+				"  \"extension\": [ {", 
+				"    \"fhir_comments\": [ \" comment 2 \", \" comment 7 \" ],", 
+				"    \"url\": \"urn:patientext:att\",", 
+				"    \"valueAttachment\": {", 
+				"      \"fhir_comments\": [ \" comment 3 \", \" comment 6 \" ],", 
+				"      \"contentType\": \"aaaa\",", 
+				"      \"_contentType\": {", 
+				"        \"fhir_comments\": [ \" comment 4 \" ]", 
+				"      },", 
+				"      \"data\": \"AAAA\",", 
+				"      \"_data\": {", 
+				"        \"fhir_comments\": [ \" comment 5 \" ]", 
+				"      }", 
+				"    }", 
+				"  } ]", 
+				"}"
 		));
 		
 		//@formatter:on
@@ -2393,7 +2263,7 @@ public class XmlParserDstu2_1Test {
 			p.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 		
 		LenientErrorHandler errorHandler = new LenientErrorHandler();

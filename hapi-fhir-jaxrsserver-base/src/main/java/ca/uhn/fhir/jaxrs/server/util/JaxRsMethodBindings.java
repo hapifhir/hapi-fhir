@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server.util;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,20 @@ package ca.uhn.fhir.jaxrs.server.util;
  * #L%
  */
 
-import java.lang.reflect.Method;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import ca.uhn.fhir.rest.server.method.*;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
+import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Class that contains the method bindings defined by a ResourceProvider
@@ -52,7 +55,9 @@ public class JaxRsMethodBindings {
      * @param theProviderClass the class definition contaning the operations 
      */
     public  JaxRsMethodBindings(AbstractJaxRsProvider theProvider, Class<? extends AbstractJaxRsProvider> theProviderClass) {
-        for (final Method m : ReflectionUtil.getDeclaredMethods(theProviderClass)) {
+	    List<Method> declaredMethodsForCurrentProvider = ReflectionUtil.getDeclaredMethods(theProviderClass);
+	    declaredMethodsForCurrentProvider.addAll(ReflectionUtil.getDeclaredMethods(theProviderClass.getSuperclass()));
+	    for (final Method m : declaredMethodsForCurrentProvider) {
             final BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, theProvider.getFhirContext(), theProvider);
             if (foundMethodBinding == null) {
                 continue;

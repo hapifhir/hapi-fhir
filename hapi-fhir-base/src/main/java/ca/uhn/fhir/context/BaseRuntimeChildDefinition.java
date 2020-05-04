@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 
 public abstract class BaseRuntimeChildDefinition {
+
+	private BaseRuntimeChildDefinition myReplacedParentDefinition;
 
 	public abstract IAccessor getAccessor();
 
@@ -64,6 +66,14 @@ public abstract class BaseRuntimeChildDefinition {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[" + getElementName() + "]";
+	}
+
+	public BaseRuntimeChildDefinition getReplacedParentDefinition() {
+		return myReplacedParentDefinition;
+	}
+
+	public void setReplacedParentDefinition(BaseRuntimeChildDefinition myReplacedParentDefinition) {
+		this.myReplacedParentDefinition = myReplacedParentDefinition;
 	}
 
 	public interface IAccessor {

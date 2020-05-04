@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,31 +23,23 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class IndexedSearchParamExtractor {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
-	@Autowired
-	private ResourceLinkExtractor myResourceLinkExtractor;
-	@Autowired
-	private InlineResourceLinkResolver myInlineResourceLinkResolver;
 
 	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest) {
 		ResourceTable entity = new ResourceTable();
 		String resourceType = myContext.getResourceDefinition(theResource).getName();
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
-		mySearchParamExtractorService.extractFromResource(theRequest, resourceIndexedSearchParams, entity, theResource);
-		myResourceLinkExtractor.extractResourceLinks(resourceIndexedSearchParams, entity, theResource, theResource.getMeta().getLastUpdated(), myInlineResourceLinkResolver, false, theRequest);
+		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, entity, theResource, theResource.getMeta().getLastUpdated(), false);
 		return resourceIndexedSearchParams;
 	}
 }

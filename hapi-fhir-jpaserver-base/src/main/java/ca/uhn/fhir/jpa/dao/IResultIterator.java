@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,15 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+
 import java.io.Closeable;
 import java.util.Iterator;
 
-public interface IResultIterator extends Iterator<Long>, Closeable {
+public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
 
 	int getSkippedCount();
+
+    int getNonSkippedCount();
 
 }

@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
@@ -386,23 +387,81 @@ public class GenericClientTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		OperationOutcome outcome = (OperationOutcome) client.delete().resourceById("Patient", "123")
-			.withAdditionalHeader("myHeaderName", "myHeaderValue").execute();
+		MethodOutcome outcome = client
+			.delete()
+			.resourceById("Patient", "123")
+			.withAdditionalHeader("myHeaderName", "myHeaderValue")
+			.execute();
 
+		oo = (OperationOutcome) outcome.getOperationOutcome();
 		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
-		Assert.assertEquals("testDelete01", outcome.getIssueFirstRep().getLocation().get(0).getValue());
+		Assert.assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
+	}
+
+
+	@Test
+	public void testDeleteInvalidResponse() throws Exception {
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().addLocation("testDelete01");
+		String ooStr = ourCtx.newXmlParser().encodeResourceToString(oo);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("LKJHLKJGLKJKLL"), StandardCharsets.UTF_8));
-		outcome = (OperationOutcome) client.delete().resourceById(new IdType("Location", "123", "456")).prettyPrint().encodedJson().execute();
 
-		assertEquals("http://example.com/fhir/Location/123?_pretty=true", capt.getAllValues().get(1).getURI().toString());
-		assertEquals("DELETE", capt.getValue().getMethod());
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Assert.assertEquals(null, outcome);
+		// Try with invalid response
+		try {
+			client
+				.delete()
+				.resourceById(new IdType("Location", "123", "456"))
+				.prettyPrint()
+				.encodedJson()
+				.execute();
+		} catch (FhirClientConnectionException e) {
+			assertEquals(0, e.getStatusCode());
+			assertThat(e.getMessage(), containsString("Failed to parse response from server when performing DELETE to URL"));
+		}
 
 	}
+	
+	
+	@Test
+	public void testDeleteNoResponse() throws Exception {
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().addLocation("testDelete01");
+		String ooStr = ourCtx.newXmlParser().encodeResourceToString(oo);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ooStr), StandardCharsets.UTF_8));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		MethodOutcome outcome = client
+			.delete()
+			.resourceById("Patient", "123")
+			.withAdditionalHeader("myHeaderName", "myHeaderValue")
+			.execute();
+
+		oo = (OperationOutcome) outcome.getOperationOutcome();
+		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
+		assertEquals("DELETE", capt.getValue().getMethod());
+		Assert.assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
+		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
+
+	}
+
 
 	@Test
 	public void testHistory() throws Exception {
@@ -413,12 +472,8 @@ public class GenericClientTest {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
-			}
-		});
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t ->
+			new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
@@ -428,7 +483,7 @@ public class GenericClientTest {
 		response = client
 			.history()
 			.onServer()
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.withAdditionalHeader("myHeaderName", "myHeaderValue")
 			.execute();
 		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
@@ -439,7 +494,7 @@ public class GenericClientTest {
 		response = client
 			.history()
 			.onType(Patient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.withAdditionalHeader("myHeaderName", "myHeaderValue1")
 			.withAdditionalHeader("myHeaderName", "myHeaderValue2")
 			.execute();

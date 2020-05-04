@@ -2,7 +2,7 @@ package ca.uhn.fhir.validator;
 
 import static org.junit.Assert.*;
 
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class ValidatorAcrossVersionsTest {
 		FhirValidator val = ctxDstu2.newValidator();
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);
-		val.registerValidatorModule(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator(ctxDstu2));
 
 		QuestionnaireResponse resp = new QuestionnaireResponse();
 		resp.setAuthored(DateTimeDt.withCurrentTime());
@@ -54,8 +54,8 @@ public class ValidatorAcrossVersionsTest {
 		ourLog.info(ctxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 
 		assertEquals(2, result.getMessages().size());
-		assertEquals("No questionnaire is identified, so no validation can be performed against the base questionnaire", result.getMessages().get(0).getMessage());
-		assertEquals("Profile http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, Element 'QuestionnaireResponse.status': minimum required = 1, but only found 0", result.getMessages().get(1).getMessage());
+		assertEquals("Profile http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, Element 'QuestionnaireResponse.status': minimum required = 1, but only found 0", result.getMessages().get(0).getMessage());
+		assertEquals("No questionnaire is identified, so no validation can be performed against the base questionnaire", result.getMessages().get(1).getMessage());
 	}
 
 }

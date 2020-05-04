@@ -1,11 +1,14 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.util.ExpungeOptions;
-import ca.uhn.fhir.jpa.util.ExpungeOutcome;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,7 +27,7 @@ import java.util.Map;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +49,8 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
@@ -75,6 +80,11 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "noSystemOrTypeHistoryForPartitionAwareServer");
+			throw new MethodNotAllowedException(msg);
+		}
+
 		if (theRequestDetails != null) {
 			// Notify interceptors
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
@@ -88,4 +98,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	}
 
 
+	@Nullable
+	@Override
+	protected String getResourceName() {
+		return null;
+	}
 }

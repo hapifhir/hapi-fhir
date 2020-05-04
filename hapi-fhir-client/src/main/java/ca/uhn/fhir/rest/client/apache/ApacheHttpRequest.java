@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -108,6 +109,11 @@ public class ApacheHttpRequest implements IHttpRequest {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void setUri(String theUrl) {
+		myRequest.setURI(URI.create(theUrl));
 	}
 
 	@Override

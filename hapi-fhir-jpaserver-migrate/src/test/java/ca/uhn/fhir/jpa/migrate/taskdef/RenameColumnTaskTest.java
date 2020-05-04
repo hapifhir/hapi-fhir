@@ -1,23 +1,29 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.flywaydb.core.api.FlywayException;
 import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.Set;
+import java.util.function.Supplier;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class RenameColumnTaskTest extends BaseTest {
+
+	public RenameColumnTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testColumnAlreadyExists() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setDescription("Drop an index");
 		task.setOldName("myTextCol");
@@ -33,7 +39,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testBothExistDeleteTargetFirst() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setDescription("Drop an index");
 		task.setOldName("myTextCol");
@@ -52,7 +58,7 @@ public class RenameColumnTaskTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL, myTextCol) VALUES (123, 'AAA', 'BBB')");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setDescription("Drop an index");
 		task.setOldName("myTextCol");
@@ -63,8 +69,8 @@ public class RenameColumnTaskTest extends BaseTest {
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (InternalErrorException e) {
-			assertEquals("Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getMessage());
+		} catch (FlywayException e) {
+			assertEquals("Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getCause().getCause().getMessage());
 		}
 
 	}
@@ -73,7 +79,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testColumnDoesntAlreadyExist() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, myTextCol varchar(255))");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setDescription("Drop an index");
 		task.setOldName("myTextCol");
@@ -89,7 +95,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testNeitherColumnExists() {
 		executeSql("create table SOMETABLE (PID bigint not null)");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setOldName("myTextCol");
 		task.setNewName("TEXTCOL");
@@ -98,8 +104,8 @@ public class RenameColumnTaskTest extends BaseTest {
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (InternalErrorException e) {
-			assertEquals("Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!", e.getMessage());
+		} catch (FlywayException e) {
+			assertEquals("Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!", e.getCause().getCause().getMessage());
 		}
 
 
@@ -109,11 +115,11 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testNeitherColumnExistsButAllowed() {
 		executeSql("create table SOMETABLE (PID bigint not null)");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setOldName("myTextCol");
 		task.setNewName("TEXTCOL");
-		task.setAllowNeitherColumnToExist(true);
+		task.setOkayIfNeitherColumnExists(true);
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();
@@ -123,7 +129,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testBothColumnsExist() {
 		executeSql("create table SOMETABLE (PID bigint not null, PID2 bigint)");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setOldName("PID");
 		task.setNewName("PID2");
@@ -132,8 +138,8 @@ public class RenameColumnTaskTest extends BaseTest {
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (InternalErrorException e) {
-			assertEquals("Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: Can not rename SOMETABLE.PID to PID2 because both columns exist!", e.getMessage());
+		} catch (FlywayException e) {
+			assertEquals("Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: Can not rename SOMETABLE.PID to PID2 because both columns exist!", e.getCause().getCause().getMessage());
 		}
 
 

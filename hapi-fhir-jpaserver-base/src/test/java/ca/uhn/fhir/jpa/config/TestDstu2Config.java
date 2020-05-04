@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 @Configuration
 @Import(TestJPAConfig.class)
@@ -157,7 +157,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidatorDstu2());
+		requestValidator.addValidatorModule(instanceValidator());
 
 		return requestValidator;
 	}

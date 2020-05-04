@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,7 @@ package ca.uhn.fhir.validation;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BOMInputStream;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
@@ -39,12 +37,14 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class SchemaBaseValidator implements IValidatorModule {
 	public static final String RESOURCES_JAR_NOTE = "Note that as of HAPI FHIR 1.2, DSTU2 validation files are kept in a separate JAR (hapi-fhir-validation-resources-XXX.jar) which must be added to your classpath. See the HAPI FHIR download page for more information.";
@@ -147,20 +147,9 @@ public class SchemaBaseValidator implements IValidatorModule {
 	Source loadXml(String theSchemaName) {
 		String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theSchemaName;
 		ourLog.debug("Going to load resource: {}", pathToBase);
-		try (InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase)) {
-			if (baseIs == null) {
-				throw new InternalErrorException("Schema not found. " + RESOURCES_JAR_NOTE);
-			}
-			try (BOMInputStream bomInputStream = new BOMInputStream(baseIs, false)) {
-				try (InputStreamReader baseReader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
-					// Buffer so that we can close the input stream
-					String contents = IOUtils.toString(baseReader);
-					return new StreamSource(new StringReader(contents), null);
-				}
-			}
-		} catch (IOException e) {
-			throw new InternalErrorException(e);
-		}
+
+		String contents = ClasspathUtil.loadResource(pathToBase, ClasspathUtil.withBom());
+		return new StreamSource(new StringReader(contents), null);
 	}
 
 	@Override
@@ -179,18 +168,12 @@ public class SchemaBaseValidator implements IValidatorModule {
 				input.setPublicId(thePublicId);
 				input.setSystemId(theSystemId);
 				input.setBaseURI(theBaseURI);
-				// String pathToBase = "ca/uhn/fhir/model/" + myVersion + "/schema/" + theSystemId;
 				String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theSystemId;
 
 				ourLog.debug("Loading referenced schema file: " + pathToBase);
 
-				InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
-				if (baseIs == null) {
-					throw new InternalErrorException("Schema file not found: " + pathToBase);
-				}
-
-				input.setByteStream(baseIs);
-				//FIXME resource leak
+				byte[] bytes = ClasspathUtil.loadResourceAsByteArray(pathToBase);
+				input.setByteStream(new ByteArrayInputStream(bytes));
 				return input;
 
 			}

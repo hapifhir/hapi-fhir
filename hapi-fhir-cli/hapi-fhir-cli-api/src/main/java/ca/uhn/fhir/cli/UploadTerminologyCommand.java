@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 			for (String nextDataFile : theDatafile) {
 
 				try (FileInputStream fileInputStream = new FileInputStream(nextDataFile)) {
-					if (nextDataFile.endsWith(".csv")) {
+					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties")) {
 
 						ourLog.info("Compressing and adding file: {}", nextDataFile);
 						ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));

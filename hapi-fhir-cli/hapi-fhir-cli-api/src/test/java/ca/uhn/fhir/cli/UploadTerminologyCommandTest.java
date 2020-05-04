@@ -64,6 +64,8 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	private File myTextFile = new File(myTextFileName);
 	private File myArchiveFile;
 	private String myArchiveFileName;
+	private String myPropertiesFileName = "target/hello.properties";
+	private File myPropertiesFile = new File(myTextFileName);
 
 	@Test
 	public void testDeltaAdd() throws IOException {
@@ -116,7 +118,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		assertEquals(1, listOfDescriptors.size());
 		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
 		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
-		assertThat(uploadFile, containsString("CODE,Display"));
+		assertThat(uploadFile, uploadFile, containsString("\"CODE\",\"Display\""));
 	}
 
 	@Test
@@ -238,6 +240,8 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	@Test
 	public void testSnapshot() throws IOException {
 
+
+
 		writeConceptAndHierarchyFiles();
 
 		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
@@ -258,6 +262,33 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		assertEquals(1, listOfDescriptors.size());
 		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+	}
+
+	@Test
+	public void testPropertiesFile() throws IOException {
+		try (FileWriter w = new FileWriter(myPropertiesFileName, false)) {
+			w.append("a=b\n");
+		}
+
+		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+
+		App.main(new String[]{
+			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+			"-v", "r4",
+			"-m", "SNAPSHOT",
+			"-t", "http://localhost:" + myPort,
+			"-u", "http://foo",
+			"-d", myPropertiesFileName,
+		});
+
+		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
+
+		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
+		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern(".*\\.zip$"));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+
+
 	}
 
 	/**
@@ -342,6 +373,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		FileUtils.deleteQuietly(myArchiveFile);
 		FileUtils.deleteQuietly(myCodeSystemFile);
 		FileUtils.deleteQuietly(myTextFile);
+		FileUtils.deleteQuietly(myPropertiesFile);
 
 		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(-1);
 	}

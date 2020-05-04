@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.server.servlet;
  * #L%
  */
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.Map;
 
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
+	private final ServletRequestDetails myWrap;
 	private Map<String, List<String>> myHeaders = new HashMap<>();
 
 	/**
@@ -36,6 +39,9 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	 */
 	public ServletSubRequestDetails(ServletRequestDetails theRequestDetails) {
 		super(theRequestDetails.getInterceptorBroadcaster());
+
+		myWrap = theRequestDetails;
+
 		if (theRequestDetails != null) {
 			Map<String, List<String>> headers = theRequestDetails.getHeaders();
 			for (Map.Entry<String, List<String>> next : headers.entrySet()) {
@@ -44,16 +50,22 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 		}
 	}
 
+	@Override
+	public HttpServletRequest getServletRequest() {
+		return myWrap.getServletRequest();
+	}
+
+	@Override
+	public HttpServletResponse getServletResponse() {
+		return myWrap.getServletResponse();
+	}
+
 	public void addHeader(String theName, String theValue) {
 		String lowerCase = theName.toLowerCase();
-		List<String> list = myHeaders.get(lowerCase);
-		if (list == null) {
-			list = new ArrayList<>();
-			myHeaders.put(lowerCase, list);
-		}
+		List<String> list = myHeaders.computeIfAbsent(lowerCase, k -> new ArrayList<>());
 		list.add(theValue);
 	}
-	
+
 	@Override
 	public String getHeader(String theName) {
 		List<String> list = myHeaders.get(theName.toLowerCase());
@@ -70,6 +82,11 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 			return null;
 		}
 		return list;
+	}
+
+	@Override
+	public Map<Object, Object> getUserData() {
+		return myWrap.getUserData();
 	}
 
 	@Override

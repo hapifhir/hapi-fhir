@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * has permission to perform the given action.
  * <p>
  * See the HAPI FHIR
- * <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_security.html">Documentation on Server Security</a>
+ * <a href="https://hapifhir.io/hapi-fhir/docs/security/introduction.html">Documentation on Server Security</a>
  * for information on how to use this interceptor.
  * </p>
  *
@@ -423,7 +423,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		private final IAuthRule myDecidingRule;
 		private final PolicyEnum myDecision;
 
-		Verdict(PolicyEnum theDecision, IAuthRule theDecidingRule) {
+		public Verdict(PolicyEnum theDecision, IAuthRule theDecidingRule) {
 			Validate.notNull(theDecision);
 
 			myDecision = theDecision;

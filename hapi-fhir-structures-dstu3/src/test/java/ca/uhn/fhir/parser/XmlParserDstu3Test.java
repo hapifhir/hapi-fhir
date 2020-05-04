@@ -45,6 +45,7 @@ import org.xmlunit.diff.ElementSelectors;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -70,8 +71,27 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
+	public void testEncodedResourceWithIncorrectRepresentationOfDecimalTypeToXml() {
+		DecimalType decimalType = new DecimalType();
+		decimalType.setValueAsString(".5");
+		MedicationRequest mr = new MedicationRequest();
+		Dosage dosage = new Dosage();
+		dosage.setDose(new SimpleQuantity()
+			.setValue(decimalType.getValue())
+			.setUnit("{tablet}")
+			.setSystem("http://unitsofmeasure.org")
+			.setCode("{tablet}"));
+		mr.addDosageInstruction(dosage);
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mr);
+		ourLog.info(encoded);
+		mr = ourCtx.newXmlParser().parseResource(MedicationRequest.class, encoded);
+		assertEquals(BigDecimal.valueOf(0.5), mr.getDosageInstructionFirstRep().getDoseSimpleQuantity().getValue());
+		assertTrue(encoded.contains("0.5"));
+	}
+
 	/**
-	 * We specifically include extensions on CapabilityStatment even in
+	 * We specifically include extensions on CapabilityStatement even in
 	 * summary mode, since this is behaviour that people depend on
 	 */
 	@Test
@@ -820,7 +840,6 @@ public class XmlParserDstu3Test {
 
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
-			"<meta>",
 			"<profile value=\"http://foo/Profile1\"/>",
 			"<profile value=\"http://foo/Profile2\"/>",
 			"<tag>",
@@ -833,7 +852,6 @@ public class XmlParserDstu3Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -880,7 +898,6 @@ public class XmlParserDstu3Test {
 
 		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
-			"<meta>",
 			"<tag>",
 			"<system value=\"scheme1\"/>",
 			"<code value=\"term1\"/>",
@@ -891,7 +908,6 @@ public class XmlParserDstu3Test {
 			"<code value=\"term2\"/>",
 			"<display value=\"label2\"/>",
 			"</tag>",
-			"</meta>",
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
@@ -1542,7 +1558,7 @@ public class XmlParserDstu3Test {
 			parser.encodeResourceToString(p);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Extension contains both a value and nested extensions: Patient(res).extension", e.getMessage());
+			assertEquals("[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
 	}
@@ -1915,7 +1931,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeUndeclaredBlock() throws Exception {
+	public void testEncodeUndeclaredBlock() {
 		FooMessageHeader.FooMessageSourceComponent source = new FooMessageHeader.FooMessageSourceComponent();
 		source.getMessageHeaderApplicationId().setValue("APPID");
 		source.setName("NAME");
@@ -1945,7 +1961,7 @@ public class XmlParserDstu3Test {
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
 		EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
-		PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+		PrimitiveType<AddressUse> enumeration = new Enumeration<>(fact).setValue(AddressUse.HOME);
 		patient.addExtension().setUrl("urn:foo").setValue(enumeration);
 
 		String val = parser.encodeResourceToString(patient);
@@ -1961,7 +1977,7 @@ public class XmlParserDstu3Test {
 
 	@Test
 	public void testEncodeWithContained() {
-		List<Resource> contained = new ArrayList<Resource>();
+		List<Resource> contained = new ArrayList<>();
 
 		// Will be added by reference
 		Patient p = new Patient();
@@ -2017,7 +2033,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeWithDontEncodeElements() throws Exception {
+	public void testEncodeWithDontEncodeElements() {
 		Patient patient = new Patient();
 		patient.setId("123");
 		patient.getMeta().addProfile("http://profile");
@@ -2072,7 +2088,7 @@ public class XmlParserDstu3Test {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setDontEncodeElements(Sets.newHashSet("Patient.meta"));
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
@@ -2086,7 +2102,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeWithEncodeElements() throws Exception {
+	public void testEncodeWithEncodeElements() {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://profile");
 		patient.addName().setFamily("FAMILY");
@@ -2109,7 +2125,7 @@ public class XmlParserDstu3Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -2120,7 +2136,7 @@ public class XmlParserDstu3Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -2133,7 +2149,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testEncodeWithEncodeElementsAppliesToChildResourcesOnly() throws Exception {
+	public void testEncodeWithEncodeElementsAppliesToChildResourcesOnly() {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://profile");
 		patient.addName().setFamily("FAMILY");
@@ -2188,7 +2204,7 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
-	public void testMoreExtensions() throws Exception {
+	public void testMoreExtensions() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
@@ -2508,42 +2524,27 @@ public class XmlParserDstu3Test {
 		output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(pat);
 		ourLog.info(output);
 
-		assertThat(output, stringContainsInOrder(
-			"{",
+		assertThat(output, stringContainsInOrder("{",
 			"  \"resourceType\": \"Patient\",",
 			"  \"id\": \"someid\",",
 			"  \"_id\": {",
-			"    \"fhir_comments\": [",
-			"      \" comment 1 \"",
-			"    ]",
+			"    \"fhir_comments\": [ \" comment 1 \" ]",
 			"  },",
-			"  \"extension\": [",
-			"    {",
-			"      \"fhir_comments\": [",
-			"        \" comment 2 \",",
-			"        \" comment 7 \"",
-			"      ],",
-			"      \"url\": \"urn:patientext:att\",",
-			"      \"valueAttachment\": {",
-			"        \"fhir_comments\": [",
-			"          \" comment 3 \",",
-			"          \" comment 6 \"",
-			"        ],",
-			"        \"contentType\": \"aaaa\",",
-			"        \"_contentType\": {",
-			"          \"fhir_comments\": [",
-			"            \" comment 4 \"",
-			"          ]",
-			"        },",
-			"        \"data\": \"AAAA\",",
-			"        \"_data\": {",
-			"          \"fhir_comments\": [",
-			"            \" comment 5 \"",
-			"          ]",
-			"        }",
+			"  \"extension\": [ {",
+			"    \"fhir_comments\": [ \" comment 2 \", \" comment 7 \" ],",
+			"    \"url\": \"urn:patientext:att\",",
+			"    \"valueAttachment\": {",
+			"      \"fhir_comments\": [ \" comment 3 \", \" comment 6 \" ],",
+			"      \"contentType\": \"aaaa\",",
+			"      \"_contentType\": {",
+			"        \"fhir_comments\": [ \" comment 4 \" ]",
+			"      },",
+			"      \"data\": \"AAAA\",",
+			"      \"_data\": {",
+			"        \"fhir_comments\": [ \" comment 5 \" ]",
 			"      }",
 			"    }",
-			"  ]",
+			"  } ]",
 			"}"));
 
 	}
@@ -3134,7 +3135,7 @@ public class XmlParserDstu3Test {
 			p.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 
 		LenientErrorHandler errorHandler = new LenientErrorHandler();

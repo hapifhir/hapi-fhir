@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -53,7 +56,11 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "RES_ID")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
+	private ResourceTable myResourceTable;
+
+	@Column(name = "RES_ID", nullable = false, updatable = false, insertable = false)
 	private Long myResourceId;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
@@ -87,7 +94,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void addTag(ResourceTag theTag) {
-		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag());
+		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag(), getPartitionId());
 		tag.setResourceType(theTag.getResourceType());
 		getTags().add(tag);
 	}
@@ -99,7 +106,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 				return next;
 			}
 		}
-		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theTag);
+		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theTag, getPartitionId());
 		getTags().add(historyTag);
 		return historyTag;
 	}
@@ -158,6 +165,41 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setVersion(long theVersion) {
 		myResourceVersion = theVersion;
+	}
+
+	@Override
+	public ResourcePersistentId getPersistentId() {
+		return new ResourcePersistentId(myResourceId);
+	}
+
+	public ResourceTable getResourceTable() {
+		return myResourceTable;
+	}
+
+	public void setResourceTable(ResourceTable theResourceTable) {
+		myResourceTable = theResourceTable;
+	}
+
+	@Override
+	public IdDt getIdDt() {
+		if (getResourceTable().getForcedId() == null) {
+			Long id = getResourceId();
+			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			// Avoid a join query if possible
+			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getResourceTable().getForcedId().getForcedId();
+			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
+	}
+
+	@Override
+	public ForcedId getForcedId() {
+		return getResourceTable().getForcedId();
+	}
+
+	@Override
+	public void setForcedId(ForcedId theForcedId) {
+		getResourceTable().setForcedId(theForcedId);
 	}
 
 }

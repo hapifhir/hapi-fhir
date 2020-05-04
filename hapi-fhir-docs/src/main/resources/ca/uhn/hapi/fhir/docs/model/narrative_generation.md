@@ -1,6 +1,6 @@
 # Narrative Generation
 
-HAPI provides a several ways to add [Narrative Text](http://hl7.org/fhir/narrative.html) to your encoded messages.
+HAPI provides several ways to add [Narrative Text](http://hl7.org/fhir/narrative.html) to your encoded messages.
 
 The simplest way is to simply place the narrative text directly in the resource via the `setDivAsString()` method.
 
@@ -8,7 +8,7 @@ The simplest way is to simply place the narrative text directly in the resource 
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/Narrative.java|simple}}
 ```
 
-# Automatic Narrative Generartion
+# Automatic Narrative Generation
 
 HAPI FHIR also comes with a built-in mechanism for automatically generating narratives based on your resources.
 
@@ -64,7 +64,7 @@ The first (name.class) defines the class name of the resource to define a templa
 
 ```properties
 # Two property lines in the file per template
-practitioner.class=ca.uhn.fhir.model.dstu.resource.Practitioner
+practitioner.resourceType=Practitioner
 practitioner.narrative=file:src/test/resources/narrative/Practitioner.html
 
 observation.class=ca.uhn.fhir.model.dstu.resource.Observation
@@ -77,7 +77,7 @@ You may also override/define behaviour for datatypes. These datatype narrative d
 
 ```properties
 # datatypes use the same format as resources
-humanname.class=ca.uhn.fhir.model.dstu.composite.HumanNameDt
+humanname.resourceType=HumanNameDt
 humanname.narrative=classpath:ca/uhn/fhir/narrative/HumanNameDt.html]]></source>
 ```
 

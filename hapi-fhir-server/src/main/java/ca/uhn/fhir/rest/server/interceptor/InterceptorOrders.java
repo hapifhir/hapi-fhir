@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,12 @@ package ca.uhn.fhir.rest.server.interceptor;
 public class InterceptorOrders {
 
 	public static final int SERVE_MEDIA_RESOURCE_RAW_INTERCEPTOR = 1000;
-
 	public static final int RESPONSE_HIGHLIGHTER_INTERCEPTOR = 10000;
+	public static final int RESPONSE_SIZE_CAPTURING_INTERCEPTOR_COMPLETED = -1;
 
-	/** Non instantiable */
+	/**
+	 * Non instantiable
+	 */
 	private InterceptorOrders() {
 		// nothing
 	}

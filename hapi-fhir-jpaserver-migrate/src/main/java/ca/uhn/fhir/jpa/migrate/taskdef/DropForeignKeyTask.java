@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +36,15 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
+public class DropForeignKeyTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropForeignKeyTask.class);
 	private String myConstraintName;
 	private String myParentTableName;
+
+	public DropForeignKeyTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
 	public void setConstraintName(String theConstraintName) {
 		myConstraintName = theConstraintName;
@@ -54,14 +60,16 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myParentTableName));
+		setDescription("Drop foreign key " + myConstraintName + " from table " + getTableName());
+
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void doExecute() throws SQLException {
 
 		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myParentTableName, getTableName());
 		if (!existing.contains(myConstraintName)) {
-			ourLog.info("Don't have constraint named {} - No action performed", myConstraintName);
+			logInfo(ourLog, "Don't have constraint named {} - No action performed", myConstraintName);
 			return;
 		}
 
@@ -71,6 +79,21 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 			executeSql(getTableName(), next);
 		}
 
+	}
+
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		DropForeignKeyTask otherObject = (DropForeignKeyTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myConstraintName, otherObject.myConstraintName);
+		theBuilder.append(myParentTableName, otherObject.myParentTableName);
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myConstraintName);
+		theBuilder.append(myParentTableName);
 	}
 
 	@Nonnull
@@ -95,5 +118,4 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 		}
 		return sqls;
 	}
-
 }

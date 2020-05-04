@@ -1,0 +1,198 @@
+---
+- item:
+    type: "add"
+    title: "HAPI FHIR is now built using OpenJDK 11. Users are recommended to upgrade to this version of Java if this is feasible. We are not yet dropping support for Java 8 (aka 1.8), but users are recommended to upgrade if possible."
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Spring (JPA): 5.0.8.RELEASE -&gt; 5.1.3.RELEASE</li> <li>Spring-Data (JPA): 2.0.7.RELEASE -&gt; 2.1.3.RELEASE</li> <li>Hibernate-Core (JPA): 5.3.6.FINAL -&gt; 5.4.1.FINAL</li> <li>Hibernate-Search (JPA): 5.10.3.FINAL -&gt; 5.11.1.FINAL</li> <li>Thymeleaf (JPA): 3.0.9.RELEASE -&gt; 3.0.11.RELEASE</li> <li>thymeleaf-spring4 (Testpage Overlay) has been replaced with thymeleaf-spring5</li> <li>Commons-Lang3: 3.8 -&gt; 3.8.1</li> <li>Commons-Text: 1.4 -&gt; 1.4</li> <li>Spring Boot: 1.5.6.RELEASE -&gt; 2.1.1.RELEASE</li> </ul>"
+- item:
+    type: "add"
+    title: "Changed subscription processing, if the subscription criteria are straightforward (i.e. no chained references, qualifiers or prefixes) then attempt to match the incoming resource against the criteria in-memory. If the subscription criteria can't be matched in-memory, then the server falls back to the original subscription matching process of querying the database. The in-memory matcher can be disabled by setting isEnableInMemorySubscriptionMatching to \"false\" in DaoConfig (by default it is true). If isEnableInMemorySubscriptionMatching is \"false\", then all subscription matching will query the database as before."
+- item:
+    type: "change"
+    title: "Removed BaseSubscriptionInterceptor and all its subclasses (RestHook, EMail, WebSocket). These are replaced by two new interceptors: SubscriptionActivatingInterceptor that is responsible for activating subscriptions and SubscriptionMatchingInterceptor that is responsible for matching incoming resources against activated subscriptions. Call DaoConfig.addSupportedSubscriptionType(type) to configure which subscription types are supported in your environment. If you are processing subscriptions on a separate server and only want to activate subscriptions on this server, you should set DaoConfig.setSubscriptionMatchingEnabled to false. The helper method SubscriptionInterceptorLoader.registerInterceptors() will check if any subscription types are supported, and if so then load active subscriptions into the SubscriptionRegistry and register the subscription activating interceptor. This method also registers the subscription matching interceptor (that matches incoming resources and sends matches to subscription channels) only if DaoConfig.isSubscriptionMatchingEnabled is true. See https://github.com/jamesagnew/hapi-fhir/wiki/Proposed-Subscription-Design-Change for more details."
+- item:
+    type: "change"
+    title: "Added support for matching subscriptions in a separate server from the REST Server. To do this, run the SubscriptionActivatingInterceptor on the REST server and the SubscriptionMatchingInterceptor in the standalone server. Classes required to support running a standalone subscription server are in the ca.uhn.fhir.jpa.subscription.module.standalone package. These classes are excluded by default from the JPA ApplicationContext (that package is explicitly filtered out in the BaseConfig.java @ComponentScan)."
+- item:
+    type: "add"
+    title: "Changed behaviour of FHIR Server to reject subscriptions with invalid criteria. If a Subscription is submitted with invalid criteria, the server returns HTTP 422 \"Unprocessable Entity\" and the Subscription is not persisted."
+- item:
+    type: "fix"
+    title: "The JPA server $expunge operation could sometimes fail to expunge if another resource linked to a resource that was being expunged. This has been corrected. In addition, the $expunge operation has been refactored to use smaller chunks of work within a single DB transaction. This improves performance and reduces contention when performing large expunge workloads."
+- item:
+    issue: "1117"
+    type: "add"
+    title: "A badly formatted log message when handing exceptions was cleaned up. Thanks to Magnus Watn for the pull request!"
+- item:
+    issue: "944"
+    type: "fix"
+    title: "A NullPointerException has been fixed when using custom resource classes that have a @Block class as a child element. Thanks to Lars Gram Mathiasen for reporting and providing a test case!"
+- item:
+    type: "add"
+    title: "AuthorizationInterceptor now allows the GraphQL operation to be authorized. Note that this is an all-or-nothing grant for now, it is not yet possible to specify individual resource security when using GraphQL."
+- item:
+    type: "fix"
+    title: "The ResponseHighlighterInterceptor now declines to handle Binary responses provided as a response from extended operations. In other words if the operation $foo returns a Binary resource, the ResponseHighliterInterceptor will not provide syntax highlighting on the response. This was previously the case for the /Binary endpoint, but not for other binary responses."
+- item:
+    type: "add"
+    title: "FHIR Parser now has an additional overload of the <code>parseResource</code> method that accepts an InputStream instead of a Reader as the source."
+- item:
+    type: "add"
+    title: "FHIR Fluent/Generic Client now has a new return option called <code>returnMethodOutcome</code> which can be used to return a raw response. This is handy for invoking operations that might return arbitrary binary content."
+- item:
+    type: "add"
+    title: "Moved state and functionality out of BaseHapiFhirDao.java into new classes: LogicalReferenceHelper, ResourceIndexedSearchParams, IdHelperService, SearcchParamExtractorService, and MatchUrlService."
+- item:
+    type: "add"
+    title: "Replaced explicit @Bean construction in BaseConfig.java with @ComponentScan. Beans with state are annotated with @Component and stateless beans are annotated as @Service. Also changed SearchBuilder.java and the three Subscriber classes into @Scope(\"protoype\") so their dependencies can be @Autowired injected as opposed to constructor parameters."
+- item:
+    type: "fix"
+    title: "A bug in the JPA resource reindexer was fixed: In many cases the reindexer would mark reindexing jobs as deleted before they had actually completed, leading to some resources not actually being reindexed."
+- item:
+    type: "change"
+    title: "The JPA stale search deletion service now deletes cached search results in much larger batches (20000 instead of 500) in order to reduce the amount of noise in the logs."
+- item:
+    type: "add"
+    title: "AuthorizationInterceptor now allows arbitrary FHIR $operations to be authorized, including support for either allowing the operation response to proceed unchallenged, or authorizing the contents of the response."
+- item:
+    type: "add"
+    title: "JPA Migrator tool enhancements: An invalid SQL syntax issue has been fixed when running the CLI JPA Migrator tool against Oracle or SQL Server. In addition, when using the \"Dry Run\" option, all generated SQL statements will be logged at the end of the run. Also, a case sensitivity issue when running against some Postgres databases has been corrected."
+- item:
+    type: "add"
+    title: "In the JPA server, when performing a chained reference search on a search parameter with a target type of <code>Reference(Any)</code> , the search failed with an incomprehensible error. This has been corrected to return an error message indicating that the chain must be qualified with a resource type for such a field. For example, <code>QuestionnaireResponse?subject:Patient.name=smith</code> instead of <code>QuestionnaireResponse?subject.name=smith</code> ."
+- item:
+    type: "add"
+    title: "The LOINC uploader has been updated to suport the LOINC 2.65 release file format."
+- item:
+    type: "add"
+    title: "The resource reindexer can now detect when a resource's current version no longer exists in the database (e.g. because it was manually expunged), and can automatically adjust the most recent version to account for this."
+- item:
+    type: "add"
+    title: "When updating existing resources, the JPA server will now attempt to reuse/update rows in the index tables if one row is being removed and one row is being added (e.g. because a Patient's name is changing from \"A\" to \"B\"). This has the net effect of reducing the number"
+- item:
+    type: "fix"
+    title: "An issue was corrected with the JPA reindexer, where String index columns do not always get reindexed if they did not have an identity hash value in the HASH_IDENTITY column."
+- item:
+    type: "add"
+    title: "Plain Server ResourceProvider classes are no longer required to be public classes. This limitation has always been enforced, but did not actually serve any real purpose so it has been removed."
+- item:
+    type: "add"
+    title: "A new interceptor called ServeMediaResourceRawInterceptor has been added. This interceptor causes Media resources to be served as raw content if the client explicitly requests the correct content type cia the Accept header."
+- item:
+    issue: "917"
+    type: "add"
+    title: "A new configuration item has been added to the FhirInstanceValidator that allows you to specify additional \"known extension domains\", meaning domains in which the validator will not complain about when it encounters new extensions. Thanks to Heinz-Dieter Conradi for the pull request!"
+- item:
+    type: "fix"
+    title: "Under some circumstances, when a custom search parameter was added to the JPA server resources could start reindexing before the new search parameter had been saved, meaning that it was not applied to all resources. This has been corrected."
+- item:
+    type: "change"
+    title: "In example-projects/README.md and hapi-fhir-jpaserver-example/README.md, incidate that these examples projects are no longer maintained. The README.md points users to a starter project they should use for examples."
+- item:
+    type: "change"
+    title: "Replaced use of BeanFactory with custom factory classes that Spring @Lookup the @Scope(\"prototype\") beans (e.g. SearchBuilderFactory)."
+- item:
+    type: "change"
+    title: "Moved e-mail from address configuration from EmailInterceptor (which doesn't exist any more) to DaoConfig."
+- item:
+    type: "add"
+    title: "Added 3 interfaces for services required by the standalone subscription server. The standalone subscription server doesn't have access to a database and so needs to get its resources using a FhirClient. Thus for each of these interfaces, there are two implementations: a Dao implementaiton and a FhirClient implementation. The interfaces thus introduced are ISubscriptionProvider (used to load subscriptions into the SubscriptionRegistry), the IResourceProvider (used to get the latest version of a resource if the \"get latest version\" flag is set on the subscription) and ISearchParamProvider used to load custom search parameters."
+- item:
+    type: "change"
+    title: "Separated active subscription cache from the interceptors into a new Spring component called the SubscriptionRegistry. This component maintains a cache of ActiveSubscriptions. An ActiveSubscription contains the subscription, it's delivery channel, and a list of delivery handlers."
+- item:
+    type: "change"
+    title: "Introduced a new Spring factory interface ISubscribableChannelFactory that is used to create delivery channels and handlers. By default, HAPI FHIR ships with a LinkedBlockingQueue implementation of the delivery channel factory. If a different type of channel factory is required (e.g. JMS or Kafka), add it to your application context and mark it as @Primary."
+- item:
+    issue: "980"
+    type: "fix"
+    title: "When using the HL7.org DSTU2 structures, a QuestionnaireResponse with a value of type reference would fail to parse. Thanks to David Gileadi for the pull request!"
+- item:
+    issue: "1051"
+    type: "add"
+    title: "FHIR Servers now support the HTTP HEAD method for FHIR read operations. Thanks to GitHub user Cory00 for the pull request!"
+- item:
+    type: "fix"
+    title: "When running the JPA server on Oracle, certain search queries that return a very large number of _included resources failed with an SQL exception stating that too many parameters were used. Search include logic has been reworked to avoid this."
+- item:
+    type: "fix"
+    title: "JPA Subscription deliveries did not always include the accurate versionId if the Subscription module was configured to use an external queuing engine. This has been corrected."
+- item:
+    type: "add"
+    title: "It is now possible in a plain or JPA server to specify the default return type for create/update operations when no Prefer header has been provided by the client."
+- item:
+    type: "add"
+    title: "It is now possible in a JPA server to specify the _total calculation behaviour if no parameter is supplied by the client. This is done using a new setting on the DaoConfig. This can be used to force a total to always be calculated for searches, including large ones."
+- item:
+    type: "add"
+    title: "AuthorizationInterceptor now rejects transactions with an invalid or unset request using an HTTP 422 response Bundle type instead of silently refusing to authorize them."
+- item:
+    type: "add"
+    title: "AuthorizationInterceptor is now able to authorize DELETE operations performed via a transaction operation. Previously these were always denied."
+- item:
+    issue: "1065"
+    type: "add"
+    title: "OperationDefinitions are now created for named queries in server module. Thanks to Stig Døssing for the pull request!"
+- item:
+    type: "add"
+    title: "A new server interceptor has been added called \"SearchNarrowingInterceptor\". This interceptor can be used to automatically narrow the scope of searches performed by the user to limit them to specific resources or compartments that the user should have access to."
+- item:
+    type: "add"
+    title: "In a DSTU2 server, if search parameters are expressed with chains directly in the parameter name (e.g. <code>@RequiredParam(name=\"subject.name.family\")</code> ) the second part of the chain was lost when the chain was described in the server CapabilityStatement. This has been corrected."
+- item:
+    type: "fix"
+    title: "In the JPA server, search/read operations being performed within a transaction bundle did not pass the client request HTTP headers to the sub-request. This meant that AuthorizationInterceptor could not authorize these requests if it was depending on headers being present."
+- item:
+    type: "fix"
+    title: "When using a client in DSTU3/R4 mode, if the client attempted to validate the server CapabilityStatement but was not able to parse the response, the client would throw an exception with a misleading error about the Conformance resource not existing. This has been corrected. Thanks to Shayaan Munshi for reporting and providing a test case!"
+- item:
+    type: "fix"
+    title: "It is now possible to upload a ConceptMap to the JPA server containing mappings where the source or target is a StructureDefinition canonical URI. This was previously blocked, as the system could not apply these mappings. It is now permitted to be stored, although the system will still not apply these mappings."
+- item:
+    type: "add"
+    title: "A wrapper script for Maven has been added, enabling new users to use Maven without having to install it beforehand. Thanks to Ari Ruotsalainen for the Pull Request!"
+- item:
+    type: "add"
+    title: "AuthorizationInterceptor can now allow a user to perform a search that is scoped to a particular resource (e.g. Patient?_id=123) if the user has read access for that specific instance."
+- item:
+    issue: "1084"
+    type: "fix"
+    title: "In JPA Server REST Hook Subscriptions, any Headers defined in the Subscription resource are now applied to the outgoing HTTP request. Thanks to Volker Schmidt for the pull request!"
+- item:
+    type: "add"
+    title: "HAPI FHIR will now log the Git revision when it first starts up (on the ame line as the version number that it already logs)."
+- item:
+    type: "fix"
+    title: "When fetching a page of search results, if a page offset beyond the total number of available result was requested, a single result was still returned (e.g. requesting a page beginning at index 1000 when there are only 10 results would result in the 10th result being returned). This will now result in an empty response Bundle as would be expected."
+- item:
+    type: "add"
+    title: "Added support for _id in in-memory matcher"
+- item:
+    type: "fix"
+    title: "The casing of the base64Binary datatype was incorrect in the DSTU3 and R4 model classes. This has been corrected."
+- item:
+    type: "add"
+    title: "Add a \"subscription-matching-strategy\" meta tag to incoming subscriptions with value of IN_MEMORY or DATABASE indicating whether the subscription can be matched against new resources in-memory or whether a call out to the database may be required. I say \"may\" because subscription matches fail fast so a negative match may be performed in-memory, but a positive match will require a database call."
+- item:
+    type: "fix"
+    title: "When performing a JPA search with a chained :text modifier (e.g. MedicationStatement?medication.code:text=aspirin,tylenol) a series of unneccesary joins were introduced to the generated SQL query, harming performance. This has been fixed."
+- item:
+    type: "fix"
+    title: "A serialization error when performing some searches in the JPA server using data parameters has been fixed. Thanks to GitHub user @PickOneFish for reporting!"
+- item:
+    issue: "1135"
+    type: "fix"
+    title: "An issue with outdated syntax in the Vagrant file that prevent it from being used was corrected. Thanks to Steve Lewis for the pull requst!"
+- item:
+    issue: "1130"
+    type: "fix"
+    title: "The HAPI FHIR tutorial server project had outdated versions of HAPI FHIR in its pom file. Thanks to Ricardo Estevez for the pull request!"
+- item:
+    issue: "1114"
+    type: "fix"
+    title: "A NullPointerException during validation was fixed. Thanks to GitHub user zilin375 for the pull request!"
+- item:
+    issue: "1148"
+    type: "add"
+    title: "Support for validating enableWhen in Questionnaires has been added to the Validator. Thanks to Eeva Turkka and Matti Uutsitalo for the pull request!"

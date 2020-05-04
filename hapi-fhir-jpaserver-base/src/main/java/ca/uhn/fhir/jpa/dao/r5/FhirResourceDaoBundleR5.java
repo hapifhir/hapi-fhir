@@ -12,7 +12,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class FhirResourceDaoBundleR5 extends BaseHapiFhirResourceDao<Bundle> {
 
-	@Override
-	protected void preProcessResourceForStorage(Bundle theResource) {
-		super.preProcessResourceForStorage(theResource);
-
-		Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
-		if (theResource.getType() == null || !allowedBundleTypes.contains(defaultString(theResource.getType().toCode()))) {
-			String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (theResource.getType() != null ? theResource.getType().toCode() : "(missing)");
-			throw new UnprocessableEntityException(message);
-		}
-
-	}
+	// nothing
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import ca.uhn.fhir.util.*;
@@ -148,8 +149,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Constructor
 	 */
 	public RestfulServer(FhirContext theCtx) {
+		this(theCtx, new InterceptorService());
+	}
+
+	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService)	{
 		myFhirContext = theCtx;
-		setInterceptorService(new InterceptorService());
+		setInterceptorService(theInterceptorService);
 	}
 
 	private void addContentLocationHeaders(RequestDetails theRequest, HttpServletResponse servletResponse, MethodOutcome response, String resourceName) {
@@ -298,7 +303,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		ResourceBinding resourceBinding = null;
 		BaseMethodBinding<?> resourceMethod = null;
 		String resourceName = requestDetails.getResourceName();
-		if (myServerConformanceMethod.incomingServerRequestMatchesMethod(requestDetails)) {
+		if (myServerConformanceMethod.incomingServerRequestMatchesMethod(requestDetails) != MethodMatchEnum.NONE) {
 			resourceMethod = myServerConformanceMethod;
 		} else if (resourceName == null) {
 			resourceBinding = myServerBinding;
@@ -361,14 +366,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		while (!Object.class.equals(supertype)) {
 			count += findResourceMethods(theProvider, supertype);
 			count += findResourceMethodsOnInterfaces(theProvider, supertype.getInterfaces());
-
 			supertype = supertype.getSuperclass();
 		}
 
 		try {
 			count += findResourceMethods(theProvider, clazz);
 			count += findResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces());
-
 		} catch (ConfigurationException e) {
 			throw new ConfigurationException("Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
 		}
@@ -386,6 +389,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 
+
+	private int findResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces) {
+		int count = 0;
+		for (Class<?> anInterface : interfaces) {
+			count += findResourceMethods(theProvider, anInterface);
+			count += findResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces());
+		}
+		return count;
+	}
 
 	private int findResourceMethods(Object theProvider, Class<?> clazz) throws ConfigurationException {
 		int count = 0;
@@ -1619,12 +1631,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		while (!Object.class.equals(supertype)) {
 			removeResourceMethods(theProvider, supertype, resourceNames);
 			removeResourceMethodsOnInterfaces(theProvider, supertype.getInterfaces(), resourceNames);
-
 			supertype = supertype.getSuperclass();
 		}
 		removeResourceMethods(theProvider, clazz, resourceNames);
 		removeResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces(), resourceNames);
-
 		for (String resourceName : resourceNames) {
 			myResourceNameToBinding.remove(resourceName);
 		}
@@ -1636,7 +1646,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			removeResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces(), resourceNames);
 		}
 	}
-
 
 	/*
 	 * Collect the set of RESTful methods for a single class when it is being unregistered
@@ -1790,6 +1799,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 		}
 	}
+
+	/**
+	 * Unregisters all plain and resource providers (but not the conformance provider).
+	 */
+	public void unregisterAllProviders() {
+		unregisterAllProviders(myPlainProviders);
+		unregisterAllProviders(myResourceProviders);
+	}
+
+	private void unregisterAllProviders(List<?> theProviders) {
+		while (theProviders.size() > 0) {
+			unregisterProvider(theProviders.get(0));
+		}
+	}
+
 
 	private void writeExceptionToResponse(HttpServletResponse theResponse, BaseServerResponseException theException) throws IOException {
 		theResponse.setStatus(theException.getStatusCode());

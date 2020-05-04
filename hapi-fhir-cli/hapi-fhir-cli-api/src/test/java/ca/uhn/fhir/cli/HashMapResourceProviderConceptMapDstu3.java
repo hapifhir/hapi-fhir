@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import com.google.common.base.Charsets;
@@ -88,7 +89,8 @@ public class HashMapResourceProviderConceptMapDstu3 extends HashMapResourceProvi
 	@Update
 	public MethodOutcome update(
 		@ResourceParam ConceptMap theConceptMap,
-		@ConditionalUrlParam String theConditional) {
+		@ConditionalUrlParam String theConditional,
+		RequestDetails theRequestDetails) {
 
 		MethodOutcome methodOutcome = new MethodOutcome();
 
@@ -112,14 +114,14 @@ public class HashMapResourceProviderConceptMapDstu3 extends HashMapResourceProvi
 				List<ConceptMap> conceptMaps = searchByUrl(url);
 
 				if (!conceptMaps.isEmpty()) {
-					methodOutcome = super.update(conceptMaps.get(0), null);
+					methodOutcome = super.update(conceptMaps.get(0), null, theRequestDetails);
 				} else {
-					methodOutcome = create(theConceptMap);
+					methodOutcome = create(theConceptMap, theRequestDetails);
 				}
 			}
 
 		} else {
-			methodOutcome = super.update(theConceptMap, null);
+			methodOutcome = super.update(theConceptMap, null, theRequestDetails);
 		}
 
 		return methodOutcome;

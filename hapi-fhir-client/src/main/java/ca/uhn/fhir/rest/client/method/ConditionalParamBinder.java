@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class ConditionalParamBinder implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null || theInnerCollectionType != null || theParameterType.equals(String.class) == false) {
-			throw new ConfigurationException("Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName()  + " must be of type String, found incorrect parameteter in method \"" + theMethod + "\"");
+			throw new ConfigurationException("Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName()  + " must be of type String, found incorrect parameter in method \"" + theMethod + "\"");
 		}
 	}
 

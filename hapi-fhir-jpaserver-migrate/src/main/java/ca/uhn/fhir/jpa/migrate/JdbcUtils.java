@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,10 +113,10 @@ public class JdbcUtils {
 			return myLength;
 		}
 
-		public boolean equals(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, Long theColumnLength) {
-			return myColumnTypeEnum == theColumnType && (myLength == null || myLength.equals(theColumnLength));
+		public boolean equals(BaseTableColumnTypeTask.ColumnTypeEnum theTaskColumnType, Long theTaskColumnLength) {
+			ourLog.debug("Comparing existing {} {} to new {} {}", myColumnTypeEnum, myLength, theTaskColumnType, theTaskColumnLength);
+			return myColumnTypeEnum == theTaskColumnType && (theTaskColumnLength == null || theTaskColumnLength.equals(myLength));
 		}
-
 	}
 
 	/**
@@ -223,6 +223,8 @@ public class JdbcUtils {
 						int dataType = indexes.getInt("DATA_TYPE");
 						Long length = indexes.getLong("COLUMN_SIZE");
 						switch (dataType) {
+							case Types.BOOLEAN:
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN, length);
 							case Types.VARCHAR:
 								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, length);
 							case Types.NUMERIC:
@@ -244,6 +246,7 @@ public class JdbcUtils {
 
 					}
 
+					ourLog.debug("Unable to find column {} in table {}.", theColumnName, theTableName);
 					return null;
 
 				} catch (SQLException e) {
@@ -439,6 +442,9 @@ public class JdbcUtils {
 
 						String tableType = tables.getString("TABLE_TYPE");
 						if ("SYSTEM TABLE".equalsIgnoreCase(tableType)) {
+							continue;
+						}
+						if (SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME.equalsIgnoreCase(tableName)) {
 							continue;
 						}
 

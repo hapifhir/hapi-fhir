@@ -11,7 +11,7 @@ When you have downloaded the archive (either ZIP or tar.bz2), expand it into a d
 
 You can now try the tool out by executing the following command: `hapi-fhir-cli`
 
-This command should show a help screen, as shown in the screeenshot below.
+This command should show a help screen, as shown in the screenshot below.
 
 <img src="/hapi-fhir/docs/images/hapi-fhir-cli.png" alt="Basic screen shot" style="margin-left: 40px;"/>
 
@@ -38,6 +38,9 @@ java version "1.8.0_60"
 Java(TM) SE Runtime Environment (build 1.8.0_60-b27)
 Java HotSpot(TM) 64-Bit Server VM (build 25.60-b23, mixed mode)
 ```
+
+Individual commands can be troubleshooted by adding the `--debug` command line argument.
+
 If this does not help, please post a question on our [Google Group](https://groups.google.com/d/forum/hapi-fhir).
 
 # Server (run-server)
@@ -82,6 +85,6 @@ Note that the path and exact filename of the terminology files will likely need 
 
 # Migrate Database
 
-The `migrate-database` command may be used to Migrate a database schema when upgrading a <a href="./doc_jpa.html">HAPI FHIR JPA</a> project from one version of HAPI	FHIR to another version.
+The `migrate-database` command may be used to Migrate a database schema when upgrading a [HAPI FHIR JPA](/docs/server_jpa/introduction.html) project from one version of HAPI	FHIR to another version.
 
-See <a href="./doc_jpa.html#upgrading">Upgrading HAPI FHIR JPA</a> for information on how to use this command.
+See [Upgrading HAPI FHIR JPA](/docs/server_jpa/upgrading.html) for information on how to use this command.

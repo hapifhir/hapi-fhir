@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,12 +174,16 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		String[] pageId = theRequest.getParameters().get(Constants.PARAM_PAGINGACTION);
 		if (pageId == null || pageId.length == 0 || isBlank(pageId[0])) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
-		return theRequest.getRequestType() == RequestTypeEnum.GET;
+		if (theRequest.getRequestType() != RequestTypeEnum.GET) {
+			return MethodMatchEnum.NONE;
+		}
+
+		return MethodMatchEnum.EXACT;
 	}
 
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,20 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface IResourceIndexedSearchParamStringDao extends JpaRepository<ResourceIndexedSearchParamString, Long> {
 
-	@Query("select count(*) from ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resid")
-	int countForResourceId(@Param("resid") Long theResourcePid);
-
 	@Modifying
-	@Query("delete from ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
+	@Query("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resId")
+	void deleteByResourceId(@Param("resId") Long theResourcePid);
+
+	@Query("SELECT t FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resId")
+	List<ResourceIndexedSearchParamString> findAllForResourceId(@Param("resId") Long thePatientId);
 }

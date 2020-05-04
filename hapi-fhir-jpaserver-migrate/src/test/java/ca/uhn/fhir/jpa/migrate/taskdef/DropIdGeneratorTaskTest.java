@@ -2,10 +2,12 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -13,6 +15,10 @@ import static org.junit.Assert.assertThat;
 
 public class DropIdGeneratorTaskTest extends BaseTest {
 
+
+	public DropIdGeneratorTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testAddIdGenerator() throws SQLException {
@@ -32,7 +38,7 @@ public class DropIdGeneratorTaskTest extends BaseTest {
 
 		public MyMigrationTasks() {
 			Builder v = forVersion(VersionEnum.V3_5_0);
-			v.dropIdGenerator("SEQ_FOO");
+			v.dropIdGenerator("1", "SEQ_FOO");
 		}
 
 

@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.util.ArrayList;
@@ -36,14 +36,14 @@ public class ExampleProviders {
 
 	
 //START SNIPPET: plainProvider
-public class PlainProvider {
+public class MyPlainProvider {
 
   /**
    * This method is a Patient search, but HAPI can not automatically
    * determine the resource type so it must be explicitly stated.
    */
   @Search(type=Patient.class)
-  public Bundle searchForPatients(@RequiredParam(name=Patient.SP_NAME) StringDt theName) {
+  public Bundle searchForPatients(@RequiredParam(name=Patient.SP_NAME) StringType theName) {
     Bundle retVal = new Bundle();
     // perform search
     return retVal;
@@ -63,11 +63,9 @@ public class ExampleServlet extends ca.uhn.fhir.rest.server.RestfulServer {
     /*
      * Plain providers are passed to the server in the same way
      * as resource providers. You may pass both resource providers
-     * and and plain providers to the same server if you like. 
+     * and plain providers to the same server if you like.
      */
-    List<Object> plainProviders=new ArrayList<Object>();
-    plainProviders.add(new PlainProvider());
-    registerProviders(plainProviders);
+    registerProvider(new MyPlainProvider());
     
     List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
     // ...add some resource providers...

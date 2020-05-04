@@ -6,7 +6,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.time.DateUtils;
+import ca.uhn.fhir.util.DateUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.*;
@@ -19,7 +19,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,6 +215,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * This lower bound is assumed to have a <code>ge</code>
 	 * (greater than or equals) modifier.
 	 * </p>
+	 * <p>
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
+	 * </p>
 	 */
 	public DateRangeParam setLowerBound(String theLowerBound) {
 		setLowerBound(new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound));
@@ -254,6 +263,67 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return this;
 	}
 
+	/**
+	 * Return the current lower bound as an integer representative of the date.
+	 *
+	 * e.g. 2019-02-22T04:22:00-0500 -> 20120922
+	 */
+	public Integer getLowerBoundAsDateInteger() {
+		if (myLowerBound == null || myLowerBound.getValue() == null) {
+			return null;
+		}
+		int retVal = DateUtils.convertDatetoDayInteger(myLowerBound.getValue());
+
+		if (myLowerBound.getPrefix() != null) {
+			switch (myLowerBound.getPrefix()) {
+				case GREATERTHAN:
+				case STARTS_AFTER:
+					retVal += 1;
+					break;
+				case EQUAL:
+				case GREATERTHAN_OR_EQUALS:
+					break;
+				case LESSTHAN:
+				case APPROXIMATE:
+				case LESSTHAN_OR_EQUALS:
+				case ENDS_BEFORE:
+				case NOT_EQUAL:
+					throw new IllegalStateException("Invalid lower bound comparator: " + myLowerBound.getPrefix());
+			}
+		}
+		return retVal;
+	}
+
+	/**
+	 * Return the current upper bound as an integer representative of the date
+	 *
+	 * e.g. 2019-02-22T04:22:00-0500 -> 2019122
+	 */
+	public Integer getUpperBoundAsDateInteger() {
+		if (myUpperBound == null || myUpperBound.getValue() == null) {
+			return null;
+		}
+		int retVal = DateUtils.convertDatetoDayInteger(myUpperBound.getValue());
+		if (myUpperBound.getPrefix() != null) {
+			switch (myUpperBound.getPrefix()) {
+				case LESSTHAN:
+				case ENDS_BEFORE:
+					retVal -= 1;
+					break;
+				case EQUAL:
+				case LESSTHAN_OR_EQUALS:
+					break;
+				case GREATERTHAN_OR_EQUALS:
+				case GREATERTHAN:
+				case APPROXIMATE:
+				case NOT_EQUAL:
+				case STARTS_AFTER:
+					throw new IllegalStateException("Invalid upper bound comparator: " + myUpperBound.getPrefix());
+			}
+		}
+		return retVal;
+	}
+
 	public Date getLowerBoundAsInstant() {
 		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
@@ -261,10 +331,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		Date retVal = myLowerBound.getValue();
 
 		if (myLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
-			Calendar cal = DateUtils.toCalendar(retVal);
-			cal.setTimeZone(TimeZone.getTimeZone("GMT-11:30"));
-			cal = DateUtils.truncate(cal, Calendar.DATE);
-			retVal = cal.getTime();
+			retVal = DateUtils.getLowestInstantFromDate(retVal);
 		}
 
 		if (myLowerBound.getPrefix() != null) {
@@ -281,7 +348,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case LESSTHAN_OR_EQUALS:
 				case ENDS_BEFORE:
 				case NOT_EQUAL:
-					throw new IllegalStateException("Unvalid lower bound comparator: " + myLowerBound.getPrefix());
+					throw new IllegalStateException("Invalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
 		return retVal;
@@ -297,6 +364,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * <p>
 	 * This upper bound is assumed to have a <code>le</code>
 	 * (less than or equals) modifier.
+	 * </p>
+	 * <p>
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
 	 * </p>
 	 */
 	public DateRangeParam setUpperBound(String theUpperBound) {
@@ -317,10 +393,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		Date retVal = myUpperBound.getValue();
 
 		if (myUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
-			Calendar cal = DateUtils.toCalendar(retVal);
-			cal.setTimeZone(TimeZone.getTimeZone("GMT+11:30"));
-			cal = DateUtils.truncate(cal, Calendar.DATE);
-			retVal = cal.getTime();
+			retVal = DateUtils.getHighestInstantFromDate(retVal);
 		}
 
 		if (myUpperBound.getPrefix() != null) {
@@ -339,7 +412,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case APPROXIMATE:
 				case NOT_EQUAL:
 				case STARTS_AFTER:
-					throw new IllegalStateException("Unvalid upper bound comparator: " + myUpperBound.getPrefix());
+					throw new IllegalStateException("Invalid upper bound comparator: " + myUpperBound.getPrefix());
 			}
 		}
 		return retVal;
@@ -467,7 +540,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				continue;
 			}
 			if (paramList.size() > 1) {
-				throw new InvalidRequestException("DateRange parameter does not suppport OR queries");
+				throw new InvalidRequestException("DateRange parameter does not support OR queries");
 			}
 			String param = paramList.get(0);
 
@@ -520,6 +593,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return b.toString();
 	}
 
+	/**
+	 * Note: An operation can take a DateRangeParam. If only a single date is provided,
+	 * it will still result in a DateRangeParam where the lower and upper bounds
+	 * are the same value. As such, even though the prefixes for the lower and
+	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
+	 * the resulting prefix is effectively <code>eq</code> where only a single
+	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * prefix is present, the prefix <code>eq</code> is assumed").
+	 */
 	private void validateAndSet(DateParam lowerBound, DateParam upperBound) {
 		if (hasBound(lowerBound) && hasBound(upperBound)) {
 			if (lowerBound.getValue().getTime() > upperBound.getValue().getTime()) {

@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+
+  Generated on Fri, Nov 1, 2019 09:29+1100 for FHIR v4.0.1 
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="CoverageEligibilityResponse" type="CoverageEligibilityResponse">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">This resource provides eligibility and plan details from the processing of an CoverageEligibilityRequest resource.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="CoverageEligibilityResponse">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">This resource provides eligibility and plan details from the processing of an CoverageEligibilityRequest resource.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A unique identifier assigned to this coverage eligiblity request.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="FinancialResourceStatusCodes">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The status of the resource instance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="purpose" minOccurs="1" maxOccurs="unbounded" type="EligibilityResponsePurpose">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Code to specify whether requesting: prior authorization requirements for some service categories or billing codes; benefits for coverages specified or discovered; discovery and return of coverages for the patient; and/or validation that the specified coverage is in-force at the date/period specified or 'now' if not specified.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="patient" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The party who is the beneficiary of the supplied coverage and for whom eligibility is sought.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date or dates when the enclosed suite of services were performed or completed.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="servicedDate" type="date"/>
+            <xs:element name="servicedPeriod" type="Period"/>
+          </xs:choice>
+          <xs:element name="created" minOccurs="1" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date this resource was created.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="requestor" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The provider which is responsible for the request.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="request" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Reference to the original request resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="outcome" minOccurs="1" maxOccurs="1" type="RemittanceOutcome">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The outcome of the request processing.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="disposition" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A human readable description of the status of the adjudication.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="insurer" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The Insurer who issued the coverage in question and is the author of the response.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="insurance" type="CoverageEligibilityResponse.Insurance" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Financial instruments for reimbursement for the health care products and services.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="preAuthRef" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A reference from the Insurer to which these services pertain to be used on further communication and as proof that the request occurred.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="form" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code for the form to be used for printing the content.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="error" type="CoverageEligibilityResponse.Error" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Errors encountered during the processing of the request.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CoverageEligibilityResponse.Insurance">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">This resource provides eligibility and plan details from the processing of an CoverageEligibilityRequest resource.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="coverage" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Reference to the insurance card level information contained in the Coverage resource. The coverage issuing insurer will use these details to locate the patient's actual coverage within the insurer's information system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="inforce" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Flag indicating if the coverage provided is inforce currently if no service date(s) specified or for the whole duration of the service dates.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="benefitPeriod" minOccurs="0" maxOccurs="1" type="Period">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The term of the benefits documented in this response.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="item" type="CoverageEligibilityResponse.Item" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Benefits and optionally current balances, and authorization details by category or service.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CoverageEligibilityResponse.Item">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">This resource provides eligibility and plan details from the processing of an CoverageEligibilityRequest resource.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="category" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Code to identify the general type of benefits under which products and services are provided.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="productOrService" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This contains the product, service, drug or other billing code for the item.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="modifier" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Item typification or modifiers codes to convey additional context for the product or service.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="provider" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The practitioner who is eligible for the provision of the product or service.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="excluded" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">True if the indicated class of service is excluded from the plan, missing or False indicates the product or service is included in the coverage.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A short name or tag for the benefit.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A richer description of the benefit or services covered.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="network" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Is a flag to indicate whether the benefits refer to in-network providers or out-of-network providers.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="unit" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates if the benefits apply to an individual or to the family.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="term" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The term or period of the values such as 'maximum lifetime benefit' or 'maximum annual visits'.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="benefit" type="CoverageEligibilityResponse.Benefit" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Benefits used to date.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="authorizationRequired" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A boolean flag indicating whether a preauthorization is required prior to actual service delivery.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="authorizationSupporting" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Codes or comments regarding information or actions associated with the preauthorization.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="authorizationUrl" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A web location for obtaining requirements or descriptive information regarding the preauthorization.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CoverageEligibilityResponse.Benefit">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">This resource provides eligibility and plan details from the processing of an CoverageEligibilityRequest resource.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Classification of benefit being provided.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The quantity of the benefit which is permitted under the coverage.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="allowedUnsignedInt" type="unsignedInt"/>
+            <xs:element name="allowedString" type="string"/>
+            <xs:element name="allowedMoney" type="Money"/>
+          </xs:choice>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The quantity of the benefit which have been consumed to date.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="usedUnsignedInt" type="unsignedInt"/>
+            <xs:element name="usedString" type="string"/>
+            <xs:element name="usedMoney" type="Money"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CoverageEligibilityResponse.Error">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">This resource provides eligibility and plan details from the processing of an CoverageEligibilityRequest resource.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An error code,from a specified code system, which details why the eligibility check could not be performed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="EligibilityResponsePurpose-list">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="auth-requirements">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Coverage auth-requirements</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="benefits">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Coverage benefits</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="discovery">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Coverage Discovery</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="validation">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Coverage Validation</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="EligibilityResponsePurpose">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code specifying the types of information being requested.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="EligibilityResponsePurpose-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

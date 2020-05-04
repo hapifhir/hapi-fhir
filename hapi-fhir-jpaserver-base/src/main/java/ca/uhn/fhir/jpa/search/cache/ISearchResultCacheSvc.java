@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.Search;
 
 import javax.annotation.Nullable;
@@ -31,7 +32,7 @@ public interface ISearchResultCacheSvc {
 	 * @param thePreviouslyStoredResourcePids A list of resource PIDs that have previously been saved to this search
 	 * @param theNewResourcePids              A list of new resoure PIDs to add to this search (these ones have not been previously saved)
 	 */
-	void storeResults(Search theSearch, List<Long> thePreviouslyStoredResourcePids, List<Long> theNewResourcePids);
+	void storeResults(Search theSearch, List<ResourcePersistentId> thePreviouslyStoredResourcePids, List<ResourcePersistentId> theNewResourcePids);
 
 	/**
 	 * Fetch a sunset of the search result IDs from the cache
@@ -43,7 +44,7 @@ public interface ISearchResultCacheSvc {
 	 * have been removed from the cache for some reason, such as expiry or manual purge)
 	 */
 	@Nullable
-	List<Long> fetchResultPids(Search theSearch, int theFrom, int theTo);
+	List<ResourcePersistentId> fetchResultPids(Search theSearch, int theFrom, int theTo);
 
 	/**
 	 * Fetch all result PIDs for a given search with no particular order required
@@ -53,6 +54,6 @@ public interface ISearchResultCacheSvc {
 	 * have been removed from the cache for some reason, such as expiry or manual purge)
 	 */
 	@Nullable
-	List<Long> fetchAllResultPids(Search theSearch);
+	List<ResourcePersistentId> fetchAllResultPids(Search theSearch);
 
 }

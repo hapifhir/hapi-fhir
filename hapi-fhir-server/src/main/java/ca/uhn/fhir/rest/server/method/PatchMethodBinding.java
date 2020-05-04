@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,9 +80,9 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		boolean retVal = super.incomingServerRequestMatchesMethod(theRequest);
-		if (retVal) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		MethodMatchEnum retVal = super.incomingServerRequestMatchesMethod(theRequest);
+		if (retVal.ordinal() > MethodMatchEnum.NONE.ordinal()) {
 			PatchTypeParameter.getTypeForRequestOrThrowInvalidRequestException(theRequest);
 		}
 		return retVal;

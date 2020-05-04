@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
@@ -21,10 +25,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -244,11 +250,132 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		));
 
 		assertHierarchyContains(
-			"CHEM seq=1",
-				" HB seq=1",
-				" NEUT seq=2",
-				"MICRO seq=2",
-				" C&S seq=1"
+			"CHEM seq=0",
+				" HB seq=0",
+				" NEUT seq=1",
+				"MICRO seq=0",
+				" C&S seq=0"
+		);
+	}
+
+	@Test
+	public void testApplyDeltaAdd_UsingCodeSystemWithComma() throws IOException {
+
+		// Create initial codesystem
+		{
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			codeSystem.setUrl("https://good.health");
+
+			LoggingInterceptor interceptor = new LoggingInterceptor(true);
+			ourClient.registerInterceptor(interceptor);
+			ourClient
+				.create()
+				.resource(codeSystem)
+				.execute();
+			ourClient.unregisterInterceptor(interceptor);
+		}
+
+		// Add a child with a really long description
+		Parameters outcome;
+		{
+			Parameters inputBundle = loadResourceFromClasspath(Parameters.class, "/term-delta-json.json");
+
+			LoggingInterceptor interceptor = new LoggingInterceptor(true);
+			ourClient.registerInterceptor(interceptor);
+			outcome = ourClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				.withParameters(inputBundle)
+				.execute();
+			ourClient.unregisterInterceptor(interceptor);
+		}
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(
+			"\"name\": \"conceptCount\"",
+			"\"valueInteger\": 2",
+			"\"name\": \"target\"",
+			"\"reference\": \"CodeSystem/"
+		));
+
+		assertHierarchyContains(
+			"1111222233 seq=0",
+			" 1111222234 seq=0"
+		);
+
+		runInTransaction(()->{
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri("https://good.health");
+			TermCodeSystemVersion version = codeSystem.getCurrentVersion();
+			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version, "1111222233").get();
+			assertEquals("Some label for the parent - with a dash too", code.getDisplay());
+
+			code = myTermConceptDao.findByCodeSystemAndCode(version, "1111222234").get();
+			assertEquals("Some very very very very very looooooong child label with a coma, another one, one more, more and final one", code.getDisplay());
+		});
+	}
+
+
+
+	@Test
+	public void testApplyDeltaAdd_UsingCodeSystemWithVeryLongDescription() {
+
+		// Create initial codesystem
+		{
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl("http://foo/cs");
+			CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("CHEM").setDisplay("Chemistry");
+			chem.addConcept().setCode("HB").setDisplay("Hemoglobin");
+
+			LoggingInterceptor interceptor = new LoggingInterceptor(true);
+			ourClient.registerInterceptor(interceptor);
+			Parameters outcome = ourClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+				.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
+				.prettyPrint()
+				.execute();
+			ourClient.unregisterInterceptor(interceptor);
+		}
+
+		// Add a child with a really long description
+		Parameters outcome;
+		{
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl("http://foo/cs");
+			CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("HB").setDisplay("Hemoglobin")
+				.addConcept().setCode("HBA").setDisplay(leftPad("", 500, 'Z'));
+
+			LoggingInterceptor interceptor = new LoggingInterceptor(true);
+			ourClient.registerInterceptor(interceptor);
+			outcome = ourClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+				.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
+				.prettyPrint()
+				.execute();
+			ourClient.unregisterInterceptor(interceptor);
+		}
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(
+			"\"name\": \"conceptCount\"",
+			"\"valueInteger\": 2",
+			"\"name\": \"target\"",
+			"\"reference\": \"CodeSystem/"
+		));
+
+		assertHierarchyContains(
+			"CHEM seq=0",
+			" HB seq=0",
+			"  HBA seq=0"
 		);
 	}
 

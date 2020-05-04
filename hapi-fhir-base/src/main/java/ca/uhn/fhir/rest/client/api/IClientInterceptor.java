@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import java.io.IOException;
  * This interface represents an interceptor which can be used to access (and optionally change or take actions upon)
  * requests that are being sent by the HTTP client, and responses received by it.
  * <p>
- * See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client_interceptor.html">HAPI Documentation Client Interceptor</a>
+ * See the <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/client_interceptors.html">HAPI Documentation Client Interceptor</a>
  * page for more information on how to use this feature.
  * </p> 
  */

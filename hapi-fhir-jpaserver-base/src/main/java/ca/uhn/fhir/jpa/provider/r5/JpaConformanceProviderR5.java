@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,26 @@ package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
-import org.hl7.fhir.r5.model.*;
-import org.hl7.fhir.r5.model.CapabilityStatement.*;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CapabilityStatement;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.r5.model.CapabilityStatement.ConditionalDeleteStatus;
+import org.hl7.fhir.r5.model.CapabilityStatement.ResourceVersionPolicy;
+import org.hl7.fhir.r5.model.DecimalType;
 import org.hl7.fhir.r5.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Meta;
+import org.hl7.fhir.r5.model.UriType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -64,13 +73,13 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderR5(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig) {
+	public JpaConformanceProviderR5(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
 		super();
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
 		setIncludeResourceCounts(true);
-		setSearchParamRegistry(theSystemDao.getSearchParamRegistry());
+		setSearchParamRegistry(theSearchParamRegistry);
 	}
 
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {

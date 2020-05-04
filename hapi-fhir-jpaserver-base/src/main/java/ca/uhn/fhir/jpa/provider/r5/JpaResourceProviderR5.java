@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,18 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -31,11 +39,17 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.IntegerType;
+import org.hl7.fhir.r5.model.Meta;
+import org.hl7.fhir.r5.model.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.*;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
 
 public class JpaResourceProviderR5<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
@@ -86,7 +100,7 @@ public class JpaResourceProviderR5<T extends IAnyResource> extends BaseJpaResour
 		RequestDetails theRequest) {
 
 		org.hl7.fhir.r4.model.Parameters parameters = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
-		return org.hl7.fhir.convertors.conv40_50.Parameters.convertParameters(parameters);
+		return org.hl7.fhir.convertors.conv40_50.Parameters40_50.convertParameters(parameters);
 
 	}
 
@@ -99,7 +113,7 @@ public class JpaResourceProviderR5<T extends IAnyResource> extends BaseJpaResour
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions,
 		RequestDetails theRequest) {
 		org.hl7.fhir.r4.model.Parameters parameters = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
-		return org.hl7.fhir.convertors.conv40_50.Parameters.convertParameters(parameters);
+		return org.hl7.fhir.convertors.conv40_50.Parameters40_50.convertParameters(parameters);
 	}
 
 	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {

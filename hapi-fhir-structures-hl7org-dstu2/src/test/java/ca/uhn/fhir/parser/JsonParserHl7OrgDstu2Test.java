@@ -1097,12 +1097,6 @@ public class JsonParserHl7OrgDstu2Test {
     assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
   }
 
-  @Test
-  public void testParseSingleQuotes() {
-    ourCtx.newJsonParser().parseResource(Bundle.class, "{ \"resourceType\": \"Bundle\" }");
-    ourCtx.newJsonParser().parseResource(Bundle.class, "{ 'resourceType': 'Bundle' }");
-  }
-
   /**
    * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
    */

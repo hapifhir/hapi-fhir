@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -206,7 +207,7 @@ public class GenericClientExample {
       }
        {
          // START SNIPPET: etagupdate
-         // First, let's retrive the latest version of a resource
+         // First, let's retrieve the latest version of a resource
          // from the server
          Patient patient = client.read().resource(Patient.class).withId("123").execute();
 
@@ -235,21 +236,27 @@ public class GenericClientExample {
          // START SNIPPET: conformance
          // Retrieve the server's conformance statement and print its
          // description
-         CapabilityStatement conf = client.capabilities().ofType(CapabilityStatement.class).execute();
+         CapabilityStatement conf = client
+				.capabilities()
+				.ofType(CapabilityStatement.class)
+				.execute();
          System.out.println(conf.getDescriptionElement().getValue());
          // END SNIPPET: conformance
       }
       {
          // START SNIPPET: delete
-          IBaseOperationOutcome resp = client.delete().resourceById(new IdType("Patient", "1234")).execute();
+			MethodOutcome response = client
+				.delete()
+				.resourceById(new IdType("Patient", "1234"))
+				.execute();
 
          // outcome may be null if the server didn't return one
-          if (resp != null) {
-              OperationOutcome outcome = (OperationOutcome) resp;
-            System.out.println(outcome.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-         }
-         // END SNIPPET: delete
-      }
+			OperationOutcome outcome = (OperationOutcome) response.getOperationOutcome();
+			if (outcome != null) {
+				System.out.println(outcome.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+			}
+			// END SNIPPET: delete
+		}
        {
            // START SNIPPET: deleteConditional
            client.delete()
@@ -262,6 +269,19 @@ public class GenericClientExample {
                    .execute();
            // END SNIPPET: deleteConditional
       }
+		{
+			// START SNIPPET: deleteCascade
+			client.delete()
+				.resourceById(new IdType("Patient/123"))
+				.cascade(DeleteCascadeModeEnum.DELETE)
+				.execute();
+
+			client.delete()
+				.resourceConditionalByType("Patient")
+				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
+				.execute();
+			// END SNIPPET: deleteCascade
+		}
       {
          // START SNIPPET: search
          Bundle response = client.search()
@@ -342,7 +362,8 @@ public class GenericClientExample {
                .revInclude(Provenance.INCLUDE_TARGET)
                .lastUpdated(new DateRangeParam("2011-01-01", null))
                .sort().ascending(Patient.BIRTHDATE)
-               .sort().descending(Patient.NAME).limitTo(123)
+               .sort().descending(Patient.NAME)
+					.count(123)
                .returnBundle(Bundle.class)
                .execute();
          // END SNIPPET: searchAdv
@@ -427,9 +448,8 @@ public class GenericClientExample {
    public static void history() {
       IGenericClient client = FhirContext.forDstu2().newRestfulGenericClient("");
       {
-         Bundle response;
          // START SNIPPET: historyDstu2
-         response = client
+			Bundle response = client
             .history()
             .onServer()
             .returnBundle(Bundle.class)
@@ -437,9 +457,8 @@ public class GenericClientExample {
          // END SNIPPET: historyDstu2
       }
       {
-         Bundle response;
          // START SNIPPET: historyFeatures
-         response = client
+			Bundle response = client
             .history()
             .onServer()
             .returnBundle(Bundle.class)

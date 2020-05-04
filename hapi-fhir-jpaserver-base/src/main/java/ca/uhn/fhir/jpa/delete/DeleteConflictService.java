@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.delete;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -132,12 +133,12 @@ public class DeleteConflictService {
 		}
 	}
 
-	public void validateDeleteConflictsEmptyOrThrowException(DeleteConflictList theDeleteConflicts) {
+	public static void validateDeleteConflictsEmptyOrThrowException(FhirContext theFhirContext, DeleteConflictList theDeleteConflicts) {
 		if (theDeleteConflicts.isEmpty()) {
 			return;
 		}
 
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
 		String firstMsg = null;
 
 		Iterator<DeleteConflict> iterator = theDeleteConflicts.iterator();
@@ -154,7 +155,7 @@ public class DeleteConflictService {
 			if (firstMsg == null) {
 				firstMsg = msg;
 			}
-			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, null, "processing");
+			OperationOutcomeUtil.addIssue(theFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, null, "processing");
 		}
 
 		throw new ResourceVersionConflictException(firstMsg, oo);

@@ -4,21 +4,24 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import ca.uhn.fhir.util.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
@@ -26,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.LoggingRule;
+import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
@@ -45,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -67,6 +72,11 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {
+	// Since scheduled tasks can cause searches, which messes up the
+	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
+})
 public abstract class BaseJpaTest extends BaseTest {
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
@@ -99,12 +109,17 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
 	protected ISearchCacheSvc mySearchCacheSvc;
+	@Autowired
+	protected IPartitionLookupSvc myPartitionConfigSvc;
 
 	@After
 	public void afterPerformCleanup() {
 		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(false);
 		if (myCaptureQueriesListener != null) {
 			myCaptureQueriesListener.clear();
+		}
+		if (myPartitionConfigSvc != null) {
+			myPartitionConfigSvc.clearCaches();
 		}
 	}
 
@@ -132,6 +147,13 @@ public abstract class BaseJpaTest extends BaseTest {
 
 				assertFalse(isReadOnly.get());
 			}
+		}
+	}
+
+	@Before
+	public void beforeInitPartitions() {
+		if (myPartitionConfigSvc != null) {
+			myPartitionConfigSvc.start();
 		}
 	}
 
