@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
-import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -44,7 +44,7 @@ public class EmpiStorageInterceptor {
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
-	private IEmpiLinkSvc myEmpiLinkSvc;
+	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -124,6 +124,6 @@ public class EmpiStorageInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
 	public void expungeAllMatchedEmpiLinks(AtomicInteger theCounter, IBaseResource theResource) {
 		ourLog.debug("Expunging EmpiLink records with reference to {}", theResource.getIdElement());
-		theCounter.addAndGet(myEmpiLinkSvc.deleteWithAnyReferenceTo(theResource));
+		theCounter.addAndGet(myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theResource));
 	}
 }

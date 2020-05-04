@@ -38,11 +38,4 @@ public interface IEmpiLinkSvc {
 	 * @param theTransactionLogMessages
 	 */
 	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages);
-
-	/**
-	 * Delete all EmpiLink records with any reference to this resource.  (Used by Expunge.)
-	 * @param theResource
-	 * @return the number of records deleted
-	 */
-	int deleteWithAnyReferenceTo(IBaseResource theResource);
 }

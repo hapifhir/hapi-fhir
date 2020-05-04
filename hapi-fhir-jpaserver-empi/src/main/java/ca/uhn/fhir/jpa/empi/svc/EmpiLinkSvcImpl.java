@@ -84,15 +84,6 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	}
 
-	@Override
-	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
-		int removed = myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theResource);
-		if (removed > 0) {
-			ourLog.info("Removed {} references to {}", removed, theResource.getIdElement());
-		}
-		return removed;
-	}
-
 	/**
 	 * Helper function which runs various business rules about what types of requests are allowed.
 	 */

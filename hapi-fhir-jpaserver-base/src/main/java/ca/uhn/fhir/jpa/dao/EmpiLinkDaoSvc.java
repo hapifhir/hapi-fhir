@@ -135,8 +135,17 @@ public class EmpiLinkDaoSvc {
 		myEmpiLinkDao.delete(theEmpiLink);
 	}
 
+	/**
+	 * Delete all EmpiLink records with any reference to this resource.  (Used by Expunge.)
+	 * @param theResource
+	 * @return the number of records deleted
+	 */
 	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
 		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
-		return myEmpiLinkDao.deleteWithAnyReferenceToPid(pid);
+		int removed =  myEmpiLinkDao.deleteWithAnyReferenceToPid(pid);
+		if (removed > 0) {
+			ourLog.info("Removed {} references to {}", removed, theResource.getIdElement());
+		}
+		return removed;
 	}
 }
