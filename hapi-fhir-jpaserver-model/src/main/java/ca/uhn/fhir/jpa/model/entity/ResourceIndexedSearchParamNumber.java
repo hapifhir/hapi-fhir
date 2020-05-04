@@ -32,7 +32,15 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.NumericField;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -83,18 +91,14 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		}
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
 
-	@Override
-	protected void clearHashes() {
-		myHashIdentity = null;
+	public Long getHashIdentity() {
+		return myHashIdentity;
 	}
 
 	@Override
@@ -112,7 +116,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getValue(), obj.getValue());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
@@ -128,7 +132,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 	@Override
 	public void setId(Long theId) {
-		myId =theId;
+		myId = theId;
 	}
 
 	public BigDecimal getValue() {

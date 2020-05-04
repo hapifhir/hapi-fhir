@@ -33,7 +33,15 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.NumericField;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -117,23 +125,14 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			String units = getUnits();
-			String system = getSystem();
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-			setHashIdentityAndUnits(calculateHashUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, units));
-			setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, units));
-		}
-	}
-
-	@Override
-	protected void clearHashes() {
-		myHashIdentity = null;
-		myHashIdentityAndUnits = null;
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		String units = getUnits();
+		String system = getSystem();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+		setHashIdentityAndUnits(calculateHashUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, units));
+		setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, units));
 	}
 
 	@Override
@@ -151,15 +150,14 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getSystem(), obj.getSystem());
-		b.append(getUnits(), obj.getUnits());
-		b.append(getValue(), obj.getValue());
+		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
+		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
 
 	public Long getHashIdentity() {
-		calculateHashes();
 		return myHashIdentity;
 	}
 
@@ -168,7 +166,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	public Long getHashIdentityAndUnits() {
-		calculateHashes();
 		return myHashIdentityAndUnits;
 	}
 
@@ -200,7 +197,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	public void setSystem(String theSystem) {
-		clearHashes();
 		mySystem = theSystem;
 	}
 
@@ -209,7 +205,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	public void setUnits(String theUnits) {
-		clearHashes();
 		myUnits = theUnits;
 	}
 
@@ -218,7 +213,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	public ResourceIndexedSearchParamQuantity setValue(BigDecimal theValue) {
-		clearHashes();
 		myValue = theValue;
 		return this;
 	}
@@ -228,9 +222,9 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getSystem());
-		b.append(getUnits());
-		b.append(getValue());
+		b.append(getHashIdentity());
+		b.append(getHashIdentityAndUnits());
+		b.append(getHashIdentitySystemAndUnits());
 		return b.toHashCode();
 	}
 

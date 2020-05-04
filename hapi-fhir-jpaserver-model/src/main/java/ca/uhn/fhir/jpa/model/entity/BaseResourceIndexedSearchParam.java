@@ -85,13 +85,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
 
-	/**
-	 * Subclasses may override
-	 */
-	protected void clearHashes() {
-		// nothing
-	}
-
 	@Override
 	public abstract Long getId();
 
@@ -100,7 +93,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public void setParamName(String theName) {
-		clearHashes();
 		myParamName = theName;
 	}
 
@@ -109,7 +101,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		clearHashes();
 		myResource = theResource;
 		myResourceType = theResource.getResourceType();
 		return this;
