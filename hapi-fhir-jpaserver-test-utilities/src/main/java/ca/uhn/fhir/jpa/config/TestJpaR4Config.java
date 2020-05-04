@@ -46,7 +46,6 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @Import(TestJpaConfig.class)
-// FIXME KHS use this other places that need it
 public class TestJpaR4Config extends BaseJavaConfigR4 {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestJpaR4Config.class);
 	@Autowired
