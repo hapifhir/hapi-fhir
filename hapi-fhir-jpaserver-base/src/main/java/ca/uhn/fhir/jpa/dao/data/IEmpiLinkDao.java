@@ -22,8 +22,14 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IEmpiLinkDao extends JpaRepository<EmpiLink, Long> {
+	@Modifying
+	@Query("DELETE FROM EmpiLink f WHERE myPersonPid = :pid OR myTargetPid = :pid")
+	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);
 }

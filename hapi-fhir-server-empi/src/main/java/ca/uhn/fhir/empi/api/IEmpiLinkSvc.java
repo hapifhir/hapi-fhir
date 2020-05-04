@@ -30,11 +30,19 @@ public interface IEmpiLinkSvc {
 	/**
 	 * Update a link between a Person record and its target Patient/Practitioner record. If a link does not exist between
 	 * these two records, create it.
-	 * @param thePerson the Person to link the target resource to.
-	 * @param theResource the target resource, which is a Patient or Practitioner
-	 * @param theMatchResult the current status of the match to set the link to.
-	 * @param theLinkSource MANUAL or AUTO: what caused the link.
+	 *
+	 * @param thePerson                 the Person to link the target resource to.
+	 * @param theResource               the target resource, which is a Patient or Practitioner
+	 * @param theMatchResult            the current status of the match to set the link to.
+	 * @param theLinkSource             MANUAL or AUTO: what caused the link.
 	 * @param theTransactionLogMessages
 	 */
 	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages);
+
+	/**
+	 * Delete all EmpiLink records with any reference to this resource.  (Used by Expunge.)
+	 * @param theResource
+	 * @return the number of records deleted
+	 */
+	int deleteWithAnyReferenceTo(IBaseResource theResource);
 }

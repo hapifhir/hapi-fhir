@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
@@ -33,18 +34,19 @@ import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import javax.transaction.Transactional;
-import java.util.Optional;
 
 /**
  * This class is in charge of managing EmpiLinks between Persons and target resources
  */
 @Service
 public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
@@ -80,6 +82,15 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
 		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theTransactionLogMessages);
 
+	}
+
+	@Override
+	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
+		int removed = myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theResource);
+		if (removed > 0) {
+			ourLog.info("Removed {} references to {}", removed, theResource.getIdElement());
+		}
+		return removed;
 	}
 
 	/**
@@ -124,8 +135,4 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages) {
 		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theTransactionLogMessages);
 	}
-
-
-
-
 }

@@ -62,7 +62,6 @@ public class EmpiLinkDaoSvc {
 	}
 
 
-
 	@Nonnull
 	public EmpiLink getOrCreateEmpiLinkByPersonPidAndTargetPid(Long thePersonPid, Long theResourcePid) {
 		EmpiLink existing = getLinkByPersonPidAndTargetPid(thePersonPid, theResourcePid);
@@ -119,12 +118,12 @@ public class EmpiLinkDaoSvc {
 	 *
 	 * @return A list of EmpiLinks that hold potential duplicate persons.
 	 */
-    public List<EmpiLink> getPossibleDuplicates() {
-		 EmpiLink exampleLink = new EmpiLink();
-		 exampleLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
-		 Example<EmpiLink> example = Example.of(exampleLink);
-		 return myEmpiLinkDao.findAll(example);
-	 }
+	public List<EmpiLink> getPossibleDuplicates() {
+		EmpiLink exampleLink = new EmpiLink();
+		exampleLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
+		Example<EmpiLink> example = Example.of(exampleLink);
+		return myEmpiLinkDao.findAll(example);
+	}
 
 	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theBaseResource) {
 		EmpiLink empiLink = new EmpiLink().setTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
@@ -133,6 +132,11 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public void deleteLink(EmpiLink theEmpiLink) {
-    	myEmpiLinkDao.delete(theEmpiLink);
+		myEmpiLinkDao.delete(theEmpiLink);
+	}
+
+	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
+		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
+		return myEmpiLinkDao.deleteWithAnyReferenceToPid(pid);
 	}
 }
