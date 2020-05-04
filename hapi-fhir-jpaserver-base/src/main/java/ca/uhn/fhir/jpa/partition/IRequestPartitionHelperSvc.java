@@ -27,7 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public interface IRequestPartitionHelperService {
+public interface IRequestPartitionHelperSvc {
 	@Nonnull
 	RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType);
 

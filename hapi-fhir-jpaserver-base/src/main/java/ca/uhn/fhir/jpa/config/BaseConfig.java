@@ -22,10 +22,10 @@ import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
@@ -225,8 +225,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public IRequestPartitionHelperService requestPartitionHelperService() {
-		return new RequestPartitionHelperService();
+	public IRequestPartitionHelperSvc requestPartitionHelperService() {
+		return new RequestPartitionHelperSvc();
 	}
 
 	@Bean

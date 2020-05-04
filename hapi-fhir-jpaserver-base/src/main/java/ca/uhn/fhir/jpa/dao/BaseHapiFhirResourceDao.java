@@ -45,7 +45,7 @@ import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -145,7 +145,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String myResourceName;
 	private Class<T> myResourceType;
 	@Autowired
-	private IRequestPartitionHelperService myRequestPartitionHelperService;
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
