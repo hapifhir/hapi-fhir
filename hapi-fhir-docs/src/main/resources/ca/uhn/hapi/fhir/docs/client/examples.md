@@ -6,7 +6,7 @@ This page contains examples of how to use the client to perform complete tasks. 
 
 The following example demonstrates a common scenario: How to create a new piece of data for a Patient (in this case, an Observation) where the identifier of the Patient is known, but the ID is not.
 
-In this kind of scenario, we want to look up the Patient record and reference it from the newly created observation. In the event that no Patient record already exists with the given identifier, a new one will be created and the Observation will reference it. This is known in FHIR as a [Conditional Create](http://hl7.org/fhir/http.html#ccreate).
+In this scenario, we want to look up the Patient record and reference it from the newly created Observation. In the event that no Patient record already exists with the given identifier, a new one will be created and the Observation will reference it. This is known in FHIR as a [Conditional Create](http://hl7.org/fhir/http.html#ccreate).
  
 **JSON**:
 
