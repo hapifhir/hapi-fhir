@@ -37,7 +37,7 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.util.InterceptorUtil;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -98,7 +98,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
-	private RequestPartitionHelperService myRequestPartitionHelperService;
+	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	/*
 	 * Non autowired fields (will be different for every instance
@@ -197,7 +197,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 				// If we have an ID, we've already checked the partition and made sure it's appropriate
 				myRequestPartitionId = RequestPartitionId.allPartitions();
 			} else {
-				myRequestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType());
+				myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType());
 			}
 		}
 		return myRequestPartitionId;

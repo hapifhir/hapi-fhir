@@ -33,7 +33,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -156,7 +156,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Autowired
-	private IRequestPartitionHelperService myRequestPartitionHelperService;
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	/**
 	 * Constructor
@@ -594,7 +594,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@VisibleForTesting
-	public void setRequestPartitionHelperService(IRequestPartitionHelperService theRequestPartitionHelperService) {
+	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperService) {
 		myRequestPartitionHelperService = theRequestPartitionHelperService;
 	}
 

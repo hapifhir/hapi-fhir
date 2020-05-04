@@ -25,7 +25,6 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -44,12 +43,10 @@ import java.util.HashSet;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
 
-public class RequestPartitionHelperService implements IRequestPartitionHelperService {
+public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	private final HashSet<Object> myPartitioningBlacklist;
 
-	@Autowired
-	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -59,7 +56,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
-	public RequestPartitionHelperService() {
+	public RequestPartitionHelperSvc() {
 		myPartitioningBlacklist = new HashSet<>();
 
 		// Infrastructure
@@ -147,7 +144,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			try {
 				partition = myPartitionConfigSvc.getPartitionByName(retVal.getPartitionName());
 			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionName", retVal.getPartitionName());
+				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionName", retVal.getPartitionName());
 				throw new ResourceNotFoundException(msg);
 			}
 
@@ -163,7 +160,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			try {
 				partition = myPartitionConfigSvc.getPartitionById(retVal.getPartitionId());
 			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionId", retVal.getPartitionId());
+				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionId", retVal.getPartitionId());
 				throw new ResourceNotFoundException(msg);
 			}
 			retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), partition.getName(), retVal.getPartitionDate());
@@ -189,7 +186,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 
 			// Make sure we're not using one of the conformance resources in a non-default partition
 			if (myPartitioningBlacklist.contains(theResourceName)) {
-				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperService.class, "blacklistedResourceTypeForPartitioning", theResourceName);
+				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "blacklistedResourceTypeForPartitioning", theResourceName);
 				throw new UnprocessableEntityException(msg);
 			}
 
@@ -197,7 +194,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			try {
 				myPartitionConfigSvc.getPartitionById(theRequestPartitionId.getPartitionId());
 			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperService.class, "unknownPartitionId", theRequestPartitionId.getPartitionId());
+				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "unknownPartitionId", theRequestPartitionId.getPartitionId());
 				throw new InvalidRequestException(msg);
 			}
 
