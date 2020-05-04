@@ -79,7 +79,7 @@ public class ClientExamples {
 
 		// Read from tenant B
 		tenantSelection.setTenantId("TENANT-B");
-		Patient patientB = genericClient.read().resource(Patient.class).withId("123").execute();
+		Patient patientB = genericClient.read().resource(Patient.class).withId("456").execute();
 		// END SNIPPET: tenantId
 	}
 
