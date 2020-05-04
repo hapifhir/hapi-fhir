@@ -41,7 +41,6 @@ import org.springframework.messaging.MessagingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-// FIXME KHS document this subscription type
 @Scope("prototype")
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
