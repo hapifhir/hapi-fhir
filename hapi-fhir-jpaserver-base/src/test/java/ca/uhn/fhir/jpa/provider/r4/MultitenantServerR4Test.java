@@ -60,7 +60,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			ourClient.create().resource(patientA).execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("Unknown partition name: TENANT-ZZZ"));
+			assertThat(e.getMessage(), containsString("Partition name \"TENANT-ZZZ\" is not valid"));
 		}
 
 	}

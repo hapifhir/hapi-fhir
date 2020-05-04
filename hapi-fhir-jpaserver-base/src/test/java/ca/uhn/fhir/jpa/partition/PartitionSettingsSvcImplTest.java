@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -43,7 +44,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		try {
 			myPartitionConfigSvc.getPartitionById(123);
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (ResourceNotFoundException e) {
 			assertEquals("No partition exists with ID 123", e.getMessage());
 		}
 

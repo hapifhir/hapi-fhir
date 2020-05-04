@@ -354,8 +354,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		try {
 			myPatientDao.create(p);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Unknown partition ID: 99", e.getMessage());
+		} catch (ResourceNotFoundException e) {
+			assertEquals("No partition exists with ID 99", e.getMessage());
 		}
 
 	}

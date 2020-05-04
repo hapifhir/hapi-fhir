@@ -80,7 +80,7 @@ public class RequestPartitionId {
 
 	@Override
 	public String toString() {
-		return getPartitionIdStringOrNullString();
+		return "RequestPartitionId[id=" + getPartitionId() + ", name=" + getPartitionName() + "]";
 	}
 
 	/**
