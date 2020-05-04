@@ -629,6 +629,10 @@
 			<id>gematik-fue</id>
 			<name>gematik FuE</name>
 		</developer>
+		<developer>
+			<id>ibacher</id>
+			<name>Ian</name>
+		</developer>
 	</developers>
 
 	<licenses>
