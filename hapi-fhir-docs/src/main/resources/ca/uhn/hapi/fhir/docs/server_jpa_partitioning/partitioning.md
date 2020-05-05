@@ -26,16 +26,16 @@ Partitioning in HAPI FHIR JPA means that every resource has a partition identity
 
 * **Partition Date**: This is an additional partition discriminator that can be used to implement partitioning strategies using a date axis.
 
-Mappings between the **Partition Name** and the **Partition ID** are maintained using the [Partition Mapping Operations](#partition-mapping-operations).
+Mappings between the **Partition Name** and the **Partition ID** are maintained using the [Partition Management Operations](./partitioning_management_operations.html).
 
 ## Logical Architecture
 
-At the database level, partitioning involves the use of two dedicated columns to many tables within the HAPI FHIR JPA [database schema](./schema.html):
+At the database level, partitioning involves the use of two dedicated columns to many tables within the HAPI FHIR JPA [database schema](/hapi-fhir/docs/server_jpa/schema.html):
 
 * **PARTITION_ID** &ndash; This is an integer indicating the specific partition that a given resource is placed in. This column can also be *NULL*, meaning that the given resource is in the **Default Partition**.
 * **PARTITION_DATE** &ndash; This is a date/time column that can be assigned an arbitrary value depending on your use case. Typically, this would be used for use cases where data should be automatically dropped after a certain time period using native database partition drops. 
 
-When partitioning is used, these two columns will be populated with the same value for a given resource on all resource-specific tables (this includes [HFJ_RESOURCE](./schema.html#HFJ_RESOURCE) and all tables that have a foreign key relationship to it including [HFJ_RES_VER](./schema.html#HFJ_RES_VER), [HFJ_RESLINK](./schema.html#HFJ_RES_LINK), [HFJ_SPIDX_*](./schema.html#search-indexes), etc.)
+When partitioning is used, these two columns will be populated with the same value for a given resource on all resource-specific tables (this includes [HFJ_RESOURCE](/hapi-fhir/docs/server_jpa/schema.html#HFJ_RESOURCE) and all tables that have a foreign key relationship to it including [HFJ_RES_VER](/hapi-fhir/docs/server_jpa/schema.html#HFJ_RES_VER), [HFJ_RESLINK](/hapi-fhir/docs/server_jpa/schema.html#HFJ_RES_LINK), [HFJ_SPIDX_*](/hapi-fhir/docs/server_jpa/schema.html#search-indexes), etc.)
 
 When a new resource is **created**, an [interceptor hook](#partition-interceptors) is invoked to request the partition ID and date to be assigned to the resource.
 
