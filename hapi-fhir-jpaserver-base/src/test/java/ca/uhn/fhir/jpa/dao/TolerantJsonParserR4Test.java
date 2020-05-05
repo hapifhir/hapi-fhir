@@ -47,6 +47,22 @@ public class TolerantJsonParserR4Test {
 	}
 
 	@Test
+	public void testParseInvalidNumeric_DoubleZeros() {
+		String input = "{\n" +
+			"\"resourceType\": \"Observation\",\n" +
+			"\"valueQuantity\": {\n" +
+			"      \"value\": 00\n" +
+			"   }\n" +
+			"}";
+
+
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		Observation obs = parser.parseResource(Observation.class, input);
+
+		assertEquals("0", obs.getValueQuantity().getValueElement().getValueAsString());
+	}
+
+	@Test
 	public void testParseInvalidNumeric2() {
 		String input = "{\n" +
 			"\"resourceType\": \"Observation\",\n" +

@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -41,14 +40,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 
+import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
 
-public class RequestPartitionHelperService implements IRequestPartitionHelperService {
+public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	private final HashSet<Object> myPartitioningBlacklist;
 
-	@Autowired
-	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -58,7 +56,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
-	public RequestPartitionHelperService() {
+	public RequestPartitionHelperSvc() {
 		myPartitioningBlacklist = new HashSet<>();
 
 		// Infrastructure
@@ -78,37 +76,45 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 	/**
 	 * Invoke the <code>STORAGE_PARTITION_IDENTIFY_READ</code> interceptor pointcut to determine the tenant for a read request
 	 */
-	@Nullable
+	@Nonnull
 	@Override
 	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
-		if (myPartitioningBlacklist.contains(theResourceType)) {
-			return null;
-		}
-
-		RequestPartitionId requestPartitionId = null;
+		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
+			// Handle system requests
+			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
+				return RequestPartitionId.defaultPartition();
+			}
+
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 			HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 
-			validatePartition(requestPartitionId, theResourceType);
+			validatePartition(requestPartitionId, theResourceType, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
+
+			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
 		}
 
-		return normalize(requestPartitionId);
+		return RequestPartitionId.allPartitions();
 	}
 
 	/**
 	 * Invoke the <code>STORAGE_PARTITION_IDENTIFY_CREATE</code> interceptor pointcut to determine the tenant for a read request
 	 */
-	@Nullable
+	@Nonnull
 	@Override
-	public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource) {
+	public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
+		RequestPartitionId requestPartitionId;
 
-		RequestPartitionId requestPartitionId = null;
 		if (myPartitionSettings.isPartitioningEnabled()) {
+			// Handle system requests
+			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
+				return RequestPartitionId.defaultPartition();
+			}
+
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 			HookParams params = new HookParams()
 				.add(IBaseResource.class, theResource)
@@ -117,62 +123,70 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
 			String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
-			validatePartition(requestPartitionId, resourceName);
+			validatePartition(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
+
+			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
 		}
 
-		return normalize(requestPartitionId);
+		return RequestPartitionId.allPartitions();
 	}
 
 	/**
 	 * If the partition only has a name but not an ID, this method resolves the ID
-	 * @param theRequestPartitionId
-	 * @return
 	 */
-	private RequestPartitionId normalize(RequestPartitionId theRequestPartitionId) {
-		if (theRequestPartitionId != null) {
-			if (theRequestPartitionId.getPartitionName() != null) {
+	@Nonnull
+	private RequestPartitionId normalizeAndNotifyHooks(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest) {
+		RequestPartitionId retVal = theRequestPartitionId;
 
-				PartitionEntity partition;
-				try {
-					partition = myPartitionConfigSvc.getPartitionByName(theRequestPartitionId.getPartitionName());
-				} catch (IllegalArgumentException e) {
-					String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionName", theRequestPartitionId.getPartitionName());
-					throw new ResourceNotFoundException(msg);
-				}
+		if (retVal.getPartitionName() != null) {
 
-				if (theRequestPartitionId.getPartitionId() != null) {
-					Validate.isTrue(theRequestPartitionId.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", theRequestPartitionId.getPartitionName(), theRequestPartitionId.getPartitionId());
-					return theRequestPartitionId;
-				} else {
-					return RequestPartitionId.forPartitionNameAndId(theRequestPartitionId.getPartitionName(), partition.getId(), theRequestPartitionId.getPartitionDate());
-				}
+			PartitionEntity partition;
+			try {
+				partition = myPartitionConfigSvc.getPartitionByName(retVal.getPartitionName());
+			} catch (IllegalArgumentException e) {
+				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionName", retVal.getPartitionName());
+				throw new ResourceNotFoundException(msg);
 			}
 
-			if (theRequestPartitionId.getPartitionId() != null) {
-				PartitionEntity partition;
-				try {
-					partition = myPartitionConfigSvc.getPartitionById(theRequestPartitionId.getPartitionId());
-				} catch (IllegalArgumentException e) {
-					String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperService.class, "unknownPartitionId", theRequestPartitionId.getPartitionId());
-					throw new ResourceNotFoundException(msg);
-				}
-				return RequestPartitionId.forPartitionNameAndId(partition.getName(), partition.getId(), theRequestPartitionId.getPartitionDate());
+			if (retVal.getPartitionId() != null) {
+				Validate.isTrue(retVal.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", retVal.getPartitionName(), retVal.getPartitionId());
+			} else {
+				retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), retVal.getPartitionName(), retVal.getPartitionDate());
 			}
+
+		} else if (retVal.getPartitionId() != null) {
+
+			PartitionEntity partition;
+			try {
+				partition = myPartitionConfigSvc.getPartitionById(retVal.getPartitionId());
+			} catch (IllegalArgumentException e) {
+				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionId", retVal.getPartitionId());
+				throw new ResourceNotFoundException(msg);
+			}
+			retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), partition.getName(), retVal.getPartitionDate());
 
 		}
 
-		// It's still possible that the partition only has a date but no name/id,
-		// or it could just be null
-		return theRequestPartitionId;
+		// Note: It's still possible that the partition only has a date but no name/id
+
+		HookParams params = new HookParams()
+			.add(RequestPartitionId.class, retVal)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_SELECTED, params);
+
+		return retVal;
 
 	}
 
-	private void validatePartition(@Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName) {
-		if (theRequestPartitionId != null && theRequestPartitionId.getPartitionId() != null) {
+	private void validatePartition(@Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
+		Validate.notNull(theRequestPartitionId, "Interceptor did not provide a value for pointcut: %s", thePointcut);
+
+		if (theRequestPartitionId.getPartitionId() != null) {
 
 			// Make sure we're not using one of the conformance resources in a non-default partition
 			if (myPartitioningBlacklist.contains(theResourceName)) {
-				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperService.class, "blacklistedResourceTypeForPartitioning", theResourceName);
+				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "blacklistedResourceTypeForPartitioning", theResourceName);
 				throw new UnprocessableEntityException(msg);
 			}
 
@@ -180,7 +194,7 @@ public class RequestPartitionHelperService implements IRequestPartitionHelperSer
 			try {
 				myPartitionConfigSvc.getPartitionById(theRequestPartitionId.getPartitionId());
 			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperService.class, "unknownPartitionId", theRequestPartitionId.getPartitionId());
+				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "unknownPartitionId", theRequestPartitionId.getPartitionId());
 				throw new InvalidRequestException(msg);
 			}
 

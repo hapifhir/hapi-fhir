@@ -37,6 +37,11 @@ public class PersistedJpaBundleProviderFactory {
 		return (PersistedJpaBundleProvider) retVal;
 	}
 
+	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
+		Object retVal = myApplicationContext.getBean(BaseConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
+		return (PersistedJpaBundleProvider) retVal;
+	}
+
 	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(RequestDetails theRequestDetails, Search theSearch, SearchCoordinatorSvcImpl.SearchTask theTask, ISearchBuilder theSearchBuilder) {
 		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(BaseConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER, theRequestDetails, theSearch, theTask, theSearchBuilder);
 	}

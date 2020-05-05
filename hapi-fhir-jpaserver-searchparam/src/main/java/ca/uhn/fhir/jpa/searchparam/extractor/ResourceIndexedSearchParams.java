@@ -22,7 +22,19 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -130,17 +142,11 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	public void calculateHashes(Collection<? extends BaseResourceIndex> theStringParams) {
-		for (BaseResourceIndex next : theStringParams) {
-			next.calculateHashes();
-		}
-	}
-
 	public Set<String> getPopulatedResourceLinkParameters() {
 		return myPopulatedResourceLinkParameters;
 	}
 
-	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
 		if (theParamDef == null) {
 			return false;
 		}
@@ -177,7 +183,7 @@ public final class ResourceIndexedSearchParams {
 		}
 		Predicate<BaseResourceIndexedSearchParam> namedParamPredicate = param ->
 			param.getParamName().equalsIgnoreCase(theParamName) &&
-				param.matches(theParam);
+				param.matches(theParam, theUseOrdinalDatesForDayComparison);
 
 		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}
@@ -305,6 +311,7 @@ public final class ResourceIndexedSearchParams {
 					param.setResource(theEntity);
 					param.setMissing(true);
 					param.setParamName(nextParamName);
+					param.calculateHashes();
 					paramCollection.add((RT) param);
 				}
 			}

@@ -84,10 +84,6 @@ class OperationRule extends BaseRule implements IAuthRule {
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		if (isOtherTenant(theRequestDetails)) {
-			return null;
-		}
-
 		boolean applies = false;
 		switch (theOperation) {
 			case ADD_TAGS:
@@ -197,15 +193,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 			return null;
 		}
 
-		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
-			return null;
-		}
-
-		return newVerdict();
-	}
-
-	public String getOperationName() {
-		return myOperationName;
+		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 	}
 
 	/**

@@ -26,6 +26,8 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -33,7 +35,18 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.r4.model.DateTimeType;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import java.util.Date;
 
 @Embeddable
@@ -55,6 +68,16 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Temporal(TemporalType.TIMESTAMP)
 	@Field
 	public Date myValueLow;
+
+	/**
+	 * Field which stores an integer representation of YYYYMDD as calculated by Calendar
+	 * e.g. 2019-01-20 -> 20190120
+	 */
+	@Column(name = "SP_VALUE_LOW_DATE_ORDINAL")
+	public Integer myValueLowDateOrdinal;
+	@Column(name = "SP_VALUE_HIGH_DATE_ORDINAL")
+	public Integer myValueHighDateOrdinal;
+
 	@Transient
 	private transient String myOriginalValue;
 	@Id
@@ -78,13 +101,50 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamDate(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
+	public ResourceIndexedSearchParamDate(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, Date theLow, String theLowString, Date theHigh, String theHighString, String theOriginalValue) {
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
+		if (theHigh != null && theHighString == null) {
+			theHighString = DateUtils.convertDateToIso8601String(theHigh);
+		}
+		if (theLow != null && theLowString == null) {
+			theLowString = DateUtils.convertDateToIso8601String(theLow);
+		}
+		computeValueHighDateOrdinal(theHighString);
+		computeValueLowDateOrdinal(theLowString);
 		myOriginalValue = theOriginalValue;
+		calculateHashes();
+	}
+
+	private void computeValueHighDateOrdinal(String theHigh) {
+		if (!StringUtils.isBlank(theHigh)) {
+			this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
+		}
+	}
+
+	private int generateOrdinalDateInteger(String theDateString) {
+		if (theDateString.contains("T")) {
+			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
+		}
+		theDateString = theDateString.replace("-", "");
+		return Integer.valueOf(theDateString);
+	}
+
+	private void computeValueLowDateOrdinal(String theLow) {
+		if (StringUtils.isNotBlank(theLow)) {
+			this.myValueLowDateOrdinal = generateOrdinalDateInteger(theLow);
+		}
+	}
+
+	public Integer getValueLowDateOrdinal() {
+		return myValueLowDateOrdinal;
+	}
+
+	public Integer getValueHighDateOrdinal() {
+		return myValueHighDateOrdinal;
 	}
 
 	@Override
@@ -93,22 +153,16 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		ResourceIndexedSearchParamDate source = (ResourceIndexedSearchParamDate) theSource;
 		myValueHigh = source.myValueHigh;
 		myValueLow = source.myValueLow;
+		myValueHighDateOrdinal = source.myValueHighDateOrdinal;
+		myValueLowDateOrdinal = source.myValueLowDateOrdinal;
 		myHashIdentity = source.myHashIdentity;
 	}
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		}
-	}
-
-	@Override
-	protected void clearHashes() {
-		myHashIdentity = null;
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
 
 	@Override
@@ -143,7 +197,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 	@Override
 	public void setId(Long theId) {
-		myId =theId;
+		myId = theId;
 	}
 
 	protected Long getTimeFromDate(Date date) {
@@ -193,30 +247,44 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("partitionId", getPartitionId());
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
 		b.append("valueLow", new InstantDt(getValueLow()));
 		b.append("valueHigh", new InstantDt(getValueHigh()));
+		b.append("hashIdentity", myHashIdentity);
 		b.append("missing", isMissing());
 		return b.build();
 	}
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public boolean matches(IQueryParameterType theParam) {
+	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
 		if (!(theParam instanceof DateParam)) {
 			return false;
 		}
-		DateParam date = (DateParam) theParam;
-		DateRangeParam range = new DateRangeParam(date);
+		DateParam dateParam = (DateParam) theParam;
+		DateRangeParam range = new DateRangeParam(dateParam);
+
+
+		boolean result;
+		if (theUseOrdinalDatesForDayComparison) {
+			result = matchesOrdinalDateBounds(range);
+			result = matchesDateBounds(range);
+		} else {
+			result = matchesDateBounds(range);
+		}
+
+		return result;
+	}
+
+	private boolean matchesDateBounds(DateRangeParam range) {
 		Date lowerBound = range.getLowerBoundAsInstant();
 		Date upperBound = range.getUpperBoundAsInstant();
-
 		if (lowerBound == null && upperBound == null) {
 			// should never happen
 			return false;
 		}
-
 		boolean result = true;
 		if (lowerBound != null) {
 			result &= (myValueLow.after(lowerBound) || myValueLow.equals(lowerBound));
@@ -227,6 +295,33 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 			result &= (myValueHigh.before(upperBound) || myValueHigh.equals(upperBound));
 		}
 		return result;
+	}
+
+	private boolean matchesOrdinalDateBounds(DateRangeParam range) {
+		boolean result = true;
+		Integer lowerBoundAsDateInteger = range.getLowerBoundAsDateInteger();
+		Integer upperBoundAsDateInteger = range.getUpperBoundAsDateInteger();
+		if (upperBoundAsDateInteger == null && lowerBoundAsDateInteger == null) {
+			return false;
+		}
+		if (lowerBoundAsDateInteger != null) {
+			//TODO as we run into equality issues
+			result &= (myValueLowDateOrdinal.equals(lowerBoundAsDateInteger) || myValueLowDateOrdinal > lowerBoundAsDateInteger);
+			result &= (myValueHighDateOrdinal.equals(lowerBoundAsDateInteger) || myValueHighDateOrdinal > lowerBoundAsDateInteger);
+		}
+		if (upperBoundAsDateInteger != null) {
+			result &= (myValueHighDateOrdinal.equals(upperBoundAsDateInteger) || myValueHighDateOrdinal < upperBoundAsDateInteger);
+			result &= (myValueLowDateOrdinal.equals(upperBoundAsDateInteger) || myValueLowDateOrdinal < upperBoundAsDateInteger);
+		}
+		return result;
+	}
+
+
+	public static Long calculateOrdinalValue(Date theDate) {
+		if (theDate == null) {
+			return null;
+		}
+		return (long) DateUtils.convertDatetoDayInteger(theDate);
 	}
 
 }

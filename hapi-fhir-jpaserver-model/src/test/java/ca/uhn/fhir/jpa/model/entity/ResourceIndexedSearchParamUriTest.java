@@ -12,6 +12,7 @@ public class ResourceIndexedSearchParamUriTest {
 	public void testHashFunctions() {
 		ResourceIndexedSearchParamUri token = new ResourceIndexedSearchParamUri(new PartitionSettings(), "Patient", "NAME", "http://example.com");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
+		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
 		assertEquals(-6132951326739875838L, token.getHashUri().longValue());

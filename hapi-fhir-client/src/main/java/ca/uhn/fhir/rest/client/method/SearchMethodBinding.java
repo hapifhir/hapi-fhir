@@ -19,27 +19,33 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private String myCompartmentName;
@@ -157,8 +163,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return getMethod().toString();
 	}
 
-	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
-		return new HttpGetClientInvocation(theContext, theParams, theSearchUrl);
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theSearchUrl, UrlSourceEnum theUrlSource, Map<String, List<String>> theParams) {
+		return new HttpGetClientInvocation(theContext, theParams, theUrlSource, theSearchUrl);
 	}
 
 

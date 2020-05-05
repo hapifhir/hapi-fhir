@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
@@ -111,6 +112,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	protected IPartitionLookupSvc myPartitionConfigSvc;
+	@Autowired
+	private IdHelperService myIdHelperService;
 
 	@After
 	public void afterPerformCleanup() {
@@ -121,6 +124,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myPartitionConfigSvc != null) {
 			myPartitionConfigSvc.clearCaches();
 		}
+		if (myIdHelperService != null) {
+			myIdHelperService.clearCache();
+		}
+
 	}
 
 	@After

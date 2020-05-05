@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -85,6 +86,38 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * Just in case any hash values are missing
+	 */
+	@Test
+	public void testCreateAndUpdateStringAndTokenWhereHashesAreNull() {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("sys1").setValue("val1");
+		p.addName().setFamily("FAMILY1");
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		runInTransaction(()->{
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashIdentity = null").executeUpdate();
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashExact = null").executeUpdate();
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = null").executeUpdate();
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamToken s SET s.myHashIdentity = null").executeUpdate();
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamToken s SET s.myHashSystem = null").executeUpdate();
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamToken s SET s.myHashValue = null").executeUpdate();
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamToken s SET s.myHashSystemAndValue = null").executeUpdate();
+		});
+
+		p = new Patient();
+		p.setId(id);
+		p.addIdentifier().setSystem("sys2").setValue("val2");
+		p.addName().setFamily("FAMILY2");
+		myPatientDao.update(p);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_FAMILY, new StringParam("FAMILY2"));
+		Patient newPatient = (Patient) myPatientDao.search(map).getResources(0,1).get(0);
+		assertEquals("FAMILY2", newPatient.getName().get(0).getFamily());
+	}
 
 	@Test
 	public void testUpdateNotModifiedDoesNotAffectDates() {

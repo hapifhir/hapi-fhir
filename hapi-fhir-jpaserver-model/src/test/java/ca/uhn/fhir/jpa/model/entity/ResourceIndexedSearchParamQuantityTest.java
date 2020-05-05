@@ -19,6 +19,7 @@ public class ResourceIndexedSearchParamQuantityTest {
 	@Test
 	public void testHashFunctions() {
 		ResourceIndexedSearchParamQuantity token = createParam("NAME", "123.001", "value", "VALUE");
+		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
 		assertEquals(834432764963581074L, token.getHashIdentity().longValue());

@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #L%
  */
 
+import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
@@ -36,7 +37,11 @@ import org.apache.http.entity.ContentType;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A Http Request based on Apache. This is an adapter around the class
@@ -44,7 +49,7 @@ import java.util.*;
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class ApacheHttpRequest implements IHttpRequest {
+public class ApacheHttpRequest extends BaseHttpRequest implements IHttpRequest {
 
 	private HttpClient myClient;
 	private HttpRequestBase myRequest;
@@ -112,13 +117,13 @@ public class ApacheHttpRequest implements IHttpRequest {
 	}
 
 	@Override
-	public void setUri(String theUrl) {
-		myRequest.setURI(URI.create(theUrl));
+	public String getUri() {
+		return myRequest.getURI().toString();
 	}
 
 	@Override
-	public String getUri() {
-		return myRequest.getURI().toString();
+	public void setUri(String theUrl) {
+		myRequest.setURI(URI.create(theUrl));
 	}
 
 	@Override

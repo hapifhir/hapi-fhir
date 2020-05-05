@@ -31,7 +31,16 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -110,6 +119,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
+		calculateHashes();
 	}
 
 	@Override
@@ -127,25 +137,15 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
-		if (myHashSystem == null && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			String system = getSystem();
-			String value = getValue();
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-			setHashSystem(calculateHashSystem(getPartitionSettings(), getPartitionId(), resourceType, paramName, system));
-			setHashSystemAndValue(calculateHashSystemAndValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, value));
-			setHashValue(calculateHashValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, value));
-		}
-	}
-
-	@Override
-	protected void clearHashes() {
-		myHashSystem = null;
-		myHashSystemAndValue = null;
-		myHashValue = null;
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		String system = getSystem();
+		String value = getValue();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+		setHashSystem(calculateHashSystem(getPartitionSettings(), getPartitionId(), resourceType, paramName, system));
+		setHashSystemAndValue(calculateHashSystemAndValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, value));
+		setHashValue(calculateHashValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, value));
 	}
 
 	@Override
@@ -161,15 +161,13 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		}
 		ResourceIndexedSearchParamToken obj = (ResourceIndexedSearchParamToken) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
-		b.append(getSystem(), obj.getSystem());
-		b.append(getValue(), obj.getValue());
+		b.append(getHashSystem(), obj.getHashSystem());
+		b.append(getHashValue(), obj.getHashValue());
+		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
 		return b.isEquals();
 	}
 
 	Long getHashSystem() {
-		calculateHashes();
 		return myHashSystem;
 	}
 
@@ -182,17 +180,14 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	Long getHashSystemAndValue() {
-		calculateHashes();
 		return myHashSystemAndValue;
 	}
 
 	private void setHashSystemAndValue(Long theHashSystemAndValue) {
-		calculateHashes();
 		myHashSystemAndValue = theHashSystemAndValue;
 	}
 
 	Long getHashValue() {
-		calculateHashes();
 		return myHashValue;
 	}
 
@@ -215,7 +210,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public void setSystem(String theSystem) {
-		clearHashes();
 		mySystem = StringUtils.defaultIfBlank(theSystem, null);
 	}
 
@@ -224,19 +218,17 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public ResourceIndexedSearchParamToken setValue(String theValue) {
-		clearHashes();
 		myValue = StringUtils.defaultIfBlank(theValue, null);
 		return this;
 	}
 
 	@Override
 	public int hashCode() {
-		calculateHashes();
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
-		b.append(getParamName());
-		b.append(getSystem());
-		b.append(getValue());
+		b.append(getHashValue());
+		b.append(getHashSystem());
+		b.append(getHashSystemAndValue());
 		return b.toHashCode();
 	}
 
@@ -252,11 +244,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append("paramName", getParamName());
 		b.append("system", getSystem());
 		b.append("value", getValue());
+		b.append("hashIdentity", myHashIdentity);
 		return b.build();
 	}
 
 	@Override
-	public boolean matches(IQueryParameterType theParam) {
+	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
 		if (!(theParam instanceof TokenParam)) {
 			return false;
 		}

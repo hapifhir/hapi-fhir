@@ -27,6 +27,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public abstract class BaseTableTask extends BaseTask {
 	private String myTableName;
 
+
+
 	public BaseTableTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}

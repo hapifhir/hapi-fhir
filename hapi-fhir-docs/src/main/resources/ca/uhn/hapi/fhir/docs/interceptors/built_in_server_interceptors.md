@@ -28,7 +28,7 @@ This interceptor will then produce output similar to the following:
 
 # Partitioning: Multitenant Request Partition
 
-If the JPA server has [partitioning](/docs/server_jpa/partitioning.html) enabled, the RequestTenantPartitionInterceptor can be used in combination with a [Tenant Identification Strategy](/docs/server_plain/multitenancy.html) in order to achieve a multitenant solution. See [JPA Server Partitioning](/docs/server_jpa/partitioning.html) for more information on partitioning.
+If the JPA server has [partitioning](/docs/server_jpa_partitioning/partitioning.html) enabled, the RequestTenantPartitionInterceptor can be used in combination with a [Tenant Identification Strategy](/docs/server_plain/multitenancy.html) in order to achieve a multitenant solution. See [JPA Server Partitioning](/docs/server_jpa_partitioning/partitioning.html) for more information on partitioning.
 
 * [RequestTenantPartitionInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.html)
 * [RequestTenantPartitionInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.java)

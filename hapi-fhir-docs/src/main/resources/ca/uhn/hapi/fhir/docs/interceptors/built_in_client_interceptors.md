@@ -82,6 +82,9 @@ When communicating with a server that supports [URL Base Multitenancy](/docs/ser
 * [UrlTenantSelectionInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/UrlTenantSelectionInterceptor.html)
 * [UrlTenantSelectionInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/UrlTenantSelectionInterceptor.java)
 
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ClientExamples.java|tenantId}}
+```
 
 # Performance: GZip Outgoing Request Bodies
 

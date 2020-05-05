@@ -160,10 +160,6 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 
 				continue;
 
-			} else {
-
-				myQueryRoot.setHasIndexJoins();
-
 			}
 
 			Join<ResourceTable, ResourceTag> tagJoin = myQueryRoot.join("myTags", JoinType.LEFT);

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -41,17 +42,24 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
 	private final Map<String, List<String>> myParameters;
 	private final String myUrlPath;
+	private final UrlSourceEnum myUrlSource;
 
 	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, String... theUrlFragments) {
+		this(theContext, theParameters, UrlSourceEnum.GENERATED, theUrlFragments);
+	}
+
+	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, UrlSourceEnum theUrlSource, String... theUrlFragments) {
 		super(theContext);
 		myParameters = theParameters;
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
+		myUrlSource = theUrlSource;
 	}
 
 	public HttpGetClientInvocation(FhirContext theContext, String theUrlPath) {
 		super(theContext);
 		myParameters = new HashMap<>();
 		myUrlPath = theUrlPath;
+		myUrlSource = UrlSourceEnum.GENERATED;
 	}
 
 
@@ -95,7 +103,10 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
 
-		return super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
+		IHttpRequest retVal = super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
+		retVal.setUrlSource(myUrlSource);
+
+		return retVal;
 	}
 
 	public Map<String, List<String>> getParameters() {
