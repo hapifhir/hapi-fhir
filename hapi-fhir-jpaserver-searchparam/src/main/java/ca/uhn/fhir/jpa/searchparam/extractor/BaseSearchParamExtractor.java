@@ -44,7 +44,6 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.search.spatial.impl.Point;
@@ -375,9 +374,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
 			String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
 			Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
+			String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
 
 			if (start != null || end != null) {
-				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, end, startAsString);
+				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
 				theParams.add(myIndexedSearchParamDate);
 			}
 		}
@@ -387,12 +387,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 			TreeSet<Date> dates = new TreeSet<>();
 			String firstValue = null;
+			String finalValue = null;
 			for (IPrimitiveType<Date> nextEvent : values) {
 				if (nextEvent.getValue() != null) {
 					dates.add(nextEvent.getValue());
 					if (firstValue == null) {
 						firstValue = nextEvent.getValueAsString();
 					}
+					finalValue = nextEvent.getValueAsString();
 				}
 			}
 
@@ -411,7 +413,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			if (!dates.isEmpty()) {
-				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), dates.first(), dates.last(), firstValue);
+				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), dates.first(), firstValue, dates.last(), finalValue, firstValue);
 				theParams.add(myIndexedSearchParamDate);
 			}
 		}
@@ -420,7 +422,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		private void addDateTimeTypes(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 			IPrimitiveType<Date> nextBaseDateTime = (IPrimitiveType<Date>) theValue;
 			if (nextBaseDateTime.getValue() != null) {
-				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString());
+				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValueAsString());
 				theParams.add(myIndexedSearchParamDate);
 			}
 		}
