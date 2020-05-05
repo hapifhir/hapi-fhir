@@ -144,7 +144,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	/**
 	 * UNIT TEST constructor
 	 */
-	BaseSearchParamExtractor(ModelConfig theModelConfig, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	BaseSearchParamExtractor(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		Validate.notNull(theModelConfig);
 		Validate.notNull(theCtx);
 		Validate.notNull(theSearchParamRegistry);
@@ -152,6 +152,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myModelConfig = theModelConfig;
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	@VisibleForTesting
