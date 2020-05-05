@@ -96,8 +96,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void deleteNoLinkKeepLink() {
-
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(myDeletePerson, myTargetPatient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, null);
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(myKeepPerson, myTargetPatient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, null);
 
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 		List<EmpiLink> links = myEmpiLinkDao.findAll();
@@ -106,6 +105,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		assertEquals(myKeepPersonPid, link.getPersonPid());
 		assertEquals(myPatientPid, link.getTargetPid());
 	}
+
+	// FIXME KHS we've tested 01, 10, now test 21,12,etc
+
+	// FIXME KHS test delete
 
 	private void populatePerson(Person thePerson) {
 		thePerson.addName(new HumanName().addGiven(GIVEN_NAME).setFamily(FAMILY_NAME));
