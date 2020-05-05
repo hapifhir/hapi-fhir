@@ -1129,29 +1129,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
-		Boolean suppressViaSearchParam = null;
-		List<IBaseExtension<?, ?>> suppressExt = theSearchParam.getExtensions(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING);
-		if (suppressExt.size() > 0) {
-			IPrimitiveType<?> value = (IPrimitiveType<?>) suppressExt.get(0).getValue();
-			if ("true".equals(value.getValueAsString())) {
-				ourLog.trace("Suppressing text indexing for SearchParameter {}", theSearchParam.getName());
-				suppressViaSearchParam = true;
-			} else if ("false".equals(value.getValueAsString())) {
-				ourLog.trace("Not suppressing text indexing for SearchParameter {}", theSearchParam.getName());
-				suppressViaSearchParam = false;
-			}
-		}
+		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
+			.map(IBaseExtension::getValue)
+			.map(val -> (IPrimitiveType<?>) val)
+			.map(IPrimitiveType::getValueAsString)
+			.map(Boolean::parseBoolean)
+			.findFirst();
 
-		if (theModelConfig.isSuppressStringIndexingInTokens()) {
-			if (!Boolean.FALSE.equals(suppressViaSearchParam))
-				return false;
+		//if the SP doesn't care, use the system default.
+		if (!noSuppressForSearchParam.isPresent()) {
+			return !theModelConfig.isSuppressStringIndexingInTokens();
+			//If the SP does care, use its value.
+		} else {
+			boolean suppressForSearchParam = noSuppressForSearchParam.get();
+			ourLog.trace("Text indexing for SearchParameter {}: {}", theSearchParam.getName(), suppressForSearchParam);
+			return !suppressForSearchParam;
 		}
-
-		if (Boolean.TRUE.equals(suppressViaSearchParam)) {
-			return false;
-		}
-
-		return true;
 	}
 
 	private static void addIgnoredType(FhirContext theCtx, String theType, Set<String> theIgnoredTypes) {
