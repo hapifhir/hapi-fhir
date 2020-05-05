@@ -1,5 +1,11 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -24,14 +30,10 @@ import java.util.Optional;
  * #L%
  */
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
-
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
+
+	@Query("SELECT f FROM ForcedId f WHERE myResourcePid IN (:resource_pids)")
+	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
 
 	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myForcedId IN (:forced_id)")
 	List<Long> findByForcedId(@Param("forced_id") Collection<String> theForcedId);
@@ -46,7 +48,7 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	Optional<Long> findByPartitionIdAndTypeAndForcedId(@Param("partition_id") Integer thePartitionId, @Param("resource_type") String theResourceType, @Param("forced_id") String theForcedId);
 
 	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
-	ForcedId findByResourcePid(@Param("resource_pid") Long theResourcePid);
+	Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
 	@Modifying
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
@@ -75,7 +77,7 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 
 	/**
 	 * Warning: No DB index exists for this particular query, so it may not perform well
-	 *
+	 * <p>
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */

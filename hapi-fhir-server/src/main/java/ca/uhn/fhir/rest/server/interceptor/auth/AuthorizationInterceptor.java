@@ -41,7 +41,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -224,9 +230,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 *
 	 * @param theDefaultPolicy The policy (must not be <code>null</code>)
 	 */
-	public void setDefaultPolicy(PolicyEnum theDefaultPolicy) {
+	public AuthorizationInterceptor setDefaultPolicy(PolicyEnum theDefaultPolicy) {
 		Validate.notNull(theDefaultPolicy, "theDefaultPolicy must not be null");
 		myDefaultPolicy = theDefaultPolicy;
+		return this;
 	}
 
 	/**

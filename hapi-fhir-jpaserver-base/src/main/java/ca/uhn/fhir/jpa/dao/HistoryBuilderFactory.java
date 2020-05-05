@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.partition;
+package ca.uhn.fhir.jpa.dao;
 
 /*-
  * #%L
@@ -20,17 +20,20 @@ package ca.uhn.fhir.jpa.partition;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.jpa.config.BaseConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Date;
 
-public interface IRequestPartitionHelperService {
-	@Nullable
-    RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType);
+public class HistoryBuilderFactory {
 
-	@Nullable
-    RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource);
+	@Autowired
+	private ApplicationContext myApplicationContext;
+
+	public HistoryBuilder newHistoryBuilder(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
+		return (HistoryBuilder) myApplicationContext.getBean(BaseConfig.HISTORY_BUILDER, theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
+	}
+
 }

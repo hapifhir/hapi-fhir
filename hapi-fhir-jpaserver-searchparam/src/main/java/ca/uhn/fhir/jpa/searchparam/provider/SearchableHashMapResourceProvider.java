@@ -47,17 +47,19 @@ public class SearchableHashMapResourceProvider<T extends IBaseResource> extends 
 		mySearchParamMatcher = theSearchParamMatcher;
 	}
 
-	public List<T> searchByCriteria(String theCriteria, RequestDetails theRequest) {
+	public List<IBaseResource> searchByCriteria(String theCriteria, RequestDetails theRequest) {
 		return searchBy(resource -> mySearchParamMatcher.match(theCriteria, resource, theRequest), theRequest);
 
 	}
 
-	public List<T> searchByParams(SearchParameterMap theSearchParams, RequestDetails theRequest) {
+	public List<IBaseResource> searchByParams(SearchParameterMap theSearchParams, RequestDetails theRequest) {
 		return searchBy(resource -> mySearchParamMatcher.match(theSearchParams.toNormalizedQueryString(getFhirContext()), resource, theRequest), theRequest);
 	}
 
-	private List<T> searchBy(Function<IBaseResource, InMemoryMatchResult> theMatcher, RequestDetails theRequest) {
-		List<T> allEResources = searchAll(theRequest);
+	private List<IBaseResource> searchBy(Function<IBaseResource, InMemoryMatchResult> theMatcher, RequestDetails theRequest) {
+		mySearchCount.incrementAndGet();
+		List<T> allEResources = getAllResources();
+
 		List<T> matches = new ArrayList<>();
 		for (T resource : allEResources) {
 			InMemoryMatchResult result = theMatcher.apply(resource);
@@ -68,6 +70,6 @@ public class SearchableHashMapResourceProvider<T extends IBaseResource> extends 
 				matches.add(resource);
 			}
 		}
-		return matches;
+		return fireInterceptorsAndFilterAsNeeded(matches, theRequest);
 	}
 }

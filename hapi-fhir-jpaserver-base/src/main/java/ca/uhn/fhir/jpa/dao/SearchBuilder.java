@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -88,8 +89,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -122,8 +121,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * The SearchBuilder is responsible for actually forming the SQL query that handles
  * searches for resources
  */
-@Component
-@Scope("prototype")
 public class SearchBuilder implements ISearchBuilder {
 
 	/**
@@ -175,7 +172,7 @@ public class SearchBuilder implements ISearchBuilder {
 	/**
 	 * Constructor
 	 */
-	SearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+	public SearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
@@ -225,7 +222,9 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+		assert theRequestPartitionId != null;
+
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		TypedQuery<Long> query = createQuery(null, null, true, theRequest);
@@ -241,7 +240,9 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+		assert theRequestPartitionId != null;
+
 		init(theParams, theSearchRuntimeDetails.getSearchUuid(), theRequestPartitionId);
 
 		if (myPidSet == null) {
@@ -359,7 +360,7 @@ public class SearchBuilder implements ISearchBuilder {
 				myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
 			}
 			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
-			if (myRequestPartitionId != null) {
+			if (!myRequestPartitionId.isAllPartitions()) {
 				if (myRequestPartitionId.getPartitionId() != null) {
 					myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myPartitionIdValue").as(Integer.class), myRequestPartitionId.getPartitionId()));
 				} else {
@@ -614,19 +615,10 @@ public class SearchBuilder implements ISearchBuilder {
 			theResourceListToPopulate.add(null);
 		}
 
-		/*
-		 * As always, Oracle can't handle things that other databases don't mind.. In this
-		 * case it doesn't like more than ~1000 IDs in a single load, so we break this up
-		 * if it's lots of IDs. I suppose maybe we should be doing this as a join anyhow
-		 * but this should work too. Sigh.
-		 */
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
-		for (int i = 0; i < pids.size(); i += MAXIMUM_PAGE_SIZE) {
-			int to = i + MAXIMUM_PAGE_SIZE;
-			to = Math.min(to, pids.size());
-			List<ResourcePersistentId> pidsSubList = pids.subList(i, to);
-			doLoadPids(pidsSubList, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
-		}
+		new QueryChunker<ResourcePersistentId>().chunk(pids, t->{
+			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
+		});
 
 	}
 
@@ -895,7 +887,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, RequestPartitionId theRequestPartitionId) {
 		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myQueryRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
 
-		if (theRequestPartitionId != null) {
+		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getPartitionId();
 			Predicate predicate = myCriteriaBuilder.equal(join.get("myPartitionIdValue").as(Integer.class), partitionId);
 			myQueryRoot.addPredicate(predicate);
@@ -1276,7 +1268,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return ResourcePersistentId.fromLongList(query.getResultList());
 	}
 
-	private static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
+	static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 }

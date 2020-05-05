@@ -40,7 +40,7 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -156,7 +156,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Autowired
-	private IRequestPartitionHelperService myRequestPartitionHelperService;
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	/**
 	 * Constructor
@@ -514,7 +514,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
 
 			// Hook: STORAGE_PRESHOW_RESOURCES
-			InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
+			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
 			return new SimpleBundleProvider(resources);
 		});
@@ -594,7 +594,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@VisibleForTesting
-	public void setRequestPartitionHelperService(IRequestPartitionHelperService theRequestPartitionHelperService) {
+	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperService) {
 		myRequestPartitionHelperService = theRequestPartitionHelperService;
 	}
 

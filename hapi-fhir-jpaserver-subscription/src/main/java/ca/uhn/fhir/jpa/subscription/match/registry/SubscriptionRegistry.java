@@ -90,10 +90,11 @@ public class SubscriptionRegistry {
 
 		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalized);
 
-		ourLog.info("Registering active subscription {}", subscriptionId);
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, channelName);
 		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
+
+		ourLog.info("Registered active subscription {} - Have {} registered", subscriptionId, myActiveSubscriptionCache.size());
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
 		HookParams params = new HookParams()
@@ -105,10 +106,10 @@ public class SubscriptionRegistry {
 	public void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
 		Validate.notNull(theSubscriptionId);
 
-		ourLog.info("Unregistering active subscription {}", theSubscriptionId);
 		ActiveSubscription activeSubscription = myActiveSubscriptionCache.remove(theSubscriptionId);
 		if (activeSubscription != null) {
 			mySubscriptionChannelRegistry.remove(activeSubscription);
+			ourLog.info("Unregistered active subscription {} - Have {} registered", theSubscriptionId, myActiveSubscriptionCache.size());
 		}
 	}
 

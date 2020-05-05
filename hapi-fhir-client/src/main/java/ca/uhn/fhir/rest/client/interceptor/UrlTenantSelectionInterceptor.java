@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import org.apache.commons.lang3.Validate;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -80,6 +81,10 @@ public class UrlTenantSelectionInterceptor {
 		}
 
 		Validate.isTrue(requestUri.startsWith(serverBase), "Request URI %s does not start with server base %s", requestUri, serverBase);
+
+		if (theRequest.getUrlSource() == UrlSourceEnum.EXPLICIT) {
+			return;
+		}
 
 		String newUri = serverBase + "/" + tenantId + requestUri.substring(serverBase.length());
 		theRequest.setUri(newUri);

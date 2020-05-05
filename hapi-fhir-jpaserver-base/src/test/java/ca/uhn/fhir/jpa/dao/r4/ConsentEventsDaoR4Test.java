@@ -318,7 +318,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
-		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		ourLog.info("Returned values: {}", returnedIdValues);

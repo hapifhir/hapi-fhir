@@ -425,7 +425,7 @@ public enum Pointcut {
 		"java.io.Writer",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-		),
+	),
 
 
 	/**
@@ -1441,7 +1441,7 @@ public enum Pointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.RequestPartitionId</code> or <code>null</code>.
+	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
 	 * </p>
 	 */
 	STORAGE_PARTITION_IDENTIFY_CREATE(
@@ -1480,13 +1480,56 @@ public enum Pointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return an instance of <code>ca.uhn.fhir.jpa.api.model.RequestPartitionId</code> or <code>null</code>.
+	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
 	 * </p>
 	 */
 	STORAGE_PARTITION_IDENTIFY_READ(
 		// Return type
 		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
 		// Params
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before any partition aware FHIR operation, when the selected partition has been identified (ie. after the
+	 * {@link #STORAGE_PARTITION_IDENTIFY_CREATE} or {@link #STORAGE_PARTITION_IDENTIFY_READ} hook was called. This allows
+	 * a separate hook to register, and potentially make decisions about whether the request should be allowed to proceed.
+	 * <p>
+	 * This hook will only be called if
+	 * partitioning is enabled in the JPA server.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.RequestPartitionId - The partition ID that was selected
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return void.
+	 * </p>
+	 */
+	STORAGE_PARTITION_SELECTED(
+		// Return type
+		void.class,
+		// Params
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),

@@ -45,7 +45,7 @@ import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -145,7 +145,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String myResourceName;
 	private Class<T> myResourceType;
 	@Autowired
-	private IRequestPartitionHelperService myRequestPartitionHelperService;
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
@@ -216,7 +216,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
 		}
 
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequestDetails, theResource);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequestDetails, theResource, getResourceName());
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing, theUpdateTimestamp, theRequestDetails, requestPartitionId);
 	}
 
@@ -685,11 +685,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "noSystemOrTypeHistoryForPartitionAwareServer");
-			throw new MethodNotAllowedException(msg);
-		}
-
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.HISTORY_TYPE, requestDetails);
@@ -1005,19 +1000,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		@Nullable RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
 		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, getResourceName(), theId.getIdPart());
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 
 		// Verify that the resource is for the correct partition
-		if (requestPartitionId != null) {
+		if (!requestPartitionId.isAllPartitions()) {
 			if (requestPartitionId.getPartitionId() == null) {
-				if (entity.getPartitionId() != null) {
+				if (entity.getPartitionId().getPartitionId() != null) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
 					entity = null;
 				}
-			} else if (entity.getPartitionId() != null) {
-				if (!entity.getPartitionId().getPartitionId().equals(requestPartitionId.getPartitionId())) {
+			} else if (entity.getPartitionId().getPartitionId() != null) {
+				if (!requestPartitionId.getPartitionId().equals(entity.getPartitionId().getPartitionId())) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
 					entity = null;
 				}
@@ -1314,7 +1309,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			 */
 			resourceId = theResource.getIdElement();
 
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource);
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource, getResourceName());
 			try {
 				entity = readEntityLatestVersion(resourceId, requestPartitionId);
 			} catch (ResourceNotFoundException e) {

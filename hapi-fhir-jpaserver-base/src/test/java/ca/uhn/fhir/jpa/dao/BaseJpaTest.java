@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -119,6 +120,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	protected IPartitionLookupSvc myPartitionConfigSvc;
+	@Autowired
+	private IdHelperService myIdHelperService;
 
 	@After
 	public void afterPerformCleanup() {
@@ -129,6 +132,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myPartitionConfigSvc != null) {
 			myPartitionConfigSvc.clearCaches();
 		}
+		if (myIdHelperService != null) {
+			myIdHelperService.clearCache();
+		}
+
 	}
 
 	@After

@@ -211,7 +211,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		// Resources by ID
-		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, targetIds, theRequest);
+		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, targetIds);
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
 			Predicate pathPredicate;
@@ -575,7 +575,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				if (nextParamDef != null) {
 
 					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-						if (theRequestPartitionId == null) {
+						if (theRequestPartitionId.isAllPartitions()) {
 							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
 						}
 					}

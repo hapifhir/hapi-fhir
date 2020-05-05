@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.partition;
  */
 
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public interface IPartitionLookupSvc {
 
@@ -30,11 +31,14 @@ public interface IPartitionLookupSvc {
 	void start();
 
 	/**
-	 * @throws IllegalArgumentException If the name is not known
+	 * @throws ResourceNotFoundException If the name is not known
 	 */
-	PartitionEntity getPartitionByName(String theName) throws IllegalArgumentException;
+	PartitionEntity getPartitionByName(String theName) throws ResourceNotFoundException;
 
-	PartitionEntity getPartitionById(Integer theId);
+	/**
+	 * @throws ResourceNotFoundException If the ID is not known
+	 */
+	PartitionEntity getPartitionById(Integer theId) throws ResourceNotFoundException;
 
 	void clearCaches();
 

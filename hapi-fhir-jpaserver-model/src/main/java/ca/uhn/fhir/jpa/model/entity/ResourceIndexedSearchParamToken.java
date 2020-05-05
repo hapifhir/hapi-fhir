@@ -38,7 +38,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -248,6 +247,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append("paramName", getParamName());
 		b.append("system", getSystem());
 		b.append("value", getValue());
+		b.append("hashIdentity", myHashIdentity);
 		return b.build();
 	}
 

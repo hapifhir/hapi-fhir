@@ -55,6 +55,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -186,7 +188,7 @@ public class SearchParamExtractorService {
 		theEntity.setHasLinks(theParams.myLinks.size() > 0);
 	}
 
-	private void extractResourceLinks(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
+	private void extractResourceLinks(@NotNull RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
 		IBaseReference nextReference = thePathAndRef.getRef();
 		IIdType nextId = nextReference.getReferenceElement();
 		String path = thePathAndRef.getPath();
@@ -288,7 +290,7 @@ public class SearchParamExtractorService {
 		theParams.myLinks.add(resourceLink);
 	}
 
-	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(RequestPartitionId theRequestPartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
+	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, Map<String, IResourceLookup> theResourceIdToResolvedTarget) {
 		/*
 		 * We keep a cache of resolved target resources. This is good since for some resource types, there
 		 * are multiple search parameters that map to the same element path within a resource (e.g.
@@ -298,7 +300,7 @@ public class SearchParamExtractorService {
 
 		RequestPartitionId targetRequestPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.getAllowReferencesAcrossPartitions() == PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
-			targetRequestPartitionId = null;
+			targetRequestPartitionId = RequestPartitionId.allPartitions();
 		}
 
 		String key = RequestPartitionId.stringifyForKey(targetRequestPartitionId) + "/" + theNextId.getValue();

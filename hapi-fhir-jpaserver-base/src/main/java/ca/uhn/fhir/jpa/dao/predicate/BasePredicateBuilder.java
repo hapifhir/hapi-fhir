@@ -131,7 +131,7 @@ abstract class BasePredicateBuilder {
 	}
 
 	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin, RequestPartitionId theRequestPartitionId) {
-		if (theRequestPartitionId != null) {
+		if (!theRequestPartitionId.isAllPartitions()) {
 			if (theRequestPartitionId.getPartitionId() != null) {
 				myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue"), theRequestPartitionId.getPartitionId()));
 			} else {
@@ -224,7 +224,7 @@ abstract class BasePredicateBuilder {
 	}
 
 	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, From<?, ? extends BasePartitionable> theJoin, List<Predicate> theCodePredicates) {
-		if (theRequestPartitionId != null) {
+		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getPartitionId();
 			Predicate partitionPredicate;
 			if (partitionId != null) {
