@@ -1,11 +1,26 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
+import ca.uhn.fhir.context.RuntimeChildDirectResource;
+import ca.uhn.fhir.context.RuntimeChildExtension;
+import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,29 +45,30 @@ public class SearchParamExtractorMegaTest {
 
 	/**
 	 * This test is my magnum opus :P
-	 *
+	 * <p>
 	 * It navigates almost every possible path in every FHIR resource in every version of FHIR,
 	 * and creates a resource with that path populated, just to ensure that we can index it
 	 * without generating any warnings.
 	 */
 	@Test
 	public void testAllCombinations() throws Exception {
+		PartitionSettings partitionSettings = new PartitionSettings();
 
 		FhirContext ctx = FhirContext.forDstu2();
 		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu2(ctx, searchParamRegistry, new ModelConfig(), new PartitionSettings()).setPartitionConfigForUnitTest(new PartitionSettings()));
+		process(ctx, new SearchParamExtractorDstu2(new ModelConfig(), partitionSettings, ctx, searchParamRegistry));
 
 		ctx = FhirContext.forDstu3();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu3(new ModelConfig(), ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry, new PartitionSettings()).setPartitionConfigForUnitTest(new PartitionSettings()));
+		process(ctx, new SearchParamExtractorDstu3(new ModelConfig(), partitionSettings, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 
 		ctx = FhirContext.forR4();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR4(new ModelConfig(), ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry, new PartitionSettings()).setPartitionConfigForUnitTest(new PartitionSettings()));
+		process(ctx, new SearchParamExtractorR4(new ModelConfig(), partitionSettings, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 
 		ctx = FhirContext.forR5();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR5(ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry, new ModelConfig(), new PartitionSettings()).setPartitionConfigForUnitTest(new PartitionSettings()));
+		process(ctx, new SearchParamExtractorR5(new ModelConfig(), partitionSettings, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
 	}
 
 	private void process(FhirContext theCtx, BaseSearchParamExtractor theExtractor) throws Exception {
@@ -74,7 +90,6 @@ public class SearchParamExtractorMegaTest {
 		if (theElementDef.getName().equals("ElementDefinition")) {
 			return;
 		}
-
 
 
 		theElementStack.add(theElementDef);
@@ -137,7 +152,7 @@ public class SearchParamExtractorMegaTest {
 			BaseRuntimeElementDefinition nextElement = theElementStack.get(i);
 
 			if (i > 0) {
-				previousChildArguments = theChildStack.get(i-1).getInstanceConstructorArguments();
+				previousChildArguments = theChildStack.get(i - 1).getInstanceConstructorArguments();
 			}
 
 			IBase nextObject = nextElement.newInstance(previousChildArguments);

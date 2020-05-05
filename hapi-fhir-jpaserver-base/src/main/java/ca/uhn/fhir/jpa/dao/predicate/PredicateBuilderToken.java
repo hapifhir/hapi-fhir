@@ -28,8 +28,10 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -39,6 +41,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import com.google.common.collect.Sets;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
@@ -72,6 +75,8 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 	private ITermReadSvc myTerminologySvc;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	PredicateBuilderToken(SearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
 		super(theSearchBuilder);
@@ -99,6 +104,20 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			if (nextOr instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextOr;
 				if (id.isText()) {
+
+					// Check whether the :text modifier is actually enabled here
+					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+					boolean tokenTextIndexingEnabled = BaseSearchParamExtractor.tokenTextIndexingEnabledForSearchParam(myModelConfig, param);
+					if (!tokenTextIndexingEnabled) {
+						String msg;
+						if (myModelConfig.isSuppressStringIndexingInTokens()) {
+							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForServer");
+						}else{
+							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
+						}
+						throw new MethodNotAllowedException(msg);
+					}
+
 					myPredicateBuilder.addPredicateString(theResourceName, theParamName, theList, theRequestPartitionId);
 					break;
 				}
