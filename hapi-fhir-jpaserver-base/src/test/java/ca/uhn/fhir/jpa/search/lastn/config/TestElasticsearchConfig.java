@@ -47,9 +47,9 @@ public class TestElasticsearchConfig {
 		return embeddedElastic;
 	}
 
-	@PreDestroy
-	public void stop() {
-		embeddedElasticSearch().stop();
-	}
+//	@PreDestroy
+//	public void stop() {
+//		embeddedElasticSearch().stop();
+//	}
 
 }

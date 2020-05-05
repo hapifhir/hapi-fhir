@@ -351,16 +351,19 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 				}
 				Integer myMaxObservationsPerCode = null;
-				String[] maxCountParams = theRequest.getParameters().get("max");
-				if (maxCountParams != null && maxCountParams.length > 0) {
-					myMaxObservationsPerCode = Integer.valueOf(maxCountParams[0]);
+//				String[] maxCountParams = theRequest.getParameters().get("max");
+//				if (maxCountParams != null && maxCountParams.length > 0) {
+//					myMaxObservationsPerCode = Integer.valueOf(maxCountParams[0]);
+				if(myParams.getLastNMax() != null) {
+					myMaxObservationsPerCode = myParams.getLastNMax();
 				} else {
 					throw new InvalidRequestException("Max parameter is required for $lastn operation");
 				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
-				for (String lastnResourceId : lastnResourceIds) {
-					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
-				}
+//				for (String lastnResourceId : lastnResourceIds) {
+//					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
+//				}
+				pids = normalizeIdListForLastNInClause(lastnResourceIds);
 			}
 			if (pids.isEmpty()) {
 				// Will never match
@@ -409,6 +412,50 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		return query;
+	}
+
+	private List<ResourcePersistentId> normalizeIdListForLastNInClause(List<String> lastnResourceIds) {
+		List<ResourcePersistentId> retVal = new ArrayList<>();
+		for (String lastnResourceId : lastnResourceIds) {
+			retVal.add(new ResourcePersistentId(Long.parseLong(lastnResourceId)));
+		}
+
+		/*
+			The following is a workaround to a known issue involving Hibernate. If queries are used with "in" clauses with large and varying
+			numbers of parameters, this can overwhelm Hibernate's QueryPlanCache and deplete heap space. See the following link for more info:
+			https://stackoverflow.com/questions/31557076/spring-hibernate-query-plan-cache-memory-usage.
+
+			Normalizing the number of parameters in the "in" clause stabilizes the size of the QueryPlanCache, so long as the number of
+			arguments never exceeds the maximum specified below.
+		 */
+		int listSize = retVal.size();
+		if(listSize > 1 && listSize < 10) {
+			padIdListWithPlaceholders(retVal, 10);
+		} else if (listSize > 10 && listSize < 100) {
+			padIdListWithPlaceholders(retVal, 100);
+		} else if (listSize > 100 && listSize < 200) {
+			padIdListWithPlaceholders(retVal, 200);
+		} else if (listSize > 200 && listSize < 500) {
+			padIdListWithPlaceholders(retVal, 500);
+		} else if (listSize > 500 && listSize < 1000) {
+			padIdListWithPlaceholders(retVal, 1000);
+		} else if (listSize > 1000 && listSize < 500) {
+			padIdListWithPlaceholders(retVal, 5000);
+		} else if (listSize > 5000 && listSize < 10000) {
+			padIdListWithPlaceholders(retVal, 10000);
+		} else if (listSize > 10000 && listSize < 20000) {
+			padIdListWithPlaceholders(retVal, 20000);
+		}  else if (listSize > 20000 && listSize < 30000) {
+			padIdListWithPlaceholders(retVal, 30000);
+		}
+
+		return retVal;
+	}
+
+	private void padIdListWithPlaceholders(List<ResourcePersistentId> theIdList, int preferredListSize) {
+		while(theIdList.size() < preferredListSize) {
+			theIdList.add(new ResourcePersistentId(-1L));
+		}
 	}
 
 	/**
@@ -1190,7 +1237,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 
-			Query<Long> hibernateQuery = (Query<Long>) query;
+				Query<Long> hibernateQuery = (Query<Long>) query;
 			hibernateQuery.setFetchSize(myFetchSize);
 			ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 			myResultsIterator = new ScrollableResultsIterator<>(scroll);

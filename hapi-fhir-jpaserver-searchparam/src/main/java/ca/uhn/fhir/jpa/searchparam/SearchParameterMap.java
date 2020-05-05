@@ -62,6 +62,7 @@ public class SearchParameterMap implements Serializable {
 	private SearchTotalModeEnum mySearchTotalMode;
 	private QuantityParam myNearDistanceParam;
 	private boolean myLastN;
+	private Integer myLastNMax;
 
 	/**
 	 * Constructor
@@ -318,6 +319,24 @@ public class SearchParameterMap implements Serializable {
 	 */
 	public SearchParameterMap setLastN(boolean theLastN) {
 		myLastN = theLastN;
+		return this;
+	}
+
+
+	/**
+	 * If set, tells the server the maximum number of observations to return for each
+	 * observation code in the result set of a lastn operation
+	 */
+	public Integer getLastNMax() {
+		return myLastNMax;
+	}
+
+	/**
+	 * If set, tells the server the maximum number of observations to return for each
+	 * observation code in the result set of a lastn operation
+	 */
+	public SearchParameterMap setLastNMax(Integer theLastNMax) {
+		myLastNMax = theLastNMax;
 		return this;
 	}
 

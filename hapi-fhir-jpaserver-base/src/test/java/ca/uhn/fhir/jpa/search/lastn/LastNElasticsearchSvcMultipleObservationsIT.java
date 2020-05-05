@@ -56,23 +56,40 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	}
 
 	@Test
-	public void testLastNNoCriteriaQuery() {
+	public void testLastNAllPatientsQuery() {
 
 		// execute Observation ID search (Composite Aggregation) last 3 observations for each patient
-		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(null, 3);
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "0");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "1");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "2");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "3");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "4");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "5");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "6");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "7");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "8");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		subjectParam = new ReferenceParam("Patient", "", "9");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
 
-		validateQueryResponse(observations);
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, 3);
 
-	}
-
-	private void validateQueryResponse(List<ObservationJson> observationIdsOnly) {
-		assertEquals(60, observationIdsOnly.size());
+		assertEquals(60, observations.size());
 
 		// Observation documents should be grouped by subject, then by observation code, and then sorted by effective date/time
 		// within each observation code. Verify the grouping by creating a nested Map.
 		Map<String, Map<String, List<Date>>> queriedPatientObservationMap = new HashMap<>();
 		ObservationJson previousObservationJson = null;
-		for (ObservationJson observationJson : observationIdsOnly) {
+		for (ObservationJson observationJson : observations) {
 			assertNotNull(observationJson.getIdentifier());
 			assertNotNull(observationJson.getSubject());
 			assertNotNull(observationJson.getCode_concept_id());
@@ -372,5 +389,20 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		}
 
 	}
+
+	@Test
+	public void testLastNNoParamsQuery() {
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, 1);
+
+		assertEquals(2, observations.size());
+
+		String observationCode1 = observations.get(0).getCode_coding_code_system_hash();
+		String observationCode2 = observations.get(1).getCode_coding_code_system_hash();
+
+		assertNotEquals(observationCode1, observationCode2);
+
+	}
+
 
 }

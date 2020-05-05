@@ -79,6 +79,8 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	private final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	private final String CODEFIRSTCODINGCODE = "test-code";
 
+	private ReferenceAndListParam multiSubjectParams = null;
+
 	@Test
 	public void testIndexObservationSingle() {
 		indexSingleObservation();
@@ -177,6 +179,8 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		// Check that all observations were indexed.
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);
+		//searchParameterMap.
 		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
 		assertEquals(100, observationIdsOnly.size());
 
@@ -223,9 +227,13 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		categoryCodeableConcept2.setCoding(category2);
 		categoryConcepts2.add(categoryCodeableConcept2);
 
+		ReferenceOrListParam subjectParams = new ReferenceOrListParam();
 		for (int patientCount = 0; patientCount < 10; patientCount++) {
 
 			String subjectId = String.valueOf(patientCount);
+
+			ReferenceParam subjectParam = new ReferenceParam("Patient", "", subjectId);
+			subjectParams.addOr(subjectParam);
 
 			for (int entryCount = 0; entryCount < 10; entryCount++) {
 
@@ -254,6 +262,9 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 			}
 
 		}
+
+		multiSubjectParams = new ReferenceAndListParam().addAnd(subjectParams);
+
 	}
 
 	@Test
@@ -265,6 +276,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		assertNotNull(observation);
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);
 		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
 		assertEquals(100, observationIdsOnly.size());
 		assertTrue(observationIdsOnly.contains("55"));

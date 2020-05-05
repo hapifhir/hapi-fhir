@@ -38,7 +38,7 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		if (theSearchParameterMap.getSort() == null) {
 			SortSpec effectiveDtm = new SortSpec("date").setOrder(SortOrderEnum.DESC);
 			SortSpec observationCode = new SortSpec(IndexConstants.CODE_SEARCH_PARAM).setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
-			theSearchParameterMap.setSort(new SortSpec(IndexConstants.SUBJECT_SEARCH_PARAM).setChain(observationCode));
+			theSearchParameterMap.setSort(new SortSpec(IndexConstants.SUBJECT_SEARCH_PARAM).setOrder(SortOrderEnum.ASC).setChain(observationCode));
 		}
 	}
 

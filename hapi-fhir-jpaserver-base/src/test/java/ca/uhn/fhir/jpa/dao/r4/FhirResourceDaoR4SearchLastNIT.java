@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.*;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -57,6 +58,8 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 		return myPlatformTransactionManager;
 	}
 
+	ObservationResourceProvider observationRp = new ObservationResourceProvider();
+
 	private final String observationCd0 = "code0";
 	private final String observationCd1 = "code1";
 	private final String observationCd2 = "code2";
@@ -101,6 +104,8 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 			dataLoaded = true;
 		}
 
+		observationRp.setDao(myObservationDao);
+
 	}
 
 	private void createObservationsForPatient(IIdType thePatientId) {
@@ -138,9 +143,13 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 	}
 
 	@Test
-	public void testLastNNoParams() {
+	public void testLastNAllPatients() {
 
 		SearchParameterMap params = new SearchParameterMap();
+		ReferenceParam subjectParam1 = new ReferenceParam("Patient", "", patient0Id.getValue());
+		ReferenceParam subjectParam2 = new ReferenceParam("Patient", "", patient1Id.getValue());
+		ReferenceParam subjectParam3 = new ReferenceParam("Patient", "", patient2Id.getValue());
+		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam1, subjectParam2, subjectParam3));
 
 		List<String> sortedPatients = new ArrayList<>();
 		sortedPatients.add(patient0Id.getValue());
@@ -155,14 +164,39 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 		executeTestCase(params, sortedPatients, sortedObservationCodes, null,90);
 	}
 
+	@Test
+	public void testLastNNoPatients() {
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLastNMax(1);
+
+		List<String> sortedPatients = new ArrayList<>();
+
+		List<String> sortedObservationCodes = new ArrayList<>();
+		sortedObservationCodes.add(observationCd0);
+		sortedObservationCodes.add(observationCd1);
+		sortedObservationCodes.add(observationCd2);
+
+//		executeTestCase(params, sortedPatients, sortedObservationCodes, null,3);
+		params.setLastN(true);
+		Map<String, String[]> requestParameters = new HashMap<>();
+		when(mySrd.getParameters()).thenReturn(requestParameters);
+
+		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(),null));
+
+		assertEquals(3, actual.size());
+	}
+
 	private void executeTestCase(SearchParameterMap params, List<String> sortedPatients, List<String> sortedObservationCodes, List<String> theCategories, int expectedObservationCount) {
 		List<String> actual;
 		params.setLastN(true);
 
 		Map<String, String[]> requestParameters = new HashMap<>();
-		String[] maxParam = new String[1];
-		maxParam[0] = "100";
-		requestParameters.put("max", maxParam);
+//		String[] maxParam = new String[1];
+//		maxParam[0] = "100";
+//		requestParameters.put("max", maxParam);
+		params.setLastNMax(100);
+
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
 		actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(),null));
@@ -297,6 +331,11 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 
 		// One category parameter.
 		SearchParameterMap params = new SearchParameterMap();
+		ReferenceParam subjectParam1 = new ReferenceParam("Patient", "", patient0Id.getValue());
+		ReferenceParam subjectParam2 = new ReferenceParam("Patient", "", patient1Id.getValue());
+		ReferenceParam subjectParam3 = new ReferenceParam("Patient", "", patient2Id.getValue());
+		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam1, subjectParam2, subjectParam3));
+
 		TokenParam categoryParam = new TokenParam(categorySystem, categoryCd0);
 		params.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
 		List<String> myCategories = new ArrayList<>();
@@ -315,6 +354,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 
 		// Another category parameter.
 		params = new SearchParameterMap();
+		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam1, subjectParam2, subjectParam3));
 		categoryParam = new TokenParam(categorySystem, categoryCd2);
 		params.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
 		myCategories = new ArrayList<>();
@@ -333,6 +373,11 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 
 		// Two category parameters.
 		SearchParameterMap params = new SearchParameterMap();
+		ReferenceParam subjectParam1 = new ReferenceParam("Patient", "", patient0Id.getValue());
+		ReferenceParam subjectParam2 = new ReferenceParam("Patient", "", patient1Id.getValue());
+		ReferenceParam subjectParam3 = new ReferenceParam("Patient", "", patient2Id.getValue());
+		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam1, subjectParam2, subjectParam3));
+
 		TokenParam categoryParam1 = new TokenParam(categorySystem, categoryCd0);
 		TokenParam categoryParam2 = new TokenParam(categorySystem, categoryCd1);
 		params.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam1, categoryParam2));
@@ -357,6 +402,11 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 
 		// One code parameter.
 		SearchParameterMap params = new SearchParameterMap();
+		ReferenceParam subjectParam1 = new ReferenceParam("Patient", "", patient0Id.getValue());
+		ReferenceParam subjectParam2 = new ReferenceParam("Patient", "", patient1Id.getValue());
+		ReferenceParam subjectParam3 = new ReferenceParam("Patient", "", patient2Id.getValue());
+		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam1, subjectParam2, subjectParam3));
+
 		TokenParam code = new TokenParam(codeSystem, observationCd0);
 		params.add(Observation.SP_CODE, buildTokenAndListParam(code));
 		List<String> sortedObservationCodes = new ArrayList<>();
@@ -371,6 +421,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 
 		// Another code parameter.
 		params = new SearchParameterMap();
+		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam1, subjectParam2, subjectParam3));
 		code = new TokenParam(codeSystem, observationCd2);
 		params.add(Observation.SP_CODE, buildTokenAndListParam(code));
 		sortedObservationCodes = new ArrayList<>();
@@ -385,6 +436,11 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 
 		// Two code parameters.
 		SearchParameterMap params = new SearchParameterMap();
+		ReferenceParam subjectParam1 = new ReferenceParam("Patient", "", patient0Id.getValue());
+		ReferenceParam subjectParam2 = new ReferenceParam("Patient", "", patient1Id.getValue());
+		ReferenceParam subjectParam3 = new ReferenceParam("Patient", "", patient2Id.getValue());
+		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam1, subjectParam2, subjectParam3));
+
 		TokenParam codeParam1 = new TokenParam(codeSystem, observationCd0);
 		TokenParam codeParam2 = new TokenParam(codeSystem, observationCd1);
 		params.add(Observation.SP_CODE, buildTokenAndListParam(codeParam1, codeParam2));
