@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
+import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -25,6 +26,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_EMPI_MANAGED;
 import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_EMPI_MANAGED;
@@ -167,5 +169,19 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage(), is(equalTo("While running in stric EID mode, EIDs may not be updated on Patient/Practitioner resources")));
 		}
+	}
+
+	@Test
+	public void testWhenASingularPatientUpdatesExternalEidThatPersonEidIsUpdated() throws InterruptedException {
+		Patient jane = addExternalEID(buildJanePatient(), "some_eid");
+		EmpiHelperR4.OutcomeAndLogMessageWrapper latch = myEmpiHelper.createWithLatch(jane);
+		jane.setId(latch.getDaoMethodOutcome().getId());
+		clearExternalEIDs(jane);
+		jane = addExternalEID(jane, "some_new_eid");
+		EmpiHelperR4.OutcomeAndLogMessageWrapper outcomeWrapper = myEmpiHelper.updateWithLatch(jane);
+		Person person = getPersonFromTarget(jane);
+		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(person);
+		assertThat(externalEids, hasSize(1));
+		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));
 	}
 }

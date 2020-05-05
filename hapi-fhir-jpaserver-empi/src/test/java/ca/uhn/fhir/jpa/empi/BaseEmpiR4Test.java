@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
+import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
@@ -76,6 +77,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected IEmpiSettings myEmpiConfig;
 	@Autowired
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
+	@Autowired
+	protected EIDHelper myEIDHelper;
 
 	@After
 	public void after() {
