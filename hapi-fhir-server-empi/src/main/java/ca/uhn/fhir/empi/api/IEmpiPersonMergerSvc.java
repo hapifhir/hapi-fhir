@@ -1,6 +1,6 @@
 package ca.uhn.fhir.empi.api;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IEmpiPersonMergerSvc {
 	/**
@@ -10,5 +10,5 @@ public interface IEmpiPersonMergerSvc {
 	 * @param thePersonToKeep the person we are merging to
 	 * @return updated thePersonToKeep with the merged fields and links.
 	 */
-	IBaseResource mergePersons(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep);
+	IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep);
 }

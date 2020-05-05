@@ -249,6 +249,7 @@ public class PersonHelper {
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
+
 	private void copyR4TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
 		Person person = (Person) thePerson;
 		switch (myFhirContext.getResourceType(theBaseResource)) {
@@ -401,5 +402,63 @@ public class PersonHelper {
 		return !firstEids.isEmpty() && !secondEids.isEmpty() && !myEIDHelper.eidMatchExists(firstEids, secondEids);
 	}
 
+	public void mergePersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				mergeR4PersonFields(thePersonToDelete, thePersonToKeep);
+				break;
+			case DSTU3:
+				mergeDstu3PersonFields(thePersonToDelete, thePersonToKeep);
+				break;
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
+	}
 
+	private void mergeR4PersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
+		Person fromPerson = (Person)thePersonToDelete;
+		Person toPerson = (Person)thePersonToKeep;
+		if (!toPerson.hasName()) {
+			toPerson.setName(fromPerson.getName());
+		}
+		if (!toPerson.hasAddress()) {
+			toPerson.setAddress(fromPerson.getAddress());
+		}
+		if (!toPerson.hasTelecom()) {
+			toPerson.setTelecom(fromPerson.getTelecom());
+		}
+		if (!toPerson.hasBirthDate()) {
+			toPerson.setBirthDate(fromPerson.getBirthDate());
+		}
+		if (!toPerson.hasGender()) {
+			toPerson.setGender(fromPerson.getGender());
+		}
+		if (!toPerson.hasPhoto()) {
+			toPerson.setPhoto(fromPerson.getPhoto());
+		}
+	}
+
+
+	private void mergeDstu3PersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
+		org.hl7.fhir.dstu3.model.Person fromPerson = (org.hl7.fhir.dstu3.model.Person)thePersonToDelete;
+		org.hl7.fhir.dstu3.model.Person toPerson = (org.hl7.fhir.dstu3.model.Person)thePersonToKeep;
+		if (!toPerson.hasName()) {
+			toPerson.setName(fromPerson.getName());
+		}
+		if (!toPerson.hasAddress()) {
+			toPerson.setAddress(fromPerson.getAddress());
+		}
+		if (!toPerson.hasTelecom()) {
+			toPerson.setTelecom(fromPerson.getTelecom());
+		}
+		if (!toPerson.hasBirthDate()) {
+			toPerson.setBirthDate(fromPerson.getBirthDate());
+		}
+		if (!toPerson.hasGender()) {
+			toPerson.setGender(fromPerson.getGender());
+		}
+		if (!toPerson.hasPhoto()) {
+			toPerson.setPhoto(fromPerson.getPhoto());
+		}
+	}
 }

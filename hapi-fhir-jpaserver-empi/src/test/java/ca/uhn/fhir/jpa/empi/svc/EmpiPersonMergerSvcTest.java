@@ -1,15 +1,23 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -19,28 +27,68 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public static final String GIVEN_NAME = "Jenn";
 	public static final String FAMILY_NAME = "Chan";
 	public static final String POSTAL_CODE = "M6G 1B4";
-	@Autowired
-	EmpiPersonMergerSvcImpl myEmpiPersonMergerSvc;
+	private static final String BAD_GIVEN_NAME = "Bob";
 
+	@Autowired
+	IEmpiPersonMergerSvc myEmpiPersonMergerSvc;
+
+	private Person myDeletePerson;
+	private Person myKeepPerson;
+	private IdType myDeletePersonId;
+	private IdType myKeepPersonId;
+	private Long myKeepPersonPid;
+
+	@Before
+	public void before() {
+		myDeletePerson = createPerson();
+		myDeletePersonId = myDeletePerson.getIdElement().toUnqualifiedVersionless();
+		myKeepPerson = createPerson();
+		myKeepPersonId = myKeepPerson.getIdElement().toUnqualifiedVersionless();
+		myKeepPersonPid = myIdHelperService.getPidOrThrowException(myKeepPersonId);
+	}
+	
 	@Test
 	public void emptyMerge() {
-		Person deletePerson = createPerson();
-		Person keepPerson = createPerson();
-		Person returnedPerson = (Person) myEmpiPersonMergerSvc.mergePersons(deletePerson, keepPerson);
-		assertEquals(keepPerson.getIdElement(), returnedPerson.getIdElement());
-		assertThat(returnedPerson, is(samePersonAs(returnedPerson)));
+		Person mergedPerson = (Person) myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		assertEquals(myKeepPerson.getIdElement(), mergedPerson.getIdElement());
+		assertThat(mergedPerson, is(samePersonAs(mergedPerson)));
 	}
 
 	@Test
 	public void fullDeleteEmptyKeep() {
-		Person deletePerson = createPerson();
-		populatePerson(deletePerson);
-		Person keepPerson = createPerson();
-		Person returnedPerson = (Person) myEmpiPersonMergerSvc.mergePersons(deletePerson, keepPerson);
-		HumanName returnedName = returnedPerson.getNameFirstRep();
+		populatePerson(myDeletePerson);
+
+		Person mergedPerson = (Person) myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		HumanName returnedName = mergedPerson.getNameFirstRep();
 		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
 		assertEquals(FAMILY_NAME, returnedName.getFamily());
-		assertEquals(POSTAL_CODE, returnedPerson.getAddressFirstRep().getPostalCode());
+		assertEquals(POSTAL_CODE, mergedPerson.getAddressFirstRep().getPostalCode());
+	}
+
+	@Test
+	public void emptyDeleteFullKeep() {
+		myDeletePerson.getName().add(new HumanName().addGiven(BAD_GIVEN_NAME));
+		populatePerson(myKeepPerson);
+
+		Person mergedPerson = (Person) myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		HumanName returnedName = mergedPerson.getNameFirstRep();
+		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
+		assertEquals(FAMILY_NAME, returnedName.getFamily());
+		assertEquals(POSTAL_CODE, mergedPerson.getAddressFirstRep().getPostalCode());
+	}
+
+	@Test
+	public void deleteLinkKeepNoLink() {
+		Patient targetPatient = createPatient();
+		Long patientPid = myIdHelperService.getPidOrThrowException(targetPatient.getIdElement());
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(myDeletePerson, targetPatient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, null);
+
+		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		assertEquals(1, links.size());
+		EmpiLink link = links.get(0);
+		assertEquals(myKeepPersonPid, link.getPersonPid());
+		assertEquals(patientPid, link.getTargetPid());
 	}
 
 	private void populatePerson(Person thePerson) {

@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,8 +126,12 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.findAll(example);
 	}
 
-	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theBaseResource) {
-		EmpiLink empiLink = new EmpiLink().setTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
+	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theTargetResource) {
+		@Nullable Long pid = myIdHelperService.getPidOrNull(theTargetResource);
+		if (pid == null) {
+			return Optional.empty();
+		}
+		EmpiLink empiLink = new EmpiLink().setTargetPid(pid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findOne(example);
 	}
@@ -147,5 +152,19 @@ public class EmpiLinkDaoSvc {
 			ourLog.info("Removed {} references to {}", removed, theResource.getIdElement());
 		}
 		return removed;
+	}
+
+	public List<EmpiLink> findEmpiLinksByPersonId(IBaseResource thePersonResource) {
+		@Nullable Long pid = myIdHelperService.getPidOrNull(thePersonResource);
+		if (pid == null) {
+			return Collections.emptyList();
+		}
+		EmpiLink empiLink = new EmpiLink().setPersonPid(pid);
+		Example<EmpiLink> example = Example.of(empiLink);
+		return myEmpiLinkDao.findAll(example);
+	}
+
+	public void update(EmpiLink theEmpiLink) {
+		myEmpiLinkDao.save(theEmpiLink);
 	}
 }
