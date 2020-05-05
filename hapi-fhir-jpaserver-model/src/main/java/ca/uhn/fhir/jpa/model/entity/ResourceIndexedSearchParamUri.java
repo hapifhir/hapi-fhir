@@ -30,7 +30,15 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.search.annotations.Field;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -87,6 +95,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setUri(theUri);
+		calculateHashes();
 	}
 
 	@Override
@@ -100,20 +109,12 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
-		if (myHashUri == null && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			String uri = getUri();
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-			setHashUri(calculateHashUri(getPartitionSettings(), getPartitionId(), resourceType, paramName, uri));
-		}
-	}
-
-	@Override
-	protected void clearHashes() {
-		myHashUri = null;
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		String uri = getUri();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+		setHashUri(calculateHashUri(getPartitionSettings(), getPartitionId(), resourceType, paramName, uri));
 	}
 
 	@Override
@@ -138,7 +139,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	private Long getHashIdentity() {
-		calculateHashes();
 		return myHashIdentity;
 	}
 
@@ -147,7 +147,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	public Long getHashUri() {
-		calculateHashes();
 		return myHashUri;
 	}
 
@@ -182,6 +181,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getParamName());
 		b.append(getUri());
 		b.append(getHashUri());
+		b.append(getHashIdentity());
 		return b.toHashCode();
 	}
 
