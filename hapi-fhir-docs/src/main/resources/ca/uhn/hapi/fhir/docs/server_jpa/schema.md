@@ -39,7 +39,7 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
             <td>Integer</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                This is the optional partition ID, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.  
             </td>        
         </tr>
         <tr>
@@ -48,7 +48,7 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
             <td>Timestamp</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                This is the optional partition date, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.  
             </td>        
         </tr>
         <tr>
@@ -154,7 +154,7 @@ The complete raw contents of the resource is stored in the `RES_TEXT` column, us
             <td>Integer</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                This is the optional partition ID, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.  
             </td>        
         </tr>
         <tr>
@@ -163,7 +163,7 @@ The complete raw contents of the resource is stored in the `RES_TEXT` column, us
             <td>Timestamp</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                This is the optional partition date, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.  
             </td>        
         </tr>
         <tr>
@@ -263,7 +263,7 @@ If the server has been configured with a [Resource Server ID Strategy](/apidocs/
             <td>Integer</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                This is the optional partition ID, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.  
             </td>        
         </tr>
         <tr>
@@ -272,7 +272,7 @@ If the server has been configured with a [Resource Server ID Strategy](/apidocs/
             <td>Timestamp</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                This is the optional partition date, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.  
             </td>        
         </tr>
         <tr>
@@ -332,7 +332,7 @@ When a resource is created or updated, it is indexed for searching. Any search p
             <td>Integer</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.
+                This is the optional partition ID, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.
                 Note that the partition indicated by the <b>PARTITION_ID</b> and <b>PARTITION_DATE</b> columns refers to the partition
                 of the <i>SOURCE</i> resource, and not necessarily the <i>TARGET</i>.  
             </td>
@@ -343,7 +343,7 @@ When a resource is created or updated, it is indexed for searching. Any search p
             <td>Timestamp</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                This is the optional partition date, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.  
                 Note that the partition indicated by the <b>PARTITION_ID</b> and <b>PARTITION_DATE</b> columns refers to the partition
                 of the <i>SOURCE</i> resource, and not necessarily the <i>TARGET</i>.  
             </td>        
@@ -448,7 +448,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>Integer</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition ID, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.
+                This is the optional partition ID, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.
                 Note that the partition indicated by the <b>PARTITION_ID</b> and <b>PARTITION_DATE</b> columns refers to the partition
                 of the <i>SOURCE</i> resource, and not necessarily the <i>TARGET</i>.  
             </td>
@@ -459,7 +459,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>Timestamp</td>
             <td>Nullable</td>
             <td>
-                This is the optional partition date, if the resource is in a partition. See <a href="./partitioning.html">Partitioning</a>.  
+                This is the optional partition date, if the resource is in a partition. See <a href="/hapi-fhir/docs/server_jpa_partitioning/partitioning.html">Partitioning</a>.  
                 Note that the partition indicated by the <b>PARTITION_ID</b> and <b>PARTITION_DATE</b> columns refers to the partition
                 of the <i>SOURCE</i> resource, and not necessarily the <i>TARGET</i>.  
             </td>        

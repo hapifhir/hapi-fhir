@@ -26,16 +26,16 @@ Partitioning in HAPI FHIR JPA means that every resource has a partition identity
 
 * **Partition Date**: This is an additional partition discriminator that can be used to implement partitioning strategies using a date axis.
 
-Mappings between the **Partition Name** and the **Partition ID** are maintained using the [Partition Mapping Operations](#partition-mapping-operations).
+Mappings between the **Partition Name** and the **Partition ID** are maintained using the [Partition Management Operations](./partitioning_management_operations.html).
 
 ## Logical Architecture
 
-At the database level, partitioning involves the use of two dedicated columns to many tables within the HAPI FHIR JPA [database schema](./schema.html):
+At the database level, partitioning involves the use of two dedicated columns to many tables within the HAPI FHIR JPA [database schema](/hapi-fhir/docs/server_jpa/schema.html):
 
 * **PARTITION_ID** &ndash; This is an integer indicating the specific partition that a given resource is placed in. This column can also be *NULL*, meaning that the given resource is in the **Default Partition**.
 * **PARTITION_DATE** &ndash; This is a date/time column that can be assigned an arbitrary value depending on your use case. Typically, this would be used for use cases where data should be automatically dropped after a certain time period using native database partition drops. 
 
-When partitioning is used, these two columns will be populated with the same value for a given resource on all resource-specific tables (this includes [HFJ_RESOURCE](./schema.html#HFJ_RESOURCE) and all tables that have a foreign key relationship to it including [HFJ_RES_VER](./schema.html#HFJ_RES_VER), [HFJ_RESLINK](./schema.html#HFJ_RES_LINK), [HFJ_SPIDX_*](./schema.html#search-indexes), etc.)
+When partitioning is used, these two columns will be populated with the same value for a given resource on all resource-specific tables (this includes [HFJ_RESOURCE](/hapi-fhir/docs/server_jpa/schema.html#HFJ_RESOURCE) and all tables that have a foreign key relationship to it including [HFJ_RES_VER](/hapi-fhir/docs/server_jpa/schema.html#HFJ_RES_VER), [HFJ_RESLINK](/hapi-fhir/docs/server_jpa/schema.html#HFJ_RES_LINK), [HFJ_SPIDX_*](/hapi-fhir/docs/server_jpa/schema.html#search-indexes), etc.)
 
 When a new resource is **created**, an [interceptor hook](#partition-interceptors) is invoked to request the partition ID and date to be assigned to the resource.
 
@@ -45,18 +45,6 @@ When a **read operation** is being performed (e.g. a read, search, history, etc.
 
 * The system can be configured to operate as a **multitenant** solution by configuring the partition interceptor to scope all read operations to read data only from the partition that request has access to.```
 * The system can be configured to operate with logical segments by configuring the partition interceptor to scope read operations to access all partitions.
-
-# Enabling Partitioning in HAPI FHIR
-
-Follow these steps to enable partitioning on the server:
-
-The [PartitionSettings](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html) bean contains configuration settings related to partitioning within the server. To enable partitioning, the [setPartitioningEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setPartitioningEnabled(boolean)) property should be enabled.
-
-The following settings can be enabled:
-
-* **Include Partition in Search Hashes** ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setIncludePartitionInSearchHashes(boolean))): If this feature is enabled, partition IDs will be factored into [Search Hashes](./schema.html#search-hashes). When this flag is not set (as is the default), when a search requests a specific partition, an additional SQL WHERE predicate is added to the query to explicitly request the given partition ID. When this flag is set, this additional WHERE predicate is not necessary since the partition is factored into the hash value being searched on. Setting this flag avoids the need to manually adjust indexes against the HFJ_SPIDX tables. Note that this flag should **not be used in environments where partitioning is being used for security purposes**, since it is possible for a user to reverse engineer false hash collisions.
-
-* **Cross-Partition Reference Mode**: ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setAllowReferencesAcrossPartitions(ca.uhn.fhir.jpa.model.config.PartitionSettings.CrossPartitionReferenceMode))): This setting controls whether resources in one partition should be allowed to create references to resources in other partitions.
 
 
 # Partition Interceptors
@@ -122,193 +110,6 @@ The following snippet shows a server with this configuration.
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|multitenantServer}}
 ```
 
-<a name="partition-mapping-operations"/>
-
-# Partition Mapping Operations
-
-Several operations exist that can be used to manage the existence of partitions. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [PartitionManagementProvider](/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/partition/PartitionManagementProvider.html).
-
-Before a partition can be used, it must be registered using these methods.
-
-## Creating a Partition
-
-The `$partition-management-add-partition` operation can be used to create a new partition. This operation takes the following parameters:
-
-<table class="table table-striped table-condensed">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Cardinality</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>id</td>
-            <td>Integer</td>
-            <td>1..1</td>
-            <td>
-                The numeric ID for the partition. This value can be any integer, positive or negative or zero. It must not be a value that has already been used. 
-            </td>
-        </tr>
-        <tr>
-            <td>name</td>
-            <td>Code</td>
-            <td>1..1</td>
-            <td>
-                A code (string) to assign to the partition. 
-            </td>
-        </tr>
-        <tr>
-            <td>description</td>
-            <td>String</td>
-            <td>0..1</td>
-            <td>
-                An optional description for the partition. 
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-### Example
-
-An HTTP POST to the following URL would be used to invoke this operation:
-
-```url
-http://example.com/$partition-management-add-partition 
-```
-
-The following request body could be used:
-
-```json
-{
-  "resourceType": "Parameters",
-  "parameter": [ {
-    "name": "id",
-    "valueInteger": 123
-  }, {
-    "name": "name",
-    "valueCode": "PARTITION-123"
-  }, {
-    "name": "description",
-    "valueString": "a description"
-  } ]
-}
-```
-
-## Updating a Partition
-
-The `$partition-management-update-partition` operation can be used to update an existing partition. This operation takes the following parameters:
-
-<table class="table table-striped table-condensed">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Cardinality</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>id</td>
-            <td>Integer</td>
-            <td>1..1</td>
-            <td>
-                The numeric ID for the partition to update. This ID must already exist. 
-            </td>
-        </tr>
-        <tr>
-            <td>name</td>
-            <td>Code</td>
-            <td>1..1</td>
-            <td>
-                A code (string) to assign to the partition. Note that it is acceptable to change the name of a partition, but this should be done with caution since partition names may be referenced by URLs, caches, etc.
-            </td>
-        </tr>
-        <tr>
-            <td>description</td>
-            <td>String</td>
-            <td>0..1</td>
-            <td>
-                An optional description for the partition. 
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-### Example
-
-An HTTP POST to the following URL would be used to invoke this operation:
-
-```url
-http://example.com/$partition-management-add-partition 
-```
-
-The following request body could be used:
-
-```json
-{
-  "resourceType": "Parameters",
-  "parameter": [ {
-    "name": "id",
-    "valueInteger": 123
-  }, {
-    "name": "name",
-    "valueCode": "PARTITION-123"
-  }, {
-    "name": "description",
-    "valueString": "a description"
-  } ]
-}
-```
-
-## Deleting a Partition
-
-The `$partition-management-delete-partition` operation can be used to delete an existing partition. This operation takes the following parameters:
-
-<table class="table table-striped table-condensed">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Cardinality</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>id</td>
-            <td>Integer</td>
-            <td>1..1</td>
-            <td>
-                The numeric ID for the partition to update. This ID must already exist. 
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-### Example
-
-An HTTP POST to the following URL would be used to invoke this operation:
-
-```url
-http://example.com/$partition-management-delete-partition 
-```
-
-The following request body could be used:
-
-```json
-{
-  "resourceType": "Parameters",
-  "parameter": [ {
-    "name": "id",
-    "valueInteger": 123
-  } ]
-}
-```
-
 
 # Limitations
 
@@ -328,5 +129,7 @@ None of the limitations listed here are considered permanent. Over time the HAPI
    * ConceptMap
 
 * **Search Parameters are not partitioned**: There is only one set of SearchParameter resources for the entire system, and any search parameters will apply to resources in all partitions. All SearchParameter resources must be stored in the default partition.
+
+* **Cross-partition History Operations are not supported**: It is not possible to perform a `_history` operation that spans all partitions (`_history` does work when applied to a single partition however). 
    
 * **Bulk Operations are not partition aware**: Bulk export operations will export data across all partitions.

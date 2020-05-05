@@ -23,7 +23,12 @@ package ca.uhn.fhir.util;
 import java.lang.ref.SoftReference;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * A utility class for parsing and formatting HTTP dates as used in cookies and

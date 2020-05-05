@@ -27,7 +27,7 @@ public class ProviderConstants {
 	/**
 	 * Operation name: add partition
 	 */
-	public static final String PARTITION_MANAGEMENT_ADD_PARTITION = "$partition-management-add-partition";
+	public static final String PARTITION_MANAGEMENT_CREATE_PARTITION = "$partition-management-create-partition";
 
 	/**
 	 * Operation name: update partition

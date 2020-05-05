@@ -32,12 +32,14 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.validatePartitionIdSupplied;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.instance.model.api.IPrimitiveType.toValueOrNull;
 
 /**
  * This HAPI FHIR Server Plain Provider class provides the following operations:
  * <ul>
- *    <li><code>partition-management-add-partition</code></li>
+ *    <li><code>partition-management-create-partition</code></li>
  *    <li><code>partition-management-update-partition</code></li>
  *    <li><code>partition-management-delete-partition</code></li>
  * </ul>
@@ -47,27 +49,50 @@ public class PartitionManagementProvider {
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired
-	private IPartitionLookupSvc myPartitionConfigSvc;
+	private IPartitionLookupSvc myPartitionLookupSvc;
 
 	/**
 	 * Add Partition:
 	 * <code>
-	 * $partition-management-add-partition
+	 * $partition-management-create-partition
 	 * </code>
 	 */
-	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_ADD_PARTITION)
+	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
 	public IBaseParameters addPartition(
 		@ResourceParam IBaseParameters theRequest,
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId,
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, min = 1, max = 1, typeName = "code") IPrimitiveType<String> thePartitionName,
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription
 	) {
+		validatePartitionIdSupplied(myCtx, toValueOrNull(thePartitionId));
 
 		PartitionEntity input = parseInput(thePartitionId, thePartitionName, thePartitionDescription);
-		PartitionEntity output = myPartitionConfigSvc.createPartition(input);
+
+		// Note: Input validation happens inside IPartitionLookupSvc
+		PartitionEntity output = myPartitionLookupSvc.createPartition(input);
+
 		IBaseParameters retVal = prepareOutput(output);
 
 		return retVal;
+	}
+
+	/**
+	 * Add Partition:
+	 * <code>
+	 * $partition-management-read-partition
+	 * </code>
+	 */
+	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_READ_PARTITION, idempotent = true)
+	public IBaseParameters addPartition(
+		@ResourceParam IBaseParameters theRequest,
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId
+	) {
+		validatePartitionIdSupplied(myCtx, toValueOrNull(thePartitionId));
+
+		// Note: Input validation happens inside IPartitionLookupSvc
+		PartitionEntity output = myPartitionLookupSvc.getPartitionById(thePartitionId.getValue());
+
+		return prepareOutput(output);
 	}
 
 	/**
@@ -83,9 +108,13 @@ public class PartitionManagementProvider {
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, min = 1, max = 1, typeName = "code") IPrimitiveType<String> thePartitionName,
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription
 	) {
+		validatePartitionIdSupplied(myCtx, toValueOrNull(thePartitionId));
 
 		PartitionEntity input = parseInput(thePartitionId, thePartitionName, thePartitionDescription);
-		PartitionEntity output = myPartitionConfigSvc.updatePartition(input);
+
+		// Note: Input validation happens inside IPartitionLookupSvc
+		PartitionEntity output = myPartitionLookupSvc.updatePartition(input);
+
 		IBaseParameters retVal = prepareOutput(output);
 
 		return retVal;
@@ -102,8 +131,9 @@ public class PartitionManagementProvider {
 		@ResourceParam IBaseParameters theRequest,
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId
 	) {
-
-		myPartitionConfigSvc.deletePartition(thePartitionId.getValue());
+		validatePartitionIdSupplied(myCtx, toValueOrNull(thePartitionId));
+		
+		myPartitionLookupSvc.deletePartition(thePartitionId.getValue());
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
 		ParametersUtil.addParameterToParametersString(myCtx, retVal, "message", "Success");

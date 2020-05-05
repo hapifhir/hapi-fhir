@@ -40,6 +40,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -243,6 +244,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append("paramName", getParamName());
 		b.append("system", getSystem());
 		b.append("value", getValue());
+		b.append("hashIdentity", myHashIdentity);
 		return b.build();
 	}
 

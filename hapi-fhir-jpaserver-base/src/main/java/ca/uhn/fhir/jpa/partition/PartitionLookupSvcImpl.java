@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -97,9 +98,9 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	@Override
-	public PartitionEntity getPartitionById(Integer theId) {
-		Validate.notNull(theId, "The ID must not be null");
-		return myIdToPartitionCache.get(theId);
+	public PartitionEntity getPartitionById(Integer thePartitionId) {
+		validatePartitionIdSupplied(myFhirCtx, thePartitionId);
+		return myIdToPartitionCache.get(thePartitionId);
 	}
 
 	@Override
@@ -158,7 +159,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	@Transactional
 	public void deletePartition(Integer thePartitionId) {
-		Validate.notNull(thePartitionId);
+		validatePartitionIdSupplied(myFhirCtx, thePartitionId);
 
 		if (DEFAULT_PERSISTED_PARTITION_ID == thePartitionId) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantDeleteDefaultPartition");
@@ -204,7 +205,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 				.findForName(theName)
 				.orElseThrow(() -> {
 					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
-					return new IllegalArgumentException(msg);
+					return new ResourceNotFoundException(msg);
 				}));
 		}
 	}
@@ -217,8 +218,15 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 				.findById(theId)
 				.orElseThrow(() -> {
 					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
-					return new IllegalArgumentException(msg);
+					return new ResourceNotFoundException(msg);
 				}));
+		}
+	}
+
+	public static void validatePartitionIdSupplied(FhirContext theFhirContext, Integer thePartitionId) {
+		if (thePartitionId == null) {
+			String msg = theFhirContext.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "noIdSupplied");
+			throw new InvalidRequestException(msg);
 		}
 	}
 }

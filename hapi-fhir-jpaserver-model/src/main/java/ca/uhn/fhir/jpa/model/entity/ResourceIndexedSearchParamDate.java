@@ -247,10 +247,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("partitionId", getPartitionId());
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
 		b.append("valueLow", new InstantDt(getValueLow()));
 		b.append("valueHigh", new InstantDt(getValueHigh()));
+		b.append("hashIdentity", myHashIdentity);
 		b.append("missing", isMissing());
 		return b.build();
 	}

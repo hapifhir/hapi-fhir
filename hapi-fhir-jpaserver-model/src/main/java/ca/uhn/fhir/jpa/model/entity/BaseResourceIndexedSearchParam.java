@@ -33,6 +33,7 @@ import com.google.common.hash.Hashing;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -85,6 +86,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
 
+	@Transient
+	private transient ModelConfig myModelConfig;
+
 	@Override
 	public abstract Long getId();
 
@@ -112,6 +116,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		myMissing = source.myMissing;
 		myParamName = source.myParamName;
 		myUpdated = source.myUpdated;
+		myModelConfig = source.myModelConfig;
+		myPartitionSettings = source.myPartitionSettings;
+		setPartitionId(source.getPartitionId());
 	}
 
 	public Long getResourcePid() {
@@ -145,6 +152,11 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	public abstract IQueryParameterType toQueryParameterType();
 
+	@Override
+	public void setPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
+		super.setPartitionId(theRequestPartitionId);
+	}
+
 	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
@@ -156,6 +168,15 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	public BaseResourceIndexedSearchParam setPartitionSettings(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
 		return this;
+	}
+
+	public BaseResourceIndexedSearchParam setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
+		return this;
+	}
+
+	public ModelConfig getModelConfig() {
+		return myModelConfig;
 	}
 
 	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {

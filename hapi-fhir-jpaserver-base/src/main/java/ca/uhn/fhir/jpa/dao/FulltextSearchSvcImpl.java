@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -282,7 +282,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Autowired
-	private IRequestPartitionHelperService myRequestPartitionHelperService;
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;

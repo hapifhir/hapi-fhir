@@ -35,7 +35,6 @@ abstract class BaseRule implements IAuthRule {
 	private String myName;
 	private PolicyEnum myMode;
 	private List<IAuthRuleTester> myTesters;
-	private RuleBuilder.ITenantApplicabilityChecker myTenantApplicabilityChecker;
 
 	BaseRule(String theRuleName) {
 		myName = theRuleName;
@@ -53,7 +52,9 @@ abstract class BaseRule implements IAuthRule {
 		theTesters.forEach(this::addTester);
 	}
 
-	boolean applyTesters(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource, IBaseResource theOutputResource) {
+	private boolean applyTesters(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource, IBaseResource theOutputResource) {
+		assert !(theInputResource != null && theOutputResource != null);
+
 		boolean retVal = true;
 		if (theOutputResource == null) {
 			for (IAuthRuleTester next : getTesters()) {
@@ -62,7 +63,15 @@ abstract class BaseRule implements IAuthRule {
 					break;
 				}
 			}
+		} else {
+			for (IAuthRuleTester next : getTesters()) {
+				if (!next.matchesOutput(theOperation, theRequestDetails, theOutputResource)) {
+					retVal = false;
+					break;
+				}
+			}
 		}
+
 		return retVal;
 	}
 
@@ -80,14 +89,6 @@ abstract class BaseRule implements IAuthRule {
 		return myName;
 	}
 
-	public RuleBuilder.ITenantApplicabilityChecker getTenantApplicabilityChecker() {
-		return myTenantApplicabilityChecker;
-	}
-
-	public final void setTenantApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenantApplicabilityChecker) {
-		myTenantApplicabilityChecker = theTenantApplicabilityChecker;
-	}
-
 	public List<IAuthRuleTester> getTesters() {
 		if (myTesters == null) {
 			return Collections.emptyList();
@@ -95,17 +96,10 @@ abstract class BaseRule implements IAuthRule {
 		return Collections.unmodifiableList(myTesters);
 	}
 
-	public boolean isOtherTenant(RequestDetails theRequestDetails) {
-		boolean otherTenant = false;
-		if (getTenantApplicabilityChecker() != null) {
-			if (!getTenantApplicabilityChecker().applies(theRequestDetails)) {
-				otherTenant = true;
-			}
+	Verdict newVerdict(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource) {
+		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+			return null;
 		}
-		return otherTenant;
-	}
-
-	Verdict newVerdict() {
 		return new Verdict(myMode, this);
 	}
 }

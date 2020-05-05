@@ -24,9 +24,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.dao.HistoryBuilder;
+import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -34,6 +37,7 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.util.InterceptorUtil;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -47,6 +51,7 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,14 +64,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -87,6 +86,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
+	private HistoryBuilderFactory myHistoryBuilderFactory;
+	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
@@ -96,6 +97,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
+	@Autowired
+	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	/*
 	 * Non autowired fields (will be different for every instance
@@ -106,6 +109,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private Search mySearchEntity;
 	private String myUuid;
 	private boolean myCacheHit;
+	private RequestPartitionId myRequestPartitionId;
 
 	/**
 	 * Constructor
@@ -113,6 +117,14 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	public PersistedJpaBundleProvider(RequestDetails theRequest, String theSearchUuid) {
 		myRequest = theRequest;
 		myUuid = theSearchUuid;
+	}
+
+	/**
+	 * Constructor
+	 */
+	public PersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
+		myRequest = theRequest;
+		mySearchEntity = theSearch;
 	}
 
 	/**
@@ -127,45 +139,17 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		mySearchEntity = null;
 	}
 
+	/**
+	 * Perform a history search
+	 */
 	private List<IBaseResource> doHistoryInTransaction(int theFromIndex, int theToIndex) {
-		List<ResourceHistoryTable> results;
 
-		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceHistoryTable> q = cb.createQuery(ResourceHistoryTable.class);
-		Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
-		List<Predicate> predicates = new ArrayList<>();
+		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 
-		if (mySearchEntity.getResourceType() == null) {
-			// All resource types
-		} else if (mySearchEntity.getResourceId() == null) {
-			predicates.add(cb.equal(from.get("myResourceType"), mySearchEntity.getResourceType()));
-		} else {
-			predicates.add(cb.equal(from.get("myResourceId"), mySearchEntity.getResourceId()));
-		}
+		RequestPartitionId partitionId = getRequestPartitionId();
+		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theFromIndex, theToIndex);
 
-		if (mySearchEntity.getLastUpdatedLow() != null) {
-			predicates.add(cb.greaterThanOrEqualTo(from.get("myUpdated").as(Date.class), mySearchEntity.getLastUpdatedLow()));
-		}
-		if (mySearchEntity.getLastUpdatedHigh() != null) {
-			predicates.add(cb.lessThanOrEqualTo(from.get("myUpdated").as(Date.class), mySearchEntity.getLastUpdatedHigh()));
-		}
-
-		if (predicates.size() > 0) {
-			q.where(predicates.toArray(new Predicate[0]));
-		}
-
-		q.orderBy(cb.desc(from.get("myUpdated")));
-
-		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(q);
-
-		if (theToIndex - theFromIndex > 0) {
-			query.setFirstResult(theFromIndex);
-			query.setMaxResults(theToIndex - theFromIndex);
-		}
-
-		results = query.getResultList();
-
-		ArrayList<IBaseResource> retVal = new ArrayList<>();
+		List<IBaseResource> retVal = new ArrayList<>();
 		for (ResourceHistoryTable next : results) {
 			BaseHasResource resource;
 			resource = next;
@@ -199,10 +183,24 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 				.add(RequestDetails.class, myRequest)
 				.addIfMatchesType(ServletRequestDetails.class, myRequest);
 			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			retVal = showDetails.toList();
 		}
 
 
 		return retVal;
+	}
+
+	@NotNull
+	private RequestPartitionId getRequestPartitionId() {
+		if (myRequestPartitionId == null) {
+			if (mySearchEntity.getResourceId() != null) {
+				// If we have an ID, we've already checked the partition and made sure it's appropriate
+				myRequestPartitionId = RequestPartitionId.allPartitions();
+			} else {
+				myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType());
+			}
+		}
+		return myRequestPartitionId;
 	}
 
 	protected List<IBaseResource> doSearchOrEverything(final int theFromIndex, final int theToIndex) {
@@ -239,6 +237,17 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 			return true;
 		}
+
+		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
+			if (mySearchEntity.getTotalCount() == null) {
+				new TransactionTemplate(myTxManager).executeWithoutResult(t->{
+					HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
+					Long count = historyBuilder.fetchCount(getRequestPartitionId());
+					mySearchEntity.setTotalCount(count.intValue());
+				});
+			}
+		}
+
 		return true;
 	}
 
@@ -361,7 +370,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		List<IBaseResource> resources = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
 
-		InterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
+		resources = InterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
 
 		return resources;
 	}
