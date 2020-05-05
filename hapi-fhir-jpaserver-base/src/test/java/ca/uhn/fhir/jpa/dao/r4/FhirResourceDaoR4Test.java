@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -1661,6 +1662,29 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertEquals("Invalid parameter chain: _tag.identifier", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void testDeleteByTagWrongType() {
+		Organization org = new Organization();
+		org.getMeta().addTag().setCode("term");
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		myPatientDao.deleteByUrl("Patient?_tag=term", mySrd);
+		// The organization is still there
+		myOrganizationDao.read(orgId);
+	}
+
+	@Test
+	public void testSearchByTagWrongType() {
+		Organization org = new Organization();
+		org.getMeta().addTag().setCode("term");
+		myOrganizationDao.create(org, mySrd);
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("_tag", new UriParam("term"));
+		map.setLoadSynchronous(true);
+		IBundleProvider result = myPatientDao.search(map);
+		List<IBaseResource> resources = result.getResources(0, 1);
+		assertEquals(0, resources.size());
 	}
 
 	@Test
