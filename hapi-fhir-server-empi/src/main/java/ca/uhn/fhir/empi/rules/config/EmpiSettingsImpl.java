@@ -69,7 +69,7 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 	}
 
 	@Override
-	public boolean isStricEidMode() {
+	public boolean isStrictEidMode() {
 		return myStrictEidMode;
 	}
 

@@ -72,7 +72,7 @@ public class EmpiStorageInterceptor {
 		}
 		forbidIfEmpiManagedTagIsPresent(theOldResource);
 		forbidModifyingEmpiTag(theNewResource, theOldResource);
-		if (myEmpiSettings.isStricEidMode()) {
+		if (myEmpiSettings.isStrictEidMode()) {
 			forbidIfModifyingExternalEidOnTarget(theNewResource, theOldResource);
 		}
 	}
