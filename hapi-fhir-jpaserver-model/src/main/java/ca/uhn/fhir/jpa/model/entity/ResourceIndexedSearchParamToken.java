@@ -84,25 +84,21 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
-	@NotNull
 	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_SYS", nullable = true)
-	@NotNull
 	private Long myHashSystem;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_SYS_AND_VALUE", nullable = true)
-	@NotNull
 	private Long myHashSystemAndValue;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_VALUE", nullable = true)
-	@NotNull
 	private Long myHashValue;
 
 
