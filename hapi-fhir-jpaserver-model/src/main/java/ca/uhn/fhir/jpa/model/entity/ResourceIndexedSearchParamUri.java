@@ -95,6 +95,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setUri(theUri);
+		calculateHashes();
 	}
 
 	@Override

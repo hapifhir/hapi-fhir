@@ -76,6 +76,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		setParamName(theParamName);
 		setLatitude(theLatitude);
 		setLongitude(theLongitude);
+		calculateHashes();
 	}
 
 	@Override

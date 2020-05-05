@@ -79,6 +79,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValue(theValue);
+		calculateHashes();
 	}
 
 	@Override

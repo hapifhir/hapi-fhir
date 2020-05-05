@@ -133,6 +133,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
+		calculateHashes();
 	}
 
 	@Override
