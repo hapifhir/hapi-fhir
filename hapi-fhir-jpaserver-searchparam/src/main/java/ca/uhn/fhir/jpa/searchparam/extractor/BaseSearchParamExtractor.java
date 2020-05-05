@@ -155,12 +155,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myPartitionSettings = thePartitionSettings;
 	}
 
-	@VisibleForTesting
-	public BaseSearchParamExtractor setPartitionConfigForUnitTest(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
-		return this;
-	}
-
 	@Override
 	public SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource) {
 		IExtractor<PathAndRef> extractor = (params, searchParam, value, path) -> {

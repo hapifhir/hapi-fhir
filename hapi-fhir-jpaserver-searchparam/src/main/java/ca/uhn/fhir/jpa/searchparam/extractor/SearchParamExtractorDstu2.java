@@ -42,8 +42,8 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 	/**
 	 * Constructor for unit tests
 	 */
-	SearchParamExtractorDstu2(ModelConfig theModelConfig, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
-		super(theModelConfig, theCtx, theSearchParamRegistry);
+	SearchParamExtractorDstu2(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+		super(theModelConfig, thePartitionSettings, theCtx, theSearchParamRegistry);
 		start();
 	}
 

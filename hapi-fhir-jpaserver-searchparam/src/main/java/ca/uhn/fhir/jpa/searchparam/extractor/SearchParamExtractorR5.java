@@ -58,8 +58,8 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	/**
 	 * Constructor for unit tests
 	 */
-	public SearchParamExtractorR5(ModelConfig theModelConfig, FhirContext theCtx, DefaultProfileValidationSupport theDefaultProfileValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theModelConfig, theCtx, theSearchParamRegistry);
+	public SearchParamExtractorR5(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, DefaultProfileValidationSupport theDefaultProfileValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+		super(theModelConfig, thePartitionSettings, theCtx, theSearchParamRegistry);
 		initFhirPath(theDefaultProfileValidationSupport);
 		start();
 	}
