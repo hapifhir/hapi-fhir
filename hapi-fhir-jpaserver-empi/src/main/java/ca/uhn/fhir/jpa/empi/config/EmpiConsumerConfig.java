@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.empi.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
+import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonFindingSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,6 +124,11 @@ public class EmpiConsumerConfig {
 	@Bean
 	IEmpiMatchFinderSvc empiMatchFinderSvc() {
 		return new EmpiMatchFinderSvcImpl();
+	}
+
+	@Bean
+	IEmpiPersonMergerSvc empiPersonMergerSvc() {
+		return new EmpiPersonMergerSvcImpl();
 	}
 
 	@Bean
