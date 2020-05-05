@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -61,8 +62,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	// This constructor is used by tests
 	@VisibleForTesting
-	public SearchParamExtractorR4(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theCtx, theSearchParamRegistry);
+	public SearchParamExtractorR4(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings) {
+		super(theCtx, theSearchParamRegistry,theModelConfig, thePartitionSettings);
 		initFhirPath(theValidationSupport);
 		start();
 	}
