@@ -58,7 +58,7 @@
      issue: "1807"
      type: "change"
      title: "**New Feature**:
-    A new feature has been added to the JPA server called **[Partitioning](/hapi-fhir/docs/server_jpa/partitioning.html). This
+    A new feature has been added to the JPA server called **[Partitioning](/hapi-fhir/docs/server_jpa_partitioning/partitioning.html). This
     feature allows data to be segregated using a user defined partitioning strategy. This can be leveraged to take
     advantags of native RDBMS partition strategies, and also to implement **multitenant servers**.
     "
