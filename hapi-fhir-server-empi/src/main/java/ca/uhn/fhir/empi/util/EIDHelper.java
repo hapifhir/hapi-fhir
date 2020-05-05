@@ -95,6 +95,4 @@ public final class EIDHelper {
 			collect1
 			);
 	}
-
-
 }

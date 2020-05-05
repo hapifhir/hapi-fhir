@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.model.CanonicalEID;
+import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
@@ -36,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -47,6 +51,10 @@ public class EmpiStorageInterceptor {
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private EIDHelper myEIDHelper;
+	@Autowired
+	private IEmpiSettings myEmpiSettings;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
@@ -64,6 +72,21 @@ public class EmpiStorageInterceptor {
 		}
 		forbidIfEmpiManagedTagIsPresent(theOldResource);
 		forbidModifyingEmpiTag(theNewResource, theOldResource);
+		if (myEmpiSettings.isStricEidMode()) {
+			forbidIfModifyingExternalEidOnTarget(theNewResource, theOldResource);
+		}
+	}
+
+	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {
+		List<CanonicalEID> newExternalEids = myEIDHelper.getExternalEid(theNewResource);
+		List<CanonicalEID> oldExternalEids = myEIDHelper.getExternalEid(theOldResource);
+		if (!myEIDHelper.eidMatchExists(newExternalEids, oldExternalEids)) {
+			throwBlockEidChange();
+		}
+	}
+
+	private void throwBlockEidChange() {
+		throw new ForbiddenOperationException("While running in stric EID mode, EIDs may not be updated on Patient/Practitioner resources");
 	}
 
 	/*

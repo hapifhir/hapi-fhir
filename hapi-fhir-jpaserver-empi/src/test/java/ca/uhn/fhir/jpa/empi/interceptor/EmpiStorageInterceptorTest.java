@@ -28,6 +28,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_EMPI_MANAGED;
 import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_EMPI_MANAGED;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.containsString;
@@ -151,5 +152,20 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 		assertThat(messages.get(1), containsString("with IdentityAssuranceLevel: LEVEL3"));
 		assertThat(messages.get(2), containsString("Creating EmpiLink from"));
 		assertThat(messages.get(2), containsString("MATCH"));
+	}
+
+	@Test
+	public void testStrictEidModeForbidsUpdatesToEidsOnTargets() throws InterruptedException {
+		Patient jane = addExternalEID(buildJanePatient(), "some_eid");
+		EmpiHelperR4.OutcomeAndLogMessageWrapper latch = myEmpiHelper.createWithLatch(jane);
+		jane.setId(latch.getDaoMethodOutcome().getId());
+		clearExternalEIDs(jane);
+		jane = addExternalEID(jane, "some_new_eid");
+		try {
+			myEmpiHelper.doUpdateResource(jane, true);
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertThat(e.getMessage(), is(equalTo("While running in stric EID mode, EIDs may not be updated on Patient/Practitioner resources")));
+		}
 	}
 }

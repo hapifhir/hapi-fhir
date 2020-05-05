@@ -31,6 +31,7 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 	private int myConcurrentConsumers = EMPI_DEFAULT_CONCURRENT_CONSUMERS;
 	private String myScriptText;
 	private EmpiRulesJson myEmpiRules;
+	private boolean myStrictEidMode;
 
 	@Override
 	public boolean isEnabled() {
@@ -65,6 +66,16 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 	@Override
 	public EmpiRulesJson getEmpiRules() {
 		return myEmpiRules;
+	}
+
+	@Override
+	public boolean isStricEidMode() {
+		return myStrictEidMode;
+	}
+
+	public EmpiSettingsImpl setStrictEidMode(boolean theStrictEidMode) {
+		myStrictEidMode = theStrictEidMode;
+		return this;
 	}
 
 	public EmpiSettingsImpl setEmpiRules(EmpiRulesJson theEmpiRules) {

@@ -31,4 +31,6 @@ public interface IEmpiSettings {
 	int getConcurrentConsumers();
 
 	EmpiRulesJson getEmpiRules();
+
+	boolean isStricEidMode();
 }
