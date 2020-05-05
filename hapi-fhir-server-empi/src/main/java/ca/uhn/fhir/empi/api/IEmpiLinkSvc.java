@@ -32,10 +32,10 @@ public interface IEmpiLinkSvc {
 	 * these two records, create it.
 	 *
 	 * @param thePerson                 the Person to link the target resource to.
-	 * @param theResource               the target resource, which is a Patient or Practitioner
+	 * @param theTargetResource               the target resource, which is a Patient or Practitioner
 	 * @param theMatchResult            the current status of the match to set the link to.
 	 * @param theLinkSource             MANUAL or AUTO: what caused the link.
 	 * @param theTransactionLogMessages
 	 */
-	void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages);
+	void updateLink(IBaseResource thePerson, IBaseResource theTargetResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages);
 }

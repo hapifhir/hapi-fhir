@@ -58,7 +58,7 @@ public class EmpiLink {
 	@JoinColumn(name = "PERSON_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"), insertable=false, updatable=false, nullable=false)
 	private ResourceTable myPerson;
 
-	@Column(name = "PERSON_PID", updatable=false, nullable=false)
+	@Column(name = "PERSON_PID", nullable=false)
 	private Long myPersonPid;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
