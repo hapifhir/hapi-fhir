@@ -130,12 +130,6 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	public void calculateHashes(Collection<? extends BaseResourceIndex> theStringParams) {
-		for (BaseResourceIndex next : theStringParams) {
-			next.calculateHashes();
-		}
-	}
-
 	public Set<String> getPopulatedResourceLinkParameters() {
 		return myPopulatedResourceLinkParameters;
 	}
@@ -305,6 +299,7 @@ public final class ResourceIndexedSearchParams {
 					param.setResource(theEntity);
 					param.setMissing(true);
 					param.setParamName(nextParamName);
+					param.calculateHashes();
 					paramCollection.add((RT) param);
 				}
 			}

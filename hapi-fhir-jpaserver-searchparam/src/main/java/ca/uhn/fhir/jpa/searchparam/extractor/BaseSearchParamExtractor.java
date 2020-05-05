@@ -141,9 +141,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	/**
 	 * UNIT TEST constructor
 	 */
-	BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry, ModelConfig theModelConfig, PartitionSettings thePartitionSettings) {
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myPartitionSettings = thePartitionSettings;
+		myModelConfig = theModelConfig;
 	}
 
 	@VisibleForTesting
