@@ -8,7 +8,9 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
@@ -18,10 +20,12 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
@@ -36,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -88,6 +94,170 @@ public class SearchParamExtractorR4Test {
 		assertEquals("context-type", token.getParamName());
 		assertEquals("http://system", token.getSystem());
 		assertEquals("code", token.getValue());
+	}
+
+	@Test
+	public void testTokenText_Enabled_Coding() {
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		extractor.setPartitionConfigForUnitTest(new PartitionSettings());
+
+		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
+			.stream()
+			.filter(t->t.getParamName().equals("code"))
+			.sorted(comparing(o -> o.getClass().getName()).reversed())
+			.collect(Collectors.toList());
+		assertEquals(2, tokens.size());
+
+		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
+		assertEquals("code", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
+
+		ResourceIndexedSearchParamString string = (ResourceIndexedSearchParamString) tokens.get(1);
+		assertEquals("code", string.getParamName());
+		assertEquals("Help Im a Bug" , string.getValueExact());
+	}
+
+	@Test
+	public void testTokenText_DisabledInSearchParam_Coding() {
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("code");
+		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
+		codeSearchParam.addExtension(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
+		mySearchParamRegistry.addSearchParam(codeSearchParam);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		extractor.setPartitionConfigForUnitTest(new PartitionSettings());
+
+		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
+			.stream()
+			.filter(t->t.getParamName().equals("code"))
+			.sorted(comparing(o -> o.getClass().getName()).reversed())
+			.collect(Collectors.toList());
+		assertEquals(1, tokens.size());
+
+		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
+		assertEquals("code", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
+
+	}
+
+	@Test
+	public void testTokenText_DisabledInModelConfig_Coding() {
+		ModelConfig modelConfig = new ModelConfig();
+		modelConfig.setSuppressStringIndexingInTokens(true);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, ourCtx, ourValidationSupport, mySearchParamRegistry);
+		extractor.setPartitionConfigForUnitTest(new PartitionSettings());
+
+		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
+			.stream()
+			.filter(t->t.getParamName().equals("code"))
+			.sorted(comparing(o -> o.getClass().getName()).reversed())
+			.collect(Collectors.toList());
+		assertEquals(1, tokens.size());
+
+		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
+		assertEquals("code", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
+
+	}
+
+	@Test
+	public void testTokenText_DisabledInModelConfigButForcedInSearchParam_Coding() {
+		ModelConfig modelConfig = new ModelConfig();
+		modelConfig.setSuppressStringIndexingInTokens(true);
+
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("code");
+		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
+		codeSearchParam.addExtension(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(false)));
+		mySearchParamRegistry.addSearchParam(codeSearchParam);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, ourCtx, ourValidationSupport, mySearchParamRegistry);
+		extractor.setPartitionConfigForUnitTest(new PartitionSettings());
+
+		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
+			.stream()
+			.filter(t->t.getParamName().equals("code"))
+			.sorted(comparing(o -> o.getClass().getName()).reversed())
+			.collect(Collectors.toList());
+		assertEquals(2, tokens.size());
+
+		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
+		assertEquals("code", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
+
+		ResourceIndexedSearchParamString string = (ResourceIndexedSearchParamString) tokens.get(1);
+		assertEquals("code", string.getParamName());
+		assertEquals("Help Im a Bug" , string.getValueExact());
+	}
+
+
+	@Test
+	public void testTokenText_Enabled_Identifier() {
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		extractor.setPartitionConfigForUnitTest(new PartitionSettings());
+
+		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
+			.stream()
+			.filter(t->t.getParamName().equals("identifier"))
+			.sorted(comparing(o -> o.getClass().getName()).reversed())
+			.collect(Collectors.toList());
+		assertEquals(2, tokens.size());
+
+		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
+		assertEquals("identifier", token.getParamName());
+		assertEquals("sys", token.getSystem());
+		assertEquals("val", token.getValue());
+
+		ResourceIndexedSearchParamString string = (ResourceIndexedSearchParamString) tokens.get(1);
+		assertEquals("identifier", string.getParamName());
+		assertEquals("Help Im a Bug" , string.getValueExact());
+	}
+
+	@Test
+	public void testTokenText_DisabledInSearchParam_Identifier() {
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("identifier");
+		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
+		codeSearchParam.addExtension(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
+
+		mySearchParamRegistry.addSearchParam(codeSearchParam);
+
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		extractor.setPartitionConfigForUnitTest(new PartitionSettings());
+
+		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
+			.stream()
+			.filter(t->t.getParamName().equals("identifier"))
+			.sorted(comparing(o -> o.getClass().getName()).reversed())
+			.collect(Collectors.toList());
+		assertEquals(1, tokens.size());
+
+		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
+		assertEquals("identifier", token.getParamName());
+		assertEquals("sys", token.getSystem());
+		assertEquals("val", token.getValue());
+
 	}
 
 	@Test

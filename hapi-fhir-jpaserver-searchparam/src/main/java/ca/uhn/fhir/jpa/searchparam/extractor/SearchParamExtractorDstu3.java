@@ -50,7 +50,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	// This constructor is used by tests
 	@VisibleForTesting
 	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theCtx, theSearchParamRegistry);
+		super(theModelConfig, theCtx, theSearchParamRegistry);
 		initFhirPathEngine(theValidationSupport);
 		start();
 	}
