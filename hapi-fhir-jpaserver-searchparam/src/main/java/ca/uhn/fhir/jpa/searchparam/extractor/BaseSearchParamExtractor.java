@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.search.spatial.impl.Point;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -131,6 +133,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private BaseRuntimeChildDefinition myCodingDisplayValueChild;
 	private BaseRuntimeChildDefinition myContactPointSystemValueChild;
 	private BaseRuntimeChildDefinition myPatientCommunicationLanguageValueChild;
+
 	/**
 	 * Constructor
 	 */
@@ -141,15 +144,15 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	/**
 	 * UNIT TEST constructor
 	 */
-	BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	BaseSearchParamExtractor(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+		Validate.notNull(theModelConfig);
+		Validate.notNull(theCtx);
+		Validate.notNull(theSearchParamRegistry);
+
+		myModelConfig = theModelConfig;
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
-	}
-
-	@VisibleForTesting
-	public BaseSearchParamExtractor setPartitionConfigForUnitTest(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
-		return this;
 	}
 
 	@Override
@@ -531,12 +534,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
 		}
 
-		Optional<IBase> type = myIdentifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
-		if (type.isPresent()) {
-			String text = extractValueAsString(myIdentifierTypeTextValueChild, type.get());
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		if (shouldIndexTextComponentOfToken(theSearchParam)) {
+			Optional<IBase> type = myIdentifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
+			if (type.isPresent()) {
+				String text = extractValueAsString(myIdentifierTypeTextValueChild, type.get());
+				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+			}
 		}
 
+	}
+
+	protected boolean shouldIndexTextComponentOfToken(RuntimeSearchParam theSearchParam) {
+		return tokenTextIndexingEnabledForSearchParam(myModelConfig, theSearchParam);
 	}
 
 	private void addToken_CodeableConcept(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -545,9 +554,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			addToken_Coding(theResourceType, theParams, theSearchParam, nextCoding);
 		}
 
-		String text = extractValueAsString(myCodeableConceptTextValueChild, theValue);
-		if (isNotBlank(text)) {
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		if (shouldIndexTextComponentOfToken(theSearchParam)) {
+			String text = extractValueAsString(myCodeableConceptTextValueChild, theValue);
+			if (isNotBlank(text)) {
+				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+			}
 		}
 	}
 
@@ -556,8 +567,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		String code = extractValueAsString(myCodingCodeValueChild, theValue);
 		createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, code);
 
-		String text = extractValueAsString(myCodingDisplayValueChild, theValue);
-		createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		if (shouldIndexTextComponentOfToken(theSearchParam)) {
+			String text = extractValueAsString(myCodingDisplayValueChild, theValue);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		}
 	}
 
 	private void addToken_ContactPoint(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -587,7 +600,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
 
 		if (start != null || end != null) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings ,theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
 			theParams.add(nextEntity);
 		}
 	}
@@ -771,7 +784,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	}
 
-
 	private <T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
@@ -821,11 +833,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void addDateTimeTypes(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		IPrimitiveType<Date> nextBaseDateTime = (IPrimitiveType<Date>) theValue;
 		if (nextBaseDateTime.getValue() != null) {
-			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(myPartitionSettings ,theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValueAsString());
+			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValueAsString());
 			theParams.add(param);
 		}
 	}
-
 
 	private void addUri_Uri(String theResourceType, Set<ResourceIndexedSearchParamUri> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		IPrimitiveType<?> value = (IPrimitiveType<?>) theValue;
@@ -1109,6 +1120,25 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					BaseSearchParamExtractor.this.addUnexpectedDatatypeWarning(params, searchParam, value);
 					break;
 			}
+		}
+	}
+
+	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
+		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
+			.map(IBaseExtension::getValue)
+			.map(val -> (IPrimitiveType<?>) val)
+			.map(IPrimitiveType::getValueAsString)
+			.map(Boolean::parseBoolean)
+			.findFirst();
+
+		//if the SP doesn't care, use the system default.
+		if (!noSuppressForSearchParam.isPresent()) {
+			return !theModelConfig.isSuppressStringIndexingInTokens();
+			//If the SP does care, use its value.
+		} else {
+			boolean suppressForSearchParam = noSuppressForSearchParam.get();
+			ourLog.trace("Text indexing for SearchParameter {}: {}", theSearchParam.getName(), suppressForSearchParam);
+			return !suppressForSearchParam;
 		}
 	}
 

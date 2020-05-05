@@ -311,6 +311,7 @@ public final class ResourceIndexedSearchParams {
 					param.setResource(theEntity);
 					param.setMissing(true);
 					param.setParamName(nextParamName);
+					param.calculateHashes();
 					paramCollection.add((RT) param);
 				}
 			}

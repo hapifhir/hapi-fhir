@@ -12,6 +12,7 @@ public class ResourceIndexedSearchParamTokenTest {
 	public void testHashFunctions() {
 		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
+		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
 		assertEquals(-8558989679010582575L, token.getHashSystem().longValue());
@@ -23,6 +24,7 @@ public class ResourceIndexedSearchParamTokenTest {
 	public void testHashFunctionsWithOverlapNames() {
 		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
+		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
 		assertEquals(-8558989679010582575L, token.getHashSystem().longValue());

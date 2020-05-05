@@ -67,18 +67,22 @@ public class DaoSearchParamSynchronizer {
 		return retVal;
 	}
 
-	private <T extends BaseResourceIndex> void synchronize(ResourceIndexedSearchParams theParams, ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParams, Collection<T> theExistingParams) {
-		List<T> paramsToRemove = subtract(theExistingParams, theNewParams);
-		List<T> paramsToAdd = subtract(theNewParams, theExistingParams);
-		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
-		for (T next : paramsToRemove) {
+// FIXME: replace quantities with params
+	private <T extends BaseResourceIndex> void synchronize(ResourceIndexedSearchParams theParams, ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParms, Collection<T> theExistingParms) {
+		for (T next : theNewParms) {
+			next.setPartitionId(theEntity.getPartitionId());
+			next.calculateHashes();
+		}
+
+		List<T> quantitiesToRemove = subtract(theExistingParms, theNewParms);
+		List<T> quantitiesToAdd = subtract(theNewParms, theExistingParms);
+		tryToReuseIndexEntities(quantitiesToRemove, quantitiesToAdd);
+
+		for (T next : quantitiesToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
 		}
-
-		for (T next : paramsToAdd) {
-			next.setPartitionId(theEntity.getPartitionId());
-			next.calculateHashes();
+		for (T next : quantitiesToAdd) {
 			myEntityManager.merge(next);
 		}
 

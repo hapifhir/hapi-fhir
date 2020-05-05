@@ -79,6 +79,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValue(theValue);
+		calculateHashes();
 	}
 
 	@Override
@@ -92,16 +93,13 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 	@Override
 	public void calculateHashes() {
-		if (myHashIdentity == null && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		}
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
 
-	@Override
-	protected void clearHashes() {
-		myHashIdentity = null;
+	public Long getHashIdentity() {
+		return myHashIdentity;
 	}
 
 	@Override
@@ -119,7 +117,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getValue(), obj.getValue());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
@@ -135,7 +133,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 	@Override
 	public void setId(Long theId) {
-		myId =theId;
+		myId = theId;
 	}
 
 	public BigDecimal getValue() {

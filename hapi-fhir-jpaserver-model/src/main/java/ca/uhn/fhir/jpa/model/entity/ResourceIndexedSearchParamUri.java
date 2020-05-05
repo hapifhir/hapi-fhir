@@ -95,6 +95,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setUri(theUri);
+		calculateHashes();
 	}
 
 	@Override
@@ -109,18 +110,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 	@Override
 	public void calculateHashes() {
-		if (myHashUri == null && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			String uri = getUri();
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-			setHashUri(calculateHashUri(getPartitionSettings(), getPartitionId(), resourceType, paramName, uri));
-		}
-	}
-
-	@Override
-	protected void clearHashes() {
-		myHashUri = null;
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		String uri = getUri();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+		setHashUri(calculateHashUri(getPartitionSettings(), getPartitionId(), resourceType, paramName, uri));
 	}
 
 	@Override
@@ -145,7 +139,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	private Long getHashIdentity() {
-		calculateHashes();
 		return myHashIdentity;
 	}
 
@@ -154,7 +147,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	public Long getHashUri() {
-		calculateHashes();
 		return myHashUri;
 	}
 
@@ -189,6 +181,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getParamName());
 		b.append(getUri());
 		b.append(getHashUri());
+		b.append(getHashIdentity());
 		return b.toHashCode();
 	}
 

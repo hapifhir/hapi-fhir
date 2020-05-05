@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
 import ca.uhn.fhir.util.FhirTerser;
@@ -40,8 +42,8 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 	/**
 	 * Constructor for unit tests
 	 */
-	SearchParamExtractorDstu2(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
-		super(theCtx, theSearchParamRegistry);
+	SearchParamExtractorDstu2(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+		super(theModelConfig, thePartitionSettings, theCtx, theSearchParamRegistry);
 		start();
 	}
 

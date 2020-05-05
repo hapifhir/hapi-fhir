@@ -49,6 +49,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -130,6 +131,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
+		calculateHashes();
 	}
 
 	@Override
@@ -145,22 +147,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@Override
 	public void calculateHashes() {
-		if ((myHashIdentity == null || myHashNormalizedPrefix == null || myHashExact == null) && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			String valueNormalized = getValueNormalized();
-			String valueExact = getValueExact();
-			setHashNormalizedPrefix(calculateHashNormalized(getPartitionSettings(), getPartitionId(), getModelConfig(), resourceType, paramName, valueNormalized));
-			setHashExact(calculateHashExact(getPartitionSettings(), getPartitionId(), resourceType, paramName, valueExact));
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		}
-	}
-
-	@Override
-	protected void clearHashes() {
-		myHashNormalizedPrefix = null;
-		myHashExact = null;
-		myHashIdentity = null;
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		String valueNormalized = getValueNormalized();
+		String valueExact = getValueExact();
+		setHashNormalizedPrefix(calculateHashNormalized(getPartitionSettings(), getPartitionId(), myModelConfig, resourceType, paramName, valueNormalized));
+		setHashExact(calculateHashExact(getPartitionSettings(), getPartitionId(), resourceType, paramName, valueExact));
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
 
 	@Override
@@ -186,7 +179,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	private Long getHashIdentity() {
-		calculateHashes();
 		return myHashIdentity;
 	}
 
@@ -195,7 +187,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	public Long getHashExact() {
-		calculateHashes();
 		return myHashExact;
 	}
 
@@ -204,7 +195,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	public Long getHashNormalizedPrefix() {
-		calculateHashes();
 		return myHashNormalizedPrefix;
 	}
 
