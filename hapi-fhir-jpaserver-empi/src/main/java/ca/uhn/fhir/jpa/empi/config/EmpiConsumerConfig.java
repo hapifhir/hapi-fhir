@@ -29,7 +29,6 @@ import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
-import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
@@ -94,11 +93,6 @@ public class EmpiConsumerConfig {
 	@Bean
 	PersonHelper personHelper(FhirContext theFhirContext) {
 		return new PersonHelper(theFhirContext);
-	}
-
-	@Bean
-	EIDHelper eidHelper(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
-		return new EIDHelper(theFhirContext, theEmpiConfig);
 	}
 
 	@Bean

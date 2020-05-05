@@ -37,6 +37,8 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	private IdType myDeletePersonId;
 	private IdType myKeepPersonId;
 	private Long myKeepPersonPid;
+	private Patient myTargetPatient;
+	private Long myPatientPid;
 
 	@Before
 	public void before() {
@@ -45,6 +47,9 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myKeepPerson = createPerson();
 		myKeepPersonId = myKeepPerson.getIdElement().toUnqualifiedVersionless();
 		myKeepPersonPid = myIdHelperService.getPidOrThrowException(myKeepPersonId);
+		myTargetPatient = createPatient();
+		myPatientPid = myIdHelperService.getPidOrThrowException(myTargetPatient.getIdElement());
+
 	}
 	
 	@Test
@@ -79,16 +84,27 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void deleteLinkKeepNoLink() {
-		Patient targetPatient = createPatient();
-		Long patientPid = myIdHelperService.getPidOrThrowException(targetPatient.getIdElement());
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(myDeletePerson, targetPatient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, null);
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(myDeletePerson, myTargetPatient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, null);
 
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 		List<EmpiLink> links = myEmpiLinkDao.findAll();
 		assertEquals(1, links.size());
 		EmpiLink link = links.get(0);
 		assertEquals(myKeepPersonPid, link.getPersonPid());
-		assertEquals(patientPid, link.getTargetPid());
+		assertEquals(myPatientPid, link.getTargetPid());
+	}
+
+	@Test
+	public void deleteNoLinkKeepLink() {
+
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(myDeletePerson, myTargetPatient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, null);
+
+		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		assertEquals(1, links.size());
+		EmpiLink link = links.get(0);
+		assertEquals(myKeepPersonPid, link.getPersonPid());
+		assertEquals(myPatientPid, link.getTargetPid());
 	}
 
 	private void populatePerson(Person thePerson) {
