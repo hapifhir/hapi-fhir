@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -178,6 +180,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Before
 	public void beforeDisableCacheReuse() {
+		myModelConfig.setSuppressStringIndexingInTokens(new ModelConfig().isSuppressStringIndexingInTokens());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
@@ -4424,6 +4427,50 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// We expect a new one because we don't cache the search URL for very long search URLs
 		assertEquals(2, mySearchEntityDao.count());
 	}
+
+	@Test
+	public void testTokenTextDisabled_Global() {
+		myModelConfig.setSuppressStringIndexingInTokens(true);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_CODE, new TokenParam("hello").setModifier(TokenParamModifier.TEXT));
+		try {
+			myObservationDao.search(map);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("The :text modifier is disabled on this server", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testTokenTextDisabled_ForSearchParam() {
+		{
+			SearchParameter sp = new SearchParameter();
+			sp.setId("observation-code");
+			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			sp.addBase("Observation");
+			sp.setType(Enumerations.SearchParamType.TOKEN);
+			sp.setCode("code");
+			sp.setExpression("Observation.code");
+			sp.addExtension()
+				.setUrl(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING)
+				.setValue(new BooleanType(true));
+			ourLog.info("SP:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+			mySearchParameterDao.update(sp);
+			mySearchParamRegistry.forceRefresh();
+		}
+
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_CODE, new TokenParam("hello").setModifier(TokenParamModifier.TEXT));
+		try {
+			myObservationDao.search(map);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("The :text modifier is disabled for this search parameter", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testDateSearchParametersShouldBeTimezoneIndependent() {
