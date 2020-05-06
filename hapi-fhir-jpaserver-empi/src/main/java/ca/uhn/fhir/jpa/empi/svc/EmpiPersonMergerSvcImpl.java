@@ -29,6 +29,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		myPersonHelper.mergePersonFields(thePersonToDelete, thePersonToKeep);
 		mergeLinks(thePersonToDelete, thePersonToKeep);
 		myEmpiResourceDaoSvc.updatePerson(thePersonToKeep);
+		myEmpiResourceDaoSvc.deletePerson(thePersonToDelete);
 		return thePersonToKeep;
 	}
 
@@ -37,6 +38,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		List<EmpiLink> newLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToDelete);
 		List<EmpiLink> oldLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToKeep);
 		newLinks.removeIf(newLink -> oldLinks.stream().anyMatch(oldLink -> newLink.getTargetPid().equals(oldLink.getTargetPid())));
+		// Update the links from thePersonToDelete, pointing them all to thePersonToKeep
 		for (EmpiLink newLink : newLinks) {
 			newLink.setPersonPid(personToKeepPid);
 			myEmpiLinkDaoSvc.update(newLink);

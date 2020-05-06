@@ -3,7 +3,10 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
+import ca.uhn.fhir.jpa.empi.helper.EmpiLinkHelper;
+import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
@@ -12,6 +15,7 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +35,24 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Autowired
 	IEmpiPersonMergerSvc myEmpiPersonMergerSvc;
+	@Autowired
+	EmpiLinkHelper myEmpiLinkHelper;
+	@Autowired
+	EmpiStorageInterceptor myEmpiStorageInterceptor;
+	@Autowired
+	IInterceptorService myInterceptorService;
 
 	private Person myDeletePerson;
 	private Person myKeepPerson;
 	private IdType myDeletePersonId;
 	private IdType myKeepPersonId;
 	private Long myKeepPersonPid;
-	private Patient myTargetPatient;
-	private Long myPatientPid;
+	private Patient myTargetPatient1;
+	private Long myPatient1Pid;
+	private Patient myTargetPatient2;
+	private Long myPatient2Pid;
+	private Patient myTargetPatient3;
+	private Long myPatient3Pid;
 
 	@Before
 	public void before() {
@@ -47,9 +61,24 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myKeepPerson = createPerson();
 		myKeepPersonId = myKeepPerson.getIdElement().toUnqualifiedVersionless();
 		myKeepPersonPid = myIdHelperService.getPidOrThrowException(myKeepPersonId);
-		myTargetPatient = createPatient();
-		myPatientPid = myIdHelperService.getPidOrThrowException(myTargetPatient.getIdElement());
 
+		myTargetPatient1 = createPatient();
+		myPatient1Pid = myIdHelperService.getPidOrThrowException(myTargetPatient1.getIdElement());
+
+		myTargetPatient2 = createPatient();
+		myPatient2Pid = myIdHelperService.getPidOrThrowException(myTargetPatient2.getIdElement());
+
+		myTargetPatient3 = createPatient();
+		myPatient3Pid = myIdHelperService.getPidOrThrowException(myTargetPatient3.getIdElement());
+
+		// Register the empi storage interceptor after the creates so the delete hook is fired when we merge
+		myInterceptorService.registerInterceptor(myEmpiStorageInterceptor);
+	}
+
+	@After
+	public void after() {
+		myInterceptorService.unregisterInterceptor(myEmpiStorageInterceptor);
+		super.after();
 	}
 	
 	@Test
@@ -84,31 +113,46 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void deleteLinkKeepNoLink() {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(myDeletePerson, myTargetPatient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, null);
+		createEmpiLink(myDeletePerson, myTargetPatient1);
 
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
-		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
 		assertEquals(1, links.size());
-		EmpiLink link = links.get(0);
-		assertEquals(myKeepPersonPid, link.getPersonPid());
-		assertEquals(myPatientPid, link.getTargetPid());
+		assertThat(myKeepPerson, is(linkedTo(myTargetPatient1)));
 	}
 
 	@Test
 	public void deleteNoLinkKeepLink() {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(myKeepPerson, myTargetPatient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, null);
+		createEmpiLink(myKeepPerson, myTargetPatient1);
 
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
-		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
 		assertEquals(1, links.size());
-		EmpiLink link = links.get(0);
-		assertEquals(myKeepPersonPid, link.getPersonPid());
-		assertEquals(myPatientPid, link.getTargetPid());
+		assertThat(myKeepPerson, is(linkedTo(myTargetPatient1)));
+	}
+
+	@Test
+	public void delete123Keep1() {
+		createEmpiLink(myDeletePerson, myTargetPatient1);
+		createEmpiLink(myDeletePerson, myTargetPatient2);
+		createEmpiLink(myDeletePerson, myTargetPatient3);
+		createEmpiLink(myKeepPerson, myTargetPatient1);
+
+		myEmpiLinkHelper.logEmpiLinks();
+		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
+		assertEquals(3, links.size());
+		myEmpiLinkHelper.logEmpiLinks();
+		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
 	}
 
 	// FIXME KHS we've tested 01, 10, now test 21,12,etc
 
 	// FIXME KHS test delete
+
+	private void createEmpiLink(Person theTheDeletePerson, Patient theTheTargetPatient1) {
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theTheDeletePerson, theTheTargetPatient1, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.MANUAL, null);
+	}
 
 	private void populatePerson(Person thePerson) {
 		thePerson.addName(new HumanName().addGiven(GIVEN_NAME).setFamily(FAMILY_NAME));

@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
+import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -75,6 +76,14 @@ public class EmpiStorageInterceptor {
 		if (myEmpiSettings.isStrictEidMode()) {
 			forbidIfModifyingExternalEidOnTarget(theNewResource, theOldResource);
 		}
+	}
+
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
+	public void deleteEmpiLinks(RequestDetails theRequest, IBaseResource theResource) {
+		if (!EmpiUtil.isEmpiResourceType(myFhirContext, theResource)) {
+			return;
+		}
+		myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theResource);
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {

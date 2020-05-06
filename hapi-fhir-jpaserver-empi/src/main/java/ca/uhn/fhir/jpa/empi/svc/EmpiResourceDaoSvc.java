@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,4 +85,8 @@ public class EmpiResourceDaoSvc {
 			return null;
 		}
 	}
+
+    public void deletePerson(IAnyResource thePersonToDelete) {
+		myPersonDao.delete(thePersonToDelete.getIdElement());
+    }
 }

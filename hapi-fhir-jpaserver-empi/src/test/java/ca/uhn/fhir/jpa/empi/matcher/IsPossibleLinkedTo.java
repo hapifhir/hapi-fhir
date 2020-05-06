@@ -16,23 +16,23 @@ import java.util.stream.Collectors;
  * FIXME GGG modify the functionality to actually check links on a person.
  *
  */
-public class IsLinkedTo extends BasePersonMatcher {
+public class IsPossibleLinkedTo extends BasePersonMatcher {
 
 	private List<Long> baseResourcePersonPids;
 	private Long incomingResourcePersonPid;
 
-	protected IsLinkedTo(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+	protected IsPossibleLinkedTo(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
 		super(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
 
 	@Override
-	protected boolean matchesSafely(IBaseResource theIncomingResource) {
-		incomingResourcePersonPid =  getMatchedPersonPidFromResource(theIncomingResource);
+	protected boolean matchesSafely(IBaseResource thePersonResource) {
+		incomingResourcePersonPid = myIdHelperService.getPidOrNull(thePersonResource);;
 
 		//OK, lets grab all the person pids of the resources passed in via the constructor.
 		baseResourcePersonPids = myBaseResources.stream()
-			.map(this::getMatchedPersonPidFromResource)
+			.flatMap(iBaseResource -> getPossibleMatchedPersonPidsFromTarget(iBaseResource).stream())
 			.collect(Collectors.toList());
 
 		//The resources are linked if all person pids match the incoming person pid.
@@ -44,7 +44,7 @@ public class IsLinkedTo extends BasePersonMatcher {
 	public void describeTo(Description theDescription) {
 	}
 
-	public static Matcher<IBaseResource> linkedTo(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		return new IsLinkedTo(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
+	public static Matcher<IBaseResource> possibleLinkedTo(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+		return new IsPossibleLinkedTo(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
 	}
 }

@@ -32,7 +32,7 @@ public class IsPossibleMatchWith extends BasePersonMatcher {
 
 		if (personPidsToMatch.isEmpty()) {
 			personPidsToMatch = myBaseResources.stream()
-				.flatMap(iBaseResource -> getPossibleMatchedPersonPidsFromResource(iBaseResource).stream())
+				.flatMap(iBaseResource -> getPossibleMatchedPersonPidsFromTarget(iBaseResource).stream())
 				.collect(Collectors.toList());
 		}
 

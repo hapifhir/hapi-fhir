@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.empi.util;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -28,6 +29,13 @@ public final class EmpiUtil {
 
 	public static boolean supportedResourceType(String theResourceType) {
 		return ("Patient".equals(theResourceType) || "Practitioner".equals(theResourceType));
+	}
+
+	public static boolean isEmpiResourceType(FhirContext theFhirContext, IBaseResource theResource) {
+		String resourceType = theFhirContext.getResourceType(theResource);
+		return ("Patient".equals(resourceType) ||
+			"Practitioner".equals(resourceType)) ||
+			"Person".equals(resourceType);
 	}
 
 	/**

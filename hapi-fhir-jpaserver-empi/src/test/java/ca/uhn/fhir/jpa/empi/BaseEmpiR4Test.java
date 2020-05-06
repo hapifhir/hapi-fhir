@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.matcher.IsLinkedTo;
 import ca.uhn.fhir.jpa.empi.matcher.IsMatchedToAPerson;
 import ca.uhn.fhir.jpa.empi.matcher.IsPossibleDuplicateOf;
+import ca.uhn.fhir.jpa.empi.matcher.IsPossibleLinkedTo;
 import ca.uhn.fhir.jpa.empi.matcher.IsPossibleMatchWith;
 import ca.uhn.fhir.jpa.empi.matcher.IsSamePersonAs;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
@@ -79,6 +81,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
 	protected EIDHelper myEIDHelper;
+	@Autowired
+	protected FhirContext myFhirContext;
 
 	@After
 	public void after() {
@@ -250,6 +254,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return IsLinkedTo.linkedTo(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
 
+	protected Matcher<IBaseResource> possibleLinkedTo(IBaseResource... theBaseResource) {
+		return IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
+	}
+
 	protected Matcher<IBaseResource> possibleMatchWith(IBaseResource... theBaseResource) {
 		return IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
@@ -261,5 +269,4 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected Matcher<IBaseResource> matchedToAPerson() {
 		return IsMatchedToAPerson.matchedToAPerson(myIdHelperService, myEmpiLinkDaoSvc);
 	}
-
 }

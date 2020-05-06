@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi.config;
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
+import ca.uhn.fhir.jpa.empi.helper.EmpiLinkHelper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,5 +25,10 @@ public abstract class BaseTestEmpiConfig {
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		return new EmpiSettingsImpl().setEnabled(false).setScriptText(json).setStrictEidMode(myStrictMode);
+	}
+
+	@Bean
+	EmpiLinkHelper empiLinkHelper() {
+		return new EmpiLinkHelper();
 	}
 }

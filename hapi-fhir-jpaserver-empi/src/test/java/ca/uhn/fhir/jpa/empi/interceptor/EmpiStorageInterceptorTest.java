@@ -26,7 +26,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
-import java.util.Optional;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_EMPI_MANAGED;
 import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_EMPI_MANAGED;
@@ -72,6 +71,24 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 	public void testCreatePerson() throws InterruptedException {
 		myPersonDao.create(new Person());
 		assertLinkCount(0);
+	}
+
+	@Test
+	public void testDeletePersonDeletesLinks() throws InterruptedException {
+		myEmpiHelper.createWithLatch(new Patient());
+		assertLinkCount(1);
+		Person person = getOnlyPerson();
+		myPersonDao.delete(person.getIdElement());
+		assertLinkCount(0);
+	}
+
+	private Person getOnlyPerson() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		IBundleProvider bundle = myPersonDao.search(map);
+		List<IBaseResource> resources = bundle.getResources(0, 99);
+		assertEquals(1, resources.size());
+		return (Person) resources.get(0);
 	}
 
 	@Test
