@@ -143,7 +143,9 @@ public class EmpiMatchLinkSvc {
 				//If there are multiple patients attached, we add.
 				//handleExternalEidAddition(person, theResource);
 				//If there is one patient attached, we overwrite.
-				handleExternalEidOverwrite(person, theResource);
+				if (matchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
+					handleExternalEidOverwrite(person, theResource);
+				}
 			}
 		} else {
 			if (matchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {

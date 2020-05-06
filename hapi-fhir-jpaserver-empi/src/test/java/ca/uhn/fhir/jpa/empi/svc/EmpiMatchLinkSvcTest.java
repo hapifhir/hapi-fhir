@@ -365,7 +365,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		patient3.getNameFirstRep().setFamily("familyone");
 		patient3  = createPatientAndUpdateLinks(patient3);
 
-		assertThat(patient2, is(not(matchedToAPerson())));
+		assertThat(patient2, is(not(samePersonAs(patient))));
 		assertThat(patient2, is(possibleMatchWith(patient)));
 		assertThat(patient3, is(samePersonAs(patient)));
 	}

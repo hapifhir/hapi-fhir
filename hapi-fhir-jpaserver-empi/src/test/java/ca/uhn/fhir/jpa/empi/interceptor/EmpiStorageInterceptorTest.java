@@ -157,21 +157,6 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testStrictEidModeForbidsUpdatesToEidsOnTargets() throws InterruptedException {
-		Patient jane = addExternalEID(buildJanePatient(), "some_eid");
-		EmpiHelperR4.OutcomeAndLogMessageWrapper latch = myEmpiHelper.createWithLatch(jane);
-		jane.setId(latch.getDaoMethodOutcome().getId());
-		clearExternalEIDs(jane);
-		jane = addExternalEID(jane, "some_new_eid");
-		try {
-			myEmpiHelper.doUpdateResource(jane, true);
-			fail();
-		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("While running in stric EID mode, EIDs may not be updated on Patient/Practitioner resources")));
-		}
-	}
-
-	@Test
 	public void testWhenASingularPatientUpdatesExternalEidThatPersonEidIsUpdated() throws InterruptedException {
 		Patient jane = addExternalEID(buildJanePatient(), "some_eid");
 		EmpiHelperR4.OutcomeAndLogMessageWrapper latch = myEmpiHelper.createWithLatch(jane);
