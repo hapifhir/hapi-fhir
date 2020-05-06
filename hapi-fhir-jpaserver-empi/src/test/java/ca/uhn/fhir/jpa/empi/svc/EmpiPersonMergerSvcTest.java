@@ -138,11 +138,9 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myDeletePerson, myTargetPatient3);
 		createEmpiLink(myKeepPerson, myTargetPatient1);
 
-		myEmpiLinkHelper.logEmpiLinks();
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
-		assertEquals(3, links.size());
 		myEmpiLinkHelper.logEmpiLinks();
+
 		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
 	}
 
