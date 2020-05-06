@@ -32,5 +32,5 @@ public interface IEmpiSettings {
 
 	EmpiRulesJson getEmpiRules();
 
-	boolean isStrictEidMode();
+	boolean isPreventEidUpdates();
 }

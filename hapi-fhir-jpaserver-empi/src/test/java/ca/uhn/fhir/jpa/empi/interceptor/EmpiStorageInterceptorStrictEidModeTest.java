@@ -47,21 +47,22 @@ import static org.slf4j.LoggerFactory.getLogger;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = {EmpiHelperConfig.class})
 @TestPropertySource(properties = {
-	"empi.strict_mode=true"
+	"empi.prevent_eid_updates=true"
 })
 public class EmpiStorageInterceptorStrictEidModeTest extends BaseEmpiR4Test {
 
 	private static final Logger ourLog = getLogger(EmpiStorageInterceptorStrictEidModeTest.class);
 
+	/**
 	@BeforeClass
 	public static void beforeClass() {
-		System.setProperty("empi.strict_mode", "true");
+		System.setProperty("empi.prevent", "true");
 	}
 
 	@AfterClass
 	public static void afterClass() {
 		System.setProperty("empi.strict_mode", "false");
-	}
+	}*/
 
 	@Rule
 	@Autowired

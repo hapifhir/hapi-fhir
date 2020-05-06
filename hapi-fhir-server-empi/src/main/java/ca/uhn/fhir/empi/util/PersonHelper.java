@@ -27,6 +27,7 @@ import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -106,26 +107,25 @@ public class PersonHelper {
 
 	/**
 	 * Create or update a link from source {@link IBaseResource} to the target {@link IIdType}, with the given {@link CanonicalIdentityAssuranceLevel}.
-	 *
-	 * @param thePerson                 The person who's link needs to be updated.
-	 * @param theResourceId             The target of the link
-	 * @param canonicalAssuranceLevel   The level of certainty of this link.
-	 * @param theTransactionLogMessages
+	 * @param thePerson The person who's link needs to be updated.
+	 * @param theResourceId The target of the link
+	 * @param canonicalAssuranceLevel The level of certainty of this link.
+	 * @param theEmpiTransactionContext
 	 */
-	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, @Nonnull CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
+	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, @Nonnull CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages);
+				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
 				break;
 			case DSTU3:
-				handleLinkUpdateDSTU3(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages);
+				handleLinkUpdateDSTU3(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
 				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 
-	private void handleLinkUpdateDSTU3(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
+	private void handleLinkUpdateDSTU3(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, EmpiTransactionContext theTransactionLogMessages) {
 		if (theCanonicalAssuranceLevel == null) {
 			ourLog.warn("Refusing to update or add a link without an Assurance Level.");
 			return;
@@ -146,15 +146,15 @@ public class PersonHelper {
 		}
 	}
 
-	private void logLinkAddMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
-		TransactionLogMessages.addMessage(theTransactionLogMessages, ("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().toUnqualifiedVersionless().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + theCanonicalAssuranceLevel.name()));
+	private void logLinkAddMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext) {
+		theEmpiTransactionContext.addTransactionLogMessage("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().toUnqualifiedVersionless().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + theCanonicalAssuranceLevel.name());
 	}
 
-	private void logLinkUpdateMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages, String theOriginalAssuranceLevel) {
-		TransactionLogMessages.addMessage(theTransactionLogMessages, ("Updating link from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless() + ". Changing IdentityAssuranceLevel: " + theOriginalAssuranceLevel + " -> " + canonicalAssuranceLevel.name()));
+	private void logLinkUpdateMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext, String theOriginalAssuranceLevel) {
+		theEmpiTransactionContext.addTransactionLogMessage("Updating link from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless() + ". Changing IdentityAssuranceLevel: " + theOriginalAssuranceLevel + " -> " + canonicalAssuranceLevel.name());
 	}
 
-	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
+	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext) {
 		if (canonicalAssuranceLevel == null) {
 			ourLog.warn("Refusing to update or add a link without an Assurance Level.");
 			return;
@@ -163,13 +163,13 @@ public class PersonHelper {
 		Person person = (Person) thePerson;
 		if (!containsLinkTo(thePerson, theResourceId)) {
 			person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
-			logLinkAddMessage(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages);
+			logLinkAddMessage(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
 		} else {
 			person.getLink().stream()
 				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
 				.findFirst()
 				.ifPresent(link -> {
-					logLinkUpdateMessage(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages, link.getAssurance().toCode());
+					logLinkUpdateMessage(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext, link.getAssurance().toCode());
 					link.setAssurance(canonicalAssuranceLevel.toR4());
 				});
 		}
@@ -178,16 +178,15 @@ public class PersonHelper {
 
 	/**
 	 * Removes a link from the given {@link IBaseResource} to the target {@link IIdType}.
-	 *
-	 * @param thePerson                 The person to remove the link from.
-	 * @param theResourceId             The target ID to remove.
-	 * @param theTransactionLogMessages
+	 * @param thePerson The person to remove the link from.
+	 * @param theResourceId The target ID to remove.
+	 * @param theEmpiTransactionContext
 	 */
-	public void removeLink(IBaseResource thePerson, IIdType theResourceId, TransactionLogMessages theTransactionLogMessages) {
+	public void removeLink(IBaseResource thePerson, IIdType theResourceId, EmpiTransactionContext theEmpiTransactionContext) {
 		if (!containsLinkTo(thePerson, theResourceId)) {
 			return;
 		}
-		TransactionLogMessages.addMessage(theTransactionLogMessages, "Removing PersonLinkComponent from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless());
+		theEmpiTransactionContext.addTransactionLogMessage("Removing PersonLinkComponent from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless());
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person person = (Person) thePerson;

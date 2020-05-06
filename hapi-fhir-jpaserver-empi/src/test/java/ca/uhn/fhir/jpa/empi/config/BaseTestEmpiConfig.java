@@ -16,15 +16,15 @@ import java.io.IOException;
 @Configuration
 public abstract class BaseTestEmpiConfig {
 
-	@Value("${empi.strict_mode:false}")
-	boolean myStrictMode;
+	@Value("${empi.prevent_eid_updates:false}")
+	boolean myPreventEidUpdates;
 
 	@Bean
     IEmpiSettings empiProperties() throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		return new EmpiSettingsImpl().setEnabled(false).setScriptText(json).setStrictEidMode(myStrictMode);
+		return new EmpiSettingsImpl().setEnabled(false).setScriptText(json).setPreventEidUpdates(myPreventEidUpdates);
 	}
 
 	@Bean

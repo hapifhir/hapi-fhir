@@ -28,6 +28,7 @@ import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
@@ -37,7 +38,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,7 +61,6 @@ public class EmpiMatchLinkSvc {
 	private PersonHelper myPersonHelper;
 	@Autowired
 	private EIDHelper myEIDHelper;
-	
 	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 
@@ -71,93 +70,97 @@ public class EmpiMatchLinkSvc {
 	 * Does nothing if resource is determined to be not managed by EMPI.
 	 *
 	 * @param theResource the incoming EMPI target, which is either a Patient or Practitioner.
-	 * @param theTransactionLogMessages
+	 * @param theEmpiTransactionContext
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to EMPI processing of this resource.
 	 */
-	public TransactionLogMessages updateEmpiLinksForEmpiTarget(IBaseResource theResource, @Nullable TransactionLogMessages theTransactionLogMessages) {
+	public EmpiTransactionContext updateEmpiLinksForEmpiTarget(IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		if (EmpiUtil.isManagedByEmpi(theResource)) {
-			return doEmpiUpdate(theResource, theTransactionLogMessages);
+			return doEmpiUpdate(theResource, theEmpiTransactionContext);
 		} else {
 			return null;
 		}
 	}
 
-	private TransactionLogMessages doEmpiUpdate(IBaseResource theResource, TransactionLogMessages theTransactionLogMessages) {
+	private EmpiTransactionContext doEmpiUpdate(IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
 		if (personCandidates.isEmpty()) {
-			handleEmpiWithNoCandidates(theResource, theTransactionLogMessages);
+			handleEmpiWithNoCandidates(theResource, theEmpiTransactionContext);
 		} else if (personCandidates.size() == 1) {
-			handleEmpiWithSingleCandidate(theResource, personCandidates, theTransactionLogMessages);
+			handleEmpiWithSingleCandidate(theResource, personCandidates, theEmpiTransactionContext);
 		} else {
-			handleEmpiWithMultipleCandidates(theResource, personCandidates, theTransactionLogMessages);
+			handleEmpiWithMultipleCandidates(theResource, personCandidates, theEmpiTransactionContext);
 		}
-		return theTransactionLogMessages;
+		return theEmpiTransactionContext;
 	}
 
-	private void handleEmpiWithMultipleCandidates(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, TransactionLogMessages theMessages) {
+	private void handleEmpiWithMultipleCandidates(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, EmpiTransactionContext theEmpiTransactionContext) {
 		Long samplePersonPid = thePersonCandidates.get(0).getCandidatePersonPid().getIdAsLong();
 		boolean allSamePerson = thePersonCandidates.stream()
 			.allMatch(candidate -> candidate.getCandidatePersonPid().getIdAsLong().equals(samplePersonPid));
 
 		if (allSamePerson) {
-			log(theMessages, "EMPI received multiple match candidates, but they are all linked to the same person.");
-			handleEmpiWithSingleCandidate(theResource, thePersonCandidates, theMessages);
+			log(theEmpiTransactionContext, "EMPI received multiple match candidates, but they are all linked to the same person.");
+			handleEmpiWithSingleCandidate(theResource, thePersonCandidates, theEmpiTransactionContext);
 		} else {
-			log(theMessages, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
+			log(theEmpiTransactionContext, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 			//Set them all as POSSIBLE_MATCH
 			List<IBaseResource> persons = thePersonCandidates.stream().map(this::getPersonFromMatchedPersonCandidate).collect(Collectors.toList());
 				persons.forEach(person -> {
-					myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
+					myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				});
 
 			//Set all Persons as POSSIBLE_DUPLICATE of the first person.
 			IBaseResource samplePerson = persons.get(0);
 			persons.subList(1, persons.size()).stream()
 				.forEach(possibleDuplicatePerson -> {
-					myEmpiLinkSvc.updateLink(samplePerson, possibleDuplicatePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theMessages);
+					myEmpiLinkSvc.updateLink(samplePerson, possibleDuplicatePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				});
 		}
 	}
 
-	private void handleEmpiWithNoCandidates(IBaseResource theResource, @Nullable TransactionLogMessages theMessages) {
-		log(theMessages, "There were no matched candidates for EMPI, creating a new Person.");
+	private void handleEmpiWithNoCandidates(IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+		log(theEmpiTransactionContext, "There were no matched candidates for EMPI, creating a new Person.");
 		IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
-		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
+		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
-	private void handleEmpiCreate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, @Nullable TransactionLogMessages theMessages) {
-		log(theMessages, "EMPI has narrowed down to one candidate for matching.");
-		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
-		IBaseResource person = getPersonFromMatchedPersonCandidate(matchedPersonCandidate);
+	private void handleEmpiCreate(IBaseResource theResource, MatchedPersonCandidate thePersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
+		log(theEmpiTransactionContext, "EMPI has narrowed down to one candidate for matching.");
+		IBaseResource person = getPersonFromMatchedPersonCandidate(thePersonCandidate);
 		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
-			log(theMessages, "Duplicate detected based on the fact that both resources have different external EIDs.");
+			log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
-			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
-			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theMessages);
+			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else {
-			if (matchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
+			if (thePersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
 				handleExternalEidAddition(person, theResource);
 			}
-			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theMessages);
+			myEmpiLinkSvc.updateLink(person, theResource, thePersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		}
 	}
-	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, @Nullable TransactionLogMessages theMessages) {
-		log(theMessages, "EMPI has narrowed down to one candidate for matching.");
+
+	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, EmpiTransactionContext theEmpiTransactionContext) {
+		log(theEmpiTransactionContext, "EMPI has narrowed down to one candidate for matching.");
 		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
-		Optional<EmpiLink> oExistingMatchLink = myEmpiLinkDaoSvc.getMatchedLinkForTarget(theResource);
-		boolean isUpdate = oExistingMatchLink.isPresent(); // If the patient has an existing match link this is an update.
-		if (isUpdate) {
-			handleEmpiUpdate(theResource, matchedPersonCandidate, theMessages, oExistingMatchLink.get());
+		if (theEmpiTransactionContext.getRestOperation().equals(EmpiTransactionContext.OperationType.UPDATE)) {
+			handleEmpiUpdate(theResource, matchedPersonCandidate, theEmpiTransactionContext);
 		} else {
-			handleEmpiCreate(theResource, thePersonCandidates, theMessages);
+			handleEmpiCreate(theResource, matchedPersonCandidate, theEmpiTransactionContext);
 		}
-
 	}
 
-	private void handleEmpiUpdate(IBaseResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, @Nullable TransactionLogMessages theMessages, EmpiLink theExistingMatchLink) {
+	private void handleEmpiUpdate(IBaseResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
 		IBaseResource person = getPersonFromMatchedPersonCandidate(theMatchedPersonCandidate);
 		boolean hasEidsInCommon = myEIDHelper.hasEidOverlap(person, theResource);
-		boolean remainsMatchedToSamePerson = candidateIsSameAsEmpiLinkPerson(theExistingMatchLink, theMatchedPersonCandidate);
+		Optional<EmpiLink> theExistingMatchLink = myEmpiLinkDaoSvc.getMatchedLinkForTarget(theResource);
+
+		boolean remainsMatchedToSamePerson;
+		if (theExistingMatchLink.isPresent()) {
+			remainsMatchedToSamePerson = candidateIsSameAsEmpiLinkPerson(theExistingMatchLink.get(), theMatchedPersonCandidate);
+		} else {
+			remainsMatchedToSamePerson = false;
+		}
 
 		if (!hasEidsInCommon && remainsMatchedToSamePerson) {
 			// the user is simply updating their EID. We propagate this change to the Person.
@@ -165,10 +168,10 @@ public class EmpiMatchLinkSvc {
 			if (theMatchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
 				handleExternalEidOverwrite(person, theResource);
 			}
-			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theMessages);
+			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else if (!hasEidsInCommon && !remainsMatchedToSamePerson) {
 			//This is a new linking scenario. we have to break the existing link and link to the new person. For now, we create duplicate.
-			createNewPersonAndFlagAsDuplicate(theResource, theMessages, person);
+			createNewPersonAndFlagAsDuplicate(theResource, theEmpiTransactionContext, person);
 		} else if (hasEidsInCommon && remainsMatchedToSamePerson) {
 			//Match didn't change, EIDS didn't change. Update person info based on patient info.
 			//myPersonHelper.updatePersonFromEmpiTarget();
@@ -188,11 +191,11 @@ public class EmpiMatchLinkSvc {
 		return theOExistingMatchLink.getPersonPid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
 	}
 
-	private void createNewPersonAndFlagAsDuplicate(IBaseResource theResource, @Nullable TransactionLogMessages theMessages, IBaseResource thePerson) {
-		log(theMessages, "Duplicate detected based on the fact that both resources have different external EIDs.");
+	private void createNewPersonAndFlagAsDuplicate(IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext, IBaseResource thePerson) {
+		log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 		IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
-		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
-		myEmpiLinkSvc.updateLink(newPerson, thePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theMessages);
+		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(newPerson, thePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private IBaseResource getPersonFromMatchedPersonCandidate(MatchedPersonCandidate theMatchedPersonCandidate) {
@@ -207,8 +210,8 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	private void log(@Nullable TransactionLogMessages theMessages, String theMessage) {
-		TransactionLogMessages.addMessage(theMessages, theMessage);
+	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
+		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
 	}
 }
