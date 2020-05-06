@@ -81,7 +81,7 @@ public class TransactionDetails {
 	}
 
 	/**
-	 * This is the wall-clock time that a given transaction started. 
+	 * This is the wall-clock time that a given transaction started.
 	 */
 	public Date getTransactionDate() {
 		return myTransactionDate;
