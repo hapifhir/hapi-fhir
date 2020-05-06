@@ -12,6 +12,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.empi.util.TestUtils.createDummyContext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -44,7 +45,7 @@ public class PersonHelperR4Test {
 		}
 
 		{
-			MY_PERSON_HELPER.removeLink(person, new IdDt(PATIENT_1), null);
+			MY_PERSON_HELPER.removeLink(person, new IdDt(PATIENT_1), createDummyContext());
 			List<IIdType> links = MY_PERSON_HELPER.getLinkIds(person).collect(Collectors.toList());
 			assertEquals(1, links.size());
 			assertEquals(PATIENT_2, links.get(0).getValue());
@@ -63,19 +64,19 @@ public class PersonHelperR4Test {
 		}
 		//Original link addition
 		{
-			MY_PERSON_HELPER.addOrUpdateLink(person, new IdDt(PATIENT_1), CanonicalIdentityAssuranceLevel.LEVEL3, null);
+			MY_PERSON_HELPER.addOrUpdateLink(person, new IdDt(PATIENT_1), CanonicalIdentityAssuranceLevel.LEVEL3, createDummyContext());
 			assertThat(person.getLink().size(), is(equalTo(1)));
 		}
 
 		//Link update
 		{
-			MY_PERSON_HELPER.addOrUpdateLink(person, new IdDt(PATIENT_1), CanonicalIdentityAssuranceLevel.LEVEL4, null);
+			MY_PERSON_HELPER.addOrUpdateLink(person, new IdDt(PATIENT_1), CanonicalIdentityAssuranceLevel.LEVEL4, createDummyContext());
 			assertThat(person.getLink().size(), is(equalTo(1)));
 		}
 
 		//New link
 		{
-			MY_PERSON_HELPER.addOrUpdateLink(person, new IdDt(PATIENT_2), CanonicalIdentityAssuranceLevel.LEVEL4, null);
+			MY_PERSON_HELPER.addOrUpdateLink(person, new IdDt(PATIENT_2), CanonicalIdentityAssuranceLevel.LEVEL4, createDummyContext());
 			assertThat(person.getLink().size(), is(equalTo(2)));
 		}
 	}
