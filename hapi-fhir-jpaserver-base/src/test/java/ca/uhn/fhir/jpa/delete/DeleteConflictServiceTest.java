@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.TransactionDetails;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +66,7 @@ public class DeleteConflictServiceTest {
 		link.setSourceResource(entity);
 		list.add(link);
 		when(myDeleteConflictFinderService.findConflicts(any(), anyInt())).thenReturn(list);
-		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null, theTransactionDetails);
+		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null, new TransactionDetails());
 		assertEquals(0, retryCount);
 	}
 }

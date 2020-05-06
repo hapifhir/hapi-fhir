@@ -28,10 +28,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This object contains runtime information that is gathered and relevant to a single <i>database transaction</i>.
+ * This doesn't mean a FHIR transaction necessarily, but rather any operation that happens withing a single DB transaction
+ * (i.e. a FHIR create, read, transaction, etc.).
+ * <p>
+ * The intent with this class is to hold things we want to pass from operation to operation within a transaction in
+ * order to avoid looking things up multime times, etc.
+ * </p>
+ */
 public class TransactionDetails {
 
 	private final Date myTransactionDate;
-	private Map<IIdType, ResourcePersistentId> myPreResolvedResourceIds = Collections.emptyMap();
+	private Map<IIdType, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 
 	/**
 	 * Constructor
@@ -47,20 +56,33 @@ public class TransactionDetails {
 		myTransactionDate = theTransactionDate;
 	}
 
-	public Map<IIdType, ResourcePersistentId> getPreResolvedResourceIds() {
-		return myPreResolvedResourceIds;
+	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
+	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
+	 */
+	public Map<IIdType, ResourcePersistentId> getResolvedResourceIds() {
+		return myResolvedResourceIds;
 	}
 
-	public void addPreResolvedResourceId(IIdType theResourceId, ResourcePersistentId thePersistentId) {
+	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
+	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
+	 */
+	public void addResolvedResourceId(IIdType theResourceId, ResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
 		assert thePersistentId != null;
 
-		if (myPreResolvedResourceIds.isEmpty()) {
-			myPreResolvedResourceIds = new HashMap<>();
+		if (myResolvedResourceIds.isEmpty()) {
+			myResolvedResourceIds = new HashMap<>();
 		}
-		myPreResolvedResourceIds.put(theResourceId, thePersistentId);
+		myResolvedResourceIds.put(theResourceId, thePersistentId);
 	}
 
+	/**
+	 * This is the wall-clock time that a given transaction started. 
+	 */
 	public Date getTransactionDate() {
 		return myTransactionDate;
 	}

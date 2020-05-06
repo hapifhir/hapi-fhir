@@ -16,7 +16,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
-import ca.uhn.fhir.jpa.model.util.TransactionDetails;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -34,7 +33,6 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -49,6 +47,7 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.TransactionDetails;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
@@ -1222,12 +1221,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Override
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
-													IBasePersistedResource theEntity2, IIdType theResourceId, IBaseResource theOldResource) {
+													IBasePersistedResource theEntity2, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
 
 		ResourceTable entity = (ResourceTable) theEntity2;
-
-		// FIXME: should this method take one as a parameter?
-		TransactionDetails transactionDetails = new TransactionDetails();
 
 		// We'll update the resource ID with the correct version later but for
 		// now at least set it to something useful for the interceptors
@@ -1249,7 +1245,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		doCallHooks(theRequestDetails, Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, hookParams);
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, entity, null, thePerformIndexing, thePerformIndexing, transactionDetails, theForceUpdateVersion, thePerformIndexing);
+		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, entity, null, thePerformIndexing, thePerformIndexing, theTransactionDetails, theForceUpdateVersion, thePerformIndexing);
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),

@@ -35,5 +35,5 @@ public interface IJpaDao<T extends IBaseResource> {
 													boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry);
 
 	IBasePersistedResource updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
-										  IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource);
+													  IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails);
 }

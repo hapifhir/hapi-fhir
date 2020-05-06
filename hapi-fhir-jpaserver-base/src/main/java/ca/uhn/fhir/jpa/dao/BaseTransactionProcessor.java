@@ -606,7 +606,7 @@ public abstract class BaseTransactionProcessor {
 			for (int i = 0; i < theEntries.size(); i++) {
 
 				if (i % 250 == 0) {
-					ourLog.info("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
+					ourLog.debug("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
 				}
 
 				IBase nextReqEntry = theEntries.get(i);
@@ -851,7 +851,7 @@ public abstract class BaseTransactionProcessor {
 			}
 			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(myContext, deleteConflicts);
 
-			theIdToPersistedOutcome.entrySet().forEach(t -> theTransactionDetails.addPreResolvedResourceId(t.getKey(), t.getValue().getEntity().getPersistentId()));
+			theIdToPersistedOutcome.entrySet().forEach(t -> theTransactionDetails.addResolvedResourceId(t.getKey(), t.getValue().getEntity().getPersistentId()));
 
 			/*
 			 * Perform ID substitutions and then index each resource we have saved
@@ -863,7 +863,7 @@ public abstract class BaseTransactionProcessor {
 			for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
 
 				if (i++ % 250 == 0) {
-					ourLog.info("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.values().size());
+					ourLog.debug("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.values().size());
 				}
 
 				IBaseResource nextResource = nextOutcome.getResource();
@@ -913,7 +913,7 @@ public abstract class BaseTransactionProcessor {
 				IJpaDao jpaDao = (IJpaDao) dao;
 
 				if (updatedEntities.contains(nextOutcome.getEntity())) {
-					jpaDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+					jpaDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
 				} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
 					jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
 				}
