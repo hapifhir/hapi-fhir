@@ -20,7 +20,7 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nullable;
@@ -30,12 +30,11 @@ public interface IEmpiLinkSvc {
 	/**
 	 * Update a link between a Person record and its target Patient/Practitioner record. If a link does not exist between
 	 * these two records, create it.
-	 *
-	 * @param thePerson                 the Person to link the target resource to.
+	 *  @param thePerson                 the Person to link the target resource to.
 	 * @param theTargetResource               the target resource, which is a Patient or Practitioner
 	 * @param theMatchResult            the current status of the match to set the link to.
 	 * @param theLinkSource             MANUAL or AUTO: what caused the link.
-	 * @param theTransactionLogMessages
+	 * @param theEmpiTransactionContext
 	 */
-	void updateLink(IBaseResource thePerson, IBaseResource theTargetResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages);
+	void updateLink(IBaseResource thePerson, IBaseResource theTargetResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
 }

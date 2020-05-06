@@ -25,6 +25,7 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
@@ -59,7 +60,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Override
 	@Transactional
-	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages) {
+	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
 		validateRequestIsLegal(thePerson, theResource, theMatchResult, theLinkSource);
@@ -67,20 +68,20 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		switch (theMatchResult) {
 			case MATCH:
 				//deleteCurrentMatch(theResource);
-				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theTransactionLogMessages);
+				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theEmpiTransactionContext);
 				myEmpiResourceDaoSvc.updatePerson(thePerson);
 				break;
 			case POSSIBLE_MATCH:
-				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theTransactionLogMessages);
+				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theEmpiTransactionContext);
 				break;
 			case NO_MATCH:
-				myPersonHelper.removeLink(thePerson, resourceId, theTransactionLogMessages);
+				myPersonHelper.removeLink(thePerson, resourceId, theEmpiTransactionContext);
 				break;
 			case POSSIBLE_DUPLICATE:
 				break;
 		}
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
-		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theTransactionLogMessages);
+		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiTransactionContext);
 
 	}
 
@@ -123,7 +124,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages) {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theTransactionLogMessages);
+	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiTransactionContext);
 	}
 }

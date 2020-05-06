@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -229,20 +230,35 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
 		thePatient = createPatient(thePatient);
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, null);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForCreate(thePatient));
 		return thePatient;
 	}
-	protected Patient updatePatientAndUpdateLinks(Patient thePatient1) {
-		thePatient1 = (Patient) myPatientDao.update(thePatient1).getResource();
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient1, null);
-		return thePatient1;
+	protected EmpiTransactionContext createContextForCreate(IBaseResource theResource) {
+		EmpiTransactionContext ctx = new EmpiTransactionContext();
+		ctx.setPayload(theResource);
+		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE);
+		ctx.setTransactionLogMessages(null);
+		return ctx;
+	}
+	protected EmpiTransactionContext createContextForUpdate(IBaseResource theResource) {
+		EmpiTransactionContext ctx = new EmpiTransactionContext();
+		ctx.setPayload(theResource);
+		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE);
+		ctx.setTransactionLogMessages(null);
+		return ctx;
+	}
+
+	protected Patient updatePatientAndUpdateLinks(Patient thePatient) {
+		thePatient = (Patient) myPatientDao.update(thePatient).getResource();
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForUpdate(thePatient));
+		return thePatient;
 	}
 
 	protected Practitioner createPractitionerAndUpdateLinks(Practitioner thePractitioner) {
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
 		thePractitioner.setId(daoMethodOutcome.getId());
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner, null);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner, createContextForCreate(thePractitioner));
 		return thePractitioner;
 	}
 

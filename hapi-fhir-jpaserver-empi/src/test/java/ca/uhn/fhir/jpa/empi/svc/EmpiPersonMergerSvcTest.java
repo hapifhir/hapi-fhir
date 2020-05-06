@@ -150,8 +150,8 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	// FIXME KHS test delete
 
-	private void createEmpiLink(Person theTheDeletePerson, Patient theTheTargetPatient1) {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theTheDeletePerson, theTheTargetPatient1, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.MANUAL, null);
+	private void createEmpiLink(Person theDeletePerson, Patient theTargetPatient1) {
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theDeletePerson, theTargetPatient1, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(theTargetPatient1));
 	}
 
 	private void populatePerson(Person thePerson) {
