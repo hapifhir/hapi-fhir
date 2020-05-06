@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
+import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
@@ -18,6 +19,8 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	PersonHelper myPersonHelper;
 	@Autowired
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	@Autowired
+	IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
 	IdHelperService myIdHelperService;
 	@Autowired
@@ -43,5 +46,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 			newLink.setPersonPid(personToKeepPid);
 			myEmpiLinkDaoSvc.update(newLink);
 		}
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToDelete);
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToKeep);
 	}
 }

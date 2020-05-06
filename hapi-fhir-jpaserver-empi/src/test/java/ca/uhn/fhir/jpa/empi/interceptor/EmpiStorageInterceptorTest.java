@@ -82,15 +82,6 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 	}
 
-	private Person getOnlyPerson() {
-		SearchParameterMap map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		IBundleProvider bundle = myPersonDao.search(map);
-		List<IBaseResource> resources = bundle.getResources(0, 99);
-		assertEquals(1, resources.size());
-		return (Person) resources.get(0);
-	}
-
 	@Test
 	public void testCreatePersonWithEmpiTagForbidden() throws InterruptedException {
 		//Creating a person with the EMPI-MANAGED tag should fail

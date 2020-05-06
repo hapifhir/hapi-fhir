@@ -83,9 +83,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	
 	@Test
 	public void emptyMerge() {
+		assertEquals(2, getAllPersons().size());
+
 		Person mergedPerson = (Person) myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 		assertEquals(myKeepPerson.getIdElement(), mergedPerson.getIdElement());
 		assertThat(mergedPerson, is(samePersonAs(mergedPerson)));
+		assertEquals(1, getAllPersons().size());
 	}
 
 	@Test
@@ -118,7 +121,8 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
 		assertEquals(1, links.size());
-		assertThat(myKeepPerson, is(linkedTo(myTargetPatient1)));
+		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1)));
+		assertEquals(1, myKeepPerson.getLink().size());
 	}
 
 	@Test
@@ -128,7 +132,8 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
 		assertEquals(1, links.size());
-		assertThat(myKeepPerson, is(linkedTo(myTargetPatient1)));
+		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1)));
+		assertEquals(1, myKeepPerson.getLink().size());
 	}
 
 	@Test
@@ -142,14 +147,55 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myEmpiLinkHelper.logEmpiLinks();
 
 		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		assertEquals(3, myKeepPerson.getLink().size());
 	}
 
-	// FIXME KHS we've tested 01, 10, now test 21,12,etc
+	@Test
+	public void delete1Keep123() {
+		createEmpiLink(myDeletePerson, myTargetPatient1);
+		createEmpiLink(myKeepPerson, myTargetPatient1);
+		createEmpiLink(myKeepPerson, myTargetPatient2);
+		createEmpiLink(myKeepPerson, myTargetPatient3);
 
-	// FIXME KHS test delete
+		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		myEmpiLinkHelper.logEmpiLinks();
+
+		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		assertEquals(3, myKeepPerson.getLink().size());
+	}
+
+	@Test
+	public void delete123Keep123() {
+		createEmpiLink(myDeletePerson, myTargetPatient1);
+		createEmpiLink(myDeletePerson, myTargetPatient2);
+		createEmpiLink(myDeletePerson, myTargetPatient3);
+		createEmpiLink(myKeepPerson, myTargetPatient1);
+		createEmpiLink(myKeepPerson, myTargetPatient2);
+		createEmpiLink(myKeepPerson, myTargetPatient3);
+
+		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		myEmpiLinkHelper.logEmpiLinks();
+
+		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		assertEquals(3, myKeepPerson.getLink().size());
+	}
+
+	@Test
+	public void delete12Keep23() {
+		createEmpiLink(myDeletePerson, myTargetPatient1);
+		createEmpiLink(myDeletePerson, myTargetPatient2);
+		createEmpiLink(myKeepPerson, myTargetPatient2);
+		createEmpiLink(myKeepPerson, myTargetPatient3);
+
+		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		myEmpiLinkHelper.logEmpiLinks();
+
+		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		assertEquals(3, myKeepPerson.getLink().size());
+	}
 
 	private void createEmpiLink(Person theTheDeletePerson, Patient theTheTargetPatient1) {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theTheDeletePerson, theTheTargetPatient1, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.MANUAL, null);
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theTheDeletePerson, theTheTargetPatient1, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, null);
 	}
 
 	private void populatePerson(Person thePerson) {

@@ -30,8 +30,11 @@ import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -40,6 +43,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class is in charge of managing EmpiLinks between Persons and target resources
@@ -82,6 +87,22 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
 		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theTransactionLogMessages);
 
+	}
+
+	// FIXME KHS transaction log
+	@Override
+	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource) {
+		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonResource);
+		List<IBaseBackboneElement> newLinks = empiLinks.stream()
+		.map(this::personLinkFromEmpiLink)
+		.collect(Collectors.toList());
+		myPersonHelper.setLinks(thePersonResource, newLinks);
+	}
+
+	private IBaseBackboneElement personLinkFromEmpiLink(EmpiLink empiLink) {
+		IdDt resourceId = empiLink.getTarget().getIdDt().toUnqualifiedVersionless();
+		CanonicalIdentityAssuranceLevel assuranceLevel = AssuranceLevelUtil.getAssuranceLevel(empiLink.getMatchResult(), empiLink.getLinkSource());
+		return myPersonHelper.newPersonLink(resourceId, assuranceLevel);
 	}
 
 	/**

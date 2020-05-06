@@ -26,8 +26,11 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -67,20 +69,20 @@ public class PersonHelper {
 
 	/**
 	 * Given a Person, extract all {@link IIdType}s for the linked targets.
-	 * @param thePerson the Person to extract link IDs from.
 	 *
+	 * @param thePerson the Person to extract link IDs from.
 	 * @return a Stream of {@link IIdType}.
 	 */
-	public Stream<IIdType> getLinks(IBaseResource thePerson) {
+	public Stream<IIdType> getLinkIds(IBaseResource thePerson) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				Person personR4 = (Person)thePerson;
+				Person personR4 = (Person) thePerson;
 				return personR4.getLink().stream()
 					.map(Person.PersonLinkComponent::getTarget)
 					.map(IBaseReference::getReferenceElement)
 					.map(IIdType::toUnqualifiedVersionless);
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person)thePerson;
+				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
 				return personStu3.getLink().stream()
 					.map(org.hl7.fhir.dstu3.model.Person.PersonLinkComponent::getTarget)
 					.map(IBaseReference::getReferenceElement)
@@ -93,21 +95,21 @@ public class PersonHelper {
 	/**
 	 * Determine whether or not the given {@link IBaseResource} person contains a link to a particular {@link IIdType}
 	 *
-	 * @param thePerson The person to check
+	 * @param thePerson     The person to check
 	 * @param theResourceId The ID to check.
-	 *
 	 * @return A boolean indicating whether or not there was a contained link.
 	 */
-    public boolean containsLinkTo(IBaseResource thePerson, IIdType theResourceId) {
-		 Stream<IIdType> links = getLinks(thePerson);
-		 return links.anyMatch(link -> link.getValue().equals(theResourceId.getValue()));
-    }
+	public boolean containsLinkTo(IBaseResource thePerson, IIdType theResourceId) {
+		Stream<IIdType> links = getLinkIds(thePerson);
+		return links.anyMatch(link -> link.getValue().equals(theResourceId.getValue()));
+	}
 
 	/**
 	 * Create or update a link from source {@link IBaseResource} to the target {@link IIdType}, with the given {@link CanonicalIdentityAssuranceLevel}.
-	 *  @param thePerson The person who's link needs to be updated.
-	 * @param theResourceId The target of the link
-	 * @param canonicalAssuranceLevel The level of certainty of this link.
+	 *
+	 * @param thePerson                 The person who's link needs to be updated.
+	 * @param theResourceId             The target of the link
+	 * @param canonicalAssuranceLevel   The level of certainty of this link.
 	 * @param theTransactionLogMessages
 	 */
 	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, @Nonnull CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, TransactionLogMessages theTransactionLogMessages) {
@@ -169,15 +171,16 @@ public class PersonHelper {
 				.ifPresent(link -> {
 					logLinkUpdateMessage(thePerson, theResourceId, canonicalAssuranceLevel, theTransactionLogMessages, link.getAssurance().toCode());
 					link.setAssurance(canonicalAssuranceLevel.toR4());
-			});
+				});
 		}
 	}
 
 
 	/**
 	 * Removes a link from the given {@link IBaseResource} to the target {@link IIdType}.
-	 *  @param thePerson The person to remove the link from.
-	 * @param theResourceId The target ID to remove.
+	 *
+	 * @param thePerson                 The person to remove the link from.
+	 * @param theResourceId             The target ID to remove.
 	 * @param theTransactionLogMessages
 	 */
 	public void removeLink(IBaseResource thePerson, IIdType theResourceId, TransactionLogMessages theTransactionLogMessages) {
@@ -192,7 +195,7 @@ public class PersonHelper {
 				links.removeIf(component -> component.hasTarget() && component.getTarget().getReference().equals(theResourceId.getValue()));
 				break;
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person)thePerson;
+				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
 				personDstu3.getLink().removeIf(component -> component.hasTarget() && component.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()));
 				break;
 			default:
@@ -218,13 +221,13 @@ public class PersonHelper {
 			case R4:
 				Person personR4 = new Person();
 				eidsToApply.forEach(eid -> personR4.addIdentifier(eid.toR4()));
-				personR4.getMeta().addTag((Coding)buildEmpiManagedTag());
+				personR4.getMeta().addTag((Coding) buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, personR4);
 				return personR4;
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.Person personDSTU3 = new org.hl7.fhir.dstu3.model.Person();
 				eidsToApply.forEach(eid -> personDSTU3.addIdentifier(eid.toDSTU3()));
-				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding)buildEmpiManagedTag());
+				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding) buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3);
 				return personDSTU3;
 			default:
@@ -236,9 +239,9 @@ public class PersonHelper {
 	 * This will copy over all attributes that are copiable from Patient/Practitioner to Person.
 	 *
 	 * @param theBaseResource The incoming {@link Patient} or {@link Practitioner} who's data we want to copy into Person.
-	 * @param thePerson The incoming {@link Person} who needs to have their data updated.
+	 * @param thePerson       The incoming {@link Person} who needs to have their data updated.
 	 */
-	private void copyEmpiTargetDataIntoPerson(IBaseResource theBaseResource,  IBaseResource thePerson) {
+	private void copyEmpiTargetDataIntoPerson(IBaseResource theBaseResource, IBaseResource thePerson) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				copyR4TargetInformation(theBaseResource, thePerson);
@@ -255,7 +258,7 @@ public class PersonHelper {
 		Person person = (Person) thePerson;
 		switch (myFhirContext.getResourceType(theBaseResource)) {
 			case "Patient":
-				Patient patient = (Patient)theBaseResource;
+				Patient patient = (Patient) theBaseResource;
 				person.setName(patient.getName());
 				person.setAddress(patient.getAddress());
 				person.setTelecom(patient.getTelecom());
@@ -264,7 +267,7 @@ public class PersonHelper {
 				person.setPhoto(patient.getPhotoFirstRep());
 				break;
 			case "Practitioner":
-				Practitioner practitioner = (Practitioner)theBaseResource;
+				Practitioner practitioner = (Practitioner) theBaseResource;
 				person.setName(practitioner.getName());
 				person.setAddress(practitioner.getAddress());
 				person.setTelecom(practitioner.getTelecom());
@@ -276,11 +279,12 @@ public class PersonHelper {
 				throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceType(theBaseResource));
 		}
 	}
+
 	private void copyDSTU3TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
-		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person)thePerson;
+		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person) thePerson;
 		switch (myFhirContext.getResourceType(theBaseResource)) {
 			case "Patient":
-				org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient)theBaseResource;
+				org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient) theBaseResource;
 				person.setName(patient.getName());
 				person.setAddress(patient.getAddress());
 				person.setTelecom(patient.getTelecom());
@@ -289,7 +293,7 @@ public class PersonHelper {
 				person.setPhoto(patient.getPhotoFirstRep());
 				break;
 			case "Practitioner":
-				org.hl7.fhir.dstu3.model.Practitioner practitioner = (org.hl7.fhir.dstu3.model.Practitioner)theBaseResource;
+				org.hl7.fhir.dstu3.model.Practitioner practitioner = (org.hl7.fhir.dstu3.model.Practitioner) theBaseResource;
 				person.setName(practitioner.getName());
 				person.setAddress(practitioner.getAddress());
 				person.setTelecom(practitioner.getTelecom());
@@ -326,9 +330,8 @@ public class PersonHelper {
 	 * Update a Person's EID based on the incoming target resource. If the incoming resource has an external EID, it is applied
 	 * to the Person, unless that person already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
 	 *
-	 * @param thePerson The person to update the external EID on.
+	 * @param thePerson     The person to update the external EID on.
 	 * @param theEmpiTarget The target we will retrieve the external EID from.
-	 *
 	 * @return the modified {@link IBaseResource} representing the person.
 	 */
 	public IBaseResource updatePersonExternalEidFromEmpiTarget(IBaseResource thePerson, IBaseResource theEmpiTarget) {
@@ -341,7 +344,7 @@ public class PersonHelper {
 			if (personOfficialEid.isEmpty()) {
 				ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().toUnqualifiedVersionless(), incomingTargetEid.stream().map(eid -> eid.toString()).collect(Collectors.joining(",")));
 				addCanonicalEidsToPersonIfAbsent(thePerson, incomingTargetEid);
-			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)){
+			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)) {
 				//FIXME GGG handle multiple new EIDs. What are the rules here?
 				ourLog.debug("incoming resource:{} with EIDs {} does not need to overwrite person, as this EID is already present",
 					theEmpiTarget.getIdElement().toUnqualifiedVersionless(),
@@ -363,11 +366,11 @@ public class PersonHelper {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person personR4 = (Person) thePerson;
-				personR4.getIdentifier().removeIf(theIdentifier ->  theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
+				personR4.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
 				break;
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
-				personDstu3.getIdentifier().removeIf(theIdentifier ->  theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
+				personDstu3.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
 				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
@@ -377,10 +380,10 @@ public class PersonHelper {
 	private void addCanonicalEidsToPersonIfAbsent(IBaseResource thePerson, List<CanonicalEID> theIncomingTargetEid) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((Person)thePerson, eid.toR4()));
+				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((Person) thePerson, eid.toR4()));
 				break;
 			case DSTU3:
-				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person)thePerson, eid.toDSTU3()));
+				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person) thePerson, eid.toDSTU3()));
 				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
@@ -389,6 +392,7 @@ public class PersonHelper {
 
 	/**
 	 * To avoid adding duplicate
+	 *
 	 * @param thePerson
 	 * @param theIdentifier
 	 */
@@ -425,8 +429,8 @@ public class PersonHelper {
 	}
 
 	private void mergeR4PersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
-		Person fromPerson = (Person)thePersonToDelete;
-		Person toPerson = (Person)thePersonToKeep;
+		Person fromPerson = (Person) thePersonToDelete;
+		Person toPerson = (Person) thePersonToKeep;
 		if (!toPerson.hasName()) {
 			toPerson.setName(fromPerson.getName());
 		}
@@ -449,8 +453,8 @@ public class PersonHelper {
 
 
 	private void mergeDstu3PersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
-		org.hl7.fhir.dstu3.model.Person fromPerson = (org.hl7.fhir.dstu3.model.Person)thePersonToDelete;
-		org.hl7.fhir.dstu3.model.Person toPerson = (org.hl7.fhir.dstu3.model.Person)thePersonToKeep;
+		org.hl7.fhir.dstu3.model.Person fromPerson = (org.hl7.fhir.dstu3.model.Person) thePersonToDelete;
+		org.hl7.fhir.dstu3.model.Person toPerson = (org.hl7.fhir.dstu3.model.Person) thePersonToKeep;
 		if (!toPerson.hasName()) {
 			toPerson.setName(fromPerson.getName());
 		}
@@ -483,5 +487,55 @@ public class PersonHelper {
 		List<CanonicalEID> externalEidsPerson = myEIDHelper.getExternalEid(theExistingPerson);
 		List<CanonicalEID> externalEidsResource = myEIDHelper.getExternalEid(theComparingPerson);
 		return !externalEidsPerson.isEmpty() && !externalEidsResource.isEmpty() && !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsPerson);
+	}
+
+	public IBaseBackboneElement newPersonLink(IdDt theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				return newR4PersonLink(theTargetId, theAssuranceLevel);
+			case DSTU3:
+				return newDstu3PersonLink(theTargetId, theAssuranceLevel);
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
+	}
+
+	private IBaseBackboneElement newR4PersonLink(IdDt theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
+		Person.PersonLinkComponent retval = new Person.PersonLinkComponent();
+		retval.setTarget(new Reference(theTargetId));
+		retval.setAssurance(theAssuranceLevel.toR4());
+		return retval;
+	}
+
+	private IBaseBackboneElement newDstu3PersonLink(IdDt theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
+		org.hl7.fhir.dstu3.model.Person.PersonLinkComponent retval = new org.hl7.fhir.dstu3.model.Person.PersonLinkComponent();
+		retval.setTarget(new org.hl7.fhir.dstu3.model.Reference(theTargetId));
+		retval.setAssurance(theAssuranceLevel.toDstu3());
+		return retval;
+	}
+
+	public void setLinks(IAnyResource thePersonResource, List<IBaseBackboneElement> theNewLinks) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				setLinksR4(thePersonResource, theNewLinks);
+				break;
+			case DSTU3:
+				setLinksDstu3(thePersonResource, theNewLinks);
+				break;
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
+	}
+
+	private void setLinksDstu3(IAnyResource thePersonResource, List<IBaseBackboneElement> theLinks) {
+		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person)thePersonResource;
+		List<org.hl7.fhir.dstu3.model.Person.PersonLinkComponent> links = (List<org.hl7.fhir.dstu3.model.Person.PersonLinkComponent>)(List<?>)theLinks;
+		person.setLink(links);
+	}
+
+	private void setLinksR4(IAnyResource thePersonResource, List<IBaseBackboneElement> theLinks) {
+		Person person = (Person)thePersonResource;
+		List<Person.PersonLinkComponent> links = (List<Person.PersonLinkComponent>)(List<?>)theLinks;
+		person.setLink(links);
 	}
 }

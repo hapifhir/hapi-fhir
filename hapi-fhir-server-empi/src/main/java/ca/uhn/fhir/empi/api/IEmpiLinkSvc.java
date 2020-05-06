@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.api;
  */
 
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nullable;
@@ -38,4 +39,10 @@ public interface IEmpiLinkSvc {
 	 * @param theTransactionLogMessages
 	 */
 	void updateLink(IBaseResource thePerson, IBaseResource theTargetResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable TransactionLogMessages theTransactionLogMessages);
+
+	/**
+	 * Replace Person.link values from what they should be based on EmpiLink values
+	 * @param thePersonResource the person to correct the links on.
+	 */
+	void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource);
 }

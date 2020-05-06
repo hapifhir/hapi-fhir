@@ -33,7 +33,7 @@ public class PersonHelperDSTU3Test {
 		person.addLink().setTarget(new Reference(PATIENT_2));
 
 		{
-			List<IIdType> links = MY_PERSON_HELPER.getLinks(person).collect(Collectors.toList());
+			List<IIdType> links = MY_PERSON_HELPER.getLinkIds(person).collect(Collectors.toList());
 			assertEquals(2, links.size());
 			assertEquals(PATIENT_1, links.get(0).getValue());
 			assertEquals(PATIENT_2, links.get(1).getValue());
@@ -44,7 +44,7 @@ public class PersonHelperDSTU3Test {
 
 		{
 			MY_PERSON_HELPER.removeLink(person, new IdDt(PATIENT_1), null);
-			List<IIdType> links = MY_PERSON_HELPER.getLinks(person).collect(Collectors.toList());
+			List<IIdType> links = MY_PERSON_HELPER.getLinkIds(person).collect(Collectors.toList());
 			assertEquals(1, links.size());
 			assertEquals(PATIENT_2, links.get(0).getValue());
 		}

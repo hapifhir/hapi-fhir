@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.empi;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
@@ -21,9 +20,11 @@ import ca.uhn.fhir.jpa.empi.matcher.IsSamePersonAs;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -31,6 +32,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -41,6 +43,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -81,8 +84,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
 	protected EIDHelper myEIDHelper;
-	@Autowired
-	protected FhirContext myFhirContext;
 
 	@After
 	public void after() {
@@ -268,5 +269,19 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected Matcher<IBaseResource> matchedToAPerson() {
 		return IsMatchedToAPerson.matchedToAPerson(myIdHelperService, myEmpiLinkDaoSvc);
+	}
+
+	protected Person getOnlyPerson() {
+		List<IBaseResource> resources = getAllPersons();
+		assertEquals(1, resources.size());
+		return (Person) resources.get(0);
+	}
+
+	@NotNull
+	protected List<IBaseResource> getAllPersons() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		IBundleProvider bundle = myPersonDao.search(map);
+		return bundle.getResources(0, 999);
 	}
 }
