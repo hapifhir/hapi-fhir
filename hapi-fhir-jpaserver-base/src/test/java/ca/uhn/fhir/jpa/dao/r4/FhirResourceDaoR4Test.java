@@ -153,6 +153,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@Before
@@ -1689,6 +1690,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteWithMatchUrlQualifierMissing() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		String methodName = "testDeleteWithMatchUrlChainedProfile";
 
 		/*
@@ -3106,6 +3109,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testSortByDate() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
 		p.addName().setFamily("testSortF1").addGiven("testSortG1");
@@ -3435,6 +3440,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testSortByString01() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		Patient p = new Patient();
 		String string = "testSortByString01";
 		p.addIdentifier().setSystem("urn:system").setValue(string);

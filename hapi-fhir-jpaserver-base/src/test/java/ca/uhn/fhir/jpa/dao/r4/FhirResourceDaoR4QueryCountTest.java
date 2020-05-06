@@ -890,6 +890,140 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testTransactionWithMultiplePreExistingReferences_IfNoneExist() {
+		myDaoConfig.setDeleteEnabled(true);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("Practitioner/B");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		// Create transaction
+
+		Bundle input = new Bundle();
+
+		patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+		patient.setActive(true);
+		input.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Patient")
+			.setIfNoneExist("Patient?active=true");
+
+		practitioner = new Practitioner();
+		practitioner.setId(IdType.newRandomUuid());
+		practitioner.setActive(true);
+		input.addEntry()
+			.setFullUrl(practitioner.getId())
+			.setResource(practitioner)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Practitioner")
+			.setIfNoneExist("Practitioner?active=true");
+
+		ServiceRequest sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Lookup the two existing IDs to make sure they are legit
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Do the same a second time
+
+		input = new Bundle();
+
+		patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+		patient.setActive(true);
+		input.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Patient")
+			.setIfNoneExist("Patient?active=true");
+
+		practitioner = new Practitioner();
+		practitioner.setId(IdType.newRandomUuid());
+		practitioner.setActive(true);
+		input.addEntry()
+			.setFullUrl(practitioner.getId())
+			.setResource(practitioner)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Practitioner")
+			.setIfNoneExist("Practitioner?active=true");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Lookup the two existing IDs to make sure they are legit
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

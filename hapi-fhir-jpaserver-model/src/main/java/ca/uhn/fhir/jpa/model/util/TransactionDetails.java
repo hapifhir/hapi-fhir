@@ -30,7 +30,7 @@ import java.util.Map;
 
 /**
  * This object contains runtime information that is gathered and relevant to a single <i>database transaction</i>.
- * This doesn't mean a FHIR transaction necessarily, but rather any operation that happens withing a single DB transaction
+ * This doesn't mean a FHIR transaction necessarily, but rather any operation that happens within a single DB transaction
  * (i.e. a FHIR create, read, transaction, etc.).
  * <p>
  * The intent with this class is to hold things we want to pass from operation to operation within a transaction in
