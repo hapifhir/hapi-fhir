@@ -86,8 +86,6 @@ public final class EIDHelper {
 	 * @return a boolean indicating whether there is a match between these two identifier sets.
 	 */
 	public boolean eidMatchExists(List<CanonicalEID> theFirstResourceEids, List<CanonicalEID> theSecondResourceEids) {
-		System.out.println("WOAH");
-
 		List<String> collect = theFirstResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
 		List<String> collect1 = theSecondResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
 		return !Collections.disjoint(
@@ -104,9 +102,12 @@ public final class EIDHelper {
 	 * @param theComparingPerson
 	 * @return
 	 */
-	public boolean eidMatchExists(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
+	public boolean hasEidOverlap(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
 		List<CanonicalEID> firstEids = this.getExternalEid(theExistingPerson);
 		List<CanonicalEID> secondEids = this.getExternalEid(theComparingPerson);
-		return !firstEids.isEmpty() && !secondEids.isEmpty() && this.eidMatchExists(firstEids, secondEids);
+		if (firstEids.isEmpty() || secondEids.isEmpty()) {
+			return false;
+		}
+		return this.eidMatchExists(firstEids, secondEids);
 	}
 }

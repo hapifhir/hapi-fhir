@@ -470,4 +470,18 @@ public class PersonHelper {
 			toPerson.setPhoto(fromPerson.getPhoto());
 		}
 	}
+
+	/**
+	 * An incoming resource is a potential duplicate if it matches a Patient that has a Person with an official EID, but
+	 * the incoming resource also has an EID that does not match.
+	 *
+	 * @param theExistingPerson
+	 * @param theComparingPerson
+	 * @return
+	 */
+	public boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
+		List<CanonicalEID> externalEidsPerson = myEIDHelper.getExternalEid(theExistingPerson);
+		List<CanonicalEID> externalEidsResource = myEIDHelper.getExternalEid(theComparingPerson);
+		return externalEidsPerson.isEmpty() && externalEidsResource.isEmpty() && !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsPerson);
+	}
 }

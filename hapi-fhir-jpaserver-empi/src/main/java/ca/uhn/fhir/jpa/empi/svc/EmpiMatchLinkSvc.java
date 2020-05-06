@@ -125,34 +125,56 @@ public class EmpiMatchLinkSvc {
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
 	}
 
-	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, @Nullable TransactionLogMessages theMessages) {
+	private void handleEmpiCreate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, @Nullable TransactionLogMessages theMessages) {
 		log(theMessages, "EMPI has narrowed down to one candidate for matching.");
 		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
 		IBaseResource person = getPersonFromMatchedPersonCandidate(matchedPersonCandidate);
-
-		Optional<EmpiLink> oExistingMatchLink = myEmpiLinkDaoSvc.getMatchedLinkForTarget(theResource);
-		boolean matchHasChangedOrIsNew = matchHasChanged(oExistingMatchLink, matchedPersonCandidate);
-		boolean hasEidsInCommon = myEIDHelper.eidMatchExists(person, theResource);
-
-		if (!hasEidsInCommon){
-			if (matchHasChangedOrIsNew) {
-				//We matched to this person without being matched to them before, and we have a changed EID. Duplicate!
-				createNewPersonAndFlagAsDuplicate(theResource, theMessages, person);
-			} else {
-				// the user is simply updating their EID. We propagate this change to the Person.
-				//If there are multiple patients attached, we add.
-				//handleExternalEidAddition(person, theResource);
-				//If there is one patient attached, we overwrite.
-				if (matchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
-					handleExternalEidOverwrite(person, theResource);
-				}
-			}
+		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
+			log(theMessages, "Duplicate detected based on the fact that both resources have different external EIDs.");
+			IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theMessages);
+			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theMessages);
 		} else {
 			if (matchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
 				handleExternalEidAddition(person, theResource);
 			}
+			myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theMessages);
 		}
-		myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theMessages);
+	}
+	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, @Nullable TransactionLogMessages theMessages) {
+		log(theMessages, "EMPI has narrowed down to one candidate for matching.");
+		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
+		Optional<EmpiLink> oExistingMatchLink = myEmpiLinkDaoSvc.getMatchedLinkForTarget(theResource);
+		boolean isUpdate = oExistingMatchLink.isPresent(); // If the patient has an existing match link this is an update.
+		if (isUpdate) {
+			handleEmpiUpdate(theResource, matchedPersonCandidate, theMessages, oExistingMatchLink.get());
+		} else {
+			handleEmpiCreate(theResource, thePersonCandidates, theMessages);
+		}
+
+	}
+
+	private void handleEmpiUpdate(IBaseResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, @Nullable TransactionLogMessages theMessages, EmpiLink theExistingMatchLink) {
+		IBaseResource person = getPersonFromMatchedPersonCandidate(theMatchedPersonCandidate);
+		boolean hasEidsInCommon = myEIDHelper.hasEidOverlap(person, theResource);
+		boolean remainsMatchedToSamePerson = candidateIsSameAsEmpiLinkPerson(theExistingMatchLink, theMatchedPersonCandidate);
+
+		if (!hasEidsInCommon && remainsMatchedToSamePerson) {
+			// the user is simply updating their EID. We propagate this change to the Person.
+			//overwrite. No EIDS in common, but still same person.
+			if (theMatchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
+				handleExternalEidOverwrite(person, theResource);
+			}
+			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theMessages);
+		} else if (!hasEidsInCommon && !remainsMatchedToSamePerson) {
+			//This is a new linking scenario. we have to break the existing link and link to the new person. For now, we create duplicate.
+			createNewPersonAndFlagAsDuplicate(theResource, theMessages, person);
+		} else if (hasEidsInCommon && remainsMatchedToSamePerson) {
+			//Match didn't change, EIDS didn't change. Update person info based on patient info.
+			//myPersonHelper.updatePersonFromEmpiTarget();
+		} else if (hasEidsInCommon && !remainsMatchedToSamePerson) {
+			//updated patient has an EID that matches to a new candidate. Link?
+		}
 	}
 
 	private void handleExternalEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
@@ -162,9 +184,8 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	private boolean matchHasChanged(Optional<EmpiLink> theOExistingMatchLink, MatchedPersonCandidate thePersonCandidate) {
-		return !theOExistingMatchLink.isPresent()
-			|| !theOExistingMatchLink.get().getPersonPid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
+	private boolean candidateIsSameAsEmpiLinkPerson(EmpiLink theOExistingMatchLink, MatchedPersonCandidate thePersonCandidate) {
+		return theOExistingMatchLink.getPersonPid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
 	}
 
 	private void createNewPersonAndFlagAsDuplicate(IBaseResource theResource, @Nullable TransactionLogMessages theMessages, IBaseResource thePerson) {
