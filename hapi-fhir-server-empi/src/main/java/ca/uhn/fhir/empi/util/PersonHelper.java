@@ -482,6 +482,6 @@ public class PersonHelper {
 	public boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
 		List<CanonicalEID> externalEidsPerson = myEIDHelper.getExternalEid(theExistingPerson);
 		List<CanonicalEID> externalEidsResource = myEIDHelper.getExternalEid(theComparingPerson);
-		return externalEidsPerson.isEmpty() && externalEidsResource.isEmpty() && !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsPerson);
+		return !externalEidsPerson.isEmpty() && !externalEidsResource.isEmpty() && !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsPerson);
 	}
 }
