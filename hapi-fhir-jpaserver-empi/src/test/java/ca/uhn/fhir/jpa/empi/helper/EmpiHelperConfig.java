@@ -18,7 +18,7 @@ public class EmpiHelperConfig {
 		return new EmpiHelperR4();
 	}
 
-	@Value("${empi.strict_mode:false}")
+	@Value("${empi.prevent_eid_updates:false}")
 	boolean myStrictMode;
 
 	@Primary
@@ -32,6 +32,6 @@ public class EmpiHelperConfig {
 		return new EmpiSettingsImpl()
 			.setEnabled(true)
 			.setScriptText(json)
-			.setStrictEidMode(myStrictMode);
+			.setPreventEidUpdates(myStrictMode);
 	}
 }
