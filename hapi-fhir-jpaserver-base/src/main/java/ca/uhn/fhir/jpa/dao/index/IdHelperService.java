@@ -364,20 +364,42 @@ public class IdHelperService {
 	}
 
 	private void resolvePids(@Nonnull RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, List<IResourceLookup> theTarget) {
-		Collection<Object[]> lookup;
-		if (theRequestPartitionId.isAllPartitions()) {
-			lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
-		} else {
-			if (theRequestPartitionId.getPartitionId() != null) {
-				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(thePidsToResolve, theRequestPartitionId.getPartitionId());
-			} else {
-				lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
+
+		if (!myDaoConfig.isDeleteEnabled()) {
+			for (Iterator<Long> forcedIdIterator = thePidsToResolve.iterator(); forcedIdIterator.hasNext(); ) {
+				Long nextPid = forcedIdIterator.next();
+				String nextKey = Long.toString(nextPid);
+				IResourceLookup cachedLookup = myResourceLookupCache.getIfPresent(nextKey);
+				if (cachedLookup != null) {
+					forcedIdIterator.remove();
+					theTarget.add(cachedLookup);
+				}
 			}
 		}
-		lookup
-			.stream()
-			.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
-			.forEach(theTarget::add);
+
+		if (thePidsToResolve.size() > 0) {
+			Collection<Object[]> lookup;
+			if (theRequestPartitionId.isAllPartitions()) {
+				lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
+			} else {
+				if (theRequestPartitionId.getPartitionId() != null) {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(thePidsToResolve, theRequestPartitionId.getPartitionId());
+				} else {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
+				}
+			}
+			lookup
+				.stream()
+				.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
+				.forEach(t->{
+					theTarget.add(t);
+					if (!myDaoConfig.isDeleteEnabled()) {
+						String nextKey = Long.toString(t.getResourceId());
+						myResourceLookupCache.put(nextKey, t);
+					}
+				});
+
+		}
 	}
 
 	public void clearCache() {

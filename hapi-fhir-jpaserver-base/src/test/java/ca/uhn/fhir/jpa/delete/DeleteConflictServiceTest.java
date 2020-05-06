@@ -65,7 +65,7 @@ public class DeleteConflictServiceTest {
 		link.setSourceResource(entity);
 		list.add(link);
 		when(myDeleteConflictFinderService.findConflicts(any(), anyInt())).thenReturn(list);
-		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null);
+		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null, theTransactionDetails);
 		assertEquals(0, retryCount);
 	}
 }

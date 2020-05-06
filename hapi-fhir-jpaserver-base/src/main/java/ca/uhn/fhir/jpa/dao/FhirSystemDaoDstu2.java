@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.util.TransactionDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -194,7 +195,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		ourLog.info("Beginning {} with {} resources", theActionName, theRequest.getEntry().size());
 
 		long start = System.currentTimeMillis();
-		Date updateTime = new Date();
+		TransactionDetails transactionDetails = new TransactionDetails();
 
 		Set<IdDt> allIds = new LinkedHashSet<IdDt>();
 		Map<IdDt, IdDt> idSubstitutions = new HashMap<IdDt, IdDt>();
@@ -233,7 +234,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		 */
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.execute(t->{
-			handleTransactionWriteOperations(theRequestDetails, theRequest, theActionName, updateTime, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, deletedResources, deleteConflicts, entriesToProcess, nonUpdatedEntities, updatedEntities);
+			handleTransactionWriteOperations(theRequestDetails, theRequest, theActionName, transactionDetails, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, deletedResources, deleteConflicts, entriesToProcess, nonUpdatedEntities, updatedEntities);
 			return null;
 		});
 
@@ -318,7 +319,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		return response;
 	}
 
-	private void handleTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, Date theUpdateTime, Set<IdDt> theAllIds, Map<IdDt, IdDt> theIdSubstitutions, Map<IdDt, DaoMethodOutcome> theIdToPersistedOutcome, Bundle theResponse, IdentityHashMap<Entry, Integer> theOriginalRequestOrder, List<IIdType> theDeletedResources, DeleteConflictList theDeleteConflicts, Map<Entry, IBasePersistedResource> theEntriesToProcess, Set<IBasePersistedResource> theNonUpdatedEntities, Set<IBasePersistedResource> theUpdatedEntities) {
+	private void handleTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IdDt> theAllIds, Map<IdDt, IdDt> theIdSubstitutions, Map<IdDt, DaoMethodOutcome> theIdToPersistedOutcome, Bundle theResponse, IdentityHashMap<Entry, Integer> theOriginalRequestOrder, List<IIdType> theDeletedResources, DeleteConflictList theDeleteConflicts, Map<Entry, IBasePersistedResource> theEntriesToProcess, Set<IBasePersistedResource> theNonUpdatedEntities, Set<IBasePersistedResource> theUpdatedEntities) {
 		/*
 		 * Loop through the request and process any entries of type
 		 * PUT, POST or DELETE
@@ -382,7 +383,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(res.getClass());
 					res.setId((String) null);
 					DaoMethodOutcome outcome;
-					outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theUpdateTime, theRequestDetails);
+					outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theTransactionDetails, theRequestDetails);
 					handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
 					theEntriesToProcess.put(nextRespEntry, outcome.getEntity());
 					if (outcome.getCreated() == false) {
@@ -397,7 +398,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
 					int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 					if (parts.getResourceId() != null) {
-						DaoMethodOutcome outcome = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), theDeleteConflicts, theRequestDetails);
+						DaoMethodOutcome outcome = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), theDeleteConflicts, theRequestDetails, theTransactionDetails);
 						if (outcome.getEntity() != null) {
 							theDeletedResources.add(outcome.getId().toUnqualifiedVersionless());
 							theEntriesToProcess.put(nextRespEntry, outcome.getEntity());
@@ -506,7 +507,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			if (theUpdatedEntities.contains(nextOutcome.getEntity())) {
 				updateInternal(theRequestDetails, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
 			} else if (!theNonUpdatedEntities.contains(nextOutcome.getEntity())) {
-				updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
+				updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
 			}
 		}
 

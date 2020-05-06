@@ -8,8 +8,12 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -53,7 +57,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 			myPatientDao.update(p);
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
@@ -77,7 +81,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 			myPatientDao.update(p).getResource();
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(2, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
@@ -453,7 +457,433 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
+	
+	
+	@Test
+	public void testTransactionWithMultipleReferences() {
+		Bundle input = new Bundle();
+		
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+		patient.setActive(true);
+		input.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Patient");
 
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(IdType.newRandomUuid());
+		practitioner.setActive(true);
+		input.addEntry()
+			.setFullUrl(practitioner.getId())
+			.setResource(practitioner)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Practitioner");
+
+		ServiceRequest sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
+
+
+	@Test
+	public void testTransactionWithMultiplePreExistingReferences_ForcedId() {
+		myDaoConfig.setDeleteEnabled(true);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("Practitioner/B");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		// Create transaction
+
+		Bundle input = new Bundle();
+
+		ServiceRequest sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Lookup the two existing IDs to make sure they are legit
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Do the same a second time - Deletes are enabled so we expect to have to resolve the
+		// targets again to make sure they weren't deleted
+
+		input = new Bundle();
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Lookup the two existing IDs to make sure they are legit
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
+
+	@Test
+	public void testTransactionWithMultiplePreExistingReferences_Numeric() {
+		myDaoConfig.setDeleteEnabled(true);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setActive(true);
+		IIdType practitionerId = myPractitionerDao.create(practitioner).getId().toUnqualifiedVersionless();
+
+		// Create transaction
+		Bundle input = new Bundle();
+
+		ServiceRequest sr = new ServiceRequest();
+		sr.getSubject().setReferenceElement(patientId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReferenceElement(patientId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Lookup the two existing IDs to make sure they are legit
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Do the same a second time - Deletes are enabled so we expect to have to resolve the
+		// targets again to make sure they weren't deleted
+
+		input = new Bundle();
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReferenceElement(patientId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReferenceElement(patientId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Lookup the two existing IDs to make sure they are legit
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
+
+	@Test
+	public void testTransactionWithMultiplePreExistingReferences_ForcedId_DeletesDisabled() {
+		myDaoConfig.setDeleteEnabled(false);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("Practitioner/B");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		// Create transaction
+
+		Bundle input = new Bundle();
+
+		ServiceRequest sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Lookup the two existing IDs to make sure they are legit
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Do the same a second time - Deletes are enabled so we expect to have to resolve the
+		// targets again to make sure they weren't deleted
+
+		input = new Bundle();
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReference(patient.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		sr.addPerformer().setReference(practitioner.getId());
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// We do not need to resolve the target IDs a second time
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
+
+	@Test
+	public void testTransactionWithMultiplePreExistingReferences_Numeric_DeletesDisabled() {
+		myDaoConfig.setDeleteEnabled(false);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setActive(true);
+		IIdType practitionerId = myPractitionerDao.create(practitioner).getId().toUnqualifiedVersionless();
+
+		// Create transaction
+		Bundle input = new Bundle();
+
+		ServiceRequest sr = new ServiceRequest();
+		sr.getSubject().setReferenceElement(patientId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReferenceElement(patientId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Lookup the two existing IDs to make sure they are legit
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Do the same a second time - Deletes are enabled so we expect to have to resolve the
+		// targets again to make sure they weren't deleted
+
+		input = new Bundle();
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReferenceElement(patientId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		sr = new ServiceRequest();
+		sr.getSubject().setReferenceElement(patientId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		sr.addPerformer().setReferenceElement(practitionerId);
+		input.addEntry()
+			.setFullUrl(sr.getId())
+			.setResource(sr)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("ServiceRequest");
+
+		myCaptureQueriesListener.clear();
+		output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// We do not need to resolve the target IDs a second time
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

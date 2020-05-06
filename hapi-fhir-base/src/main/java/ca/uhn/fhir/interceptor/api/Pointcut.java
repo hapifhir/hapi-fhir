@@ -1278,6 +1278,9 @@ public enum Pointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>ca.uhn.fhir.jpa.delete.DeleteConflictOutcome</code>.
@@ -1291,7 +1294,8 @@ public enum Pointcut {
 		// Params
 		"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
 	),
 
 	/**
