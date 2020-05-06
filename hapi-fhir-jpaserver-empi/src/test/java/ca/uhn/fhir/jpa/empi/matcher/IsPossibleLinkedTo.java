@@ -21,10 +21,9 @@ public class IsPossibleLinkedTo extends BasePersonMatcher {
 	private List<Long> baseResourcePersonPids;
 	private Long incomingResourcePersonPid;
 
-	protected IsPossibleLinkedTo(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
-		super(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
+	protected IsPossibleLinkedTo(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theTargetResources) {
+		super(theIdHelperService, theEmpiLinkDaoSvc, theTargetResources);
 	}
-
 
 	@Override
 	protected boolean matchesSafely(IBaseResource thePersonResource) {
