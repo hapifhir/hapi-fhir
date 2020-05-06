@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -344,12 +345,33 @@ public class PersonHelper {
 				//FIXME GGG handle multiple new EIDs. What are the rules here?
 				ourLog.debug("incoming resource:{} with EIDs {} does not need to overwrite person, as this EID is already present",
 					theEmpiTarget.getIdElement().toUnqualifiedVersionless(),
-					incomingTargetEid.stream().map(eid -> eid.toString()).collect(Collectors.joining(",")));
+					incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")));
 			} else {
 				throw new IllegalArgumentException("This would create a duplicate person!");
 			}
 		}
 		return thePerson;
+	}
+
+	public IBaseResource overwriteExternalEids(IBaseResource thePerson, List<CanonicalEID> theNewEid) {
+		clearExternalEids(thePerson);
+		addCanonicalEidsToPersonIfAbsent(thePerson, theNewEid);
+		return thePerson;
+	}
+
+	private void clearExternalEids(IBaseResource thePerson) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person personR4 = (Person) thePerson;
+				personR4.getIdentifier().removeIf(theIdentifier ->  theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
+				break;
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
+				personDstu3.getIdentifier().removeIf(theIdentifier ->  theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
+				break;
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
 	}
 
 	private void addCanonicalEidsToPersonIfAbsent(IBaseResource thePerson, List<CanonicalEID> theIncomingTargetEid) {
@@ -388,19 +410,6 @@ public class PersonHelper {
 		}
 	}
 
-	/**
-	 * An incoming resource is a potential duplicate if it matches a Patient that has a Person with an official EID, but
-	 * the incoming resource also has an EID that does not match.
-	 *
-	 * @param theExistingPerson
-	 * @param theComparingPerson
-	 * @return
-	 */
-	public boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
-		List<CanonicalEID> firstEids = myEIDHelper.getExternalEid(theExistingPerson);
-		List<CanonicalEID> secondEids = myEIDHelper.getExternalEid(theComparingPerson);
-		return !firstEids.isEmpty() && !secondEids.isEmpty() && !myEIDHelper.eidMatchExists(firstEids, secondEids);
-	}
 
 	public void mergePersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
 		switch (myFhirContext.getVersion().getVersion()) {

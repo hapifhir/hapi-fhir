@@ -178,6 +178,7 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 		jane.setId(latch.getDaoMethodOutcome().getId());
 		clearExternalEIDs(jane);
 		jane = addExternalEID(jane, "some_new_eid");
+
 		EmpiHelperR4.OutcomeAndLogMessageWrapper outcomeWrapper = myEmpiHelper.updateWithLatch(jane);
 		Person person = getPersonFromTarget(jane);
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(person);

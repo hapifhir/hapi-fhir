@@ -95,4 +95,18 @@ public final class EIDHelper {
 			collect1
 			);
 	}
+
+	/**
+	 * An incoming resource is a potential duplicate if it matches a Patient that has a Person with an official EID, but
+	 * the incoming resource also has an EID that does not match.
+	 *
+	 * @param theExistingPerson
+	 * @param theComparingPerson
+	 * @return
+	 */
+	public boolean eidMatchExists(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
+		List<CanonicalEID> firstEids = this.getExternalEid(theExistingPerson);
+		List<CanonicalEID> secondEids = this.getExternalEid(theComparingPerson);
+		return !firstEids.isEmpty() && !secondEids.isEmpty() && this.eidMatchExists(firstEids, secondEids);
+	}
 }

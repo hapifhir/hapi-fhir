@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +103,19 @@ public class EmpiLinkDaoSvc {
 		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findOne(example);
+	}
 
+	public Optional<EmpiLink> getMatchedLinkForTarget(IBaseResource theTarget) {
+		Long pid = myIdHelperService.getPidOrNull(theTarget);
+		if (pid == null) {
+			return Optional.empty();
+		}
+
+		EmpiLink exampleLink = new EmpiLink();
+		exampleLink.setTargetPid(pid);
+		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
+		Example<EmpiLink> example = Example.of(exampleLink);
+		return myEmpiLinkDao.findOne(example);
 	}
 
 	public Optional<EmpiLink> getEmpiLinksByPersonPidTargetPidAndMatchResult(Long thePersonPid, Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
