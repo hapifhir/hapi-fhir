@@ -28,12 +28,16 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.IModelVisitor2;
 import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +48,11 @@ import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -84,7 +92,9 @@ public class BinaryStorageInterceptor {
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void start() {
-		myBinaryType = (Class<? extends IPrimitiveType<byte[]>>) myCtx.getElementDefinition("base64Binary").getImplementingClass();
+		BaseRuntimeElementDefinition<?> base64Binary = myCtx.getElementDefinition("base64Binary");
+		assert base64Binary != null;
+		myBinaryType = (Class<? extends IPrimitiveType<byte[]>>) base64Binary.getImplementingClass();
 		myDeferredListKey = getClass().getName() + "_" + hashCode() + "_DEFERRED_LIST";
 	}
 
@@ -97,7 +107,7 @@ public class BinaryStorageInterceptor {
 			.stream()
 			.flatMap(t -> ((IBaseHasExtensions) t).getExtension().stream())
 			.filter(t -> JpaConstants.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-			.map(t -> ((IPrimitiveType) t.getValue()).getValueAsString())
+			.map(t -> ((IPrimitiveType<?>) t.getValue()).getValueAsString())
 			.collect(Collectors.toList());
 
 		for (String next : attachmentIds) {
@@ -110,14 +120,14 @@ public class BinaryStorageInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void extractLargeBinariesBeforeCreate(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePointcut) throws IOException {
-		extractLargeBinaries(theRequestDetails, theResource, thePointcut);
+	public void extractLargeBinariesBeforeCreate(TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePointcut) throws IOException {
+		extractLargeBinaries(theTransactionDetails, theResource, thePointcut);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void extractLargeBinariesBeforeUpdate(ServletRequestDetails theRequestDetails, IBaseResource thePreviousResource, IBaseResource theResource, Pointcut thePointcut) throws IOException {
+	public void extractLargeBinariesBeforeUpdate(TransactionDetails theTransactionDetails, IBaseResource thePreviousResource, IBaseResource theResource, Pointcut thePointcut) throws IOException {
 		blockIllegalExternalBinaryIds(thePreviousResource, theResource);
-		extractLargeBinaries(theRequestDetails, theResource, thePointcut);
+		extractLargeBinaries(theTransactionDetails, theResource, thePointcut);
 	}
 
 	/**
@@ -136,7 +146,7 @@ public class BinaryStorageInterceptor {
 						.stream()
 						.filter(t -> t.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
 						.filter(t -> EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-						.map(t -> (IPrimitiveType) t.getValue())
+						.map(t -> (IPrimitiveType<?>) t.getValue())
 						.map(t -> t.getValueAsString())
 						.filter(t -> isNotBlank(t))
 						.forEach(t -> existingBinaryIds.add(t));
@@ -152,12 +162,11 @@ public class BinaryStorageInterceptor {
 					.stream()
 					.filter(t -> t.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
 					.filter(t -> t.getUrl().equals(EXT_EXTERNALIZED_BINARY_ID))
-					.map(t->(IPrimitiveType) t.getValue())
-					.map(t->t.getValueAsString())
-					.filter(t->isNotBlank(t))
-					.filter(t->{
-						return !existingBinaryIds.contains(t);
-					}).findFirst();
+					.map(t -> (IPrimitiveType<?>) t.getValue())
+					.map(t -> t.getValueAsString())
+					.filter(t -> isNotBlank(t))
+					.filter(t -> !existingBinaryIds.contains(t))
+					.findFirst();
 
 				if (hasExternalizedBinaryReference.isPresent()) {
 					String msg = myCtx.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID, hasExternalizedBinaryReference.get());
@@ -168,11 +177,8 @@ public class BinaryStorageInterceptor {
 
 	}
 
-	private void extractLargeBinaries(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePointcut) throws IOException {
-		if (theRequestDetails == null) {
-			// RequestDetails will only be null for internal HAPI events.  If externalization is required for them it will need to be done in a different way.
-			return;
-		}
+	private void extractLargeBinaries(TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePointcut) throws IOException {
+
 		IIdType resourceId = theResource.getIdElement();
 		if (!resourceId.hasResourceType() && resourceId.hasIdPart()) {
 			String resourceType = myCtx.getResourceDefinition(theResource).getName();
@@ -197,7 +203,7 @@ public class BinaryStorageInterceptor {
 					} else {
 						assert thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED : thePointcut.name();
 						newBlobId = myBinaryStorageSvc.newBlobId();
-						List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theRequestDetails);
+						List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theTransactionDetails);
 						DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
 						deferredBinaryTargets.add(newDeferredBinaryTarget);
 					}
@@ -207,26 +213,20 @@ public class BinaryStorageInterceptor {
 			}
 
 		}
+
 	}
 
 	@Nonnull
-	@SuppressWarnings("unchecked")
-	private List<DeferredBinaryTarget> getOrCreateDeferredBinaryStorageMap(ServletRequestDetails theRequestDetails) {
-		List<DeferredBinaryTarget> deferredBinaryTargets = (List<DeferredBinaryTarget>) theRequestDetails.getUserData().get(getDeferredListKey());
-		if (deferredBinaryTargets == null) {
-			deferredBinaryTargets = new ArrayList<>();
-			theRequestDetails.getUserData().put(getDeferredListKey(), deferredBinaryTargets);
-		}
-		return deferredBinaryTargets;
+	private List<DeferredBinaryTarget> getOrCreateDeferredBinaryStorageMap(TransactionDetails theTransactionDetails) {
+		return theTransactionDetails.getOrCreateUserData(getDeferredListKey(), () -> new ArrayList<>());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
-	public void storeLargeBinariesBeforeCreatePersistence(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
-		if (theRequestDetails == null) {
+	public void storeLargeBinariesBeforeCreatePersistence(TransactionDetails theTransactionDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
+		if (theTransactionDetails == null) {
 			return;
 		}
-		List<DeferredBinaryTarget> deferredBinaryTargets = (List<DeferredBinaryTarget>) theRequestDetails.getUserData().get(getDeferredListKey());
+		List<DeferredBinaryTarget> deferredBinaryTargets = theTransactionDetails.getUserData(getDeferredListKey());
 		if (deferredBinaryTargets != null) {
 			IIdType resourceId = theResource.getIdElement();
 			for (DeferredBinaryTarget next : deferredBinaryTargets) {
@@ -284,9 +284,7 @@ public class BinaryStorageInterceptor {
 				if (theElement.getClass().equals(myBinaryType)) {
 					IBase parent = theContainingElementPath.get(theContainingElementPath.size() - 2);
 					Optional<IBinaryTarget> binaryTarget = myBinaryAccessProvider.toBinaryTarget(parent);
-					if (binaryTarget.isPresent()) {
-						binaryTargets.add(binaryTarget.get());
-					}
+					binaryTarget.ifPresent(binaryTargets::add);
 				}
 				return true;
 			}

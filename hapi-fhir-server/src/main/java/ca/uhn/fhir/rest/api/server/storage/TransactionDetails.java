@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.util;
+package ca.uhn.fhir.rest.api.server.storage;
 
 /*-
  * #%L
@@ -20,13 +20,13 @@ package ca.uhn.fhir.jpa.model.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * This object contains runtime information that is gathered and relevant to a single <i>database transaction</i>.
@@ -36,11 +36,14 @@ import java.util.Map;
  * The intent with this class is to hold things we want to pass from operation to operation within a transaction in
  * order to avoid looking things up multime times, etc.
  * </p>
+ *
+ * @since 5.0.0
  */
 public class TransactionDetails {
 
 	private final Date myTransactionDate;
 	private Map<IIdType, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
+	private Map<String, Object> myUserData;
 
 	/**
 	 * Constructor
@@ -87,4 +90,41 @@ public class TransactionDetails {
 		return myTransactionDate;
 	}
 
+	/**
+	 * Sets an arbitraty object that will last the lifetime of the current transaction
+	 *
+	 * @see #getUserData(String)
+	 */
+	public void putUserData(String theKey, Object theValue) {
+		if (myUserData == null) {
+			myUserData = new HashMap<>();
+		}
+		myUserData.put(theKey, theValue);
+	}
+
+	/**
+	 * Gets an arbitraty object that will last the lifetime of the current transaction
+	 *
+	 * @see #putUserData(String, Object)
+	 */
+	public <T> T getUserData(String theKey) {
+		if (myUserData != null) {
+			return (T) myUserData.get(theKey);
+		}
+		return null;
+	}
+
+	/**
+	 * Fetches the existing value in the user data map, or uses {@literal theSupplier} to create a new object and
+	 * puts that in the map, and returns it
+	 */
+	public <T> T getOrCreateUserData(String theKey, Supplier<T> theSupplier) {
+		T retVal = (T) getUserData(theKey);
+		if (retVal == null) {
+			retVal = theSupplier.get();
+			putUserData(theKey, retVal);
+		}
+		return retVal;
+	}
 }
+
