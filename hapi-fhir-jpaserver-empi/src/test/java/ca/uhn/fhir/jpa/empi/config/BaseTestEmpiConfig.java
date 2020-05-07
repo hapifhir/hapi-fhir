@@ -19,12 +19,19 @@ public abstract class BaseTestEmpiConfig {
 	@Value("${empi.prevent_eid_updates:false}")
 	boolean myPreventEidUpdates;
 
+	@Value("${empi.allow_multiple_eids:false}")
+	boolean myAllowMultipleEids;
+
 	@Bean
     IEmpiSettings empiProperties() throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		return new EmpiSettingsImpl().setEnabled(false).setScriptText(json).setPreventEidUpdates(myPreventEidUpdates);
+		return new EmpiSettingsImpl()
+			.setEnabled(false)
+			.setScriptText(json)
+			.setPreventEidUpdates(myPreventEidUpdates)
+			.setAllowMultipleEids(myAllowMultipleEids);
 	}
 
 	@Bean

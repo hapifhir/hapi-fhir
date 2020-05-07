@@ -33,4 +33,6 @@ public interface IEmpiSettings {
 	EmpiRulesJson getEmpiRules();
 
 	boolean isPreventEidUpdates();
+
+	boolean isAllowMultipleEids();
 }

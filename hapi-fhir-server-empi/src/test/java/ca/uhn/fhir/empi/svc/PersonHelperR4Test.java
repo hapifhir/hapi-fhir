@@ -50,7 +50,6 @@ public class PersonHelperR4Test {
 			assertEquals(1, links.size());
 			assertEquals(PATIENT_2, links.get(0).getValue());
 		}
-
 	}
 
 	@Test

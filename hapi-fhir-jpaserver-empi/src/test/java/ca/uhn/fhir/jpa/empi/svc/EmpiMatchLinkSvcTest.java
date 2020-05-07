@@ -407,14 +407,4 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		assertThat(janePerson, is(not(samePersonAs(janePaulPatient))));
 	}
-
-	@Test
-	public void testStrictEidModePatientUpdatingEidIsForbidden() {
-		Patient janePatient = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(),"some_eid"));
-		clearExternalEIDs(janePatient);
-		addExternalEID(janePatient, "some_new_eid");
-	}
-
-
-
 }

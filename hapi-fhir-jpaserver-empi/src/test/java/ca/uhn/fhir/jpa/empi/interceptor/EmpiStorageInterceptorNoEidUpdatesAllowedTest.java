@@ -1,24 +1,10 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.helper.EmpiHelperConfig;
 import ca.uhn.fhir.jpa.empi.helper.EmpiHelperR4;
-import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -27,15 +13,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.List;
-
-import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_EMPI_MANAGED;
-import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
@@ -49,20 +29,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 @TestPropertySource(properties = {
 	"empi.prevent_eid_updates=true"
 })
-public class EmpiStorageInterceptorStrictEidModeTest extends BaseEmpiR4Test {
+public class EmpiStorageInterceptorNoEidUpdatesAllowedTest extends BaseEmpiR4Test {
 
-	private static final Logger ourLog = getLogger(EmpiStorageInterceptorStrictEidModeTest.class);
-
-	/**
-	@BeforeClass
-	public static void beforeClass() {
-		System.setProperty("empi.prevent", "true");
-	}
-
-	@AfterClass
-	public static void afterClass() {
-		System.setProperty("empi.strict_mode", "false");
-	}*/
+	private static final Logger ourLog = getLogger(EmpiStorageInterceptorNoEidUpdatesAllowedTest.class);
 
 	@Rule
 	@Autowired
