@@ -273,7 +273,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HookParams hook = new HookParams()
 			.add(IBaseResource.class, resourceToDelete)
 			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hook);
 
 		myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theRequest, theTransactionDetails);
@@ -296,7 +297,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				HookParams hookParams = new HookParams()
 					.add(IBaseResource.class, resourceToDelete)
 					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(TransactionDetails.class, theTransactionDetails);
 				doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 			}
 		});
@@ -362,7 +364,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			HookParams hooks = new HookParams()
 				.add(IBaseResource.class, resourceToDelete)
 				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(TransactionDetails.class, transactionDetails);
 			doCallHooks(theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
 
 			myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, theRequest, transactionDetails);
@@ -508,7 +511,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HookParams hookParams = new HookParams()
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
 		// Perform actual DB update
@@ -553,7 +557,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					HookParams hookParams = new HookParams()
 						.add(IBaseResource.class, theResource)
 						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+						.addIfMatchesType(ServletRequestDetails.class, theRequest)
+						.add(TransactionDetails.class, theTransactionDetails);
 					doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
 				}
 			});

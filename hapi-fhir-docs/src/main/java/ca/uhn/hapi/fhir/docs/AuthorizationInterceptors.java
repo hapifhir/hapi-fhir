@@ -23,6 +23,7 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.util.TransactionDetails;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -149,7 +150,8 @@ public class AuthorizationInterceptors {
 			.add(IBaseResource.class, previousContents)
 			.add(IBaseResource.class, newContents)
 			.add(RequestDetails.class, theRequestDetails)
-			.add(ServletRequestDetails.class, theRequestDetails);
+			.add(ServletRequestDetails.class, theRequestDetails)
+			.add(TransactionDetails.class, theTransactionDetails);
 		theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
 
       MethodOutcome retVal = new MethodOutcome();

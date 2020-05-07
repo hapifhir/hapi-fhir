@@ -1241,7 +1241,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			.add(IBaseResource.class, theOldResource)
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theRequestDetails, Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, hookParams);
 
 		// Perform update
@@ -1274,7 +1275,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						.add(IBaseResource.class, theOldResource)
 						.add(IBaseResource.class, theResource)
 						.add(RequestDetails.class, theRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(TransactionDetails.class, theTransactionDetails);
 					doCallHooks(theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, hookParams);
 				}
 			});

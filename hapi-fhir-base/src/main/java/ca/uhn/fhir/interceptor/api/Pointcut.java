@@ -1056,6 +1056,9 @@ public enum Pointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1064,7 +1067,8 @@ public enum Pointcut {
 	STORAGE_PRESTORAGE_RESOURCE_CREATED(void.class,
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
 	),
 
 	/**
@@ -1094,6 +1098,9 @@ public enum Pointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1103,7 +1110,8 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
 	),
 
 	/**
@@ -1131,6 +1139,9 @@ public enum Pointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1139,7 +1150,8 @@ public enum Pointcut {
 	STORAGE_PRESTORAGE_RESOURCE_DELETED(void.class,
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
 	),
 
 
@@ -1170,6 +1182,9 @@ public enum Pointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1178,7 +1193,8 @@ public enum Pointcut {
 	STORAGE_PRECOMMIT_RESOURCE_CREATED(void.class,
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
 	),
 
 	/**
@@ -1209,6 +1225,9 @@ public enum Pointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1218,7 +1237,8 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
 	),
 
 
@@ -1245,6 +1265,9 @@ public enum Pointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1253,7 +1276,8 @@ public enum Pointcut {
 	STORAGE_PRECOMMIT_RESOURCE_DELETED(void.class,
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
 	),
 
 	/**
@@ -1279,7 +1303,7 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object
+	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * </ul>
 	 * <p>
