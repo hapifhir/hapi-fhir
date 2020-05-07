@@ -28,6 +28,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 	@Override
 	@Transactional
+	// FIXME KHS call me I'm lonely
 	public IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep) {
 		myPersonHelper.mergePersonFields(thePersonToDelete, thePersonToKeep);
 		mergeLinks(thePersonToDelete, thePersonToKeep);

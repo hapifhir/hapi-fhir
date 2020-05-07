@@ -23,7 +23,9 @@ package ca.uhn.fhir.empi.provider;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
+import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.validation.IResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,14 +37,18 @@ public class EmpiProviderLoader {
 	private ResourceProviderFactory myResourceProviderFactory;
 	@Autowired
 	private IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
+	@Autowired
+	private IEmpiPersonMergerSvc myPersonMergerSvc;
+	@Autowired
+	private IResourceLoader myResourceLoader;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myEmpiMatchFinderSvc));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myEmpiMatchFinderSvc, myPersonMergerSvc, myResourceLoader));
 				break;
 			case R4:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myEmpiMatchFinderSvc));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myEmpiMatchFinderSvc, myPersonMergerSvc, myResourceLoader));
 				break;
 			default:
 				throw new ConfigurationException("EMPI not supported for FHIR version " + myFhirContext.getVersion().getVersion());

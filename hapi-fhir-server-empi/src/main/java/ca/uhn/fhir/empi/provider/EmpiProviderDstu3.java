@@ -21,21 +21,29 @@ package ca.uhn.fhir.empi.provider;
  */
 
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
+import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 import java.util.UUID;
 
-public class EmpiProviderDstu3 {
+public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	private final IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
+	private final IEmpiPersonMergerSvc myPersonMergerSvc;
+	private final IResourceLoader myResourceLoader;
 
 	/**
 	 * Constructor
@@ -43,8 +51,10 @@ public class EmpiProviderDstu3 {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderDstu3(IEmpiMatchFinderSvc theEmpiMatchFinderSvc) {
+	public EmpiProviderDstu3(IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IResourceLoader theResourceLoader) {
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
+		myPersonMergerSvc = thePersonMergerSvc;
+		myResourceLoader = theResourceLoader;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, type = Patient.class)
@@ -64,5 +74,20 @@ public class EmpiProviderDstu3 {
 		}
 
 		return retVal;
+	}
+
+	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS, type = Person.class)
+	public Person mergePerson(@OperationParam(name="personIdToDelete", min = 1, max = 1) StringType thePersonIdToDelete,
+									  @OperationParam(name="personIdToKeep", min = 1, max = 1) StringType thePersonIdToKeep) {
+		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
+		IAnyResource personToDelete = getPersonFromId(thePersonIdToDelete.getValue(), "personIdToDelete");
+		IAnyResource personToKeep = getPersonFromId(thePersonIdToKeep.getValue(), "personIdToKeep");
+
+		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep);
+	}
+
+	@Override
+	protected IAnyResource loadPerson(IdDt thePersonId) {
+		return myResourceLoader.load(Person.class, thePersonId);
 	}
 }
