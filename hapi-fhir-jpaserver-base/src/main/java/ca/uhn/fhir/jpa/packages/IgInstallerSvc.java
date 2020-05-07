@@ -156,9 +156,14 @@ public class IgInstallerSvc {
 
 			ourLog.info(String.format("creating or updating %s resources of type %s", resources.size(), type));
 
-			resources.stream()
-				.map(r -> isStructureDefinitionWithoutSnapshot(r) ? generateSnapshot(r) : r)
-				.forEach(r -> createOrUpdate(r));
+			try {
+				resources.stream()
+					.map(r -> isStructureDefinitionWithoutSnapshot(r) ? generateSnapshot(r) : r)
+					.forEach(r -> createOrUpdate(r));
+			} catch (Exception e) {
+				throw new ImplementationGuideInstallationException(String.format(
+					"Error installing IG %s#%s: ", name, version), e);
+			}
 		}
 		ourLog.info(String.format("Finished installation of package: %s#%s", name, version));
 	}
