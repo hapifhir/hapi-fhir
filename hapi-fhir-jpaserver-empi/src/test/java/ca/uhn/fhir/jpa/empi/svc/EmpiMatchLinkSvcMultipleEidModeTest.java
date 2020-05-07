@@ -139,9 +139,11 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 
 		Patient patient3 = buildPaulPatient();
 		addExternalEID(patient3, "eid-22");
+		patient3 = createPatientAndUpdateLinks(patient3);
 
 		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
 		assertThat(patient2, is(samePersonAs(patient3)));
+		
 		//Now lets change one of the EIDs on an incoming patient to one that matches our original patient.
 		//This should create a situation in which the incoming EIDs are matched to _two_ unique patients. In this case, we want to s
 		patient2.getIdentifier().clear();
@@ -155,6 +157,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 	}
+
 
 	@Test
 	public void testWhenIncomingPatientHasMultipleEidsThatTheyAreAllPersistedToPerson() {
