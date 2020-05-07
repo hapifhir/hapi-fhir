@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.api.server.storage;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
