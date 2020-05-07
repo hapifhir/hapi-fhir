@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -26,7 +28,27 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import com.google.common.collect.Lists;
@@ -36,15 +58,66 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Age;
+import org.hl7.fhir.r4.model.Appointment;
+import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CareTeam;
+import org.hl7.fhir.r4.model.ChargeItem;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.CommunicationRequest;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.EpisodeOfCare;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.MolecularSequence;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Range;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RiskAssessment;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.Substance;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Timing;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -108,6 +181,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Before
 	public void beforeDisableCacheReuse() {
+		myModelConfig.setSuppressStringIndexingInTokens(new ModelConfig().isSuppressStringIndexingInTokens());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
@@ -4354,6 +4428,50 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// We expect a new one because we don't cache the search URL for very long search URLs
 		assertEquals(2, mySearchEntityDao.count());
 	}
+
+	@Test
+	public void testTokenTextDisabled_Global() {
+		myModelConfig.setSuppressStringIndexingInTokens(true);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_CODE, new TokenParam("hello").setModifier(TokenParamModifier.TEXT));
+		try {
+			myObservationDao.search(map);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("The :text modifier is disabled on this server", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testTokenTextDisabled_ForSearchParam() {
+		{
+			SearchParameter sp = new SearchParameter();
+			sp.setId("observation-code");
+			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			sp.addBase("Observation");
+			sp.setType(Enumerations.SearchParamType.TOKEN);
+			sp.setCode("code");
+			sp.setExpression("Observation.code");
+			sp.addExtension()
+				.setUrl(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING)
+				.setValue(new BooleanType(true));
+			ourLog.info("SP:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+			mySearchParameterDao.update(sp);
+			mySearchParamRegistry.forceRefresh();
+		}
+
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_CODE, new TokenParam("hello").setModifier(TokenParamModifier.TEXT));
+		try {
+			myObservationDao.search(map);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("The :text modifier is disabled for this search parameter", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testDateSearchParametersShouldBeTimezoneIndependent() {

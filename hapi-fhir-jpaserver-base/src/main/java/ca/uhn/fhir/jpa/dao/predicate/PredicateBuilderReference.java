@@ -61,7 +61,17 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.SpecialParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -201,7 +211,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		// Resources by ID
-		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, targetIds, theRequest);
+		List<ResourcePersistentId> targetPids = myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestPartitionId, targetIds);
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
 			Predicate pathPredicate;
@@ -565,7 +575,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				if (nextParamDef != null) {
 
 					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-						if (theRequestPartitionId == null) {
+						if (theRequestPartitionId.isAllPartitions()) {
 							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
 						}
 					}

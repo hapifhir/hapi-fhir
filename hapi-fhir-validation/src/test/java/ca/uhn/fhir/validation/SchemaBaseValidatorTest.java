@@ -7,7 +7,9 @@ import org.junit.Test;
 import javax.xml.transform.Source;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class SchemaBaseValidatorTest {
 

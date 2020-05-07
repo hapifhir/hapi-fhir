@@ -57,7 +57,7 @@ public class RequestTenantPartitionInterceptor {
 	}
 
 	@Nonnull
-	private RequestPartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
+	protected RequestPartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
 
 		// We will use the tenant ID that came from the request as the partition name
 		String tenantId = theRequestDetails.getTenantId();

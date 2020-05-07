@@ -22,7 +22,19 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -127,12 +139,6 @@ public final class ResourceIndexedSearchParams {
 	private void setUpdatedTime(Collection<? extends BaseResourceIndexedSearchParam> theParams, Date theUpdateTime) {
 		for (BaseResourceIndexedSearchParam nextSearchParam : theParams) {
 			nextSearchParam.setUpdated(theUpdateTime);
-		}
-	}
-
-	public void calculateHashes(Collection<? extends BaseResourceIndex> theStringParams) {
-		for (BaseResourceIndex next : theStringParams) {
-			next.calculateHashes();
 		}
 	}
 
@@ -305,6 +311,7 @@ public final class ResourceIndexedSearchParams {
 					param.setResource(theEntity);
 					param.setMissing(true);
 					param.setParamName(nextParamName);
+					param.calculateHashes();
 					paramCollection.add((RT) param);
 				}
 			}

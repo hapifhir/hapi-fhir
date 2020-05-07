@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 /**
  * Base class for RESTful operation parameter types
  */
-abstract class BaseParam implements IQueryParameterType {
+public abstract class BaseParam implements IQueryParameterType {
 
 	private Boolean myMissing;
 

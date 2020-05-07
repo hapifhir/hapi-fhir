@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.api.server;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -163,4 +164,12 @@ public interface IBundleProvider {
 		return getResources(0, 1).isEmpty();
 	}
 
+	/**
+	 * Returns the value of {@link #size()} and throws a {@link NullPointerException} of it is null
+	 */
+	default int sizeOrThrowNpe() {
+		Integer retVal = size();
+		Validate.notNull(retVal, "size() returned null");
+		return retVal;
+	}
 }

@@ -22,9 +22,11 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.TransactionDetails;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hibernate.Transaction;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,10 +38,11 @@ public class IndexedSearchParamExtractor {
 
 	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest) {
 		ResourceTable entity = new ResourceTable();
+		TransactionDetails transactionDetails = new TransactionDetails();
 		String resourceType = myContext.getResourceDefinition(theResource).getName();
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
-		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, entity, theResource, theResource.getMeta().getLastUpdated(), false);
+		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, entity, theResource, transactionDetails, false);
 		return resourceIndexedSearchParams;
 	}
 }

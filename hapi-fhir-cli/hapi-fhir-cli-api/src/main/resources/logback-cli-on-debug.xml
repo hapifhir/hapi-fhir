@@ -16,6 +16,12 @@
         <Encoding>utf-8</Encoding>
     </appender>
 
+	<!-- HAPI HL7v2 App Module -->
+	<logger name="ca.uhn.hl7v2.app" additivity="false" level="debug">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</logger>
+
 	<logger name="ca.uhn.fhir" additivity="false" level="debug">
 		<appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />

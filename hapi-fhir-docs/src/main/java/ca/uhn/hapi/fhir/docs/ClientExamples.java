@@ -34,7 +34,8 @@ import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import org.hl7.fhir.r4.model.*;
+import ca.uhn.fhir.rest.client.interceptor.UrlTenantSelectionInterceptor;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 
 public class ClientExamples {
@@ -59,6 +60,29 @@ public class ClientExamples {
       IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
       // END SNIPPET: proxy
    }
+
+
+   public void tenantId() {
+   	// START SNIPPET: tenantId
+		FhirContext ctx = FhirContext.forR4();
+
+		// Create the client
+		IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+
+		// Register the interceptor
+		UrlTenantSelectionInterceptor tenantSelection = new UrlTenantSelectionInterceptor();
+		genericClient.registerInterceptor(tenantSelection);
+
+		// Read from tenant A
+		tenantSelection.setTenantId("TENANT-A");
+		Patient patientA = genericClient.read().resource(Patient.class).withId("123").execute();
+
+		// Read from tenant B
+		tenantSelection.setTenantId("TENANT-B");
+		Patient patientB = genericClient.read().resource(Patient.class).withId("456").execute();
+		// END SNIPPET: tenantId
+	}
+
 
    @SuppressWarnings("unused")
    public void processMessage() {

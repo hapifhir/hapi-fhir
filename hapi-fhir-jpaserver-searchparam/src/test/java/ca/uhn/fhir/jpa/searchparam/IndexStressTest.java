@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.searchparam;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
@@ -44,7 +45,7 @@ public class IndexStressTest {
 		when(mockValidationSupport.getFhirContext()).thenReturn(ctx);
 		IValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), mockValidationSupport));
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ctx, validationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ctx, validationSupport, searchParamRegistry);
 		extractor.start();
 
 		Map<String, RuntimeSearchParam> spMap = ctx

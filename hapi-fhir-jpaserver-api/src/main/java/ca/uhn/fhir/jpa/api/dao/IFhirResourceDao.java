@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.model.util.TransactionDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -76,10 +77,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * @param thePerformIndexing Use with caution! If you set this to false, you need to manually perform indexing or your resources
 	 *                           won't be indexed and searches won't work.
-	 * @param theUpdateTimestamp
 	 * @param theRequestDetails  TODO
 	 */
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTimestamp, RequestDetails theRequestDetails);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
 
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
@@ -95,7 +95,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *
 	 * @param theRequestDetails TODO
 	 */
-	DaoMethodOutcome delete(IIdType theResource, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
+	DaoMethodOutcome delete(IIdType theResource, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
@@ -241,7 +241,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theForceUpdateVersion Create a new version with the same contents as the current version even if the content hasn't changed (this is mostly useful for
 	 *                              resources mapping to external content such as external code systems)
 	 */
-	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails);
+	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
 	/**
 	 * Not supported in DSTU1!

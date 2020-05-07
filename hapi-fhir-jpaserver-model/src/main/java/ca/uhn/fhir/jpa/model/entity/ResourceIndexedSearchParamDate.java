@@ -35,7 +35,18 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.r4.model.DateTimeType;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import java.util.Date;
 
 @Embeddable
@@ -62,9 +73,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	 * Field which stores an integer representation of YYYYMDD as calculated by Calendar
 	 * e.g. 2019-01-20 -> 20190120
 	 */
-	@Column(name="SP_VALUE_LOW_DATE_ORDINAL")
+	@Column(name = "SP_VALUE_LOW_DATE_ORDINAL")
 	public Integer myValueLowDateOrdinal;
-	@Column(name="SP_VALUE_HIGH_DATE_ORDINAL")
+	@Column(name = "SP_VALUE_HIGH_DATE_ORDINAL")
 	public Integer myValueHighDateOrdinal;
 
 	@Transient
@@ -105,6 +116,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		computeValueHighDateOrdinal(theHighString);
 		computeValueLowDateOrdinal(theLowString);
 		myOriginalValue = theOriginalValue;
+		calculateHashes();
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
@@ -112,7 +124,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 			this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
 		}
 	}
-	private int generateOrdinalDateInteger(String theDateString){
+
+	private int generateOrdinalDateInteger(String theDateString) {
 		if (theDateString.contains("T")) {
 			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
 		}
@@ -146,18 +159,10 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null && getParamName() != null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		}
-	}
-
-	@Override
-	protected void clearHashes() {
-		myHashIdentity = null;
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
 
 	@Override
@@ -192,7 +197,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 	@Override
 	public void setId(Long theId) {
-		myId =theId;
+		myId = theId;
 	}
 
 	protected Long getTimeFromDate(Date date) {
@@ -242,10 +247,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("partitionId", getPartitionId());
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
 		b.append("valueLow", new InstantDt(getValueLow()));
 		b.append("valueHigh", new InstantDt(getValueHigh()));
+		b.append("hashIdentity", myHashIdentity);
 		b.append("missing", isMissing());
 		return b.build();
 	}
@@ -260,14 +267,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		DateRangeParam range = new DateRangeParam(dateParam);
 
 
-
-
 		boolean result;
 		if (theUseOrdinalDatesForDayComparison) {
 			result = matchesOrdinalDateBounds(range);
 			result = matchesDateBounds(range);
 		} else {
-			result =  matchesDateBounds(range);
+			result = matchesDateBounds(range);
 		}
 
 		return result;
