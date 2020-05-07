@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.empi.model.CanonicalEID;
+import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -177,5 +178,21 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(person);
 		assertThat(externalEids, hasSize(1));
 		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));
+	}
+	@Test
+	public void testWhenEidUpdatesAreDisabledForbidsUpdatesToEidsOnTargets() throws InterruptedException {
+		((EmpiSettingsImpl)myEmpiConfig).setPreventEidUpdates(true);
+		Patient jane = addExternalEID(buildJanePatient(), "some_eid");
+		EmpiHelperR4.OutcomeAndLogMessageWrapper latch = myEmpiHelper.createWithLatch(jane);
+		jane.setId(latch.getDaoMethodOutcome().getId());
+		clearExternalEIDs(jane);
+		jane = addExternalEID(jane, "some_new_eid");
+		try {
+			myEmpiHelper.doUpdateResource(jane, true);
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertThat(e.getMessage(), is(equalTo("While running in stric EID mode, EIDs may not be updated on Patient/Practitioner resources")));
+		}
+		((EmpiSettingsImpl)myEmpiConfig).setPreventEidUpdates(false);
 	}
 }

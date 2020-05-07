@@ -46,6 +46,7 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 		Collection<IBaseResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);
 		assertEquals(1, result.size());
 	}
+
 	@Test
 	public void testFindCandidatesCorrectlySearchesWithReferenceParams() {
 		Practitioner practitioner = new Practitioner();

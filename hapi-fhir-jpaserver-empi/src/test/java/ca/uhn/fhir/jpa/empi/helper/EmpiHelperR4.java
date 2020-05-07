@@ -77,7 +77,7 @@ public class EmpiHelperR4 extends BaseEmpiHelper {
 	}
 
 	/**
-	 * Excellent wrapper is a simple wrapper class which is _excellent_. It allows us to skip the fact that java doesn't allow
+	 * OutcomeAndLogMessageWrapper is a simple wrapper class which is _excellent_. It allows us to skip the fact that java doesn't allow
 	 * multiple returns, and wraps both the Method Outcome of the DAO, _and_ the TransactionLogMessages that were passed to the pointcut
 	 * by the EMPI module.
 	 */
