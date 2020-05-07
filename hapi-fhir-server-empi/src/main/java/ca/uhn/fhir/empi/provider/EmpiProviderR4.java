@@ -58,7 +58,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, type = Patient.class)
-	public Bundle match(@OperationParam(name="resource", min = 1, max = 1) Patient thePatient) {
+	public Bundle match(@OperationParam(name=ProviderConstants.EMPI_MATCH_RESOURCE, min = 1, max = 1) Patient thePatient) {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
@@ -78,8 +78,8 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS, type = Person.class)
-	public Person mergePersons(@OperationParam(name="personIdToDelete", min = 1, max = 1) StringType thePersonIdToDelete,
-									  @OperationParam(name="personIdToKeep", min = 1, max = 1) StringType thePersonIdToKeep) {
+	public Person mergePersons(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, min = 1, max = 1) StringType thePersonIdToDelete,
+									  @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep) {
 		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
 		IAnyResource personToDelete = getPersonFromId(thePersonIdToDelete.getValue(), "personIdToDelete");
 		IAnyResource personToKeep = getPersonFromId(thePersonIdToKeep.getValue(), "personIdToKeep");

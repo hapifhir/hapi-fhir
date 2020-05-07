@@ -49,5 +49,8 @@ public class ProviderConstants {
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
 
 	public static final String EMPI_MATCH = "$match";
+	public static final String EMPI_MATCH_RESOURCE = "resource";
 	public static final String EMPI_MERGE_PERSONS = "$empi-merge-persons";
+	public static final String EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE = "personIdToDelete";
+	public static final String EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP = "personIdToKeep";
 }
