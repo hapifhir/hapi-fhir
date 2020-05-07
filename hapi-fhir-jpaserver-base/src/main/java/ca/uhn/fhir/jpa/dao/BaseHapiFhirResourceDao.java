@@ -389,7 +389,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					HookParams hookParams = new HookParams()
 						.add(IBaseResource.class, resourceToDelete)
 						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+						.addIfMatchesType(ServletRequestDetails.class, theRequest)
+						.add(TransactionDetails.class, transactionDetails);
 					doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 				}
 			});
