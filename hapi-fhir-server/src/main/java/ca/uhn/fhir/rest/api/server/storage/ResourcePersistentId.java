@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.cross;
+package ca.uhn.fhir.rest.api.server.storage;
 
 /*-
  * #%L

@@ -1057,7 +1057,7 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1068,7 +1068,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
 	),
 
 	/**
@@ -1099,7 +1099,7 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1111,7 +1111,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
 	),
 
 	/**
@@ -1140,7 +1140,7 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1151,7 +1151,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
 	),
 
 
@@ -1183,7 +1183,7 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1194,7 +1194,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
 	),
 
 	/**
@@ -1226,7 +1226,7 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1238,7 +1238,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
 	),
 
 
@@ -1266,7 +1266,7 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1277,7 +1277,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
 	),
 
 	/**
@@ -1303,7 +1303,7 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.jpa.model.util.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1319,7 +1319,7 @@ public enum Pointcut {
 		"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.model.util.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
 	),
 
 	/**

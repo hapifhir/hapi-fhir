@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.util;
+package ca.uhn.fhir.rest.api.server.storage;
 
 /*-
  * #%L
@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.model.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collections;

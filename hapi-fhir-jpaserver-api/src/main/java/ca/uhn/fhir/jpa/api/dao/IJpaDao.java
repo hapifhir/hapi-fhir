@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.util.TransactionDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
