@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.Column;
@@ -141,5 +143,16 @@ public class EmpiLink {
 	public EmpiLink setLinkSource(EmpiLinkSourceEnum theLinkSource) {
 		myLinkSource = theLinkSource;
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("myId", myId)
+			.append("myPersonPid", myPersonPid)
+			.append("myTargetPid", myTargetPid)
+			.append("myMatchResult", myMatchResult)
+			.append("myLinkSource", myLinkSource)
+			.toString();
 	}
 }

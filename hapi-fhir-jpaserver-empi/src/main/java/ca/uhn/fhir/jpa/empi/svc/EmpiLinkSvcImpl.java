@@ -93,7 +93,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource) {
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonResource);
 		List<IBaseBackboneElement> newLinks = empiLinks.stream()
-			.filter(link -> link.getMatchResult() != EmpiMatchResultEnum.POSSIBLE_DUPLICATE)
+			.filter(link -> link.getMatchResult() == EmpiMatchResultEnum.MATCH || link.getMatchResult() == EmpiMatchResultEnum.POSSIBLE_MATCH)
 			.map(this::personLinkFromEmpiLink)
 			.collect(Collectors.toList());
 		myPersonHelper.setLinks(thePersonResource, newLinks);
