@@ -36,6 +36,6 @@ public class EmpiHelperConfig {
 			.setEnabled(true)
 			.setScriptText(json)
 			.setPreventEidUpdates(myStrictMode)
-			.setAllowMultipleEids(myAllowMultipleEids);
+			.setPreventMultipleEids(myAllowMultipleEids);
 	}
 }

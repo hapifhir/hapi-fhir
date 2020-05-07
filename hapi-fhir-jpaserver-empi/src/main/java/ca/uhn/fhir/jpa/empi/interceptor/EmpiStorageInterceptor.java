@@ -59,15 +59,27 @@ public class EmpiStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+
+		//If running in single EID mode, forbid multiple eids.
+		if (myEmpiSettings.isPreventMultipleEids()) {
+			forbidIfHasMultipleEids(theBaseResource);
+		}
+
 		// TODO EMPI find a better way to identify EMPI calls
 		if (isInternalRequest(theRequestDetails)) {
 			return;
 		}
+
 		forbidIfEmpiManagedTagIsPresent(theBaseResource);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void blockManualPersonManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		//If running in single EID mode, forbid multiple eids.
+		if (myEmpiSettings.isPreventMultipleEids()) {
+			forbidIfHasMultipleEids(theNewResource);
+		}
+
 		if (isInternalRequest(theRequestDetails)) {
 			return;
 		}
@@ -95,7 +107,7 @@ public class EmpiStorageInterceptor {
 	}
 
 	private void throwBlockEidChange() {
-		throw new ForbiddenOperationException("While running in stric EID mode, EIDs may not be updated on Patient/Practitioner resources");
+		throw new ForbiddenOperationException("While running with EID updates disabled, EIDs may not be updated on Patient/Practitioner resources");
 	}
 
 	/*
@@ -108,6 +120,16 @@ public class EmpiStorageInterceptor {
 			}
 		}
 	}
+
+	private void forbidIfHasMultipleEids(IBaseResource theResource) {
+		String resourceType = extractResourceType(theResource);
+		if (resourceType.equalsIgnoreCase("Patient") || resourceType.equalsIgnoreCase("Practitioner")) {
+			if (myEIDHelper.getExternalEid(theResource).size() > 1) {
+				throwBlockMultipleEids();
+			}
+		}
+	}
+
 
 	/**
 	 * Checks for the presence of the EMPI-managed tag, indicating the EMPI system has ownership
@@ -141,6 +163,10 @@ public class EmpiStorageInterceptor {
 	}
 	private void throwModificationBlockedByEmpi(){
 		throw new ForbiddenOperationException("Cannot create or modify Persons who are managed by EMPI.");
+	}
+
+	private void throwBlockMultipleEids() {
+		throw new ForbiddenOperationException("While running with multiple EIDs disabled, Patient/Practitioner resources may have at most one EID.");
 	}
 
 	private String extractResourceType(IBaseResource theResource) {

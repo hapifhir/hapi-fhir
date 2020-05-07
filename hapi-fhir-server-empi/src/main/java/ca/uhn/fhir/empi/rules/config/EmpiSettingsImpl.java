@@ -34,13 +34,13 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 	private boolean myPreventEidUpdates;
 
 	/**
-	 * If enabled, the underlying EMPI system will operate under the following assumptions:
+	 * If disabled, the underlying EMPI system will operate under the following assumptions:
 	 *
 	 * 1. Patients/Practitioners may have more than 1 EID of the same system simultaneously.
 	 * 2. During linking, incoming patient EIDs will be merged with existing Person EIDs.
 	 *
 	 */
-	private boolean myAllowMultipleEids;
+	private boolean myPreventMultipleEids;
 
 	@Override
 	public boolean isEnabled() {
@@ -92,12 +92,12 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 		return this;
 	}
 
-	public boolean isAllowMultipleEids() {
-		return myAllowMultipleEids;
+	public boolean isPreventMultipleEids() {
+		return myPreventMultipleEids;
 	}
 
-	public EmpiSettingsImpl setAllowMultipleEids(boolean theAllowMultipleEids) {
-		myAllowMultipleEids = theAllowMultipleEids;
+	public EmpiSettingsImpl setPreventMultipleEids(boolean thePreventMultipleEids) {
+		myPreventMultipleEids = thePreventMultipleEids;
 		return this;
 	}
 }

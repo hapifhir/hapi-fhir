@@ -34,5 +34,5 @@ public interface IEmpiSettings {
 
 	boolean isPreventEidUpdates();
 
-	boolean isAllowMultipleEids();
+	boolean isPreventMultipleEids();
 }

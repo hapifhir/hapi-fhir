@@ -181,7 +181,7 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 	}
 	@Test
 	public void testWhenEidUpdatesAreDisabledForbidsUpdatesToEidsOnTargets() throws InterruptedException {
-		((EmpiSettingsImpl)myEmpiConfig).setPreventEidUpdates(true);
+		setPreventEidUpdates(true);
 		Patient jane = addExternalEID(buildJanePatient(), "some_eid");
 		EmpiHelperR4.OutcomeAndLogMessageWrapper latch = myEmpiHelper.createWithLatch(jane);
 		jane.setId(latch.getDaoMethodOutcome().getId());
@@ -191,8 +191,34 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 			myEmpiHelper.doUpdateResource(jane, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("While running in stric EID mode, EIDs may not be updated on Patient/Practitioner resources")));
+			assertThat(e.getMessage(), is(equalTo("While running with EID updates disabled, EIDs may not be updated on Patient/Practitioner resources")));
 		}
-		((EmpiSettingsImpl)myEmpiConfig).setPreventEidUpdates(false);
+		setPreventEidUpdates(false);
 	}
+
+	@Test
+	public void testWhenMultipleEidsAreDisabledThatTheInterceptorRejectsCreatesWithThem() {
+		setPreventMultipleEids(true);
+		Patient patient = buildJanePatient();
+		addExternalEID(patient, "123");
+		addExternalEID(patient, "456");
+		try {
+			myEmpiHelper.doCreateResource(patient, true);
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertThat(e.getMessage(), is(equalTo("While running with multiple EIDs disabled, Patient/Practitioner resources may have at most one EID.")));
+		}
+
+		setPreventMultipleEids(false);
+
+	}
+
+	private void setPreventEidUpdates(boolean thePrevent) {
+		((EmpiSettingsImpl)myEmpiConfig).setPreventEidUpdates(thePrevent);
+	}
+
+	private void setPreventMultipleEids(boolean thePrevent) {
+		((EmpiSettingsImpl)myEmpiConfig).setPreventMultipleEids(thePrevent);
+	}
+
 }

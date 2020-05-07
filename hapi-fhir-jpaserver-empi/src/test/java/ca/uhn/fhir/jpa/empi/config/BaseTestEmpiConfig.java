@@ -31,7 +31,7 @@ public abstract class BaseTestEmpiConfig {
 			.setEnabled(false)
 			.setScriptText(json)
 			.setPreventEidUpdates(myPreventEidUpdates)
-			.setAllowMultipleEids(myAllowMultipleEids);
+			.setPreventMultipleEids(myAllowMultipleEids);
 	}
 
 	@Bean
