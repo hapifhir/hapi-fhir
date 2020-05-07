@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.dstu2.resource.ImplementationGuide;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -168,6 +169,12 @@ public class SearchUtilitiesImpl {
 	}
 
 	private static IBaseResource getFirstResourceFrom(IBundleProvider searchResult) {
-		return searchResult.getResources(0, 0).get(0);
+		try {
+			return searchResult.getResources(0, 0).get(0);
+		} catch (IndexOutOfBoundsException e) {
+			ourLog.warn("Error when extracting resource from search result " +
+				"(search result should have been non-empty))", e);
+			return null;
+		}
 	}
 }

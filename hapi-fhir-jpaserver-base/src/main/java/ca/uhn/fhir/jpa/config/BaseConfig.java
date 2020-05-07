@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.packages.IgInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperService;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
@@ -233,6 +234,9 @@ public abstract class BaseConfig {
 	protected boolean isSupported(String theResourceType) {
 		return daoRegistry().getResourceDaoOrNull(theResourceType) != null;
 	}
+
+	@Bean
+	public IgInstallerSvc igInstallerSvc() { return new IgInstallerSvc(); }
 
 	@Bean
 	public IConsentContextServices consentContextServices() {
