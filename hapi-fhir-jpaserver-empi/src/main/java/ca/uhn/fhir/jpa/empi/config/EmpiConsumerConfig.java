@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -51,6 +52,7 @@ import org.springframework.core.annotation.Order;
 import javax.annotation.PostConstruct;
 
 @Configuration
+@Import(EmpiSharedConfig.class)
 public class EmpiConsumerConfig {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 

@@ -20,25 +20,19 @@ package ca.uhn.fhir.jpa.empi.config;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.IEmpiSettings;
-import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiSubmitterInterceptorLoader;
 import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(EmpiSharedConfig.class)
 public class EmpiSubmitterConfig {
 	@Bean
     EmpiStorageInterceptor empiStorageInterceptor() {
 		return new EmpiStorageInterceptor();
-	}
-
-	@Bean
-	EIDHelper eidHelper(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
-		return new EIDHelper(theFhirContext, theEmpiConfig);
 	}
 
 	@Bean
