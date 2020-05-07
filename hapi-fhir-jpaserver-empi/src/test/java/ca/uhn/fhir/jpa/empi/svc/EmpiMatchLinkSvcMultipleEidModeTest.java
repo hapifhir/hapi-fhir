@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.Person;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
@@ -126,7 +125,6 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testWhenPatientEidUpdateWouldCauseALinkChangeThatDuplicatePersonIsCreatedInstead() {
-
 		Patient patient1 = buildJanePatient();
 		addExternalEID(patient1, "eid-1");
 		addExternalEID(patient1, "eid-11");
@@ -143,13 +141,16 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 
 		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
 		assertThat(patient2, is(samePersonAs(patient3)));
-		
+
 		//Now lets change one of the EIDs on an incoming patient to one that matches our original patient.
-		//This should create a situation in which the incoming EIDs are matched to _two_ unique patients. In this case, we want to s
+		//This should create a situation in which the incoming EIDs are matched to _two_ unique patients. In this case, we want to
+		//set them all to possible_match, and set the two persons as possible duplicates.
 		patient2.getIdentifier().clear();
 		addExternalEID(patient2, "eid-11");
 		addExternalEID(patient2, "eid-22");
 		patient2 = updatePatientAndUpdateLinks(patient2);
+
+		assertThat(patient2, is(not(matchedToAPerson())));
 		assertThat(patient2,is(possibleMatchWith(patient1)));
 		assertThat(patient2,is(possibleMatchWith(patient3)));
 
@@ -158,9 +159,9 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 	}
 
-
 	@Test
-	public void testWhenIncomingPatientHasMultipleEidsThatTheyAreAllPersistedToPerson() {
+	public void testWhenPatientUpdatesMaterialInformationThatWouldRelinkThatPossibleMatchesAreCreatedAndADuplicateIsMade() {
 
 	}
+
 }
