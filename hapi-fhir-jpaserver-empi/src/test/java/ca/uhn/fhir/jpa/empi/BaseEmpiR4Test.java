@@ -244,7 +244,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiTransactionContext createContextForUpdate(IBaseResource theResource) {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
 		ctx.setPayload(theResource);
-		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE);
+		ctx.setRestOperation(EmpiTransactionContext.OperationType.UPDATE);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
 	}

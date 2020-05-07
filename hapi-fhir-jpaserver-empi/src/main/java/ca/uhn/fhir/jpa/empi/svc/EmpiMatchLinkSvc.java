@@ -153,6 +153,7 @@ public class EmpiMatchLinkSvc {
 	private void handleEmpiUpdate(IBaseResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
 		IBaseResource person = getPersonFromMatchedPersonCandidate(theMatchedPersonCandidate);
 		boolean hasEidsInCommon = myEIDHelper.hasEidOverlap(person, theResource);
+		boolean incomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
 		Optional<EmpiLink> theExistingMatchLink = myEmpiLinkDaoSvc.getMatchedLinkForTarget(theResource);
 
 		boolean remainsMatchedToSamePerson;
@@ -162,6 +163,11 @@ public class EmpiMatchLinkSvc {
 			remainsMatchedToSamePerson = false;
 		}
 
+		if (remainsMatchedToSamePerson && (!incomingResourceHasAnEid || hasEidsInCommon)) {
+			//update to patient that uses internal EIDs only.
+			myPersonHelper.updatePersonFromEmpiTarget(person, theResource, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		}
 		if (!hasEidsInCommon && remainsMatchedToSamePerson) {
 			// the user is simply updating their EID. We propagate this change to the Person.
 			//overwrite. No EIDS in common, but still same person.
@@ -172,9 +178,6 @@ public class EmpiMatchLinkSvc {
 		} else if (!hasEidsInCommon && !remainsMatchedToSamePerson) {
 			//This is a new linking scenario. we have to break the existing link and link to the new person. For now, we create duplicate.
 			createNewPersonAndFlagAsDuplicate(theResource, theEmpiTransactionContext, person);
-		} else if (hasEidsInCommon && remainsMatchedToSamePerson) {
-			//Match didn't change, EIDS didn't change. Update person info based on patient info.
-			//myPersonHelper.updatePersonFromEmpiTarget();
 		} else if (hasEidsInCommon && !remainsMatchedToSamePerson) {
 			//updated patient has an EID that matches to a new candidate. Link?
 		}

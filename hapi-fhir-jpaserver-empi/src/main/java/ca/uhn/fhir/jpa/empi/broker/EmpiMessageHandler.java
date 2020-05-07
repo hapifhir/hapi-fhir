@@ -120,8 +120,8 @@ public class EmpiMessageHandler implements MessageHandler {
 		}
 	}
 
-	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, EmpiTransactionContext theEmpiContext) {
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext), theEmpiContext);
+	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, EmpiTransactionContext theEmpiTransactionContext) {
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext), theEmpiTransactionContext);
 	}
 
 	private void handleUpdatePatientOrPractitioner(ResourceModifiedMessage theMsg, EmpiTransactionContext theEmpiTransactionContext) {

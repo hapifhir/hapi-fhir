@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
@@ -394,8 +396,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	@Ignore
-	//FIXME EMPI uncomment this test when we decide on functionaliy.
 	public void testPatientThatUndergoesSufficientChangeIsReassignedToNewPerson() {
 		Patient janePatient= createPatientAndUpdateLinks(buildJanePatient());
 		Person janePerson = getPersonFromTarget(janePatient);
@@ -405,6 +405,14 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		patient1.setId(janePatient.getId());
 		Patient janePaulPatient = updatePatientAndUpdateLinks(patient1);
 
-		assertThat(janePerson, is(not(samePersonAs(janePaulPatient))));
+		assertThat(janePerson, is(samePersonAs(janePaulPatient)));
+
+		//Ensure the related person was updated with new info.
+		Person personFromTarget = getPersonFromTarget(janePaulPatient);
+		HumanName nameFirstRep = personFromTarget.getNameFirstRep();
+		assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
+
 	}
+
+
 }

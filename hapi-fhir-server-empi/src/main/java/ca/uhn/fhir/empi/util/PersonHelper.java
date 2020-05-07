@@ -535,4 +535,8 @@ public class PersonHelper {
 		List<Person.PersonLinkComponent> links = (List<Person.PersonLinkComponent>)(List<?>)theLinks;
 		person.setLink(links);
 	}
+
+    public void updatePersonFromEmpiTarget(IBaseResource thePerson, IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+		copyEmpiTargetDataIntoPerson(theResource, thePerson);
+    }
 }
