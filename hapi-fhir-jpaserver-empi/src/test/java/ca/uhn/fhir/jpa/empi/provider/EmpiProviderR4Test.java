@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.validation.IResourceLoader;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
@@ -40,6 +42,18 @@ public class EmpiProviderR4Test extends BaseEmpiR4Test {
 		myDeletePersonId = new StringType(myDeletePerson.getIdElement().toUnqualifiedVersionless().getValue());
 		myKeepPerson = createPerson();
 		myKeepPersonId = new StringType(myKeepPerson.getIdElement().toUnqualifiedVersionless().getValue());
+	}
+
+	@Test
+	public void testMatch() {
+		Patient jane = buildJanePatient();
+		jane.setActive(true);
+		Patient createdJane = createPatient(jane);
+		Patient newJane = buildJanePatient();
+
+		Bundle result = myEmpiProviderR4.match(newJane);
+		assertEquals(1, result.getEntry().size());
+		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
 	}
 
 	@Test
