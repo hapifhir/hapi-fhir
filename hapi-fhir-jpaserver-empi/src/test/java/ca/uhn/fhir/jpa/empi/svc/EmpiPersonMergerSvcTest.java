@@ -46,6 +46,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	private Person myKeepPerson;
 	private IdType myDeletePersonId;
 	private IdType myKeepPersonId;
+	private Long myDeletePersonPid;
 	private Long myKeepPersonPid;
 	private Patient myTargetPatient1;
 	private Long myPatient1Pid;
@@ -58,6 +59,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public void before() {
 		myDeletePerson = createPerson();
 		myDeletePersonId = myDeletePerson.getIdElement().toUnqualifiedVersionless();
+		myDeletePersonPid = myIdHelperService.getPidOrThrowException(myDeletePersonId);
 		myKeepPerson = createPerson();
 		myKeepPersonId = myKeepPerson.getIdElement().toUnqualifiedVersionless();
 		myKeepPersonPid = myIdHelperService.getPidOrThrowException(myKeepPersonId);
@@ -89,6 +91,15 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		assertEquals(myKeepPerson.getIdElement(), mergedPerson.getIdElement());
 		assertThat(mergedPerson, is(samePersonAs(mergedPerson)));
 		assertEquals(1, getAllPersons().size());
+	}
+
+	@Test
+	public void mergeRemovesPossibleDuplicatesLink() {
+		EmpiLink empiLink = new EmpiLink().setPersonPid(myKeepPersonPid).setTargetPid(myDeletePersonPid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
+		myEmpiLinkDao.save(empiLink);
+		assertEquals(1, myEmpiLinkDao.count());
+		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		assertEquals(0, myEmpiLinkDao.count());
 	}
 
 	@Test

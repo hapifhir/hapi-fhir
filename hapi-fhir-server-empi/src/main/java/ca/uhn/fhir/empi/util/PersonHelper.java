@@ -26,9 +26,8 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -412,7 +411,6 @@ public class PersonHelper {
 			thePerson.addIdentifier(theIdentifier);
 		}
 	}
-
 
 	public void mergePersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
 		switch (myFhirContext.getVersion().getVersion()) {

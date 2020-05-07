@@ -54,7 +54,7 @@ public class EmpiExpungeTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testUninterceptedDeleteRemovesLBReference() {
+	public void testUninterceptedDeleteRemovesEMPIReference() {
 		assertEquals(1, myEmpiLinkDao.count());
 		myPatientDao.delete(myTargetEntity.getIdDt());
 		assertEquals(1, myEmpiLinkDao.count());

@@ -28,8 +28,8 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 	@Override
 	@Transactional
-	// FIXME KHS call me I'm lonely
 	public IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep) {
+		// TODO EMPI replace this with a post containing the manually merged fields
 		myPersonHelper.mergePersonFields(thePersonToDelete, thePersonToKeep);
 		mergeLinks(thePersonToDelete, thePersonToKeep);
 		myEmpiResourceDaoSvc.updatePerson(thePersonToKeep);
@@ -41,12 +41,14 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		long personToKeepPid = myIdHelperService.getPidOrThrowException(thePersonToKeep);
 		List<EmpiLink> newLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToDelete);
 		List<EmpiLink> oldLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToKeep);
+		// FIXME KHS upgrade AUTO to MANUAL
 		newLinks.removeIf(newLink -> oldLinks.stream().anyMatch(oldLink -> newLink.getTargetPid().equals(oldLink.getTargetPid())));
 		// Update the links from thePersonToDelete, pointing them all to thePersonToKeep
 		for (EmpiLink newLink : newLinks) {
 			newLink.setPersonPid(personToKeepPid);
 			myEmpiLinkDaoSvc.update(newLink);
 		}
+		// FIXME KHS throw exception if this violates a NO_MATCH
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToDelete);
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToKeep);
 	}
