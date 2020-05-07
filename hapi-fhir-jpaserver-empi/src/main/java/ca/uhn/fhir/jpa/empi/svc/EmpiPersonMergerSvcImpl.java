@@ -1,20 +1,26 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
+
 	@Autowired
 	PersonHelper myPersonHelper;
 	@Autowired
@@ -39,17 +45,39 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 	private void mergeLinks(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep) {
 		long personToKeepPid = myIdHelperService.getPidOrThrowException(thePersonToKeep);
-		List<EmpiLink> newLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToDelete);
-		List<EmpiLink> oldLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToKeep);
-		// FIXME KHS upgrade AUTO to MANUAL
-		newLinks.removeIf(newLink -> oldLinks.stream().anyMatch(oldLink -> newLink.getTargetPid().equals(oldLink.getTargetPid())));
-		// Update the links from thePersonToDelete, pointing them all to thePersonToKeep
-		for (EmpiLink newLink : newLinks) {
-			newLink.setPersonPid(personToKeepPid);
-			myEmpiLinkDaoSvc.update(newLink);
+		List<EmpiLink> incomingLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToDelete);
+		List<EmpiLink> origLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToKeep);
+
+		// For each incomingLink, either ignore it, move it, or replace the original one
+
+		for (EmpiLink incomingLink : incomingLinks) {
+			Optional<EmpiLink> optionalOrigLink = findLinkWithMatchingTarget(origLinks, incomingLink);
+			if (optionalOrigLink.isPresent()) {
+				// The original links already contain this target, so move it over to the personToKeep
+				EmpiLink origLink = optionalOrigLink.get();
+				if (incomingLink.getLinkSource() == EmpiLinkSourceEnum.MANUAL &&
+					origLink.getLinkSource() == EmpiLinkSourceEnum.AUTO) {
+					// Manual links override auto ones
+					ourLog.trace("Deleting link {}", origLink);
+					myEmpiLinkDaoSvc.deleteLink(origLink);
+				} else {
+					continue;
+				}
+			}
+			// The original links didn't contain this target, so move it over to the personToKeep
+			incomingLink.setPersonPid(personToKeepPid);
+			ourLog.trace("Saving link {}", incomingLink);
+			myEmpiLinkDaoSvc.update(incomingLink);
 		}
+
 		// FIXME KHS throw exception if this violates a NO_MATCH
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToDelete);
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToKeep);
+	}
+
+	private Optional<EmpiLink> findLinkWithMatchingTarget(List<EmpiLink> theEmpiLinks, EmpiLink theLinkWithTargetToMatch) {
+		return theEmpiLinks.stream()
+			.filter(empiLink -> empiLink.getTargetPid().equals(theLinkWithTargetToMatch.getTargetPid()))
+			.findFirst();
 	}
 }

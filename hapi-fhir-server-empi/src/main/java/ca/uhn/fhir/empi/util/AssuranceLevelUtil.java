@@ -53,7 +53,7 @@ public final class AssuranceLevelUtil {
 			case POSSIBLE_DUPLICATE:
 			case NO_MATCH:
 			default:
-				return null;
+				throw new InvalidRequestException("An AUTO EMPI Link may not have a match result of " + theMatchResult);
 		}
 	}
 
@@ -65,7 +65,7 @@ public final class AssuranceLevelUtil {
 			case POSSIBLE_DUPLICATE:
 			case POSSIBLE_MATCH:
 			default:
-				return null;
+				throw new InvalidRequestException("A MANUAL EMPI Link may not have a match result of " + theMatchResult);
 		}
 	}
 }

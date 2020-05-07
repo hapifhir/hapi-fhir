@@ -26,13 +26,14 @@ import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,7 +50,7 @@ public class EmpiLinkDaoSvc {
 	@Autowired
 	private IdHelperService myIdHelperService;
 
-	public void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
+	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
 		Long personPid = myIdHelperService.getPidOrNull(thePerson);
 		Long resourcePid = myIdHelperService.getPidOrNull(theResource);
 
@@ -61,6 +62,7 @@ public class EmpiLinkDaoSvc {
 		theEmpiTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		myEmpiLinkDao.save(empiLink);
+		return empiLink;
 	}
 
 
@@ -149,6 +151,7 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.findOne(example);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteLink(EmpiLink theEmpiLink) {
 		myEmpiLinkDao.delete(theEmpiLink);
 	}
