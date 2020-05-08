@@ -24,9 +24,9 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -79,10 +79,10 @@ public class EmpiResourceDaoSvc {
 		map.setLoadSynchronous(true);
 		map.add("identifier", new TokenParam(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theEidFromResource));
 		IBundleProvider search = myPersonDao.search(map);
-		if (search.size() > 0) {
-			return search.getResources(0, 1).get(0);
-		} else {
+		if (search.isEmpty()) {
 			return null;
+		} else {
+			return search.getResources(0, 1).get(0);
 		}
 	}
 

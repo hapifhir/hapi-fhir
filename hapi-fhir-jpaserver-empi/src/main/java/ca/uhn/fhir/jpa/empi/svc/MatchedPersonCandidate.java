@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.empi.svc;
  */
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 public class MatchedPersonCandidate {
 

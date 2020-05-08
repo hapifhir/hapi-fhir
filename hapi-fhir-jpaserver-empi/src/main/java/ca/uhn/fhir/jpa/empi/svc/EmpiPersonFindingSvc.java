@@ -30,7 +30,7 @@ import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
