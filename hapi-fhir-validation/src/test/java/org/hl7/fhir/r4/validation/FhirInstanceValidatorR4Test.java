@@ -338,7 +338,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("@value cannot be empty", all.get(0).getMessage());
+		assertEquals("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]", all.get(0).getMessage());
 	}
 
 	/**
@@ -367,6 +367,32 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals("This property must be an Array, not a a primitive property", all.get(0).getMessage());
 	}
 
+	@Test
+	public void testValidateMeta() {
+		String input = "{" +
+			"   \"resourceType\": \"Parameters\"," +
+			"   \"parameter\": [" +
+			"      {" +
+			"         \"name\": \"meta\"," +
+			"         \"valueMeta\": {" +
+			"            \"tag\": [" +
+			"               {" +
+			"                  \"system\": \"urn:test-fake-system\"," +
+			"                  \"code\": \"420\"" +
+			"               }" +
+			"            ]" +
+			"         }" +
+			"      }" +
+			"   ]" +
+			"}";
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+		assertTrue(result.isSuccessful());
+	}
+	
 	/**
 	 * See #1676 - We should ignore schema location
 	 */
@@ -1353,7 +1379,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(14)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).fetch(any(), anyString());
 	}

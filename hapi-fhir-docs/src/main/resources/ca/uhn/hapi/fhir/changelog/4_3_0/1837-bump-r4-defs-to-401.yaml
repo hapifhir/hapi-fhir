@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1837
+title: "The FHIR R4 validation resources (StructureDefintion, ValueSet, etc) were not updated to the R4 4.0.1
+   technical correction versions in HAPI FHIR 4.2.0. This has been corrected."
