@@ -56,8 +56,6 @@ import javax.annotation.PostConstruct;
 public class EmpiConsumerConfig {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
-	public static final String EMPI_CONSUMER_COUNT_DEFAULT = "5";
-
 	@Autowired
 	IEmpiSettings myEmpiProperties;
 	@Autowired
