@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ import java.util.Optional;
 
 @Service
 public class EmpiLinkDaoSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(EmpiLinkDaoSvc.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private IEmpiLinkDao myEmpiLinkDao;
@@ -165,7 +165,7 @@ public class EmpiLinkDaoSvc {
 		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
 		int removed =  myEmpiLinkDao.deleteWithAnyReferenceToPid(pid);
 		if (removed > 0) {
-			ourLog.info("Removed {} references to {}", removed, theResource.getIdElement());
+			ourLog.info("Removed {} EMPI links with references to {}", removed, theResource.getIdElement().toVersionless());
 		}
 		return removed;
 	}

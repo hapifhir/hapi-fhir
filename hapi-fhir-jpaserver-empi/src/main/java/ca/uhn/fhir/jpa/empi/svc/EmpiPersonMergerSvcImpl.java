@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.log.Logs;
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -34,16 +35,18 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 	@Override
 	@Transactional
-	public IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep) {
+	public IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep, EmpiTransactionContext theEmpiTransactionContext) {
 		// TODO EMPI replace this with a post containing the manually merged fields
 		myPersonHelper.mergePersonFields(thePersonToDelete, thePersonToKeep);
-		mergeLinks(thePersonToDelete, thePersonToKeep);
+		mergeLinks(thePersonToDelete, thePersonToKeep, theEmpiTransactionContext);
 		myEmpiResourceDaoSvc.updatePerson(thePersonToKeep);
+		log(theEmpiTransactionContext, "Merged " + thePersonToDelete.getIdElement().toVersionless() + " into " + thePersonToKeep.getIdElement().toVersionless());
 		myEmpiResourceDaoSvc.deletePerson(thePersonToDelete);
+		log(theEmpiTransactionContext, "Deleted " + thePersonToDelete.getIdElement().toVersionless());
 		return thePersonToKeep;
 	}
 
-	private void mergeLinks(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep) {
+	private void mergeLinks(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep, EmpiTransactionContext theEmpiTransactionContext) {
 		long personToKeepPid = myIdHelperService.getPidOrThrowException(thePersonToKeep);
 		List<EmpiLink> incomingLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToDelete);
 		List<EmpiLink> origLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToKeep);
@@ -76,13 +79,18 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 			myEmpiLinkDaoSvc.update(incomingLink);
 		}
 
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToDelete);
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToKeep);
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToDelete, theEmpiTransactionContext);
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToKeep, theEmpiTransactionContext);
 	}
 
 	private Optional<EmpiLink> findLinkWithMatchingTarget(List<EmpiLink> theEmpiLinks, EmpiLink theLinkWithTargetToMatch) {
 		return theEmpiLinks.stream()
 			.filter(empiLink -> empiLink.getTargetPid().equals(theLinkWithTargetToMatch.getTargetPid()))
 			.findFirst();
+	}
+
+	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
+		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
+		ourLog.debug(theMessage);
 	}
 }

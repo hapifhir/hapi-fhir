@@ -87,16 +87,23 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	}
 
-	// FIXME KHS transaction log
 	@Override
 	@Transactional
-	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource) {
+	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext) {
+		int origLinkCount = myPersonHelper.getLinkCount(thePersonResource);
+
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonResource);
+
 		List<IBaseBackboneElement> newLinks = empiLinks.stream()
 			.filter(link -> link.isMatch() || link.isPossibleMatch())
 			.map(this::personLinkFromEmpiLink)
 			.collect(Collectors.toList());
 		myPersonHelper.setLinks(thePersonResource, newLinks);
+		if (newLinks.size() > origLinkCount) {
+			log(theEmpiTransactionContext, thePersonResource.getIdElement().toVersionless() + " links increased from " + origLinkCount + " to " + newLinks.size());
+		} else if (newLinks.size() < origLinkCount) {
+			log(theEmpiTransactionContext, thePersonResource.getIdElement().toVersionless() + " links decreased from " + origLinkCount + " to " + newLinks.size());
+		}
 	}
 
 	private IBaseBackboneElement personLinkFromEmpiLink(EmpiLink empiLink) {
@@ -146,5 +153,10 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
 		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiTransactionContext);
+	}
+
+	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
+		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
+		ourLog.debug(theMessage);
 	}
 }

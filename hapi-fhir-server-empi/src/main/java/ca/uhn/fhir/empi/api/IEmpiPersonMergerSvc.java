@@ -1,5 +1,6 @@
 package ca.uhn.fhir.empi.api;
 
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IEmpiPersonMergerSvc {
@@ -10,5 +11,5 @@ public interface IEmpiPersonMergerSvc {
 	 * @param thePersonToKeep the person we are merging to
 	 * @return updated thePersonToKeep with the merged fields and links.
 	 */
-	IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep);
+	IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep, EmpiTransactionContext theEmpiTransactionContext);
 }

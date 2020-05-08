@@ -1,8 +1,7 @@
 package ca.uhn.fhir.empi.model;
 
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
-import com.google.common.annotations.VisibleForTesting;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public class EmpiTransactionContext {
 
@@ -14,14 +13,15 @@ public class EmpiTransactionContext {
 	/**
 	 * The payload of the original message that came in causing empi subscriber to start processing.
 	 */
-	private IBaseResource myPayload;
+	private IAnyResource[] myResources;
 	private OperationType myRestOperation;
 
 
 	public enum OperationType {
 		CREATE,
 		UPDATE,
-		BATCH
+		BATCH,
+		MERGE_PERSONS
 	}
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
@@ -30,9 +30,9 @@ public class EmpiTransactionContext {
 	public EmpiTransactionContext() {
 	}
 
-	public EmpiTransactionContext(TransactionLogMessages theTransactionLogMessages, IBaseResource thePayload, OperationType theRestOperation) {
+	public EmpiTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, IAnyResource... theResources) {
 		myTransactionLogMessages = theTransactionLogMessages;
-		myPayload = thePayload;
+		myResources = theResources;
 		myRestOperation = theRestOperation;
 	}
 
@@ -43,8 +43,8 @@ public class EmpiTransactionContext {
 		this.myTransactionLogMessages.addMessage(myTransactionLogMessages, theMessage);
 	}
 
-	public IBaseResource getPayload() {
-		return myPayload;
+	public IAnyResource[] getResources() {
+		return myResources;
 	}
 
 	public OperationType getRestOperation() {
@@ -55,8 +55,8 @@ public class EmpiTransactionContext {
 		myTransactionLogMessages = theTransactionLogMessages;
 	}
 
-	public void setPayload(IBaseResource thePayload) {
-		myPayload = thePayload;
+	public void setResources(IAnyResource... theResources) {
+		myResources = theResources;
 	}
 
 	public void setRestOperation(OperationType theRestOperation) {

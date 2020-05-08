@@ -26,7 +26,9 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hamcrest.Matcher;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
@@ -85,6 +87,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
 	protected EIDHelper myEIDHelper;
+
+	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
 	@After
 	public void after() {
@@ -234,16 +238,16 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForCreate(thePatient));
 		return thePatient;
 	}
-	protected EmpiTransactionContext createContextForCreate(IBaseResource theResource) {
+	protected EmpiTransactionContext createContextForCreate(IAnyResource theResource) {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
-		ctx.setPayload(theResource);
+		ctx.setResources(theResource);
 		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
 	}
-	protected EmpiTransactionContext createContextForUpdate(IBaseResource theResource) {
+	protected EmpiTransactionContext createContextForUpdate(IAnyResource theResource) {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
-		ctx.setPayload(theResource);
+		ctx.setResources(theResource);
 		ctx.setRestOperation(EmpiTransactionContext.OperationType.UPDATE);
 		ctx.setTransactionLogMessages(null);
 		return ctx;

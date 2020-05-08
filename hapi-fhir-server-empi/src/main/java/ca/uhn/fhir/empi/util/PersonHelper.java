@@ -539,4 +539,17 @@ public class PersonHelper {
     public void updatePersonFromEmpiTarget(IBaseResource thePerson, IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		copyEmpiTargetDataIntoPerson(theResource, thePerson);
     }
+
+	public int getLinkCount(IAnyResource thePerson) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person personR4 = (Person) thePerson;
+				return personR4.getLink().size();
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
+				return personStu3.getLink().size();
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
+	}
 }

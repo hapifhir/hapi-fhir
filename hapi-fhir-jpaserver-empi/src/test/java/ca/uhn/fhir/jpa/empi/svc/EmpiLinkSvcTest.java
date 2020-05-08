@@ -97,7 +97,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient1, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(patient1));
 		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient2, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(patient2));
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(person);
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(person, createContextForCreate(person));
 		assertTrue(person.hasLink());
 		assertEquals(patient1.getIdElement().toVersionless().getValue(), person.getLinkFirstRep().getTarget().getReference());
 	}

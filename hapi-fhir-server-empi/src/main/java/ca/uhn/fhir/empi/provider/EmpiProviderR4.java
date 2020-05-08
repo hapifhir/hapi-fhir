@@ -25,6 +25,7 @@ import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.validation.IResourceLoader;
@@ -78,12 +79,13 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS, type = Person.class)
 	public Person mergePersons(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, min = 1, max = 1) StringType thePersonIdToDelete,
-									  @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep) {
+										@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep,
+										RequestDetails theRequestDetails) {
 		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
 		IAnyResource personToDelete = getPersonFromId(thePersonIdToDelete.getValue(), "personIdToDelete");
 		IAnyResource personToKeep = getPersonFromId(thePersonIdToKeep.getValue(), "personIdToKeep");
 
-		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep);
+		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(personToDelete, personToKeep, theRequestDetails));
 	}
 
 	@Override

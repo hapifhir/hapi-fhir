@@ -1,6 +1,9 @@
 package ca.uhn.fhir.empi.provider;
 
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -29,4 +32,8 @@ public abstract class BaseEmpiProvider {
 			throw new InvalidRequestException("personIdToDelete must be different from personToKeep");
 		}
  	}
+	protected EmpiTransactionContext createEmpiContext(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep, RequestDetails theRequestDetails) {
+		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
+		return new EmpiTransactionContext(transactionLogMessages, EmpiTransactionContext.OperationType.MERGE_PERSONS, thePersonToDelete, thePersonToKeep);
+	}
 }

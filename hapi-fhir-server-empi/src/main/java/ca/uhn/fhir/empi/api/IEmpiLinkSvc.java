@@ -40,5 +40,5 @@ public interface IEmpiLinkSvc {
 	 * Replace Person.link values from what they should be based on EmpiLink values
 	 * @param thePersonResource the person to correct the links on.
 	 */
-	void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource);
+	void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext);
 }
