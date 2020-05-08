@@ -1064,9 +1064,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem(null).setCode("code1"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertEquals(2, errors.getMessages().size());
+		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
+		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.getMessages().get(1).getMessage(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
+		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -1075,8 +1077,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertEquals(2, errors.getMessages().size());
+		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
+		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.getMessages().get(1).getMessage(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
+		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -1116,7 +1121,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay(""));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response found for required item with id = 'link0'"));
+		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
 	}
 
 	@Test
