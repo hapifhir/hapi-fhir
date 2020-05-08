@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
@@ -94,7 +95,7 @@ public class CascadingDeleteInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS)
-	public DeleteConflictOutcome handleDeleteConflicts(DeleteConflictList theConflictList, RequestDetails theRequest) {
+	public DeleteConflictOutcome handleDeleteConflicts(DeleteConflictList theConflictList, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ourLog.debug("Have delete conflicts: {}", theConflictList);
 
 		if (shouldCascade(theRequest) == DeleteCascadeModeEnum.NONE) {
@@ -130,7 +131,7 @@ public class CascadingDeleteInterceptor {
 
 				// Actually perform the delete
 				ourLog.info("Have delete conflict {} - Cascading delete", next);
-				dao.delete(nextSource, theConflictList, theRequest);
+				dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
 
 				cascadedDeletes.add(nextSourceId);
 

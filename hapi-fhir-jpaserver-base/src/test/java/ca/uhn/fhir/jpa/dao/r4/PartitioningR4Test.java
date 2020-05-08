@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -114,6 +115,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 				myEntityManager.createNativeQuery("alter table HFJ_FORCED_ID add constraint IDX_FORCEDID_TYPE_FID unique (RESOURCE_TYPE, FORCED_ID)");
 			});
 		}
+
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@Override
@@ -139,6 +142,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"));
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"));
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName("PART-3"));
+
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
 	@Test
