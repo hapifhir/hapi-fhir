@@ -67,15 +67,14 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
 		validateRequestIsLegal(thePerson, theResource, theMatchResult, theLinkSource);
-		CanonicalIdentityAssuranceLevel assuranceLevel = AssuranceLevelUtil.getAssuranceLevel(theMatchResult, theLinkSource);
 		switch (theMatchResult) {
 			case MATCH:
 				//deleteCurrentMatch(theResource);
-				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theEmpiTransactionContext);
+				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelUtil.getAssuranceLevel(theMatchResult, theLinkSource), theEmpiTransactionContext);
 				myEmpiResourceDaoSvc.updatePerson(thePerson);
 				break;
 			case POSSIBLE_MATCH:
-				myPersonHelper.addOrUpdateLink(thePerson, resourceId, assuranceLevel, theEmpiTransactionContext);
+				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelUtil.getAssuranceLevel(theMatchResult, theLinkSource), theEmpiTransactionContext);
 				break;
 			case NO_MATCH:
 				myPersonHelper.removeLink(thePerson, resourceId, theEmpiTransactionContext);
@@ -90,6 +89,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	// FIXME KHS transaction log
 	@Override
+	@Transactional
 	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource) {
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonResource);
 		List<IBaseBackboneElement> newLinks = empiLinks.stream()

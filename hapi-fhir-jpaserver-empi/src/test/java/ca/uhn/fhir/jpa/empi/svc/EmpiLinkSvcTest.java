@@ -17,6 +17,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class EmpiLinkSvcTest extends BaseEmpiR4Test {
@@ -85,5 +86,19 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), is(equalTo("EMPI system is not allowed to automatically NO_MATCH a resource")));
 		}
+	}
+
+	@Test
+	public void testSyncDoesNotSyncNoMatchLinks() {
+		Person person = createPerson(buildJanePerson());
+		Patient patient1 = createPatient(buildJanePatient());
+		Patient patient2 = createPatient(buildJanePatient());
+		assertEquals(0, myEmpiLinkDao.count());
+
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient1, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(patient1));
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient2, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(patient2));
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(person);
+		assertTrue(person.hasLink());
+		assertEquals(patient1.getIdElement().toVersionless().getValue(), person.getLinkFirstRep().getTarget().getReference());
 	}
 }
