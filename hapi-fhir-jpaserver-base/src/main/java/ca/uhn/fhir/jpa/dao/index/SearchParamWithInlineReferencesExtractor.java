@@ -25,11 +25,12 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -57,7 +58,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -94,7 +94,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
+	public void populateFromResource(ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
 		extractInlineReferences(theResource, theRequest);
 
 		RequestPartitionId partitionId;
@@ -104,7 +104,7 @@ public class SearchParamWithInlineReferencesExtractor {
 			partitionId = RequestPartitionId.allPartitions();
 		}
 
-		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theUpdateTime, true);
+		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, true);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {

@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
@@ -970,16 +971,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return myContext.getResourceType(theResource);
 	}
 
-	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, ResourceTable entity) {
+	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
 		Date updateTime = new Date();
-		return updateEntity(theRequest, null, entity, updateTime, true, true, updateTime, false, true);
+		return updateEntity(theRequest, null, entity, updateTime, true, true, theTransactionDetails, false, true);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, IBasePersistedResource
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		Validate.notNull(theEntity);
 		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[%s] or a deleted timestamp[%s] for resource PID[%s]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getPersistentId());
 
@@ -1004,9 +1005,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (entity.getPublished() == null) {
-			ourLog.debug("Entity has published time: {}", new InstantDt(theUpdateTime));
-
-			entity.setPublished(theUpdateTime);
+			ourLog.debug("Entity has published time: {}", theTransactionDetails.getTransactionDate());
+			entity.setPublished(theTransactionDetails.getTransactionDate());
 		}
 
 		ResourceIndexedSearchParams existingParams = null;
@@ -1033,11 +1033,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing) {
 
 				newParams = new ResourceIndexedSearchParams();
-				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theUpdateTime, entity, theResource, existingParams, theRequest);
+				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, entity, true);
 				if (changed.isChanged()) {
-					entity.setUpdated(theUpdateTime);
+					entity.setUpdated(theTransactionDetails.getTransactionDate());
 					if (theResource instanceof IResource) {
 						entity.setLanguage(((IResource) theResource).getLanguage().getValue());
 					} else {
@@ -1052,7 +1052,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				changed = populateResourceIntoEntity(theRequest, theResource, entity, false);
 
-				entity.setUpdated(theUpdateTime);
+				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
 
 			}
@@ -1120,7 +1120,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						.stream()
 						.filter(t -> Constants.EXT_META_SOURCE.equals(t.getUrl()))
 						.filter(t -> t.getValue() instanceof IPrimitiveType)
-						.map(t -> ((IPrimitiveType) t.getValue()).getValueAsString())
+						.map(t -> ((IPrimitiveType<?>) t.getValue()).getValueAsString())
 						.findFirst()
 						.orElse(null);
 				}
@@ -1221,7 +1221,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Override
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
-													IBasePersistedResource theEntity2, IIdType theResourceId, IBaseResource theOldResource) {
+													IBasePersistedResource theEntity2, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
 
 		ResourceTable entity = (ResourceTable) theEntity2;
 
@@ -1241,11 +1241,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			.add(IBaseResource.class, theOldResource)
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theRequestDetails, Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, hookParams);
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
+		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, entity, null, thePerformIndexing, thePerformIndexing, theTransactionDetails, theForceUpdateVersion, thePerformIndexing);
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
@@ -1274,7 +1275,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						.add(IBaseResource.class, theOldResource)
 						.add(IBaseResource.class, theResource)
 						.add(RequestDetails.class, theRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(TransactionDetails.class, theTransactionDetails);
 					doCallHooks(theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, hookParams);
 				}
 			});

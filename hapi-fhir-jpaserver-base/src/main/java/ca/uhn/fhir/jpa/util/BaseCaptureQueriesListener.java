@@ -81,7 +81,8 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 			long elapsedTime = theExecutionInfo.getElapsedTime();
 			long startTime = System.currentTimeMillis() - elapsedTime;
-			queryList.add(new SqlQuery(sql, params, startTime, elapsedTime, stackTraceElements, size));
+			SqlQuery sqlQuery = new SqlQuery(sql, params, startTime, elapsedTime, stackTraceElements, size);
+			queryList.add(sqlQuery);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -30,6 +31,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 
 	@After
 	public final void after() {
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@Test
@@ -210,7 +212,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSortOnSparselyPopulatedFields() {
-//		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
 		IIdType pid1, pid2, pid3, pid4, pid5, pid6;
 		{
@@ -257,7 +259,9 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSortOnSparselyPopulatedSearchParameter() throws Exception {
+	public void testSortOnSparselyPopulatedSearchParameter() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		Patient pCA = new Patient();
 		pCA.setId("CA");
 		pCA.setActive(false);

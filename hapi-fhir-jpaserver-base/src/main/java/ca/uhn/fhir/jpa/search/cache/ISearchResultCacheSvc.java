@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.Search;
 
 import javax.annotation.Nullable;
