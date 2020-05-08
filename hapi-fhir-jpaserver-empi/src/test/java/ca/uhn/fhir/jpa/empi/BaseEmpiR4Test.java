@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hamcrest.Matcher;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
@@ -235,19 +234,17 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
 		thePatient = createPatient(thePatient);
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForCreate(thePatient));
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForCreate());
 		return thePatient;
 	}
-	protected EmpiTransactionContext createContextForCreate(IAnyResource theResource) {
+	protected EmpiTransactionContext createContextForCreate() {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
-		ctx.setResources(theResource);
 		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
 	}
-	protected EmpiTransactionContext createContextForUpdate(IAnyResource theResource) {
+	protected EmpiTransactionContext createContextForUpdate() {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
-		ctx.setResources(theResource);
 		ctx.setRestOperation(EmpiTransactionContext.OperationType.UPDATE);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
@@ -255,7 +252,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected Patient updatePatientAndUpdateLinks(Patient thePatient) {
 		thePatient = (Patient) myPatientDao.update(thePatient).getResource();
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForUpdate(thePatient));
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForUpdate());
 		return thePatient;
 	}
 
@@ -263,7 +260,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
 		thePractitioner.setId(daoMethodOutcome.getId());
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner, createContextForCreate(thePractitioner));
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner, createContextForCreate());
 		return thePractitioner;
 	}
 

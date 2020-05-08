@@ -1,7 +1,6 @@
 package ca.uhn.fhir.empi.model;
 
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public class EmpiTransactionContext {
 
@@ -10,10 +9,6 @@ public class EmpiTransactionContext {
 	 */
 	private TransactionLogMessages myTransactionLogMessages;
 
-	/**
-	 * The payload of the original message that came in causing empi subscriber to start processing.
-	 */
-	private IAnyResource[] myResources;
 	private OperationType myRestOperation;
 
 
@@ -30,9 +25,8 @@ public class EmpiTransactionContext {
 	public EmpiTransactionContext() {
 	}
 
-	public EmpiTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, IAnyResource... theResources) {
+	public EmpiTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation) {
 		myTransactionLogMessages = theTransactionLogMessages;
-		myResources = theResources;
 		myRestOperation = theRestOperation;
 	}
 
@@ -43,20 +37,12 @@ public class EmpiTransactionContext {
 		this.myTransactionLogMessages.addMessage(myTransactionLogMessages, theMessage);
 	}
 
-	public IAnyResource[] getResources() {
-		return myResources;
-	}
-
 	public OperationType getRestOperation() {
 		return myRestOperation;
 	}
 
 	public void setTransactionLogMessages(TransactionLogMessages theTransactionLogMessages) {
 		myTransactionLogMessages = theTransactionLogMessages;
-	}
-
-	public void setResources(IAnyResource... theResources) {
-		myResources = theResources;
 	}
 
 	public void setRestOperation(OperationType theRestOperation) {

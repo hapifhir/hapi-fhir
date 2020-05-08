@@ -98,7 +98,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	}
 
 	private EmpiTransactionContext createEmpiContext() {
-		return new EmpiTransactionContext(TransactionLogMessages.createFromTransactionGuid(UUID.randomUUID().toString()), EmpiTransactionContext.OperationType.MERGE_PERSONS, myDeletePerson, myKeepPerson);
+		return new EmpiTransactionContext(TransactionLogMessages.createFromTransactionGuid(UUID.randomUUID().toString()), EmpiTransactionContext.OperationType.MERGE_PERSONS);
 	}
 
 	@Test
@@ -317,7 +317,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	private EmpiLink createEmpiLink(Person thePerson, Patient theTargetPatient) {
 		thePerson.addLink().setTarget(new Reference(theTargetPatient));
-		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate(theTargetPatient));
+		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 	}
 
 	private void populatePerson(Person thePerson) {

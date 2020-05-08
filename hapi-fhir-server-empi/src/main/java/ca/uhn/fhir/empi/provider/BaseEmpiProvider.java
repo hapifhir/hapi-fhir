@@ -32,8 +32,8 @@ public abstract class BaseEmpiProvider {
 			throw new InvalidRequestException("personIdToDelete must be different from personToKeep");
 		}
  	}
-	protected EmpiTransactionContext createEmpiContext(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep, RequestDetails theRequestDetails) {
+	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
-		return new EmpiTransactionContext(transactionLogMessages, EmpiTransactionContext.OperationType.MERGE_PERSONS, thePersonToDelete, thePersonToKeep);
+		return new EmpiTransactionContext(transactionLogMessages, EmpiTransactionContext.OperationType.MERGE_PERSONS);
 	}
 }

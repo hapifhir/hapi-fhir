@@ -110,7 +110,7 @@ public class EmpiMessageHandler implements MessageHandler {
 				ourLog.trace("Not creating an EmpiTransactionContext for {}", theMsg.getOperationType());
 				return null;
 		}
-		return new EmpiTransactionContext(transactionLogMessages, empiOperation, getResourceFromPayload(theMsg));
+		return new EmpiTransactionContext(transactionLogMessages, empiOperation);
 	}
 
 	private void validateResourceType(String theResourceType) {

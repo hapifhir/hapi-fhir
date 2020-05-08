@@ -46,14 +46,14 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient = createPatient();
 
 		{
-			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate(patient));
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 			assertLinkCount(1);
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(1, newPerson.getLink().size());
 		}
 
 		{
-			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(patient));
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
 			assertLinkCount(1);
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(0, newPerson.getLink().size());
@@ -65,7 +65,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		Person person = createPerson(buildJanePerson());
 		Patient patient = createPatient(buildJanePatient());
 
-		myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(patient));
+		myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
 		try {
 			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, null);
 			fail();
@@ -95,9 +95,9 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient2 = createPatient(buildJanePatient());
 		assertEquals(0, myEmpiLinkDao.count());
 
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient1, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(patient1));
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient2, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate(patient2));
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(person, createContextForCreate(person));
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient1, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient2, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(person, createContextForCreate());
 		assertTrue(person.hasLink());
 		assertEquals(patient1.getIdElement().toVersionless().getValue(), person.getLinkFirstRep().getTarget().getReference());
 	}

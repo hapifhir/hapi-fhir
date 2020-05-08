@@ -84,7 +84,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		IAnyResource personToDelete = getPersonFromId(thePersonIdToDelete.getValue(), "personIdToDelete");
 		IAnyResource personToKeep = getPersonFromId(thePersonIdToKeep.getValue(), "personIdToKeep");
 
-		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(personToDelete, personToKeep, theRequestDetails));
+		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(theRequestDetails));
 	}
 
 	@Override
