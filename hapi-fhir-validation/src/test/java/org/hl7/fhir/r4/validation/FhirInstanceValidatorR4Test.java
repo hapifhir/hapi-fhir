@@ -579,7 +579,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(1, errors.size());
-		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/report-codes (http://hl7.org/fhir/ValueSet/report-codes, and a code is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
+		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/report-codes (http://hl7.org/fhir/ValueSet/report-codes), and a code is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -980,7 +980,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(output.toString(), 0, res.size());
+		assertEquals(output.toString(), 1, res.size());
+		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	/**
@@ -1152,7 +1153,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided (\"notvalidcode\") is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
+			"The value provided (\"notvalidcode\") is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.0 (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
 			output.getMessages().get(0).getMessage());
 	}
 
