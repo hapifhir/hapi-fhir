@@ -62,9 +62,8 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 							myEmpiLinkDaoSvc.deleteLink(origLink);
 							break;
 						case MANUAL:
-							if (incomingLink.isNoMatch() && origLink.isMatch() ||
-								incomingLink.isMatch() && origLink.isNoMatch()) {
-								throw new InvalidRequestException("A MANUAL NO_MATCH link may not be merged with a MANUAL MATCH link for the same target");
+							if (incomingLink.getMatchResult() != origLink.getMatchResult()) {
+								throw new InvalidRequestException("A MANUAL " + incomingLink.getMatchResult() + " link may not be merged into a MANUAL " + origLink.getMatchResult() + " link for the same target");
 							}
 					}
 				} else {

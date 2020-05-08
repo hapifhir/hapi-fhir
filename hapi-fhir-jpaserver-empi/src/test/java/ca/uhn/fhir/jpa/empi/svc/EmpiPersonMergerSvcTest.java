@@ -210,7 +210,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 			myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("A MANUAL NO_MATCH link may not be merged with a MANUAL MATCH link for the same target", e.getMessage());
+			assertEquals("A MANUAL NO_MATCH link may not be merged into a MANUAL MATCH link for the same target", e.getMessage());
 		}
 	}
 
@@ -230,7 +230,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 			myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("A MANUAL NO_MATCH link may not be merged with a MANUAL MATCH link for the same target", e.getMessage());
+			assertEquals("A MANUAL MATCH link may not be merged into a MANUAL NO_MATCH link for the same target", e.getMessage());
 		}
 	}
 
