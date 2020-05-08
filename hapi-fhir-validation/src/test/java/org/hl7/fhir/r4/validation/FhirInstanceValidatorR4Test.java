@@ -367,6 +367,32 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals("This property must be an Array, not a a primitive property", all.get(0).getMessage());
 	}
 
+	@Test
+	public void testValidateMeta() {
+		String input = "{" +
+			"   \"resourceType\": \"Parameters\"," +
+			"   \"parameter\": [" +
+			"      {" +
+			"         \"name\": \"meta\"," +
+			"         \"valueMeta\": {" +
+			"            \"tag\": [" +
+			"               {" +
+			"                  \"system\": \"urn:test-fake-system\"," +
+			"                  \"code\": \"420\"" +
+			"               }" +
+			"            ]" +
+			"         }" +
+			"      }" +
+			"   ]" +
+			"}";
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+		assertTrue(result.isSuccessful());
+	}
+	
 	/**
 	 * See #1676 - We should ignore schema location
 	 */
