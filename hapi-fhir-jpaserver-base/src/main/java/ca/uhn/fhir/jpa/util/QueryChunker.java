@@ -34,8 +34,8 @@ import java.util.function.Consumer;
 public class QueryChunker<T> {
 
 	public void chunk(List<T> theInput, Consumer<List<T>> theBatchConsumer) {
-		for (int i = 0; i < theInput.size(); i += SearchBuilder.MAXIMUM_PAGE_SIZE) {
-			int to = i + SearchBuilder.MAXIMUM_PAGE_SIZE;
+		for (int i = 0; i < theInput.size(); i += SearchBuilder.getMaximumPageSize()) {
+			int to = i + SearchBuilder.getMaximumPageSize();
 			to = Math.min(to, theInput.size());
 			List<T> batch = theInput.subList(i, to);
 			theBatchConsumer.accept(batch);

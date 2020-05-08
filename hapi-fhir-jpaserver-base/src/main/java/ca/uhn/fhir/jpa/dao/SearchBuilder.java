@@ -54,6 +54,7 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
+import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -113,7 +114,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -131,6 +131,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	// NB: keep public
 	public static final int MAXIMUM_PAGE_SIZE = 800;
+	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 4;
+	public static boolean myIsTest = false;
 
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
@@ -182,6 +184,18 @@ public class SearchBuilder implements ISearchBuilder {
 		myResourceType = theResourceType;
 	}
 
+	public static int getMaximumPageSize() {
+		if (myIsTest) {
+			return MAXIMUM_PAGE_SIZE_FOR_TESTING;
+		} else {
+			return MAXIMUM_PAGE_SIZE;
+		}
+	}
+
+	public static void setIsTest(boolean theIsTest) {
+		myIsTest = theIsTest;
+	}
+
 	@Override
 	public void setMaxResultsToFetch(Integer theMaxResultsToFetch) {
 		myMaxResultsToFetch = theMaxResultsToFetch;
@@ -210,6 +224,10 @@ public class SearchBuilder implements ISearchBuilder {
 		// Handle each parameter
 		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
+			if (myParams.isLastN() && LastNParameterHelper.isLastNParameter(nextParamName, myContext)) {
+				// Skip parameters for Subject, Patient, Code and Category for LastN
+				continue;
+			}
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
 			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
 		}
@@ -231,8 +249,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		TypedQuery<Long> query = createQuery(null, null, true, theRequest);
-		return new CountQueryIterator(query);
+		List<TypedQuery<Long>> queries = createQuery(null, null, true, theRequest);
+		return new CountQueryIterator(queries.get(0));
 	}
 
 	/**
@@ -265,7 +283,72 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 
-	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
+	private List<TypedQuery<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
+		List<ResourcePersistentId> pids = new ArrayList<>();
+
+		/*
+		 * Fulltext or lastn search
+		 */
+		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
+			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
+				if (myFulltextSearchSvc == null) {
+					if (myParams.containsKey(Constants.PARAM_TEXT)) {
+						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+					}
+				}
+
+				if (myParams.getEverythingMode() != null) {
+					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+				} else {
+					pids = myFulltextSearchSvc.search(myResourceName, myParams);
+				}
+			} else if (myParams.isLastN()) {
+				if (myIElasticsearchSvc == null) {
+					if (myParams.isLastN()) {
+						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+					}
+				}
+				Integer myMaxObservationsPerCode = null;
+				if(myParams.getLastNMax() != null) {
+					myMaxObservationsPerCode = myParams.getLastNMax();
+				} else {
+					throw new InvalidRequestException("Max parameter is required for $lastn operation");
+				}
+				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
+				for (String lastnResourceId : lastnResourceIds) {
+					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
+				}
+			}
+			if (pids.isEmpty()) {
+				// Will never match
+				pids = Collections.singletonList(new ResourcePersistentId(-1L));
+			}
+
+		}
+
+		ArrayList<TypedQuery<Long>> myQueries = new ArrayList<>();
+
+		if (!pids.isEmpty()) {
+			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t->{
+				doCreateChunkedQueries(t, sort, theMaximumResults, theCount, theRequest, myQueries);
+			});
+		} else {
+			myQueries.add(createQuery(sort,theMaximumResults, theCount, theRequest, null));
+		}
+
+		return myQueries;
+	}
+
+	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
+		if(thePids.size() < MAXIMUM_PAGE_SIZE) {
+			thePids = normalizeIdListForLastNInClause(thePids);
+		}
+		theQueries.add(createQuery(sort, theMaximumResults, theCount, theRequest, thePids));
+	}
+
+	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		CriteriaQuery<Long> outerQuery;
 		/*
 		 * Sort
@@ -329,7 +412,7 @@ public class SearchBuilder implements ISearchBuilder {
 		/*
 		 * Fulltext or lastn search
 		 */
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
+/*		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
 			List<ResourcePersistentId> pids = new ArrayList<>();
 			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
 				if (myFulltextSearchSvc == null) {
@@ -352,19 +435,16 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 				}
 				Integer myMaxObservationsPerCode = null;
-//				String[] maxCountParams = theRequest.getParameters().get("max");
-//				if (maxCountParams != null && maxCountParams.length > 0) {
-//					myMaxObservationsPerCode = Integer.valueOf(maxCountParams[0]);
 				if(myParams.getLastNMax() != null) {
 					myMaxObservationsPerCode = myParams.getLastNMax();
 				} else {
 					throw new InvalidRequestException("Max parameter is required for $lastn operation");
 				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
-//				for (String lastnResourceId : lastnResourceIds) {
-//					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
-//				}
-				pids = normalizeIdListForLastNInClause(lastnResourceIds);
+				for (String lastnResourceId : lastnResourceIds) {
+					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
+				}
+//				pids = normalizeIdListForLastNInClause(lastnResourceIds);
 			}
 			if (pids.isEmpty()) {
 				// Will never match
@@ -373,6 +453,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 			myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(pids)));
 
+		}
+*/
+		// Add PID list predicate for full text search and/or lastn operation
+		if (thePidList != null && thePidList.size() > 0) {
+			myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(thePidList));
 		}
 
 		/*
@@ -415,10 +500,10 @@ public class SearchBuilder implements ISearchBuilder {
 		return query;
 	}
 
-	private List<ResourcePersistentId> normalizeIdListForLastNInClause(List<String> lastnResourceIds) {
-		List<ResourcePersistentId> retVal = new ArrayList<>();
-		for (String lastnResourceId : lastnResourceIds) {
-			retVal.add(new ResourcePersistentId(Long.parseLong(lastnResourceId)));
+	private List<Long> normalizeIdListForLastNInClause(List<Long> lastnResourceIds) {
+		List<Long> retVal = new ArrayList<>();
+		for (Long lastnResourceId : lastnResourceIds) {
+			retVal.add(lastnResourceId);
 		}
 
 		/*
@@ -430,32 +515,27 @@ public class SearchBuilder implements ISearchBuilder {
 			arguments never exceeds the maximum specified below.
 		 */
 		int listSize = retVal.size();
+
 		if(listSize > 1 && listSize < 10) {
 			padIdListWithPlaceholders(retVal, 10);
-		} else if (listSize > 10 && listSize < 100) {
+		} else if (listSize > 10 && listSize < 50) {
+			padIdListWithPlaceholders(retVal, 50);
+		} else if (listSize > 50 && listSize < 100) {
 			padIdListWithPlaceholders(retVal, 100);
 		} else if (listSize > 100 && listSize < 200) {
 			padIdListWithPlaceholders(retVal, 200);
 		} else if (listSize > 200 && listSize < 500) {
 			padIdListWithPlaceholders(retVal, 500);
-		} else if (listSize > 500 && listSize < 1000) {
-			padIdListWithPlaceholders(retVal, 1000);
-		} else if (listSize > 1000 && listSize < 500) {
-			padIdListWithPlaceholders(retVal, 5000);
-		} else if (listSize > 5000 && listSize < 10000) {
-			padIdListWithPlaceholders(retVal, 10000);
-		} else if (listSize > 10000 && listSize < 20000) {
-			padIdListWithPlaceholders(retVal, 20000);
-		}  else if (listSize > 20000 && listSize < 30000) {
-			padIdListWithPlaceholders(retVal, 30000);
+		} else if (listSize > 500 && listSize < 800) {
+			padIdListWithPlaceholders(retVal, 800);
 		}
 
 		return retVal;
 	}
 
-	private void padIdListWithPlaceholders(List<ResourcePersistentId> theIdList, int preferredListSize) {
+	private void padIdListWithPlaceholders(List<Long> theIdList, int preferredListSize) {
 		while(theIdList.size() < preferredListSize) {
-			theIdList.add(new ResourcePersistentId(-1L));
+			theIdList.add(-1L);
 		}
 	}
 
@@ -733,7 +813,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (matchAll) {
 					String sql;
 					sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
-					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
+					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
 						TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
@@ -786,7 +866,7 @@ public class SearchBuilder implements ISearchBuilder {
 							sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
 
-						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
+						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
 							TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
 							q.setParameter("src_path", nextPath);
@@ -1076,6 +1156,8 @@ public class SearchBuilder implements ISearchBuilder {
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
 
+		private List<TypedQuery<Long>> myQueryList;
+
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
 			mySort = myParams.getSort();
@@ -1126,7 +1208,12 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 
 					if (myNext == null) {
-						while (myResultsIterator.hasNext()) {
+						while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
+							// Update iterator with next chunk if necessary.
+							if (!myResultsIterator.hasNext() && !myQueryList.isEmpty()) {
+								retrieveNextIteratorQuery();
+							}
+
 							Long nextLong = myResultsIterator.next();
 							if (myHavePerfTraceFoundIdHook) {
 								HookParams params = new HookParams()
@@ -1225,17 +1312,29 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		private void initializeIteratorQuery(Integer theMaxResultsToFetch) {
-			final TypedQuery<Long> query = createQuery(mySort, theMaxResultsToFetch, false, myRequest);
+			if (myQueryList == null || myQueryList.isEmpty()) {
+				myQueryList = createQuery(mySort, theMaxResultsToFetch, false, myRequest);
+			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 
-				Query<Long> hibernateQuery = (Query<Long>) query;
-			hibernateQuery.setFetchSize(myFetchSize);
-			ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-			myResultsIterator = new ScrollableResultsIterator<>(scroll);
+			retrieveNextIteratorQuery();
 
 			mySkipCount = 0;
 			myNonSkipCount = 0;
+		}
+
+		private void retrieveNextIteratorQuery() {
+			if (myQueryList != null && myQueryList.size() > 0) {
+				final TypedQuery<Long> query = myQueryList.remove(0);
+				Query<Long> hibernateQuery = (Query<Long>) (query);
+				hibernateQuery.setFetchSize(myFetchSize);
+				ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+				myResultsIterator = new ScrollableResultsIterator<>(scroll);
+			} else {
+				myResultsIterator = null;
+			}
+
 		}
 
 		@Override

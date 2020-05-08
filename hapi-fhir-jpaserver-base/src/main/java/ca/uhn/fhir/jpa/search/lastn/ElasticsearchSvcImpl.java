@@ -200,6 +200,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@Override
+	// TODO: Should eliminate dependency on SearchParameterMap in API.
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode) {
 		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
 		try {
@@ -252,6 +253,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@VisibleForTesting
+	// TODO: Should eliminate dependency on SearchParameterMap in API.
 	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode) {
 		try {
 			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theMaxObservationsPerCode, null);

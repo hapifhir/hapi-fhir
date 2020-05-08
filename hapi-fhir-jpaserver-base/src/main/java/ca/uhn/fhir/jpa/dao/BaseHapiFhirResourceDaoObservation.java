@@ -37,6 +37,7 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		theSearchParameterMap.setLastN(true);
 		if (theSearchParameterMap.getSort() == null) {
 			SortSpec effectiveDtm = new SortSpec("date").setOrder(SortOrderEnum.DESC);
+			// TODO: Should probably remove these constants, maybe move this logic to the version-specific classes.
 			SortSpec observationCode = new SortSpec(IndexConstants.CODE_SEARCH_PARAM).setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
 			theSearchParameterMap.setSort(new SortSpec(IndexConstants.SUBJECT_SEARCH_PARAM).setOrder(SortOrderEnum.ASC).setChain(observationCode));
 		}

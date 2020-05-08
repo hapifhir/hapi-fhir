@@ -5,13 +5,16 @@ import ca.uhn.fhir.jpa.api.dao.*;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +26,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +62,9 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 	protected PlatformTransactionManager getTxManager() {
 		return myPlatformTransactionManager;
 	}
+
+	@Autowired
+	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 
 	ObservationResourceProvider observationRp = new ObservationResourceProvider();
 
@@ -106,6 +114,11 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 
 		observationRp.setDao(myObservationDao);
 
+	}
+
+	@After
+	public void resetMaximumPageSize() {
+		SearchBuilder.setIsTest(false);
 	}
 
 	private void createObservationsForPatient(IIdType thePatientId) {
@@ -192,9 +205,6 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 		params.setLastN(true);
 
 		Map<String, String[]> requestParameters = new HashMap<>();
-//		String[] maxParam = new String[1];
-//		maxParam[0] = "100";
-//		requestParameters.put("max", maxParam);
 		params.setLastNMax(100);
 
 		when(mySrd.getParameters()).thenReturn(requestParameters);
@@ -518,6 +528,82 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseJpaTest {
 			myTokenOrListParam.addOr(tokenParam);
 		}
 		return new TokenAndListParam().addAnd(myTokenOrListParam);
+	}
+
+	@Test
+	public void testLastNWithChunkedQuery() {
+		SearchBuilder.setIsTest(true);
+		Integer numberOfObservations = SearchBuilder.getMaximumPageSize()+1;
+		Calendar observationDate = new GregorianCalendar();
+
+		List<IIdType> myObservationIds = new ArrayList<>();
+		List<IIdType> myPatientIds = new ArrayList<>();
+		List<ReferenceParam> myPatientReferences = new ArrayList<>();
+		for (int idx=0; idx<numberOfObservations; idx++ ) {
+			Patient pt = new Patient();
+			pt.addName().setFamily("Lastn_" + idx).addGiven("Chunked");
+			IIdType patientId = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
+			myPatientIds.add(patientId);
+			ReferenceParam subjectParam = new ReferenceParam("Patient", "", patientId.getValue());
+			myPatientReferences.add(subjectParam);
+			Observation obs = new Observation();
+			obs.getSubject().setReferenceElement(patientId);
+			obs.getCode().addCoding().setCode(observationCd0).setSystem(codeSystem);
+			obs.setValue(new StringType(observationCd0 + "_0"));
+			observationDate.add(Calendar.HOUR, -1);
+			Date effectiveDtm = observationDate.getTime();
+			obs.setEffective(new DateTimeType(effectiveDtm));
+			obs.getCategoryFirstRep().addCoding().setCode(categoryCd0).setSystem(categorySystem);
+			myObservationIds.add(myObservationDao.create(obs, mockSrd()).getId());
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		ReferenceParam[] referenceParams = new ReferenceParam[numberOfObservations];
+		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(myPatientReferences.toArray(referenceParams)));
+
+		TokenParam codeParam = new TokenParam(codeSystem, observationCd0);
+		params.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+
+		TokenParam categoryParam = new TokenParam(categorySystem, categoryCd0);
+		params.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
+
+		List<String> actual;
+		params.setLastN(true);
+
+		Map<String, String[]> requestParameters = new HashMap<>();
+		params.setLastNMax(1);
+
+		params.setCount(numberOfObservations);
+
+		when(mySrd.getParameters()).thenReturn(requestParameters);
+
+		myCaptureQueriesListener.clear();
+		actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(),null));
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		List<String> queries = myCaptureQueriesListener
+			.getSelectQueriesForCurrentThread()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.collect(Collectors.toList());
+
+		// First chunked query
+		String resultingQueryNotFormatted = queries.get(0);
+		assertThat(resultingQueryNotFormatted, matchesPattern(".*RES_ID in \\('[0-9]+' , '[0-9]+' , '[0-9]+' , '[0-9]+'\\).*"));
+
+		// Second chunked query chunk
+		resultingQueryNotFormatted = queries.get(1);
+		assertThat(resultingQueryNotFormatted, matchesPattern(".*RES_ID in \\('[0-9]+' , '-1' , '-1' , '-1'\\).*"));
+
+		assertEquals(numberOfObservations, (Integer)actual.size());
+		for(IIdType observationId : myObservationIds) {
+			myObservationDao.delete(observationId);
+		}
+
+		for (IIdType patientId : myPatientIds) {
+			myPatientDao.delete(patientId);
+		}
+
 	}
 
 	@AfterClass
