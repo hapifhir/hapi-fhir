@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.helper.EmpiLinkHelper;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -26,6 +27,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public static final String GIVEN_NAME = "Jenn";
@@ -149,11 +151,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void deleteManualLinkOverridesAutoKeepLink() {
-		createEmpiLink(myKeepPerson, myTargetPatient1);
 		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
 		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		deleteLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		myEmpiLinkDao.save(deleteLink);
+
+		createEmpiLink(myKeepPerson, myTargetPatient1);
 
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
@@ -163,11 +166,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void deleteManualNoMatchLinkOverridesAutoKeepLink() {
-		createEmpiLink(myKeepPerson, myTargetPatient1);
 		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
 		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		deleteLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		myEmpiLinkDao.save(deleteLink);
+
+		createEmpiLink(myKeepPerson, myTargetPatient1);
 
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
@@ -177,16 +181,74 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void deleteManualAutoMatchLinkNoOverridesManualKeepLink() {
+		createEmpiLink(myDeletePerson, myTargetPatient1);
+
 		EmpiLink keepLink = createEmpiLink(myKeepPerson, myTargetPatient1);
 		keepLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		keepLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		myEmpiLinkDao.save(keepLink);
-		createEmpiLink(myDeletePerson, myTargetPatient1);
 
 		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
 		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+	}
+
+	@Test
+	public void deleteNoMatchMergeToManualMatchIsError() {
+		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
+		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		deleteLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
+		myEmpiLinkDao.save(deleteLink);
+
+		EmpiLink keepLink = createEmpiLink(myKeepPerson, myTargetPatient1);
+		keepLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		keepLink.setMatchResult(EmpiMatchResultEnum.MATCH);
+		myEmpiLinkDao.save(keepLink);
+
+		try {
+			myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("A MANUAL NO_MATCH link may not be merged with a MANUAL MATCH link for the same target", e.getMessage());
+		}
+	}
+
+	@Test
+	public void deleteMatchMergeToManualNoMatchIsError() {
+		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
+		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		deleteLink.setMatchResult(EmpiMatchResultEnum.MATCH);
+		myEmpiLinkDao.save(deleteLink);
+
+		EmpiLink keepLink = createEmpiLink(myKeepPerson, myTargetPatient1);
+		keepLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		keepLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
+		myEmpiLinkDao.save(keepLink);
+
+		try {
+			myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("A MANUAL NO_MATCH link may not be merged with a MANUAL MATCH link for the same target", e.getMessage());
+		}
+	}
+
+	@Test
+	public void deleteNoMatchMergeToManualMatchDifferentPatientIsOk() {
+		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
+		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		deleteLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
+		myEmpiLinkDao.save(deleteLink);
+
+		EmpiLink keepLink = createEmpiLink(myKeepPerson, myTargetPatient2);
+		keepLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		keepLink.setMatchResult(EmpiMatchResultEnum.MATCH);
+		myEmpiLinkDao.save(keepLink);
+
+		myEmpiPersonMergerSvc.mergePersons(myDeletePerson, myKeepPerson);
+		assertEquals(1, myKeepPerson.getLink().size());
+		assertEquals(2, myEmpiLinkDao.count());
 	}
 
 	@Test
@@ -264,4 +326,6 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		address.setPostalCode(POSTAL_CODE);
 		thePerson.setAddress(Collections.singletonList(address));
 	}
+
+	// FIXME KHS change api to IAnyResource where possible
 }

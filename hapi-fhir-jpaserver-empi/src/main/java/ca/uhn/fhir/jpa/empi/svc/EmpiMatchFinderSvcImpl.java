@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.MatchedTarget;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
@@ -55,7 +54,7 @@ public class EmpiMatchFinderSvcImpl implements IEmpiMatchFinderSvc {
 	public List<IBaseResource> findMatches(String theResourceType, IBaseResource theResource) {
 		List<MatchedTarget> targetCandidates = getMatchedTargets(theResourceType, theResource);
 		return targetCandidates.stream()
-			.filter(candidate -> candidate.getMatchResult() == EmpiMatchResultEnum.MATCH)
+			.filter(candidate -> candidate.isMatch())
 			.map(MatchedTarget::getTarget)
 			.collect(Collectors.toList());
 	}

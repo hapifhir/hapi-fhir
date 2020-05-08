@@ -26,11 +26,11 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 public class MatchedPersonCandidate {
 
 	private final ResourcePersistentId myCandidatePersonPid;
-	private final EmpiMatchResultEnum myEmpiMatchResultEnum;
+	private final EmpiMatchResultEnum myEmpiMatchResult;
 
-	public MatchedPersonCandidate(ResourcePersistentId theCandidate, EmpiMatchResultEnum theEmpiMatchResultEnum) {
+	public MatchedPersonCandidate(ResourcePersistentId theCandidate, EmpiMatchResultEnum theEmpiMatchResult) {
 		myCandidatePersonPid = theCandidate;
-		myEmpiMatchResultEnum = theEmpiMatchResultEnum;
+		myEmpiMatchResult = theEmpiMatchResult;
 	}
 
 	public ResourcePersistentId getCandidatePersonPid() {
@@ -38,7 +38,10 @@ public class MatchedPersonCandidate {
 	}
 
 	public EmpiMatchResultEnum getMatchResult() {
-		return myEmpiMatchResultEnum;
+		return myEmpiMatchResult;
 	}
 
+	public boolean isMatch() {
+		return myEmpiMatchResult == EmpiMatchResultEnum.MATCH;
+	}
 }

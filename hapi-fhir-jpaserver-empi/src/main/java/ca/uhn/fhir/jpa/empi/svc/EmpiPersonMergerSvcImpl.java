@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.log.Logs;
@@ -8,6 +7,7 @@ import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +55,18 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 			if (optionalOrigLink.isPresent()) {
 				// The original links already contain this target, so move it over to the personToKeep
 				EmpiLink origLink = optionalOrigLink.get();
-				if (incomingLink.getLinkSource() == EmpiLinkSourceEnum.MANUAL &&
-					origLink.getLinkSource() == EmpiLinkSourceEnum.AUTO) {
-					// Manual links override auto ones
-					ourLog.trace("Deleting link {}", origLink);
-					myEmpiLinkDaoSvc.deleteLink(origLink);
+				if (incomingLink.isManual()) {
+					switch (origLink.getLinkSource()) {
+						case AUTO:
+							ourLog.trace("MANUAL overrides AUT0.  Deleting link {}", origLink);
+							myEmpiLinkDaoSvc.deleteLink(origLink);
+							break;
+						case MANUAL:
+							if (incomingLink.isNoMatch() && origLink.isMatch() ||
+								incomingLink.isMatch() && origLink.isNoMatch()) {
+								throw new InvalidRequestException("A MANUAL NO_MATCH link may not be merged with a MANUAL MATCH link for the same target");
+							}
+					}
 				} else {
 					continue;
 				}
@@ -70,7 +77,6 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 			myEmpiLinkDaoSvc.update(incomingLink);
 		}
 
-		// FIXME KHS throw exception if this violates a NO_MATCH
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToDelete);
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToKeep);
 	}

@@ -133,7 +133,7 @@ public class EmpiMatchLinkSvc {
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else {
-			if (thePersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
+			if (thePersonCandidate.isMatch()) {
 				handleExternalEidAddition(person, theResource);
 			}
 			myEmpiLinkSvc.updateLink(person, theResource, thePersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
@@ -171,7 +171,7 @@ public class EmpiMatchLinkSvc {
 		if (!hasEidsInCommon && remainsMatchedToSamePerson) {
 			// the user is simply updating their EID. We propagate this change to the Person.
 			//overwrite. No EIDS in common, but still same person.
-			if (theMatchedPersonCandidate.getMatchResult().equals(EmpiMatchResultEnum.MATCH)) {
+			if (theMatchedPersonCandidate.isMatch()) {
 				handleExternalEidOverwrite(person, theResource);
 			}
 			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);

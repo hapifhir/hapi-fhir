@@ -39,4 +39,12 @@ public class MatchedTarget {
 	public EmpiMatchResultEnum getMatchResult() {
 		return myMatchResult;
 	}
+
+	public boolean isMatch() {
+		return myMatchResult == EmpiMatchResultEnum.MATCH;
+	}
+
+	public boolean isPossibleMatch() {
+		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_MATCH;
+	}
 }

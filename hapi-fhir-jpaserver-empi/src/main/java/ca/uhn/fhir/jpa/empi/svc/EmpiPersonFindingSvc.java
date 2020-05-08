@@ -142,7 +142,7 @@ public class EmpiPersonFindingSvc {
 		//while ensuring that the matches aren't in our NO_MATCH list.
 		// The data flow is as follows ->
 		// MatchedTargetCandidate -> Person -> EmpiLink -> MatchedPersonCandidate
-		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.getMatchResult().equals(EmpiMatchResultEnum.MATCH) || mc.getMatchResult().equals(EmpiMatchResultEnum.POSSIBLE_MATCH)).collect(Collectors.toList());
+		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.isMatch() || mc.isPossibleMatch()).collect(Collectors.toList());
 		for (MatchedTarget match : matchedCandidates) {
 			Optional<EmpiLink> optMatchEmpiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(match.getTarget()));
 			if (!optMatchEmpiLink.isPresent()) {

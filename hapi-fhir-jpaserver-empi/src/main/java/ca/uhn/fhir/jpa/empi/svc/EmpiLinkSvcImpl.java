@@ -93,7 +93,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource) {
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonResource);
 		List<IBaseBackboneElement> newLinks = empiLinks.stream()
-			.filter(link -> link.getMatchResult() == EmpiMatchResultEnum.MATCH || link.getMatchResult() == EmpiMatchResultEnum.POSSIBLE_MATCH)
+			.filter(link -> link.isMatch() || link.isPossibleMatch())
 			.map(this::personLinkFromEmpiLink)
 			.collect(Collectors.toList());
 		myPersonHelper.setLinks(thePersonResource, newLinks);
@@ -110,7 +110,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	 */
 	private void validateRequestIsLegal(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		EmpiLink existingLink = getEmpiLinkForPersonTargetPair(thePerson, theResource);
-		if (existingLink != null && systemIsAttemptingToModifyManualLink(theLinkSource, existingLink.getLinkSource())) {
+		if (existingLink != null && systemIsAttemptingToModifyManualLink(theLinkSource, existingLink)) {
 			throw new InternalErrorException("EMPI system is not allowed to modify links on manually created links");
 		}
 
@@ -123,14 +123,14 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	 * Helper function which detects when the EMPI system is attempting to add a NO_MATCH link, which is not allowed.
 	 */
 	private boolean systemIsAttemptingToAddNoMatch(EmpiLinkSourceEnum theLinkSource, EmpiMatchResultEnum theMatchResult) {
-		return EmpiLinkSourceEnum.AUTO.equals(theLinkSource) && EmpiMatchResultEnum.NO_MATCH.equals(theMatchResult);
+		return theLinkSource == EmpiLinkSourceEnum.AUTO && theMatchResult == EmpiMatchResultEnum.NO_MATCH;
 	}
 
 	/**
 	 * Helper function to let us catch when System EMPI rules are attempting to override a manually defined link.
 	 */
-	private boolean systemIsAttemptingToModifyManualLink(EmpiLinkSourceEnum theIncomingSource, EmpiLinkSourceEnum theExistingSource) {
-		return EmpiLinkSourceEnum.AUTO.equals(theIncomingSource) && EmpiLinkSourceEnum.MANUAL.equals(theExistingSource);
+	private boolean systemIsAttemptingToModifyManualLink(EmpiLinkSourceEnum theIncomingSource, EmpiLink theExistingSource) {
+		return theIncomingSource == EmpiLinkSourceEnum.AUTO && theExistingSource.isManual();
 	}
 
 	private EmpiLink getEmpiLinkForPersonTargetPair(IBaseResource thePerson, IBaseResource theCandidate) {

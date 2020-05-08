@@ -136,6 +136,18 @@ public class EmpiLink {
 		return this;
 	}
 
+	public boolean isNoMatch() {
+		return myMatchResult == EmpiMatchResultEnum.NO_MATCH;
+	}
+
+	public boolean isMatch() {
+		return myMatchResult == EmpiMatchResultEnum.MATCH;
+	}
+
+	public boolean isPossibleMatch() {
+		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_MATCH;
+	}
+
 	public EmpiLinkSourceEnum getLinkSource() {
 		return myLinkSource;
 	}
@@ -143,6 +155,14 @@ public class EmpiLink {
 	public EmpiLink setLinkSource(EmpiLinkSourceEnum theLinkSource) {
 		myLinkSource = theLinkSource;
 		return this;
+	}
+
+	public boolean isAuto() {
+		return myLinkSource == EmpiLinkSourceEnum.AUTO;
+	}
+
+	public boolean isManual() {
+		return myLinkSource == EmpiLinkSourceEnum.MANUAL;
 	}
 
 	@Override
