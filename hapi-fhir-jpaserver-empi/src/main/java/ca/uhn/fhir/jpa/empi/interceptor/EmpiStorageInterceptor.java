@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class EmpiStorageInterceptor {
+public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiStorageInterceptor.class);
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;

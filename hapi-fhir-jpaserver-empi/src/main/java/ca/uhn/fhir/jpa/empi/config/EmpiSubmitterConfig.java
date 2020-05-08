@@ -20,20 +20,13 @@ package ca.uhn.fhir.jpa.empi.config;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiSubmitterInterceptorLoader;
 import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(EmpiSharedConfig.class)
 public class EmpiSubmitterConfig {
-	@Bean
-    EmpiStorageInterceptor empiStorageInterceptor() {
-		return new EmpiStorageInterceptor();
-	}
 
 	@Bean
 	EmpiSubmitterInterceptorLoader empiSubmitterInterceptorLoader() {
@@ -44,4 +37,5 @@ public class EmpiSubmitterConfig {
 	EmpiSearchParamSvc empiSearchParamSvc() {
 		return new EmpiSearchParamSvc();
 	}
+
 }

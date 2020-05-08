@@ -6,7 +6,7 @@ import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.helper.EmpiLinkHelper;
-import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
+import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Address;
@@ -40,7 +40,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	EmpiLinkHelper myEmpiLinkHelper;
 	@Autowired
-	EmpiStorageInterceptor myEmpiStorageInterceptor;
+	IEmpiStorageInterceptor myEmpiStorageInterceptor;
 	@Autowired
 	IInterceptorService myInterceptorService;
 

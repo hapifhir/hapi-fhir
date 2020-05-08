@@ -28,7 +28,7 @@ public class EmpiExpungeTest extends BaseEmpiR4Test {
 	@Autowired
 	IInterceptorService myInterceptorService;
 	@Autowired
-	EmpiStorageInterceptor myEmpiStorageInterceptor;
+	IEmpiStorageInterceptor myEmpiStorageInterceptor;
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired

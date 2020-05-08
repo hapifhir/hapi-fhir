@@ -29,10 +29,13 @@ import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
+import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.broker.EmpiSubscriptionLoader;
+import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
+import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchFinderSvcImpl;
@@ -44,7 +47,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -52,7 +54,6 @@ import org.springframework.core.annotation.Order;
 import javax.annotation.PostConstruct;
 
 @Configuration
-@Import(EmpiSharedConfig.class)
 public class EmpiConsumerConfig {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
@@ -64,6 +65,12 @@ public class EmpiConsumerConfig {
 	EmpiProviderLoader myEmpiProviderLoader;
 	@Autowired
 	EmpiSubscriptionLoader myEmpiSubscriptionLoader;
+
+
+	@Bean
+	IEmpiStorageInterceptor empiStorageInterceptor() {
+		return new EmpiStorageInterceptor();
+	}
 
 	@Bean
 	EmpiQueueConsumerLoader empiQueueConsumerLoader() {
@@ -133,6 +140,11 @@ public class EmpiConsumerConfig {
 	@Bean
 	EmpiResourceComparatorSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
 		return new EmpiResourceComparatorSvc(theFhirContext, theEmpiConfig);
+	}
+
+	@Bean
+	EIDHelper eidHelper(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
+		return new EIDHelper(theFhirContext, theEmpiConfig);
 	}
 
 	@PostConstruct

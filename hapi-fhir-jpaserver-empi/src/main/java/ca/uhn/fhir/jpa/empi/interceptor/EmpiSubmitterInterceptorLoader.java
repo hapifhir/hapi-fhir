@@ -39,7 +39,7 @@ public class EmpiSubmitterInterceptorLoader {
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
-	private EmpiStorageInterceptor myEmpiStorageInterceptor;
+	private IEmpiStorageInterceptor myIEmpiStorageInterceptor;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	@Autowired
@@ -52,7 +52,7 @@ public class EmpiSubmitterInterceptorLoader {
 		}
 
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
-		myInterceptorService.registerInterceptor(myEmpiStorageInterceptor);
+		myInterceptorService.registerInterceptor(myIEmpiStorageInterceptor);
 		ourLog.info("EMPI interceptor registered");
 		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types the first time it was called.
 		mySubscriptionSubmitInterceptorLoader.start();
