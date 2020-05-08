@@ -326,6 +326,4 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		address.setPostalCode(POSTAL_CODE);
 		thePerson.setAddress(Collections.singletonList(address));
 	}
-
-	// FIXME KHS change api to IAnyResource where possible
 }

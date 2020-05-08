@@ -20,6 +20,7 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
@@ -35,17 +36,17 @@ public interface IEmpiMatchFinderSvc {
 	 * @return a List of {@link MatchedTarget} representing POSSIBLE_MATCH and MATCH outcomes.
 	 */
 	@Nonnull
-	List<MatchedTarget> getMatchedTargets(String theResourceType, IBaseResource theResource);
+	List<MatchedTarget> getMatchedTargets(String theResourceType, IAnyResource theResource);
 
 	/**
 	 * Used by the $match operation.
-	 * Retrieve a list of Patient/Practitioner matches, based on the given {@link IBaseResource}
+	 * Retrieve a list of Patient/Practitioner matches, based on the given {@link IAnyResource}
 	 * Internally, performs all EMPI matching rules on the type of the resource then returns only those
 	 * with a match result of MATCHED.
 	 *
 	 * @param theResourceType the type of the resource.
 	 * @param theResource the resource that we are attempting to find matches for.
-	 * @return a List of {@link IBaseResource} representing all people who had a MATCH outcome.
+	 * @return a List of {@link IAnyResource} representing all people who had a MATCH outcome.
 	 */
-	List<IBaseResource> findMatches(String theResourceType, IBaseResource theResource);
+	List<IAnyResource> findMatches(String theResourceType, IAnyResource theResource);
 }

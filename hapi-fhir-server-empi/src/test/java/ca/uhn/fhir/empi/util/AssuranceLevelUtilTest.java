@@ -1,5 +1,6 @@
 package ca.uhn.fhir.empi.util;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -14,7 +15,6 @@ import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.LEVEL3;
 import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.LEVEL4;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class AssuranceLevelUtilTest extends TestCase {
@@ -26,13 +26,39 @@ public class AssuranceLevelUtilTest extends TestCase {
 		assertThat(AssuranceLevelUtil.getAssuranceLevel(MATCH, MANUAL), is(equalTo(LEVEL4)));
 
 	}
+
 	@Test
 	public void testInvalidPersonLinkLevels() {
-		assertThat(AssuranceLevelUtil.getAssuranceLevel(NO_MATCH, AUTO), is(nullValue()));
-		assertThat(AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_DUPLICATE, AUTO), is(nullValue()));
-		assertThat(AssuranceLevelUtil.getAssuranceLevel(NO_MATCH, MANUAL), is(nullValue()));
-		assertThat(AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_MATCH, MANUAL), is(nullValue()));
-		assertThat(AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_DUPLICATE, MANUAL), is(nullValue()));
+		try {
+			AssuranceLevelUtil.getAssuranceLevel(NO_MATCH, AUTO);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("An AUTO EMPI Link may not have a match result of NO_MATCH", e.getMessage());
+		}
+		try {
+			AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_DUPLICATE, AUTO);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("An AUTO EMPI Link may not have a match result of POSSIBLE_DUPLICATE", e.getMessage());
+		}
+		try {
+			AssuranceLevelUtil.getAssuranceLevel(NO_MATCH, MANUAL);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("A MANUAL EMPI Link may not have a match result of NO_MATCH", e.getMessage());
+		}
+		try {
+			AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_MATCH, MANUAL);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("A MANUAL EMPI Link may not have a match result of POSSIBLE_MATCH", e.getMessage());
+		}
+		try {
+			AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_DUPLICATE, MANUAL);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("A MANUAL EMPI Link may not have a match result of POSSIBLE_DUPLICATE", e.getMessage());
+		}
 	}
 
 }

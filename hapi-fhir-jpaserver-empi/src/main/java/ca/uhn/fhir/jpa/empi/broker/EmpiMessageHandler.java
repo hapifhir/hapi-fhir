@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -109,7 +110,7 @@ public class EmpiMessageHandler implements MessageHandler {
 				ourLog.trace("Not creating an EmpiTransactionContext for {}", theMsg.getOperationType());
 				return null;
 		}
-		return new EmpiTransactionContext(transactionLogMessages, theMsg.getNewPayload(myFhirContext), empiOperation);
+		return new EmpiTransactionContext(transactionLogMessages, getResourceFromPayload(theMsg), empiOperation);
 	}
 
 	private void validateResourceType(String theResourceType) {
@@ -119,11 +120,15 @@ public class EmpiMessageHandler implements MessageHandler {
 	}
 
 	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext), theEmpiTransactionContext);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(getResourceFromPayload(theMsg), theEmpiTransactionContext);
+	}
+
+	private IAnyResource getResourceFromPayload(ResourceModifiedMessage theMsg) {
+		return (IAnyResource) theMsg.getNewPayload(myFhirContext);
 	}
 
 	private void handleUpdatePatientOrPractitioner(ResourceModifiedMessage theMsg, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMsg.getNewPayload(myFhirContext), theEmpiTransactionContext);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(getResourceFromPayload(theMsg), theEmpiTransactionContext);
 	}
 
 	private void log(EmpiTransactionContext theMessages, String theMessage) {

@@ -20,12 +20,8 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IEmpiLinkSvc {
 
@@ -38,7 +34,7 @@ public interface IEmpiLinkSvc {
 	 * @param theLinkSource             MANUAL or AUTO: what caused the link.
 	 * @param theEmpiTransactionContext
 	 */
-	void updateLink(IBaseResource thePerson, IBaseResource theTargetResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
+	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
 
 	/**
 	 * Replace Person.link values from what they should be based on EmpiLink values

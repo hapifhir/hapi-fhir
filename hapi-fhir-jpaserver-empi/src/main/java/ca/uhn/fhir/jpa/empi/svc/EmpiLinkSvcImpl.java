@@ -63,7 +63,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Override
 	@Transactional
-	public void updateLink(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+	public void updateLink(IAnyResource thePerson, IAnyResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
 		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
 
 		validateRequestIsLegal(thePerson, theResource, theMatchResult, theLinkSource);

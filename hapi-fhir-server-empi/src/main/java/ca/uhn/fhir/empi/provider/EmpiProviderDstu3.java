@@ -35,7 +35,6 @@ import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -62,14 +61,14 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-		Collection<IBaseResource> matches = myEmpiMatchFinderSvc.findMatches("Patient", thePatient);
+		Collection<IAnyResource> matches = myEmpiMatchFinderSvc.findMatches("Patient", thePatient);
 
 		Bundle retVal = new Bundle();
 		retVal.setType(Bundle.BundleType.SEARCHSET);
 		retVal.setId(UUID.randomUUID().toString());
 		retVal.getMeta().setLastUpdatedElement(InstantType.now());
 
-		for (IBaseResource next : matches) {
+		for (IAnyResource next : matches) {
 			retVal.addEntry().setResource((Resource) next);
 		}
 

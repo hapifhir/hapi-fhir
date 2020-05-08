@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,24 +65,24 @@ public class EmpiPersonFindingSvc {
 	 * <p>
 	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Person with this EID, it automatically matches.
 	 * 1. First, check link table for any entries where this baseresource is the target of a person. If found, return.
-	 * 2. If none are found, attempt to find Person Resources which link to this theBaseResource.
+	 * 2. If none are found, attempt to find Person Resources which link to this theResource.
 	 * 3. If none are found, attempt to find Persons similar to our incoming resource based on the EMPI rules and similarity metrics.
 	 * 4. If none are found, attempt to find Persons that are linked to Patients/Practitioners that are similar to our incoming resource based on the EMPI rules and
 	 * similarity metrics.
 	 *
-	 * @param theBaseResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
+	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
 	 * @return A list of {@link MatchedPersonCandidate} indicating all potential Person matches.
 	 */
-	public List<MatchedPersonCandidate> findPersonCandidates(IBaseResource theBaseResource) {
-		List<MatchedPersonCandidate> matchedPersonCandidates = attemptToFindPersonCandidateFromIncomingEID(theBaseResource);
+	public List<MatchedPersonCandidate> findPersonCandidates(IAnyResource theResource) {
+		List<MatchedPersonCandidate> matchedPersonCandidates = attemptToFindPersonCandidateFromIncomingEID(theResource);
 		if (matchedPersonCandidates.isEmpty()) {
-			matchedPersonCandidates = attemptToFindPersonCandidateFromEmpiLinkTable(theBaseResource);
+			matchedPersonCandidates = attemptToFindPersonCandidateFromEmpiLinkTable(theResource);
 		}
 		if (matchedPersonCandidates.isEmpty()) {
 			//OK, so we have not found any links in the EmpiLink table with us as a target. Next, let's find possible Patient/Practitioner
 			//matches by following EMPI rules.
 
-			matchedPersonCandidates = attemptToFindPersonCandidateFromSimilarTargetResource(theBaseResource);
+			matchedPersonCandidates = attemptToFindPersonCandidateFromSimilarTargetResource(theResource);
 		}
 		return matchedPersonCandidates;
 	}
@@ -132,7 +133,7 @@ public class EmpiPersonFindingSvc {
 	 * @param theBaseResource the {@link IBaseResource} which we want to find candidate Persons for.
 	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
 	 */
-	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromSimilarTargetResource(IBaseResource theBaseResource) {
+	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromSimilarTargetResource(IAnyResource theBaseResource) {
 		List<MatchedPersonCandidate> retval = new ArrayList<>();
 
 		List<Long> personPidsToExclude = getNoMatchPersonPids(theBaseResource);

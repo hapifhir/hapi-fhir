@@ -208,7 +208,7 @@ public class PersonHelper {
 	 * @param theSourceResource The Patient that will be used as the starting point for the person.
 	 * @return the Person that is created.
 	 */
-	public IBaseResource createPersonFromEmpiTarget(IBaseResource theSourceResource) {
+	public IAnyResource createPersonFromEmpiTarget(IBaseResource theSourceResource) {
 		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
 		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theSourceResource);
 

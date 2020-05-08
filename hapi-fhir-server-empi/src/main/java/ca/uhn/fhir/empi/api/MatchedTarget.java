@@ -20,19 +20,19 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public class MatchedTarget {
 
-	private final IBaseResource myTarget;
+	private final IAnyResource myTarget;
 	private final EmpiMatchResultEnum myMatchResult;
 
-	public MatchedTarget(IBaseResource theTarget, EmpiMatchResultEnum theMatchResult) {
+	public MatchedTarget(IAnyResource theTarget, EmpiMatchResultEnum theMatchResult) {
 		myTarget = theTarget;
 		myMatchResult = theMatchResult;
 	}
 
-	public IBaseResource getTarget() {
+	public IAnyResource getTarget() {
 		return myTarget;
 	}
 

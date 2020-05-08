@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +68,8 @@ public class EmpiCandidateSearchSvc {
 	 *
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
-	public Collection<IBaseResource> findCandidates(String theResourceType, IBaseResource theResource) {
-		Map<Long, IBaseResource> matchedPidsToResources = new HashMap<>();
+	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource) {
+		Map<Long, IAnyResource> matchedPidsToResources = new HashMap<>();
 
 		List<EmpiFilterSearchParamJson> filterSearchParams = myEmpiConfig.getEmpiRules().getFilterSearchParams();
 
@@ -110,7 +111,7 @@ public class EmpiCandidateSearchSvc {
 	 * 4. Store all results in `theMatchedPidsToResources`
 	 */
 	@SuppressWarnings("rawtypes")
-	private void searchForIdsAndAddToMap(String theResourceType, Map<Long, IBaseResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
+	private void searchForIdsAndAddToMap(String theResourceType, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
 		//1.
 		String resourceCriteria = buildResourceQueryString(theResourceType, theFilterCriteria, resourceSearchParam, theValuesFromResourceForSearchParam);
 		ourLog.debug("Searching for {} candidates with {}", theResourceType, resourceCriteria);
@@ -129,7 +130,7 @@ public class EmpiCandidateSearchSvc {
 		int initialSize = theMatchedPidsToResources.size();
 
 		//4.
-		resources.forEach(resource -> theMatchedPidsToResources.put(myIdHelperService.getPidOrNull(resource), resource));
+		resources.forEach(resource -> theMatchedPidsToResources.put(myIdHelperService.getPidOrNull(resource), (IAnyResource) resource));
 
 		int newSize = theMatchedPidsToResources.size();
 

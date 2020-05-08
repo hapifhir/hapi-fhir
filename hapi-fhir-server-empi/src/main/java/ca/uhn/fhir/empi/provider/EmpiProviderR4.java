@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
@@ -63,14 +62,14 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 			throw new InvalidRequestException("resource may not be null");
 		}
 
-		Collection<IBaseResource> matches = myEmpiMatchFinderSvc.findMatches("Patient", thePatient);
+		Collection<IAnyResource> matches = myEmpiMatchFinderSvc.findMatches("Patient", thePatient);
 
 		Bundle retVal = new Bundle();
 		retVal.setType(Bundle.BundleType.SEARCHSET);
 		retVal.setId(UUID.randomUUID().toString());
 		retVal.getMeta().setLastUpdatedElement(InstantType.now());
 
-		for (IBaseResource next : matches) {
+		for (IAnyResource next : matches) {
 			retVal.addEntry().setResource((Resource) next);
 		}
 

@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +74,7 @@ public class EmpiMatchLinkSvc {
 	 * @param theEmpiTransactionContext
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to EMPI processing of this resource.
 	 */
-	public EmpiTransactionContext updateEmpiLinksForEmpiTarget(IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+	public EmpiTransactionContext updateEmpiLinksForEmpiTarget(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		if (EmpiUtil.isManagedByEmpi(theResource)) {
 			return doEmpiUpdate(theResource, theEmpiTransactionContext);
 		} else {
@@ -81,7 +82,7 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	private EmpiTransactionContext doEmpiUpdate(IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+	private EmpiTransactionContext doEmpiUpdate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		List<MatchedPersonCandidate> personCandidates = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
 		if (personCandidates.isEmpty()) {
 			handleEmpiWithNoCandidates(theResource, theEmpiTransactionContext);
@@ -93,7 +94,7 @@ public class EmpiMatchLinkSvc {
 		return theEmpiTransactionContext;
 	}
 
-	private void handleEmpiWithMultipleCandidates(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, EmpiTransactionContext theEmpiTransactionContext) {
+	private void handleEmpiWithMultipleCandidates(IAnyResource theResource, List<MatchedPersonCandidate> thePersonCandidates, EmpiTransactionContext theEmpiTransactionContext) {
 		Long samplePersonPid = thePersonCandidates.get(0).getCandidatePersonPid().getIdAsLong();
 		boolean allSamePerson = thePersonCandidates.stream()
 			.allMatch(candidate -> candidate.getCandidatePersonPid().getIdAsLong().equals(samplePersonPid));
@@ -104,13 +105,13 @@ public class EmpiMatchLinkSvc {
 		} else {
 			log(theEmpiTransactionContext, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 			//Set them all as POSSIBLE_MATCH
-			List<IBaseResource> persons = thePersonCandidates.stream().map(this::getPersonFromMatchedPersonCandidate).collect(Collectors.toList());
+			List<IAnyResource> persons = thePersonCandidates.stream().map(this::getPersonFromMatchedPersonCandidate).collect(Collectors.toList());
 				persons.forEach(person -> {
 					myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				});
 
 			//Set all Persons as POSSIBLE_DUPLICATE of the first person.
-			IBaseResource samplePerson = persons.get(0);
+			IAnyResource samplePerson = persons.get(0);
 			persons.subList(1, persons.size()).stream()
 				.forEach(possibleDuplicatePerson -> {
 					myEmpiLinkSvc.updateLink(samplePerson, possibleDuplicatePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
@@ -118,18 +119,18 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	private void handleEmpiWithNoCandidates(IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+	private void handleEmpiWithNoCandidates(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		log(theEmpiTransactionContext, "There were no matched candidates for EMPI, creating a new Person.");
-		IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
-	private void handleEmpiCreate(IBaseResource theResource, MatchedPersonCandidate thePersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
+	private void handleEmpiCreate(IAnyResource theResource, MatchedPersonCandidate thePersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
 		log(theEmpiTransactionContext, "EMPI has narrowed down to one candidate for matching.");
-		IBaseResource person = getPersonFromMatchedPersonCandidate(thePersonCandidate);
+		IAnyResource person = getPersonFromMatchedPersonCandidate(thePersonCandidate);
 		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
 			log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-			IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+			IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else {
@@ -140,7 +141,7 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	private void handleEmpiWithSingleCandidate(IBaseResource theResource, List<MatchedPersonCandidate> thePersonCandidates, EmpiTransactionContext theEmpiTransactionContext) {
+	private void handleEmpiWithSingleCandidate(IAnyResource theResource, List<MatchedPersonCandidate> thePersonCandidates, EmpiTransactionContext theEmpiTransactionContext) {
 		log(theEmpiTransactionContext, "EMPI has narrowed down to one candidate for matching.");
 		MatchedPersonCandidate matchedPersonCandidate = thePersonCandidates.get(0);
 		if (theEmpiTransactionContext.getRestOperation().equals(EmpiTransactionContext.OperationType.UPDATE)) {
@@ -150,8 +151,8 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	private void handleEmpiUpdate(IBaseResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
-		IBaseResource person = getPersonFromMatchedPersonCandidate(theMatchedPersonCandidate);
+	private void handleEmpiUpdate(IAnyResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
+		IAnyResource person = getPersonFromMatchedPersonCandidate(theMatchedPersonCandidate);
 		boolean hasEidsInCommon = myEIDHelper.hasEidOverlap(person, theResource);
 		boolean incomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
 		Optional<EmpiLink> theExistingMatchLink = myEmpiLinkDaoSvc.getMatchedLinkForTarget(theResource);
@@ -194,14 +195,14 @@ public class EmpiMatchLinkSvc {
 		return theOExistingMatchLink.getPersonPid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
 	}
 
-	private void createNewPersonAndFlagAsDuplicate(IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext, IBaseResource thePerson) {
+	private void createNewPersonAndFlagAsDuplicate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext, IAnyResource thePerson) {
 		log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-		IBaseResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		myEmpiLinkSvc.updateLink(newPerson, thePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
-	private IBaseResource getPersonFromMatchedPersonCandidate(MatchedPersonCandidate theMatchedPersonCandidate) {
+	private IAnyResource getPersonFromMatchedPersonCandidate(MatchedPersonCandidate theMatchedPersonCandidate) {
 		ResourcePersistentId personPid = theMatchedPersonCandidate.getCandidatePersonPid();
 		return myEmpiResourceDaoSvc.readPersonByPid(personPid);
 	}

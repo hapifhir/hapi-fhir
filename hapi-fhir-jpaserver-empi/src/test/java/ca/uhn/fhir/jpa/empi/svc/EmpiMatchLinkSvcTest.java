@@ -11,13 +11,12 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testWhenMatchOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap());
-		IBaseResource janePerson = search.getResources(0,1).get(0);
+		IAnyResource janePerson = (IAnyResource) search.getResources(0,1).get(0);
 
 		//Create a manual NO_MATCH between janePerson and unmatchedJane.
 		Patient unmatchedJane= createPatient(buildJanePatient());
@@ -94,7 +93,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testWhenPOSSIBLE_MATCHOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap());
-		IBaseResource janePerson = search.getResources(0, 1).get(0);
+		IAnyResource janePerson = (IAnyResource) search.getResources(0, 1).get(0);
 
 		Patient unmatchedPatient = createPatient(buildJanePatient());
 
@@ -309,7 +308,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 		//own individual Persons for the purpose of this test.
-		IBaseResource person = myPersonHelper.createPersonFromEmpiTarget(janePatient2);
+		IAnyResource person = myPersonHelper.createPersonFromEmpiTarget(janePatient2);
 		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate(janePatient));
 		assertThat(janePatient, is(not(samePersonAs(janePatient2))));
 

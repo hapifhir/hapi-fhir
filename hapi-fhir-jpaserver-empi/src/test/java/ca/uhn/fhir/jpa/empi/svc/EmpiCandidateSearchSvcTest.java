@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
@@ -28,7 +28,7 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 		Patient createdJane = createPatient(jane);
 		Patient newJane = buildJanePatient();
 
-		Collection<IBaseResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);
+		Collection<IAnyResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);
 		assertEquals(1, result.size());
 	}
 
@@ -43,7 +43,7 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 
 		Patient newJane = buildJaneWithBirthday(today);
 
-		Collection<IBaseResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);
+		Collection<IAnyResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);
 		assertEquals(1, result.size());
 	}
 
@@ -61,7 +61,7 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 		incomingPatient.setActive(true);
 		incomingPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
 
-		Collection<IBaseResource> patient = myEmpiCandidateSearchSvc.findCandidates("Patient", incomingPatient);
+		Collection<IAnyResource> patient = myEmpiCandidateSearchSvc.findCandidates("Patient", incomingPatient);
 		assertThat(patient, hasSize(1));
 	}
 }
