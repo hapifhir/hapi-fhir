@@ -15,17 +15,30 @@ import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.CanonicalResource;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.ResourceType;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.StructureMap;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -349,6 +362,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, CanonicalResource canonicalForSource) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public org.hl7.fhir.r5.model.Resource fetchResourceById(String theType, String theUri) {
 		throw new UnsupportedOperationException();
 	}
@@ -360,6 +378,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public void cacheResource(org.hl7.fhir.r5.model.Resource theRes) throws FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void cacheResourceFromPackage(Resource res, PackageVersion packageDetails) throws FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void cachePackage(PackageVersion packageDetails, List<PackageVersion> dependencies) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -380,7 +408,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public Map<String, byte[]> getBinaries() {
-		return null;
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FileNotFoundException, IOException, FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean hasPackage(String id, String ver) {
+		throw new UnsupportedOperationException();
 	}
 
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
