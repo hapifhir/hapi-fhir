@@ -228,6 +228,30 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Test
+	public void testTodayTomorrow() {
+		Observation futureObservation = new Observation();
+		Instant nextWeek = Instant.now().plus(Duration.ofDays(1));
+		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
+		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testTodayYesterday() {
+		Observation futureObservation = new Observation();
+		Instant nextWeek = Instant.now().minus(Duration.ofDays(1));
+		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
+		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertFalse(result.matched());
+	}
+
+	@Test
 	public void testTodayNextMinute() {
 		Observation futureObservation = new Observation();
 		Instant nextMinute = Instant.now().plus(Duration.ofMinutes(1));
