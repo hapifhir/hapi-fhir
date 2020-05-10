@@ -208,6 +208,38 @@ public class InMemoryResourceMatcherR5Test {
 		assertTrue(result.matched());
 	}
 
+	@Test
+	public void testTodayPast() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, myObservation, mySearchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testTodayNextWeek() {
+		Observation futureObservation = new Observation();
+		Instant nextWeek = Instant.now().plus(Duration.ofDays(7));
+		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
+		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testTodayNextMinute() {
+		Observation futureObservation = new Observation();
+		Instant nextMinute = Instant.now().plus(Duration.ofMinutes(1));
+		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
+		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertFalse(result.matched());
+	}
+
+
 	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
 		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
 		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
