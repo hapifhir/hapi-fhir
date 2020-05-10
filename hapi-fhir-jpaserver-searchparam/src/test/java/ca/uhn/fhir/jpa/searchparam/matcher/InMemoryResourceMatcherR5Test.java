@@ -28,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -251,10 +252,16 @@ public class InMemoryResourceMatcherR5Test {
 		assertFalse(result.matched());
 	}
 
+
 	@Test
 	public void testTodayNextMinute() {
 		Observation futureObservation = new Observation();
-		Instant nextMinute = Instant.now().plus(Duration.ofMinutes(1));
+		ZonedDateTime now = ZonedDateTime.now();
+		if (now.getHour() == 23 && now.getMinute() == 59) {
+			// this test fails between 23:59 and midnight...
+			return;
+		}
+		Instant nextMinute = now.toInstant().plus(Duration.ofMinutes(1));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
