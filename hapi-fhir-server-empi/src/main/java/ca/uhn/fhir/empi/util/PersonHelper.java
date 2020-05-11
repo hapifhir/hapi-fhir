@@ -591,7 +591,7 @@ public class PersonHelper {
    }
 
 	public void updatePersonFromUpdatedEmpiTarget(IBaseResource thePerson, IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
-		copyEmpiTargetDataIntoPerson(theResource, thePerson, false);
+		copyEmpiTargetDataIntoPerson(theResource, thePerson, true);
 	}
 
 	public int getLinkCount(IAnyResource thePerson) {

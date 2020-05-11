@@ -456,6 +456,4 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(personFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
 		assertLinkCount(1);
 	}
-
-
 }

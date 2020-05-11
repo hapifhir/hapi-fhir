@@ -165,12 +165,16 @@ public class EmpiMatchLinkSvc {
 			remainsMatchedToSamePerson = false;
 		}
 
+		if (remainsMatchedToSamePerson) {
+			myPersonHelper.updatePersonFromUpdatedEmpiTarget(person, theResource, theEmpiTransactionContext);
+		}
+
 		if (remainsMatchedToSamePerson && (!incomingResourceHasAnEid || hasEidsInCommon)) {
 			//update to patient that uses internal EIDs only.
-			myPersonHelper.updatePersonFromNewlyCreatedEmpiTarget(person, theResource, theEmpiTransactionContext);
 			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		}
-		if (!hasEidsInCommon && remainsMatchedToSamePerson) {
+
+		if (remainsMatchedToSamePerson && !hasEidsInCommon) {
 			// the user is simply updating their EID. We propagate this change to the Person.
 			//overwrite. No EIDS in common, but still same person.
 			if (theMatchedPersonCandidate.isMatch()) {
