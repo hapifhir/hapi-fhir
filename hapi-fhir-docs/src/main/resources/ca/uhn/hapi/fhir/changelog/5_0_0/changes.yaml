@@ -10,6 +10,8 @@
     <li>Guava (JPA): 28.0 -&gt; 28.2</li>
     <li>Spring Boot (Boot): 2.2.0.RELEASE -&gt; 2.2.6.RELEASE</li>
     <li>FlywayDB (JPA) 6.1.0 -&gt; 6.4.1</li>
+    <li>Apache HTTPCliient (JPA): 4.5.9 -&gt; 4.5.12</li>
+    <li>Apache HTTPCore (JPA): 4.4.11 -&gt; 4.4.14</li>
     </ul>"
 - item:
     issue: "1583"
