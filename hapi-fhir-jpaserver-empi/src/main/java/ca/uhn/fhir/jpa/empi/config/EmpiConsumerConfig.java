@@ -33,7 +33,6 @@ import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
-import ca.uhn.fhir.jpa.empi.broker.EmpiSubscriptionLoader;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
@@ -65,7 +64,8 @@ public class EmpiConsumerConfig {
 	EmpiProviderLoader myEmpiProviderLoader;
 	@Autowired
 	EmpiSubscriptionLoader myEmpiSubscriptionLoader;
-
+	@Autowired
+	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
 
 	@Bean
 	IEmpiStorageInterceptor empiStorageInterceptor() {
@@ -105,6 +105,11 @@ public class EmpiConsumerConfig {
 	@Bean
 	EmpiSubscriptionLoader empiSubscriptionLoader() {
 		return new EmpiSubscriptionLoader();
+	}
+
+	@Bean
+	EmpiSearchParameterLoader empiSearchParameterLoader() {
+		return new EmpiSearchParameterLoader();
 	}
 
 	@Bean
@@ -169,5 +174,9 @@ public class EmpiConsumerConfig {
 		ourLog.info("EMPI provider registered");
 
 		myEmpiSubscriptionLoader.daoUpdateEmpiSubscriptions();
+		ourLog.info("EMPI subscriptions updated");
+
+		myEmpiSearchParameterLoader.daoUpdateEmpiSearchParameters();
+		ourLog.info("EMPI search parameters updated");
 	}
 }
