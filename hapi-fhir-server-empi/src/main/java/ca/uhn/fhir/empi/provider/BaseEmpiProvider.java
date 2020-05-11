@@ -1,14 +1,26 @@
 package ca.uhn.fhir.empi.provider;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public abstract class BaseEmpiProvider {
+
+	private final FhirContext myFhirContext;
+	private final IResourceLoader myResourceLoader;
+
+	public BaseEmpiProvider(FhirContext theFhirContext, IResourceLoader theResourceLoader) {
+		myFhirContext = theFhirContext;
+		myResourceLoader = theResourceLoader;
+	}
 
 	protected IAnyResource getPersonFromId(String theId, String theParamName) {
 		IdDt personId = new IdDt(theId);
@@ -16,10 +28,23 @@ public abstract class BaseEmpiProvider {
 			personId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " must have form Person/<id> where <id> is the id of the person");
 		}
-		return loadPerson(personId);
+		return loadResource(personId);
 	}
 
-	protected abstract IAnyResource loadPerson(IdDt thePersonId);
+	protected IAnyResource getTargetFromId(String theId, String theParamName) {
+		IdDt targetId = new IdDt(theId);
+		String resourceType = targetId.getResourceType();
+		if (!EmpiUtil.supportedTargetType(resourceType) ||
+			targetId.getIdPart() == null) {
+			throw new InvalidRequestException(theParamName + " must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource");
+		}
+		return loadResource(targetId);
+	}
+
+	protected IAnyResource loadResource(IdDt theResourceId) {
+		Class<? extends IBaseResource> resourceClass = myFhirContext.getResourceDefinition(theResourceId.getResourceType()).getImplementingClass();
+		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
+	}
 
 	protected void validateMergeParameters(IPrimitiveType<String> thePersonIdToDelete, IPrimitiveType<String> thePersonIdToKeep) {
 		if (thePersonIdToDelete == null) {
@@ -32,6 +57,20 @@ public abstract class BaseEmpiProvider {
 			throw new InvalidRequestException("personIdToDelete must be different from personToKeep");
 		}
  	}
+
+	protected void validateUpdateLinkParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId, IPrimitiveType<String> theMatchResult) {
+		if (thePersonId == null) {
+			// FIXME KHS these should all use constants
+			throw new InvalidRequestException("personId cannot be null");
+		}
+		if (theTargetId == null) {
+			throw new InvalidRequestException("targetId cannot be null");
+		}
+		if (theMatchResult == null) {
+			throw new InvalidRequestException("matchResult cannot be null");
+		}
+	}
+
 	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
 		return new EmpiTransactionContext(transactionLogMessages, EmpiTransactionContext.OperationType.MERGE_PERSONS);

@@ -10,12 +10,13 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +75,7 @@ public class QuestionnaireValidatorDstu3Test {
 				.setType(QuestionnaireItemType.STRING)
 				.addExtension()
 				.setUrl(extensionDomainToTest)
-				.setValue(new Coding(null, "text-box", null));
+				.setValue(new CodeType("text-box"));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
@@ -131,7 +132,7 @@ public class QuestionnaireValidatorDstu3Test {
 				.setType(QuestionnaireItemType.STRING)
 				.addExtension()
 					.setUrl(extensionUrl + "questionnaire-itemControl")
-					.setValue(new Coding(null, "text-box", null));
+					.setValue(new CodeType("text-box"));
 
 		ValidationResult errors = myVal.validateWithResult(q);
 

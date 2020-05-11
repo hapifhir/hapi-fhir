@@ -256,7 +256,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
             if (methodBinding.getQueryName() != null) {
               String queryName = bindings.getNamedSearchMethodBindingToName().get(methodBinding);
               if (operationNames.add(queryName)) {
-                rest.addOperation().setName(methodBinding.getQueryName()).setDefinition(("OperationDefinition/" + queryName));
+                rest.addOperation().setName(methodBinding.getQueryName()).setDefinition((getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + queryName));
               }
             } else {
               handleNamelessSearchMethodBinding(resource, def, includes, (SearchMethodBinding) nextMethodBinding, theRequestDetails);
@@ -266,7 +266,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
             String opName = bindings.getOperationBindingToName().get(methodBinding);
             if (operationNames.add(opName)) {
               // Only add each operation (by name) once
-              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(("OperationDefinition/" + opName));
+              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition((getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + opName));
             }
           }
 
@@ -301,7 +301,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
             String opName = bindings.getOperationBindingToName().get(methodBinding);
             if (operationNames.add(opName)) {
               ourLog.debug("Found bound operation: {}", opName);
-              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(("OperationDefinition/" + opName));
+              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition((getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + opName));
             }
           }
         }
@@ -309,6 +309,13 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     }
 
     return retVal;
+  }
+
+  protected String getOperationDefinitionPrefix(RequestDetails theRequestDetails) {
+    if (theRequestDetails == null) {
+      return "";
+    }
+    return theRequestDetails.getServerBaseForRequest() + "/";
   }
 
   private void handleNamelessSearchMethodBinding(CapabilityStatementRestResourceComponent resource, RuntimeResourceDefinition def, TreeSet<String> includes,

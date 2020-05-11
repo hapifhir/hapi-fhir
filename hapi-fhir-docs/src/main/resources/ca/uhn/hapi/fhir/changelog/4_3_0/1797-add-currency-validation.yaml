@@ -1,4 +1,0 @@
----
-type: add
-issue: 1797
-title: The HAPI FHIR instance validator now includes validation for currency types (ISO 4217)

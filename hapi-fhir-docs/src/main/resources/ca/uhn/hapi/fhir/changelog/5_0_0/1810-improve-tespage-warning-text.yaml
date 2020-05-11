@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1810
+title: The text styling on the Testpage Overlay homepage has been improved to use native 
+    Bootstrap warning colours. Thanks to Joel Schneider for the pull request!

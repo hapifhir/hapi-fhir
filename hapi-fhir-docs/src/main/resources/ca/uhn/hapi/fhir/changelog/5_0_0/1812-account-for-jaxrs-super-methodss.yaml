@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1812
+title: The JAX-RS server will now scan and serve ResourceProvider methods defined in super-classes as well. Thanks
+   to Zhe Wang for the pull request!

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1778
+title: "When encoding a resource, a crash could occur if the resource had a contained Bundle resource. This
+  is not commonly done, but there are valid scenarios for doing so."

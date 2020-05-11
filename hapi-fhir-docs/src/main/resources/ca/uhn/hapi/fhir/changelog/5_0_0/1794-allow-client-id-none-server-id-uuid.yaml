@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1794
+title: A bug in the JPA server prevented Client Resource ID mode from being set to NOT_ALLOWED when Server Resource ID mode
+   was set to UUID. Thanks to GitHub user @G-2-Z for reporting!

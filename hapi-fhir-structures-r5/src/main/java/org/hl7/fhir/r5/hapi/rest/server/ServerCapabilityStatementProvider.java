@@ -90,293 +90,298 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class ServerCapabilityStatementProvider extends BaseServerCapabilityStatementProvider implements IServerConformanceProvider<CapabilityStatement> {
 
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProvider.class);
-  private String myPublisher = "Not provided";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProvider.class);
+	private String myPublisher = "Not provided";
 
-  /**
-   * No-arg constructor and setter so that the ServerConformanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
-   */
-  public ServerCapabilityStatementProvider() {
-    super();
-  }
+	/**
+	 * No-arg constructor and setter so that the ServerConformanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
+	 */
+	public ServerCapabilityStatementProvider() {
+		super();
+	}
 
-  /**
-   * Constructor - This is intended only for JAX-RS server
-   */
-  public ServerCapabilityStatementProvider(RestfulServerConfiguration theServerConfiguration) {
-    super(theServerConfiguration);
-  }
+	/**
+	 * Constructor - This is intended only for JAX-RS server
+	 */
+	public ServerCapabilityStatementProvider(RestfulServerConfiguration theServerConfiguration) {
+		super(theServerConfiguration);
+	}
 
-  private void checkBindingForSystemOps(CapabilityStatementRestComponent rest, Set<SystemRestfulInteraction> systemOps, BaseMethodBinding<?> nextMethodBinding) {
-    if (nextMethodBinding.getRestOperationType() != null) {
-      String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
-      if (sysOpCode != null) {
-        SystemRestfulInteraction sysOp;
-        try {
-          sysOp = SystemRestfulInteraction.fromCode(sysOpCode);
-        } catch (FHIRException e) {
-          return;
-        }
-        if (sysOp == null) {
-          return;
-        }
-        if (systemOps.contains(sysOp) == false) {
-          systemOps.add(sysOp);
-          rest.addInteraction().setCode(sysOp);
-        }
-      }
-    }
-  }
-
-
-
-  private DateTimeType conformanceDate(RequestDetails theRequestDetails) {
-    IPrimitiveType<Date> buildDate = getServerConfiguration(theRequestDetails).getConformanceDate();
-    if (buildDate != null && buildDate.getValue() != null) {
-      try {
-        return new DateTimeType(buildDate.getValueAsString());
-      } catch (DataFormatException e) {
-        // fall through
-      }
-    }
-    return DateTimeType.now();
-  }
+	private void checkBindingForSystemOps(CapabilityStatementRestComponent rest, Set<SystemRestfulInteraction> systemOps, BaseMethodBinding<?> nextMethodBinding) {
+		if (nextMethodBinding.getRestOperationType() != null) {
+			String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
+			if (sysOpCode != null) {
+				SystemRestfulInteraction sysOp;
+				try {
+					sysOp = SystemRestfulInteraction.fromCode(sysOpCode);
+				} catch (FHIRException e) {
+					return;
+				}
+				if (sysOp == null) {
+					return;
+				}
+				if (systemOps.contains(sysOp) == false) {
+					systemOps.add(sysOp);
+					rest.addInteraction().setCode(sysOp);
+				}
+			}
+		}
+	}
 
 
+	private DateTimeType conformanceDate(RequestDetails theRequestDetails) {
+		IPrimitiveType<Date> buildDate = getServerConfiguration(theRequestDetails).getConformanceDate();
+		if (buildDate != null && buildDate.getValue() != null) {
+			try {
+				return new DateTimeType(buildDate.getValueAsString());
+			} catch (DataFormatException e) {
+				// fall through
+			}
+		}
+		return DateTimeType.now();
+	}
 
-  /**
-   * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-   * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
-   */
-  public String getPublisher() {
-    return myPublisher;
-  }
 
-  /**
-   * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-   * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
-   */
-  public void setPublisher(String thePublisher) {
-    myPublisher = thePublisher;
-  }
+	/**
+	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 */
+	public String getPublisher() {
+		return myPublisher;
+	}
 
-  @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-  @Override
-  @Metadata
-  public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+	/**
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 */
+	public void setPublisher(String thePublisher) {
+		myPublisher = thePublisher;
+	}
 
-    RestfulServerConfiguration configuration = getServerConfiguration(theRequestDetails);
-    Bindings bindings = configuration.provideBindings();
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+	@Override
+	@Metadata
+	public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 
-    CapabilityStatement retVal = new CapabilityStatement();
+		RestfulServerConfiguration configuration = getServerConfiguration(theRequestDetails);
+		Bindings bindings = configuration.provideBindings();
 
-    retVal.setPublisher(myPublisher);
-    retVal.setDateElement(conformanceDate(theRequestDetails));
-    retVal.setFhirVersion(Enumerations.FHIRVersion.fromCode(FhirVersionEnum.R5.getFhirVersionString()));
+		CapabilityStatement retVal = new CapabilityStatement();
 
-    ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
-    String serverBase = configuration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
-    retVal
-      .getImplementation()
-      .setUrl(serverBase)
-      .setDescription(configuration.getImplementationDescription());
+		retVal.setPublisher(myPublisher);
+		retVal.setDateElement(conformanceDate(theRequestDetails));
+		retVal.setFhirVersion(Enumerations.FHIRVersion.fromCode(FhirVersionEnum.R5.getFhirVersionString()));
 
-    retVal.setKind(Enumerations.CapabilityStatementKind.INSTANCE);
-    retVal.getSoftware().setName(configuration.getServerName());
-    retVal.getSoftware().setVersion(configuration.getServerVersion());
-    retVal.addFormat(Constants.CT_FHIR_XML_NEW);
-    retVal.addFormat(Constants.CT_FHIR_JSON_NEW);
-    retVal.setStatus(PublicationStatus.ACTIVE);
+		ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+		String serverBase = configuration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+		retVal
+			.getImplementation()
+			.setUrl(serverBase)
+			.setDescription(configuration.getImplementationDescription());
 
-    CapabilityStatementRestComponent rest = retVal.addRest();
-    rest.setMode(Enumerations.RestfulCapabilityMode.SERVER);
+		retVal.setKind(Enumerations.CapabilityStatementKind.INSTANCE);
+		retVal.getSoftware().setName(configuration.getServerName());
+		retVal.getSoftware().setVersion(configuration.getServerVersion());
+		retVal.addFormat(Constants.CT_FHIR_XML_NEW);
+		retVal.addFormat(Constants.CT_FHIR_JSON_NEW);
+		retVal.setStatus(PublicationStatus.ACTIVE);
 
-    Set<SystemRestfulInteraction> systemOps = new HashSet<>();
-    Set<String> operationNames = new HashSet<>();
+		CapabilityStatementRestComponent rest = retVal.addRest();
+		rest.setMode(Enumerations.RestfulCapabilityMode.SERVER);
 
-    Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
-    Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
-    for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+		Set<SystemRestfulInteraction> systemOps = new HashSet<>();
+		Set<String> operationNames = new HashSet<>();
 
-      if (nextEntry.getKey().isEmpty() == false) {
-        Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
-        CapabilityStatementRestResourceComponent resource = rest.addResource();
-        String resourceName = nextEntry.getKey();
-        RuntimeResourceDefinition def;
-        FhirContext context = configuration.getFhirContext();
-        if (resourceNameToSharedSupertype.containsKey(resourceName)) {
-          def = context.getResourceDefinition(resourceNameToSharedSupertype.get(resourceName));
-        } else {
-          def = context.getResourceDefinition(resourceName);
-        }
-        resource.getTypeElement().setValue(def.getName());
-        resource.getProfileElement().setValue((def.getResourceProfile(serverBase)));
+		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
+		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
+		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
 
-        TreeSet<String> includes = new TreeSet<>();
+			if (nextEntry.getKey().isEmpty() == false) {
+				Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
+				CapabilityStatementRestResourceComponent resource = rest.addResource();
+				String resourceName = nextEntry.getKey();
+				RuntimeResourceDefinition def;
+				FhirContext context = configuration.getFhirContext();
+				if (resourceNameToSharedSupertype.containsKey(resourceName)) {
+					def = context.getResourceDefinition(resourceNameToSharedSupertype.get(resourceName));
+				} else {
+					def = context.getResourceDefinition(resourceName);
+				}
+				resource.getTypeElement().setValue(def.getName());
+				resource.getProfileElement().setValue((def.getResourceProfile(serverBase)));
 
-        // Map<String, CapabilityStatement.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
-        // CapabilityStatement.RestResourceSearchParam>();
-        for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
-          if (nextMethodBinding.getRestOperationType() != null) {
-            String resOpCode = nextMethodBinding.getRestOperationType().getCode();
-            if (resOpCode != null) {
-              TypeRestfulInteraction resOp;
-              try {
-                resOp = TypeRestfulInteraction.fromCode(resOpCode);
-              } catch (Exception e) {
-                resOp = null;
-              }
-              if (resOp != null) {
-                if (resourceOps.contains(resOp) == false) {
-                  resourceOps.add(resOp);
-                  resource.addInteraction().setCode(resOp);
-                }
-                if ("vread".equals(resOpCode)) {
-                  // vread implies read
-                  resOp = TypeRestfulInteraction.READ;
-                  if (resourceOps.contains(resOp) == false) {
-                    resourceOps.add(resOp);
-                    resource.addInteraction().setCode(resOp);
-                  }
-                }
+				TreeSet<String> includes = new TreeSet<>();
 
-                if (nextMethodBinding.isSupportsConditional()) {
-                  switch (resOp) {
-                    case CREATE:
-                      resource.setConditionalCreate(true);
-                      break;
-                    case DELETE:
-                      if (nextMethodBinding.isSupportsConditionalMultiple()) {
-                        resource.setConditionalDelete(ConditionalDeleteStatus.MULTIPLE);
-                      } else {
-                        resource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
-                      }
-                      break;
-                    case UPDATE:
-                      resource.setConditionalUpdate(true);
-                      break;
-                    default:
-                      break;
-                  }
-                }
-              }
-            }
-          }
+				// Map<String, CapabilityStatement.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
+				// CapabilityStatement.RestResourceSearchParam>();
+				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+					if (nextMethodBinding.getRestOperationType() != null) {
+						String resOpCode = nextMethodBinding.getRestOperationType().getCode();
+						if (resOpCode != null) {
+							TypeRestfulInteraction resOp;
+							try {
+								resOp = TypeRestfulInteraction.fromCode(resOpCode);
+							} catch (Exception e) {
+								resOp = null;
+							}
+							if (resOp != null) {
+								if (resourceOps.contains(resOp) == false) {
+									resourceOps.add(resOp);
+									resource.addInteraction().setCode(resOp);
+								}
+								if ("vread".equals(resOpCode)) {
+									// vread implies read
+									resOp = TypeRestfulInteraction.READ;
+									if (resourceOps.contains(resOp) == false) {
+										resourceOps.add(resOp);
+										resource.addInteraction().setCode(resOp);
+									}
+								}
 
-          checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
+								if (nextMethodBinding.isSupportsConditional()) {
+									switch (resOp) {
+										case CREATE:
+											resource.setConditionalCreate(true);
+											break;
+										case DELETE:
+											if (nextMethodBinding.isSupportsConditionalMultiple()) {
+												resource.setConditionalDelete(ConditionalDeleteStatus.MULTIPLE);
+											} else {
+												resource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
+											}
+											break;
+										case UPDATE:
+											resource.setConditionalUpdate(true);
+											break;
+										default:
+											break;
+									}
+								}
+							}
+						}
+					}
 
-          if (nextMethodBinding instanceof SearchMethodBinding) {
-            SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
-            if (methodBinding.getQueryName() != null) {
-              String queryName = bindings.getNamedSearchMethodBindingToName().get(methodBinding);
-              if (operationNames.add(queryName)) {
-                rest.addOperation().setName(methodBinding.getQueryName()).setDefinition(("OperationDefinition/" + queryName));
-              }
-            } else {
-              handleNamelessSearchMethodBinding(resource, def, includes, (SearchMethodBinding) nextMethodBinding, theRequestDetails);
-            }
-          } else if (nextMethodBinding instanceof OperationMethodBinding) {
-            OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-            String opName = bindings.getOperationBindingToName().get(methodBinding);
-            if (operationNames.add(opName)) {
-              // Only add each operation (by name) once
-              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(("OperationDefinition/" + opName));
-            }
-          }
+					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 
-          resource.getInteraction().sort(new Comparator<ResourceInteractionComponent>() {
-            @Override
-            public int compare(ResourceInteractionComponent theO1, ResourceInteractionComponent theO2) {
-              TypeRestfulInteraction o1 = theO1.getCode();
-              TypeRestfulInteraction o2 = theO2.getCode();
-              if (o1 == null && o2 == null) {
-                return 0;
-              }
-              if (o1 == null) {
-                return 1;
-              }
-              if (o2 == null) {
-                return -1;
-              }
-              return o1.ordinal() - o2.ordinal();
-            }
-          });
+					if (nextMethodBinding instanceof SearchMethodBinding) {
+						SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
+						if (methodBinding.getQueryName() != null) {
+							String queryName = bindings.getNamedSearchMethodBindingToName().get(methodBinding);
+							if (operationNames.add(queryName)) {
+								rest.addOperation().setName(methodBinding.getQueryName()).setDefinition((getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + queryName));
+							}
+						} else {
+							handleNamelessSearchMethodBinding(resource, def, includes, (SearchMethodBinding) nextMethodBinding, theRequestDetails);
+						}
+					} else if (nextMethodBinding instanceof OperationMethodBinding) {
+						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
+						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						if (operationNames.add(opName)) {
+							// Only add each operation (by name) once
+							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition((getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + opName));
+						}
+					}
 
-        }
+					resource.getInteraction().sort(new Comparator<ResourceInteractionComponent>() {
+						@Override
+						public int compare(ResourceInteractionComponent theO1, ResourceInteractionComponent theO2) {
+							TypeRestfulInteraction o1 = theO1.getCode();
+							TypeRestfulInteraction o2 = theO2.getCode();
+							if (o1 == null && o2 == null) {
+								return 0;
+							}
+							if (o1 == null) {
+								return 1;
+							}
+							if (o2 == null) {
+								return -1;
+							}
+							return o1.ordinal() - o2.ordinal();
+						}
+					});
 
-        for (String nextInclude : includes) {
-          resource.addSearchInclude(nextInclude);
-        }
-      } else {
-        for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
-          checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
-          if (nextMethodBinding instanceof OperationMethodBinding) {
-            OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-            String opName = bindings.getOperationBindingToName().get(methodBinding);
-            if (operationNames.add(opName)) {
-              ourLog.debug("Found bound operation: {}", opName);
-              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(("OperationDefinition/" + opName));
-            }
-          }
-        }
-      }
-    }
+				}
 
-    return retVal;
-  }
+				for (String nextInclude : includes) {
+					resource.addSearchInclude(nextInclude);
+				}
+			} else {
+				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
+					if (nextMethodBinding instanceof OperationMethodBinding) {
+						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
+						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						if (operationNames.add(opName)) {
+							ourLog.debug("Found bound operation: {}", opName);
+							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition((getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + opName));
+						}
+					}
+				}
+			}
+		}
 
-  private void handleNamelessSearchMethodBinding(CapabilityStatementRestResourceComponent resource, RuntimeResourceDefinition def, TreeSet<String> includes,
-                                                 SearchMethodBinding searchMethodBinding, RequestDetails theRequestDetails) {
-    includes.addAll(searchMethodBinding.getIncludes());
+		return retVal;
+	}
 
-    List<IParameter> params = searchMethodBinding.getParameters();
-    List<SearchParameter> searchParameters = new ArrayList<>();
-    for (IParameter nextParameter : params) {
-      if ((nextParameter instanceof SearchParameter)) {
-        searchParameters.add((SearchParameter) nextParameter);
-      }
-    }
-    sortSearchParameters(searchParameters);
-    if (!searchParameters.isEmpty()) {
-      // boolean allOptional = searchParameters.get(0).isRequired() == false;
-      //
-      // OperationDefinition query = null;
-      // if (!allOptional) {
-      // RestOperation operation = rest.addOperation();
-      // query = new OperationDefinition();
-      // operation.setDefinition(new ResourceReferenceDt(query));
-      // query.getDescriptionElement().setValue(searchMethodBinding.getDescription());
-      // query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
-      // for (String nextInclude : searchMethodBinding.getIncludes()) {
-      // query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
-      // }
-      // }
+	protected String getOperationDefinitionPrefix(RequestDetails theRequestDetails) {
+		if (theRequestDetails == null) {
+			return "";
+		}
+		return theRequestDetails.getServerBaseForRequest() + "/";
+	}
 
-      for (SearchParameter nextParameter : searchParameters) {
+	private void handleNamelessSearchMethodBinding(CapabilityStatementRestResourceComponent resource, RuntimeResourceDefinition def, TreeSet<String> includes,
+																  SearchMethodBinding searchMethodBinding, RequestDetails theRequestDetails) {
+		includes.addAll(searchMethodBinding.getIncludes());
 
-        String nextParamName = nextParameter.getName();
+		List<IParameter> params = searchMethodBinding.getParameters();
+		List<SearchParameter> searchParameters = new ArrayList<>();
+		for (IParameter nextParameter : params) {
+			if ((nextParameter instanceof SearchParameter)) {
+				searchParameters.add((SearchParameter) nextParameter);
+			}
+		}
+		sortSearchParameters(searchParameters);
+		if (!searchParameters.isEmpty()) {
+			// boolean allOptional = searchParameters.get(0).isRequired() == false;
+			//
+			// OperationDefinition query = null;
+			// if (!allOptional) {
+			// RestOperation operation = rest.addOperation();
+			// query = new OperationDefinition();
+			// operation.setDefinition(new ResourceReferenceDt(query));
+			// query.getDescriptionElement().setValue(searchMethodBinding.getDescription());
+			// query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
+			// for (String nextInclude : searchMethodBinding.getIncludes()) {
+			// query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
+			// }
+			// }
 
-        String chain = null;
-        String nextParamUnchainedName = nextParamName;
-        if (nextParamName.contains(".")) {
-          chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
-          nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
-        }
+			for (SearchParameter nextParameter : searchParameters) {
 
-        String nextParamDescription = nextParameter.getDescription();
+				String nextParamName = nextParameter.getName();
 
-        /*
-         * If the parameter has no description, default to the one from the resource
-         */
-        if (StringUtils.isBlank(nextParamDescription)) {
-          RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
-          if (paramDef != null) {
-            nextParamDescription = paramDef.getDescription();
-          }
-        }
+				String chain = null;
+				String nextParamUnchainedName = nextParamName;
+				if (nextParamName.contains(".")) {
+					chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
+					nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
+				}
 
-        CapabilityStatementRestResourceSearchParamComponent param = resource.addSearchParam();
-        param.setName(nextParamUnchainedName);
+				String nextParamDescription = nextParameter.getDescription();
+
+				/*
+				 * If the parameter has no description, default to the one from the resource
+				 */
+				if (StringUtils.isBlank(nextParamDescription)) {
+					RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
+					if (paramDef != null) {
+						nextParamDescription = paramDef.getDescription();
+					}
+				}
+
+				CapabilityStatementRestResourceSearchParamComponent param = resource.addSearchParam();
+				param.setName(nextParamUnchainedName);
 
 //				if (StringUtils.isNotBlank(chain)) {
 //					param.addChain(chain);
@@ -390,211 +395,210 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 //					}
 //				}
 
-        param.setDocumentation(nextParamDescription);
-        if (nextParameter.getParamType() != null) {
-          param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
-        }
-        for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
-          RuntimeResourceDefinition targetDef = getServerConfiguration(theRequestDetails).getFhirContext().getResourceDefinition(nextTarget);
-          if (targetDef != null) {
-            ResourceType code;
-            try {
-              code = ResourceType.fromCode(targetDef.getName());
-            } catch (FHIRException e) {
-              code = null;
-            }
+				param.setDocumentation(nextParamDescription);
+				if (nextParameter.getParamType() != null) {
+					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
+				}
+				for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
+					RuntimeResourceDefinition targetDef = getServerConfiguration(theRequestDetails).getFhirContext().getResourceDefinition(nextTarget);
+					if (targetDef != null) {
+						ResourceType code;
+						try {
+							code = ResourceType.fromCode(targetDef.getName());
+						} catch (FHIRException e) {
+							code = null;
+						}
 //						if (code != null) {
 //							param.addTarget(targetDef.getName());
 //						}
-          }
-        }
-      }
-    }
-  }
+					}
+				}
+			}
+		}
+	}
 
 
+	@Read(type = OperationDefinition.class)
+	public OperationDefinition readOperationDefinition(@IdParam IdType theId, RequestDetails theRequestDetails) {
+		if (theId == null || theId.hasIdPart() == false) {
+			throw new ResourceNotFoundException(theId);
+		}
+		RestfulServerConfiguration configuration = getServerConfiguration(theRequestDetails);
+		Bindings bindings = configuration.provideBindings();
 
-  @Read(type = OperationDefinition.class)
-  public OperationDefinition readOperationDefinition(@IdParam IdType theId, RequestDetails theRequestDetails) {
-    if (theId == null || theId.hasIdPart() == false) {
-      throw new ResourceNotFoundException(theId);
-    }
-    RestfulServerConfiguration configuration = getServerConfiguration(theRequestDetails);
-    Bindings bindings = configuration.provideBindings();
+		List<OperationMethodBinding> operationBindings = bindings.getOperationNameToBindings().get(theId.getIdPart());
+		if (operationBindings != null && !operationBindings.isEmpty()) {
+			return readOperationDefinitionForOperation(operationBindings);
+		}
+		List<SearchMethodBinding> searchBindings = bindings.getSearchNameToBindings().get(theId.getIdPart());
+		if (searchBindings != null && !searchBindings.isEmpty()) {
+			return readOperationDefinitionForNamedSearch(searchBindings);
+		}
+		throw new ResourceNotFoundException(theId);
+	}
 
-    List<OperationMethodBinding> operationBindings = bindings.getOperationNameToBindings().get(theId.getIdPart());
-    if (operationBindings != null && !operationBindings.isEmpty()) {
-      return readOperationDefinitionForOperation(operationBindings);
-    }
-    List<SearchMethodBinding> searchBindings = bindings.getSearchNameToBindings().get(theId.getIdPart());
-    if (searchBindings != null && !searchBindings.isEmpty()) {
-      return readOperationDefinitionForNamedSearch(searchBindings);
-    }
-    throw new ResourceNotFoundException(theId);
-  }
+	private OperationDefinition readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {
+		OperationDefinition op = new OperationDefinition();
+		op.setStatus(PublicationStatus.ACTIVE);
+		op.setKind(OperationKind.QUERY);
+		op.setAffectsState(false);
 
-  private OperationDefinition readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {
-    OperationDefinition op = new OperationDefinition();
-    op.setStatus(PublicationStatus.ACTIVE);
-    op.setKind(OperationKind.QUERY);
-    op.setAffectsState(false);
+		op.setSystem(false);
+		op.setType(false);
+		op.setInstance(false);
 
-    op.setSystem(false);
-    op.setType(false);
-    op.setInstance(false);
+		Set<String> inParams = new HashSet<>();
 
-    Set<String> inParams = new HashSet<>();
+		for (SearchMethodBinding binding : bindings) {
+			if (isNotBlank(binding.getDescription())) {
+				op.setDescription(binding.getDescription());
+			}
+			if (isBlank(binding.getResourceProviderResourceName())) {
+				op.setSystem(true);
+			} else {
+				op.setType(true);
+				op.addResourceElement().setValue(binding.getResourceProviderResourceName());
+			}
+			op.setCode(binding.getQueryName());
+			for (IParameter nextParamUntyped : binding.getParameters()) {
+				if (nextParamUntyped instanceof SearchParameter) {
+					SearchParameter nextParam = (SearchParameter) nextParamUntyped;
+					if (!inParams.add(nextParam.getName())) {
+						continue;
+					}
+					OperationDefinitionParameterComponent param = op.addParameter();
+					param.setUse(Enumerations.OperationParameterUse.IN);
+					param.setType(Enumerations.FHIRAllTypes.STRING);
+					param.getSearchTypeElement().setValueAsString(nextParam.getParamType().getCode());
+					param.setMin(nextParam.isRequired() ? 1 : 0);
+					param.setMax("1");
+					param.setName(nextParam.getName());
+				}
+			}
 
-    for (SearchMethodBinding binding : bindings) {
-      if (isNotBlank(binding.getDescription())) {
-        op.setDescription(binding.getDescription());
-      }
-      if (isBlank(binding.getResourceProviderResourceName())) {
-        op.setSystem(true);
-      } else {
-        op.setType(true);
-        op.addResourceElement().setValue(binding.getResourceProviderResourceName());
-      }
-      op.setCode(binding.getQueryName());
-      for (IParameter nextParamUntyped : binding.getParameters()) {
-        if (nextParamUntyped instanceof SearchParameter) {
-          SearchParameter nextParam = (SearchParameter) nextParamUntyped;
-          if (!inParams.add(nextParam.getName())) {
-            continue;
-          }
-          OperationDefinitionParameterComponent param = op.addParameter();
-          param.setUse(Enumerations.OperationParameterUse.IN);
-          param.setType(Enumerations.FHIRAllTypes.STRING);
-          param.getSearchTypeElement().setValueAsString(nextParam.getParamType().getCode());
-          param.setMin(nextParam.isRequired() ? 1 : 0);
-          param.setMax("1");
-          param.setName(nextParam.getName());
-        }
-      }
+			if (isBlank(op.getName())) {
+				if (isNotBlank(op.getDescription())) {
+					op.setName(op.getDescription());
+				} else {
+					op.setName(op.getCode());
+				}
+			}
+		}
 
-      if (isBlank(op.getName())) {
-        if (isNotBlank(op.getDescription())) {
-          op.setName(op.getDescription());
-        } else {
-          op.setName(op.getCode());
-        }
-      }
-    }
+		return op;
+	}
 
-    return op;
-  }
+	private OperationDefinition readOperationDefinitionForOperation(List<OperationMethodBinding> bindings) {
+		OperationDefinition op = new OperationDefinition();
+		op.setStatus(PublicationStatus.ACTIVE);
+		op.setKind(OperationKind.OPERATION);
+		op.setAffectsState(false);
 
-  private OperationDefinition readOperationDefinitionForOperation(List<OperationMethodBinding> bindings) {
-    OperationDefinition op = new OperationDefinition();
-    op.setStatus(PublicationStatus.ACTIVE);
-    op.setKind(OperationKind.OPERATION);
-    op.setAffectsState(false);
+		// We reset these to true below if we find a binding that can handle the level
+		op.setSystem(false);
+		op.setType(false);
+		op.setInstance(false);
 
-    // We reset these to true below if we find a binding that can handle the level
-    op.setSystem(false);
-    op.setType(false);
-    op.setInstance(false);
+		Set<String> inParams = new HashSet<>();
+		Set<String> outParams = new HashSet<>();
 
-    Set<String> inParams = new HashSet<>();
-    Set<String> outParams = new HashSet<>();
+		for (OperationMethodBinding sharedDescription : bindings) {
+			if (isNotBlank(sharedDescription.getDescription())) {
+				op.setDescription(sharedDescription.getDescription());
+			}
+			if (sharedDescription.isCanOperateAtInstanceLevel()) {
+				op.setInstance(true);
+			}
+			if (sharedDescription.isCanOperateAtServerLevel()) {
+				op.setSystem(true);
+			}
+			if (sharedDescription.isCanOperateAtTypeLevel()) {
+				op.setType(true);
+			}
+			if (!sharedDescription.isIdempotent()) {
+				op.setAffectsState(!sharedDescription.isIdempotent());
+			}
+			op.setCode(sharedDescription.getName().substring(1));
+			if (sharedDescription.isCanOperateAtInstanceLevel()) {
+				op.setInstance(sharedDescription.isCanOperateAtInstanceLevel());
+			}
+			if (sharedDescription.isCanOperateAtServerLevel()) {
+				op.setSystem(sharedDescription.isCanOperateAtServerLevel());
+			}
+			if (isNotBlank(sharedDescription.getResourceName())) {
+				op.addResourceElement().setValue(sharedDescription.getResourceName());
+			}
 
-    for (OperationMethodBinding sharedDescription : bindings) {
-      if (isNotBlank(sharedDescription.getDescription())) {
-        op.setDescription(sharedDescription.getDescription());
-      }
-      if (sharedDescription.isCanOperateAtInstanceLevel()) {
-        op.setInstance(true);
-      }
-      if (sharedDescription.isCanOperateAtServerLevel()) {
-        op.setSystem(true);
-      }
-      if (sharedDescription.isCanOperateAtTypeLevel()) {
-        op.setType(true);
-      }
-      if (!sharedDescription.isIdempotent()) {
-        op.setAffectsState(!sharedDescription.isIdempotent());
-      }
-      op.setCode(sharedDescription.getName().substring(1));
-      if (sharedDescription.isCanOperateAtInstanceLevel()) {
-        op.setInstance(sharedDescription.isCanOperateAtInstanceLevel());
-      }
-      if (sharedDescription.isCanOperateAtServerLevel()) {
-        op.setSystem(sharedDescription.isCanOperateAtServerLevel());
-      }
-      if (isNotBlank(sharedDescription.getResourceName())) {
-        op.addResourceElement().setValue(sharedDescription.getResourceName());
-      }
+			for (IParameter nextParamUntyped : sharedDescription.getParameters()) {
+				if (nextParamUntyped instanceof OperationParameter) {
+					OperationParameter nextParam = (OperationParameter) nextParamUntyped;
+					OperationDefinitionParameterComponent param = op.addParameter();
+					if (!inParams.add(nextParam.getName())) {
+						continue;
+					}
+					param.setUse(Enumerations.OperationParameterUse.IN);
+					if (nextParam.getParamType() != null) {
+						param.setType(Enumerations.FHIRAllTypes.fromCode(nextParam.getParamType()));
+					}
+					if (nextParam.getSearchParamType() != null) {
+						param.getSearchTypeElement().setValueAsString(nextParam.getSearchParamType());
+					}
+					param.setMin(nextParam.getMin());
+					param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
+					param.setName(nextParam.getName());
+				}
+			}
 
-      for (IParameter nextParamUntyped : sharedDescription.getParameters()) {
-        if (nextParamUntyped instanceof OperationParameter) {
-          OperationParameter nextParam = (OperationParameter) nextParamUntyped;
-          OperationDefinitionParameterComponent param = op.addParameter();
-          if (!inParams.add(nextParam.getName())) {
-            continue;
-          }
-          param.setUse(Enumerations.OperationParameterUse.IN);
-          if (nextParam.getParamType() != null) {
-            param.setType(Enumerations.FHIRAllTypes.fromCode(nextParam.getParamType()));
-          }
-          if (nextParam.getSearchParamType() != null) {
-            param.getSearchTypeElement().setValueAsString(nextParam.getSearchParamType());
-          }
-          param.setMin(nextParam.getMin());
-          param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
-          param.setName(nextParam.getName());
-        }
-      }
+			for (ReturnType nextParam : sharedDescription.getReturnParams()) {
+				if (!outParams.add(nextParam.getName())) {
+					continue;
+				}
+				OperationDefinitionParameterComponent param = op.addParameter();
+				param.setUse(Enumerations.OperationParameterUse.OUT);
+				if (nextParam.getType() != null) {
+					param.setType(Enumerations.FHIRAllTypes.fromCode(nextParam.getType()));
+				}
+				param.setMin(nextParam.getMin());
+				param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
+				param.setName(nextParam.getName());
+			}
+		}
 
-      for (ReturnType nextParam : sharedDescription.getReturnParams()) {
-        if (!outParams.add(nextParam.getName())) {
-          continue;
-        }
-        OperationDefinitionParameterComponent param = op.addParameter();
-        param.setUse(Enumerations.OperationParameterUse.OUT);
-        if (nextParam.getType() != null) {
-          param.setType(Enumerations.FHIRAllTypes.fromCode(nextParam.getType()));
-        }
-        param.setMin(nextParam.getMin());
-        param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
-        param.setName(nextParam.getName());
-      }
-    }
+		if (isBlank(op.getName())) {
+			if (isNotBlank(op.getDescription())) {
+				op.setName(op.getDescription());
+			} else {
+				op.setName(op.getCode());
+			}
+		}
 
-    if (isBlank(op.getName())) {
-      if (isNotBlank(op.getDescription())) {
-        op.setName(op.getDescription());
-      } else {
-        op.setName(op.getCode());
-      }
-    }
+		if (op.hasSystem() == false) {
+			op.setSystem(false);
+		}
+		if (op.hasInstance() == false) {
+			op.setInstance(false);
+		}
 
-    if (op.hasSystem() == false) {
-      op.setSystem(false);
-    }
-    if (op.hasInstance() == false) {
-      op.setInstance(false);
-    }
+		return op;
+	}
 
-    return op;
-  }
-
-  @Override
-  public void setRestfulServer(RestfulServer theRestfulServer) {
-    // ignore
-  }
+	@Override
+	public void setRestfulServer(RestfulServer theRestfulServer) {
+		// ignore
+	}
 
 	private void sortSearchParameters(List<SearchParameter> searchParameters) {
-    Collections.sort(searchParameters, new Comparator<SearchParameter>() {
-      @Override
-      public int compare(SearchParameter theO1, SearchParameter theO2) {
-        if (theO1.isRequired() == theO2.isRequired()) {
-          return theO1.getName().compareTo(theO2.getName());
-        }
-        if (theO1.isRequired()) {
-          return -1;
-        }
-        return 1;
-      }
-    });
-  }
+		Collections.sort(searchParameters, new Comparator<SearchParameter>() {
+			@Override
+			public int compare(SearchParameter theO1, SearchParameter theO2) {
+				if (theO1.isRequired() == theO2.isRequired()) {
+					return theO1.getName().compareTo(theO2.getName());
+				}
+				if (theO1.isRequired()) {
+					return -1;
+				}
+				return 1;
+			}
+		});
+	}
 }
