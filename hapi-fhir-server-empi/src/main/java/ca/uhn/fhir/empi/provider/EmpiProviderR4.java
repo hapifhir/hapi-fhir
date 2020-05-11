@@ -20,14 +20,17 @@ package ca.uhn.fhir.empi.provider;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -43,7 +46,7 @@ import java.util.UUID;
 public class EmpiProviderR4 extends BaseEmpiProvider {
 	private final IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 	private final IEmpiPersonMergerSvc myPersonMergerSvc;
-	private final IResourceLoader myResourceLoader;
+	private final IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
 
 	/**
 	 * Constructor
@@ -51,10 +54,11 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderR4(IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IResourceLoader theResourceLoader) {
+	public EmpiProviderR4(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IResourceLoader theResourceLoader) {
+		super(theFhirContext, theResourceLoader);
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 		myPersonMergerSvc = thePersonMergerSvc;
-		myResourceLoader = theResourceLoader;
+		myEmpiLinkUpdaterSvc = theEmpiLinkUpdaterSvc;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, type = Patient.class)
@@ -82,14 +86,24 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 										@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep,
 										RequestDetails theRequestDetails) {
 		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
-		IAnyResource personToDelete = getPersonFromId(thePersonIdToDelete.getValue(), "personIdToDelete");
-		IAnyResource personToKeep = getPersonFromId(thePersonIdToKeep.getValue(), "personIdToKeep");
+		IAnyResource personToDelete = getPersonFromId(thePersonIdToDelete.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE);
+		IAnyResource personToKeep = getPersonFromId(thePersonIdToKeep.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP);
 
 		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(theRequestDetails));
 	}
 
-	@Override
-	protected IAnyResource loadPerson(IdDt thePersonId) {
-		return myResourceLoader.load(Person.class, thePersonId);
+	@Operation(name = ProviderConstants.EMPI_UPDATE_LINK, type = Person.class)
+	public Person updateLink(@OperationParam(name=ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, min = 1, max = 1) StringType thePersonId,
+								  @OperationParam(name=ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, min = 1, max = 1) StringType theTargetId,
+								  @OperationParam(name=ProviderConstants.EMPI_UPDATE_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
+								  ServletRequestDetails theRequestDetails) {
+
+		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
+		EmpiMatchResultEnum matchResult = EmpiMatchResultEnum.valueOf(theMatchResult.getValue());
+		IAnyResource person = getPersonFromId(thePersonId.getValue(), "personIdToDelete");
+		IAnyResource target = getTargetFromId(theTargetId.getValue(), "personIdToKeep");
+
+		return (Person) myEmpiLinkUpdaterSvc.updateLink(person, target, matchResult, createEmpiContext(theRequestDetails));
 	}
+
 }

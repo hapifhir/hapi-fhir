@@ -1,34 +1,21 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
-import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
-import ca.uhn.fhir.empi.provider.EmpiProviderR4;
-import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-public class EmpiProviderR4Test extends BaseEmpiR4Test {
-	@Autowired
-	private IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
-	@Autowired
-	private IEmpiPersonMergerSvc myPersonMergerSvc;
-	@Autowired
-	private IResourceLoader myResourceLoader;
+public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
-	EmpiProviderR4 myEmpiProviderR4;
 	private Person myDeletePerson;
 	private StringType myDeletePersonId;
 	private Person myKeepPerson;
@@ -36,7 +23,7 @@ public class EmpiProviderR4Test extends BaseEmpiR4Test {
 
 	@Before
 	public void before() {
-		myEmpiProviderR4 = new EmpiProviderR4(myEmpiMatchFinderSvc, myPersonMergerSvc, myResourceLoader);
+		super.before();
 
 		myDeletePerson = createPerson();
 		myDeletePersonId = new StringType(myDeletePerson.getIdElement().toUnqualifiedVersionless().getValue());

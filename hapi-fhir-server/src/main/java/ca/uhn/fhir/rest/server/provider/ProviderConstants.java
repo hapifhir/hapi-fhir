@@ -50,7 +50,13 @@ public class ProviderConstants {
 
 	public static final String EMPI_MATCH = "$match";
 	public static final String EMPI_MATCH_RESOURCE = "resource";
+
 	public static final String EMPI_MERGE_PERSONS = "$empi-merge-persons";
 	public static final String EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE = "personIdToDelete";
 	public static final String EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP = "personIdToKeep";
+
+	public static final String EMPI_UPDATE_LINK = "$empi-update-link";
+	public static final String EMPI_UPDATE_LINK_PERSON_ID = "personId";
+	public static final String EMPI_UPDATE_LINK_TARGET_ID = "targetId";
+	public static final String EMPI_UPDATE_MATCH_RESULT = "matchResult";
 }

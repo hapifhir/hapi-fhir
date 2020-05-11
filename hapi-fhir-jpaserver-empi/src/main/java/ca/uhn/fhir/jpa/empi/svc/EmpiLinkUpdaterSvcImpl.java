@@ -4,11 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IManualLinkUpdaterSvc;
+import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.log.Logs;
+import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -16,7 +18,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-public class ManualLinkUpdaterSvcImpl implements IManualLinkUpdaterSvc {
+public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
@@ -25,10 +27,12 @@ public class ManualLinkUpdaterSvcImpl implements IManualLinkUpdaterSvc {
 	IdHelperService myIdHelperService;
 	@Autowired
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	@Autowired
+	IEmpiLinkSvc myEmpiLinkSvc;
 
 	@Transactional
 	@Override
-	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult) {
+	public IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiTransactionContext theEmpiContext) {
 		if (theMatchResult != EmpiMatchResultEnum.NO_MATCH &&
 		theMatchResult != EmpiMatchResultEnum.MATCH) {
 			throw new InvalidRequestException("Match Result may only be set to " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
@@ -57,12 +61,14 @@ public class ManualLinkUpdaterSvcImpl implements IManualLinkUpdaterSvc {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personId, targetId);
 		if (empiLink.getMatchResult() == theMatchResult) {
 			ourLog.warn("EMPI Link for " + thePerson.getIdElement().toVersionless() + ", " + theTarget.getIdElement().toVersionless() + " already has value " + theMatchResult + ".  Nothing to do.");
-			return;
+			return thePerson;
 		}
 
 		ourLog.info("Manually updating EMPI Link for " + thePerson.getIdElement().toVersionless() + ", " + theTarget.getIdElement().toVersionless() + " from " + empiLink.getMatchResult() + " to " + theMatchResult + ".");
 		empiLink.setMatchResult(theMatchResult);
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.update(empiLink);
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePerson, theEmpiContext);
+		return thePerson;
 	}
 }
