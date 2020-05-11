@@ -1,0 +1,73 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+    <li>Hibernate ORM (JPA): 5.4.6 -&gt; 5.4.14</li>
+    <li>Hibernate Search (JPA): 5.11.3 -&gt; 5.11.5</li>
+    <li>Hibernate Validator (JPA): 5.4.2.Final -&gt; 6.1.3.Final</li>
+    <li>Guava (JPA): 28.0 -&gt; 28.2</li>
+    <li>Spring Boot (Boot): 2.2.0.RELEASE -&gt; 2.2.6.RELEASE</li>
+    <li>FlywayDB (JPA) 6.1.0 -&gt; 6.4.1</li>
+    <li>Apache HTTPCliient (JPA): 4.5.9 -&gt; 4.5.12</li>
+    <li>Apache HTTPCore (JPA): 4.4.11 -&gt; 4.4.14</li>
+    <li>Commons Compress (All): 1.19 -&gt; 1.20</li>
+    </ul>"
+- item:
+    issue: "1583"
+    type: "fix"
+    title: "**Breaking Change**:
+    The HAPI FHIR Validation infrastructure has changed significantly under the hood. Existing users of the
+    validator may need to change package declarations (as FhirInstanceValidator and several other related classes
+    have been moved) and potentially add new modules to their Validation Support Chain. See
+    [Migrating to HAPI FHIR 5.x](/hapi-fhir/docs/validation/instance_validator.html#migrating-to-hapi-fhir-5x)
+    for details on how to account for this change in your code.
+    "
+- item:
+     issue: "1769"
+     type: "change"
+     title: "**Breaking Change**:
+    The `IFluentPath` interface has been renamed to `IFhirPath`, and the `FhirContext#newFluentPath()` method
+    has been replaced with an equivalent `FhirContext.newFhirPath()`. The FhirPath expression language was initially
+    called FluentPath before being renamed, so this change brings HAPI FHIR inline with the correct naming.
+    "
+- item:
+     issue: "1790"
+     type: "change"
+     title: "**Breaking Change**:
+    Several classes in the JPA server have been moved to new packages, including the DaoConfig and IDao interfaces.
+    These classes have not changed in terms of functionality, but existing projects may need to adjust some
+    package import statements.
+    "
+- item:
+     issue: "1804"
+     type: "change"
+     title: "**Breaking Change**:
+    The Generic/Fluent **delete()** operation now returns a [MethodOutcome](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/api/MethodOutcome.html)
+    object instead of an OperationOutcome. The OperationOutcomoe is still available direcly by querying
+    the MethodOutcome object, but this change makes the delete() method more consistent with
+    other similar methods in the API.
+    "
+- item:
+     type: "change"
+     title: "**Breaking Change**:
+    Some R4 and R5 structure fields containing a `code` value with a **Required (closed) binding**
+    did not use the java Enum type that was generated for the given field. These have been changed
+    to use the Enum values where possible. This change does not remove any functionality from the model
+    but may require a small amount of re-coding to deal with new setter/getter types on a few fields.
+    "
+- item:
+     issue: "1807"
+     type: "change"
+     title: "**New Feature**:
+    A new feature has been added to the JPA server called **[Partitioning](/hapi-fhir/docs/server_jpa_partitioning/partitioning.html). This
+    feature allows data to be segregated using a user defined partitioning strategy. This can be leveraged to take
+    advantags of native RDBMS partition strategies, and also to implement **multitenant servers**.
+    "
+- item:
+     issue: "1841"
+     type: "change"
+     title: "**Breaking Change**:
+    The FHIR R5 draft definitions have been updated to the current 'Preview 2' definitions (FHIR 4.4.0).
+    "

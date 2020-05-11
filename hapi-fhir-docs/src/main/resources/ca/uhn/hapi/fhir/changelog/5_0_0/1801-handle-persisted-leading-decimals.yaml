@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 1801
+title: "In previous versions of HAPI FHIR, the server incorrectly silently accepted decimal numbers in JSON with no
+   leading numbers (e.g. `.123`), as well as decimal numbers with more than one leading zero (e.g. 00.123). These will 
+   now be rejected by the JSON parser. Any values with this string that have previously been stored in the JPA server 
+   database will now automatically normalize the value to `0.123`."
