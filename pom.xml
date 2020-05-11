@@ -664,6 +664,7 @@
 		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>2.7.0</caffeine_version>
 		<commons_codec_version>1.12</commons_codec_version>
+		<commons_compress_version>1.20</commons_compress_version>
 		<commons_text_version>1.7</commons_text_version>
 		<commons_io_version>2.6</commons_io_version>
 		<commons_lang3_version>3.9</commons_lang3_version>
@@ -862,7 +863,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-				<version>1.19</version>
+				<version>${commons_compress_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>

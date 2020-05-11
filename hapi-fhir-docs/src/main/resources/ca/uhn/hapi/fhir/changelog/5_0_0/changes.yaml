@@ -12,6 +12,7 @@
     <li>FlywayDB (JPA) 6.1.0 -&gt; 6.4.1</li>
     <li>Apache HTTPCliient (JPA): 4.5.9 -&gt; 4.5.12</li>
     <li>Apache HTTPCore (JPA): 4.4.11 -&gt; 4.4.14</li>
+    <li>Commons Compress (All): 1.19 -&gt; 1.20</li>
     </ul>"
 - item:
     issue: "1583"
