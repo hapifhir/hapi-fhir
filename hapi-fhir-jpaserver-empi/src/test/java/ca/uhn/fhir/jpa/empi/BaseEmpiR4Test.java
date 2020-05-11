@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
@@ -66,6 +67,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
 
+	@Autowired
+	protected FhirContext myFhirContext;
 	@Autowired
 	protected IFhirResourceDao<Person> myPersonDao;
 	@Autowired
