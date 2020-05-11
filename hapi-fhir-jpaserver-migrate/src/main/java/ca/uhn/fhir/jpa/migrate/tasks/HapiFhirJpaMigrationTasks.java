@@ -67,7 +67,67 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init400(); // 20190401 - 20190814
 		init410(); // 20190815 - 20191014
 		init420(); // 20191015 - 20200217
+		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - present
+	}
+
+	/**
+	 * Partway through the 4.3.0 releaase cycle we renumbered to
+	 * 5.0.0 - We have a bunch of NOP tasks here to avoid breakage for anyone
+	 * who installed a prerelease before we made the switch
+	 */
+	@SuppressWarnings("deprecation")
+	private void init430() {
+		Builder version = forVersion(VersionEnum.V4_3_0);
+		version.addNop("20200218.1");
+		version.addNop("20200218.2");
+		version.addNop("20200218.3");
+		version.addNop("20200220.1");
+		version.addNop("20200419.1");
+		version.addNop("20200419.2");
+		version.addNop("20200420.0");
+		version.addNop("20200420.1");
+		version.addNop("20200420.2");
+		version.addNop("20200420.3");
+		version.addNop("20200420.4");
+		version.addNop("20200420.5");
+		version.addNop("20200420.6");
+		version.addNop("20200420.7");
+		version.addNop("20200420.8");
+		version.addNop("20200420.9");
+		version.addNop("20200420.10");
+		version.addNop("20200420.11");
+		version.addNop("20200420.12");
+		version.addNop("20200420.13");
+		version.addNop("20200420.14");
+		version.addNop("20200420.15");
+		version.addNop("20200420.16");
+		version.addNop("20200420.17");
+		version.addNop("20200420.18");
+		version.addNop("20200420.19");
+		version.addNop("20200420.20");
+		version.addNop("20200420.21");
+		version.addNop("20200420.22");
+		version.addNop("20200420.23");
+		version.addNop("20200420.24");
+		version.addNop("20200420.25");
+		version.addNop("20200420.26");
+		version.addNop("20200420.27");
+		version.addNop("20200420.28");
+		version.addNop("20200420.29");
+		version.addNop("20200420.30");
+		version.addNop("20200420.31");
+		version.addNop("20200420.32");
+		version.addNop("20200420.33");
+		version.addNop("20200420.34");
+		version.addNop("20200420.35");
+		version.addNop("20200420.36");
+		version.addNop("20200420.37");
+		version.addNop("20200420.38");
+		version.addNop("20200420.39");
+		version.addNop("20200420.40");
+		version.addNop("20200420.41");
+		version.addNop("20200420.42");
 	}
 
 	protected void init500() { // 20200218 - present
