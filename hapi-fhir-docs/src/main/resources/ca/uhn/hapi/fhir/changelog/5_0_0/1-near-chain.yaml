@@ -1,0 +1,4 @@
+---
+type: fix
+title: "DSTU3 searches using near-distance only worked on Location resources directly.  It now works on chained searches on resources with a location.
+E.g. PractitionerRole?location.near-distance=1.0 now works properly."

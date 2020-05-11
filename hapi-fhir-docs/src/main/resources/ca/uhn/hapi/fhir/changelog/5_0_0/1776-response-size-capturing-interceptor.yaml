@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1776
+title: A new server interceptor called `ResponseSizeCapturingInterceptor` has been added. This interceptor captures and makes
+   available the number of characters written (pre-compression if Gzip compression is being used) to the HTTP response
+   stream for FHIR responses.

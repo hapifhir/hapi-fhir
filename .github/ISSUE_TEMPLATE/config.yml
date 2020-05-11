@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Getting Help / Community
+    url: https://github.com/jamesagnew/hapi-fhir/wiki/Getting-Help
+    about: Please click here to learn about where to ask questions about HAPI FHIR

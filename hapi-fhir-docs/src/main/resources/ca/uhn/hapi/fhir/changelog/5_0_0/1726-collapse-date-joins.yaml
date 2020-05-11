@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 1726
+title: When performing date range searches in the JPA server, the server was generating extra
+  unneccessary joins in the generated SQL. This has been streamlined, which should result in 
+  faster searches when performing date ranges.
