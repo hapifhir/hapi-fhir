@@ -150,11 +150,11 @@ public class IgInstallerSvc {
 		fetchAndInstallDependencies(npmPackage);
 
 		ourLog.info("Installing package: {}#{}", name, version);
+		int[] count = new int[SUPPORTED_RESOURCE_TYPES.length];
 
-		for (String type : SUPPORTED_RESOURCE_TYPES) {
-			Collection<IBaseResource> resources = parseResourcesOfType(type, npmPackage);
-
-			ourLog.info(String.format("creating or updating %s resources of type %s", resources.size(), type));
+		for (int i = 0; i < SUPPORTED_RESOURCE_TYPES.length; i++) {
+			Collection<IBaseResource> resources = parseResourcesOfType(SUPPORTED_RESOURCE_TYPES[i], npmPackage);
+			count[i] = resources.size();
 
 			try {
 				resources.stream()
@@ -165,7 +165,11 @@ public class IgInstallerSvc {
 					"Error installing IG %s#%s: ", name, version), e);
 			}
 		}
-		ourLog.info(String.format("Finished installation of package: %s#%s", name, version));
+		ourLog.info(String.format("Finished installation of package %s#%s:", name, version));
+
+		for (int i = 0; i < count.length; i++) {
+			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], SUPPORTED_RESOURCE_TYPES[i]));
+		}
 	}
 
 	private void fetchAndInstallDependencies(NpmPackage npmPackage) throws ImplementationGuideInstallationException {
