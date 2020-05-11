@@ -211,7 +211,6 @@ public class PersonHelper {
 	public IAnyResource createPersonFromEmpiTarget(IBaseResource theSourceResource) {
 		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
 		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theSourceResource);
-
 		if (eidsToApply.isEmpty()) {
 			eidsToApply.add(myEIDHelper.createHapiEid());
 		}
@@ -220,13 +219,13 @@ public class PersonHelper {
 				Person personR4 = new Person();
 				eidsToApply.forEach(eid -> personR4.addIdentifier(eid.toR4()));
 				personR4.getMeta().addTag((Coding) buildEmpiManagedTag());
-				copyEmpiTargetDataIntoPerson(theSourceResource, personR4);
+				copyEmpiTargetDataIntoPerson(theSourceResource, personR4, true);
 				return personR4;
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.Person personDSTU3 = new org.hl7.fhir.dstu3.model.Person();
 				eidsToApply.forEach(eid -> personDSTU3.addIdentifier(eid.toDSTU3()));
 				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding) buildEmpiManagedTag());
-				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3);
+				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3, true);
 				return personDSTU3;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
@@ -238,66 +237,117 @@ public class PersonHelper {
 	 *
 	 * @param theBaseResource The incoming {@link Patient} or {@link Practitioner} who's data we want to copy into Person.
 	 * @param thePerson       The incoming {@link Person} who needs to have their data updated.
+	 * @param theAllowOverwriting If enabled, will overwrite existing values on the person. Otherwise, will set them only if they are currently empty/null.
+	 *
 	 */
-	private void copyEmpiTargetDataIntoPerson(IBaseResource theBaseResource, IBaseResource thePerson) {
+	private void copyEmpiTargetDataIntoPerson(IBaseResource theBaseResource, IBaseResource thePerson, Boolean theAllowOverwriting) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				copyR4TargetInformation(theBaseResource, thePerson);
+				copyR4TargetInformation(theBaseResource, thePerson, theAllowOverwriting);
 				break;
 			case DSTU3:
-				copyDSTU3TargetInformation(theBaseResource, thePerson);
+				copyDSTU3TargetInformation(theBaseResource, thePerson, theAllowOverwriting);
 				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 
-	private void copyR4TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
+	private void copyR4TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson, boolean theAllowOverwriting) {
 		Person person = (Person) thePerson;
 		switch (myFhirContext.getResourceType(theBaseResource)) {
 			case "Patient":
 				Patient patient = (Patient) theBaseResource;
-				person.setName(patient.getName());
-				person.setAddress(patient.getAddress());
-				person.setTelecom(patient.getTelecom());
-				person.setBirthDate(patient.getBirthDate());
-				person.setGender(patient.getGender());
-				person.setPhoto(patient.getPhotoFirstRep());
+				if (theAllowOverwriting || person.getName().isEmpty()) {
+					person.setName(patient.getName());
+				}
+				if (theAllowOverwriting || person.getName().isEmpty()) {
+					person.setAddress(patient.getAddress());
+				}
+				if (theAllowOverwriting || person.getTelecom().isEmpty()) {
+					person.setTelecom(patient.getTelecom());
+				}
+				if (theAllowOverwriting || person.getBirthDate() == null) {
+					person.setBirthDate(patient.getBirthDate());
+				}
+				if (theAllowOverwriting || person.getGender() == null) {
+					person.setGender(patient.getGender());
+				}
+				if (theAllowOverwriting || person.getPhoto().isEmpty()) {
+					person.setPhoto(patient.getPhotoFirstRep());
+				}
 				break;
 			case "Practitioner":
 				Practitioner practitioner = (Practitioner) theBaseResource;
-				person.setName(practitioner.getName());
-				person.setAddress(practitioner.getAddress());
-				person.setTelecom(practitioner.getTelecom());
-				person.setBirthDate(practitioner.getBirthDate());
-				person.setGender(practitioner.getGender());
-				person.setPhoto(practitioner.getPhotoFirstRep());
+				if (theAllowOverwriting || person.getName().isEmpty()) {
+					person.setName(practitioner.getName());
+				}
+				if (theAllowOverwriting || person.getAddress().isEmpty()) {
+					person.setAddress(practitioner.getAddress());
+				}
+				if (theAllowOverwriting || person.getTelecom().isEmpty()) {
+					person.setTelecom(practitioner.getTelecom());
+				}
+				if (theAllowOverwriting || person.getBirthDate() == null) {
+					person.setBirthDate(practitioner.getBirthDate());
+				}
+				if (theAllowOverwriting || person.getGender() == null) {
+					person.setGender(practitioner.getGender());
+				}
+				if (theAllowOverwriting || person.getPhoto().isEmpty()) {
+					person.setPhoto(practitioner.getPhotoFirstRep());
+				}
 				break;
 			default:
 				throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceType(theBaseResource));
 		}
 	}
 
-	private void copyDSTU3TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson) {
+	private void copyDSTU3TargetInformation(IBaseResource theBaseResource, IBaseResource thePerson, boolean theAllowOverwriting) {
 		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person) thePerson;
 		switch (myFhirContext.getResourceType(theBaseResource)) {
 			case "Patient":
 				org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient) theBaseResource;
-				person.setName(patient.getName());
-				person.setAddress(patient.getAddress());
-				person.setTelecom(patient.getTelecom());
-				person.setBirthDate(patient.getBirthDate());
-				person.setGender(patient.getGender());
-				person.setPhoto(patient.getPhotoFirstRep());
+
+				if (theAllowOverwriting || person.getName().isEmpty()) {
+					person.setName(patient.getName());
+				}
+				if (theAllowOverwriting || person.getAddress().isEmpty()) {
+					person.setAddress(patient.getAddress());
+				}
+				if (theAllowOverwriting || person.getTelecom().isEmpty()) {
+					person.setTelecom(patient.getTelecom());
+				}
+				if (theAllowOverwriting || person.getBirthDate() == null ) {
+					person.setBirthDate(patient.getBirthDate());
+				}
+				if (theAllowOverwriting || person.getGender() == null ) {
+					person.setGender(patient.getGender());
+				}
+				if (theAllowOverwriting || person.getPhoto().isEmpty()) {
+					person.setPhoto(patient.getPhotoFirstRep());
+				}
 				break;
 			case "Practitioner":
 				org.hl7.fhir.dstu3.model.Practitioner practitioner = (org.hl7.fhir.dstu3.model.Practitioner) theBaseResource;
-				person.setName(practitioner.getName());
-				person.setAddress(practitioner.getAddress());
-				person.setTelecom(practitioner.getTelecom());
-				person.setBirthDate(practitioner.getBirthDate());
-				person.setGender(practitioner.getGender());
-				person.setPhoto(practitioner.getPhotoFirstRep());
+				if (theAllowOverwriting || person.getName().isEmpty()) {
+					person.setName(practitioner.getName());
+				}
+				if (theAllowOverwriting || person.getAddress().isEmpty()) {
+					person.setAddress(practitioner.getAddress());
+				}
+				if (theAllowOverwriting || person.getTelecom().isEmpty()) {
+					person.setTelecom(practitioner.getTelecom());
+				}
+				if (theAllowOverwriting || person.getBirthDate() == null) {
+					person.setBirthDate(practitioner.getBirthDate());
+				}
+				if (theAllowOverwriting || person.getGender() == null) {
+					person.setGender(practitioner.getGender());
+				}
+				if (theAllowOverwriting || person.getPhoto().isEmpty()) {
+					person.setPhoto(practitioner.getPhotoFirstRep());
+				}
 				break;
 			default:
 				throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceType(theBaseResource));
@@ -536,9 +586,13 @@ public class PersonHelper {
 		person.setLink(links);
 	}
 
-    public void updatePersonFromEmpiTarget(IBaseResource thePerson, IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
-		copyEmpiTargetDataIntoPerson(theResource, thePerson);
-    }
+   public void updatePersonFromNewlyCreatedEmpiTarget(IBaseResource thePerson, IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+		copyEmpiTargetDataIntoPerson(theResource, thePerson, false);
+   }
+
+	public void updatePersonFromUpdatedEmpiTarget(IBaseResource thePerson, IBaseResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+		copyEmpiTargetDataIntoPerson(theResource, thePerson, false);
+	}
 
 	public int getLinkCount(IAnyResource thePerson) {
 		switch (myFhirContext.getVersion().getVersion()) {

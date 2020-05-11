@@ -11,7 +11,9 @@ import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -21,6 +23,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.temporal.TemporalField;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +37,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -410,7 +414,47 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Person personFromTarget = getPersonFromTarget(janePaulPatient);
 		HumanName nameFirstRep = personFromTarget.getNameFirstRep();
 		assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
+	}
 
+
+	@Test
+	public void testPatientCreateDoesNotOverwritePersonAttributes() {
+		Patient paul = buildPaulPatient();
+		paul.setGender(Enumerations.AdministrativeGender.MALE);
+		paul = createPatientAndUpdateLinks(paul);
+
+		Person personFromTarget = getPersonFromTarget(paul);
+		assertThat(personFromTarget.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
+
+		Patient paul2 = buildPaulPatient();
+		paul2.setGender(Enumerations.AdministrativeGender.FEMALE);
+		paul2 = createPatientAndUpdateLinks(paul2);
+
+		assertThat(paul2, is(samePersonAs(paul)));
+
+		//Newly matched patients aren't allowed to overwrite Person Attributes unless they are empty, so gender should still be set to male.
+		Person paul2Person= getPersonFromTarget(paul2);
+		assertThat(paul2Person.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
+	}
+
+	@Test
+	public void testPatientUpdatesOverwritePersonData() {
+		Patient paul = buildPaulPatient();
+		String incorrectBirthdate = "1980-06-27";
+		paul.getBirthDateElement().setValueAsString(incorrectBirthdate);
+		paul = createPatientAndUpdateLinks(paul);
+
+		Person personFromTarget = getPersonFromTarget(paul);
+		assertThat(personFromTarget.getBirthDateElement().getValueAsString(), is(incorrectBirthdate));
+
+		String correctBirthdate = "1990-06-28";
+		paul.getBirthDateElement().setValueAsString(correctBirthdate);
+
+		paul = updatePatientAndUpdateLinks(paul);
+
+		personFromTarget = getPersonFromTarget(paul);
+		assertThat(personFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
+		assertLinkCount(1);
 	}
 
 

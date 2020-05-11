@@ -136,6 +136,7 @@ public class EmpiMatchLinkSvc {
 		} else {
 			if (thePersonCandidate.isMatch()) {
 				handleExternalEidAddition(person, theResource);
+				myPersonHelper.updatePersonFromNewlyCreatedEmpiTarget(person, theResource, theEmpiTransactionContext);
 			}
 			myEmpiLinkSvc.updateLink(person, theResource, thePersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		}
@@ -166,7 +167,7 @@ public class EmpiMatchLinkSvc {
 
 		if (remainsMatchedToSamePerson && (!incomingResourceHasAnEid || hasEidsInCommon)) {
 			//update to patient that uses internal EIDs only.
-			myPersonHelper.updatePersonFromEmpiTarget(person, theResource, theEmpiTransactionContext);
+			myPersonHelper.updatePersonFromNewlyCreatedEmpiTarget(person, theResource, theEmpiTransactionContext);
 			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		}
 		if (!hasEidsInCommon && remainsMatchedToSamePerson) {
