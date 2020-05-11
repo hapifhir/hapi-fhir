@@ -25,6 +25,7 @@ import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.api.IManualLinkUpdaterSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
+import ca.uhn.fhir.jpa.empi.svc.ManualLinkUpdaterSvcImpl;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -150,6 +152,11 @@ public class EmpiConsumerConfig {
 	@Bean
 	EIDHelper eidHelper(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
 		return new EIDHelper(theFhirContext, theEmpiConfig);
+	}
+
+	@Bean
+	IManualLinkUpdaterSvc manualLinkUpdaterSvc() {
+		return new ManualLinkUpdaterSvcImpl();
 	}
 
 	@PostConstruct

@@ -114,7 +114,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	}
 
 	private void validateResourceType(String theResourceType) {
-		if (!EmpiUtil.supportedResourceType(theResourceType)) {
+		if (!EmpiUtil.supportedTargetType(theResourceType)) {
 			throw new IllegalStateException("Unsupported resource type submitted to EMPI matching queue: " + theResourceType);
 		}
 	}

@@ -27,7 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public final class EmpiUtil {
 	private EmpiUtil() {}
 
-	public static boolean supportedResourceType(String theResourceType) {
+	public static boolean supportedTargetType(String theResourceType) {
 		return ("Patient".equals(theResourceType) || "Practitioner".equals(theResourceType));
 	}
 
@@ -43,7 +43,18 @@ public final class EmpiUtil {
 	 * @param theBaseResource The Patient/Practitioner that is potentially managed by EMPI.
 	 * @return A boolean indicating whether EMPI should manage this resource.
 	 */
-	public static boolean isManagedByEmpi(IBaseResource theBaseResource) {
+	public static boolean isEmpiAccessible(IBaseResource theBaseResource) {
 		return theBaseResource.getMeta().getTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_NO_EMPI_MANAGED) == null;
+	}
+
+	/**
+	 * Checks for the presence of the EMPI-managed tag, indicating the EMPI system has ownership
+	 * of this Person's links.
+	 *
+	 * @param theBaseResource the resource to check.
+	 * @return a boolean indicating whether or not EMPI manages this Person.
+	 */
+	public static boolean isEmpiManaged(IBaseResource theBaseResource) {
+		return theBaseResource.getMeta().getTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED) != null;
 	}
 }

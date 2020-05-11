@@ -51,6 +51,7 @@ public class SearchParameterTest extends BaseEmpiR4Test {
 		map.setLoadSynchronous(true);
 		map.add("assurance", new TokenParam(Person.IdentityAssuranceLevel.LEVEL2.toCode()));
 		IBundleProvider result = myPersonDao.search(map);
+
 		assertEquals(1, result.size().intValue());
 		Person person = (Person) result.getResources(0, 1).get(0);
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(person);

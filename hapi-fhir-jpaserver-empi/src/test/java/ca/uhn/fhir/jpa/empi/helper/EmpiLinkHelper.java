@@ -25,7 +25,7 @@ public class EmpiLinkHelper {
 		for (EmpiLink link : links) {
 			IdDt personId = link.getPerson().getIdDt().toVersionless();
 			IdDt targetId = link.getTarget().getIdDt().toVersionless();
-			ourLog.info(link.getId() + ": " + personId + " -> " + targetId);
+			ourLog.info("{}: {}, {}, {}, {}", link.getId(), personId, targetId, link.getMatchResult(), link.getLinkSource());
 		}
 	}
 }

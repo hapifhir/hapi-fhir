@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.empi.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
@@ -115,7 +114,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	 */
 	private void forbidModifyingEmpiTag(IBaseResource theNewResource, IBaseResource theOldResource) {
 		if (extractResourceType(theNewResource).equalsIgnoreCase("Person")) {
-			if (isEmpiManaged(theNewResource) != isEmpiManaged(theOldResource)) {
+			if (EmpiUtil.isEmpiManaged(theNewResource) != EmpiUtil.isEmpiManaged(theOldResource)) {
 				throwBlockEmpiStatusChange();
 			}
 		}
@@ -131,16 +130,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	}
 
 
-	/**
-	 * Checks for the presence of the EMPI-managed tag, indicating the EMPI system has ownership
-	 * of this Person's links.
-	 *
-	 * @param theBaseResource the Person to check .
-	 * @return a boolean indicating whether or not EMPI manages this Person.
-	 */
-	private boolean isEmpiManaged(IBaseResource theBaseResource) {
-		return theBaseResource.getMeta().getTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED) != null;
-	}
+
 
 	/*
 	 * We assume that if we have RequestDetails, then this was an HTTP request and not an internal one.
@@ -152,7 +142,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 
 	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
 		if (extractResourceType(theResource).equalsIgnoreCase("Person")) {
-			if (theResource.getMeta().getTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED) != null) {
+			if (EmpiUtil.isEmpiManaged(theResource)) {
 				throwModificationBlockedByEmpi();
 			}
 		}

@@ -70,6 +70,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 							}
 					}
 				} else {
+					// Ignore the case where the incoming link is AUTO
 					continue;
 				}
 			}

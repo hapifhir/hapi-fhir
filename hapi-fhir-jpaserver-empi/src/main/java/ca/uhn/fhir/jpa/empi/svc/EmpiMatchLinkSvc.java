@@ -75,7 +75,7 @@ public class EmpiMatchLinkSvc {
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to EMPI processing of this resource.
 	 */
 	public EmpiTransactionContext updateEmpiLinksForEmpiTarget(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
-		if (EmpiUtil.isManagedByEmpi(theResource)) {
+		if (EmpiUtil.isEmpiAccessible(theResource)) {
 			return doEmpiUpdate(theResource, theEmpiTransactionContext);
 		} else {
 			return null;

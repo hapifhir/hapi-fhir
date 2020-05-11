@@ -141,7 +141,7 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.findAll(example);
 	}
 
-	public Optional<EmpiLink> findEmpiLinkByTargetId(IBaseResource theTargetResource) {
+	public Optional<EmpiLink> findEmpiLinkByTarget(IBaseResource theTargetResource) {
 		@Nullable Long pid = myIdHelperService.getPidOrNull(theTargetResource);
 		if (pid == null) {
 			return Optional.empty();
