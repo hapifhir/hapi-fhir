@@ -62,3 +62,9 @@
     feature allows data to be segregated using a user defined partitioning strategy. This can be leveraged to take
     advantags of native RDBMS partition strategies, and also to implement **multitenant servers**.
     "
+- item:
+     issue: "1841"
+     type: "change"
+     title: "**Breaking Change**:
+    The FHIR R5 draft definitions have been updated to the current 'Preview 2' definitions (FHIR 4.4.0).
+    "
