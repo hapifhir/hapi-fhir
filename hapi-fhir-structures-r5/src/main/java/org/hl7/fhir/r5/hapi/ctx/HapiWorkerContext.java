@@ -343,7 +343,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResource(Class<T> theClass, String theUri) {
-		if (myValidationSupport == null) {
+		if (myValidationSupport == null || theUri == null) {
 			return null;
 		} else {
 			@SuppressWarnings("unchecked")

@@ -505,13 +505,13 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
-		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
 
 		// Add a duplicate
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
-		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
 
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL);
@@ -531,7 +531,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("67890");
 		target.setDisplay("Target Code 67890");
-		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
 
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL_4);
@@ -546,7 +546,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
-		target.setRelationship(Enumerations.ConceptMapRelationship.NARROWER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISNARROWERTHANTARGET);
 
 		return conceptMap;
 	}
