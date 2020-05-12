@@ -33,7 +33,7 @@ public class EmpiRuleValidatorTest {
    
    @Test
 	public void testNonExistentMatchField() throws IOException {
-		EmpiSettingsImpl empiSettings = new EmpiSettingsImpl();
+		EmpiSettings empiSettings = new EmpiSettings();
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("bad-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);

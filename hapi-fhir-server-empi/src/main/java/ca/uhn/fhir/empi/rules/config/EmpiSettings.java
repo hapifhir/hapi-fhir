@@ -26,7 +26,7 @@ import ca.uhn.fhir.util.JsonUtil;
 
 import java.io.IOException;
 
-public class EmpiSettingsImpl implements IEmpiSettings {
+public class EmpiSettings implements IEmpiSettings {
 	private boolean myEnabled;
 	private int myConcurrentConsumers = EMPI_DEFAULT_CONCURRENT_CONSUMERS;
 	private String myScriptText;
@@ -47,7 +47,7 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 		return myEnabled;
 	}
 
-	public EmpiSettingsImpl setEnabled(boolean theEnabled) {
+	public EmpiSettings setEnabled(boolean theEnabled) {
 		myEnabled = theEnabled;
 		return this;
 	}
@@ -57,7 +57,7 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 		return myConcurrentConsumers;
 	}
 
-	public EmpiSettingsImpl setConcurrentConsumers(int theConcurrentConsumers) {
+	public EmpiSettings setConcurrentConsumers(int theConcurrentConsumers) {
 		myConcurrentConsumers = theConcurrentConsumers;
 		return this;
 	}
@@ -66,7 +66,7 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 		return myScriptText;
 	}
 
-	public EmpiSettingsImpl setScriptText(String theScriptText) throws IOException {
+	public EmpiSettings setScriptText(String theScriptText) throws IOException {
 		myScriptText = theScriptText;
 		myEmpiRules = JsonUtil.deserialize(theScriptText, EmpiRulesJson.class);
 		return this;
@@ -82,12 +82,12 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 		return myPreventEidUpdates;
 	}
 
-	public EmpiSettingsImpl setPreventEidUpdates(boolean thePreventEidUpdates) {
+	public EmpiSettings setPreventEidUpdates(boolean thePreventEidUpdates) {
 		myPreventEidUpdates = thePreventEidUpdates;
 		return this;
 	}
 
-	public EmpiSettingsImpl setEmpiRules(EmpiRulesJson theEmpiRules) {
+	public EmpiSettings setEmpiRules(EmpiRulesJson theEmpiRules) {
 		myEmpiRules = theEmpiRules;
 		return this;
 	}
@@ -96,7 +96,7 @@ public class EmpiSettingsImpl implements IEmpiSettings {
 		return myPreventMultipleEids;
 	}
 
-	public EmpiSettingsImpl setPreventMultipleEids(boolean thePreventMultipleEids) {
+	public EmpiSettings setPreventMultipleEids(boolean thePreventMultipleEids) {
 		myPreventMultipleEids = thePreventMultipleEids;
 		return this;
 	}

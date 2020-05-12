@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.empi.model.CanonicalEID;
-import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
+import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -214,11 +214,11 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 	}
 
 	private void setPreventEidUpdates(boolean thePrevent) {
-		((EmpiSettingsImpl)myEmpiConfig).setPreventEidUpdates(thePrevent);
+		((EmpiSettings)myEmpiConfig).setPreventEidUpdates(thePrevent);
 	}
 
 	private void setPreventMultipleEids(boolean thePrevent) {
-		((EmpiSettingsImpl)myEmpiConfig).setPreventMultipleEids(thePrevent);
+		((EmpiSettings)myEmpiConfig).setPreventMultipleEids(thePrevent);
 	}
 
 }

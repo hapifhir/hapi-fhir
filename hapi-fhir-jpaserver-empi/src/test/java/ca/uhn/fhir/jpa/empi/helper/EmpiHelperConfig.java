@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.helper;
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
-import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
+import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +32,7 @@ public class EmpiHelperConfig {
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 
 		// Set Enabled to true, and set strict mode.
-		return new EmpiSettingsImpl()
+		return new EmpiSettings()
 			.setEnabled(true)
 			.setScriptText(json)
 			.setPreventEidUpdates(myStrictMode)

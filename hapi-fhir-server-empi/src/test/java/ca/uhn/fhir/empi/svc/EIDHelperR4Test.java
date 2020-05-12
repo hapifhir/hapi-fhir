@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.model.CanonicalEID;
-import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
+import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import org.hl7.fhir.r4.model.Identifier;
@@ -27,7 +27,7 @@ public class EIDHelperR4Test {
 		setEnterpriseEIDSystem(EXTERNAL_ID_SYSTEM_FOR_TEST);
 	}};
 
-	private static final EmpiSettingsImpl mySettings = new EmpiSettingsImpl() {{
+	private static final EmpiSettings mySettings = new EmpiSettings() {{
 		setEmpiRules(myRules);
 	}};
 

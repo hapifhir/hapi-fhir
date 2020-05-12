@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.config;
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
-import ca.uhn.fhir.empi.rules.config.EmpiSettingsImpl;
+import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.jpa.empi.helper.EmpiLinkHelper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -27,7 +27,7 @@ public abstract class BaseTestEmpiConfig {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		return new EmpiSettingsImpl()
+		return new EmpiSettings()
 			.setEnabled(false)
 			.setScriptText(json)
 			.setPreventEidUpdates(myPreventEidUpdates)
