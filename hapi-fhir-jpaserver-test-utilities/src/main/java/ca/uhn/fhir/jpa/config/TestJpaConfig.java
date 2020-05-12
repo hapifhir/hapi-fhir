@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
-
+// FIXME KHS can use in jpa tests?
 public class TestJpaConfig {
 	@Bean
 	public DaoConfig daoConfig() {
