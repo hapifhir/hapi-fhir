@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
 import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -22,14 +21,48 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 
 	private final CriteriaBuilder myCriteriaBuilder;
 	private final AbstractQuery<Long> myQuery;
+	private final SearchParameterMap mySearchParameterMap;
+	private final RequestPartitionId myRequestPartitionId;
+	private final String myResourceType;
+
+	@Override
+	AbstractQuery<Long> pop() {
+
+		/*
+		 * Add a predicate to make sure we only include non-deleted resources, and only include
+		 * resources of the right type.
+		 *
+		 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
+		 * need an explicit predicate for it.
+		 */
+		if (!isHasIndexJoins()) {
+			if (mySearchParameterMap.getEverythingMode() == null) {
+				addPredicate(myCriteriaBuilder.equal(getRoot().get("myResourceType"), myResourceType));
+			}
+			addPredicate(myCriteriaBuilder.isNull(getRoot().get("myDeleted")));
+			if (!myRequestPartitionId.isAllPartitions()) {
+				if (myRequestPartitionId.getPartitionId() != null) {
+					addPredicate(myCriteriaBuilder.equal(getRoot().get("myPartitionIdValue").as(Integer.class), myRequestPartitionId.getPartitionId()));
+				} else {
+					addPredicate(myCriteriaBuilder.isNull(getRoot().get("myPartitionIdValue").as(Integer.class)));
+				}
+			}
+		}
+
+		return super.pop();
+	}
+
 	private final Root<ResourceTable> myResourceTableRoot;
 
 	/**
 	 * Root query constructor
 	 */
-	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, boolean theCountQuery) {
+	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, boolean theCountQuery, SearchParameterMap theSearchParameterMap, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		super(theCriteriaBuilder);
 		myCriteriaBuilder = theCriteriaBuilder;
+		mySearchParameterMap = theSearchParameterMap;
+		myRequestPartitionId = theRequestPartitionId;
+		myResourceType = theResourceType;
 
 		CriteriaQuery<Long> query = myCriteriaBuilder.createQuery(Long.class);
 		myResourceTableRoot = query.from(ResourceTable.class);
@@ -45,9 +78,12 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	/**
 	 * Subquery constructor
 	 */
-	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, QueryRootEntry theParent) {
+	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, QueryRootEntry theParent, SearchParameterMap theSearchParameterMap, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		super(theCriteriaBuilder);
 		myCriteriaBuilder = theCriteriaBuilder;
+		mySearchParameterMap = theSearchParameterMap;
+		myRequestPartitionId = theRequestPartitionId;
+		myResourceType = theResourceType;
 
 		AbstractQuery<Long> queryRoot = theParent.getQueryRoot();
 		Subquery<Long> query = queryRoot.subquery(Long.class);

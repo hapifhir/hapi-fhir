@@ -20,11 +20,6 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-
 import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
@@ -44,12 +39,21 @@ abstract class QueryRootEntry {
 	private final ArrayList<Predicate> myPredicates = new ArrayList<>();
 	private final IndexJoins myIndexJoins = new IndexJoins();
 	private final CriteriaBuilder myCriteriaBuilder;
+	private boolean myHasIndexJoins;
 
 	QueryRootEntry(CriteriaBuilder theCriteriaBuilder) {
 		myCriteriaBuilder = theCriteriaBuilder;
 	}
 
-	Join<?,?> getIndexJoin(SearchBuilderJoinKey theKey) {
+	public boolean isHasIndexJoins() {
+		return myHasIndexJoins;
+	}
+
+	public void setHasIndexJoins(boolean theHasIndexJoins) {
+		myHasIndexJoins = theHasIndexJoins;
+	}
+
+	Join<?, ?> getIndexJoin(SearchBuilderJoinKey theKey) {
 		return myIndexJoins.get(theKey);
 	}
 
@@ -77,15 +81,6 @@ abstract class QueryRootEntry {
 		return Collections.unmodifiableList(myPredicates);
 	}
 
-	// FIXME: remove
-//	<T> Subquery<T> subquery(Class<T> theClass) {
-//		return myResourceTableQuery.subquery(theClass);
-//	}
-//
-//	<T> From<?,T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
-//		return myJoinStrategy.createJoin(theType, theSearchParameterName);
-//	}
-
 	<Y> Path<Y> get(String theAttributeName) {
 		return getRoot().get(theAttributeName);
 	}
@@ -101,12 +96,11 @@ abstract class QueryRootEntry {
 		return getQueryRoot();
 	}
 
-
 	abstract void orderBy(List<Order> theOrders);
 
 	abstract Expression<Date> getLastUpdatedColumn();
 
-	abstract <T> From<?,T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName);
+	abstract <T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName);
 
 	abstract AbstractQuery<Long> getQueryRoot();
 
@@ -115,5 +109,4 @@ abstract class QueryRootEntry {
 	public abstract Expression<Long> getResourcePidColumn();
 
 	public abstract Subquery<Long> subqueryForTagNegation();
-
 }

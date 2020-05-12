@@ -98,8 +98,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -254,7 +252,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
-		myQueryRoot = new QueryRoot(myCriteriaBuilder);
+		myQueryRoot = new QueryRoot(myCriteriaBuilder, myResourceName, theParams, theRequestPartitionId);
 		myParams = theParams;
 		mySearchUuid = theSearchUuid;
 		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
@@ -335,27 +333,6 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(pids)));
-		}
-
-		/*
-		 * Add a predicate to make sure we only include non-deleted resources, and only include
-		 * resources of the right type.
-		 *
-		 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
-		 * need an explicit predicate for it.
-		 */
-		if (!myQueryRoot.hasIndexJoins()) {
-			if (myParams.getEverythingMode() == null) {
-				myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
-			}
-			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
-			if (!myRequestPartitionId.isAllPartitions()) {
-				if (myRequestPartitionId.getPartitionId() != null) {
-					myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myPartitionIdValue").as(Integer.class), myRequestPartitionId.getPartitionId()));
-				} else {
-					myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myPartitionIdValue").as(Integer.class)));
-				}
-			}
 		}
 
 		// Last updated
@@ -1231,7 +1208,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	// FIXME: why is this needed?
 	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
 		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
 		if (theLastUpdated != null) {

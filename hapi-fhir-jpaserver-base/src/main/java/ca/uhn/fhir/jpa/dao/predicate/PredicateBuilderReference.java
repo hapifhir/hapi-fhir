@@ -44,7 +44,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -77,7 +76,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -522,14 +520,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		 */
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theSubResourceName, theChain);
 		if (nextParamDef != null && !theChain.startsWith("_")) {
-			myQueryRoot.pushIndexTableSubQuery(nextParamDef.getParamType());
+			myQueryRoot.pushIndexTableSubQuery();
 		} else {
-			myQueryRoot.pushResourceTableSubQuery();
-
-			// FIXME: we probably don't always need this
-			// Create the subquery predicates
-			myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
-			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
+			myQueryRoot.pushResourceTableSubQuery(theSubResourceName);
 		}
 
 		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();

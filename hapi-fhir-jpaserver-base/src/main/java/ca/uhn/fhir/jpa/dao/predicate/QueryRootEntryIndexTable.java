@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -8,7 +9,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang3.Validate;
 
 import javax.persistence.criteria.AbstractQuery;
@@ -22,67 +22,16 @@ import java.util.Date;
 import java.util.List;
 
 public class QueryRootEntryIndexTable extends QueryRootEntry {
-	private final CriteriaBuilder myCriteriaBuilder;
-	private final QueryRootEntry myTop;
 	private final Subquery<Long> myQuery;
-	private final Root<? extends BaseResourceIndex> myRoot;
-	private final SearchBuilderJoinEnum myParamType;
-	private final Expression<Long> myResourcePidColumn;
+	private Root<? extends BaseResourceIndex> myRoot;
+	private SearchBuilderJoinEnum myParamType;
+	private Expression<Long> myResourcePidColumn;
 
-	public QueryRootEntryIndexTable(CriteriaBuilder theCriteriaBuilder, RestSearchParameterTypeEnum theParamType, QueryRootEntry theParent) {
+	public QueryRootEntryIndexTable(CriteriaBuilder theCriteriaBuilder, QueryRootEntry theParent) {
 		super(theCriteriaBuilder);
-		myCriteriaBuilder = theCriteriaBuilder;
-		myTop = theParent;
 
 		AbstractQuery<Long> queryRoot = theParent.getQueryRoot();
-		Subquery<Long> query = queryRoot.subquery(Long.class);
-		myQuery = query;
-
-		switch (theParamType) {
-			case REFERENCE:
-				myRoot = myQuery.from(ResourceLink.class);
-				this.myResourcePidColumn = myRoot.get("mySourceResourcePid").as(Long.class);
-				myParamType = SearchBuilderJoinEnum.REFERENCE;
-				break;
-			case NUMBER:
-				myRoot = myQuery.from(ResourceIndexedSearchParamNumber.class);
-				myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
-				myParamType = SearchBuilderJoinEnum.NUMBER;
-				break;
-			case DATE:
-				myRoot = myQuery.from(ResourceIndexedSearchParamDate.class);
-				myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
-				myParamType = SearchBuilderJoinEnum.DATE;
-				break;
-			case STRING:
-				myRoot = myQuery.from(ResourceIndexedSearchParamString.class);
-				myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
-				myParamType = SearchBuilderJoinEnum.STRING;
-				break;
-			case TOKEN:
-				myRoot = myQuery.from(ResourceIndexedSearchParamToken.class);
-				myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
-				myParamType = SearchBuilderJoinEnum.TOKEN;
-				break;
-			case QUANTITY:
-				myRoot = myQuery.from(ResourceIndexedSearchParamQuantity.class);
-				myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
-				myParamType = SearchBuilderJoinEnum.QUANTITY;
-				break;
-			case URI:
-				myRoot = myQuery.from(ResourceIndexedSearchParamUri.class);
-				myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
-				myParamType = SearchBuilderJoinEnum.URI;
-				break;
-			default:
-			case COMPOSITE:
-			case HAS:
-			case SPECIAL:
-				throw new IllegalStateException();
-		}
-
-		query.select(myResourcePidColumn);
-
+		myQuery = queryRoot.subquery(Long.class);
 	}
 
 	@Override
@@ -92,27 +41,79 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 
 	@Override
 	Expression<Date> getLastUpdatedColumn() {
-		return myRoot.get("myUpdated").as(Date.class);
+		return getRoot().get("myUpdated").as(Date.class);
 	}
 
 	@Override
 	<T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
+		if (myParamType == null) {
+			switch (theType) {
+				case REFERENCE:
+					myRoot = myQuery.from(ResourceLink.class);
+					this.myResourcePidColumn = myRoot.get("mySourceResourcePid").as(Long.class);
+					myParamType = SearchBuilderJoinEnum.REFERENCE;
+					break;
+				case NUMBER:
+					myRoot = myQuery.from(ResourceIndexedSearchParamNumber.class);
+					myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
+					myParamType = SearchBuilderJoinEnum.NUMBER;
+					break;
+				case DATE:
+					myRoot = myQuery.from(ResourceIndexedSearchParamDate.class);
+					myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
+					myParamType = SearchBuilderJoinEnum.DATE;
+					break;
+				case STRING:
+					myRoot = myQuery.from(ResourceIndexedSearchParamString.class);
+					myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
+					myParamType = SearchBuilderJoinEnum.STRING;
+					break;
+				case TOKEN:
+					myRoot = myQuery.from(ResourceIndexedSearchParamToken.class);
+					myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
+					myParamType = SearchBuilderJoinEnum.TOKEN;
+					break;
+				case QUANTITY:
+					myRoot = myQuery.from(ResourceIndexedSearchParamQuantity.class);
+					myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
+					myParamType = SearchBuilderJoinEnum.QUANTITY;
+					break;
+				case URI:
+					myRoot = myQuery.from(ResourceIndexedSearchParamUri.class);
+					myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
+					myParamType = SearchBuilderJoinEnum.URI;
+					break;
+				case COORDS:
+					myRoot = myQuery.from(ResourceIndexedSearchParamCoords.class);
+					myResourcePidColumn = myRoot.get("myResourcePid").as(Long.class);
+					myParamType = SearchBuilderJoinEnum.COORDS;
+					break;
+				default:
+					throw new IllegalStateException();
+			}
+
+			myQuery.select(myResourcePidColumn);
+		}
+
 		Validate.isTrue(theType == myParamType, "Wanted %s but got %s for %s", myParamType, theType, theSearchParameterName);
 		return (From<?, T>) myRoot;
 	}
 
 	@Override
 	AbstractQuery<Long> getQueryRoot() {
+		Validate.isTrue(myQuery != null);
 		return myQuery;
 	}
 
 	@Override
 	Root<?> getRoot() {
+		Validate.isTrue(myRoot != null);
 		return myRoot;
 	}
 
 	@Override
 	public Expression<Long> getResourcePidColumn() {
+		Validate.isTrue(myResourcePidColumn != null);
 		return myResourcePidColumn;
 	}
 

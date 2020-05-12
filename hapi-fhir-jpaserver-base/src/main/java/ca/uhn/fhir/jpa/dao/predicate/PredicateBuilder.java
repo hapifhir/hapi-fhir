@@ -97,7 +97,7 @@ public class PredicateBuilder {
 	}
 
 	Subquery<Long> createLinkSubquery(String theParameterName, String theTargetResourceType, ArrayList<IQueryParameterType> theOrValues, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		return myPredicateBuilderReference.createLinkSubquery(true, theParameterName, theTargetResourceType, theOrValues, theRequest, theRequestPartitionId);
+		return myPredicateBuilderReference.createLinkSubquery(theParameterName, theTargetResourceType, theOrValues, theRequest, theRequestPartitionId);
 	}
 
 	Predicate createResourceLinkPathPredicate(String theTargetResourceType, String theParamReference, Join<?, ResourceLink> theJoin) {

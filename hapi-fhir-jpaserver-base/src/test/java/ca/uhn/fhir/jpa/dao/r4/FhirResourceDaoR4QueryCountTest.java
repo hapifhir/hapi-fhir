@@ -21,9 +21,11 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.contains;
 
 public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
@@ -457,6 +459,37 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
+
+
+	@Test
+	public void testSearchOnChainedToken() {
+		Patient patient = new Patient();
+		patient.setId("P");
+		patient.addIdentifier().setSystem("sys").setValue("val");
+		myPatientDao.update(patient);
+
+		Observation obs = new Observation();
+		obs.setId("O");
+		obs.getSubject().setReference("Patient/P");
+		myObservationDao.update(obs);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_SUBJECT, new ReferenceParam("identifier", "sys|val"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myObservationDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Observation/O"));
+
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, StringUtils.countMatches(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true).toLowerCase(), "join"));
+	}
+
+
 	
 	
 	@Test

@@ -20,11 +20,8 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.lang3.Validate;
 
 import javax.persistence.criteria.AbstractQuery;
@@ -44,10 +41,15 @@ import java.util.Stack;
 public class QueryRoot {
 	private final Stack<QueryRootEntry> myQueryRootStack = new Stack<>();
 	private final CriteriaBuilder myCriteriaBuilder;
-	private boolean myHasIndexJoins;
+	private final SearchParameterMap mySearchParameterMap;
+	private final RequestPartitionId myRequestPartitionId;
+	private final String myResourceType;
 
-	public QueryRoot(CriteriaBuilder theCriteriaBuilder) {
+	public QueryRoot(CriteriaBuilder theCriteriaBuilder, String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = theCriteriaBuilder;
+		mySearchParameterMap = theSearchParameterMap;
+		myRequestPartitionId = theRequestPartitionId;
+		myResourceType = theResourceType;
 	}
 
 	private QueryRootEntry top() {
@@ -59,11 +61,6 @@ public class QueryRoot {
 		QueryRootEntry element = myQueryRootStack.pop();
 		return element.pop();
 	}
-
-	// FIXME: remove
-//	public Root<ResourceTable> getRoot() {
-//		return top().getRoot();
-//	}
 
 	public <Y> Path<Y> get(String theAttributeName) {
 		return top().get(theAttributeName);
@@ -81,15 +78,6 @@ public class QueryRoot {
 		top().addPredicates(thePredicates);
 	}
 
-	public Predicate[] getPredicateArray() {
-		return top().getPredicateArray();
-	}
-
-	void putIndex(SearchBuilderJoinKey theKey, Join<ResourceTable, ResourceIndexedSearchParamDate> theJoin) {
-		myHasIndexJoins = true;
-		top().putIndex(theKey, theJoin);
-	}
-
 	void clearPredicates() {
 		top().clearPredicates();
 	}
@@ -98,47 +86,32 @@ public class QueryRoot {
 		return top().getPredicates();
 	}
 
-	// FIXME: remove
-//	<T> Subquery<T> subquery(Class<T> theClass) {
-//		return top().subquery(theClass);
-//	}
-
-	public boolean hasIndexJoins() {
-		return myHasIndexJoins;
-	}
-
 	public void setHasIndexJoins() {
-		myHasIndexJoins = true;
+		top().setHasIndexJoins(true);
 	}
 
 	public void clearHasIndexJoins() {
-		myHasIndexJoins = false;
+		top().setHasIndexJoins(false);
 	}
 
 	public <T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
 		return top().createJoin(theType, theSearchParameterName);
 	}
 
-
-	// FIXME: remove
-//	public void setJoinStrategyForCurrentStackTop(IJoinStrategy theJoinStrategy) {
-//		top().setJoinStrategy(theJoinStrategy);
-//	}
-
 	public void pushResourceTableQuery() {
-		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, false));
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, false, mySearchParameterMap, myResourceType, myRequestPartitionId));
 	}
 
 	public void pushResourceTableCountQuery() {
-		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, true));
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, true, mySearchParameterMap, myResourceType, myRequestPartitionId));
 	}
 
-	public void pushResourceTableSubQuery() {
-		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, top()));
+	public void pushResourceTableSubQuery(String theResourceType) {
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, top(), mySearchParameterMap, theResourceType, myRequestPartitionId));
 	}
 
-	public void pushIndexTableSubQuery(RestSearchParameterTypeEnum theParamType) {
-		myQueryRootStack.push(new QueryRootEntryIndexTable(myCriteriaBuilder, theParamType, top()));
+	public void pushIndexTableSubQuery() {
+		myQueryRootStack.push(new QueryRootEntryIndexTable(myCriteriaBuilder, top()));
 	}
 
 	public boolean isEmpty() {
