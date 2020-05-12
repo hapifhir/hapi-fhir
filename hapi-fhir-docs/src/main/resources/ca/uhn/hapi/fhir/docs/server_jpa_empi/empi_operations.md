@@ -186,3 +186,11 @@ This might result in a response such as the following:
   ]
 }
 ```
+
+# Finding Possible Matches
+
+Use the following FHIR query to find all matches in the system that were automatically determined as possible matches:
+
+```
+http://example.com/Person?assurance=level2
+```
