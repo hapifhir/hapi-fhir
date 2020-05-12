@@ -20,11 +20,23 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang3.Validate;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.AbstractQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.Date;
 import java.util.List;
 import java.util.Stack;
@@ -57,11 +69,7 @@ public class QueryRoot {
 		return top().get(theAttributeName);
 	}
 
-	public <Y> Join<ResourceTable, Y> join(String theAttributeName, JoinType theJoinType) {
-		return top().join(theAttributeName, theJoinType);
-	}
-
-	public Join<?,?> getIndexJoin(SearchBuilderJoinKey theKey) {
+	public Join<?, ?> getIndexJoin(SearchBuilderJoinKey theKey) {
 		return top().getIndexJoin(theKey);
 	}
 
@@ -107,7 +115,7 @@ public class QueryRoot {
 		myHasIndexJoins = false;
 	}
 
-	<T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
+	public <T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
 		return top().createJoin(theType, theSearchParameterName);
 	}
 
@@ -129,6 +137,10 @@ public class QueryRoot {
 		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, top()));
 	}
 
+	public void pushIndexTableSubQuery(RestSearchParameterTypeEnum theParamType) {
+		myQueryRootStack.push(new QueryRootEntryIndexTable(myCriteriaBuilder, theParamType, top()));
+	}
+
 	public boolean isEmpty() {
 		return myQueryRootStack.isEmpty();
 	}
@@ -147,8 +159,8 @@ public class QueryRoot {
 	 * they rely on a leaky abstraction right now.. But when we get around to implementing composites properly,
 	 * let's not continue this. JA 2020-05-12
 	 */
-	public Root<ResourceTable> getRootForComposite() {
-		return top().getRootForComposite();
+	public Root<?> getRootForComposite() {
+		return top().getRoot();
 	}
 
 	public Expression<Long> getResourcePidColumn() {
@@ -158,4 +170,5 @@ public class QueryRoot {
 	public Subquery<Long> subqueryForTagNegation() {
 		return top().subqueryForTagNegation();
 	}
+
 }

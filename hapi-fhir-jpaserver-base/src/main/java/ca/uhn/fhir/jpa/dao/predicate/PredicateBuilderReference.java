@@ -414,14 +414,16 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				orValues.add(chainValue);
 			}
 
+			// If this is false, we throw an exception below so no sense doing any further processing
+			if (foundChainMatch) {
+				Subquery<Long> subQ = createLinkSubquery(chain, subResourceName, orValues, theRequest, theRequestPartitionId);
 
-			Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues, theRequest, theRequestPartitionId);
-
-			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
-			Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
-			Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
-			theCodePredicates.add(andPredicate);
-			candidateTargetTypes.add(nextType);
+				Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
+				Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
+				Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
+				theCodePredicates.add(andPredicate);
+				candidateTargetTypes.add(nextType);
+			}
 		}
 
 		if (!foundChainMatch) {
@@ -511,29 +513,29 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return chainValue;
 	}
 
-	Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-
-		// FIXME: what does theFoundChainMatch do?
-		Validate.isTrue(theFoundChainMatch);
+	Subquery<Long> createLinkSubquery(String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		/*
 		 * We're doing a chain call, so push the current query root
 		 * and predicate list down and put new ones at the top of the
 		 * stack and run a subquery
 		 */
-		myQueryRoot.pushResourceTableSubQuery();
+		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theSubResourceName, theChain);
+		if (nextParamDef != null && !theChain.startsWith("_")) {
+			myQueryRoot.pushIndexTableSubQuery(nextParamDef.getParamType());
+		} else {
+			myQueryRoot.pushResourceTableSubQuery();
+
+			// FIXME: we probably don't always need this
+			// Create the subquery predicates
+			myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
+			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
+		}
 
 		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
 		andOrParams.add(theOrValues);
 
-		// Create the subquery predicates
-		myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
-		myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
-
-		// FIXME: this is always true
-		if (theFoundChainMatch) {
-			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest, theRequestPartitionId);
-		}
+		searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest, theRequestPartitionId);
 
 		/*
 		 * Pop the old query root and predicate list back
@@ -877,7 +879,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			throw new InvalidRequestException(msg);
 		}
 
-		Join<ResourceTable, ResourceHistoryProvenanceEntity> join = myQueryRoot.join("myProvenance", JoinType.LEFT);
+		From<?, ResourceHistoryProvenanceEntity> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.PROVENANCE, Constants.PARAM_SOURCE);
 
 		List<Predicate> codePredicates = new ArrayList<>();
 
@@ -965,7 +967,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(paramName, targetResourceType, orValues, theRequest, theRequestPartitionId);
-			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
+			Join<?, ResourceLink> join = (Join) myQueryRoot.createJoin(SearchBuilderJoinEnum.HAS, "_has");
 
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
 			Predicate sourceTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType"), theResourceType);
@@ -998,7 +1000,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 	}
 
-	private Predicate createCompositeParamPart(String theResourceName, Root<ResourceTable> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue, RequestPartitionId theRequestPartitionId) {
+	private Predicate createCompositeParamPart(String theResourceName, Root<?> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue, RequestPartitionId theRequestPartitionId) {
 		Predicate retVal = null;
 		switch (theParam.getParamType()) {
 			case STRING: {

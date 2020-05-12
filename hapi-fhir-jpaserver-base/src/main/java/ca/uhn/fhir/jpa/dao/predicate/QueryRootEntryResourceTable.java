@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 import javax.persistence.criteria.AbstractQuery;
@@ -11,15 +13,12 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.Date;
 import java.util.List;
 
 class QueryRootEntryResourceTable extends QueryRootEntry {
-
 
 	private final CriteriaBuilder myCriteriaBuilder;
 	private final AbstractQuery<Long> myQuery;
@@ -29,15 +28,16 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	 * Root query constructor
 	 */
 	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, boolean theCountQuery) {
+		super(theCriteriaBuilder);
 		myCriteriaBuilder = theCriteriaBuilder;
 
 		CriteriaQuery<Long> query = myCriteriaBuilder.createQuery(Long.class);
 		myResourceTableRoot = query.from(ResourceTable.class);
 
 		if (theCountQuery) {
-			query.multiselect(get("myId").as(Long.class));
-		} else {
 			query.multiselect(myCriteriaBuilder.countDistinct(myResourceTableRoot));
+		} else {
+			query.multiselect(get("myId").as(Long.class));
 		}
 		myQuery = query;
 	}
@@ -46,34 +46,14 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	 * Subquery constructor
 	 */
 	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, QueryRootEntry theParent) {
+		super(theCriteriaBuilder);
 		myCriteriaBuilder = theCriteriaBuilder;
 
 		AbstractQuery<Long> queryRoot = theParent.getQueryRoot();
-		myQuery = queryRoot.subquery(Long.class);
+		Subquery<Long> query = queryRoot.subquery(Long.class);
+		myQuery = query;
 		myResourceTableRoot = myQuery.from(ResourceTable.class);
-	}
-
-
-	@Override
-	<Y> Path<Y> get(String theAttributeName) {
-		return myResourceTableRoot.get(theAttributeName);
-	}
-
-	@Override
-	<Y> Join<ResourceTable, Y> join(String theAttributeName, JoinType theJoinType) {
-		return myResourceTableRoot.join(theAttributeName, theJoinType);
-	}
-
-	@Override
-	AbstractQuery<Long> pop() {
-		Predicate[] predicateArray = getPredicateArray();
-		if (predicateArray.length == 1) {
-			myQuery.where(predicateArray[0]);
-		} else {
-			myQuery.where(myCriteriaBuilder.and(predicateArray));
-		}
-
-		return myQuery;
+		query.select(myResourceTableRoot.get("myId").as(Long.class));
 	}
 
 	@Override
@@ -91,32 +71,51 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	@SuppressWarnings("unchecked")
 	@Override
 	<T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
+		Join<?,?> join = null;
 		switch (theType) {
 			case DATE:
-				join = join("myParamsDate", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
 				break;
 			case NUMBER:
-				join = join("myParamsNumber", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
 				break;
 			case QUANTITY:
-				join = join("myParamsQuantity", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
 				break;
 			case REFERENCE:
-				join = join("myResourceLinks", JoinType.LEFT);
+				join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
 				break;
 			case STRING:
-				join = join("myParamsString", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
 				break;
 			case URI:
-				join = join("myParamsUri", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
 				break;
 			case TOKEN:
-				join = join("myParamsToken", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
 				break;
 			case COORDS:
-				join = join("myParamsCoords", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsCoords", JoinType.LEFT);
 				break;
+			case HAS:
+				join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
+				break;
+			case PROVENANCE:
+				join = myResourceTableRoot.join("myProvenance", JoinType.LEFT);
+				break;
+			case FORCED_ID:
+				join = myResourceTableRoot.join("myForcedId", JoinType.LEFT);
+				break;
+			case PRESENCE:
+				join = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
+				break;
+			case COMPOSITE_UNIQUE:
+				join = myResourceTableRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+				break;
+			case RESOURCE_TAGS:
+				join = myResourceTableRoot.join("myTags", JoinType.LEFT);
+				break;
+
 		}
 
 		SearchBuilderJoinKey key = new SearchBuilderJoinKey(theSearchParameterName, theType);
@@ -131,7 +130,7 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	}
 
 	@Override
-	Root<ResourceTable> getRootForComposite() {
+	Root<ResourceTable> getRoot() {
 		return myResourceTableRoot;
 	}
 
@@ -144,6 +143,5 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	public Subquery<Long> subqueryForTagNegation() {
 		return myQuery.subquery(Long.class);
 	}
-
 
 }

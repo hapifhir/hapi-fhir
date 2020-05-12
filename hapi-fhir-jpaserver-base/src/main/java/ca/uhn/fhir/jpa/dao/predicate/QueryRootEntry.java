@@ -20,14 +20,16 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 import javax.persistence.criteria.AbstractQuery;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -41,13 +43,11 @@ import java.util.List;
 abstract class QueryRootEntry {
 	private final ArrayList<Predicate> myPredicates = new ArrayList<>();
 	private final IndexJoins myIndexJoins = new IndexJoins();
+	private final CriteriaBuilder myCriteriaBuilder;
 
-	QueryRootEntry() {
+	QueryRootEntry(CriteriaBuilder theCriteriaBuilder) {
+		myCriteriaBuilder = theCriteriaBuilder;
 	}
-
-	abstract <Y> Path<Y> get(String theAttributeName);
-
-	abstract <Y> Join<ResourceTable, Y> join(String theAttributeName, JoinType theJoinType);
 
 	Join<?,?> getIndexJoin(SearchBuilderJoinKey theKey) {
 		return myIndexJoins.get(theKey);
@@ -65,7 +65,7 @@ abstract class QueryRootEntry {
 		return myPredicates.toArray(new Predicate[0]);
 	}
 
-	void putIndex(SearchBuilderJoinKey theKey, Join<ResourceTable, ResourceIndexedSearchParamDate> theJoin) {
+	void putIndex(SearchBuilderJoinKey theKey, Join<?, ?> theJoin) {
 		myIndexJoins.put(theKey, theJoin);
 	}
 
@@ -86,7 +86,21 @@ abstract class QueryRootEntry {
 //		return myJoinStrategy.createJoin(theType, theSearchParameterName);
 //	}
 
-	abstract AbstractQuery<Long> pop();
+	<Y> Path<Y> get(String theAttributeName) {
+		return getRoot().get(theAttributeName);
+	}
+
+	AbstractQuery<Long> pop() {
+		Predicate[] predicateArray = getPredicateArray();
+		if (predicateArray.length == 1) {
+			getQueryRoot().where(predicateArray[0]);
+		} else {
+			getQueryRoot().where(myCriteriaBuilder.and(predicateArray));
+		}
+
+		return getQueryRoot();
+	}
+
 
 	abstract void orderBy(List<Order> theOrders);
 
@@ -96,9 +110,10 @@ abstract class QueryRootEntry {
 
 	abstract AbstractQuery<Long> getQueryRoot();
 
-	abstract Root<ResourceTable> getRootForComposite();
+	abstract Root<?> getRoot();
 
 	public abstract Expression<Long> getResourcePidColumn();
 
 	public abstract Subquery<Long> subqueryForTagNegation();
+
 }

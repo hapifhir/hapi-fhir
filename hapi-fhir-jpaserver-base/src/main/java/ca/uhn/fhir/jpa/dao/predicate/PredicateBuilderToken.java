@@ -375,7 +375,13 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				break;
 		}
 
-		Predicate predicate = hashField.in(values);
+		Predicate predicate;
+		if (values.size() == 1) {
+			predicate = myCriteriaBuilder.equal(hashField, values.get(0));
+		} else {
+			predicate = hashField.in(values);
+		}
+
 		if (theModifier == TokenParamModifier.NOT) {
 			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName));
 			Predicate disjunctionPredicate = theBuilder.not(predicate);

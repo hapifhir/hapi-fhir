@@ -290,7 +290,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		if (myParams.getEverythingMode() != null) {
-			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinks", JoinType.LEFT);
+			From<?, ResourceLink> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.REFERENCE, null);
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
@@ -387,7 +387,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
-			From<?, ?> forcedIdJoin = theQueryRoot.join("myForcedId", JoinType.LEFT);
+			From<?, ?> forcedIdJoin = theQueryRoot.createJoin(SearchBuilderJoinEnum.FORCED_ID, null);
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
 				theOrders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
 				theOrders.add(theBuilder.asc(theQueryRoot.get("myId")));
@@ -415,43 +415,35 @@ public class SearchBuilder implements ISearchBuilder {
 			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
 
-		String joinAttrName;
 		String[] sortAttrName;
 		SearchBuilderJoinEnum joinType;
 
 		switch (param.getParamType()) {
 			case STRING:
-				joinAttrName = "myParamsString";
 				sortAttrName = new String[]{"myValueExact"};
 				joinType = SearchBuilderJoinEnum.STRING;
 				break;
 			case DATE:
-				joinAttrName = "myParamsDate";
 				sortAttrName = new String[]{"myValueLow"};
 				joinType = SearchBuilderJoinEnum.DATE;
 				break;
 			case REFERENCE:
-				joinAttrName = "myResourceLinks";
 				sortAttrName = new String[]{"myTargetResourcePid"};
 				joinType = SearchBuilderJoinEnum.REFERENCE;
 				break;
 			case TOKEN:
-				joinAttrName = "myParamsToken";
 				sortAttrName = new String[]{"mySystem", "myValue"};
 				joinType = SearchBuilderJoinEnum.TOKEN;
 				break;
 			case NUMBER:
-				joinAttrName = "myParamsNumber";
 				sortAttrName = new String[]{"myValue"};
 				joinType = SearchBuilderJoinEnum.NUMBER;
 				break;
 			case URI:
-				joinAttrName = "myParamsUri";
 				sortAttrName = new String[]{"myUri"};
 				joinType = SearchBuilderJoinEnum.URI;
 				break;
 			case QUANTITY:
-				joinAttrName = "myParamsQuantity";
 				sortAttrName = new String[]{"myValue"};
 				joinType = SearchBuilderJoinEnum.QUANTITY;
 				break;
@@ -467,9 +459,9 @@ public class SearchBuilder implements ISearchBuilder {
 		 * sorting on, we'll also sort with it. Otherwise we need a new join.
 		 */
 		SearchBuilderJoinKey key = new SearchBuilderJoinKey(theSort.getParamName(), joinType);
-		Join<?, ?> join = theQueryRoot.getIndexJoin(key);
+		From<?, ?> join = theQueryRoot.getIndexJoin(key);
 		if (join == null) {
-			join = theQueryRoot.join(joinAttrName, JoinType.LEFT);
+			join = theQueryRoot.createJoin(joinType, theSort.getParamName());
 
 			if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 				theQueryRoot.addPredicate(join.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
@@ -874,7 +866,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, RequestPartitionId theRequestPartitionId) {
-		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myQueryRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+		From<?, ResourceIndexedCompositeStringUnique> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.COMPOSITE_UNIQUE, null);
 
 		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getPartitionId();

@@ -162,7 +162,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 
 			}
 
-			Join<ResourceTable, ResourceTag> tagJoin = myQueryRoot.join("myTags", JoinType.LEFT);
+			From<?, ResourceTag> tagJoin = myQueryRoot.createJoin(SearchBuilderJoinEnum.RESOURCE_TAGS, null);
 			From<ResourceTag, TagDefinition> defJoin = tagJoin.join("myTag");
 
 			Predicate tagListPredicate = createPredicateTagList(defJoin, myCriteriaBuilder, tagType, tokens);
