@@ -124,3 +124,65 @@ The following request body could be used:
   } ]
 }
 ```
+
+# Querying The EMPI
+
+When EMPI is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server.
+
+This operation allows a Patient resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules.  
+
+For example, the following request may be submitted:
+
+```http
+POST /Patient/$match
+Content-Type: application/fhir+json; charset=UTF-8
+
+{
+    "resourceType":"Parameters",
+    "parameter": [
+        {
+            "name":"resource",
+            "resource": {
+                "resourceType":"Patient",
+                "name": [
+                   { "family":"foo" }
+                ]
+            }
+        }
+    ]
+}
+```
+
+This might result in a response such as the following:
+
+```json
+{
+  "resourceType": "Bundle",
+  "id": "0e712adc-6979-4875-bbe9-70b883a955b8",
+  "meta": {
+    "lastUpdated": "2019-06-06T22:46:43.809+03:30"
+  },
+  "type": "searchset",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "3",
+        "meta": {
+          "versionId": "1",
+          "lastUpdated": "2019-06-06T22:46:43.339+03:30"
+        },
+        "name": [
+          {
+            "family": "foo",
+            "given": [
+              "bar"
+            ]
+          }
+        ],
+        "birthDate": "2000-01-01"
+      }
+    }
+  ]
+}
+```
