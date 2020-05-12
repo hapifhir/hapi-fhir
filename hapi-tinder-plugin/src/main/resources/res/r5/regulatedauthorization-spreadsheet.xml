@@ -16,7 +16,7 @@
   
   
   <TabRatio>837</TabRatio>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1053,7 +1053,6 @@
     <VerticalResolution>600</VerticalResolution>
    </Print>
    <Zoom>90</Zoom>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -1562,7 +1561,7 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=Search!R1C1:R1C5"/>
   </Names>
-  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="28" ss:StyleID="s94" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="29" ss:StyleID="s94" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s94" ss:Width="76.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s94" ss:Width="61.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s94" ss:Width="201.0"/>
@@ -1634,6 +1633,16 @@
     <Cell ss:StyleID="s100"/>
     <Cell ss:StyleID="s102"><Data ss:Type="String">RegulatedAuthorization.case.identifier</Data></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">The case or procedure number</Data></Cell>
+    <Cell ss:StyleID="s101"/>
+    <Cell ss:StyleID="s101"/>
+    <Cell ss:StyleID="s101"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s99"><Data ss:Type="String">case-type</Data></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s100"/>
+    <Cell ss:StyleID="s102"><Data ss:Type="String">RegulatedAuthorization.case.type</Data></Cell>
+    <Cell ss:StyleID="s103"/>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s101"/>
     <Cell ss:StyleID="s101"/>
@@ -1781,6 +1790,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
