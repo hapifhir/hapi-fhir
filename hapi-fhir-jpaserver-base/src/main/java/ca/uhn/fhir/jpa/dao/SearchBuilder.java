@@ -41,7 +41,6 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -71,6 +70,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -133,7 +133,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
-	private final QueryRoot myQueryRoot = new QueryRoot();
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
 	private final IDao myCallingDao;
@@ -143,6 +142,7 @@ public class SearchBuilder implements ISearchBuilder {
 	protected IResourceTagDao myResourceTagDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+	private QueryRoot myQueryRoot;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
@@ -253,8 +253,9 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
-		myParams = theParams;
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
+		myQueryRoot = new QueryRoot(myCriteriaBuilder);
+		myParams = theParams;
 		mySearchUuid = theSearchUuid;
 		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
 		myRequestPartitionId = theRequestPartitionId;
@@ -262,7 +263,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 
 	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
-		CriteriaQuery<Long> outerQuery;
 		/*
 		 * Sort
 		 *
@@ -272,31 +272,20 @@ public class SearchBuilder implements ISearchBuilder {
 		if (sort != null) {
 			assert !theCount;
 
-			outerQuery = myCriteriaBuilder.createQuery(Long.class);
-			myQueryRoot.push(outerQuery);
-			if (theCount) {
-				outerQuery.multiselect(myCriteriaBuilder.countDistinct(myQueryRoot.getRoot()));
-			} else {
-				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
-			}
+			myQueryRoot.pushResourceTableQuery();
 
 			List<Order> orders = Lists.newArrayList();
-
 			createSort(myCriteriaBuilder, myQueryRoot, sort, orders);
 			if (orders.size() > 0) {
-				outerQuery.orderBy(orders);
+				myQueryRoot.orderBy(orders);
 			}
 
 		} else {
 
-			outerQuery = myCriteriaBuilder.createQuery(Long.class);
-			myQueryRoot.push(outerQuery);
 			if (theCount) {
-				outerQuery.multiselect(myCriteriaBuilder.countDistinct(myQueryRoot.getRoot()));
+				myQueryRoot.pushResourceTableCountQuery();
 			} else {
-				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
-				// KHS This distinct call is causing performance issues in large installations
-//				outerQuery.distinct(true);
+				myQueryRoot.pushResourceTableQuery();
 			}
 		}
 
@@ -371,15 +360,15 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Last updated
 		DateRangeParam lu = myParams.getLastUpdated();
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myCriteriaBuilder, myQueryRoot.getRoot());
+		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myCriteriaBuilder);
 		myQueryRoot.addPredicates(lastUpdatedPredicates);
-
-		myQueryRoot.where(myCriteriaBuilder.and(myQueryRoot.getPredicateArray()));
 
 		/*
 		 * Now perform the search
 		 */
+		CriteriaQuery<Long> outerQuery = (CriteriaQuery<Long>) myQueryRoot.pop();
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
+		assert myQueryRoot.isEmpty();
 
 		if (theMaximumResults != null) {
 			query.setMaxResults(theMaximumResults);
@@ -616,7 +605,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
-		new QueryChunker<ResourcePersistentId>().chunk(pids, t->{
+		new QueryChunker<ResourcePersistentId>().chunk(pids, t -> {
 			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
 		});
 
@@ -941,6 +930,22 @@ public class SearchBuilder implements ISearchBuilder {
 		myDaoConfig = theDaoConfig;
 	}
 
+	private List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder) {
+		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
+		if (theLastUpdated != null) {
+			if (theLastUpdated.getLowerBoundAsInstant() != null) {
+				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
+				Predicate predicateLower = builder.greaterThanOrEqualTo(myQueryRoot.getLastUpdatedColumn(), theLastUpdated.getLowerBoundAsInstant());
+				lastUpdatedPredicates.add(predicateLower);
+			}
+			if (theLastUpdated.getUpperBoundAsInstant() != null) {
+				Predicate predicateUpper = builder.lessThanOrEqualTo(myQueryRoot.getLastUpdatedColumn(), theLastUpdated.getUpperBoundAsInstant());
+				lastUpdatedPredicates.add(predicateUpper);
+			}
+		}
+		return lastUpdatedPredicates;
+	}
+
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
 
 		private final RequestDetails myRequest;
@@ -1234,6 +1239,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
+	// FIXME: why is this needed?
 	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
 		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
 		if (theLastUpdated != null) {

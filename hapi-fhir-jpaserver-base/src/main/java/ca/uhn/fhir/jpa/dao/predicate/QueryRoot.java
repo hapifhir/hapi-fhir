@@ -22,30 +22,36 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import org.apache.commons.lang3.Validate;
 
 import javax.persistence.criteria.*;
+import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 
 public class QueryRoot {
 	private final Stack<QueryRootEntry> myQueryRootStack = new Stack<>();
+	private final CriteriaBuilder myCriteriaBuilder;
 	private boolean myHasIndexJoins;
 
-	public void push(AbstractQuery<Long> theResourceTableQuery) {
-		myQueryRootStack.push(new QueryRootEntry(theResourceTableQuery));
+	public QueryRoot(CriteriaBuilder theCriteriaBuilder) {
+		myCriteriaBuilder = theCriteriaBuilder;
 	}
 
 	private QueryRootEntry top() {
+		Validate.isTrue(!myQueryRootStack.empty());
 		return myQueryRootStack.peek();
 	}
 
-	void pop() {
-		myQueryRootStack.pop();
+	public AbstractQuery<Long> pop() {
+		QueryRootEntry element = myQueryRootStack.pop();
+		return element.pop();
 	}
 
-	public Root<ResourceTable> getRoot() {
-		return top().getRoot();
-	}
+	// FIXME: remove
+//	public Root<ResourceTable> getRoot() {
+//		return top().getRoot();
+//	}
 
 	public <Y> Path<Y> get(String theAttributeName) {
 		return top().get(theAttributeName);
@@ -84,13 +90,10 @@ public class QueryRoot {
 		return top().getPredicates();
 	}
 
-	public void where(Predicate theAnd) {
-		top().where(theAnd);
-	}
-
-	<T> Subquery<T> subquery(Class<T> theClass) {
-		return top().subquery(theClass);
-	}
+	// FIXME: remove
+//	<T> Subquery<T> subquery(Class<T> theClass) {
+//		return top().subquery(theClass);
+//	}
 
 	public boolean hasIndexJoins() {
 		return myHasIndexJoins;
@@ -102,5 +105,57 @@ public class QueryRoot {
 
 	public void clearHasIndexJoins() {
 		myHasIndexJoins = false;
+	}
+
+	<T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
+		return top().createJoin(theType, theSearchParameterName);
+	}
+
+
+	// FIXME: remove
+//	public void setJoinStrategyForCurrentStackTop(IJoinStrategy theJoinStrategy) {
+//		top().setJoinStrategy(theJoinStrategy);
+//	}
+
+	public void pushResourceTableQuery() {
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, false));
+	}
+
+	public void pushResourceTableCountQuery() {
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, true));
+	}
+
+	public void pushResourceTableSubQuery() {
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, top()));
+	}
+
+	public boolean isEmpty() {
+		return myQueryRootStack.isEmpty();
+	}
+
+	public void orderBy(List<Order> theOrders) {
+		top().orderBy(theOrders);
+	}
+
+	public Expression<Date> getLastUpdatedColumn() {
+		return top().getLastUpdatedColumn();
+	}
+
+	/**
+	 * This class should avoid leaking the internal query root, but we need to do so for how composite search params are
+	 * currently implemented. These only half work in the first place so I'm not going to worry about the fact that
+	 * they rely on a leaky abstraction right now.. But when we get around to implementing composites properly,
+	 * let's not continue this. JA 2020-05-12
+	 */
+	public Root<ResourceTable> getRootForComposite() {
+		return top().getRootForComposite();
+	}
+
+	public Expression<Long> getResourcePidColumn() {
+		return top().getResourcePidColumn();
+	}
+
+	public Subquery<Long> subqueryForTagNegation() {
+		return top().subqueryForTagNegation();
 	}
 }

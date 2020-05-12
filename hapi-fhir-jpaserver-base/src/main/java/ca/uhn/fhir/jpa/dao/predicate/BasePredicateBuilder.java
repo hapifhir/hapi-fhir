@@ -79,42 +79,6 @@ abstract class BasePredicateBuilder {
 		myDontUseHashesForSearch = myDaoConfig.getDisableHashBasedSearches();
 	}
 
-	@SuppressWarnings("unchecked")
-	<T> Join<ResourceTable, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
-		switch (theType) {
-			case DATE:
-				join = myQueryRoot.join("myParamsDate", JoinType.LEFT);
-				break;
-			case NUMBER:
-				join = myQueryRoot.join("myParamsNumber", JoinType.LEFT);
-				break;
-			case QUANTITY:
-				join = myQueryRoot.join("myParamsQuantity", JoinType.LEFT);
-				break;
-			case REFERENCE:
-				join = myQueryRoot.join("myResourceLinks", JoinType.LEFT);
-				break;
-			case STRING:
-				join = myQueryRoot.join("myParamsString", JoinType.LEFT);
-				break;
-			case URI:
-				join = myQueryRoot.join("myParamsUri", JoinType.LEFT);
-				break;
-			case TOKEN:
-				join = myQueryRoot.join("myParamsToken", JoinType.LEFT);
-				break;
-			case COORDS:
-				join = myQueryRoot.join("myParamsCoords", JoinType.LEFT);
-				break;
-		}
-
-		SearchBuilderJoinKey key = new SearchBuilderJoinKey(theSearchParameterName, theType);
-		myQueryRoot.putIndex(key, join);
-
-		return (Join<ResourceTable, T>) join;
-	}
-
 	void addPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myQueryRoot.join("mySearchParamPresents", JoinType.LEFT);
 
@@ -130,7 +94,7 @@ abstract class BasePredicateBuilder {
 		myQueryRoot.addPredicates(predicates);
 	}
 
-	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin, RequestPartitionId theRequestPartitionId) {
+	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, From<?, ? extends BaseResourceIndexedSearchParam> theJoin, RequestPartitionId theRequestPartitionId) {
 		if (!theRequestPartitionId.isAllPartitions()) {
 			if (theRequestPartitionId.getPartitionId() != null) {
 				myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue"), theRequestPartitionId.getPartitionId()));

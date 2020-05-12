@@ -23,47 +23,45 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.AbstractQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
-public class QueryRootEntry {
-	private final AbstractQuery<Long> myResourceTableQuery;
-	private final Root<ResourceTable> myResourceTableRoot;
+abstract class QueryRootEntry {
 	private final ArrayList<Predicate> myPredicates = new ArrayList<>();
 	private final IndexJoins myIndexJoins = new IndexJoins();
 
-	public QueryRootEntry(AbstractQuery<Long> theResourceTableQuery) {
-		myResourceTableQuery = theResourceTableQuery;
-		myResourceTableRoot = theResourceTableQuery.from(ResourceTable.class);
+	QueryRootEntry() {
 	}
 
-	public Root<ResourceTable> getRoot() {
-		return myResourceTableRoot;
-	}
+	abstract <Y> Path<Y> get(String theAttributeName);
 
-	public <Y> Path<Y> get(String theAttributeName) {
-		return myResourceTableRoot.get(theAttributeName);
-	}
+	abstract <Y> Join<ResourceTable, Y> join(String theAttributeName, JoinType theJoinType);
 
-	public <Y> Join<ResourceTable, Y> join(String theAttributeName, JoinType theJoinType) {
-		return myResourceTableRoot.join(theAttributeName, theJoinType);
-	}
-
-	public Join<?,?> getIndexJoin(SearchBuilderJoinKey theKey) {
+	Join<?,?> getIndexJoin(SearchBuilderJoinKey theKey) {
 		return myIndexJoins.get(theKey);
 	}
 
-	public void addPredicate(Predicate thePredicate) {
+	void addPredicate(Predicate thePredicate) {
 		myPredicates.add(thePredicate);
 	}
 
-	public void addPredicates(List<Predicate> thePredicates) {
+	void addPredicates(List<Predicate> thePredicates) {
 		myPredicates.addAll(thePredicates);
 	}
 
-	public Predicate[] getPredicateArray() {
+	Predicate[] getPredicateArray() {
 		return myPredicates.toArray(new Predicate[0]);
 	}
 
@@ -79,11 +77,28 @@ public class QueryRootEntry {
 		return Collections.unmodifiableList(myPredicates);
 	}
 
-	public void where(Predicate theAnd) {
-		myResourceTableQuery.where(theAnd);
-	}
+	// FIXME: remove
+//	<T> Subquery<T> subquery(Class<T> theClass) {
+//		return myResourceTableQuery.subquery(theClass);
+//	}
+//
+//	<T> From<?,T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
+//		return myJoinStrategy.createJoin(theType, theSearchParameterName);
+//	}
 
-	<T> Subquery<T> subquery(Class<T> theClass) {
-		return myResourceTableQuery.subquery(theClass);
-	}
+	abstract AbstractQuery<Long> pop();
+
+	abstract void orderBy(List<Order> theOrders);
+
+	abstract Expression<Date> getLastUpdatedColumn();
+
+	abstract <T> From<?,T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName);
+
+	abstract AbstractQuery<Long> getQueryRoot();
+
+	abstract Root<ResourceTable> getRootForComposite();
+
+	public abstract Expression<Long> getResourcePidColumn();
+
+	public abstract Subquery<Long> subqueryForTagNegation();
 }

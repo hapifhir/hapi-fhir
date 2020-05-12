@@ -50,7 +50,7 @@ import java.util.Map;
 public class PredicateBuilderDate extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
 
-	private Map<String, Join<ResourceTable, ResourceIndexedSearchParamDate>> myJoinMap;
+	private Map<String, From<?, ResourceIndexedSearchParamDate>> myJoinMap;
 
 	PredicateBuilderDate(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
@@ -69,9 +69,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		}
 		String key = theResourceName + " " + theParamName;
 
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
+		From<?, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
 		if (join == null) {
-			join = createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+			join = myQueryRoot.createJoin(SearchBuilderJoinEnum.DATE, theParamName);
 			myJoinMap.put(key, join);
 			newJoin = true;
 		}

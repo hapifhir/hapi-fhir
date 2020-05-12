@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
 import ca.uhn.fhir.jpa.util.SearchBox;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -39,7 +38,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +149,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
 											RequestPartitionId theRequestPartitionId) {
-		Join<ResourceTable, ResourceIndexedSearchParamCoords> join = createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
+		From<?, ResourceIndexedSearchParamCoords> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);

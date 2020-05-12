@@ -46,6 +46,7 @@ import java.util.List;
 @Component
 @Scope("prototype")
 class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
+
 	@Autowired
 	DaoConfig myDaoConfig;
 
@@ -60,7 +61,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 											SearchFilterParser.CompareOperation theOperation,
 											RequestPartitionId theRequestPartitionId) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamString> join = createJoin(SearchBuilderJoinEnum.STRING, theParamName);
+		From<?, ResourceIndexedSearchParamString> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.STRING, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);

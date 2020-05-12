@@ -38,7 +38,6 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -61,6 +60,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.HasParam;
@@ -77,6 +77,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -121,7 +122,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
-    PartitionSettings myPartitionSettings;
+	PartitionSettings myPartitionSettings;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -141,7 +142,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 											RequestDetails theRequest,
 											RequestPartitionId theRequestPartitionId) {
 
-		//Is this just to ensure the chain has been split correctly???
+		// This just to ensure the chain has been split correctly
 		assert theParamName.contains(".") == false;
 
 		if ((operation != null) &&
@@ -155,7 +156,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			return null;
 		}
 
-		Join<ResourceTable, ResourceLink> join = createJoin(SearchBuilderJoinEnum.REFERENCE, theParamName);
+		From<?, ResourceLink> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.REFERENCE, theParamName);
 
 		List<IIdType> targetIds = new ArrayList<>();
 		List<String> targetQualifiedUrls = new ArrayList<>();
@@ -269,7 +270,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
 	 * on the device.
 	 */
-	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, Join<ResourceTable, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		final List<Class<? extends IBaseResource>> resourceTypes;
 		if (!theReferenceParam.hasResourceType()) {
 
@@ -511,14 +512,16 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	}
 
 	Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		Subquery<Long> subQ = myQueryRoot.subquery(Long.class);
+
+		// FIXME: what does theFoundChainMatch do?
+		Validate.isTrue(theFoundChainMatch);
+
 		/*
 		 * We're doing a chain call, so push the current query root
 		 * and predicate list down and put new ones at the top of the
 		 * stack and run a subquery
 		 */
-		myQueryRoot.push(subQ);
-		subQ.select(myQueryRoot.get("myId").as(Long.class));
+		myQueryRoot.pushResourceTableSubQuery();
 
 		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
 		andOrParams.add(theOrValues);
@@ -527,16 +530,16 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), theSubResourceName));
 		myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
 
+		// FIXME: this is always true
 		if (theFoundChainMatch) {
 			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest, theRequestPartitionId);
-			subQ.where(myQueryRoot.getPredicateArray());
 		}
 
 		/*
 		 * Pop the old query root and predicate list back
 		 */
-		myQueryRoot.pop();
-		return subQ;
+		return (Subquery<Long>) myQueryRoot.pop();
+
 	}
 
 	void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
@@ -987,11 +990,11 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
 		IQueryParameterType leftValue = cp.getLeftValue();
-		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRoot(), left, leftValue, theRequestPartitionId));
+		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRootForComposite(), left, leftValue, theRequestPartitionId));
 
 		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
 		IQueryParameterType rightValue = cp.getRightValue();
-		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRoot(), right, rightValue, theRequestPartitionId));
+		myQueryRoot.addPredicate(createCompositeParamPart(theResourceName, myQueryRoot.getRootForComposite(), right, rightValue, theRequestPartitionId));
 
 	}
 
