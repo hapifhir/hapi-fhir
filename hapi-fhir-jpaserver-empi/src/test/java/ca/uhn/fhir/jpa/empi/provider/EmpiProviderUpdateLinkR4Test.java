@@ -3,46 +3,17 @@ package ca.uhn.fhir.jpa.empi.provider;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
 import org.junit.Test;
-
-import javax.annotation.Nonnull;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class EmpiProviderUpdateLinkR4Test extends BaseProviderR4Test {
-	private Patient myPatient;
-	private Person myPerson;
-	private EmpiLink myLink;
-	private StringType myPatientId;
-	private StringType myPersonId;
-	private StringType myNoMatch;
-	private StringType myPossibleMatch;
-	private StringType myPossibleDuplicate;
+public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
-	@Before
-	public void before() {
-		super.before();
-
-		myPatient = createPatientAndUpdateLinks(new Patient());
-		myPatientId = new StringType(myPatient.getIdElement().toUnqualifiedVersionless().getValue());
-
-		myPerson = getPersonFromTarget(myPatient);
-		myPersonId = new StringType(myPerson.getIdElement().toUnqualifiedVersionless().getValue());
-		myLink = getLink();
-		assertEquals(EmpiLinkSourceEnum.AUTO, myLink.getLinkSource());
-		assertEquals(EmpiMatchResultEnum.MATCH, myLink.getMatchResult());
-
-		myNoMatch = new StringType(EmpiMatchResultEnum.NO_MATCH.name());
-		myPossibleMatch = new StringType(EmpiMatchResultEnum.POSSIBLE_MATCH.name());
-		myPossibleDuplicate = new StringType(EmpiMatchResultEnum.POSSIBLE_DUPLICATE.name());
-	}
 
 	@Test
 	public void testUpdateLinkHappyPath() {
@@ -51,11 +22,6 @@ public class EmpiProviderUpdateLinkR4Test extends BaseProviderR4Test {
 		myLink = getLink();
 		assertEquals(EmpiLinkSourceEnum.MANUAL, myLink.getLinkSource());
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, myLink.getMatchResult());
-	}
-
-	@Nonnull
-	private EmpiLink getLink() {
-		return myEmpiLinkDaoSvc.findEmpiLinkByTarget(myPatient).get();
 	}
 
 	@Test

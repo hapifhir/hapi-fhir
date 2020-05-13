@@ -21,16 +21,21 @@ package ca.uhn.fhir.empi.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.StringType;
 
 public abstract class BaseEmpiProvider {
 
@@ -42,52 +47,66 @@ public abstract class BaseEmpiProvider {
 		myResourceLoader = theResourceLoader;
 	}
 
-	protected IAnyResource getPersonFromId(String theId, String theParamName) {
+	protected IAnyResource getPersonFromIdOrThrowException(String theId, String theParamName) {
+		IdDt personId = getPersonIdDtOrThrowException(theId, theParamName);
+		return loadResource(personId);
+	}
+
+	private IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
 		IdDt personId = new IdDt(theId);
 		if (!"Person".equals(personId.getResourceType()) ||
 			personId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " must have form Person/<id> where <id> is the id of the person");
 		}
-		return loadResource(personId);
+		return personId;
 	}
 
-	protected IAnyResource getTargetFromId(String theId, String theParamName) {
+	protected IAnyResource getTargetFromIdOrThrowException(String theParamName, String theId) {
+		IIdType targetId = getTargetIdDtOrThrowException(theId, theParamName);
+		return loadResource(targetId);
+	}
+
+	protected IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
 		IdDt targetId = new IdDt(theId);
 		String resourceType = targetId.getResourceType();
 		if (!EmpiUtil.supportedTargetType(resourceType) ||
 			targetId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource");
 		}
-		return loadResource(targetId);
+		return targetId;
 	}
 
-	protected IAnyResource loadResource(IdDt theResourceId) {
+	protected IAnyResource loadResource(IIdType theResourceId) {
 		Class<? extends IBaseResource> resourceClass = myFhirContext.getResourceDefinition(theResourceId.getResourceType()).getImplementingClass();
 		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
 	}
 
 	protected void validateMergeParameters(IPrimitiveType<String> thePersonIdToDelete, IPrimitiveType<String> thePersonIdToKeep) {
-		if (thePersonIdToDelete == null) {
-			throw new InvalidRequestException("personToDelete cannot be null");
-		}
-		if (thePersonIdToKeep == null) {
-			throw new InvalidRequestException("personToKeep cannot be null");
-		}
+		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonIdToDelete);
+		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonIdToKeep);
 		if (thePersonIdToDelete.getValue().equals(thePersonIdToKeep.getValue())) {
 			throw new InvalidRequestException("personIdToDelete must be different from personToKeep");
 		}
  	}
 
+	private void validateNotNull(String theName, IPrimitiveType<String> theString) {
+		if (theString == null || theString.getValue() == null) {
+			throw new InvalidRequestException(theName + " cannot be null");
+		}
+	}
+
 	protected void validateUpdateLinkParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId, IPrimitiveType<String> theMatchResult) {
-		if (thePersonId == null) {
-			// FIXME KHS these should all use constants
-			throw new InvalidRequestException("personId cannot be null");
-		}
-		if (theTargetId == null) {
-			throw new InvalidRequestException("targetId cannot be null");
-		}
-		if (theMatchResult == null) {
-			throw new InvalidRequestException("matchResult cannot be null");
+		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
+		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
+		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_MATCH_RESULT, theMatchResult);
+		EmpiMatchResultEnum matchResult = EmpiMatchResultEnum.valueOf(theMatchResult.getValue());
+		switch (matchResult) {
+			case NO_MATCH:
+			case MATCH:
+				break;
+			default:
+				throw new InvalidRequestException(ProviderConstants.EMPI_UPDATE_LINK + " illegal " + ProviderConstants.EMPI_UPDATE_LINK_MATCH_RESULT +
+					" value '" + matchResult + "'.  Must be " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
 		}
 	}
 
@@ -95,4 +114,44 @@ public abstract class BaseEmpiProvider {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
 		return new EmpiTransactionContext(transactionLogMessages, EmpiTransactionContext.OperationType.MERGE_PERSONS);
 	}
+
+	protected EmpiMatchResultEnum extractMatchResultOrNull(IPrimitiveType<String> theMatchResult) {
+		String matchResult = extractStringNull(theMatchResult);
+		if (matchResult == null) {
+			return null;
+		}
+		return EmpiMatchResultEnum.valueOf(matchResult);
+	}
+
+	protected EmpiLinkSourceEnum extractLinkSourceOrNull(IPrimitiveType<String> theLinkSource) {
+		String linkSource = extractStringNull(theLinkSource);
+		if (linkSource == null) {
+			return null;
+		}
+		return EmpiLinkSourceEnum.valueOf(linkSource);
+	}
+
+	private String extractStringNull(IPrimitiveType<String> theString) {
+		if (theString == null) {
+			return null;
+		}
+		return theString.getValue();
+	}
+
+	protected IIdType extractPersonIdDtOrNull(String theName, StringType thePersonId) {
+		String personId = extractStringNull(thePersonId);
+		if (personId == null) {
+			return null;
+		}
+		return getPersonIdDtOrThrowException(theName, personId);
+	}
+
+	protected IIdType extractTargetIdDtOrNull(String theName, StringType theTargetId) {
+		String targetId = extractStringNull(theTargetId);
+		if (targetId == null) {
+			return null;
+		}
+		return getTargetIdDtOrThrowException(theName, targetId);
+	}
+
 }

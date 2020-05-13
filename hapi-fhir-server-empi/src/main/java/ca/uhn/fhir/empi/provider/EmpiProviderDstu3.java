@@ -85,8 +85,8 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 									  @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep,
 									  RequestDetails theRequestDetails) {
 		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
-		IAnyResource personToDelete = getPersonFromId(thePersonIdToDelete.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE);
-		IAnyResource personToKeep = getPersonFromId(thePersonIdToKeep.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP);
+		IAnyResource personToDelete = getPersonFromIdOrThrowException(thePersonIdToDelete.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE);
+		IAnyResource personToKeep = getPersonFromIdOrThrowException(thePersonIdToKeep.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP);
 
 		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(theRequestDetails));
 	}
@@ -94,13 +94,13 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	@Operation(name = ProviderConstants.EMPI_UPDATE_LINK, type = Person.class)
 	public Person updateLink(@OperationParam(name=ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, min = 1, max = 1) StringType thePersonId,
 																  @OperationParam(name=ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, min = 1, max = 1) StringType theTargetId,
-																  @OperationParam(name=ProviderConstants.EMPI_UPDATE_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
+																  @OperationParam(name=ProviderConstants.EMPI_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
 																  ServletRequestDetails theRequestDetails) {
 
 		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
 		EmpiMatchResultEnum matchResult = EmpiMatchResultEnum.valueOf(theMatchResult.getValue());
-		IAnyResource person = getPersonFromId(thePersonId.getValue(), "personIdToDelete");
-		IAnyResource target = getTargetFromId(theTargetId.getValue(), "personIdToKeep");
+		IAnyResource person = getPersonFromIdOrThrowException(thePersonId.getValue(), "personIdToDelete");
+		IAnyResource target = getTargetFromIdOrThrowException(theTargetId.getValue(), "personIdToKeep");
 
 		return (Person) myEmpiLinkUpdaterSvc.updateLink(person, target, matchResult, createEmpiContext(theRequestDetails));
 	}

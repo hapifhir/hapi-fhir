@@ -183,4 +183,8 @@ public class EmpiLinkDaoSvc {
 	public void update(EmpiLink theEmpiLink) {
 		myEmpiLinkDao.save(theEmpiLink);
 	}
+
+    public List<EmpiLink> findEmpiLinkByExample(Example<EmpiLink> theExampleLink) {
+		return myEmpiLinkDao.findAll(theExampleLink);
+    }
 }

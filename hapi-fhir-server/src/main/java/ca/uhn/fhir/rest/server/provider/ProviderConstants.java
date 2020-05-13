@@ -48,6 +48,9 @@ public class ProviderConstants {
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
 
+	/**
+	 * EMPI Operations
+	 */
 	public static final String EMPI_MATCH = "$match";
 	public static final String EMPI_MATCH_RESOURCE = "resource";
 
@@ -58,5 +61,11 @@ public class ProviderConstants {
 	public static final String EMPI_UPDATE_LINK = "$empi-update-link";
 	public static final String EMPI_UPDATE_LINK_PERSON_ID = "personId";
 	public static final String EMPI_UPDATE_LINK_TARGET_ID = "targetId";
-	public static final String EMPI_UPDATE_MATCH_RESULT = "matchResult";
+	public static final String EMPI_UPDATE_LINK_MATCH_RESULT = "matchResult";
+
+	public static final String EMPI_QUERY_LINKS = "$empi-query-links";
+	public static final String EMPI_QUERY_LINKS_PERSON_ID = "personId";
+	public static final String EMPI_QUERY_LINKS_TARGET_ID = "targetId";
+	public static final String EMPI_QUERY_LINKS_MATCH_RESULT = "matchResult";
+	public static final String EMPI_QUERY_LINKS_LINK_SOURCE = "linkSource";
 }
