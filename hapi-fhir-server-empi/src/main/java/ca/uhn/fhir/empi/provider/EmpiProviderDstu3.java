@@ -124,4 +124,9 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 
 		return (Parameters) myEmpiLinkQuerySvc.queryLinks(personId, targetId, matchResult, linkSource, createEmpiContext(theRequestDetails));
 	}
+
+	@Operation(name = ProviderConstants.EMPI_DUPLICATE_PERSONS)
+	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
+		return (Parameters) myEmpiLinkQuerySvc.getPossibleDuplicates(createEmpiContext(theRequestDetails));
+	}
 }

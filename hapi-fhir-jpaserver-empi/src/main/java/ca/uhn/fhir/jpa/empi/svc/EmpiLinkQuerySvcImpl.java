@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiLinkQuerySvcImpl.class);
@@ -35,8 +36,18 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	@Override
 	public IBaseParameters queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext) {
 		Example<EmpiLink> exampleLink = exampleLinkFromParameters(thePersonId, theTargetId, theMatchResult, theLinkSource);
+		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink).stream()
+			.filter(empiLink -> empiLink.getMatchResult() != EmpiMatchResultEnum.POSSIBLE_DUPLICATE)
+			.collect(Collectors.toList());
 		// FIXME KHS page this
+		return parametersFromEmpiLinks(empiLinks);
+	}
+
+	@Override
+	public IBaseParameters getPossibleDuplicates(EmpiTransactionContext theEmpiContext) {
+		Example<EmpiLink> exampleLink = exampleLinkFromParameters(null, null, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, null);
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink);
+		// FIXME KHS page this
 		return parametersFromEmpiLinks(empiLinks);
 	}
 
@@ -44,10 +55,6 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 
 		for (EmpiLink empiLink : theEmpiLinks) {
-			// FIXME KHS remove this
-			if (empiLink.getMatchResult() == EmpiMatchResultEnum.POSSIBLE_DUPLICATE) {
-				continue;
-			}
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
 			String personId = myResourceTableDao.findById(empiLink.getPersonPid()).get().getIdDt().toVersionless().getValue();
 			ParametersUtil.addPartString(myFhirContext, resultPart, "personId", personId);

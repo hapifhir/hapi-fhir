@@ -116,7 +116,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	public Parameters queryLinks(@OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, min = 0, max = 1) StringType thePersonId,
 									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, min = 0, max = 1) StringType theTargetId,
 									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theMatchResult,
-									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theLinkSource,
+									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1) StringType theLinkSource,
 									 ServletRequestDetails theRequestDetails) {
 		IIdType personId = extractPersonIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, thePersonId);
 		IIdType targetId = extractTargetIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, theTargetId);
@@ -124,5 +124,11 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		EmpiLinkSourceEnum linkSource = extractLinkSourceOrNull(theLinkSource);
 
 		return (Parameters) myEmpiLinkQuerySvc.queryLinks(personId, targetId, matchResult, linkSource, createEmpiContext(theRequestDetails));
+	}
+
+	// FIXME KHS document new operations
+	@Operation(name = ProviderConstants.EMPI_DUPLICATE_PERSONS)
+	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
+		return (Parameters) myEmpiLinkQuerySvc.getPossibleDuplicates(createEmpiContext(theRequestDetails));
 	}
 }

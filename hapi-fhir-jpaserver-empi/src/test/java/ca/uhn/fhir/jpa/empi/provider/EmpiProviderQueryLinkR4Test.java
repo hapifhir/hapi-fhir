@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -20,6 +22,8 @@ import static org.hamcrest.Matchers.is;
 public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLinkR4Test.class);
 	private StringType myLinkSource;
+	private IdType myPerson1Id;
+	private IdType myPerson2Id;
 
 	@Before
 	public void before() {
@@ -27,7 +31,17 @@ private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLi
 
 		// Add a second patient
 		createPatientAndUpdateLinks(buildJanePatient());
+
+		// Add a possible duplicate
 		myLinkSource = new StringType(EmpiLinkSourceEnum.AUTO.name());
+		Person person1 = createPerson();
+		myPerson1Id = person1.getIdElement().toVersionless();
+		Long person1Pid = myIdHelperService.getPidOrNull(person1);
+		Person person2 = createPerson();
+		myPerson2Id = person2.getIdElement().toVersionless();
+		Long person2Pid = myIdHelperService.getPidOrNull(person2);
+		EmpiLink empiLink = new EmpiLink().setPersonPid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
+		myEmpiLinkDaoSvc.update(empiLink);
 	}
 
 	@Test
@@ -38,14 +52,19 @@ private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLi
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertThat(part.get(0).getName(), is("personId"));
-		assertThat(part.get(0).getValue().toString(), is(myPersonId.getValue()));
-		assertThat(part.get(1).getName(), is("targetId"));
-		assertThat(part.get(1).getValue().toString(), is(myPatientId.getValue()));
-		assertThat(part.get(2).getName(), is("matchResult"));
-		assertThat(part.get(2).getValue().toString(), is("MATCH"));
-		assertThat(part.get(3).getName(), is("linkSource"));
-		assertThat(part.get(3).getValue().toString(), is("AUTO"));	}
+		assertEmpiLink(part, myPersonId.getValue(), myPatientId.getValue(), EmpiMatchResultEnum.MATCH);
+	}
+
+	private void assertEmpiLink(List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, EmpiMatchResultEnum theMatchResult) {
+		assertThat(thePart.get(0).getName(), is("personId"));
+		assertThat(thePart.get(0).getValue().toString(), is(thePersonId));
+		assertThat(thePart.get(1).getName(), is("targetId"));
+		assertThat(thePart.get(1).getValue().toString(), is(theTargetId));
+		assertThat(thePart.get(2).getName(), is("matchResult"));
+		assertThat(thePart.get(2).getValue().toString(), is(theMatchResult.name()));
+		assertThat(thePart.get(3).getName(), is("linkSource"));
+		assertThat(thePart.get(3).getValue().toString(), is("AUTO"));
+	}
 
 	@Test
 	public void testQueryLinkThreeMatches() {
@@ -60,13 +79,16 @@ private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLi
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(2).getPart();
-		assertThat(part.get(0).getName(), is("personId"));
-		assertThat(part.get(0).getValue().toString(), is(personId.getValue()));
-		assertThat(part.get(1).getName(), is("targetId"));
-		assertThat(part.get(1).getValue().toString(), is(patientId.getValue()));
-		assertThat(part.get(2).getName(), is("matchResult"));
-		assertThat(part.get(2).getValue().toString(), is("MATCH"));
-		assertThat(part.get(3).getName(), is("linkSource"));
-		assertThat(part.get(3).getValue().toString(), is("AUTO"));
+		assertEmpiLink(part, personId.getValue(), patientId.getValue(), EmpiMatchResultEnum.MATCH);
+	}
+
+	@Test
+	public void testQueryPossibleDuplicates() {
+		Parameters result = myEmpiProviderR4.getDuplicatePersons(myRequestDetails);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+		List<Parameters.ParametersParameterComponent> list = result.getParameter();
+		assertThat(list, hasSize(1));
+		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
+		assertEmpiLink(part, myPerson1Id.getValue(), myPerson2Id.getValue(), EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
 	}
 }

@@ -68,4 +68,6 @@ public class ProviderConstants {
 	public static final String EMPI_QUERY_LINKS_TARGET_ID = "targetId";
 	public static final String EMPI_QUERY_LINKS_MATCH_RESULT = "matchResult";
 	public static final String EMPI_QUERY_LINKS_LINK_SOURCE = "linkSource";
+
+	public static final String EMPI_DUPLICATE_PERSONS = "$empi-duplicate-persons";
 }
