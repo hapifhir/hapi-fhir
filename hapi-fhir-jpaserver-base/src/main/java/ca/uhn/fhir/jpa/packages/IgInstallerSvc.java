@@ -4,10 +4,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.gson.Gson;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.cache.PackageCacheManager;
 import org.slf4j.Logger;
@@ -47,23 +53,12 @@ public class IgInstallerSvc {
 			"SearchParameter",
 			"Subscription" };
 
-	private SearchUtilities searchUtilities;
-
 	@PostConstruct
 	public void initialize() {
 		switch (fhirContext.getVersion().getVersion()) {
-			case R5: {
-				searchUtilities = SearchUtilitiesImpl.forR5();
-				break;
-			}
-			case R4: {
-				searchUtilities = SearchUtilitiesImpl.forR4();
-				break;
-			}
-			case DSTU3: {
-				searchUtilities = SearchUtilitiesImpl.forDstu3();
-				break;
-			}
+			case R5: 
+			case R4:
+			case DSTU3: break;
 			default: {
 				ourLog.info("IG installation not supported for version: {}", fhirContext.getVersion().getVersion());
 				enabled = false;
@@ -243,11 +238,11 @@ public class IgInstallerSvc {
 	 */
 	private void createOrUpdate(IBaseResource resource) {
 		IFhirResourceDao dao = daoRegistry.getResourceDao(resource.getClass());
-		IBundleProvider searchResult = dao.search(searchUtilities.createSearchParameterMapFor(resource));
+		IBundleProvider searchResult = dao.search(createSearchParameterMapFor(resource));
 		if (searchResult.isEmpty()) {
 			dao.create(resource);
 		} else {
-			IBaseResource existingResource = searchUtilities.verifySearchResultFor(resource, searchResult);
+			IBaseResource existingResource = verifySearchResultFor(resource, searchResult);
 			if (existingResource != null) {
 				resource.setId(existingResource.getIdElement().getValue());
 				dao.update(resource);
@@ -268,5 +263,78 @@ public class IgInstallerSvc {
 			throw new ImplementationGuideInstallationException(String.format(
 				"Failure when generating snapshot of StructureDefinition: %s", sd.getIdElement()), e);
 		}
+	}
+
+	private SearchParameterMap createSearchParameterMapFor(IBaseResource resource) {
+		FhirTerser terser = fhirContext.newTerser();
+		if (resource.getClass().getSimpleName().equals("NamingSystem")) {
+			String uniqueId = extractUniqeIdFromNamingSystem(resource);
+			return new SearchParameterMap().add("value", new StringParam(uniqueId).setExact(true));
+		} else if (resource.getClass().getSimpleName().equals("Subscription")) {
+			String id = extractIdFromSubscription(resource);
+			return new SearchParameterMap().add("_id", new TokenParam(id));
+		} else {
+			String url = extractUniqueUrlFromMetadataResouce(resource);
+			return new SearchParameterMap().add("url", new UriParam(url));
+		}
+	}
+
+	private IBaseResource verifySearchResultFor(IBaseResource resource, IBundleProvider searchResult) {
+		FhirTerser terser = fhirContext.newTerser();
+		if (resource.getClass().getSimpleName().equals("NamingSystem")) {
+			if (searchResult.size() > 1) {
+				ourLog.warn("Expected 1 NamingSystem with unique ID {}, found {}. Will not attempt to update resource.",
+					extractUniqeIdFromNamingSystem(resource), searchResult.size());
+				return null;
+			}
+			return getFirstResourceFrom(searchResult);
+		} else if (resource.getClass().getSimpleName().equals("Subscription")) {
+			if (searchResult.size() > 1) {
+				ourLog.warn("Expected 1 Subscription with ID {}, found {}. Will not attempt to update resource.",
+					extractIdFromSubscription(resource), searchResult.size());
+				return null;
+			}
+			return getFirstResourceFrom(searchResult);
+		} else {
+			// Resource is of type CodeSystem, ValueSet, StructureDefinition, ConceptMap or SearchParameter
+			if (searchResult.size() > 1) {
+				ourLog.warn("Expected 1 MetadataResource with globally unique URL {}, found {}. " +
+					"Will not attempt to update resource.", extractUniqueUrlFromMetadataResouce(resource), searchResult.size());
+				return null;
+			}
+			return getFirstResourceFrom(searchResult);
+		}
+	}
+
+	private static IBaseResource getFirstResourceFrom(IBundleProvider searchResult) {
+		try {
+			return searchResult.getResources(0, 0).get(0);
+		} catch (IndexOutOfBoundsException e) {
+			ourLog.warn("Error when extracting resource from search result " +
+				"(search result should have been non-empty))", e);
+			return null;
+		}
+	}
+
+	private String extractUniqeIdFromNamingSystem(IBaseResource resource) {
+		FhirTerser terser = fhirContext.newTerser();
+		IBase uniqueIdComponent = (IBase) terser.getSingleValueOrNull(resource, "uniqueId");
+		if (uniqueIdComponent == null) {
+			throw new ImplementationGuideInstallationException("NamingSystem does not have uniqueId component.");
+		}
+		IPrimitiveType asPrimitiveType = (IPrimitiveType) terser.getSingleValueOrNull(uniqueIdComponent, "value");
+		return (String) asPrimitiveType.getValue();
+	}
+
+	private String extractIdFromSubscription(IBaseResource resource) {
+		FhirTerser terser = fhirContext.newTerser();
+		IPrimitiveType asPrimitiveType = (IPrimitiveType) terser.getSingleValueOrNull(resource, "id");
+		return (String) asPrimitiveType.getValue();
+	}
+
+	private String extractUniqueUrlFromMetadataResouce(IBaseResource resource) {
+		FhirTerser terser = fhirContext.newTerser();
+		IPrimitiveType asPrimitiveType = (IPrimitiveType) terser.getSingleValueOrNull(resource, "url");
+		return (String) asPrimitiveType.getValue();
 	}
 }
