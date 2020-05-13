@@ -360,7 +360,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		ourLog.info("IDS: {}", ids);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids.toString(), ids, containsInAnyOrder("Observation/OBS2", "Pbservation/OBS1"));
+		assertThat(ids.toString(), ids, contains("Observation/OBS2", "Observation/OBS1"));
 
 	}
 
