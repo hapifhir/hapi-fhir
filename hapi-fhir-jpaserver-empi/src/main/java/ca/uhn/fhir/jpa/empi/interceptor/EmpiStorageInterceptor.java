@@ -141,11 +141,9 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 
 
 	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
-		if (extractResourceType(theResource).equalsIgnoreCase("Person")) {
 			if (EmpiUtil.isEmpiManaged(theResource)) {
 				throwModificationBlockedByEmpi();
 			}
-		}
 	}
 
 	private void throwBlockEmpiStatusChange(){
