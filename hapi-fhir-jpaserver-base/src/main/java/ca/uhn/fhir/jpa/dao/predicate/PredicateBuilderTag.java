@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -41,8 +40,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -137,14 +134,14 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 			if (paramInverted) {
 				ourLog.debug("Searching for _tag:not");
 
-				Subquery<Long> subQ = myQueryRoot.subqueryForTagNegation();
+				Subquery<Long> subQ = myQueryRootStack.subqueryForTagNegation();
 				Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
 				subQ.select(subQfrom.get("myResourceId").as(Long.class));
 
-				myQueryRoot.addPredicate(
+				myQueryRootStack.addPredicate(
 					myCriteriaBuilder.not(
 						myCriteriaBuilder.in(
-							myQueryRoot.get("myId")
+							myQueryRootStack.get("myId")
 						).value(subQ)
 					)
 				);
@@ -162,7 +159,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 
 			}
 
-			From<?, ResourceTag> tagJoin = myQueryRoot.createJoin(SearchBuilderJoinEnum.RESOURCE_TAGS, null);
+			From<?, ResourceTag> tagJoin = myQueryRootStack.createJoin(SearchBuilderJoinEnum.RESOURCE_TAGS, null);
 			From<ResourceTag, TagDefinition> defJoin = tagJoin.join("myTag");
 
 			Predicate tagListPredicate = createPredicateTagList(defJoin, myCriteriaBuilder, tagType, tokens);
@@ -172,7 +169,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				addPartitionIdPredicate(theRequestPartitionId, tagJoin, predicates);
 			}
 
-			myQueryRoot.addPredicates(predicates);
+			myQueryRootStack.addPredicates(predicates);
 
 		}
 

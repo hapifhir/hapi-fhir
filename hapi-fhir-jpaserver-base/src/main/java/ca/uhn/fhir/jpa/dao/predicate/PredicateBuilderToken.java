@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -53,7 +52,6 @@ import org.springframework.stereotype.Component;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -91,7 +89,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 											RequestPartitionId theRequestPartitionId) {
 
 		if (theList.get(0).getMissing() != null) {
-			From<?, ResourceIndexedSearchParamToken> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
+			From<?, ResourceIndexedSearchParamToken> join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
 			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
@@ -130,7 +128,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			return null;
 		}
 
-		From<?, ResourceIndexedSearchParamToken> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
+		From<?, ResourceIndexedSearchParamToken> join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
 		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myCriteriaBuilder, join, theOperation, theRequestPartitionId);
@@ -139,8 +137,8 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 
 		Predicate spPredicate = myCriteriaBuilder.or(toArray(codePredicates));
 
-		myQueryRoot.setHasIndexJoins();
-		myQueryRoot.addPredicate(spPredicate);
+		myQueryRootStack.setHasIndexJoins();
+		myQueryRootStack.addPredicate(spPredicate);
 
 		return spPredicate;
 	}

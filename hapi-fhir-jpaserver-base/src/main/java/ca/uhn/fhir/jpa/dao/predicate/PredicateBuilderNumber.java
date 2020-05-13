@@ -56,7 +56,7 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 											SearchFilterParser.CompareOperation operation,
 											RequestPartitionId theRequestPartitionId) {
 
-		From<?, ResourceIndexedSearchParamNumber> join = myQueryRoot.createJoin(SearchBuilderJoinEnum.NUMBER, theParamName);
+		From<?, ResourceIndexedSearchParamNumber> join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.NUMBER, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -108,8 +108,8 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 		}
 
 		Predicate predicate = myCriteriaBuilder.or(toArray(codePredicates));
-		myQueryRoot.setHasIndexJoins();
-		myQueryRoot.addPredicate(predicate);
+		myQueryRootStack.setHasIndexJoins();
+		myQueryRootStack.addPredicate(predicate);
 		return predicate;
 	}
 }

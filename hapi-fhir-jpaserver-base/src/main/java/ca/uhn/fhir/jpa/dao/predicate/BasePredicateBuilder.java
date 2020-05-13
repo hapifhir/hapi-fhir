@@ -24,11 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryRootStack;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -43,8 +42,6 @@ import javax.annotation.PostConstruct;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -54,7 +51,7 @@ import java.util.List;
 abstract class BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BasePredicateBuilder.class);
 	final CriteriaBuilder myCriteriaBuilder;
-	final QueryRoot myQueryRoot;
+	final QueryRootStack myQueryRootStack;
 	final Class<? extends IBaseResource> myResourceType;
 	final String myResourceName;
 	final SearchParameterMap myParams;
@@ -68,7 +65,7 @@ abstract class BasePredicateBuilder {
 
 	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
 		myCriteriaBuilder = theSearchBuilder.getBuilder();
-		myQueryRoot = theSearchBuilder.getQueryRoot();
+		myQueryRootStack = theSearchBuilder.getQueryRootStack();
 		myResourceType = theSearchBuilder.getResourceType();
 		myResourceName = theSearchBuilder.getResourceName();
 		myParams = theSearchBuilder.getParams();
@@ -80,7 +77,7 @@ abstract class BasePredicateBuilder {
 	}
 
 	void addPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		From<?, SearchParamPresent> paramPresentJoin = myQueryRoot.createJoin(SearchBuilderJoinEnum.PRESENCE, null);
+		From<?, SearchParamPresent> paramPresentJoin = myQueryRootStack.createJoin(SearchBuilderJoinEnum.PRESENCE, null);
 
 		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
 		Long hash = SearchParamPresent.calculateHashPresence(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
@@ -90,22 +87,22 @@ abstract class BasePredicateBuilder {
 
 		addPartitionIdPredicate(theRequestPartitionId, paramPresentJoin, predicates);
 
-		myQueryRoot.setHasIndexJoins();
-		myQueryRoot.addPredicates(predicates);
+		myQueryRootStack.setHasIndexJoins();
+		myQueryRootStack.addPredicates(predicates);
 	}
 
 	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, From<?, ? extends BaseResourceIndexedSearchParam> theJoin, RequestPartitionId theRequestPartitionId) {
 		if (!theRequestPartitionId.isAllPartitions()) {
 			if (theRequestPartitionId.getPartitionId() != null) {
-				myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue"), theRequestPartitionId.getPartitionId()));
+				myQueryRootStack.addPredicate(myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue"), theRequestPartitionId.getPartitionId()));
 			} else {
-				myQueryRoot.addPredicate(myCriteriaBuilder.isNull(theJoin.get("myPartitionIdValue")));
+				myQueryRootStack.addPredicate(myCriteriaBuilder.isNull(theJoin.get("myPartitionIdValue")));
 			}
 		}
-		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myResourceType"), theResourceName));
-		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myParamName"), theParamName));
-		myQueryRoot.addPredicate(myCriteriaBuilder.equal(theJoin.get("myMissing"), theMissing));
-		myQueryRoot.setHasIndexJoins();
+		myQueryRootStack.addPredicate(myCriteriaBuilder.equal(theJoin.get("myResourceType"), theResourceName));
+		myQueryRootStack.addPredicate(myCriteriaBuilder.equal(theJoin.get("myParamName"), theParamName));
+		myQueryRootStack.addPredicate(myCriteriaBuilder.equal(theJoin.get("myMissing"), theMissing));
+		myQueryRootStack.setHasIndexJoins();
 	}
 
 	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate, RequestPartitionId theRequestPartitionId) {
@@ -196,7 +193,7 @@ abstract class BasePredicateBuilder {
 			} else {
 				partitionPredicate = myCriteriaBuilder.isNull(theJoin.get("myPartitionIdValue").as(Integer.class));
 			}
-			myQueryRoot.addPredicate(partitionPredicate);
+			myQueryRootStack.addPredicate(partitionPredicate);
 		}
 	}
 

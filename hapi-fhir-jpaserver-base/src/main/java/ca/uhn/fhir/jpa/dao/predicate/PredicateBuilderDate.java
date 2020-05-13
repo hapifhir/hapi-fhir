@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -71,7 +69,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		From<?, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
 		if (join == null) {
-			join = myQueryRoot.createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+			join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.DATE, theParamName);
 			myJoinMap.put(key, join);
 			newJoin = true;
 		}
@@ -95,12 +93,12 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		Predicate orPredicates = myCriteriaBuilder.or(toArray(codePredicates));
 
-		myQueryRoot.setHasIndexJoins();
+		myQueryRootStack.setHasIndexJoins();
 		if (newJoin) {
 			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, theRequestPartitionId);
-			myQueryRoot.addPredicate(identityAndValuePredicate);
+			myQueryRootStack.addPredicate(identityAndValuePredicate);
 		} else {
-			myQueryRoot.addPredicate(orPredicates);
+			myQueryRootStack.addPredicate(orPredicates);
 		}
 
 		return orPredicates;

@@ -61,7 +61,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 		Predicate nextPredicate = createPredicate(theResourceName, theValues, theOperation, theRequestPartitionId);
 
 		if (nextPredicate != null) {
-			myQueryRoot.addPredicate(nextPredicate);
+			myQueryRootStack.addPredicate(nextPredicate);
 			return nextPredicate;
 		}
 
@@ -108,7 +108,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 		if (allOrPids != null && allOrPids.isEmpty()) {
 
 			// This will never match
-			nextPredicate = myCriteriaBuilder.equal(myQueryRoot.getResourcePidColumn(), -1);
+			nextPredicate = myCriteriaBuilder.equal(myQueryRootStack.getResourcePidColumn(), -1);
 
 		} else if (allOrPids != null) {
 
@@ -118,11 +118,11 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 			switch (operation) {
 				default:
 				case eq:
-					codePredicates.add(myQueryRoot.getResourcePidColumn().in(ResourcePersistentId.toLongList(allOrPids)));
+					codePredicates.add(myQueryRootStack.getResourcePidColumn().in(ResourcePersistentId.toLongList(allOrPids)));
 					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
-					codePredicates.add(myQueryRoot.getResourcePidColumn().in(ResourcePersistentId.toLongList(allOrPids)).not());
+					codePredicates.add(myQueryRootStack.getResourcePidColumn().in(ResourcePersistentId.toLongList(allOrPids)).not());
 					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 			}

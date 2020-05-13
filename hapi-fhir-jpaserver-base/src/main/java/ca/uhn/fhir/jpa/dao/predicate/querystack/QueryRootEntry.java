@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.predicate;
+package ca.uhn.fhir.jpa.dao.predicate.querystack;
 
 /*-
  * #%L
@@ -20,6 +20,10 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.predicate.IndexJoins;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+
 import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
@@ -34,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 abstract class QueryRootEntry {
 	private final ArrayList<Predicate> myPredicates = new ArrayList<>();
@@ -53,8 +58,8 @@ abstract class QueryRootEntry {
 		myHasIndexJoins = theHasIndexJoins;
 	}
 
-	Join<?, ?> getIndexJoin(SearchBuilderJoinKey theKey) {
-		return myIndexJoins.get(theKey);
+	Optional<Join<?, ?>> getIndexJoin(SearchBuilderJoinKey theKey) {
+		return Optional.ofNullable(myIndexJoins.get(theKey));
 	}
 
 	void addPredicate(Predicate thePredicate) {
