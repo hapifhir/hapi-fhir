@@ -21,7 +21,9 @@ package ca.uhn.fhir.empi.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
@@ -39,6 +41,8 @@ import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -47,6 +51,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	private final IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 	private final IEmpiPersonMergerSvc myPersonMergerSvc;
 	private final IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
+	private final IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
 
 	/**
 	 * Constructor
@@ -54,11 +59,12 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderDstu3(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IResourceLoader theResourceLoader) {
+	public EmpiProviderDstu3(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader) {
 		super(theFhirContext, theResourceLoader);
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 		myPersonMergerSvc = thePersonMergerSvc;
 		myEmpiLinkUpdaterSvc = theEmpiLinkUpdaterSvc;
+		myEmpiLinkQuerySvc = theEmpiLinkQuerySvc;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, type = Patient.class)
@@ -85,8 +91,8 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 									  @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep,
 									  RequestDetails theRequestDetails) {
 		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
-		IAnyResource personToDelete = getPersonFromIdOrThrowException(thePersonIdToDelete.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE);
-		IAnyResource personToKeep = getPersonFromIdOrThrowException(thePersonIdToKeep.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP);
+		IAnyResource personToDelete = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonIdToDelete.getValue());
+		IAnyResource personToKeep = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonIdToKeep.getValue());
 
 		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(theRequestDetails));
 	}
@@ -98,11 +104,24 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 																  ServletRequestDetails theRequestDetails) {
 
 		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
-		EmpiMatchResultEnum matchResult = EmpiMatchResultEnum.valueOf(theMatchResult.getValue());
-		IAnyResource person = getPersonFromIdOrThrowException(thePersonId.getValue(), "personIdToDelete");
-		IAnyResource target = getTargetFromIdOrThrowException(theTargetId.getValue(), "personIdToKeep");
+		EmpiMatchResultEnum matchResult = extractMatchResultOrNull(theMatchResult);
+		IAnyResource person = getPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
+		IAnyResource target = getTargetFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
 
 		return (Person) myEmpiLinkUpdaterSvc.updateLink(person, target, matchResult, createEmpiContext(theRequestDetails));
 	}
 
+	@Operation(name = ProviderConstants.EMPI_QUERY_LINKS)
+	public Parameters queryLinks(@OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, min = 0, max = 1) StringType thePersonId,
+										  @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, min = 0, max = 1) StringType theTargetId,
+										  @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theMatchResult,
+										  @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theLinkSource,
+										  ServletRequestDetails theRequestDetails) {
+		IIdType personId = extractPersonIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, thePersonId);
+		IIdType targetId = extractTargetIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, theTargetId);
+		EmpiMatchResultEnum matchResult = extractMatchResultOrNull(theMatchResult);
+		EmpiLinkSourceEnum linkSource = extractLinkSourceOrNull(theLinkSource);
+
+		return (Parameters) myEmpiLinkQuerySvc.queryLinks(personId, targetId, matchResult, linkSource, createEmpiContext(theRequestDetails));
+	}
 }

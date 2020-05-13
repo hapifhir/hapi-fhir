@@ -92,8 +92,8 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 										@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep,
 										RequestDetails theRequestDetails) {
 		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
-		IAnyResource personToDelete = getPersonFromIdOrThrowException(thePersonIdToDelete.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE);
-		IAnyResource personToKeep = getPersonFromIdOrThrowException(thePersonIdToKeep.getValue(), ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP);
+		IAnyResource personToDelete = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonIdToDelete.getValue());
+		IAnyResource personToKeep = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonIdToKeep.getValue());
 
 		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(theRequestDetails));
 	}
@@ -106,8 +106,8 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
 		EmpiMatchResultEnum matchResult = extractMatchResultOrNull(theMatchResult);
-		IAnyResource person = getPersonFromIdOrThrowException(thePersonId.getValue(), ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID);
-		IAnyResource target = getTargetFromIdOrThrowException(theTargetId.getValue(), ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID);
+		IAnyResource person = getPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
+		IAnyResource target = getTargetFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
 
 		return (Person) myEmpiLinkUpdaterSvc.updateLink(person, target, matchResult, createEmpiContext(theRequestDetails));
 	}
@@ -125,7 +125,4 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 		return (Parameters) myEmpiLinkQuerySvc.queryLinks(personId, targetId, matchResult, linkSource, createEmpiContext(theRequestDetails));
 	}
-
-
-
 }

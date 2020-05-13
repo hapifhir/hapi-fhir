@@ -51,7 +51,7 @@ public class EmpiProviderLoader {
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myResourceLoader));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader));
 				break;
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader));

@@ -9,6 +9,8 @@ import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -30,7 +32,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myEmpiProviderR4.updateLink(myPersonId, myPatientId, myPossibleMatch, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Match Result may only be set to NO_MATCH or MATCH", e.getMessage());
+			assertEquals("$empi-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
 	}
 
@@ -40,7 +42,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myEmpiProviderR4.updateLink(myPersonId, myPatientId, myPossibleDuplicate, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Match Result may only be set to NO_MATCH or MATCH", e.getMessage());
+			assertEquals("$empi-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
 	}
 
@@ -50,7 +52,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myEmpiProviderR4.updateLink(myPatientId, myPatientId, myNoMatch, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToDelete must have form Person/<id> where <id> is the id of the person", e.getMessage());
+			assertEquals("personId must have form Person/<id> where <id> is the id of the person", e.getMessage());
 		}
 	}
 
@@ -60,7 +62,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myEmpiProviderR4.updateLink(myPersonId, myPersonId, myNoMatch, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToKeep must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource", e.getMessage());
+			assertThat(e.getMessage(), endsWith("must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource"));
 		}
 	}
 
@@ -68,7 +70,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	public void testUpdateStrangePerson() {
 		Person person = createPerson();
 		try {
-			myEmpiProviderR4.updateLink(new StringType(person.getId()), myPatientId, myNoMatch, myRequestDetails);
+			myEmpiProviderR4.updateLink(new StringType(person.getIdElement().toVersionless().getValue()), myPatientId, myNoMatch, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Only EMPI Managed Person resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi", e.getMessage());
@@ -81,7 +83,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		patient.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_NO_EMPI_MANAGED);
 		createPatient(patient);
 		try {
-			myEmpiProviderR4.updateLink(myPersonId, new StringType(patient.getId()), myNoMatch, myRequestDetails);
+			myEmpiProviderR4.updateLink(myPersonId, new StringType(patient.getIdElement().toVersionless().getValue()), myNoMatch, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("The target is marked with the " + EmpiConstants.CODE_NO_EMPI_MANAGED + " tag which means it may not be EMPI linked.", e.getMessage());

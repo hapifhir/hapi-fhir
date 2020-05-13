@@ -57,19 +57,19 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 			myEmpiProviderR4.mergePersons(null, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personToDelete cannot be null", e.getMessage());
+			assertEquals("personIdToDelete cannot be null", e.getMessage());
 		}
 		try {
 			myEmpiProviderR4.mergePersons(null, myKeepPersonId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personToDelete cannot be null", e.getMessage());
+			assertEquals("personIdToDelete cannot be null", e.getMessage());
 		}
 		try {
 			myEmpiProviderR4.mergePersons(myDeletePersonId, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personToKeep cannot be null", e.getMessage());
+			assertEquals("personIdToKeep cannot be null", e.getMessage());
 		}
 	}
 

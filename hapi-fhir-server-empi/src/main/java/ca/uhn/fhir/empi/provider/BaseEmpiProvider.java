@@ -35,7 +35,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.StringType;
 
 public abstract class BaseEmpiProvider {
 
@@ -47,8 +46,8 @@ public abstract class BaseEmpiProvider {
 		myResourceLoader = theResourceLoader;
 	}
 
-	protected IAnyResource getPersonFromIdOrThrowException(String theId, String theParamName) {
-		IdDt personId = getPersonIdDtOrThrowException(theId, theParamName);
+	protected IAnyResource getPersonFromIdOrThrowException(String theParamName, String theId) {
+		IdDt personId = getPersonIdDtOrThrowException(theParamName, theId);
 		return loadResource(personId);
 	}
 
@@ -62,7 +61,7 @@ public abstract class BaseEmpiProvider {
 	}
 
 	protected IAnyResource getTargetFromIdOrThrowException(String theParamName, String theId) {
-		IIdType targetId = getTargetIdDtOrThrowException(theId, theParamName);
+		IIdType targetId = getTargetIdDtOrThrowException(theParamName, theId);
 		return loadResource(targetId);
 	}
 
@@ -138,7 +137,7 @@ public abstract class BaseEmpiProvider {
 		return theString.getValue();
 	}
 
-	protected IIdType extractPersonIdDtOrNull(String theName, StringType thePersonId) {
+	protected IIdType extractPersonIdDtOrNull(String theName, IPrimitiveType<String> thePersonId) {
 		String personId = extractStringNull(thePersonId);
 		if (personId == null) {
 			return null;
@@ -146,7 +145,7 @@ public abstract class BaseEmpiProvider {
 		return getPersonIdDtOrThrowException(theName, personId);
 	}
 
-	protected IIdType extractTargetIdDtOrNull(String theName, StringType theTargetId) {
+	protected IIdType extractTargetIdDtOrNull(String theName, IPrimitiveType<String> theTargetId) {
 		String targetId = extractStringNull(theTargetId);
 		if (targetId == null) {
 			return null;
