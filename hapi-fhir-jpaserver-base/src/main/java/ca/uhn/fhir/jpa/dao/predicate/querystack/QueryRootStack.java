@@ -182,7 +182,7 @@ public class QueryRootStack {
 	/**
 	 * Fetch all the current predicates
 	 * <p>
-	 * This should really be package protected, but it is called externally in one spot - We need to clean that up
+	 * TODO This should really be package protected, but it is called externally in one spot - We need to clean that up
 	 * at some point.
 	 */
 	public List<Predicate> getPredicates() {
