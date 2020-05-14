@@ -60,8 +60,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init410(); // 20190815 - 20191014
 		init420(); // 20191015 - 20200217
 		init430(); // Replaced by 5.0.0
-		init500(); // 20200218 - 20200519
-		init501(); // 20200520 - present
+		init500(); // 20200218 - 20200513
+		init501(); // 20200514 - present
 	}
 
 
@@ -125,7 +125,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 
-	private void init501() { //20200520 - present
+	private void init501() { //20200514 - present
 		Builder version = forVersion(VersionEnum.V5_0_1);
 
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
