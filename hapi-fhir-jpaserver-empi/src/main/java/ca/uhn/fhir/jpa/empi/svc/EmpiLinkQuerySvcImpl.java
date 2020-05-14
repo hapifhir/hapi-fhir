@@ -6,7 +6,6 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -28,8 +27,6 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	FhirContext myFhirContext;
 	@Autowired
 	IdHelperService myIdHelperService;
-	@Autowired
-	IResourceTableDao myResourceTableDao;
 	@Autowired
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 
@@ -56,11 +53,12 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 
 		for (EmpiLink empiLink : theEmpiLinks) {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
-			String personId = myResourceTableDao.findById(empiLink.getPersonPid()).get().getIdDt().toVersionless().getValue();
+			String personId = myIdHelperService.resourceIdFromPidOrThrowException(empiLink.getPersonPid()).toVersionless().getValue();
 			ParametersUtil.addPartString(myFhirContext, resultPart, "personId", personId);
 
-			String targetId = myResourceTableDao.findById(empiLink.getTargetPid()).get().getIdDt().toVersionless().getValue();
+			String targetId = myIdHelperService.resourceIdFromPidOrThrowException(empiLink.getTargetPid()).toVersionless().getValue();
 			ParametersUtil.addPartString(myFhirContext, resultPart, "targetId", targetId);
+
 			if (includeResultAndSource) {
 				ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", empiLink.getMatchResult().name());
 				ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", empiLink.getLinkSource().name());

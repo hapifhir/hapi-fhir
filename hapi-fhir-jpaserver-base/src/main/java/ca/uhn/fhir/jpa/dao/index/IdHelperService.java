@@ -28,11 +28,12 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -504,4 +505,11 @@ public class IdHelperService {
 		return theIds.stream().collect(Collectors.toMap(t->getPidOrThrowException(t), Function.identity()));
 	}
 
+    public IIdType resourceIdFromPidOrThrowException(Long thePid) {
+		 Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
+		 if (!optionalResource.isPresent()) {
+		 	throw new ResourceNotFoundException("Requested resource not found");
+		 }
+		 return optionalResource.get().getIdDt();
+    }
 }
