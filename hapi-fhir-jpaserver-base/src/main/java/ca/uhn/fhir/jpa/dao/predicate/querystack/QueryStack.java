@@ -54,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * select on a different table since many tables have a column with a FK dependency on RES_ID.
  * </p>
  */
-public class QueryRootStack {
+public class QueryStack {
 
 	private final Stack<QueryRootEntry> myQueryRootStack = new Stack<>();
 	private final CriteriaBuilder myCriteriaBuilder;
@@ -65,7 +65,7 @@ public class QueryRootStack {
 	/**
 	 * Constructor
 	 */
-	public QueryRootStack(CriteriaBuilder theCriteriaBuilder, String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId) {
+	public QueryStack(CriteriaBuilder theCriteriaBuilder, String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId) {
 		assert theCriteriaBuilder != null;
 		assert isNotBlank(theResourceType);
 		assert theSearchParameterMap != null;
@@ -166,6 +166,36 @@ public class QueryRootStack {
 	}
 
 	/**
+	 * Adds a predicate and marks it as having implicit type selection in it. In other words, call this method if a
+	 * this predicate will ensure:
+	 * <ul>
+	 *    <li>Only Resource PIDs for the correct resource type will be selected</li>
+	 *    <li>Only Resource PIDs for non-deleted resources will be selected</li>
+	 * </ul>
+	 * Setting this flag is a performance optimization, since it avoids the need for us to explicitly
+	 * add predicates for the two conditions above.
+	 */
+	public void addPredicateWithImplicitTypeSelection(Predicate thePredicate) {
+		setHasImplicitTypeSelection();
+		addPredicate(thePredicate);
+	}
+
+	/**
+	 * Adds predicates and marks them as having implicit type selection in it. In other words, call this method if a
+	 * this predicate will ensure:
+	 * <ul>
+	 *    <li>Only Resource PIDs for the correct resource type will be selected</li>
+	 *    <li>Only Resource PIDs for non-deleted resources will be selected</li>
+	 * </ul>
+	 * Setting this flag is a performance optimization, since it avoids the need for us to explicitly
+	 * add predicates for the two conditions above.
+	 */
+	public void addPredicatesWithImplicitTypeSelection(List<Predicate> thePredicates) {
+		setHasImplicitTypeSelection();
+		addPredicates(thePredicates);
+	}
+
+	/**
 	 * Adds predicate(s) to the current select statement
 	 */
 	public void addPredicates(List<Predicate> thePredicates) {
@@ -189,24 +219,15 @@ public class QueryRootStack {
 		return top().getPredicates();
 	}
 
-	/**
-	 * Call this method if a join has been created against this root that will ensure:
-	 * <ul>
-	 *    <li>Only Resource PIDs for the correct resource type will be selected</li>
-	 *    <li>Only Resource PIDs for non-deleted resources will be selected</li>
-	 * </ul>
-	 * Setting this flag is a performance optimization, since it avoids the need for us to explicitly
-	 * add predicates for the two conditions above.
-	 */
-	public void setHasIndexJoins() {
-		top().setHasIndexJoins(true);
+	private void setHasImplicitTypeSelection() {
+		top().setHasImplicitTypeSelection(true);
 	}
 
 	/**
-	 * @see #setHasIndexJoins()
+	 * @see #setHasImplicitTypeSelection()
 	 */
-	public void clearHasIndexJoins() {
-		top().setHasIndexJoins(false);
+	public void clearHasImplicitTypeSelection() {
+		top().setHasImplicitTypeSelection(false);
 	}
 
 	public boolean isEmpty() {
@@ -254,4 +275,10 @@ public class QueryRootStack {
 	}
 
 
+	/**
+	 * Add a predicate that will never match any resources
+	 */
+	public Predicate addNeverMatchingPredicate() {
+		return top().addNeverMatchingPredicate();
+	}
 }

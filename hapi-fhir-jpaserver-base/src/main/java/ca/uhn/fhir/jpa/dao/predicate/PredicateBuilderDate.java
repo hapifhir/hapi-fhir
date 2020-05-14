@@ -69,7 +69,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		From<?, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
 		if (join == null) {
-			join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+			join = myQueryStack.createJoin(SearchBuilderJoinEnum.DATE, theParamName);
 			myJoinMap.put(key, join);
 			newJoin = true;
 		}
@@ -93,12 +93,11 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		Predicate orPredicates = myCriteriaBuilder.or(toArray(codePredicates));
 
-		myQueryRootStack.setHasIndexJoins();
 		if (newJoin) {
 			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, theRequestPartitionId);
-			myQueryRootStack.addPredicate(identityAndValuePredicate);
+			myQueryStack.addPredicateWithImplicitTypeSelection(identityAndValuePredicate);
 		} else {
-			myQueryRootStack.addPredicate(orPredicates);
+			myQueryStack.addPredicateWithImplicitTypeSelection(orPredicates);
 		}
 
 		return orPredicates;

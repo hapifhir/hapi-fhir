@@ -149,7 +149,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
 											RequestPartitionId theRequestPartitionId) {
-		From<?, ResourceIndexedSearchParamCoords> join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
+		From<?, ResourceIndexedSearchParamCoords> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -171,8 +171,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 		}
 
 		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
-		myQueryRootStack.addPredicate(retVal);
-		myQueryRootStack.setHasIndexJoins();
+		myQueryStack.addPredicateWithImplicitTypeSelection(retVal);
 		return retVal;
 	}
 }

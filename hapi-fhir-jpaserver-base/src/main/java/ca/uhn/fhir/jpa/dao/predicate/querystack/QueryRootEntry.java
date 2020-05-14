@@ -44,18 +44,18 @@ abstract class QueryRootEntry {
 	private final ArrayList<Predicate> myPredicates = new ArrayList<>();
 	private final IndexJoins myIndexJoins = new IndexJoins();
 	private final CriteriaBuilder myCriteriaBuilder;
-	private boolean myHasIndexJoins;
+	private boolean myHasImplicitTypeSelection;
 
 	QueryRootEntry(CriteriaBuilder theCriteriaBuilder) {
 		myCriteriaBuilder = theCriteriaBuilder;
 	}
 
-	public boolean isHasIndexJoins() {
-		return myHasIndexJoins;
+	boolean isHasImplicitTypeSelection() {
+		return myHasImplicitTypeSelection;
 	}
 
-	public void setHasIndexJoins(boolean theHasIndexJoins) {
-		myHasIndexJoins = theHasIndexJoins;
+	void setHasImplicitTypeSelection(boolean theHasImplicitTypeSelection) {
+		myHasImplicitTypeSelection = theHasImplicitTypeSelection;
 	}
 
 	Optional<Join<?, ?>> getIndexJoin(SearchBuilderJoinKey theKey) {
@@ -68,6 +68,13 @@ abstract class QueryRootEntry {
 
 	void addPredicates(List<Predicate> thePredicates) {
 		myPredicates.addAll(thePredicates);
+	}
+
+	Predicate addNeverMatchingPredicate() {
+		Predicate predicate = myCriteriaBuilder.equal(getResourcePidColumn(), -1L);
+		clearPredicates();
+		addPredicate(predicate);
+		return predicate;
 	}
 
 	Predicate[] getPredicateArray() {
@@ -111,7 +118,7 @@ abstract class QueryRootEntry {
 
 	abstract Root<?> getRoot();
 
-	public abstract Expression<Long> getResourcePidColumn();
+	abstract Expression<Long> getResourcePidColumn();
 
-	public abstract Subquery<Long> subqueryForTagNegation();
+	abstract Subquery<Long> subqueryForTagNegation();
 }

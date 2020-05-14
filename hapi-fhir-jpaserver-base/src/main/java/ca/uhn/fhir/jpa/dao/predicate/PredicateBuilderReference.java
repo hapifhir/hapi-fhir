@@ -154,7 +154,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			return null;
 		}
 
-		From<?, ResourceLink> join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.REFERENCE, theParamName);
+		From<?, ResourceLink> join = myQueryStack.createJoin(SearchBuilderJoinEnum.REFERENCE, theParamName);
 
 		List<IIdType> targetIds = new ArrayList<>();
 		List<String> targetQualifiedUrls = new ArrayList<>();
@@ -250,17 +250,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			codePredicates.add(myCriteriaBuilder.and(pathPredicate, pidPredicate));
 		}
 
-		myQueryRootStack.setHasIndexJoins();
 		if (codePredicates.size() > 0) {
 			Predicate predicate = myCriteriaBuilder.or(toArray(codePredicates));
-			myQueryRootStack.addPredicate(predicate);
+			myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
 			return predicate;
 		} else {
-			// Add a predicate that will never match
-			Predicate pidPredicate = join.get("myTargetResourcePid").in(-1L);
-			myQueryRootStack.clearPredicates();
-			myQueryRootStack.addPredicate(pidPredicate);
-			return pidPredicate;
+			return myQueryStack.addNeverMatchingPredicate();
 		}
 	}
 
@@ -269,97 +264,22 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	 * on the device.
 	 */
 	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		final List<Class<? extends IBaseResource>> resourceTypes;
-		if (!theReferenceParam.hasResourceType()) {
 
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-			resourceTypes = new ArrayList<>();
+		/*
+		  * Which resource types can the given chained parameter actually link to? This might be a list
+		  * where the chain is unqualified, as in: Observation?subject.identifier=(...)
+		  * since subject can link to several possible target types.
+		  *
+		  * If the user has qualified the chain, as in: Observation?subject:Patient.identifier=(...)
+		  * this is just a simple 1-entry list.
+		 */
+		final List<Class<? extends IBaseResource>> resourceTypes = determineCandidateResourceTypesForChain(theResourceName, theParamName, theReferenceParam);
 
-			if (param.hasTargets()) {
-				Set<String> targetTypes = param.getTargets();
-				for (String next : targetTypes) {
-					resourceTypes.add(myContext.getResourceDefinition(next).getImplementingClass());
-				}
-			}
-
-			if (resourceTypes.isEmpty()) {
-				RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
-				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
-				if (searchParamByName == null) {
-					throw new InternalErrorException("Could not find parameter " + theParamName);
-				}
-				String paramPath = searchParamByName.getPath();
-				if (paramPath.endsWith(".as(Reference)")) {
-					paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
-				}
-
-				if (paramPath.contains(".extension(")) {
-					int startIdx = paramPath.indexOf(".extension(");
-					int endIdx = paramPath.indexOf(')', startIdx);
-					if (startIdx != -1 && endIdx != -1) {
-						paramPath = paramPath.substring(0, startIdx + 10) + paramPath.substring(endIdx + 1);
-					}
-				}
-
-				BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
-				if (def instanceof RuntimeChildChoiceDefinition) {
-					RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
-					resourceTypes.addAll(choiceDef.getResourceTypes());
-				} else if (def instanceof RuntimeChildResourceDefinition) {
-					RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
-					resourceTypes.addAll(resDef.getResourceTypes());
-					if (resourceTypes.size() == 1) {
-						if (resourceTypes.get(0).isInterface()) {
-							throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
-						}
-					}
-				} else {
-					throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
-				}
-			}
-
-			if (resourceTypes.isEmpty()) {
-				for (BaseRuntimeElementDefinition<?> next : myContext.getElementDefinitions()) {
-					if (next instanceof RuntimeResourceDefinition) {
-						RuntimeResourceDefinition nextResDef = (RuntimeResourceDefinition) next;
-						resourceTypes.add(nextResDef.getImplementingClass());
-					}
-				}
-			}
-
-		} else {
-
-			try {
-				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theReferenceParam.getResourceType());
-				resourceTypes = new ArrayList<>(1);
-				resourceTypes.add(resDef.getImplementingClass());
-			} catch (DataFormatException e) {
-				throw newInvalidResourceTypeException(theReferenceParam.getResourceType());
-			}
-
-		}
-
-		// Handle chain on _type
+		/*
+		 * Handle chain on _type
+		 */
 		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
-			String typeValue = theReferenceParam.getValue();
-
-			Class<? extends IBaseResource> wantedType;
-			try {
-				wantedType = myContext.getResourceDefinition(typeValue).getImplementingClass();
-			} catch (DataFormatException e) {
-				throw newInvalidResourceTypeException(typeValue);
-			}
-			if (!resourceTypes.contains(wantedType)) {
-				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
-			}
-
-			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
-			Predicate sourceTypeParameter = myCriteriaBuilder.equal(theJoin.get("mySourceResourceType"), myResourceName);
-			Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
-
-			Predicate composite = myCriteriaBuilder.and(pathPredicate, sourceTypeParameter, targetTypeParameter);
-			myQueryRootStack.addPredicate(composite);
-			return composite;
+			return createChainPredicateOnType(theResourceName, theParamName, theJoin, theReferenceParam, resourceTypes);
 		}
 
 		boolean foundChainMatch = false;
@@ -433,8 +353,104 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
-		myQueryRootStack.addPredicate(predicate);
+		myQueryStack.addPredicate(predicate);
 		return predicate;
+	}
+
+	private Predicate createChainPredicateOnType(String theResourceName, String theParamName, From<?, ResourceLink> theJoin, ReferenceParam theReferenceParam, List<Class<? extends IBaseResource>> theResourceTypes) {
+		String typeValue = theReferenceParam.getValue();
+
+		Class<? extends IBaseResource> wantedType;
+		try {
+			wantedType = myContext.getResourceDefinition(typeValue).getImplementingClass();
+		} catch (DataFormatException e) {
+			throw newInvalidResourceTypeException(typeValue);
+		}
+		if (!theResourceTypes.contains(wantedType)) {
+			throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
+		}
+
+		Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
+		Predicate sourceTypeParameter = myCriteriaBuilder.equal(theJoin.get("mySourceResourceType"), myResourceName);
+		Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
+
+		Predicate composite = myCriteriaBuilder.and(pathPredicate, sourceTypeParameter, targetTypeParameter);
+		myQueryStack.addPredicate(composite);
+		return composite;
+	}
+
+	@Nonnull
+	private List<Class<? extends IBaseResource>> determineCandidateResourceTypesForChain(String theResourceName, String theParamName, ReferenceParam theReferenceParam) {
+		final List<Class<? extends IBaseResource>> resourceTypes;
+		if (!theReferenceParam.hasResourceType()) {
+
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+			resourceTypes = new ArrayList<>();
+
+			if (param.hasTargets()) {
+				Set<String> targetTypes = param.getTargets();
+				for (String next : targetTypes) {
+					resourceTypes.add(myContext.getResourceDefinition(next).getImplementingClass());
+				}
+			}
+
+			if (resourceTypes.isEmpty()) {
+				RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
+				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+				if (searchParamByName == null) {
+					throw new InternalErrorException("Could not find parameter " + theParamName);
+				}
+				String paramPath = searchParamByName.getPath();
+				if (paramPath.endsWith(".as(Reference)")) {
+					paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
+				}
+
+				if (paramPath.contains(".extension(")) {
+					int startIdx = paramPath.indexOf(".extension(");
+					int endIdx = paramPath.indexOf(')', startIdx);
+					if (startIdx != -1 && endIdx != -1) {
+						paramPath = paramPath.substring(0, startIdx + 10) + paramPath.substring(endIdx + 1);
+					}
+				}
+
+				BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
+				if (def instanceof RuntimeChildChoiceDefinition) {
+					RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
+					resourceTypes.addAll(choiceDef.getResourceTypes());
+				} else if (def instanceof RuntimeChildResourceDefinition) {
+					RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
+					resourceTypes.addAll(resDef.getResourceTypes());
+					if (resourceTypes.size() == 1) {
+						if (resourceTypes.get(0).isInterface()) {
+							throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
+						}
+					}
+				} else {
+					throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
+				}
+			}
+
+			if (resourceTypes.isEmpty()) {
+				for (BaseRuntimeElementDefinition<?> next : myContext.getElementDefinitions()) {
+					if (next instanceof RuntimeResourceDefinition) {
+						RuntimeResourceDefinition nextResDef = (RuntimeResourceDefinition) next;
+						resourceTypes.add(nextResDef.getImplementingClass());
+					}
+				}
+			}
+
+		} else {
+
+			try {
+				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theReferenceParam.getResourceType());
+				resourceTypes = new ArrayList<>(1);
+				resourceTypes.add(resDef.getImplementingClass());
+			} catch (DataFormatException e) {
+				throw newInvalidResourceTypeException(theReferenceParam.getResourceType());
+			}
+
+		}
+		return resourceTypes;
 	}
 
 	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, @Nullable List<Class<? extends IBaseResource>> theCandidateTargetTypes) {
@@ -520,9 +536,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		 */
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theSubResourceName, theChain);
 		if (nextParamDef != null && !theChain.startsWith("_")) {
-			myQueryRootStack.pushIndexTableSubQuery();
+			myQueryStack.pushIndexTableSubQuery();
 		} else {
-			myQueryRootStack.pushResourceTableSubQuery(theSubResourceName);
+			myQueryStack.pushResourceTableSubQuery(theSubResourceName);
 		}
 
 		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
@@ -533,7 +549,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		/*
 		 * Pop the old query root and predicate list back
 		 */
-		return (Subquery<Long>) myQueryRootStack.pop();
+		return (Subquery<Long>) myQueryStack.pop();
 
 	}
 
@@ -654,18 +670,18 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 								// TODO: we clear the predicates below because the filter builds up
 								// its own collection of predicates. It'd probably be good at some
 								// point to do something more fancy...
-								ArrayList<Predicate> holdPredicates = new ArrayList<>(myQueryRootStack.getPredicates());
+								ArrayList<Predicate> holdPredicates = new ArrayList<>(myQueryStack.getPredicates());
 
 								Predicate filterPredicate = processFilter(filter, theResourceName, theRequest, theRequestPartitionId);
-								myQueryRootStack.clearPredicates();
-								myQueryRootStack.addPredicates(holdPredicates);
-								myQueryRootStack.addPredicate(filterPredicate);
+								myQueryStack.clearPredicates();
+								myQueryStack.addPredicates(holdPredicates);
+								myQueryStack.addPredicate(filterPredicate);
 
 								// Because filters can have an OR at the root, we never know for sure that we haven't done an optimized
 								// search that doesn't check the resource type. This could be improved in the future, but for now it's
 								// safest to just clear this flag. The test "testRetrieveDifferentTypeEq" will fail if we don't clear
 								// this here.
-								myQueryRootStack.clearHasIndexJoins();
+								myQueryStack.clearHasImplicitTypeSelection();
 							}
 						}
 
@@ -842,13 +858,13 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			Predicate predicate;
 			if ((operation == null) ||
 				(operation == SearchFilterParser.CompareOperation.eq)) {
-				predicate = myQueryRootStack.get("myLanguage").as(String.class).in(values);
+				predicate = myQueryStack.get("myLanguage").as(String.class).in(values);
 			} else if (operation == SearchFilterParser.CompareOperation.ne) {
-				predicate = myQueryRootStack.get("myLanguage").as(String.class).in(values).not();
+				predicate = myQueryStack.get("myLanguage").as(String.class).in(values).not();
 			} else {
 				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
 			}
-			myQueryRootStack.addPredicate(predicate);
+			myQueryStack.addPredicate(predicate);
 			if (operation != null) {
 				return predicate;
 			}
@@ -872,7 +888,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			throw new InvalidRequestException(msg);
 		}
 
-		From<?, ResourceHistoryProvenanceEntity> join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.PROVENANCE, Constants.PARAM_SOURCE);
+		From<?, ResourceHistoryProvenanceEntity> join = myQueryStack.createJoin(SearchBuilderJoinEnum.PROVENANCE, Constants.PARAM_SOURCE);
 
 		List<Predicate> codePredicates = new ArrayList<>();
 
@@ -892,7 +908,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
-		myQueryRootStack.addPredicate(retVal);
+		myQueryStack.addPredicate(retVal);
 		return retVal;
 	}
 
@@ -960,13 +976,13 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(paramName, targetResourceType, orValues, theRequest, theRequestPartitionId);
-			Join<?, ResourceLink> join = (Join) myQueryRootStack.createJoin(SearchBuilderJoinEnum.HAS, "_has");
+			Join<?, ResourceLink> join = (Join) myQueryStack.createJoin(SearchBuilderJoinEnum.HAS, "_has");
 
 			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
 			Predicate sourceTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType"), theResourceType);
 			Predicate sourcePidPredicate = join.get("mySourceResourcePid").in(subQ);
 			Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, sourcePidPredicate, sourceTypePredicate);
-			myQueryRootStack.addPredicate(andPredicate);
+			myQueryStack.addPredicate(andPredicate);
 		}
 	}
 
@@ -985,11 +1001,11 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
 		IQueryParameterType leftValue = cp.getLeftValue();
-		myQueryRootStack.addPredicate(createCompositeParamPart(theResourceName, myQueryRootStack.getRootForComposite(), left, leftValue, theRequestPartitionId));
+		myQueryStack.addPredicate(createCompositeParamPart(theResourceName, myQueryStack.getRootForComposite(), left, leftValue, theRequestPartitionId));
 
 		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
 		IQueryParameterType rightValue = cp.getRightValue();
-		myQueryRootStack.addPredicate(createCompositeParamPart(theResourceName, myQueryRootStack.getRootForComposite(), right, rightValue, theRequestPartitionId));
+		myQueryStack.addPredicate(createCompositeParamPart(theResourceName, myQueryStack.getRootForComposite(), right, rightValue, theRequestPartitionId));
 
 	}
 

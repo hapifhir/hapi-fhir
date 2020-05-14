@@ -47,17 +47,17 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	private final RequestPartitionId myRequestPartitionId;
 	private final String myResourceType;
 
+	/**
+	 * This method will ddd a predicate to make sure we only include non-deleted resources, and only include
+	 * resources of the right type.
+	 *
+	 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
+	 * need an explicit predicate for it.
+	 */
 	@Override
 	AbstractQuery<Long> pop() {
 
-		/*
-		 * Add a predicate to make sure we only include non-deleted resources, and only include
-		 * resources of the right type.
-		 *
-		 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
-		 * need an explicit predicate for it.
-		 */
-		if (!isHasIndexJoins()) {
+		if (!isHasImplicitTypeSelection()) {
 			if (mySearchParameterMap.getEverythingMode() == null) {
 				addPredicate(myCriteriaBuilder.equal(getRoot().get("myResourceType"), myResourceType));
 			}

@@ -89,7 +89,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 											RequestPartitionId theRequestPartitionId) {
 
 		if (theList.get(0).getMissing() != null) {
-			From<?, ResourceIndexedSearchParamToken> join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
+			From<?, ResourceIndexedSearchParamToken> join = myQueryStack.createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
 			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
@@ -128,7 +128,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			return null;
 		}
 
-		From<?, ResourceIndexedSearchParamToken> join = myQueryRootStack.createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
+		From<?, ResourceIndexedSearchParamToken> join = myQueryStack.createJoin(SearchBuilderJoinEnum.TOKEN, theParamName);
 		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myCriteriaBuilder, join, theOperation, theRequestPartitionId);
@@ -137,8 +137,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 
 		Predicate spPredicate = myCriteriaBuilder.or(toArray(codePredicates));
 
-		myQueryRootStack.setHasIndexJoins();
-		myQueryRootStack.addPredicate(spPredicate);
+		myQueryStack.addPredicateWithImplicitTypeSelection(spPredicate);
 
 		return spPredicate;
 	}

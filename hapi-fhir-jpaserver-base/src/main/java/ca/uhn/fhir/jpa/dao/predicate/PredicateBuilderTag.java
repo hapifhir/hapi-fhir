@@ -134,14 +134,14 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 			if (paramInverted) {
 				ourLog.debug("Searching for _tag:not");
 
-				Subquery<Long> subQ = myQueryRootStack.subqueryForTagNegation();
+				Subquery<Long> subQ = myQueryStack.subqueryForTagNegation();
 				Root<ResourceTag> subQfrom = subQ.from(ResourceTag.class);
 				subQ.select(subQfrom.get("myResourceId").as(Long.class));
 
-				myQueryRootStack.addPredicate(
+				myQueryStack.addPredicate(
 					myCriteriaBuilder.not(
 						myCriteriaBuilder.in(
-							myQueryRootStack.get("myId")
+							myQueryStack.get("myId")
 						).value(subQ)
 					)
 				);
@@ -159,7 +159,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 
 			}
 
-			From<?, ResourceTag> tagJoin = myQueryRootStack.createJoin(SearchBuilderJoinEnum.RESOURCE_TAGS, null);
+			From<?, ResourceTag> tagJoin = myQueryStack.createJoin(SearchBuilderJoinEnum.RESOURCE_TAGS, null);
 			From<ResourceTag, TagDefinition> defJoin = tagJoin.join("myTag");
 
 			Predicate tagListPredicate = createPredicateTagList(defJoin, myCriteriaBuilder, tagType, tokens);
@@ -169,7 +169,7 @@ class PredicateBuilderTag extends BasePredicateBuilder {
 				addPartitionIdPredicate(theRequestPartitionId, tagJoin, predicates);
 			}
 
-			myQueryRootStack.addPredicates(predicates);
+			myQueryStack.addPredicates(predicates);
 
 		}
 

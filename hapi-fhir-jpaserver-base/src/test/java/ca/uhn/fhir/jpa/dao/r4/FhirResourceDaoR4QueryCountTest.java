@@ -473,9 +473,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		obs.getSubject().setReference("Patient/P");
 		myObservationDao.update(obs);
 
-		SearchParameterMap map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add(Observation.SP_SUBJECT, new ReferenceParam("identifier", "sys|val"));
+		SearchParameterMap map = SearchParameterMap.newSynchronous(Observation.SP_SUBJECT, new ReferenceParam("identifier", "sys|val"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myObservationDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Observation/O"));

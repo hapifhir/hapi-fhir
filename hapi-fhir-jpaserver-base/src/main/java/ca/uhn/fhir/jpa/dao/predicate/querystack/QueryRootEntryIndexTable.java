@@ -71,7 +71,7 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 			switch (theType) {
 				case REFERENCE:
 					myRoot = myQuery.from(ResourceLink.class);
-					this.myResourcePidColumn = myRoot.get("mySourceResourcePid").as(Long.class);
+					myResourcePidColumn = myRoot.get("mySourceResourcePid").as(Long.class);
 					myParamType = SearchBuilderJoinEnum.REFERENCE;
 					break;
 				case NUMBER:
