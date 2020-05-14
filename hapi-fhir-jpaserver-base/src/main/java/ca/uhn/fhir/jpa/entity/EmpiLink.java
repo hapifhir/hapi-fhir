@@ -40,7 +40,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import java.util.Date;
 
 @Entity
 @Table(name = "MPI_LINK", uniqueConstraints = {
@@ -79,6 +82,16 @@ public class EmpiLink {
 	@Enumerated(EnumType.ORDINAL)
 	@OptimisticLock(excluded = true)
 	private EmpiLinkSourceEnum myLinkSource;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATED", nullable = false)
+	@OptimisticLock(excluded = true)
+	private Date myCreated;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "UPDATED", nullable = false)
+	@OptimisticLock(excluded = true)
+	private Date myUpdated;
 
 	public Long getId() {
 		return myId;
@@ -174,5 +187,23 @@ public class EmpiLink {
 			.append("myMatchResult", myMatchResult)
 			.append("myLinkSource", myLinkSource)
 			.toString();
+	}
+
+	public Date getCreated() {
+		return myCreated;
+	}
+
+	public EmpiLink setCreated(Date theCreated) {
+		myCreated = theCreated;
+		return this;
+	}
+
+	public Date getUpdated() {
+		return myUpdated;
+	}
+
+	public EmpiLink setUpdated(Date theUpdated) {
+		myUpdated = theUpdated;
+		return this;
 	}
 }
