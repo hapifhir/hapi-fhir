@@ -39,19 +39,19 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink).stream()
 			.filter(empiLink -> empiLink.getMatchResult() != EmpiMatchResultEnum.POSSIBLE_DUPLICATE)
 			.collect(Collectors.toList());
-		// FIXME KHS page this
-		return parametersFromEmpiLinks(empiLinks);
+		// TODO RC1 KHS page results
+		return parametersFromEmpiLinks(empiLinks, true);
 	}
 
 	@Override
 	public IBaseParameters getPossibleDuplicates(EmpiTransactionContext theEmpiContext) {
 		Example<EmpiLink> exampleLink = exampleLinkFromParameters(null, null, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, null);
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink);
-		// FIXME KHS page this
-		return parametersFromEmpiLinks(empiLinks);
+		// TODO RC1 page results
+		return parametersFromEmpiLinks(empiLinks, false);
 	}
 
-	private IBaseParameters parametersFromEmpiLinks(List<EmpiLink> theEmpiLinks) {
+	private IBaseParameters parametersFromEmpiLinks(List<EmpiLink> theEmpiLinks, boolean includeResultAndSource) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 
 		for (EmpiLink empiLink : theEmpiLinks) {
@@ -61,9 +61,10 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 
 			String targetId = myResourceTableDao.findById(empiLink.getTargetPid()).get().getIdDt().toVersionless().getValue();
 			ParametersUtil.addPartString(myFhirContext, resultPart, "targetId", targetId);
-
-			ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", empiLink.getMatchResult().name());
-			ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", empiLink.getLinkSource().name());
+			if (includeResultAndSource) {
+				ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", empiLink.getMatchResult().name());
+				ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", empiLink.getLinkSource().name());
+			}
 		}
 		return retval;
 	}

@@ -52,18 +52,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLi
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertEmpiLink(part, myPersonId.getValue(), myPatientId.getValue(), EmpiMatchResultEnum.MATCH);
-	}
-
-	private void assertEmpiLink(List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, EmpiMatchResultEnum theMatchResult) {
-		assertThat(thePart.get(0).getName(), is("personId"));
-		assertThat(thePart.get(0).getValue().toString(), is(thePersonId));
-		assertThat(thePart.get(1).getName(), is("targetId"));
-		assertThat(thePart.get(1).getValue().toString(), is(theTargetId));
-		assertThat(thePart.get(2).getName(), is("matchResult"));
-		assertThat(thePart.get(2).getValue().toString(), is(theMatchResult.name()));
-		assertThat(thePart.get(3).getName(), is("linkSource"));
-		assertThat(thePart.get(3).getValue().toString(), is("AUTO"));
+		assertEmpiLink(4, part, myPersonId.getValue(), myPatientId.getValue(), EmpiMatchResultEnum.MATCH);
 	}
 
 	@Test
@@ -79,7 +68,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLi
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(2).getPart();
-		assertEmpiLink(part, personId.getValue(), patientId.getValue(), EmpiMatchResultEnum.MATCH);
+		assertEmpiLink(4, part, personId.getValue(), patientId.getValue(), EmpiMatchResultEnum.MATCH);
 	}
 
 	@Test
@@ -89,6 +78,21 @@ private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLi
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertEmpiLink(part, myPerson1Id.getValue(), myPerson2Id.getValue(), EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
+		assertEmpiLink(2, part, myPerson1Id.getValue(), myPerson2Id.getValue(), EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
+	}
+
+
+	private void assertEmpiLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, EmpiMatchResultEnum theMatchResult) {
+		assertThat(thePart, hasSize(theExpectedSize));
+		assertThat(thePart.get(0).getName(), is("personId"));
+		assertThat(thePart.get(0).getValue().toString(), is(thePersonId));
+		assertThat(thePart.get(1).getName(), is("targetId"));
+		assertThat(thePart.get(1).getValue().toString(), is(theTargetId));
+		if (theExpectedSize > 2) {
+			assertThat(thePart.get(2).getName(), is("matchResult"));
+			assertThat(thePart.get(2).getValue().toString(), is(theMatchResult.name()));
+			assertThat(thePart.get(3).getName(), is("linkSource"));
+			assertThat(thePart.get(3).getValue().toString(), is("AUTO"));
+		}
 	}
 }
