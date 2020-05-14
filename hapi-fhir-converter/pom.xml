@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.0.0-SNAPSHOT</version>
+		<version>5.1.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -189,6 +189,13 @@
 					<dependencySourceIncludes>
 						<include>ca.uhn.hapi.fhir:org.hl7.fhir.convertors</include>
 					</dependencySourceIncludes>
+					<additionalDependencies>
+						<dependency>
+							<groupId>org.apache.commons</groupId>
+							<artifactId>commons-compress</artifactId>
+							<version>${commons_compress_version}</version>
+						</dependency>
+					</additionalDependencies>
 				</configuration>
 			</plugin>
 

@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -45,7 +45,7 @@ import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.model.util.TransactionDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -273,7 +273,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HookParams hook = new HookParams()
 			.add(IBaseResource.class, resourceToDelete)
 			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hook);
 
 		myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theRequest, theTransactionDetails);
@@ -296,7 +297,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				HookParams hookParams = new HookParams()
 					.add(IBaseResource.class, resourceToDelete)
 					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(TransactionDetails.class, theTransactionDetails);
 				doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 			}
 		});
@@ -362,7 +364,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			HookParams hooks = new HookParams()
 				.add(IBaseResource.class, resourceToDelete)
 				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(TransactionDetails.class, transactionDetails);
 			doCallHooks(theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
 
 			myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, theRequest, transactionDetails);
@@ -386,7 +389,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					HookParams hookParams = new HookParams()
 						.add(IBaseResource.class, resourceToDelete)
 						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+						.addIfMatchesType(ServletRequestDetails.class, theRequest)
+						.add(TransactionDetails.class, transactionDetails);
 					doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 				}
 			});
@@ -508,7 +512,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HookParams hookParams = new HookParams()
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
 		// Perform actual DB update
@@ -553,7 +558,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					HookParams hookParams = new HookParams()
 						.add(IBaseResource.class, theResource)
 						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+						.addIfMatchesType(ServletRequestDetails.class, theRequest)
+						.add(TransactionDetails.class, theTransactionDetails);
 					doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
 				}
 			});

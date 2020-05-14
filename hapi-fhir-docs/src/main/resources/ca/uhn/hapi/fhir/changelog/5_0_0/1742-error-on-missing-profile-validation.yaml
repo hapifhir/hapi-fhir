@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1742
+title: "When validating a resource, the validator will now report an error if the resource declares conformance
+   to an unknown or invalid profile URL via the `Resource.meta.profile` declaration. Previously this was a warning
+   and did not block successful validation."

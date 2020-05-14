@@ -28,12 +28,15 @@ import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.INarrativeGenerator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -112,6 +115,16 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 	}
 
 	@Override
+	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FileNotFoundException, IOException, FHIRException {
+
+	}
+
+	@Override
+	public boolean hasPackage(String id, String ver) {
+		return false;
+	}
+
+	@Override
 	public void generateSnapshot(StructureDefinition input) throws FHIRException {
 		if (input.hasSnapshot()) {
 			return;
@@ -170,6 +183,16 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 	@Override
 	public void cacheResource(Resource res) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void cacheResourceFromPackage(Resource res, PackageVersion packageDetails) throws FHIRException {
+
+	}
+
+	@Override
+	public void cachePackage(PackageVersion packageDetails, List<PackageVersion> dependencies) {
+
 	}
 
 	@Nonnull
@@ -284,6 +307,11 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 	}
 
 	@Override
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, CanonicalResource canonicalForSource) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public List<org.hl7.fhir.r5.model.ConceptMap> findMapsForSource(String url) {
 		throw new UnsupportedOperationException();
 	}
@@ -330,7 +358,7 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 
 	@Override
 	public void setOverrideVersionNs(String value) {
-
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

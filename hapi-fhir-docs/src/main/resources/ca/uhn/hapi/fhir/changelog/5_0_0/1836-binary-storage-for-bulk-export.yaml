@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1836
+title: "In HAPI FHIR 4.2.0, when performing a Bulk Export on a server with Binary Storage enabled, the bulk export files
+   were not able to take advantage of the externalized binary stroage and would be stored in the relational DB. This has
+   now been enhanced to allow bulk export files to store externally."

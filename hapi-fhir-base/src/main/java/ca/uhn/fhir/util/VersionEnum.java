@@ -61,7 +61,9 @@ public enum VersionEnum {
 	V4_2_0,
 	@Deprecated
 	V4_3_0, // 4.3.0 was renamed to 5.0.0 during the cycle
-	V5_0_0;
+	V5_0_0,
+	V5_0_1,
+	V5_1_0;
 
 	public static VersionEnum latestVersion() {
 		VersionEnum[] values = VersionEnum.values();

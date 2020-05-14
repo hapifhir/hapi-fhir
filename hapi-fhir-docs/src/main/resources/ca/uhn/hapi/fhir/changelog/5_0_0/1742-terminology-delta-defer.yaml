@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1742
+title: When performing a terminology delta ADD operation, if the number of codes being added is large
+   the codes will be added in small batches via an asynchronous scheduled task in order to avoid overwhelming
+   the database with a large operation.

@@ -23,20 +23,20 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r5.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,7 +179,6 @@ public class SubscriptionCanonicalizer {
 				case R5: {
 					org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
 					return subscription
-						.getChannel()
 						.getExtension()
 						.stream()
 						.collect(Collectors.groupingBy(t -> t.getUrl(), mapping(t -> t.getValueAsPrimitive().getValueAsString(), toList())));
@@ -251,24 +250,24 @@ public class SubscriptionCanonicalizer {
 		org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
-		org.hl7.fhir.r5.model.Subscription.SubscriptionStatus status = subscription.getStatus();
+		org.hl7.fhir.r5.model.Enumerations.SubscriptionState status = subscription.getStatus();
 		if (status != null) {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 		}
 		retVal.setChannelType(getChannelType(subscription));
 		retVal.setCriteriaString(getCriteria(theSubscription));
-		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
-		retVal.setHeaders(subscription.getChannel().getHeader());
+		retVal.setEndpointUrl(subscription.getEndpoint());
+		retVal.setHeaders(subscription.getHeader());
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
-		retVal.setPayloadString(subscription.getChannel().getPayload().getContentType());
+		retVal.setPayloadString(subscription.getContentType());
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
 			String subjectTemplate;
 			try {
-				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
-				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
+				from = getExtensionString(subscription, JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
+				subjectTemplate = getExtensionString(subscription, JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
 			} catch (FHIRException theE) {
 				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
@@ -280,8 +279,8 @@ public class SubscriptionCanonicalizer {
 			String stripVersionIds;
 			String deliverLatestVersion;
 			try {
-				stripVersionIds = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
-				deliverLatestVersion = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
+				stripVersionIds = getExtensionString(subscription, JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
+				deliverLatestVersion = getExtensionString(subscription, JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
 			} catch (FHIRException theE) {
 				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
@@ -298,6 +297,18 @@ public class SubscriptionCanonicalizer {
 		}
 
 		return retVal;
+	}
+
+	private String getExtensionString(IBaseHasExtensions theBase, String theUrl) {
+		return theBase
+			.getExtension()
+			.stream()
+			.filter(t -> theUrl.equals(t.getUrl()))
+			.filter(t -> t.getValue() instanceof IPrimitiveType)
+			.map(t -> (IPrimitiveType<?>) t.getValue())
+			.map(t -> t.getValueAsString())
+			.findFirst()
+			.orElse(null);
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
@@ -327,11 +338,10 @@ public class SubscriptionCanonicalizer {
 				break;
 			}
 			case R5: {
-				for (Coding nextTypeCode : ((org.hl7.fhir.r5.model.Subscription) theSubscription).getChannel().getType().getCoding()) {
-					CanonicalSubscriptionChannelType code = CanonicalSubscriptionChannelType.fromCode(nextTypeCode.getSystem(), nextTypeCode.getCode());
-					if (code != null) {
-						retVal = code;
-					}
+				org.hl7.fhir.r5.model.Coding nextTypeCode = ((org.hl7.fhir.r5.model.Subscription) theSubscription).getChannelType();
+				CanonicalSubscriptionChannelType code = CanonicalSubscriptionChannelType.fromCode(nextTypeCode.getSystem(), nextTypeCode.getCode());
+				if (code != null) {
+					retVal = code;
 				}
 				break;
 			}
@@ -355,7 +365,7 @@ public class SubscriptionCanonicalizer {
 				retVal = ((org.hl7.fhir.r4.model.Subscription) theSubscription).getCriteria();
 				break;
 			case R5:
-				org.hl7.fhir.r5.model.Topic topic = (org.hl7.fhir.r5.model.Topic) ((org.hl7.fhir.r5.model.Subscription) theSubscription).getTopic().getResource();
+				org.hl7.fhir.r5.model.SubscriptionTopic topic = (org.hl7.fhir.r5.model.SubscriptionTopic) ((org.hl7.fhir.r5.model.Subscription) theSubscription).getTopic().getResource();
 				Validate.notNull(topic);
 				retVal = topic.getResourceTrigger().getQueryCriteria().getCurrent();
 				break;
@@ -372,8 +382,8 @@ public class SubscriptionCanonicalizer {
 		meta
 			.getTag()
 			.stream()
-			.filter(t->JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(t.getSystem()))
-			.forEach(t->{
+			.filter(t -> JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(t.getSystem()))
+			.forEach(t -> {
 				t.setCode(null);
 				t.setSystem(null);
 				t.setDisplay(null);

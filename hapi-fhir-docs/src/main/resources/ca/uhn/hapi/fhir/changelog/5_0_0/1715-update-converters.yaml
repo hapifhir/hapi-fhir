@@ -1,0 +1,6 @@
+---
+type: change
+issue: 1715
+title: The version converters for all versions except R4/R5 have been reworked to be split into individual
+   classes per resource type (the R4/R5 converters were already organized this way). Thanks to Mark Iantorno
+   for a huge effort to write a Java source parser/serializer to acomplish this task.

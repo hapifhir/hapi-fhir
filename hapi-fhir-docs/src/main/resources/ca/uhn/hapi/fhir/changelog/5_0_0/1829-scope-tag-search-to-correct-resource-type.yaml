@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1829
+title: "In the JPA server, performing a search where the only search parameter was the `_tag` parameter could cause resources
+  of the wrong type to be included in search results. This has been corrected."

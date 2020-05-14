@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 1761
+title: "A minor regression in 4.2.0 was introduced, where JPA searches using the `_id` search parameter often had
+   a duplicate SQL predicate in their where clause. This issue may not have caused any bad effects on some environments, 
+   but it did look strange in SQL logs and has been corrected."
+

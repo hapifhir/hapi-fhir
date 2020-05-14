@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -3760,7 +3761,8 @@ public class AuthorizationInterceptorR4Test {
 				HookParams params = new HookParams()
 					.add(IBaseResource.class, next)
 					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(TransactionDetails.class, new TransactionDetails());
 				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 			}
 			return new MethodOutcome();
@@ -3918,7 +3920,8 @@ public class AuthorizationInterceptorR4Test {
 					HookParams params = new HookParams()
 						.add(IBaseResource.class, next)
 						.add(RequestDetails.class, theRequestDetails)
-						.add(ServletRequestDetails.class, theRequestDetails);
+						.add(ServletRequestDetails.class, theRequestDetails)
+						.add(TransactionDetails.class, new TransactionDetails());
 					theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 				}
 			}
