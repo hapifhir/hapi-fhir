@@ -126,7 +126,7 @@ public class QueryStack {
 	}
 
 	/**
-	 * This method must be called once all predicated have been added
+	 * This method must be called once all predicates have been added
 	 */
 	public AbstractQuery<Long> pop() {
 		QueryRootEntry element = myQueryRootStack.pop();
@@ -212,7 +212,7 @@ public class QueryStack {
 	/**
 	 * Fetch all the current predicates
 	 * <p>
-	 * This should really be package protected, but it is called externally in one spot - We need to clean that up
+	 * TODO This should really be package protected, but it is called externally in one spot - We need to clean that up
 	 * at some point.
 	 */
 	public List<Predicate> getPredicates() {
@@ -265,7 +265,7 @@ public class QueryStack {
 	}
 
 	/**
-	 * This class should avoid leaking the internal query root, but we need to do so for how composite search params are
+	 * TODO This class should avoid leaking the internal query root, but we need to do so for how composite search params are
 	 * currently implemented. These only half work in the first place so I'm not going to worry about the fact that
 	 * they rely on a leaky abstraction right now.. But when we get around to implementing composites properly,
 	 * let's not continue this. JA 2020-05-12
