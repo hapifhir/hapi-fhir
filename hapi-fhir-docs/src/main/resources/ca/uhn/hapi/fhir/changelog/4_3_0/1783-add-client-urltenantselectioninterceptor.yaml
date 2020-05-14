@@ -1,6 +1,0 @@
----
-type: add
-issue: 1783
-title: "A new client interceptor called UrlTenantSelectionInterceptor has been added. This interceptor allows the dynamic
-   selection of a tenant ID on servers that are using URL Base Tenant Selection."
-

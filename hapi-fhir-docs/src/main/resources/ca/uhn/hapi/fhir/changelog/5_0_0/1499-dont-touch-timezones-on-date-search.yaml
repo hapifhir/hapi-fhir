@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1499
+title: "When performing a search with a DateParam that has DAY precision, rely on new ordinal date field for comparison
+   instead of attempting to find oldest and newest instant that could be valid."

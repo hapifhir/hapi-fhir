@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1806
+title: The JPA server ElasticSearch provider failed to initialize if username/password credentials were not
+  explicitly provided, meaning it could not run on AWS-supplied ElasticSearch. Thanks to Maciej Kucharek for
+  the pull request!

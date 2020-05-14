@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1742
+title: "When performing a search in the JPA server where the only parameter was a `_has` parameter,
+   the server did not respect the resource typename being searched for, causing false positive
+   search results. This has been corrected."

@@ -96,7 +96,11 @@ public class Builder {
 		addTask(task);
 	}
 
-	public class BuilderAddTableRawSql {
+    public void addNop(String theVersion) {
+		 addTask(new NopTask(myRelease, theVersion));
+    }
+
+    public class BuilderAddTableRawSql {
 
 		private final AddTableRawSqlTask myTask;
 

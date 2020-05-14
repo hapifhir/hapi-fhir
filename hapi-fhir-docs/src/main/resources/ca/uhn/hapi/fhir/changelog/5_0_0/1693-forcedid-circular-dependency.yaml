@@ -1,0 +1,5 @@
+---
+type: change
+issue: 1693
+title: Adjusted schema definitions for Resource and Resource History tables to eliminate circular
+   dependencies with Forced ID table and to improve performance when expunging large numbers of resources.

@@ -65,7 +65,7 @@ The criteria for determining the partition will depend on your use case. For exa
 
 ## Identify Partition for Read (Optional)
 
-A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_CREATE) pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine the partition to assign the resource to.
+A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine the partition to assign the resource to.
 
 ## Example: Partitioning based on Tenant ID
 
