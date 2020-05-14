@@ -107,7 +107,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
 		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
 
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3, 100);
 
 		assertEquals(1, observationIdsOnly.size());
 		assertEquals(SINGLE_OBSERVATION_PID, observationIdsOnly.get(0));
@@ -181,14 +181,14 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);
 		//searchParameterMap.
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10, 200);
 		assertEquals(100, observationIdsOnly.size());
 
 		// Filter the results by category code.
 		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
 		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
 
-		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
+		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10, 100);
 
 		assertEquals(50, observationIdsOnly.size());
 
@@ -277,7 +277,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10, 200);
 		assertEquals(100, observationIdsOnly.size());
 		assertTrue(observationIdsOnly.contains("55"));
 
@@ -295,7 +295,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		observation = myResourceIndexedObservationLastNDao.findForIdentifier("55");
 		assertNull(observation);
 
-		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
+		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10, 200);
 		assertEquals(99, observationIdsOnly.size());
 		assertTrue(!observationIdsOnly.contains("55"));
 
@@ -316,7 +316,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
 		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
 		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10, 200);
 		assertEquals(1, observationIdsOnly.size());
 		assertTrue(observationIdsOnly.contains(SINGLE_OBSERVATION_PID));
 
@@ -339,7 +339,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		assertEquals(newEffectiveDtm.getValue(), updatedObservationEntity.getEffectiveDtm());
 
 		// Repeat earlier Elasticsearch query. This time, should return no matches.
-		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
+		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10, 200);
 		assertEquals(0, observationIdsOnly.size());
 
 		// Try again with the new patient ID.
@@ -348,7 +348,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
 		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
 		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
-		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10);
+		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 10, 200);
 
 		// Should see the observation returned now.
 		assertEquals(1, observationIdsOnly.size());
@@ -398,11 +398,11 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 
 		// execute Observation ID search - Composite Aggregation
-		List<String>  observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap,1);
+		List<String>  observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap,1, 200);
 
 		assertEquals(20, observationIdsOnly.size());
 
-		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3);
+		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3, 200);
 
 		assertEquals(38, observationIdsOnly.size());
 

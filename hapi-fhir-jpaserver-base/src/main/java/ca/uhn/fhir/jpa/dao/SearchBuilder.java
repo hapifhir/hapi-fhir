@@ -131,7 +131,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	// NB: keep public
 	public static final int MAXIMUM_PAGE_SIZE = 800;
-	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 4;
+	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	public static boolean myIsTest = false;
 
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
@@ -249,7 +249,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		List<TypedQuery<Long>> queries = createQuery(null, null, true, theRequest);
+		List<TypedQuery<Long>> queries = createQuery(null, null, true, theRequest, null);
 		return new CountQueryIterator(queries.get(0));
 	}
 
@@ -283,7 +283,8 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 
-	private List<TypedQuery<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
+	private List<TypedQuery<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+															 SearchRuntimeDetails theSearchRuntimeDetails) {
 		List<ResourcePersistentId> pids = new ArrayList<>();
 
 		/*
@@ -310,17 +311,26 @@ public class SearchBuilder implements ISearchBuilder {
 						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
 					}
 				}
-				Integer myMaxObservationsPerCode = null;
+				Integer myMaxObservationsPerCode;
 				if(myParams.getLastNMax() != null) {
 					myMaxObservationsPerCode = myParams.getLastNMax();
 				} else {
 					throw new InvalidRequestException("Max parameter is required for $lastn operation");
 				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
+				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode, theMaximumResults);
 				for (String lastnResourceId : lastnResourceIds) {
 					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
 				}
 			}
+			if (theSearchRuntimeDetails != null) {
+				theSearchRuntimeDetails.setFoundIndexMatchesCount(pids.size());
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(SearchRuntimeDetails.class, theSearchRuntimeDetails);
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
+			}
+
 			if (pids.isEmpty()) {
 				// Will never match
 				pids = Collections.singletonList(new ResourcePersistentId(-1L));
@@ -331,24 +341,27 @@ public class SearchBuilder implements ISearchBuilder {
 		ArrayList<TypedQuery<Long>> myQueries = new ArrayList<>();
 
 		if (!pids.isEmpty()) {
+			if (theMaximumResults != null && pids.size() > theMaximumResults) {
+				pids.subList(0,theMaximumResults-1);
+			}
 			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t->{
-				doCreateChunkedQueries(t, sort, theMaximumResults, theCount, theRequest, myQueries);
+				doCreateChunkedQueries(t, sort, theCount, theRequest, myQueries);
 			});
 		} else {
-			myQueries.add(createQuery(sort,theMaximumResults, theCount, theRequest, null));
+			myQueries.add(createChunkedQuery(sort,theMaximumResults, theCount, theRequest, null));
 		}
 
 		return myQueries;
 	}
 
-	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
-		if(thePids.size() < MAXIMUM_PAGE_SIZE) {
-			thePids = normalizeIdListForLastNInClause(thePids);
+	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
+		if(thePids.size() < getMaximumPageSize()) {
+			normalizeIdListForLastNInClause(thePids);
 		}
-		theQueries.add(createQuery(sort, theMaximumResults, theCount, theRequest, thePids));
+		theQueries.add(createChunkedQuery(sort, thePids.size(), theCount, theRequest, thePids));
 	}
 
-	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
+	private TypedQuery<Long> createChunkedQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		CriteriaQuery<Long> outerQuery;
 		/*
 		 * Sort
@@ -501,11 +514,6 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private List<Long> normalizeIdListForLastNInClause(List<Long> lastnResourceIds) {
-		List<Long> retVal = new ArrayList<>();
-		for (Long lastnResourceId : lastnResourceIds) {
-			retVal.add(lastnResourceId);
-		}
-
 		/*
 			The following is a workaround to a known issue involving Hibernate. If queries are used with "in" clauses with large and varying
 			numbers of parameters, this can overwhelm Hibernate's QueryPlanCache and deplete heap space. See the following link for more info:
@@ -514,23 +522,23 @@ public class SearchBuilder implements ISearchBuilder {
 			Normalizing the number of parameters in the "in" clause stabilizes the size of the QueryPlanCache, so long as the number of
 			arguments never exceeds the maximum specified below.
 		 */
-		int listSize = retVal.size();
+		int listSize = lastnResourceIds.size();
 
 		if(listSize > 1 && listSize < 10) {
-			padIdListWithPlaceholders(retVal, 10);
+			padIdListWithPlaceholders(lastnResourceIds, 10);
 		} else if (listSize > 10 && listSize < 50) {
-			padIdListWithPlaceholders(retVal, 50);
+			padIdListWithPlaceholders(lastnResourceIds, 50);
 		} else if (listSize > 50 && listSize < 100) {
-			padIdListWithPlaceholders(retVal, 100);
+			padIdListWithPlaceholders(lastnResourceIds, 100);
 		} else if (listSize > 100 && listSize < 200) {
-			padIdListWithPlaceholders(retVal, 200);
+			padIdListWithPlaceholders(lastnResourceIds, 200);
 		} else if (listSize > 200 && listSize < 500) {
-			padIdListWithPlaceholders(retVal, 500);
+			padIdListWithPlaceholders(lastnResourceIds, 500);
 		} else if (listSize > 500 && listSize < 800) {
-			padIdListWithPlaceholders(retVal, 800);
+			padIdListWithPlaceholders(lastnResourceIds, 800);
 		}
 
-		return retVal;
+		return lastnResourceIds;
 	}
 
 	private void padIdListWithPlaceholders(List<Long> theIdList, int preferredListSize) {
@@ -664,10 +672,17 @@ public class SearchBuilder implements ISearchBuilder {
 
 
 	private void doLoadPids(Collection<ResourcePersistentId> thePids, Collection<ResourcePersistentId> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation,
-									Map<ResourcePersistentId, Integer> thePosition, RequestDetails theRequest) {
+									Map<ResourcePersistentId, Integer> thePosition) {
+
+		List<Long> myLongPersistentIds;
+		if(thePids.size() < getMaximumPageSize()) {
+			myLongPersistentIds = normalizeIdListForLastNInClause(ResourcePersistentId.toLongList(thePids));
+		} else {
+			myLongPersistentIds = ResourcePersistentId.toLongList(thePids);
+		}
 
 		// -- get the resource from the searchView
-		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(ResourcePersistentId.toLongList(thePids));
+		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(myLongPersistentIds);
 
 		//-- preload all tags with tag definition if any
 		Map<ResourcePersistentId, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
@@ -768,7 +783,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
 		new QueryChunker<ResourcePersistentId>().chunk(pids, t->{
-			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
+			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position);
 		});
 
 	}
@@ -1096,9 +1111,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private final RequestDetails myRequest;
 		private Iterator<ResourcePersistentId> myCurrentIterator;
-		private Set<ResourcePersistentId> myCurrentPids;
+		private final Set<ResourcePersistentId> myCurrentPids;
 		private ResourcePersistentId myNext;
-		private int myPageSize = myDaoConfig.getEverythingIncludesFetchPageSize();
 
 		IncludesIterator(Set<ResourcePersistentId> thePidSet, RequestDetails theRequest) {
 			myCurrentPids = new HashSet<>(thePidSet);
@@ -1151,12 +1165,12 @@ public class SearchBuilder implements ISearchBuilder {
 		private ResourcePersistentId myNext;
 		private Iterator<ResourcePersistentId> myPreResultsIterator;
 		private ScrollableResultsIterator<Long> myResultsIterator;
-		private SortSpec mySort;
+		private final SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
 
-		private List<TypedQuery<Long>> myQueryList;
+		private List<TypedQuery<Long>> myQueryList = new ArrayList<>();
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
@@ -1210,7 +1224,7 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myNext == null) {
 						while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
 							// Update iterator with next chunk if necessary.
-							if (!myResultsIterator.hasNext() && !myQueryList.isEmpty()) {
+							if (!myResultsIterator.hasNext()) {
 								retrieveNextIteratorQuery();
 							}
 
@@ -1312,8 +1326,10 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		private void initializeIteratorQuery(Integer theMaxResultsToFetch) {
-			if (myQueryList == null || myQueryList.isEmpty()) {
-				myQueryList = createQuery(mySort, theMaxResultsToFetch, false, myRequest);
+			if (myQueryList.isEmpty()) {
+				// Capture times for Lucene/Elasticsearch queries as well
+				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
+				myQueryList = createQuery(mySort, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
 			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());

@@ -24,7 +24,9 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 	private static final String ELASTIC_VERSION = "6.5.4";
 	protected final String elasticsearchHost = "localhost";
 	protected final String elasticsearchUserId = "";
+//	protected final String elasticsearchUserId = "elastic";
 	protected final String elasticsearchPassword = "";
+//	protected final String elasticsearchPassword = "changeme";
 
 
 	@Override
@@ -34,6 +36,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 		// Force elasticsearch to start first
 		int httpPort = embeddedElasticSearch().getHttpPort();
+//		int httpPort = 9301;
 		ourLog.info("ElasticSearch started on port: {}", httpPort);
 
 		new ElasticsearchHibernatePropertiesBuilder()

@@ -79,6 +79,11 @@ public class PerformanceTracingLoggingInterceptor {
 		log("SqlQuery {} failed in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
 	}
 
+	@Hook(value = Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE)
+	public void indexSearchQueryComplete(SearchRuntimeDetails theOutcome) {
+		log("Index query for {} completed in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundIndexMatchesCount());
+	}
+
 	@Hook(value = Pointcut.JPA_PERFTRACE_INFO)
 	public void info(StorageProcessingMessage theMessage) {
 		log("[INFO] " + theMessage);

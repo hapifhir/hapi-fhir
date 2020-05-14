@@ -103,13 +103,13 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
 
 		// execute Observation ID search
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3, 100);
 
 		assertEquals(1, observationIdsOnly.size());
 		assertEquals(RESOURCEPID, observationIdsOnly.get(0));
 
 		// execute Observation search for all search fields
-		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, 3);
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, 3, 100);
 
 		validateFullObservationSearch(observations);
 	}

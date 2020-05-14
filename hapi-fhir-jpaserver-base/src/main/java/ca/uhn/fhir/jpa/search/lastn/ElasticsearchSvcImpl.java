@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
@@ -49,9 +48,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
-	RestHighLevelClient myRestHighLevelClient;
+	private final RestHighLevelClient myRestHighLevelClient;
 
-	ObjectMapper objectMapper = new ObjectMapper();
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final String GROUP_BY_SUBJECT = "group_by_subject";
 	private final String GROUP_BY_CODE = "group_by_code";
@@ -201,14 +200,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@Override
 	// TODO: Should eliminate dependency on SearchParameterMap in API.
-	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode) {
+	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode, Integer theMaxResultsToFetch) {
 		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
 		try {
 			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theMaxObservationsPerCode, topHitsInclude);
 			List<String> observationIds = new ArrayList<>();
 			for (SearchResponse response : responses) {
 //				observationIds.addAll(buildObservationIdList(response));
-				observationIds.addAll(buildObservationList(response, t -> t.getIdentifier(), theSearchParameterMap));
+				Integer maxResultsToAdd = theMaxResultsToFetch - observationIds.size();
+				observationIds.addAll(buildObservationList(response, t -> t.getIdentifier(), theSearchParameterMap, maxResultsToAdd));
 			}
 			return observationIds;
 		} catch (IOException theE) {
@@ -216,7 +216,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 	}
 
-	private List<SearchResponse> buildAndExecuteSearch(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode, String[] topHitsInclude) {
+	private List<SearchResponse> buildAndExecuteSearch(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode,
+																		String[] topHitsInclude) {
 		List<SearchResponse> responses = new ArrayList<>();
 		if (theSearchParameterMap.containsKey(IndexConstants.PATIENT_SEARCH_PARAM) || theSearchParameterMap.containsKey(IndexConstants.SUBJECT_SEARCH_PARAM)) {
 			ArrayList<String> subjectReferenceCriteria = new ArrayList<>();
@@ -254,12 +255,12 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@VisibleForTesting
 	// TODO: Should eliminate dependency on SearchParameterMap in API.
-	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode) {
+	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode, Integer theMaxResultsToFetch) {
 		try {
 			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theMaxObservationsPerCode, null);
 			List<ObservationJson> observationDocuments = new ArrayList<>();
 			for (SearchResponse response : responses) {
-				observationDocuments.addAll(buildObservationList(response, t -> t, theSearchParameterMap));
+				observationDocuments.addAll(buildObservationList(response, t -> t, theSearchParameterMap, theMaxResultsToFetch));
 			}
 			return observationDocuments;
 		} catch (IOException theE) {
@@ -337,12 +338,22 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return theObservationList;
 	}
 
-	private <T> List<T> buildObservationList(SearchResponse theSearchResponse, Function<ObservationJson,T> setValue, SearchParameterMap theSearchParameterMap) throws IOException {
+	private <T> List<T> buildObservationList(SearchResponse theSearchResponse, Function<ObservationJson,T> setValue,
+														  SearchParameterMap theSearchParameterMap, Integer theMaxResultsToFetch) throws IOException {
 		List<T> theObservationList = new ArrayList<>();
 		if (theSearchParameterMap.containsKey(IndexConstants.PATIENT_SEARCH_PARAM) || theSearchParameterMap.containsKey(IndexConstants.SUBJECT_SEARCH_PARAM)) {
 			for (ParsedComposite.ParsedBucket subjectBucket : getSubjectBuckets(theSearchResponse)) {
+				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+					break;
+				}
 				for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(subjectBucket)) {
+					if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+						break;
+					}
 					for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
+						if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+							break;
+						}
 						String indexedObservation = lastNMatch.getSourceAsString();
 						ObservationJson observationJson = objectMapper.readValue(indexedObservation, ObservationJson.class);
 						theObservationList.add(setValue.apply(observationJson));
@@ -351,7 +362,13 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 		} else {
 			for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(theSearchResponse)) {
+				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+					break;
+				}
 				for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
+					if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+						break;
+					}
 					String indexedObservation = lastNMatch.getSourceAsString();
 					ObservationJson observationJson = objectMapper.readValue(indexedObservation, ObservationJson.class);
 					theObservationList.add(setValue.apply(observationJson));

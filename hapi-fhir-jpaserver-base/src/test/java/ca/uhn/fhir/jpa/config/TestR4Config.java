@@ -102,10 +102,14 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		};
 
 		retVal.setDriver(new org.h2.Driver());
+//		retVal.setDriver(new org.postgresql.Driver());
 		retVal.setUrl("jdbc:h2:mem:testdb_r4");
+//		retVal.setUrl("jdbc:postgresql://localhost:5432/hapi");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
+//		retVal.setUsername("hapi");
 		retVal.setPassword("");
+//		retVal.setPassword("HapiFHIR");
 		retVal.setMaxTotal(ourMaxThreads);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
@@ -145,6 +149,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
+//		extraProperties.put("hibernate.dialect", org.hibernate.dialect.PostgreSQL95Dialect.class.getName());
 		extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
 		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");

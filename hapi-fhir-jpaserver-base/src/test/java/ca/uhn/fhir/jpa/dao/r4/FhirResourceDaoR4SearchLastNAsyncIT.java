@@ -1,28 +1,64 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Observation;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
+public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
+
+	@Autowired
+	protected DaoConfig myDaoConfig;
+
+	private List<Integer> originalPreFetchThresholds;
+
+	@Before
+	public void before() {
+
+		RestfulServer myServer = new RestfulServer(myFhirCtx);
+		myServer.setPagingProvider(myDatabaseBackedPagingProvider);
+
+		when(mySrd.getServer()).thenReturn(myServer);
+
+		// Set pre-fetch sizes small so that most tests are forced to do multiple fetches.
+		// This will allow testing a common use case where result set is larger than first fetch size but smaller than the normal query chunk size.
+		originalPreFetchThresholds = myDaoConfig.getSearchPreFetchThresholds();
+		List<Integer> mySmallerPreFetchThresholds = new ArrayList<>();
+		mySmallerPreFetchThresholds.add(20);
+		mySmallerPreFetchThresholds.add(400);
+		mySmallerPreFetchThresholds.add(-1);
+		myDaoConfig.setSearchPreFetchThresholds(mySmallerPreFetchThresholds);
+
+		SearchBuilder.setIsTest(true);
+
+	}
 
 	@After
-	public void resetMaximumPageSize() {
+	public void after() {
+		myDaoConfig.setSearchPreFetchThresholds(originalPreFetchThresholds);
 		SearchBuilder.setIsTest(false);
 	}
 
@@ -48,6 +84,13 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		// Set chunk size to 50
 		SearchBuilder.setIsTest(true);
 
+		// Expand default fetch sizes to ensure all observations are returned in first page:
+		List<Integer> myBiggerPreFetchThresholds = new ArrayList<>();
+		myBiggerPreFetchThresholds.add(100);
+		myBiggerPreFetchThresholds.add(1000);
+		myBiggerPreFetchThresholds.add(-1);
+		myDaoConfig.setSearchPreFetchThresholds(myBiggerPreFetchThresholds);
+
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(),null));
 		assertEquals(75, results.size());
@@ -58,19 +101,18 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 			.map(t -> t.getSql(true, false))
 			.collect(Collectors.toList());
 
-		// Two chunked queries executed by the QueryIterator (in current thread) and two chunked queries to retrieve resources by PID.
-		assertEquals(4, queries.size());
+		// 1 query to lookup up Search from cache, and 2 chunked queries to retrieve resources by PID.
+		assertEquals(3, queries.size());
 
-		// The first and third chunked queries should have a full complement of PIDs
+		// The first chunked query should have a full complement of PIDs
 		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex<50; pidIndex++) {
 			firstQueryPattern.append(" , '[0-9]+'");
 		}
 		firstQueryPattern.append("\\).*");
-		assertThat(queries.get(0), matchesPattern(firstQueryPattern.toString()));
-		assertThat(queries.get(2), matchesPattern(firstQueryPattern.toString()));
+		assertThat(queries.get(1), matchesPattern(firstQueryPattern.toString()));
 
-		// the second and fourth chunked queries should be padded with "-1".
+		// the second chunked query should be padded with "-1".
 		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex<25; pidIndex++) {
 			secondQueryPattern.append(" , '[0-9]+'");
@@ -79,8 +121,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 			secondQueryPattern.append(" , '-1'");
 		}
 		secondQueryPattern.append("\\).*");
-		assertThat(queries.get(1), matchesPattern(secondQueryPattern.toString()));
-		assertThat(queries.get(3), matchesPattern(secondQueryPattern.toString()));
+		assertThat(queries.get(2), matchesPattern(secondQueryPattern.toString()));
 
 	}
 

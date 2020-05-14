@@ -5,6 +5,5 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import java.util.List;
 
 public interface IElasticsearchSvc {
-
-	List<String> executeLastN(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode);
+	List<String> executeLastN(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode, Integer theMaxResultsToFetch);
 }
