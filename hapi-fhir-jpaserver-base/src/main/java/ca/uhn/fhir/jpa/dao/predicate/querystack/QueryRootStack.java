@@ -126,7 +126,7 @@ public class QueryRootStack {
 	}
 
 	/**
-	 * This method must be called once all predicated have been added
+	 * This method must be called once all predicates have been added
 	 */
 	public AbstractQuery<Long> pop() {
 		QueryRootEntry element = myQueryRootStack.pop();
