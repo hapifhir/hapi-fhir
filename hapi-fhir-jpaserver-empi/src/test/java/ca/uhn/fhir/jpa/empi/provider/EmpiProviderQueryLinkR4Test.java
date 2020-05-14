@@ -41,7 +41,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLi
 		myPerson2Id = person2.getIdElement().toVersionless();
 		Long person2Pid = myIdHelperService.getPidOrNull(person2);
 		EmpiLink empiLink = new EmpiLink().setPersonPid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
-		myEmpiLinkDaoSvc.update(empiLink);
+		myEmpiLinkDaoSvc.save(empiLink);
 	}
 
 	@Test

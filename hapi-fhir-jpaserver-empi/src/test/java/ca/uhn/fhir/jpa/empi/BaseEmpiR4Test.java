@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
@@ -303,5 +305,18 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider bundle = myPersonDao.search(map);
 		return bundle.getResources(0, 999);
+	}
+
+	@Nonnull
+	protected EmpiLink createResourcesAndBuildTestEmpiLink() {
+		Person person = createPerson();
+		Patient patient = createPatient();
+
+		EmpiLink empiLink = new EmpiLink();
+		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
+		empiLink.setPersonPid(myIdHelperService.getPidOrNull(person));
+		empiLink.setTargetPid(myIdHelperService.getPidOrNull(patient));
+		return empiLink;
 	}
 }

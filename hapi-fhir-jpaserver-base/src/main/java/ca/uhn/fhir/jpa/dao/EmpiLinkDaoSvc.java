@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,7 +62,7 @@ public class EmpiLinkDaoSvc {
 		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchResult);
 		theEmpiTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
-		myEmpiLinkDao.save(empiLink);
+		save(empiLink);
 		return empiLink;
 	}
 
@@ -180,8 +181,12 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.findAll(example);
 	}
 
-	public void update(EmpiLink theEmpiLink) {
-		myEmpiLinkDao.save(theEmpiLink);
+	public EmpiLink save(EmpiLink theEmpiLink) {
+		if (theEmpiLink.getCreated() == null) {
+			theEmpiLink.setCreated(new Date());
+		}
+		theEmpiLink.setUpdated(new Date());
+		return myEmpiLinkDao.save(theEmpiLink);
 	}
 
     public List<EmpiLink> findEmpiLinkByExample(Example<EmpiLink> theExampleLink) {

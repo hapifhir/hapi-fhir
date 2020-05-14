@@ -87,7 +87,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		ourLog.info("Manually updating EMPI Link for " + thePerson.getIdElement().toVersionless() + ", " + theTarget.getIdElement().toVersionless() + " from " + empiLink.getMatchResult() + " to " + theMatchResult + ".");
 		empiLink.setMatchResult(theMatchResult);
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
-		myEmpiLinkDaoSvc.update(empiLink);
+		myEmpiLinkDaoSvc.save(empiLink);
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePerson, theEmpiContext);
 		return thePerson;
 	}

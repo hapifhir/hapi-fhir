@@ -97,7 +97,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 			// The original links didn't contain this target, so move it over to the personToKeep
 			incomingLink.setPersonPid(personToKeepPid);
 			ourLog.trace("Saving link {}", incomingLink);
-			myEmpiLinkDaoSvc.update(incomingLink);
+			myEmpiLinkDaoSvc.save(incomingLink);
 		}
 
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToDelete, theEmpiTransactionContext);

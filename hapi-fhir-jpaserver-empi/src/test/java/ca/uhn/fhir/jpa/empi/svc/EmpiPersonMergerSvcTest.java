@@ -104,7 +104,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
 		EmpiLink empiLink = new EmpiLink().setPersonPid(myKeepPersonPid).setTargetPid(myDeletePersonPid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
-		myEmpiLinkDao.save(empiLink);
+		myEmpiLinkDaoSvc.save(empiLink);
 		assertEquals(1, myEmpiLinkDao.count());
 		mergePersons();
 		assertEquals(0, myEmpiLinkDao.count());
@@ -160,7 +160,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
 		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		deleteLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		myEmpiLinkDao.save(deleteLink);
+		myEmpiLinkDaoSvc.save(deleteLink);
 
 		createEmpiLink(myKeepPerson, myTargetPatient1);
 
@@ -175,7 +175,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
 		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		deleteLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDao.save(deleteLink);
+		myEmpiLinkDaoSvc.save(deleteLink);
 
 		createEmpiLink(myKeepPerson, myTargetPatient1);
 
@@ -192,7 +192,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink keepLink = createEmpiLink(myKeepPerson, myTargetPatient1);
 		keepLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		keepLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDao.save(keepLink);
+		myEmpiLinkDaoSvc.save(keepLink);
 
 		mergePersons();
 		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myKeepPerson);
@@ -205,12 +205,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
 		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		deleteLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDao.save(deleteLink);
+		myEmpiLinkDaoSvc.save(deleteLink);
 
 		EmpiLink keepLink = createEmpiLink(myKeepPerson, myTargetPatient1);
 		keepLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		keepLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		myEmpiLinkDao.save(keepLink);
+		myEmpiLinkDaoSvc.save(keepLink);
 
 		try {
 			mergePersons();
@@ -225,12 +225,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
 		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		deleteLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		myEmpiLinkDao.save(deleteLink);
+		myEmpiLinkDaoSvc.save(deleteLink);
 
 		EmpiLink keepLink = createEmpiLink(myKeepPerson, myTargetPatient1);
 		keepLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		keepLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDao.save(keepLink);
+		myEmpiLinkDaoSvc.save(keepLink);
 
 		try {
 			mergePersons();
@@ -245,12 +245,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink deleteLink = createEmpiLink(myDeletePerson, myTargetPatient1);
 		deleteLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		deleteLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDao.save(deleteLink);
+		myEmpiLinkDaoSvc.save(deleteLink);
 
 		EmpiLink keepLink = createEmpiLink(myKeepPerson, myTargetPatient2);
 		keepLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		keepLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		myEmpiLinkDao.save(keepLink);
+		myEmpiLinkDaoSvc.save(keepLink);
 
 		mergePersons();
 		assertEquals(1, myKeepPerson.getLink().size());
