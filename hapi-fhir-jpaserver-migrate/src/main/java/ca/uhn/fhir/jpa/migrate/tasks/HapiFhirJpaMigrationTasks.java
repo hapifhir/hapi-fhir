@@ -60,8 +60,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init410(); // 20190815 - 20191014
 		init420(); // 20191015 - 20200217
 		init430(); // Replaced by 5.0.0
-		init500(); // 20200218 - present
+		init500(); // 20200218 - 20200519
+		init501(); // 20200520 - present
 	}
+
 
 	/**
 	 * Partway through the 4.3.0 releaase cycle we renumbered to
@@ -122,7 +124,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.addNop("20200420.42");
 	}
 
-	protected void init500() { // 20200218 - present
+
+	private void init501() { //20200520 - present
+		Builder version = forVersion(VersionEnum.V5_0_1);
+
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.addIndex("20200520.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
+		spidxDate.addIndex("20200520.2", "IDX_SP_DATE_ORD_DATE_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
+		spidxDate.addIndex("20200520.3", "IDX_SP_DATE_ORD_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
+	}
+
+	protected void init500() { // 20200218 - 20200519
 		Builder version = forVersion(VersionEnum.V5_0_0);
 
 		// Eliminate circular dependency.
