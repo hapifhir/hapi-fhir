@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -92,7 +93,34 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 			myEmpiHelper.doCreateResource(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("Cannot create or modify Persons who are managed by EMPI.", e.getMessage());
+			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testCreateOrganizationWithEmpiTagForbidden() throws InterruptedException {
+		//Creating a organization with the EMPI-MANAGED tag should fail
+		Organization organization = new Organization();
+		organization.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
+		try {
+			myEmpiHelper.doCreateResource(organization, true);
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testUpdateOrganizationWithEmpiTagForbidden() throws InterruptedException {
+		//Creating a organization with the EMPI-MANAGED tag should fail
+		Organization organization = new Organization();
+		myEmpiHelper.doCreateResource(organization, true);
+		organization.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
+		try {
+			myEmpiHelper.doUpdateResource(organization, true);
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertEquals("The HAPI-EMPI tag on a resource may not be changed once created.", e.getMessage());
 		}
 	}
 
@@ -122,7 +150,7 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 			myEmpiHelper.doUpdateResource(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("The EMPI status of a Person may not be changed once created.", e.getMessage() );
+			assertEquals("The HAPI-EMPI tag on a resource may not be changed once created.", e.getMessage() );
 		}
 	}
 
@@ -143,7 +171,7 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 			myEmpiHelper.doUpdateResource(empiPerson, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("Cannot create or modify Persons who are managed by EMPI.", e.getMessage());
+			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());
 		}
 	}
 	

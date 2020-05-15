@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.helper;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
@@ -12,13 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class EmpiHelperR4 extends BaseEmpiHelper {
 	@Autowired
-	protected IFhirResourceDao<Patient> myPatientDao;
+	private IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
-	protected IFhirResourceDao<Practitioner> myPractitionerDao;
+	private IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
-	protected IFhirResourceDao<Person> myPersonDao;
+	private IFhirResourceDao<Person> myPersonDao;
 	@Autowired
-	protected FhirContext myFhirContext;
+	private FhirContext myFhirContext;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	public OutcomeAndLogMessageWrapper createWithLatch(IBaseResource theResource) throws InterruptedException {
 		return createWithLatch(theResource, true);
@@ -45,35 +48,14 @@ public class EmpiHelperR4 extends BaseEmpiHelper {
 	public DaoMethodOutcome doCreateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 
-		switch (resourceType) {
-			case "Patient":
-				Patient patient = (Patient)theResource;
-				return isExternalHttpRequest ? myPatientDao.create(patient, myMockSrd): myPatientDao.create(patient);
-			case "Practitioner":
-				Practitioner practitioner = (Practitioner)theResource;
-				return isExternalHttpRequest ? myPractitionerDao.create(practitioner, myMockSrd): myPractitionerDao.create(practitioner);
-			case "Person":
-				Person person = (Person) theResource;
-				return isExternalHttpRequest ? myPersonDao.create(person, myMockSrd): myPersonDao.create(person);
-		}
-		return null;
+		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
+		return isExternalHttpRequest ? dao.create(theResource, myMockSrd): dao.create(theResource);
 	}
 
 	public DaoMethodOutcome doUpdateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-
-		switch (resourceType) {
-			case "Patient":
-				Patient patient = (Patient)theResource;
-				return isExternalHttpRequest ? myPatientDao.update(patient, myMockSrd): myPatientDao.update(patient);
-			case "Practitioner":
-				Practitioner practitioner = (Practitioner)theResource;
-				return isExternalHttpRequest ? myPractitionerDao.update(practitioner, myMockSrd): myPractitionerDao.update(practitioner);
-			case "Person":
-				Person person = (Person) theResource;
-				return isExternalHttpRequest ? myPersonDao.update(person, myMockSrd): myPersonDao.update(person);
-		}
-		return null;
+		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
+		return isExternalHttpRequest ? dao.update(theResource, myMockSrd): dao.create(theResource);
 	}
 
 	/**

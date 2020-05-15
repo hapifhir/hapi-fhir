@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.empi.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
@@ -113,10 +114,8 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	 * Will throw a forbidden error if a request attempts to add/remove the EMPI tag on a Person.
 	 */
 	private void forbidModifyingEmpiTag(IBaseResource theNewResource, IBaseResource theOldResource) {
-		if (extractResourceType(theNewResource).equalsIgnoreCase("Person")) {
-			if (EmpiUtil.isEmpiManaged(theNewResource) != EmpiUtil.isEmpiManaged(theOldResource)) {
-				throwBlockEmpiStatusChange();
-			}
+		if (EmpiUtil.isEmpiManaged(theNewResource) != EmpiUtil.isEmpiManaged(theOldResource)) {
+			throwBlockEmpiManagedTagChange();
 		}
 	}
 
@@ -129,9 +128,6 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 		}
 	}
 
-
-
-
 	/*
 	 * We assume that if we have RequestDetails, then this was an HTTP request and not an internal one.
 	 */
@@ -141,16 +137,17 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 
 
 	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
-			if (EmpiUtil.isEmpiManaged(theResource)) {
-				throwModificationBlockedByEmpi();
-			}
+		if (EmpiUtil.isEmpiManaged(theResource)) {
+			throwModificationBlockedByEmpi();
+		}
 	}
 
-	private void throwBlockEmpiStatusChange(){
-		throw new ForbiddenOperationException("The EMPI status of a Person may not be changed once created.");
+	private void throwBlockEmpiManagedTagChange() {
+		throw new ForbiddenOperationException("The " + EmpiConstants.CODE_HAPI_EMPI_MANAGED + " tag on a resource may not be changed once created.");
 	}
-	private void throwModificationBlockedByEmpi(){
-		throw new ForbiddenOperationException("Cannot create or modify Persons who are managed by EMPI.");
+
+	private void throwModificationBlockedByEmpi() {
+		throw new ForbiddenOperationException("Cannot create or modify Resources that are managed by EMPI.");
 	}
 
 	private void throwBlockMultipleEids() {
