@@ -692,7 +692,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, true);
-		assertThat(selectQuery, containsString("HASH_VALUE in"));
+		assertThat(selectQuery, containsString("HASH_VALUE="));
 		assertThat(selectQuery, not(containsString("HASH_SYS")));
 
 	}

@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
@@ -35,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.Join;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +58,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 											SearchFilterParser.CompareOperation operation,
 											RequestPartitionId theRequestPartitionId) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamUri> join = createJoin(SearchBuilderJoinEnum.URI, theParamName);
+		From<?, ResourceIndexedSearchParamUri> join = myQueryStack.createJoin(SearchBuilderJoinEnum.URI, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -169,8 +168,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 		 */
 		if (codePredicates.isEmpty()) {
 			Predicate predicate = myCriteriaBuilder.isNull(join.get("myMissing").as(String.class));
-			myQueryRoot.setHasIndexJoins();
-			myQueryRoot.addPredicate(predicate);
+			myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
 			return null;
 		}
 
@@ -181,8 +179,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 			join,
 			orPredicate,
                 theRequestPartitionId);
-		myQueryRoot.setHasIndexJoins();
-		myQueryRoot.addPredicate(outerPredicate);
+		myQueryStack.addPredicateWithImplicitTypeSelection(outerPredicate);
 		return outerPredicate;
 	}
 

@@ -24,7 +24,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -38,7 +37,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +44,7 @@ import java.util.List;
 @Component
 @Scope("prototype")
 class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
+
 	@Autowired
 	DaoConfig myDaoConfig;
 
@@ -60,7 +59,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 											SearchFilterParser.CompareOperation theOperation,
 											RequestPartitionId theRequestPartitionId) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamString> join = createJoin(SearchBuilderJoinEnum.STRING, theParamName);
+		From<?, ResourceIndexedSearchParamString> join = myQueryStack.createJoin(SearchBuilderJoinEnum.STRING, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -77,8 +76,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 
 		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
 
-		myQueryRoot.setHasIndexJoins();
-		myQueryRoot.addPredicate(retVal);
+		myQueryStack.addPredicateWithImplicitTypeSelection(retVal);
 
 		return retVal;
 	}
