@@ -65,7 +65,12 @@ public class BaseMigrationTasks<T extends Enum> {
 			theTask.validate();
 			myTasks.put(theRelease, theTask);
 		};
-		return new Builder(theRelease.name(), sink);
+		return new Builder(toReleaseName(theRelease), sink);
+	}
+
+	@Nonnull
+	protected String toReleaseName(T theRelease) {
+		return theRelease.name();
 	}
 
 	public List<BaseTask> getAllTasks(T[] theVersionEnumValues) {
