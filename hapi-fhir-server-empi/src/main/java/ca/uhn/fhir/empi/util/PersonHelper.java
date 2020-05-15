@@ -27,7 +27,6 @@ import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -536,7 +535,7 @@ public class PersonHelper {
 		return !externalEidsPerson.isEmpty() && !externalEidsResource.isEmpty() && !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsPerson);
 	}
 
-	public IBaseBackboneElement newPersonLink(IdDt theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
+	public IBaseBackboneElement newPersonLink(IIdType theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				return newR4PersonLink(theTargetId, theAssuranceLevel);
@@ -547,14 +546,14 @@ public class PersonHelper {
 		}
 	}
 
-	private IBaseBackboneElement newR4PersonLink(IdDt theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
+	private IBaseBackboneElement newR4PersonLink(IIdType theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
 		Person.PersonLinkComponent retval = new Person.PersonLinkComponent();
 		retval.setTarget(new Reference(theTargetId));
 		retval.setAssurance(theAssuranceLevel.toR4());
 		return retval;
 	}
 
-	private IBaseBackboneElement newDstu3PersonLink(IdDt theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
+	private IBaseBackboneElement newDstu3PersonLink(IIdType theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
 		org.hl7.fhir.dstu3.model.Person.PersonLinkComponent retval = new org.hl7.fhir.dstu3.model.Person.PersonLinkComponent();
 		retval.setTarget(new org.hl7.fhir.dstu3.model.Reference(theTargetId));
 		retval.setAssurance(theAssuranceLevel.toDstu3());

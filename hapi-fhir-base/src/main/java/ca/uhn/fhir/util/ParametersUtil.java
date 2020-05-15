@@ -20,11 +20,19 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.StringDt;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +53,7 @@ public class ParametersUtil {
 	}
 
 	public static List<Integer> getNamedParameterValuesAsInteger(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
-		Function<IPrimitiveType<?>, Integer> mapper = t -> (Integer)t.getValue();
+		Function<IPrimitiveType<?>, Integer> mapper = t -> (Integer) t.getValue();
 		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
 	}
 
@@ -53,23 +61,53 @@ public class ParametersUtil {
 		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream().findFirst();
 	}
 
+	public static List<String> getNamedParameterPartAsString(FhirContext theCtx, IBaseParameters theParameters, String thePartName, String theParameterName) {
+		return extractNamedParameterPartsAsString(theCtx, theParameters, thePartName, theParameterName);
+	}
+
+	private static List<String> extractNamedParameterPartsAsString(FhirContext theCtx, IBaseParameters theParameters, String thePartName, String theParameterName) {
+		List<IBase> parameterReps = getParameterReps(theCtx, theParameters);
+
+		List<String> retVal = new ArrayList<>();
+
+		for (IBase nextParameter : parameterReps) {
+			BaseRuntimeElementCompositeDefinition<?> nextParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
+			Optional<? extends IPrimitiveType<?>> nameValue = getNameValue(nextParameter, nextParameterDef);
+			if (!nameValue.isPresent() || !thePartName.equals(nameValue.get().getValueAsString())) {
+				continue;
+			}
+
+			BaseRuntimeChildDefinition partChild = nextParameterDef.getChildByName("part");
+			List<IBase> partValues = partChild.getAccessor().getValues(nextParameter);
+			for (IBase partValue : partValues) {
+				BaseRuntimeElementCompositeDefinition<?> partParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(partValue.getClass());
+				Optional<? extends IPrimitiveType<?>> partNameValue = getNameValue(partValue, partParameterDef);
+				if (!partNameValue.isPresent() || !theParameterName.equals(partNameValue.get().getValueAsString())) {
+					continue;
+				}
+				BaseRuntimeChildDefinition valueChild = partParameterDef.getChildByName("value[x]");
+				List<IBase> valueValues = valueChild.getAccessor().getValues(partValue);
+				valueValues
+					.stream()
+					.filter(t -> t instanceof IPrimitiveType<?>)
+					.map(t -> ((IPrimitiveType<String>) t))
+					.map(t -> defaultIfBlank(t.getValueAsString(), null))
+					.filter(t -> t != null)
+					.forEach(retVal::add);
+
+			}
+		}
+		return retVal;
+	}
+
 	private static <T> List<T> extractNamedParameters(FhirContext theCtx, IBaseParameters theParameters, String theParameterName, Function<IPrimitiveType<?>, T> theMapper) {
-		Validate.notNull(theParameters, "theParameters must not be null");
-		RuntimeResourceDefinition resDef = theCtx.getResourceDefinition(theParameters.getClass());
-		BaseRuntimeChildDefinition parameterChild = resDef.getChildByName("parameter");
-		List<IBase> parameterReps = parameterChild.getAccessor().getValues(theParameters);
+		List<IBase> parameterReps = getParameterReps(theCtx, theParameters);
 
 		List<T> retVal = new ArrayList<>();
 
 		for (IBase nextParameter : parameterReps) {
 			BaseRuntimeElementCompositeDefinition<?> nextParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
-			BaseRuntimeChildDefinition nameChild = nextParameterDef.getChildByName("name");
-			List<IBase> nameValues = nameChild.getAccessor().getValues(nextParameter);
-			Optional<? extends IPrimitiveType<?>> nameValue = nameValues
-				.stream()
-				.filter(t -> t instanceof IPrimitiveType<?>)
-				.map(t -> ((IPrimitiveType<?>) t))
-				.findFirst();
+			Optional<? extends IPrimitiveType<?>> nameValue = getNameValue(nextParameter, nextParameterDef);
 			if (!nameValue.isPresent() || !theParameterName.equals(nameValue.get().getValueAsString())) {
 				continue;
 			}
@@ -79,13 +117,30 @@ public class ParametersUtil {
 			valueValues
 				.stream()
 				.filter(t -> t instanceof IPrimitiveType<?>)
-				.map(t->((IPrimitiveType<?>) t))
+				.map(t -> ((IPrimitiveType<?>) t))
 				.map(theMapper)
 				.filter(t -> t != null)
 				.forEach(retVal::add);
 
 		}
 		return retVal;
+	}
+
+	private static List<IBase> getParameterReps(FhirContext theCtx, IBaseParameters theParameters) {
+		Validate.notNull(theParameters, "theParameters must not be null");
+		RuntimeResourceDefinition resDef = theCtx.getResourceDefinition(theParameters.getClass());
+		BaseRuntimeChildDefinition parameterChild = resDef.getChildByName("parameter");
+		return parameterChild.getAccessor().getValues(theParameters);
+	}
+
+	private static Optional<? extends IPrimitiveType<?>> getNameValue(IBase nextParameter, BaseRuntimeElementCompositeDefinition<?> theNextParameterDef) {
+		BaseRuntimeChildDefinition nameChild = theNextParameterDef.getChildByName("name");
+		List<IBase> nameValues = nameChild.getAccessor().getValues(nextParameter);
+		return nameValues
+			.stream()
+			.filter(t -> t instanceof IPrimitiveType<?>)
+			.map(t -> ((IPrimitiveType<?>) t))
+			.findFirst();
 	}
 
 	private static void addClientParameter(FhirContext theContext, Object theValue, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {

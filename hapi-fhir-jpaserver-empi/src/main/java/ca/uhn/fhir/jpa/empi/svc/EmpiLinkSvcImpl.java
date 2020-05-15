@@ -31,7 +31,6 @@ import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -108,7 +107,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	}
 
 	private IBaseBackboneElement personLinkFromEmpiLink(EmpiLink empiLink) {
-		IdDt resourceId = empiLink.getTarget().getIdDt().toUnqualifiedVersionless();
+		IIdType resourceId = myIdHelperService.resourceIdFromPidOrThrowException(empiLink.getTargetPid());
 		CanonicalIdentityAssuranceLevel assuranceLevel = AssuranceLevelUtil.getAssuranceLevel(empiLink.getMatchResult(), empiLink.getLinkSource());
 		return myPersonHelper.newPersonLink(resourceId, assuranceLevel);
 	}
