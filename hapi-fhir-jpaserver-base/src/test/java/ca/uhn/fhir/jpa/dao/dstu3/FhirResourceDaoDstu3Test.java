@@ -1258,7 +1258,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		ourLog.info("Created patient, got it: {}", id);
 
+		myCaptureQueriesListener.clear();
 		myPatientDao.deleteByUrl("Patient?organization._profile=http://foo", mySrd);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertGone(id);
 
 		myOrganizationDao.deleteByUrl("Organization?_profile=http://foo", mySrd);
