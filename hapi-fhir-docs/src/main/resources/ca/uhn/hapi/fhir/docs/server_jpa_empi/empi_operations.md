@@ -297,6 +297,8 @@ The following request body could be used:
 }
 ```
 
+This operation returns the merged Person resource.
+
 # Querying The EMPI
 
 When EMPI is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server.
