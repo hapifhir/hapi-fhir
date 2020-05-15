@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1847
+title: "Issue #1849 added two new search columns for date SearchParameters that are used to provide searching
+   at the day granularity in a timezone independent way. These new columns require a new database index that
+   was missed in the original merge."
