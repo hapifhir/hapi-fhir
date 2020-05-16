@@ -510,6 +510,6 @@ public class IdHelperService {
 		 if (!optionalResource.isPresent()) {
 		 	throw new ResourceNotFoundException("Requested resource not found");
 		 }
-		 return optionalResource.get().getIdDt();
+		 return optionalResource.get().getIdDt().toVersionless();
     }
 }
