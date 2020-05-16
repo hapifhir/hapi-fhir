@@ -497,7 +497,7 @@ public class IdHelperService {
 	@Nonnull
 	public Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
 		List<IIdType> ids = Collections.singletonList(theId);
-		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(null, ids);
+		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
 		return resourcePersistentIds.get(0).getIdAsLong();
 	}
 
