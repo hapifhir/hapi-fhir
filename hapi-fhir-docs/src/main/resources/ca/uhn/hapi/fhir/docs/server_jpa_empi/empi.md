@@ -16,7 +16,7 @@ The [hapi-fhir-jpaserver-starter](https://github.com/hapifhir/hapi-fhir-jpaserve
 
 Because HAPI EMPI is implemented on the HAPI JPA Server, it uses the FHIR model to represent roles and links. The following illustration shows an example of how these links work.
 
-<a href="/docs/images/empi-links.svg"><img src="/docs/images/empi-links.svg" alt="EMPI links" style="margin-left: 15px; margin-bottom: 15px; width: 500px;" /></a>
+<a href="/hapi-fhir/docs/images/empi-links.svg"><img src="/hapi-fhir/docs/images/empi-links.svg" alt="EMPI links" style="margin-left: 15px; margin-bottom: 15px; width: 500px;" /></a>
 
 There are several resources that are used:
 
