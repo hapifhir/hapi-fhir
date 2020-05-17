@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 /*
  * #%L
@@ -46,14 +45,6 @@ class PatchTypeParameter implements IParameter {
 
 	public static PatchTypeEnum getTypeForRequestOrThrowInvalidRequestException(RequestDetails theRequest) {
 		String contentTypeAll = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
-
-		int semicolonIndex = contentTypeAll.indexOf(';');
-		if (semicolonIndex > 0) {
-			contentTypeAll = contentTypeAll.substring(0, semicolonIndex);
-		}
-
-		contentTypeAll = trim(contentTypeAll);
-
 		return PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentTypeAll);
 	}
 

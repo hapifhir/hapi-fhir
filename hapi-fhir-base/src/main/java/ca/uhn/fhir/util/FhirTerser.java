@@ -1,17 +1,7 @@
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeChildDirectResource;
-import ca.uhn.fhir.context.RuntimeExtensionDtDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
@@ -20,30 +10,14 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -266,11 +240,6 @@ public class FhirTerser {
 		}
 		return retVal.get(0);
 	}
-
-	public <T extends IBase> Optional<T> getSingleValue(IBase theTarget, String thePath, Class<T> theWantedType) {
-		return Optional.ofNullable(getSingleValueOrNull(theTarget, thePath, theWantedType));
-	}
-
 
 	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		return getValues(theCurrentDef, theCurrentObj, theSubList, theWantedClass, false, false);
@@ -502,85 +471,85 @@ public class FhirTerser {
 	 * Returns values stored in an element identified by its path. The list of values is of
 	 * type {@link Object}.
 	 *
-	 * @param theElement The element to be accessed. Must not be null.
-	 * @param thePath    The path for the element to be accessed.@param theElement The resource instance to be accessed. Must not be null.
+	 * @param theResource The resource instance to be accessed. Must not be null.
+	 * @param thePath     The path for the element to be accessed.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<IBase> getValues(IBase theElement, String thePath) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath) {
 		Class<IBase> wantedClass = IBase.class;
 
-		return getValues(theElement, thePath, wantedClass);
+		return getValues(theResource, thePath, wantedClass);
 	}
 
 	/**
 	 * Returns values stored in an element identified by its path. The list of values is of
 	 * type {@link Object}.
 	 *
-	 * @param theElement The element to be accessed. Must not be null.
-	 * @param thePath    The path for the element to be accessed.
-	 * @param theCreate  When set to <code>true</code>, the terser will create a null-valued element where none exists.
+	 * @param theResource The resource instance to be accessed. Must not be null.
+	 * @param thePath     The path for the element to be accessed.
+	 * @param theCreate   When set to <code>true</code>, the terser will create a null-valued element where none exists.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<IBase> getValues(IBase theElement, String thePath, boolean theCreate) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
 		Class<IBase> wantedClass = IBase.class;
 
-		return getValues(theElement, thePath, wantedClass, theCreate);
+		return getValues(theResource, thePath, wantedClass, theCreate);
 	}
 
 	/**
 	 * Returns values stored in an element identified by its path. The list of values is of
 	 * type {@link Object}.
 	 *
-	 * @param theElement      The element to be accessed. Must not be null.
+	 * @param theResource     The resource instance to be accessed. Must not be null.
 	 * @param thePath         The path for the element to be accessed.
 	 * @param theCreate       When set to <code>true</code>, the terser will create a null-valued element where none exists.
 	 * @param theAddExtension When set to <code>true</code>, the terser will add a null-valued extension where one or more such extensions already exist.
 	 * @return A list of values of type {@link Object}.
 	 */
-	public List<IBase> getValues(IBase theElement, String thePath, boolean theCreate, boolean theAddExtension) {
+	public List<IBase> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
 		Class<IBase> wantedClass = IBase.class;
 
-		return getValues(theElement, thePath, wantedClass, theCreate, theAddExtension);
+		return getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
 	}
 
 	/**
 	 * Returns values stored in an element identified by its path. The list of values is of
 	 * type <code>theWantedClass</code>.
 	 *
-	 * @param theElement     The element to be accessed. Must not be null.
+	 * @param theResource    The resource instance to be accessed. Must not be null.
 	 * @param thePath        The path for the element to be accessed.
 	 * @param theWantedClass The desired class to be returned in a list.
 	 * @param <T>            Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T extends IBase> List<T> getValues(IBase theElement, String thePath, Class<T> theWantedClass) {
-		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theElement.getClass());
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
-		return getValues(def, theElement, parts, theWantedClass);
+		return getValues(def, theResource, parts, theWantedClass);
 	}
 
 	/**
 	 * Returns values stored in an element identified by its path. The list of values is of
 	 * type <code>theWantedClass</code>.
 	 *
-	 * @param theElement     The element to be accessed. Must not be null.
+	 * @param theResource    The resource instance to be accessed. Must not be null.
 	 * @param thePath        The path for the element to be accessed.
 	 * @param theWantedClass The desired class to be returned in a list.
 	 * @param theCreate      When set to <code>true</code>, the terser will create a null-valued element where none exists.
 	 * @param <T>            Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T extends IBase> List<T> getValues(IBase theElement, String thePath, Class<T> theWantedClass, boolean theCreate) {
-		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theElement.getClass());
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
-		return getValues(def, theElement, parts, theWantedClass, theCreate, false);
+		return getValues(def, theResource, parts, theWantedClass, theCreate, false);
 	}
 
 	/**
 	 * Returns values stored in an element identified by its path. The list of values is of
 	 * type <code>theWantedClass</code>.
 	 *
-	 * @param theElement      The element to be accessed. Must not be null.
+	 * @param theResource     The resource instance to be accessed. Must not be null.
 	 * @param thePath         The path for the element to be accessed.
 	 * @param theWantedClass  The desired class to be returned in a list.
 	 * @param theCreate       When set to <code>true</code>, the terser will create a null-valued element where none exists.
@@ -588,10 +557,10 @@ public class FhirTerser {
 	 * @param <T>             Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T extends IBase> List<T> getValues(IBase theElement, String thePath, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
-		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theElement.getClass());
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
-		return getValues(def, theElement, parts, theWantedClass, theCreate, theAddExtension);
+		return getValues(def, theResource, parts, theWantedClass, theCreate, theAddExtension);
 	}
 
 	private List<String> parsePath(BaseRuntimeElementCompositeDefinition<?> theElementDef, String thePath) {
@@ -832,7 +801,7 @@ public class FhirTerser {
 	}
 
 	/**
-	 * Visit all elements in a given resource or element
+	 * Visit all elements in a given resource
 	 * <p>
 	 * <b>THIS ALTERNATE METHOD IS STILL EXPERIMENTAL! USE WITH CAUTION</b>
 	 * </p>
@@ -841,19 +810,12 @@ public class FhirTerser {
 	 * {@link BaseResourceReferenceDt#getResource()}) or embedded resources (e.g. Bundle.entry.resource)
 	 * </p>
 	 *
-	 * @param theElement The element to visit
-	 * @param theVisitor The visitor
+	 * @param theResource The resource to visit
+	 * @param theVisitor  The visitor
 	 */
-	public void visit(IBase theElement, IModelVisitor2 theVisitor) {
-		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
-		if (def instanceof BaseRuntimeElementCompositeDefinition) {
-			BaseRuntimeElementCompositeDefinition<?> defComposite = (BaseRuntimeElementCompositeDefinition<?>) def;
-			visit(theElement, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-		} else if (theElement instanceof IBaseExtension) {
-			theVisitor.acceptUndeclaredExtension((IBaseExtension<?, ?>) theElement, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-		} else {
-			theVisitor.acceptElement(theElement, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-		}
+	public void visit(IBaseResource theResource, IModelVisitor2 theVisitor) {
+		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+		visit(theResource, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 	}
 
 	private void visit(Map<Object, Object> theStack, IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
@@ -1009,5 +971,4 @@ public class FhirTerser {
 
 		});
 	}
-
 }

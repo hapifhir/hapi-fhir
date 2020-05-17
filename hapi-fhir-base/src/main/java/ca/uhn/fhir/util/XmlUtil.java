@@ -31,42 +31,16 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLResolver;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.*;
 import javax.xml.stream.events.XMLEvent;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -1539,11 +1513,8 @@ public class XmlUtil {
 		VALID_ENTITY_NAMES = Collections.unmodifiableMap(validEntityNames);
 	}
 
-	/**
-	 * Non-instantiable
-	 */
-	private XmlUtil() {
-	}
+	/** Non-instantiable */
+	private XmlUtil() {}
 
 	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
 		@Override
@@ -1864,7 +1835,7 @@ public class XmlUtil {
 	}
 
 	public static Document parseDocument(String theInput) throws IOException, SAXException {
-		DocumentBuilder builder;
+		DocumentBuilder builder = null;
 		try {
 			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 			docBuilderFactory.setNamespaceAware(true);
@@ -1888,14 +1859,5 @@ public class XmlUtil {
 
 		InputSource src = new InputSource(new StringReader(theInput));
 		return builder.parse(src);
-	}
-
-	public static String encodeDocument(Element theElement) throws TransformerException {
-		TransformerFactory transFactory = TransformerFactory.newInstance();
-		Transformer transformer = transFactory.newTransformer();
-		StringWriter buffer = new StringWriter();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-		transformer.transform(new DOMSource(theElement), new StreamResult(buffer));
-		return buffer.toString();
 	}
 }

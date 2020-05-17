@@ -164,9 +164,6 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			}
 			if (theClear) {
 				existingList.clear();
-				if (theValue == null) {
-					return;
-				}
 			}
 			existingList.add(theValue);
 		}

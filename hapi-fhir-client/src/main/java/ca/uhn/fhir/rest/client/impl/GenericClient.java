@@ -1618,16 +1618,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IPatchWithBody withFhirPatch(IBaseParameters thePatchBody) {
-			Validate.notNull(thePatchBody, "thePatchBody must not be null");
-
-			myPatchType = PatchTypeEnum.FHIR_PATCH_JSON;
-			myPatchBody = myContext.newJsonParser().encodeResourceToString(thePatchBody);
-
-			return this;
-		}
-
-		@Override
 		public IPatchExecutable withId(IIdType theId) {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");

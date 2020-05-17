@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -9,7 +8,6 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.Test;
@@ -27,39 +25,6 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PatchProviderR4Test.class);
-
-	@Test
-	public void testFhirPatch() {
-		Patient patient = new Patient();
-		patient.setActive(true);
-		patient.addIdentifier().addExtension("http://foo", new StringType("abc"));
-		patient.addIdentifier().setSystem("sys").setValue("val");
-		IIdType id = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent operation = patch.addParameter();
-		operation.setName("operation");
-		operation
-			.addPart()
-			.setName("type")
-			.setValue(new CodeType("delete"));
-		operation
-			.addPart()
-			.setName("path")
-			.setValue(new StringType("Patient.identifier[0]"));
-
-		MethodOutcome outcome = ourClient
-			.patch()
-			.withFhirPatch(patch)
-			.withId(id)
-			.execute();
-
-		Patient resultingResource = (Patient) outcome.getResource();
-		assertEquals(1, resultingResource.getIdentifier().size());
-
-		resultingResource = ourClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, resultingResource.getIdentifier().size());
-	}
 
 	@Test
 	public void testPatchAddArray() throws IOException {

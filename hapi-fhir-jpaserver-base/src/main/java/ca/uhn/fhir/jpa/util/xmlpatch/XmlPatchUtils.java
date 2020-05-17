@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.patch;
+package ca.uhn.fhir.jpa.util.xmlpatch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;

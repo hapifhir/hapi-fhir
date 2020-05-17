@@ -562,11 +562,6 @@
 			<artifactId>embedded-elasticsearch</artifactId>
 			<version>2.10.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.hl7.fhir.testcases</groupId>
-			<artifactId>fhir-test-cases</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
