@@ -131,7 +131,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.addNop("20200420.42");
 	}
 
-
 	private void init501() { //20200514 - present
 		Builder version = forVersion(VersionEnum.V5_0_1);
 
@@ -139,6 +138,31 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
 		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
 		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
+
+		// MPI_LINK
+		version.addIdGenerator("20200517.1", "SEQ_EMPI_LINK_ID");
+		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200424.2", "MPI_LINK", "PID");
+		empiLink.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+
+		empiLink.addColumn("PERSON_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200517.3", "FK_EMPI_LINK_PERSON")
+			.toColumn("PERSON_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("TARGET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200517.4", "FK_EMPI_LINK_TARGET")
+			.toColumn("TARGET_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("MATCH_RESULT").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		empiLink.addColumn("LINK_SOURCE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		empiLink.addColumn("CREATED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		empiLink.addColumn("UPDATED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+
+
+		empiLink.addIndex("20200517.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
 	}
 
 	protected void init500() { // 20200218 - 20200519
@@ -205,31 +229,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20200420.40", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
 		version.onTable("HFJ_SPIDX_URI").modifyColumn("20200420.41", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
 		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20200420.42", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-
-		// MPI_LINK
-		version.addIdGenerator("20200424.1", "SEQ_EMPI_LINK_ID");
-		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200424.2", "MPI_LINK", "PID");
-		empiLink.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-
-		empiLink.addColumn("PERSON_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		empiLink
-			.addForeignKey("20200424.3", "FK_EMPI_LINK_PERSON")
-			.toColumn("PERSON_PID")
-			.references("HFJ_RESOURCE", "RES_ID");
-
-		empiLink.addColumn("TARGET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		empiLink
-			.addForeignKey("20200424.4", "FK_EMPI_LINK_TARGET")
-			.toColumn("TARGET_PID")
-			.references("HFJ_RESOURCE", "RES_ID");
-
-		empiLink.addColumn("MATCH_RESULT").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		empiLink.addColumn("LINK_SOURCE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		empiLink.addColumn("CREATED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		empiLink.addColumn("UPDATED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-
-
-		empiLink.addIndex("20200424.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
 
 		// Add support for integer comparisons during day-precision date search.
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
