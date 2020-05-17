@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
@@ -52,8 +53,8 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
-import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
+import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
+import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -87,10 +88,12 @@ import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.github.fge.jsonpatch.JsonPatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -886,10 +889,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IBaseResource resourceToUpdate = toResource(entityToUpdate, false);
 		IBaseResource destination;
-		if (thePatchType == PatchTypeEnum.JSON_PATCH) {
+		switch (thePatchType) {
+			case JSON_PATCH:
 			destination = JsonPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
-		} else {
+				break;
+			case XML_PATCH:
 			destination = XmlPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
+				break;
+			case FHIR_PATCH_XML:
+				IBaseParameters fhirPatchJson = (IBaseParameters) getContext().newXmlParser().parseResource(thePatchBody);
+				new FhirPatch(getContext()).apply(resourceToUpdate, fhirPatchJson);
+				destination = resourceToUpdate;
+				break;
+			default:
+			case FHIR_PATCH_JSON:
+				IBaseParameters fhirPatchXml = (IBaseParameters) getContext().newJsonParser().parseResource(thePatchBody);
+				new FhirPatch(getContext()).apply(resourceToUpdate, fhirPatchXml);
+				destination = resourceToUpdate;
+				break;
 		}
 
 		@SuppressWarnings("unchecked")

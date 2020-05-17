@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.util.jsonpatch;
+package ca.uhn.fhir.jpa.patch;
 
 /*
  * #%L
