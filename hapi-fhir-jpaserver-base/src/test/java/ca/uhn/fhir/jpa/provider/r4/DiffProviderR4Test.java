@@ -55,6 +55,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			.onInstance(id)
 			.named(ProviderConstants.DIFF_OPERATION_NAME)
 			.withNoParameters(Parameters.class)
+			.useHttpGet()
 			.execute();
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));

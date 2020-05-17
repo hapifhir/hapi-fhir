@@ -27,7 +27,7 @@ public class DiffProvider {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, global = true)
+	@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, global = true, idempotent = true)
 	public IBaseParameters diff(
 		@IdParam IIdType theResourceId,
 		@OperationParam(name = ProviderConstants.DIFF_FROM_VERSION_PARAMETER, typeName = "string", min = 0, max = 1) IPrimitiveType<?> theFromVersion,
@@ -65,7 +65,7 @@ public class DiffProvider {
 
 	}
 
-	@Operation(name = ProviderConstants.DIFF_OPERATION_NAME)
+	@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, idempotent = true)
 	public IBaseParameters diff(
 		@OperationParam(name = ProviderConstants.DIFF_FROM_PARAMETER, typeName = "id", min = 1, max = 1) IIdType theFromVersion,
 		@OperationParam(name = ProviderConstants.DIFF_TO_PARAMETER, typeName = "id", min = 1, max = 1) IIdType theToVersion,
