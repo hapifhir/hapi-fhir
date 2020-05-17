@@ -71,66 +71,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init501(); // 20200514 - present
 	}
 
-
-	/**
-	 * Partway through the 4.3.0 releaase cycle we renumbered to
-	 * 5.0.0 - We have a bunch of NOP tasks here to avoid breakage for anyone
-	 * who installed a prerelease before we made the switch
-	 */
-	@SuppressWarnings("deprecation")
-	private void init430() {
-		Builder version = forVersion(VersionEnum.V4_3_0);
-		version.addNop("20200218.1");
-		version.addNop("20200218.2");
-		version.addNop("20200218.3");
-		version.addNop("20200220.1");
-		version.addNop("20200419.1");
-		version.addNop("20200419.2");
-		version.addNop("20200420.0");
-		version.addNop("20200420.1");
-		version.addNop("20200420.2");
-		version.addNop("20200420.3");
-		version.addNop("20200420.4");
-		version.addNop("20200420.5");
-		version.addNop("20200420.6");
-		version.addNop("20200420.7");
-		version.addNop("20200420.8");
-		version.addNop("20200420.9");
-		version.addNop("20200420.10");
-		version.addNop("20200420.11");
-		version.addNop("20200420.12");
-		version.addNop("20200420.13");
-		version.addNop("20200420.14");
-		version.addNop("20200420.15");
-		version.addNop("20200420.16");
-		version.addNop("20200420.17");
-		version.addNop("20200420.18");
-		version.addNop("20200420.19");
-		version.addNop("20200420.20");
-		version.addNop("20200420.21");
-		version.addNop("20200420.22");
-		version.addNop("20200420.23");
-		version.addNop("20200420.24");
-		version.addNop("20200420.25");
-		version.addNop("20200420.26");
-		version.addNop("20200420.27");
-		version.addNop("20200420.28");
-		version.addNop("20200420.29");
-		version.addNop("20200420.30");
-		version.addNop("20200420.31");
-		version.addNop("20200420.32");
-		version.addNop("20200420.33");
-		version.addNop("20200420.34");
-		version.addNop("20200420.35");
-		version.addNop("20200420.36");
-		version.addNop("20200420.37");
-		version.addNop("20200420.38");
-		version.addNop("20200420.39");
-		version.addNop("20200420.40");
-		version.addNop("20200420.41");
-		version.addNop("20200420.42");
-	}
-
 	private void init501() { //20200514 - present
 		Builder version = forVersion(VersionEnum.V5_0_1);
 
@@ -141,7 +81,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// MPI_LINK
 		version.addIdGenerator("20200517.1", "SEQ_EMPI_LINK_ID");
-		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200424.2", "MPI_LINK", "PID");
+		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200517.2", "MPI_LINK", "PID");
 		empiLink.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
 		empiLink.addColumn("PERSON_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
@@ -240,6 +180,65 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
 			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
 		);
+	}
+
+	/**
+	 * Partway through the 4.3.0 releaase cycle we renumbered to
+	 * 5.0.0 - We have a bunch of NOP tasks here to avoid breakage for anyone
+	 * who installed a prerelease before we made the switch
+	 */
+	@SuppressWarnings("deprecation")
+	private void init430() {
+		Builder version = forVersion(VersionEnum.V4_3_0);
+		version.addNop("20200218.1");
+		version.addNop("20200218.2");
+		version.addNop("20200218.3");
+		version.addNop("20200220.1");
+		version.addNop("20200419.1");
+		version.addNop("20200419.2");
+		version.addNop("20200420.0");
+		version.addNop("20200420.1");
+		version.addNop("20200420.2");
+		version.addNop("20200420.3");
+		version.addNop("20200420.4");
+		version.addNop("20200420.5");
+		version.addNop("20200420.6");
+		version.addNop("20200420.7");
+		version.addNop("20200420.8");
+		version.addNop("20200420.9");
+		version.addNop("20200420.10");
+		version.addNop("20200420.11");
+		version.addNop("20200420.12");
+		version.addNop("20200420.13");
+		version.addNop("20200420.14");
+		version.addNop("20200420.15");
+		version.addNop("20200420.16");
+		version.addNop("20200420.17");
+		version.addNop("20200420.18");
+		version.addNop("20200420.19");
+		version.addNop("20200420.20");
+		version.addNop("20200420.21");
+		version.addNop("20200420.22");
+		version.addNop("20200420.23");
+		version.addNop("20200420.24");
+		version.addNop("20200420.25");
+		version.addNop("20200420.26");
+		version.addNop("20200420.27");
+		version.addNop("20200420.28");
+		version.addNop("20200420.29");
+		version.addNop("20200420.30");
+		version.addNop("20200420.31");
+		version.addNop("20200420.32");
+		version.addNop("20200420.33");
+		version.addNop("20200420.34");
+		version.addNop("20200420.35");
+		version.addNop("20200420.36");
+		version.addNop("20200420.37");
+		version.addNop("20200420.38");
+		version.addNop("20200420.39");
+		version.addNop("20200420.40");
+		version.addNop("20200420.41");
+		version.addNop("20200420.42");
 	}
 
 	protected void init420() { // 20191015 - 20200217
