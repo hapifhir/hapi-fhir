@@ -71,7 +71,7 @@ When a new Patient resource is compared with all other resources of that type in
 
 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, empi-link records are created with POSSIBLE_MATCH outcome and await manual assignment to either NO_MATCH or MATCHED.  Person resources are not changed.
 
-## Rules
+# Rules
 
 HAPI EMPI rules are managed via a single json document.  This document contains a version.  empi-links derived from these rules are marked with this version.  The following configuration is stored in the rules:
 

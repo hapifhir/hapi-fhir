@@ -2067,11 +2067,17 @@
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
+								<copy todir="target/site/apidocs-jpaserver-empi">
+									<fileset dir="hapi-fhir-jpaserver-empi/target/site/apidocs"/>
+								</copy>
 								<copy todir="target/site/apidocs-client">
 									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-server">
 									<fileset dir="hapi-fhir-server/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-server-empi">
+									<fileset dir="hapi-fhir-server-empi/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
