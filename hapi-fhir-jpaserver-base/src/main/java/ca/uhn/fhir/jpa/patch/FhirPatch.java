@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -100,13 +101,14 @@ public class FhirPatch {
 			List<IBase> paths = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 			for (IBase next : paths) {
 
-				BaseRuntimeElementCompositeDefinition<?> element = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(next.getClass());
+				BaseRuntimeElementDefinition<?> elementDef = myContext.getElementDefinition(next.getClass());
+
 				String childName = elementName;
-				BaseRuntimeChildDefinition childDef = element.getChildByName(childName);
+				BaseRuntimeChildDefinition childDef = elementDef.getChildByName(childName);
 				BaseRuntimeElementDefinition<?> childElement;
 				if (childDef == null) {
 					childName = elementName + "[x]";
-					childDef = element.getChildByName(childName);
+					childDef = elementDef.getChildByName(childName);
 					childElement = childDef.getChildByName(childDef.getValidChildNames().iterator().next());
 				} else {
 					childElement = childDef.getChildByName(childName);
@@ -164,7 +166,7 @@ public class FhirPatch {
 				}
 
 				if (IBaseEnumeration.class.isAssignableFrom(childElement.getImplementingClass()) || XhtmlNode.class.isAssignableFrom(childElement.getImplementingClass())) {
-					// If the element is an IBaseEnumeration, we will use the actual element definition to build one, since
+					// If the compositeElementDef is an IBaseEnumeration, we will use the actual compositeElementDef definition to build one, since
 					// it needs the right factory object passed to its constructor
 					IPrimitiveType<?> newValueInstance = (IPrimitiveType<?>) childElement.newInstance();
 					newValueInstance.setValueAsString(((IPrimitiveType<?>) newValue).getValueAsString());
@@ -237,64 +239,15 @@ public class FhirPatch {
 
 	public void compare(IBaseParameters theDiff, BaseRuntimeElementDefinition<?> theDef, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField) {
 
-		if (theDef instanceof BaseRuntimeElementCompositeDefinition) {
-
-			for (BaseRuntimeChildDefinition nextChild : ((BaseRuntimeElementCompositeDefinition<?>) theDef).getChildren()) {
-
-				List<IBase> sourceValues = nextChild.getAccessor().getValues(theOldField);
-				List<IBase> targetValues = nextChild.getAccessor().getValues(theNewField);
-
-				int sourceIndex = 0;
-				int targetIndex = 0;
-				while (sourceIndex < sourceValues.size() && targetIndex < targetValues.size()) {
-
-					IBase sourceChildField = sourceValues.get(sourceIndex);
-					Validate.notNull(sourceChildField); // not expected to happen, but just in case
-					BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(sourceChildField.getClass());
-					IBase targetChildField = targetValues.get(targetIndex);
-					Validate.notNull(targetChildField); // not expected to happen, but just in case
-					String sourcePath = theSourcePath + "." + nextChild.getElementName() + (nextChild.getMax() != 1 ? "[" + sourceIndex + "]" : "");
-					String targetPath = theSourcePath + "." + nextChild.getElementName() + (nextChild.getMax() != 1 ? "[" + targetIndex + "]" : "");
-
-					compare(theDiff, def, sourcePath, targetPath, sourceChildField, targetChildField);
-
-					sourceIndex++;
-					targetIndex++;
-				}
-
-				// Find newly inserted items
-				while (targetIndex < targetValues.size()) {
-					IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-					ParametersUtil.addPartCode(myContext, operation, "type", "insert");
-					ParametersUtil.addPartString(myContext, operation, "path", theTargetPath + "." + nextChild.getElementName());
-					ParametersUtil.addPartInteger(myContext, operation, "index", targetIndex);
-					ParametersUtil.addPart(myContext, operation, "value", targetValues.get(targetIndex));
-
-					targetIndex++;
-				}
-
-				// Find deleted items
-				while (sourceIndex < sourceValues.size()) {
-					IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-					ParametersUtil.addPartCode(myContext, operation, "type", "delete");
-					ParametersUtil.addPartString(myContext, operation, "path", theTargetPath + "." + nextChild.getElementName() + (nextChild.getMax() != 1 ? "[" + targetIndex + "]" : ""));
-
-					sourceIndex++;
-					targetIndex++;
-				}
-
-			}
-
+		BaseRuntimeElementDefinition<?> sourceDef = myContext.getElementDefinition(theOldField.getClass());
+		BaseRuntimeElementDefinition<?> targetDef = myContext.getElementDefinition(theNewField.getClass());
+		if (!sourceDef.getName().equals(targetDef.getName())) {
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
+			ParametersUtil.addPartCode(myContext, operation, "type", "replace");
+			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath);
+			ParametersUtil.addPart(myContext, operation, "value", theNewField);
 		} else {
-
-			BaseRuntimeElementDefinition<?> sourceDef = myContext.getElementDefinition(theOldField.getClass());
-			BaseRuntimeElementDefinition<?> targetDef = myContext.getElementDefinition(theNewField.getClass());
-			if (!sourceDef.getName().equals(targetDef.getName())) {
-				IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-				ParametersUtil.addPartCode(myContext, operation, "type", "replace");
-				ParametersUtil.addPartString(myContext, operation, "path", theTargetPath);
-				ParametersUtil.addPart(myContext, operation, "value", theNewField);
-			} else if (theOldField instanceof IPrimitiveType) {
+			if (theOldField instanceof IPrimitiveType) {
 				IPrimitiveType<?> oldPrimitive = (IPrimitiveType<?>) theOldField;
 				IPrimitiveType<?> newPrimitive = (IPrimitiveType<?>) theNewField;
 				if (!Objects.equals(oldPrimitive.getValueAsString(), newPrimitive.getValueAsString())) {
@@ -303,14 +256,62 @@ public class FhirPatch {
 					ParametersUtil.addPartString(myContext, operation, "path", theTargetPath);
 					ParametersUtil.addPart(myContext, operation, "value", newPrimitive);
 				}
+			}
 
-				if ()
-
-
+			List<BaseRuntimeChildDefinition> children = theDef.getChildren();
+			for (BaseRuntimeChildDefinition nextChild : children) {
+				compareField(theDiff, theSourcePath, theTargetPath, theOldField, theNewField, nextChild);
 			}
 
 		}
 
+	}
+
+	public void compareField(IBaseParameters theDiff, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField, BaseRuntimeChildDefinition theChildDef) {
+		String elementName = theChildDef.getElementName();
+		boolean repeatable = theChildDef.getMax() != 1;
+
+		List<? extends IBase> sourceValues = theChildDef.getAccessor().getValues(theOldField);
+		List<? extends IBase> targetValues = theChildDef.getAccessor().getValues(theNewField);
+
+		int sourceIndex = 0;
+		int targetIndex = 0;
+		while (sourceIndex < sourceValues.size() && targetIndex < targetValues.size()) {
+
+			IBase sourceChildField = sourceValues.get(sourceIndex);
+			Validate.notNull(sourceChildField); // not expected to happen, but just in case
+			BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(sourceChildField.getClass());
+			IBase targetChildField = targetValues.get(targetIndex);
+			Validate.notNull(targetChildField); // not expected to happen, but just in case
+			String sourcePath = theSourcePath + "." + elementName + (repeatable ? "[" + sourceIndex + "]" : "");
+			String targetPath = theSourcePath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : "");
+
+			compare(theDiff, def, sourcePath, targetPath, sourceChildField, targetChildField);
+
+			sourceIndex++;
+			targetIndex++;
+		}
+
+		// Find newly inserted items
+		while (targetIndex < targetValues.size()) {
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
+			ParametersUtil.addPartCode(myContext, operation, "type", "insert");
+			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath + "." + elementName);
+			ParametersUtil.addPartInteger(myContext, operation, "index", targetIndex);
+			ParametersUtil.addPart(myContext, operation, "value", targetValues.get(targetIndex));
+
+			targetIndex++;
+		}
+
+		// Find deleted items
+		while (sourceIndex < sourceValues.size()) {
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
+			ParametersUtil.addPartCode(myContext, operation, "type", "delete");
+			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : ""));
+
+			sourceIndex++;
+			targetIndex++;
+		}
 	}
 
 }

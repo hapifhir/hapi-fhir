@@ -110,6 +110,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			Boolean encodeExtension = null;
 			for (IBaseExtension<?, ?> next : ext) {
 
+				if (next.isEmpty()) {
+					continue;
+				}
+
 				// Make sure we respect _summary and _elements
 				if (encodeExtension == null) {
 					encodeExtension = isEncodeExtension(theParent, theEncodeContext, theContainedResource, theContainingElement);

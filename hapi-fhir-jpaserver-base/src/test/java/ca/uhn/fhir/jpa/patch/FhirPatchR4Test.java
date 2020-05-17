@@ -263,6 +263,116 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
+	public void testGeneratePatch_RemoveExtensionOnPrimitive() {
+		Patient oldValue = new Patient();
+		oldValue.setActive(true);
+		oldValue.getActiveElement().addExtension("http://foo", new StringType("a value"));
+
+		Patient newValue = new Patient();
+		newValue.setActive(true);
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("delete", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.active.extension[0]", extractPartValuePrimitive(diff, 0, "operation", "path"));
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
+	@Test
+	public void testGeneratePatch_ModifyExtensionOnPrimitive() {
+		Patient oldValue = new Patient();
+		oldValue.setActive(true);
+		oldValue.getActiveElement().addExtension("http://foo", new StringType("a value"));
+
+		Patient newValue = new Patient();
+		newValue.setActive(true);
+		newValue.getActiveElement().addExtension("http://foo", new StringType("a new value"));
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.active.extension[0].value", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("a new value", extractPartValuePrimitive(diff, 0, "operation", "value"));
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
+
+	@Test
+	public void testGeneratePatch_AddExtensionOnComposite() {
+		Patient oldValue = new Patient();
+		oldValue.addName().setFamily("Family");
+
+		Patient newValue = new Patient();
+		newValue.addName().setFamily("Family");
+		newValue.getNameFirstRep().addExtension("http://foo", new StringType("a value"));
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.name[0].extension", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("0", extractPartValuePrimitive(diff, 0, "operation", "index"));
+		assertEquals("http://foo", extractPartValue(diff, 0, "operation", "value", Extension.class).getUrl());
+		assertEquals("a value", extractPartValue(diff, 0, "operation", "value", Extension.class).getValueAsPrimitive().getValueAsString());
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
+	@Test
+	public void testGeneratePatch_RemoveExtensionOnComposite() {
+		Patient oldValue = new Patient();
+		oldValue.addName().setFamily("Family");
+		oldValue.getNameFirstRep().addExtension("http://foo", new StringType("a value"));
+
+		Patient newValue = new Patient();
+		newValue.addName().setFamily("Family");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("delete", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.name[0].extension[0]", extractPartValuePrimitive(diff, 0, "operation", "path"));
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
+	@Test
+	public void testGeneratePatch_ModifyExtensionOnComposite() {
+		Patient oldValue = new Patient();
+		oldValue.addName().setFamily("Family");
+		oldValue.getNameFirstRep().addExtension("http://foo", new StringType("a value"));
+
+		Patient newValue = new Patient();
+		newValue.addName().setFamily("Family");
+		newValue.getNameFirstRep().addExtension("http://foo", new StringType("a new value"));
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.name[0].extension[0].value", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("a new value", extractPartValuePrimitive(diff, 0, "operation", "value"));
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+	
+	
+	@Test
 	public void testGeneratePatch_InsertIdentifier() {
 		Patient oldValue = new Patient();
 		oldValue.addIdentifier().setSystem("system-0").setValue("value-0");
@@ -311,6 +421,10 @@ public class FhirPatchR4Test {
 		theSvc.apply(theOldValue, theDiff);
 		String expected = ourCtx.newJsonParser().encodeResourceToString(theNewValue);
 		String actual = ourCtx.newJsonParser().encodeResourceToString(theOldValue);
+		assertEquals(expected, actual);
+
+		expected = ourCtx.newXmlParser().encodeResourceToString(theNewValue);
+		actual = ourCtx.newXmlParser().encodeResourceToString(theOldValue);
 		assertEquals(expected, actual);
 	}
 
