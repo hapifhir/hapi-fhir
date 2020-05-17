@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.patch;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -370,8 +371,80 @@ public class FhirPatchR4Test {
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
-	
-	
+
+	@Test
+	public void testGeneratePatch_ModifyId() {
+		Patient oldValue = new Patient();
+		oldValue.setId("http://foo/Patient/123/_history/2");
+		oldValue.getMeta().setVersionId("2");
+		oldValue.addName().setFamily("Family");
+
+		Patient newValue = new Patient();
+		newValue.setId("http://bar/Patient/456/_history/667");
+		newValue.getMeta().setVersionId("667");
+		newValue.addName().setFamily("Family");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		assertEquals(2, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.id", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("456", extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertEquals("replace", extractPartValuePrimitive(diff, 1, "operation", "type"));
+		assertEquals("Patient.meta.versionId", extractPartValuePrimitive(diff, 1, "operation", "path"));
+		assertEquals("667", extractPartValuePrimitive(diff, 1, "operation", "value"));
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
+	@Test
+	public void testGeneratePatch_ModifyId_OnlyVersionDifferent() {
+		Patient oldValue = new Patient();
+		oldValue.setId("http://foo/Patient/123/_history/2");
+		oldValue.getMeta().setVersionId("2");
+		oldValue.addName().setFamily("Family");
+
+		Patient newValue = new Patient();
+		newValue.setId("http://foo/Patient/123/_history/3");
+		newValue.getMeta().setVersionId("3");
+		newValue.addName().setFamily("Family");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.meta.versionId", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("3", extractPartValuePrimitive(diff, 0, "operation", "value"));
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
+	@Test
+	public void testGeneratePatch_ModifyNarrative() {
+		Patient oldValue = new Patient();
+		oldValue.getText().getDiv().setValue("<div>123</div>");
+		oldValue.addName().setFamily("Family");
+
+		Patient newValue = new Patient();
+		newValue.getText().getDiv().setValue("<div>456</div>");
+		newValue.addName().setFamily("Family");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.text.div", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">456</div>", extractPartValuePrimitive(diff, 0, "operation", "value"));
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
 	@Test
 	public void testGeneratePatch_InsertIdentifier() {
 		Patient oldValue = new Patient();
@@ -428,17 +501,22 @@ public class FhirPatchR4Test {
 		assertEquals(expected, actual);
 	}
 
-	public String extractPartValuePrimitive(Parameters theDiff, int theIndex, String theParameterName, String thePartName) {
+	public static String extractPartValuePrimitive(Parameters theDiff, int theIndex, String theParameterName, String thePartName) {
 		Parameters.ParametersParameterComponent component = theDiff.getParameter().stream().filter(t -> t.getName().equals(theParameterName)).collect(Collectors.toList()).get(theIndex);
 		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		return ((IPrimitiveType) part.getValue()).getValueAsString();
 	}
 
-	public <T extends IBase> T extractPartValue(Parameters theDiff, int theIndex, String theParameterName, String thePartName, Class<T> theExpectedType) {
+	public static <T extends IBase> T extractPartValue(Parameters theDiff, int theIndex, String theParameterName, String thePartName, Class<T> theExpectedType) {
 		Parameters.ParametersParameterComponent component = theDiff.getParameter().stream().filter(t -> t.getName().equals(theParameterName)).collect(Collectors.toList()).get(theIndex);
 		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assert theExpectedType.isAssignableFrom(part.getValue().getClass());
-		return (T) part.getValue();
+
+		if (IBaseResource.class.isAssignableFrom(theExpectedType)) {
+			return (T) part.getResource();
+		} else {
+			assert theExpectedType.isAssignableFrom(part.getValue().getClass());
+			return (T) part.getValue();
+		}
 	}
 
 }

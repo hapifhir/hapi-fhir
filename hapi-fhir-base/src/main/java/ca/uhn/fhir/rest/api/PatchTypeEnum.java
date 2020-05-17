@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
@@ -27,6 +28,9 @@ import ca.uhn.fhir.util.UrlUtil;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Parameter type for methods annotated with {@link Patch}
@@ -50,8 +54,8 @@ public enum PatchTypeEnum {
 	}
 
 	@Nonnull
-	public static PatchTypeEnum forContentTypeOrThrowInvalidRequestException(String theContentType) {
-		String contentType = theContentType;
+	public static PatchTypeEnum forContentTypeOrThrowInvalidRequestException(FhirContext theContext, String theContentType) {
+		String contentType = defaultString(theContentType);
 		int semiColonIdx = contentType.indexOf(';');
 		if (semiColonIdx != -1) {
 			contentType = theContentType.substring(0, semiColonIdx);
@@ -70,7 +74,13 @@ public enum PatchTypeEnum {
 
 		PatchTypeEnum retVal = map.get(contentType);
 		if (retVal == null) {
-			throw new InvalidRequestException("Invalid Content-Type for PATCH operation: " + UrlUtil.sanitizeUrlPart(theContentType));
+			if (isBlank(contentType)) {
+				String msg = theContext.getLocalizer().getMessage(PatchTypeEnum.class, "missingPatchContentType");
+				throw new InvalidRequestException(msg);
+			}
+
+			String msg = theContext.getLocalizer().getMessageSanitized(PatchTypeEnum.class, "invalidPatchContentType", contentType);
+			throw new InvalidRequestException(msg);
 		}
 
 		return retVal;

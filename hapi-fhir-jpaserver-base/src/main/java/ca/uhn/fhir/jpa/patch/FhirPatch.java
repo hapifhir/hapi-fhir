@@ -13,14 +13,16 @@ import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -28,6 +30,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirPatch {
 
 	private final FhirContext myContext;
+	private boolean myIncludePreviousValueInDiff;
 
 	public FhirPatch(FhirContext theContext) {
 		myContext = theContext;
@@ -153,7 +156,7 @@ public class FhirPatch {
 								Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
 								if (value.isPresent()) {
 
-									BaseRuntimeChildDefinition partChildDef = ((BaseRuntimeElementCompositeDefinition<?>) childElement).getChildByName(name);
+									BaseRuntimeChildDefinition partChildDef = childElement.getChildByName(name);
 									partChildDef.getMutator().addValue(newValue, value.get());
 
 								}
@@ -222,18 +225,29 @@ public class FhirPatch {
 		}
 	}
 
-	public IBaseParameters diff(IBaseResource theOldValue, IBaseResource theNewValue) {
-		String oldValueTypeName = myContext.getResourceDefinition(theOldValue).getName();
-		String newValueTypeName = myContext.getResourceDefinition(theNewValue).getName();
-		Validate.isTrue(oldValueTypeName.equalsIgnoreCase(newValueTypeName), "Resources must be of same type");
-
+	public IBaseParameters diff(@Nullable IBaseResource theOldValue, @Nonnull IBaseResource theNewValue) {
 		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
+		String newValueTypeName = myContext.getResourceDefinition(theNewValue).getName();
 
-		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theOldValue).getBaseDefinition();
-		String path = def.getName();
+		if (theOldValue == null) {
 
-		compare(retVal, def, path, path, theOldValue, theNewValue);
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, retVal, "operation");
+			ParametersUtil.addPartCode(myContext, operation, "type", "insert");
+			ParametersUtil.addPartString(myContext, operation, "path", newValueTypeName);
+			ParametersUtil.addPart(myContext, operation, "value", theNewValue);
 
+		} else {
+
+			String oldValueTypeName = myContext.getResourceDefinition(theOldValue).getName();
+			Validate.isTrue(oldValueTypeName.equalsIgnoreCase(newValueTypeName), "Resources must be of same type");
+
+
+			BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theOldValue).getBaseDefinition();
+			String path = def.getName();
+
+			compare(retVal, def, path, path, theOldValue, theNewValue);
+
+		}
 		return retVal;
 	}
 
@@ -245,16 +259,19 @@ public class FhirPatch {
 			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
 			ParametersUtil.addPartCode(myContext, operation, "type", "replace");
 			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath);
+			addValueToDiff(operation, theOldField, theNewField);
 			ParametersUtil.addPart(myContext, operation, "value", theNewField);
 		} else {
 			if (theOldField instanceof IPrimitiveType) {
 				IPrimitiveType<?> oldPrimitive = (IPrimitiveType<?>) theOldField;
 				IPrimitiveType<?> newPrimitive = (IPrimitiveType<?>) theNewField;
-				if (!Objects.equals(oldPrimitive.getValueAsString(), newPrimitive.getValueAsString())) {
+				String oldValueAsString = toValue(oldPrimitive);
+				String newValueAsString = toValue(newPrimitive);
+				if (!Objects.equals(oldValueAsString, newValueAsString)) {
 					IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
 					ParametersUtil.addPartCode(myContext, operation, "type", "replace");
 					ParametersUtil.addPartString(myContext, operation, "path", theTargetPath);
-					ParametersUtil.addPart(myContext, operation, "value", newPrimitive);
+					addValueToDiff(operation, oldPrimitive, newPrimitive);
 				}
 			}
 
@@ -265,6 +282,40 @@ public class FhirPatch {
 
 		}
 
+	}
+
+	public void addValueToDiff(IBase theOperationPart, IBase theOldValue, IBase theNewValue) {
+
+		if (myIncludePreviousValueInDiff) {
+			IBase oldValue = massageValueForDiff(theOldValue);
+			ParametersUtil.addPart(myContext, theOperationPart, "previousValue", oldValue);
+		}
+
+		IBase newValue = massageValueForDiff(theNewValue);
+		ParametersUtil.addPart(myContext, theOperationPart, "value", newValue);
+	}
+
+	public IBase massageValueForDiff(IBase theNewValue) {
+		// XHTML content is dealt with by putting it in a string
+		if (theNewValue instanceof XhtmlNode) {
+			String xhtmlString = ((XhtmlNode) theNewValue).getValueAsString();
+			theNewValue = myContext.getElementDefinition("string").newInstance(xhtmlString);
+		}
+
+		// IIdType can hold a fully qualified ID, but we just want the ID part to show up in diffs
+		if (theNewValue instanceof IIdType) {
+			String idPart = ((IIdType) theNewValue).getIdPart();
+			theNewValue = myContext.getElementDefinition("id").newInstance(idPart);
+		}
+
+		return theNewValue;
+	}
+
+	private String toValue(IPrimitiveType<?> theOldPrimitive) {
+		if (theOldPrimitive instanceof IIdType) {
+			return ((IIdType) theOldPrimitive).getIdPart();
+		}
+		return theOldPrimitive.getValueAsString();
 	}
 
 	public void compareField(IBaseParameters theDiff, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField, BaseRuntimeChildDefinition theChildDef) {
@@ -314,4 +365,7 @@ public class FhirPatch {
 		}
 	}
 
+	public void setIncludePreviousValueInDiff(boolean theIncludePreviousValueInDiff) {
+		myIncludePreviousValueInDiff = theIncludePreviousValueInDiff;
+	}
 }

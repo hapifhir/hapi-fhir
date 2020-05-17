@@ -48,4 +48,12 @@ public class ProviderConstants {
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
 
+	/**
+	 * Operation name: diff
+	 */
+	public static final String DIFF_OPERATION_NAME = "$diff";
+	public static final String DIFF_FROM_VERSION_PARAMETER = "fromVersion";
+
+	public static final String DIFF_FROM_PARAMETER = "from";
+	public static final String DIFF_TO_PARAMETER = "to";
 }

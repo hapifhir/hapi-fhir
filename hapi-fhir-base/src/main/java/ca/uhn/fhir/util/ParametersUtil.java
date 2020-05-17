@@ -322,7 +322,12 @@ public class ParametersUtil {
 		name.setValue(theName);
 		partChildElem.getChildByName("name").getMutator().addValue(part, name);
 
-		partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+		if (theValue instanceof IBaseResource) {
+			partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
+		} else {
+			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+		}
+
 	}
 
 	public static void addPartResource(FhirContext theContext, IBase theParameter, String theName, IBaseResource theValue) {

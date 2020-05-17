@@ -88,7 +88,6 @@ import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
-import com.github.fge.jsonpatch.JsonPatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -859,7 +858,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequest) {
+	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequest) {
 
 		ResourceTable entityToUpdate;
 		if (isNotBlank(theConditionalUrl)) {
@@ -897,14 +896,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			destination = XmlPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
 				break;
 			case FHIR_PATCH_XML:
-				IBaseParameters fhirPatchJson = (IBaseParameters) getContext().newXmlParser().parseResource(thePatchBody);
-				new FhirPatch(getContext()).apply(resourceToUpdate, fhirPatchJson);
-				destination = resourceToUpdate;
-				break;
-			default:
 			case FHIR_PATCH_JSON:
-				IBaseParameters fhirPatchXml = (IBaseParameters) getContext().newJsonParser().parseResource(thePatchBody);
-				new FhirPatch(getContext()).apply(resourceToUpdate, fhirPatchXml);
+			default:
+				IBaseParameters fhirPatchJson = theFhirPatchBody;
+				new FhirPatch(getContext()).apply(resourceToUpdate, fhirPatchJson);
 				destination = resourceToUpdate;
 				break;
 		}

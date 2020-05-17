@@ -113,6 +113,12 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	default <T extends IBaseResource> Consumer<T> withId(IIdType theId) {
+		return t -> {
+			t.setId(theId.toUnqualifiedVersionless());
+		};
+	}
+
 	default Consumer<IBaseResource> withTag(String theSystem, String theCode) {
 		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode).setDisplay(theCode);
 	}
@@ -151,19 +157,6 @@ public interface ITestDataBuilder {
 		};
 	}
 
-
-	/**
-	 * Name chosen to avoid potential for conflict. This is an internal API to this interface.
-	 */
-	static void __setPrimitiveChild(FhirContext theFhirContext, IBaseResource theTarget, String theElementName, String theElementType, String theValue) {
-		RuntimeResourceDefinition def = theFhirContext.getResourceDefinition(theTarget.getClass());
-		BaseRuntimeChildDefinition activeChild = def.getChildByName(theElementName);
-
-		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance();
-		booleanType.setValueAsString(theValue);
-		activeChild.getMutator().addValue(theTarget, booleanType);
-	}
-
 	/**
 	 * Users of this API must implement this method
 	 */
@@ -178,6 +171,18 @@ public interface ITestDataBuilder {
 	 * Users of this API must implement this method
 	 */
 	FhirContext getFhirContext();
+
+	/**
+	 * Name chosen to avoid potential for conflict. This is an internal API to this interface.
+	 */
+	static void __setPrimitiveChild(FhirContext theFhirContext, IBaseResource theTarget, String theElementName, String theElementType, String theValue) {
+		RuntimeResourceDefinition def = theFhirContext.getResourceDefinition(theTarget.getClass());
+		BaseRuntimeChildDefinition activeChild = def.getChildByName(theElementName);
+
+		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance();
+		booleanType.setValueAsString(theValue);
+		activeChild.getMutator().addValue(theTarget, booleanType);
+	}
 
 
 }

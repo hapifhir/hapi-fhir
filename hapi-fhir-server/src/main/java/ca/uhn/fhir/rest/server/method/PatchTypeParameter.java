@@ -54,7 +54,7 @@ class PatchTypeParameter implements IParameter {
 
 		contentTypeAll = trim(contentTypeAll);
 
-		return PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentTypeAll);
+		return PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(theRequest.getFhirContext(), contentTypeAll);
 	}
 
 }
