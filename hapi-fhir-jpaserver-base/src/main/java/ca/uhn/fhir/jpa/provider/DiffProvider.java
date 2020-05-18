@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+
 public class DiffProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(DiffProvider.class);
 	@Autowired
@@ -31,6 +33,7 @@ public class DiffProvider {
 	public IBaseParameters diff(
 		@IdParam IIdType theResourceId,
 		@OperationParam(name = ProviderConstants.DIFF_FROM_VERSION_PARAMETER, typeName = "string", min = 0, max = 1) IPrimitiveType<?> theFromVersion,
+		@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theIncludeMeta,
 		RequestDetails theRequestDetails) {
 
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceId.getResourceType());
@@ -58,8 +61,7 @@ public class DiffProvider {
 
 		}
 
-		FhirPatch fhirPatch = new FhirPatch(myContext);
-		fhirPatch.setIncludePreviousValueInDiff(true);
+		FhirPatch fhirPatch = newPatch(theIncludeMeta);
 		IBaseParameters diff = fhirPatch.diff(sourceResource, targetResource);
 		return diff;
 
@@ -69,6 +71,7 @@ public class DiffProvider {
 	public IBaseParameters diff(
 		@OperationParam(name = ProviderConstants.DIFF_FROM_PARAMETER, typeName = "id", min = 1, max = 1) IIdType theFromVersion,
 		@OperationParam(name = ProviderConstants.DIFF_TO_PARAMETER, typeName = "id", min = 1, max = 1) IIdType theToVersion,
+		@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theIncludeMeta,
 		RequestDetails theRequestDetails) {
 
 		if (!Objects.equal(theFromVersion.getResourceType(), theToVersion.getResourceType())) {
@@ -80,10 +83,23 @@ public class DiffProvider {
 		IBaseResource sourceResource = dao.read(theFromVersion, theRequestDetails);
 		IBaseResource targetResource = dao.read(theToVersion, theRequestDetails);
 
-		FhirPatch fhirPatch = new FhirPatch(myContext);
-		fhirPatch.setIncludePreviousValueInDiff(true);
+		FhirPatch fhirPatch = newPatch(theIncludeMeta);
 		IBaseParameters diff = fhirPatch.diff(sourceResource, targetResource);
 		return diff;
+	}
+
+	@Nonnull
+	public FhirPatch newPatch(IPrimitiveType<Boolean> theIncludeMeta) {
+		FhirPatch fhirPatch = new FhirPatch(myContext);
+		fhirPatch.setIncludePreviousValueInDiff(true);
+
+		if (theIncludeMeta != null && theIncludeMeta.getValue()) {
+			ourLog.trace("Including resource metadata in patch");
+		} else {
+			fhirPatch.addIgnorePath("*.meta");
+		}
+
+		return fhirPatch;
 	}
 
 }

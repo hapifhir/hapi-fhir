@@ -1,16 +1,10 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
@@ -18,161 +12,17 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.stream.Collectors;
-
+import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValue;
+import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValuePrimitive;
 import static org.junit.Assert.assertEquals;
 
-public class FhirPatchR4Test {
+public class FhirPatchDiffR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatchR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatchDiffR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4();
 
 	@Test
-	public void testInvalidOperation() {
-		FhirPatch svc = new FhirPatch(ourCtx);
-
-		Patient patient = new Patient();
-
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent operation = patch.addParameter();
-		operation.setName("operation");
-		operation
-			.addPart()
-			.setName("type")
-			.setValue(new CodeType("foo"));
-
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals("Unknown patch operation type: foo", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testInsertToInvalidIndex() {
-		FhirPatch svc = new FhirPatch(ourCtx);
-
-		Patient patient = new Patient();
-
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent operation = patch.addParameter();
-		operation.setName("operation");
-		operation
-			.addPart()
-			.setName("type")
-			.setValue(new CodeType("insert"));
-		operation
-			.addPart()
-			.setName("path")
-			.setValue(new StringType("Patient.identifier"));
-		operation
-			.addPart()
-			.setName("index")
-			.setValue(new IntegerType(2));
-
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals("Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testMoveFromInvalidIndex() {
-		FhirPatch svc = new FhirPatch(ourCtx);
-
-		Patient patient = new Patient();
-
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent operation = patch.addParameter();
-		operation.setName("operation");
-		operation
-			.addPart()
-			.setName("type")
-			.setValue(new CodeType("move"));
-		operation
-			.addPart()
-			.setName("path")
-			.setValue(new StringType("Patient.identifier"));
-		operation
-			.addPart()
-			.setName("source")
-			.setValue(new IntegerType(2));
-		operation
-			.addPart()
-			.setName("destination")
-			.setValue(new IntegerType(1));
-
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals("Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testMoveToInvalidIndex() {
-		FhirPatch svc = new FhirPatch(ourCtx);
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("sys");
-
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent operation = patch.addParameter();
-		operation.setName("operation");
-		operation
-			.addPart()
-			.setName("type")
-			.setValue(new CodeType("move"));
-		operation
-			.addPart()
-			.setName("path")
-			.setValue(new StringType("Patient.identifier"));
-		operation
-			.addPart()
-			.setName("source")
-			.setValue(new IntegerType(0));
-		operation
-			.addPart()
-			.setName("destination")
-			.setValue(new IntegerType(1));
-
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals("Invalid move destination index 1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testDeleteItemWithExtension() {
-		FhirPatch svc = new FhirPatch(ourCtx);
-
-		Patient patient = new Patient();
-		patient.setActive(true);
-		patient.addIdentifier().addExtension("http://foo", new StringType("abc"));
-		patient.addIdentifier().setSystem("sys").setValue("val");
-
-		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent operation = patch.addParameter();
-		operation.setName("operation");
-		operation
-			.addPart()
-			.setName("type")
-			.setValue(new CodeType("delete"));
-		operation
-			.addPart()
-			.setName("path")
-			.setValue(new StringType("Patient.identifier[0]"));
-
-		svc.apply(patient, patch);
-
-		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
-
-	}
-
-	@Test
-	public void testGeneratePatch_ReplaceIdentifier() {
+	public void testReplaceIdentifier() {
 		Patient oldValue = new Patient();
 		oldValue.addIdentifier().setSystem("system-0").setValue("value-0");
 
@@ -196,7 +46,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_ReplaceChoice() {
+	public void testReplaceChoice() {
 		Patient oldValue = new Patient();
 		oldValue.setDeceased(new BooleanType(true));
 
@@ -218,7 +68,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_ReplaceChoice2() {
+	public void testReplaceChoice2() {
 		Patient oldValue = new Patient();
 		oldValue.setDeceased(new DateTimeType("2020-05-16"));
 
@@ -240,7 +90,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_AddExtensionOnPrimitive() {
+	public void testAddExtensionOnPrimitive() {
 		Patient oldValue = new Patient();
 		oldValue.setActive(true);
 
@@ -264,7 +114,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_RemoveExtensionOnPrimitive() {
+	public void testRemoveExtensionOnPrimitive() {
 		Patient oldValue = new Patient();
 		oldValue.setActive(true);
 		oldValue.getActiveElement().addExtension("http://foo", new StringType("a value"));
@@ -284,7 +134,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_ModifyExtensionOnPrimitive() {
+	public void testModifyExtensionOnPrimitive() {
 		Patient oldValue = new Patient();
 		oldValue.setActive(true);
 		oldValue.getActiveElement().addExtension("http://foo", new StringType("a value"));
@@ -307,7 +157,7 @@ public class FhirPatchR4Test {
 
 
 	@Test
-	public void testGeneratePatch_AddExtensionOnComposite() {
+	public void testAddExtensionOnComposite() {
 		Patient oldValue = new Patient();
 		oldValue.addName().setFamily("Family");
 
@@ -331,7 +181,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_RemoveExtensionOnComposite() {
+	public void testRemoveExtensionOnComposite() {
 		Patient oldValue = new Patient();
 		oldValue.addName().setFamily("Family");
 		oldValue.getNameFirstRep().addExtension("http://foo", new StringType("a value"));
@@ -351,7 +201,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_ModifyExtensionOnComposite() {
+	public void testModifyExtensionOnComposite() {
 		Patient oldValue = new Patient();
 		oldValue.addName().setFamily("Family");
 		oldValue.getNameFirstRep().addExtension("http://foo", new StringType("a value"));
@@ -373,7 +223,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_ModifyId() {
+	public void testModifyId() {
 		Patient oldValue = new Patient();
 		oldValue.setId("http://foo/Patient/123/_history/2");
 		oldValue.getMeta().setVersionId("2");
@@ -400,7 +250,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_ModifyId_OnlyVersionDifferent() {
+	public void testModifyId_OnlyVersionDifferent() {
 		Patient oldValue = new Patient();
 		oldValue.setId("http://foo/Patient/123/_history/2");
 		oldValue.getMeta().setVersionId("2");
@@ -424,7 +274,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_ModifyNarrative() {
+	public void testModifyNarrative() {
 		Patient oldValue = new Patient();
 		oldValue.getText().getDiv().setValue("<div>123</div>");
 		oldValue.addName().setFamily("Family");
@@ -446,7 +296,7 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_InsertIdentifier() {
+	public void testInsertIdentifier() {
 		Patient oldValue = new Patient();
 		oldValue.addIdentifier().setSystem("system-0").setValue("value-0");
 
@@ -470,7 +320,95 @@ public class FhirPatchR4Test {
 	}
 
 	@Test
-	public void testGeneratePatch_DeleteIdentifier() {
+	public void testIgnoreElementComposite_Resource() {
+		Patient oldValue = new Patient();
+		oldValue.setActive(true);
+		oldValue.getMeta().setSource("123");
+
+		Patient newValue = new Patient();
+		newValue.setActive(false);
+		newValue.getMeta().setSource("456");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		svc.addIgnorePath("Patient.meta");
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.active", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("false", extractPartValuePrimitive(diff, 0, "operation", "value"));
+	}
+
+	@Test
+	public void testIgnoreElementComposite_Star() {
+		Patient oldValue = new Patient();
+		oldValue.setActive(true);
+		oldValue.getMeta().setSource("123");
+
+		Patient newValue = new Patient();
+		newValue.setActive(false);
+		newValue.getMeta().setSource("456");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		svc.addIgnorePath("*.meta");
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.active", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("false", extractPartValuePrimitive(diff, 0, "operation", "value"));
+	}
+
+	@Test
+	public void testIgnoreElementPrimitive() {
+		Patient oldValue = new Patient();
+		oldValue.setActive(true);
+		oldValue.getMeta().setSource("123");
+
+		Patient newValue = new Patient();
+		newValue.setActive(false);
+		newValue.getMeta().setSource("456");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		svc.addIgnorePath("Patient.meta.source");
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.active", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("false", extractPartValuePrimitive(diff, 0, "operation", "value"));
+	}
+
+	@Test
+	public void testIgnoreId() {
+		Patient oldValue = new Patient();
+		oldValue.setId("1");
+		oldValue.setActive(true);
+
+		Patient newValue = new Patient();
+		newValue.setId("2");
+		newValue.setActive(false);
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		svc.addIgnorePath("*.id");
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertEquals(1, diff.getParameter().size());
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.active", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("false", extractPartValuePrimitive(diff, 0, "operation", "value"));
+	}
+
+	@Test
+	public void testDeleteIdentifier() {
 		Patient oldValue = new Patient();
 		oldValue.addIdentifier().setSystem("system-0").setValue("value-0");
 		oldValue.addIdentifier().setSystem("system-1").setValue("value-1");
@@ -501,22 +439,5 @@ public class FhirPatchR4Test {
 		assertEquals(expected, actual);
 	}
 
-	public static String extractPartValuePrimitive(Parameters theDiff, int theIndex, String theParameterName, String thePartName) {
-		Parameters.ParametersParameterComponent component = theDiff.getParameter().stream().filter(t -> t.getName().equals(theParameterName)).collect(Collectors.toList()).get(theIndex);
-		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		return ((IPrimitiveType) part.getValue()).getValueAsString();
-	}
-
-	public static <T extends IBase> T extractPartValue(Parameters theDiff, int theIndex, String theParameterName, String thePartName, Class<T> theExpectedType) {
-		Parameters.ParametersParameterComponent component = theDiff.getParameter().stream().filter(t -> t.getName().equals(theParameterName)).collect(Collectors.toList()).get(theIndex);
-		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(() -> new IllegalArgumentException());
-
-		if (IBaseResource.class.isAssignableFrom(theExpectedType)) {
-			return (T) part.getResource();
-		} else {
-			assert theExpectedType.isAssignableFrom(part.getValue().getClass());
-			return (T) part.getValue();
-		}
-	}
 
 }

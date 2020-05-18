@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -20,9 +21,12 @@ import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -31,9 +35,28 @@ public class FhirPatch {
 
 	private final FhirContext myContext;
 	private boolean myIncludePreviousValueInDiff;
+	private Set<EncodeContextPath> myIgnorePaths = Collections.emptySet();
 
 	public FhirPatch(FhirContext theContext) {
 		myContext = theContext;
+	}
+
+	/**
+	 * Adds a path element that will not be included in generated diffs. Values can take the form
+	 * <code>ResourceName.fieldName.fieldName</code> and wildcards are supported, such
+	 * as <code>*.meta</code>.
+	 */
+	public void addIgnorePath(String theIgnorePath) {
+		Validate.notBlank(theIgnorePath, "theIgnorePath must not be null or empty");
+
+		if (myIgnorePaths.isEmpty()) {
+			myIgnorePaths = new HashSet<>();
+		}
+		myIgnorePaths.add(new EncodeContextPath(theIgnorePath));
+	}
+
+	public void setIncludePreviousValueInDiff(boolean theIncludePreviousValueInDiff) {
+		myIncludePreviousValueInDiff = theIncludePreviousValueInDiff;
 	}
 
 	public void apply(IBaseResource theResource, IBaseResource thePatch) {
@@ -202,8 +225,7 @@ public class FhirPatch {
 
 	}
 
-
-	public void doDelete(IBaseResource theResource, String thePath) {
+	private void doDelete(IBaseResource theResource, String thePath) {
 		List<IBase> paths = myContext.newFhirPath().evaluate(theResource, thePath, IBase.class);
 		for (IBase next : paths) {
 			myContext.newTerser().visit(next, new IModelVisitor2() {
@@ -245,13 +267,24 @@ public class FhirPatch {
 			BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theOldValue).getBaseDefinition();
 			String path = def.getName();
 
-			compare(retVal, def, path, path, theOldValue, theNewValue);
+			EncodeContextPath contextPath = new EncodeContextPath();
+			contextPath.pushPath(path, true);
 
+			compare(retVal, contextPath, def, path, path, theOldValue, theNewValue);
+
+			contextPath.popPath();
+			assert contextPath.getPath().isEmpty();
 		}
+
 		return retVal;
 	}
 
-	public void compare(IBaseParameters theDiff, BaseRuntimeElementDefinition<?> theDef, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField) {
+	private void compare(IBaseParameters theDiff, EncodeContextPath theSourceEncodeContext, BaseRuntimeElementDefinition<?> theDef, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField) {
+
+		boolean pathIsIgnored = pathIsIgnored(theSourceEncodeContext);
+		if (pathIsIgnored) {
+			return;
+		}
 
 		BaseRuntimeElementDefinition<?> sourceDef = myContext.getElementDefinition(theOldField.getClass());
 		BaseRuntimeElementDefinition<?> targetDef = myContext.getElementDefinition(theNewField.getClass());
@@ -260,7 +293,6 @@ public class FhirPatch {
 			ParametersUtil.addPartCode(myContext, operation, "type", "replace");
 			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath);
 			addValueToDiff(operation, theOldField, theNewField);
-			ParametersUtil.addPart(myContext, operation, "value", theNewField);
 		} else {
 			if (theOldField instanceof IPrimitiveType) {
 				IPrimitiveType<?> oldPrimitive = (IPrimitiveType<?>) theOldField;
@@ -277,14 +309,71 @@ public class FhirPatch {
 
 			List<BaseRuntimeChildDefinition> children = theDef.getChildren();
 			for (BaseRuntimeChildDefinition nextChild : children) {
-				compareField(theDiff, theSourcePath, theTargetPath, theOldField, theNewField, nextChild);
+				compareField(theDiff, theSourceEncodeContext, theSourcePath, theTargetPath, theOldField, theNewField, nextChild);
 			}
 
 		}
 
 	}
 
-	public void addValueToDiff(IBase theOperationPart, IBase theOldValue, IBase theNewValue) {
+	private void compareField(IBaseParameters theDiff, EncodeContextPath theSourceEncodePath, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField, BaseRuntimeChildDefinition theChildDef) {
+		String elementName = theChildDef.getElementName();
+		boolean repeatable = theChildDef.getMax() != 1;
+		theSourceEncodePath.pushPath(elementName, false);
+		if (pathIsIgnored(theSourceEncodePath)) {
+			theSourceEncodePath.popPath();
+			return;
+		}
+
+		List<? extends IBase> sourceValues = theChildDef.getAccessor().getValues(theOldField);
+		List<? extends IBase> targetValues = theChildDef.getAccessor().getValues(theNewField);
+
+		int sourceIndex = 0;
+		int targetIndex = 0;
+		while (sourceIndex < sourceValues.size() && targetIndex < targetValues.size()) {
+
+			IBase sourceChildField = sourceValues.get(sourceIndex);
+			Validate.notNull(sourceChildField); // not expected to happen, but just in case
+			BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(sourceChildField.getClass());
+			IBase targetChildField = targetValues.get(targetIndex);
+			Validate.notNull(targetChildField); // not expected to happen, but just in case
+			String sourcePath = theSourcePath + "." + elementName + (repeatable ? "[" + sourceIndex + "]" : "");
+			String targetPath = theSourcePath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : "");
+
+			compare(theDiff, theSourceEncodePath, def, sourcePath, targetPath, sourceChildField, targetChildField);
+
+			sourceIndex++;
+			targetIndex++;
+		}
+
+		// Find newly inserted items
+		while (targetIndex < targetValues.size()) {
+			String path = theTargetPath + "." + elementName;
+
+
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
+			ParametersUtil.addPartCode(myContext, operation, "type", "insert");
+			ParametersUtil.addPartString(myContext, operation, "path", path);
+			ParametersUtil.addPartInteger(myContext, operation, "index", targetIndex);
+			ParametersUtil.addPart(myContext, operation, "value", targetValues.get(targetIndex));
+
+			targetIndex++;
+		}
+
+		// Find deleted items
+		while (sourceIndex < sourceValues.size()) {
+			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
+			ParametersUtil.addPartCode(myContext, operation, "type", "delete");
+			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : ""));
+
+			sourceIndex++;
+			targetIndex++;
+		}
+
+		theSourceEncodePath.popPath();
+	}
+
+	private void addValueToDiff(IBase theOperationPart, IBase theOldValue, IBase theNewValue) {
 
 		if (myIncludePreviousValueInDiff) {
 			IBase oldValue = massageValueForDiff(theOldValue);
@@ -295,7 +384,18 @@ public class FhirPatch {
 		ParametersUtil.addPart(myContext, theOperationPart, "value", newValue);
 	}
 
-	public IBase massageValueForDiff(IBase theNewValue) {
+	private boolean pathIsIgnored(EncodeContextPath theSourceEncodeContext) {
+		boolean pathIsIgnored = false;
+		for (EncodeContextPath next : myIgnorePaths) {
+			if (theSourceEncodeContext.startsWith(next, false)) {
+				pathIsIgnored = true;
+				break;
+			}
+		}
+		return pathIsIgnored;
+	}
+
+	private IBase massageValueForDiff(IBase theNewValue) {
 		// XHTML content is dealt with by putting it in a string
 		if (theNewValue instanceof XhtmlNode) {
 			String xhtmlString = ((XhtmlNode) theNewValue).getValueAsString();
@@ -316,56 +416,5 @@ public class FhirPatch {
 			return ((IIdType) theOldPrimitive).getIdPart();
 		}
 		return theOldPrimitive.getValueAsString();
-	}
-
-	public void compareField(IBaseParameters theDiff, String theSourcePath, String theTargetPath, IBase theOldField, IBase theNewField, BaseRuntimeChildDefinition theChildDef) {
-		String elementName = theChildDef.getElementName();
-		boolean repeatable = theChildDef.getMax() != 1;
-
-		List<? extends IBase> sourceValues = theChildDef.getAccessor().getValues(theOldField);
-		List<? extends IBase> targetValues = theChildDef.getAccessor().getValues(theNewField);
-
-		int sourceIndex = 0;
-		int targetIndex = 0;
-		while (sourceIndex < sourceValues.size() && targetIndex < targetValues.size()) {
-
-			IBase sourceChildField = sourceValues.get(sourceIndex);
-			Validate.notNull(sourceChildField); // not expected to happen, but just in case
-			BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(sourceChildField.getClass());
-			IBase targetChildField = targetValues.get(targetIndex);
-			Validate.notNull(targetChildField); // not expected to happen, but just in case
-			String sourcePath = theSourcePath + "." + elementName + (repeatable ? "[" + sourceIndex + "]" : "");
-			String targetPath = theSourcePath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : "");
-
-			compare(theDiff, def, sourcePath, targetPath, sourceChildField, targetChildField);
-
-			sourceIndex++;
-			targetIndex++;
-		}
-
-		// Find newly inserted items
-		while (targetIndex < targetValues.size()) {
-			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-			ParametersUtil.addPartCode(myContext, operation, "type", "insert");
-			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath + "." + elementName);
-			ParametersUtil.addPartInteger(myContext, operation, "index", targetIndex);
-			ParametersUtil.addPart(myContext, operation, "value", targetValues.get(targetIndex));
-
-			targetIndex++;
-		}
-
-		// Find deleted items
-		while (sourceIndex < sourceValues.size()) {
-			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-			ParametersUtil.addPartCode(myContext, operation, "type", "delete");
-			ParametersUtil.addPartString(myContext, operation, "path", theTargetPath + "." + elementName + (repeatable ? "[" + targetIndex + "]" : ""));
-
-			sourceIndex++;
-			targetIndex++;
-		}
-	}
-
-	public void setIncludePreviousValueInDiff(boolean theIncludePreviousValueInDiff) {
-		myIncludePreviousValueInDiff = theIncludePreviousValueInDiff;
 	}
 }

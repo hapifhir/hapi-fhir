@@ -56,4 +56,5 @@ public class ProviderConstants {
 
 	public static final String DIFF_FROM_PARAMETER = "from";
 	public static final String DIFF_TO_PARAMETER = "to";
+	public static final String DIFF_INCLUDE_META_PARAMETER = "includeMeta";
 }
