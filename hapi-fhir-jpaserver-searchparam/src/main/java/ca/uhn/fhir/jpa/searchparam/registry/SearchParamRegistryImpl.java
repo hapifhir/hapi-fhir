@@ -248,11 +248,14 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 			StopWatch sw = new StopWatch();
 
 			Map<String, Map<String, RuntimeSearchParam>> searchParams = new HashMap<>();
-			for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : getBuiltInSearchParams().entrySet()) {
+			Set<Map.Entry<String, Map<String, RuntimeSearchParam>>> builtInSps = getBuiltInSearchParams().entrySet();
+			for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : builtInSps) {
 				for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
 					String nextResourceName = nextBuiltInEntry.getKey();
 					getSearchParamMap(searchParams, nextResourceName).put(nextParam.getName(), nextParam);
 				}
+
+				ourLog.trace("Have {} built-in SPs for: {}", nextBuiltInEntry.getValue().size(), nextBuiltInEntry.getKey());
 			}
 
 			SearchParameterMap params = new SearchParameterMap();

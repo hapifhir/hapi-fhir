@@ -120,13 +120,13 @@ public class FhirPatch {
 				if ("move".equals(type)) {
 
 					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
-					if (removeIndex >= existingValues.size()) {
+					if (removeIndex == null || removeIndex >= existingValues.size()) {
 						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
 						throw new InvalidRequestException(msg);
 					}
 					IBase newValue = existingValues.remove(removeIndex.intValue());
 
-					if (insertIndex > existingValues.size()) {
+					if (insertIndex == null || insertIndex > existingValues.size()) {
 						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
 						throw new InvalidRequestException(msg);
 					}
@@ -180,7 +180,7 @@ public class FhirPatch {
 				if ("insert".equals(type)) {
 
 					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
-					if (insertIndex > existingValues.size()) {
+					if (insertIndex == null || insertIndex > existingValues.size()) {
 						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
 						throw new InvalidRequestException(msg);
 					}

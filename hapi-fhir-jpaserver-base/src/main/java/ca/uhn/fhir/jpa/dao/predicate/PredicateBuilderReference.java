@@ -100,6 +100,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -685,9 +686,10 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 							}
 						}
 
-
 					} else {
-						throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
+						String validNames = new TreeSet<>(mySearchParamRegistry.getActiveSearchParams(theResourceName).keySet()).toString();
+						String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
+						throw new InvalidRequestException(msg);
 					}
 				}
 				break;
