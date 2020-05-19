@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * #L%
  */
 
-public class ChannelConsumerSettings extends BaseChannelSettings {
+public class ChannelProducerSettings extends BaseChannelSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
 
 	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
@@ -28,7 +28,7 @@ public class ChannelConsumerSettings extends BaseChannelSettings {
 	/**
 	 * Constructor
 	 */
-	public ChannelConsumerSettings() {
+	public ChannelProducerSettings() {
 		super();
 	}
 
@@ -36,7 +36,7 @@ public class ChannelConsumerSettings extends BaseChannelSettings {
 		return myConcurrentConsumers;
 	}
 
-	public ChannelConsumerSettings setConcurrentConsumers(int theConcurrentConsumers) {
+	public ChannelProducerSettings setConcurrentConsumers(int theConcurrentConsumers) {
 		myConcurrentConsumers = theConcurrentConsumers;
 		return this;
 	}

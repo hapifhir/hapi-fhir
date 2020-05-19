@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  */
 
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.util.StopWatch;
@@ -53,17 +55,18 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 	}
 
 	@Override
-	public IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig) {
-		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
+	public IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings) {
+		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
 	@Override
-	public IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig) {
-		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
+	public IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings) {
+		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
-	private LinkedBlockingChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers) {
-		String channelName = myChannelNamer.getChannelName(theChannelName);
+	private LinkedBlockingChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers, IChannelSettings theChannelSettings) {
+		final String channelName = myChannelNamer.getChannelName(theChannelName, theChannelSettings);
+
 		return myChannels.computeIfAbsent(channelName, t -> {
 
 			String threadNamingPattern = channelName + "-%d";

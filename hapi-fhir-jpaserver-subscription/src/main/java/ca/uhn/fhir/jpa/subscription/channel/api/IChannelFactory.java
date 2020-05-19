@@ -36,14 +36,9 @@ public interface IChannelFactory {
 	 *
 	 * @param theChannelName The actual underlying queue name
 	 * @param theMessageType The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
-	 * @param theConfig      Contains the configuration for subscribers. Note that this parameter is provided for
-	 *                       both {@link #getOrCreateReceiver} and
-	 *                       {@link #getOrCreateProducer(String, Class, ChannelConsumerSettings)}
-	 *                       even though this object is used to configure the sender only. We do this because the factory
-	 *                       may want to create a single object to be used for both the sender and receiver, so this allows
-	 *                       the config details to be known regardless of which method is returned first.
+	 * @param theChannelSettings      Contains the configuration for subscribers.
 	 */
-	IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig);
+	IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings);
 
 	/**
 	 * Create a channel that is used to send messages to the queue.
@@ -55,13 +50,8 @@ public interface IChannelFactory {
 	 *
 	 * @param theChannelName The actual underlying queue name
 	 * @param theMessageType The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
-	 * @param theConfig      Contains the configuration for subscribers. Note that this parameter is provided for
-	 *                       both {@link #getOrCreateReceiver} and
-	 *                       {@link #getOrCreateProducer(String, Class, ChannelConsumerSettings)}
-	 *                       even though this object is used to configure the sender only. We do this because the factory
-	 *                       may want to create a single object to be used for both the sender and receiver, so this allows
-	 *                       the config details to be known regardless of which method is returned first.
+	 * @param theChannelSettings Contains the configuration for senders.
 	 */
-	IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig);
+	IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
 
 }
