@@ -17,30 +17,18 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static org.awaitility.Awaitility.await;
-import static org.awaitility.Awaitility.waitAtMost;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -97,7 +85,7 @@ public class ResponseSizeCapturingInterceptorTest {
 		resource = ourServerRule.getFhirClient().read().resource(Patient.class).withId(id).execute();
 		assertEquals(true, resource.getActive());
 
-		verify(myConsumer, timeout(Duration.ofSeconds(10)).times(1)).accept(myResultCaptor.capture());
+		verify(myConsumer, timeout(10 * MILLIS_PER_SECOND).times(1)).accept(myResultCaptor.capture());
 		assertEquals(100, myResultCaptor.getValue().getWrittenChars());
 	}
 
