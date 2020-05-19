@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.search.lastn.IndexConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.*;
@@ -35,12 +34,18 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		}
 
 		theSearchParameterMap.setLastN(true);
-		if (theSearchParameterMap.getSort() == null) {
-			SortSpec effectiveDtm = new SortSpec("date").setOrder(SortOrderEnum.DESC);
-			// TODO: Should probably remove these constants, maybe move this logic to the version-specific classes.
-			SortSpec observationCode = new SortSpec(IndexConstants.CODE_SEARCH_PARAM).setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
-			theSearchParameterMap.setSort(new SortSpec(IndexConstants.SUBJECT_SEARCH_PARAM).setOrder(SortOrderEnum.ASC).setChain(observationCode));
+		SortSpec effectiveDtm = new SortSpec(getEffectiveParamName()).setOrder(SortOrderEnum.DESC);
+		SortSpec observationCode = new SortSpec(getCodeParamName()).setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
+		if(theSearchParameterMap.containsKey(getSubjectParamName()) || theSearchParameterMap.containsKey(getPatientParamName())) {
+			theSearchParameterMap.setSort(new SortSpec(getSubjectParamName()).setOrder(SortOrderEnum.ASC).setChain(observationCode));
+		} else {
+			theSearchParameterMap.setSort(observationCode);
 		}
 	}
+
+	abstract protected String getEffectiveParamName();
+	abstract protected String getCodeParamName();
+	abstract protected String getSubjectParamName();
+	abstract protected String getPatientParamName();
 
 }

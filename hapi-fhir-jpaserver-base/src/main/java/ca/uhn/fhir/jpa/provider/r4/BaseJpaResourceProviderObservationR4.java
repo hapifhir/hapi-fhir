@@ -69,26 +69,23 @@ public class BaseJpaResourceProviderObservationR4 extends JpaResourceProviderR4<
 
 		@Description(shortDefinition="The maximum number of observations to return for each observation code")
 		@OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
-			IPrimitiveType<Integer> theMax,
-
-		@Sort
-			SortSpec theSort
+			IPrimitiveType<Integer> theMax
 
 		) {
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add("category", theCategory);
-			paramMap.add("code", theCode);
-			paramMap.add("patient", thePatient);
-			paramMap.add("subject", theSubject);
+			paramMap.add(Observation.SP_CATEGORY, theCategory);
+			paramMap.add(Observation.SP_CODE, theCode);
+			if (thePatient != null) {
+				paramMap.add(Observation.SP_PATIENT, thePatient);
+			}
+			if (theSubject != null) {
+				paramMap.add(Observation.SP_SUBJECT, theSubject);
+			}
 			paramMap.setLastNMax(theMax.getValue());
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());
-			}
-
-			if (theSort != null) {
-				paramMap.setSort(theSort);
 			}
 
 			return ((IFhirResourceDaoObservation<Observation>) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);

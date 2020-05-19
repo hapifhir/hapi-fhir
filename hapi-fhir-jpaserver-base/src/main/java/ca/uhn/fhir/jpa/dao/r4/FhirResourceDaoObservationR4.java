@@ -58,6 +58,26 @@ public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDaoObserva
 	}
 
 	@Override
+	protected String getEffectiveParamName() {
+		return Observation.SP_DATE;
+	}
+
+	@Override
+	protected String getCodeParamName() {
+		return Observation.SP_CODE;
+	}
+
+	@Override
+	protected String getSubjectParamName() {
+		return Observation.SP_SUBJECT;
+	}
+
+	@Override
+	protected String getPatientParamName() {
+		return Observation.SP_PATIENT;
+	}
+
+	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource	theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);

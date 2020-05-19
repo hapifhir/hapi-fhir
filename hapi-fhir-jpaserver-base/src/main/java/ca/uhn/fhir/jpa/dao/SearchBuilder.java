@@ -317,7 +317,7 @@ public class SearchBuilder implements ISearchBuilder {
 				} else {
 					throw new InvalidRequestException("Max parameter is required for $lastn operation");
 				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode, theMaximumResults);
+				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
 				for (String lastnResourceId : lastnResourceIds) {
 					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
 				}
@@ -422,52 +422,6 @@ public class SearchBuilder implements ISearchBuilder {
 			searchForIdsWithAndOr(myParams, theRequest);
 		}
 
-		/*
-		 * Fulltext or lastn search
-		 */
-/*		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
-			List<ResourcePersistentId> pids = new ArrayList<>();
-			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null) {
-					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-					}
-				}
-
-				if (myParams.getEverythingMode() != null) {
-					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-				} else {
-					pids = myFulltextSearchSvc.search(myResourceName, myParams);
-				}
-			} else if (myParams.isLastN()) {
-				if (myIElasticsearchSvc == null) {
-					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-					}
-				}
-				Integer myMaxObservationsPerCode = null;
-				if(myParams.getLastNMax() != null) {
-					myMaxObservationsPerCode = myParams.getLastNMax();
-				} else {
-					throw new InvalidRequestException("Max parameter is required for $lastn operation");
-				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myMaxObservationsPerCode);
-				for (String lastnResourceId : lastnResourceIds) {
-					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
-				}
-//				pids = normalizeIdListForLastNInClause(lastnResourceIds);
-			}
-			if (pids.isEmpty()) {
-				// Will never match
-				pids = Collections.singletonList(new ResourcePersistentId(-1L));
-			}
-
-			myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(pids)));
-
-		}
-*/
 		// Add PID list predicate for full text search and/or lastn operation
 		if (thePidList != null && thePidList.size() > 0) {
 			myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(thePidList));

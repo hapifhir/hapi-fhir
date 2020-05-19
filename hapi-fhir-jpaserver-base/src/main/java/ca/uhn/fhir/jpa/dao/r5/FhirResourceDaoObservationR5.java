@@ -30,8 +30,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +48,26 @@ public class FhirResourceDaoObservationR5 extends BaseHapiFhirResourceDaoObserva
 		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
 
 		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails);
+	}
+
+	@Override
+	protected String getEffectiveParamName() {
+		return Observation.SP_DATE;
+	}
+
+	@Override
+	protected String getCodeParamName() {
+		return Observation.SP_CODE;
+	}
+
+	@Override
+	protected String getSubjectParamName() {
+		return Observation.SP_SUBJECT;
+	}
+
+	@Override
+	protected String getPatientParamName() {
+		return Observation.SP_PATIENT;
 	}
 
 	@Override

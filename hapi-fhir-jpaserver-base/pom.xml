@@ -585,6 +585,11 @@
 			<version>1.0-SNAPSHOT</version>
 			<classifier>shaded6</classifier>
 		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.9</version>
+		</dependency>
 
     </dependencies>
 

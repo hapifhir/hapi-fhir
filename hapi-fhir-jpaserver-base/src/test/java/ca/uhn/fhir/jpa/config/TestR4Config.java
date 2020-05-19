@@ -104,12 +104,12 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setDriver(new org.h2.Driver());
 //		retVal.setDriver(new org.postgresql.Driver());
 		retVal.setUrl("jdbc:h2:mem:testdb_r4");
-//		retVal.setUrl("jdbc:postgresql://localhost:5432/hapi");
+//		retVal.setUrl("jdbc:postgresql://localhost:5432/cdr");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
-//		retVal.setUsername("hapi");
+//		retVal.setUsername("cdr");
 		retVal.setPassword("");
-//		retVal.setPassword("HapiFHIR");
+//		retVal.setPassword("SmileCDR");
 		retVal.setMaxTotal(ourMaxThreads);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -48,13 +50,18 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
+	public static final String OBSERVATION_INDEX = "observation_index";
+	public static final String CODE_INDEX = "code_index";
+	public static final String OBSERVATION_DOCUMENT_TYPE = "ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedSearchParamLastNEntity";
+	public static final String CODE_DOCUMENT_TYPE = "ca.uhn.fhir.jpa.dao.lastn.entity.ObservationIndexedCodeCodeableConceptEntity";
+
 	private final RestHighLevelClient myRestHighLevelClient;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final String GROUP_BY_SUBJECT = "group_by_subject";
+	private final String GROUP_BY_SYSTEM = "group_by_system";
 	private final String GROUP_BY_CODE = "group_by_code";
-	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
 
 
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
@@ -69,7 +76,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private void createObservationIndexIfMissing() throws IOException {
-		if (indexExists(IndexConstants.OBSERVATION_INDEX)) {
+		if (indexExists(OBSERVATION_INDEX)) {
 			return;
 		}
 		String observationMapping = "{\n" +
@@ -124,14 +131,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			"    }\n" +
 			"  }\n" +
 			"}\n";
-		if (!createIndex(IndexConstants.OBSERVATION_INDEX, observationMapping)) {
+		if (!createIndex(OBSERVATION_INDEX, observationMapping)) {
 			throw new RuntimeException("Failed to create observation index");
 		}
 
 	}
 
 	private void createCodeIndexIfMissing() throws IOException {
-		if (indexExists(IndexConstants.CODE_INDEX)) {
+		if (indexExists(CODE_INDEX)) {
 			return;
 		}
 		String codeMapping = "{\n" +
@@ -161,7 +168,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			"    }\n" +
 			"  }\n" +
 			"}\n";
-		if (!createIndex(IndexConstants.CODE_INDEX, codeMapping)) {
+		if (!createIndex(CODE_INDEX, codeMapping)) {
 			throw new RuntimeException("Failed to create code index");
 		}
 
@@ -199,16 +206,18 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@Override
-	// TODO: Should eliminate dependency on SearchParameterMap in API.
-	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode, Integer theMaxResultsToFetch) {
+	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch) {
+		String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
 		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
 		try {
-			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theMaxObservationsPerCode, topHitsInclude);
+			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theFhirContext, topHitsInclude);
 			List<String> observationIds = new ArrayList<>();
 			for (SearchResponse response : responses) {
-//				observationIds.addAll(buildObservationIdList(response));
-				Integer maxResultsToAdd = theMaxResultsToFetch - observationIds.size();
-				observationIds.addAll(buildObservationList(response, t -> t.getIdentifier(), theSearchParameterMap, maxResultsToAdd));
+				Integer maxResultsToAdd = null;
+				if (theMaxResultsToFetch != null) {
+					maxResultsToAdd = theMaxResultsToFetch - observationIds.size();
+				}
+				observationIds.addAll(buildObservationList(response, ObservationJson::getIdentifier, theSearchParameterMap, theFhirContext, maxResultsToAdd));
 			}
 			return observationIds;
 		} catch (IOException theE) {
@@ -216,23 +225,27 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 	}
 
-	private List<SearchResponse> buildAndExecuteSearch(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode,
+	private List<SearchResponse> buildAndExecuteSearch(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext,
 																		String[] topHitsInclude) {
 		List<SearchResponse> responses = new ArrayList<>();
-		if (theSearchParameterMap.containsKey(IndexConstants.PATIENT_SEARCH_PARAM) || theSearchParameterMap.containsKey(IndexConstants.SUBJECT_SEARCH_PARAM)) {
+		String patientParamName = LastNParameterHelper.getPatientParamName(theFhirContext);
+		String subjectParamName = LastNParameterHelper.getSubjectParamName(theFhirContext);
+		if (theSearchParameterMap.containsKey(patientParamName)
+			|| theSearchParameterMap.containsKey(subjectParamName)) {
 			ArrayList<String> subjectReferenceCriteria = new ArrayList<>();
 			List<List<IQueryParameterType>> patientParams = new ArrayList<>();
-			if (theSearchParameterMap.get(IndexConstants.PATIENT_SEARCH_PARAM) != null) {
-				patientParams.addAll(theSearchParameterMap.get(IndexConstants.PATIENT_SEARCH_PARAM));
+			if (theSearchParameterMap.get(patientParamName) != null) {
+				patientParams.addAll(theSearchParameterMap.get(patientParamName));
 			}
-			if (theSearchParameterMap.get(IndexConstants.SUBJECT_SEARCH_PARAM) != null) {
-				patientParams.addAll(theSearchParameterMap.get(IndexConstants.SUBJECT_SEARCH_PARAM));
+			if (theSearchParameterMap.get(subjectParamName) != null) {
+				patientParams.addAll(theSearchParameterMap.get(subjectParamName));
 			}
 			for (List<? extends IQueryParameterType> nextSubjectList : patientParams) {
 				subjectReferenceCriteria.addAll(getReferenceValues(nextSubjectList));
 			}
 			for (String subject : subjectReferenceCriteria) {
-				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, createCompositeAggregationBuilder(theMaxObservationsPerCode, topHitsInclude));
+				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, theFhirContext,
+					createCompositeAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
 				try {
 					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 					responses.add(lastnResponse);
@@ -241,7 +254,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				}
 			}
 		} else {
-			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, createObservationCodeAggregationBuilder(theMaxObservationsPerCode, topHitsInclude));
+			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, theFhirContext, createObservationCodeAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
 			try {
 				SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 				responses.add(lastnResponse);
@@ -254,13 +267,12 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@VisibleForTesting
-	// TODO: Should eliminate dependency on SearchParameterMap in API.
-	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, Integer theMaxObservationsPerCode, Integer theMaxResultsToFetch) {
+	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
 		try {
-			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theMaxObservationsPerCode, null);
+			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theFhirContext, null);
 			List<ObservationJson> observationDocuments = new ArrayList<>();
 			for (SearchResponse response : responses) {
-				observationDocuments.addAll(buildObservationList(response, t -> t, theSearchParameterMap, theMaxResultsToFetch));
+				observationDocuments.addAll(buildObservationList(response, t -> t, theSearchParameterMap, theFhirContext, 100));
 			}
 			return observationDocuments;
 		} catch (IOException theE) {
@@ -269,20 +281,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@VisibleForTesting
-	List<CodeJson> queryAllIndexedObservationCodes(int theMaxResultSetSize) throws IOException {
-		SearchRequest codeSearchRequest = buildObservationCodesSearchRequest(theMaxResultSetSize);
-		SearchResponse codeSearchResponse = executeSearchRequest(codeSearchRequest);
-		return buildCodeResult(codeSearchResponse);
-	}
-
-	private SearchRequest buildObservationCodesSearchRequest(int theMaxResultSetSize) {
-		SearchRequest searchRequest = new SearchRequest(IndexConstants.CODE_INDEX);
+	List<CodeJson> queryAllIndexedObservationCodes() throws IOException {
+		SearchRequest codeSearchRequest = new SearchRequest(CODE_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
 		searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-		searchSourceBuilder.size(theMaxResultSetSize);
-		searchRequest.source(searchSourceBuilder);
-		return searchRequest;
+		searchSourceBuilder.size(1000);
+		codeSearchRequest.source(searchSourceBuilder);
+		SearchResponse codeSearchResponse = executeSearchRequest(codeSearchRequest);
+		return buildCodeResult(codeSearchResponse);
 	}
 
 	private CompositeAggregationBuilder createCompositeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
@@ -297,51 +304,27 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private TermsAggregationBuilder createObservationCodeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		TermsAggregationBuilder observationCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field("codeconceptid");
+		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field("codeconceptcodingcode");
 		// Top Hits Aggregation
-		observationCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits("most_recent_effective")
+		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits("most_recent_effective")
 			.sort("effectivedtm", SortOrder.DESC)
 			.fetchSource(theTopHitsInclude, null).size(theMaxNumberObservationsPerCode));
-		observationCodeAggregationBuilder.size(10000);
-		return observationCodeAggregationBuilder;
+		observationCodeCodeAggregationBuilder.size(10000);
+		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field("codeconceptcodingsystem");
+		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
+		return observationCodeSystemAggregationBuilder;
 	}
 
-	public SearchResponse executeSearchRequest(SearchRequest searchRequest) throws IOException {
+	private SearchResponse executeSearchRequest(SearchRequest searchRequest) throws IOException {
 		return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 	}
 
-	private List<String> buildObservationIdList(SearchResponse theSearchResponse) throws IOException {
-		List<String> theObservationList = new ArrayList<>();
-		for (ParsedComposite.ParsedBucket subjectBucket : getSubjectBuckets(theSearchResponse)) {
-			for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(subjectBucket)) {
-				for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
-					String indexedObservation = lastNMatch.getSourceAsString();
-					ObservationJson observationJson = objectMapper.readValue(indexedObservation, ObservationJson.class);
-					theObservationList.add(observationJson.getIdentifier());
-				}
-			}
-		}
-		return theObservationList;
-	}
-
-	private List<ObservationJson> buildObservationDocumentList(SearchResponse theSearchResponse) throws IOException {
-		List<ObservationJson> theObservationList = new ArrayList<>();
-		for (ParsedComposite.ParsedBucket subjectBucket : getSubjectBuckets(theSearchResponse)) {
-			for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(subjectBucket)) {
-				for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
-					String indexedObservation = lastNMatch.getSourceAsString();
-					ObservationJson observationJson = objectMapper.readValue(indexedObservation, ObservationJson.class);
-					theObservationList.add(observationJson);
-				}
-			}
-		}
-		return theObservationList;
-	}
-
 	private <T> List<T> buildObservationList(SearchResponse theSearchResponse, Function<ObservationJson,T> setValue,
-														  SearchParameterMap theSearchParameterMap, Integer theMaxResultsToFetch) throws IOException {
+														  SearchParameterMap theSearchParameterMap, FhirContext theFhirContext,
+														  Integer theMaxResultsToFetch) throws IOException {
 		List<T> theObservationList = new ArrayList<>();
-		if (theSearchParameterMap.containsKey(IndexConstants.PATIENT_SEARCH_PARAM) || theSearchParameterMap.containsKey(IndexConstants.SUBJECT_SEARCH_PARAM)) {
+		if (theSearchParameterMap.containsKey(LastNParameterHelper.getPatientParamName(theFhirContext))
+			|| theSearchParameterMap.containsKey(LastNParameterHelper.getSubjectParamName(theFhirContext))) {
 			for (ParsedComposite.ParsedBucket subjectBucket : getSubjectBuckets(theSearchResponse)) {
 				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
 					break;
@@ -387,14 +370,23 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private List<? extends Terms.Bucket> getObservationCodeBuckets(SearchResponse theSearchResponse) {
 		Aggregations responseAggregations = theSearchResponse.getAggregations();
-		ParsedTerms aggregatedObservationCodes = responseAggregations.get(GROUP_BY_CODE);
-		return aggregatedObservationCodes.getBuckets();
+		return getObservationCodeBuckets(responseAggregations);
 	}
 
 	private List<? extends Terms.Bucket> getObservationCodeBuckets(ParsedComposite.ParsedBucket theSubjectBucket) {
-		Aggregations observationCodeAggregations = theSubjectBucket.getAggregations();
-		ParsedTerms aggregatedObservationCodes = observationCodeAggregations.get(GROUP_BY_CODE);
-		return aggregatedObservationCodes.getBuckets();
+		Aggregations observationCodeSystemAggregations = theSubjectBucket.getAggregations();
+		return getObservationCodeBuckets(observationCodeSystemAggregations);
+	}
+
+	private List<? extends Terms.Bucket> getObservationCodeBuckets(Aggregations theObservationCodeSystemAggregations) {
+		List<Terms.Bucket> retVal = new ArrayList<>();
+		ParsedTerms aggregatedObservationCodeSystems = theObservationCodeSystemAggregations.get(GROUP_BY_SYSTEM);
+		for(Terms.Bucket observationCodeSystem : aggregatedObservationCodeSystems.getBuckets()) {
+			Aggregations observationCodeCodeAggregations = observationCodeSystem.getAggregations();
+			ParsedTerms aggregatedObservationCodeCodes = observationCodeCodeAggregations.get(GROUP_BY_CODE);
+			retVal.addAll(aggregatedObservationCodeCodes.getBuckets());
+		}
+		return retVal;
 	}
 
 	private SearchHit[] getLastNMatches(Terms.Bucket theObservationCodeBucket) {
@@ -413,17 +405,16 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return codes;
 	}
 
-	private SearchRequest buildObservationsSearchRequest(SearchParameterMap theSearchParameterMap, AggregationBuilder theAggregationBuilder) {
-		SearchRequest searchRequest = new SearchRequest(IndexConstants.OBSERVATION_INDEX);
+	private SearchRequest buildObservationsSearchRequest(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, AggregationBuilder theAggregationBuilder) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
-		if (!searchParamsHaveLastNCriteria(theSearchParameterMap)) {
+		if (!searchParamsHaveLastNCriteria(theSearchParameterMap, theFhirContext)) {
 			searchSourceBuilder.query(QueryBuilders.matchAllQuery());
 		} else {
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-			addSubjectsCriteria(boolQueryBuilder, theSearchParameterMap);
-			addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap);
-			addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap);
+			addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
+			addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 			searchSourceBuilder.query(boolQueryBuilder);
 		}
 		searchSourceBuilder.size(0);
@@ -435,14 +426,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return searchRequest;
 	}
 
-	private SearchRequest buildObservationsSearchRequest(String theSubjectParam, SearchParameterMap theSearchParameterMap, AggregationBuilder theAggregationBuilder) {
-		SearchRequest searchRequest = new SearchRequest(IndexConstants.OBSERVATION_INDEX);
+	private SearchRequest buildObservationsSearchRequest(String theSubjectParam, SearchParameterMap theSearchParameterMap, FhirContext theFhirContext,
+																		  AggregationBuilder theAggregationBuilder) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
 		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 		boolQueryBuilder.must(QueryBuilders.termQuery("subject", theSubjectParam));
-		addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap);
-		addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap);
+		addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
+		addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 		searchSourceBuilder.query(boolQueryBuilder);
 		searchSourceBuilder.size(0);
 
@@ -453,30 +445,12 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return searchRequest;
 	}
 
-	private Boolean searchParamsHaveLastNCriteria(SearchParameterMap theSearchParameterMap) {
+	private Boolean searchParamsHaveLastNCriteria(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
 		return theSearchParameterMap != null &&
-			(theSearchParameterMap.containsKey(IndexConstants.PATIENT_SEARCH_PARAM) || theSearchParameterMap.containsKey(IndexConstants.SUBJECT_SEARCH_PARAM) ||
-				theSearchParameterMap.containsKey(IndexConstants.CATEGORY_SEARCH_PARAM) || theSearchParameterMap.containsKey(IndexConstants.CODE_SEARCH_PARAM));
-	}
-
-	private void addSubjectsCriteria(BoolQueryBuilder theBoolQueryBuilder, SearchParameterMap theSearchParameterMap) {
-		if (theSearchParameterMap.containsKey(IndexConstants.PATIENT_SEARCH_PARAM) || theSearchParameterMap.containsKey(IndexConstants.SUBJECT_SEARCH_PARAM)) {
-			ArrayList<String> subjectReferenceCriteria = new ArrayList<>();
-			List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
-			if (theSearchParameterMap.get(IndexConstants.PATIENT_SEARCH_PARAM) != null) {
-				andOrParams.addAll(theSearchParameterMap.get(IndexConstants.PATIENT_SEARCH_PARAM));
-			}
-			if (theSearchParameterMap.get(IndexConstants.SUBJECT_SEARCH_PARAM) != null) {
-				andOrParams.addAll(theSearchParameterMap.get(IndexConstants.SUBJECT_SEARCH_PARAM));
-			}
-			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-				subjectReferenceCriteria.addAll(getReferenceValues(nextAnd));
-			}
-			if (subjectReferenceCriteria.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("subject", subjectReferenceCriteria));
-			}
-		}
-
+			(theSearchParameterMap.containsKey(LastNParameterHelper.getPatientParamName(theFhirContext))
+				|| theSearchParameterMap.containsKey(LastNParameterHelper.getSubjectParamName(theFhirContext))
+				|| theSearchParameterMap.containsKey(LastNParameterHelper.getCategoryParamName(theFhirContext))
+				|| theSearchParameterMap.containsKey(LastNParameterHelper.getCodeParamName(theFhirContext)));
 	}
 
 	private List<String> getReferenceValues(List<? extends IQueryParameterType> referenceParams) {
@@ -496,13 +470,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return referenceList;
 	}
 
-	private void addCategoriesCriteria(BoolQueryBuilder theBoolQueryBuilder, SearchParameterMap theSearchParameterMap) {
-		if (theSearchParameterMap.containsKey(IndexConstants.CATEGORY_SEARCH_PARAM)) {
+	private void addCategoriesCriteria(BoolQueryBuilder theBoolQueryBuilder, SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
+		String categoryParamName = LastNParameterHelper.getCategoryParamName(theFhirContext);
+		if (theSearchParameterMap.containsKey(categoryParamName)) {
 			ArrayList<String> codeSystemHashList = new ArrayList<>();
 			ArrayList<String> codeOnlyList = new ArrayList<>();
 			ArrayList<String> systemOnlyList = new ArrayList<>();
 			ArrayList<String> textOnlyList = new ArrayList<>();
-			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(IndexConstants.CATEGORY_SEARCH_PARAM);
+			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(categoryParamName);
 			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
 				codeSystemHashList.addAll(getCodingCodeSystemValues(nextAnd));
 				codeOnlyList.addAll(getCodingCodeOnlyValues(nextAnd));
@@ -593,13 +568,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return textOnlyList;
 	}
 
-	private void addObservationCodeCriteria(BoolQueryBuilder theBoolQueryBuilder, SearchParameterMap theSearchParameterMap) {
-		if (theSearchParameterMap.containsKey(IndexConstants.CODE_SEARCH_PARAM)) {
+	private void addObservationCodeCriteria(BoolQueryBuilder theBoolQueryBuilder, SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
+		String codeParamName = LastNParameterHelper.getCodeParamName(theFhirContext);
+		if (theSearchParameterMap.containsKey(codeParamName)) {
 			ArrayList<String> codeSystemHashList = new ArrayList<>();
 			ArrayList<String> codeOnlyList = new ArrayList<>();
 			ArrayList<String> systemOnlyList = new ArrayList<>();
 			ArrayList<String> textOnlyList = new ArrayList<>();
-			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(IndexConstants.CODE_SEARCH_PARAM);
+			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(codeParamName);
 			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
 				codeSystemHashList.addAll(getCodingCodeSystemValues(nextAnd));
 				codeOnlyList.addAll(getCodingCodeOnlyValues(nextAnd));
@@ -634,12 +610,4 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
 	}
 
-/*	public void deleteObservationIndex(String theObservationIdentifier) throws IOException {
-		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(IndexConstants.OBSERVATION_DOCUMENT_TYPE);
-		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theObservationIdentifier));
-		deleteByQueryRequest.setQuery(boolQueryBuilder);
-		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
-	}
- */
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
@@ -67,12 +68,14 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	final String CODEFIRSTCODINGCODE = "test-code";
 	final String CODEFIRSTCODINGDISPLAY = "test-code display";
-	final String CODESECONDCODINGSYSTEM = "http://myalternatecodes.org/fhir/observation-code";
-	final String CODESECONDCODINGCODE = "test-alt-code";
-	final String CODESECONDCODINGDISPLAY = "test-alt-code display";
-	final String CODETHIRDCODINGSYSTEM = "http://mysecondaltcodes.org/fhir/observation-code";
-	final String CODETHIRDCODINGCODE = "test-second-alt-code";
-	final String CODETHIRDCODINGDISPLAY = "test-second-alt-code display";
+//	final String CODESECONDCODINGSYSTEM = "http://myalternatecodes.org/fhir/observation-code";
+//	final String CODESECONDCODINGCODE = "test-alt-code";
+//	final String CODESECONDCODINGDISPLAY = "test-alt-code display";
+//	final String CODETHIRDCODINGSYSTEM = "http://mysecondaltcodes.org/fhir/observation-code";
+//	final String CODETHIRDCODINGCODE = "test-second-alt-code";
+//	final String CODETHIRDCODINGDISPLAY = "test-second-alt-code display";
+
+	final FhirContext myFhirContext = FhirContext.forR4();
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -85,8 +88,8 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 	@After
 	public void after() throws IOException {
-		elasticsearchSvc.deleteAllDocuments(IndexConstants.OBSERVATION_INDEX);
-		elasticsearchSvc.deleteAllDocuments(IndexConstants.CODE_INDEX);
+		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.CODE_INDEX);
 	}
 
 	@Test
@@ -102,14 +105,16 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
 		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
 
+		searchParameterMap.setLastNMax(3);
+
 		// execute Observation ID search
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, 3, 100);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
 
 		assertEquals(1, observationIdsOnly.size());
 		assertEquals(RESOURCEPID, observationIdsOnly.get(0));
 
 		// execute Observation search for all search fields
-		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, 3, 100);
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, myFhirContext);
 
 		validateFullObservationSearch(observations);
 	}
@@ -243,7 +248,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash);
 
 		// Retrieve all Observation codes
-		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodes(1000);
+		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodes();
 		assertEquals(1, codes.size());
 		CodeJson persistedObservationCode = codes.get(0);
 
@@ -331,11 +336,11 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		indexedObservation.setCode(codeableConceptField);
 
 		String observationDocument = ourMapperNonPrettyPrint.writeValueAsString(indexedObservation);
-		assertTrue(elasticsearchSvc.performIndex(IndexConstants.OBSERVATION_INDEX, RESOURCEPID, observationDocument, IndexConstants.OBSERVATION_DOCUMENT_TYPE));
+		assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX, RESOURCEPID, observationDocument, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE));
 
 		CodeJson observationCode = new CodeJson(codeableConceptField, OBSERVATIONSINGLECODEID);
 		String codeDocument = ourMapperNonPrettyPrint.writeValueAsString(observationCode);
-		assertTrue(elasticsearchSvc.performIndex(IndexConstants.CODE_INDEX, OBSERVATIONSINGLECODEID, codeDocument, IndexConstants.CODE_DOCUMENT_TYPE));
+		assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.CODE_INDEX, OBSERVATIONSINGLECODEID, codeDocument, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
 
 		try {
 			Thread.sleep(1000L);
