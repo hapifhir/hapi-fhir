@@ -878,7 +878,7 @@
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>17.0.0</version>
+				<version>19.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -1382,12 +1382,12 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.10</version>
+				<version>42.2.12</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
