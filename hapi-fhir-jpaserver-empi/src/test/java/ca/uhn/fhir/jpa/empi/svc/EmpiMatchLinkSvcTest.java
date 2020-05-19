@@ -399,7 +399,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testPatientThatUndergoesSufficientChangeIsReassignedToNewPerson() {
+	public void testPatientUpdateOverwritesPersonDataOnChanges() {
 		Patient janePatient= createPatientAndUpdateLinks(buildJanePatient());
 		Person janePerson = getPersonFromTarget(janePatient);
 
@@ -416,9 +416,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
 	}
 
-
 	@Test
-	public void testPatientCreateDoesNotOverwritePersonAttributes() {
+	public void testPatientCreateDoesNotOverwritePersonAttributesThatAreInvolvedInLinking() {
 		Patient paul = buildPaulPatient();
 		paul.setGender(Enumerations.AdministrativeGender.MALE);
 		paul = createPatientAndUpdateLinks(paul);
