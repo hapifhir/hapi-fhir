@@ -81,7 +81,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -283,8 +282,81 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
+	private List<TypedQuery<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+															 SearchRuntimeDetails theSearchRuntimeDetails) {
 
-	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
+		List<ResourcePersistentId> pids = new ArrayList<>();
+
+		/*
+		 * Fulltext or lastn search
+		 */
+		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
+			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
+				if (myFulltextSearchSvc == null) {
+					if (myParams.containsKey(Constants.PARAM_TEXT)) {
+						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+					}
+				}
+
+				if (myParams.getEverythingMode() != null) {
+					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+				} else {
+					pids = myFulltextSearchSvc.search(myResourceName, myParams);
+				}
+			} else if (myParams.isLastN()) {
+				if (myIElasticsearchSvc == null) {
+					if (myParams.isLastN()) {
+						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+					}
+				}
+				if(myParams.getLastNMax() == null) {
+					throw new InvalidRequestException("Max parameter is required for $lastn operation");
+				}
+				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
+				for (String lastnResourceId : lastnResourceIds) {
+					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
+				}
+			}
+			if (theSearchRuntimeDetails != null) {
+				theSearchRuntimeDetails.setFoundIndexMatchesCount(pids.size());
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(SearchRuntimeDetails.class, theSearchRuntimeDetails);
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
+			}
+
+			if (pids.isEmpty()) {
+				// Will never match
+				pids = Collections.singletonList(new ResourcePersistentId(-1L));
+			}
+
+		}
+
+		ArrayList<TypedQuery<Long>> myQueries = new ArrayList<>();
+
+		if (!pids.isEmpty()) {
+			if (theMaximumResults != null && pids.size() > theMaximumResults) {
+				pids.subList(0,theMaximumResults-1);
+			}
+			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t-> doCreateChunkedQueries(t, sort, theCount, theRequest, myQueries));
+		} else {
+			myQueries.add(createChunkedQuery(sort,theMaximumResults, theCount, theRequest, null));
+		}
+
+		return myQueries;
+	}
+
+	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
+		if(thePids.size() < getMaximumPageSize()) {
+			normalizeIdListForLastNInClause(thePids);
+		}
+		theQueries.add(createChunkedQuery(sort, thePids.size(), theCount, theRequest, thePids));
+	}
+
+	private TypedQuery<Long> createChunkedQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		/*
 		 * Sort
 		 *
@@ -332,30 +404,9 @@ public class SearchBuilder implements ISearchBuilder {
 			searchForIdsWithAndOr(myParams, theRequest);
 		}
 
-		/*
-		 * Fulltext search
-		 */
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-			if (myFulltextSearchSvc == null) {
-				if (myParams.containsKey(Constants.PARAM_TEXT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-				}
-			}
-
-			List<ResourcePersistentId> pids;
-			if (myParams.getEverythingMode() != null) {
-				pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-			} else {
-				pids = myFulltextSearchSvc.search(myResourceName, myParams);
-			}
-			if (pids.isEmpty()) {
-				// Will never match
-				pids = Collections.singletonList(new ResourcePersistentId(-1L));
-			}
-
-			myQueryStack.addPredicate(myQueryStack.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(pids)));
+		// Add PID list predicate for full text search and/or lastn operation
+		if (thePidList != null && thePidList.size() > 0) {
+			myQueryStack.addPredicate(myQueryStack.get("myId").as(Long.class).in(thePidList));
 		}
 
 		// Last updated
@@ -644,9 +695,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
-		new QueryChunker<ResourcePersistentId>().chunk(pids, t -> {
-			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
-		});
+		new QueryChunker<ResourcePersistentId>().chunk(pids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 
 	}
 
