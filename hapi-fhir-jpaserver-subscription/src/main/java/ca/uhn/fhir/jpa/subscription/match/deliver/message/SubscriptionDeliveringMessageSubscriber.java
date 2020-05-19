@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.message;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
@@ -86,7 +86,10 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 		String queueName = extractQueueNameFromEndpoint(endpointUrl);
 
-		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, new ChannelConsumerSettings().setNameAlreadyQualified(true));
+		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
+		channelSettings.setQualifyChannelName(false);
+
+		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();

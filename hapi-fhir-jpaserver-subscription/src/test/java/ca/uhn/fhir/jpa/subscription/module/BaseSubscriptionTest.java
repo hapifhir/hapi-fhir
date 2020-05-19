@@ -69,7 +69,7 @@ public abstract class BaseSubscriptionTest {
 		@Bean
 		// Default implementation returns the name unchanged
 		public IChannelNamer channelNamer() {
-			return theNameComponent -> theNameComponent;
+			return (theNameComponent, theChannelSettings) -> theNameComponent;
 		}
 	}
 }

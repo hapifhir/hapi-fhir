@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  */
 
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -46,35 +47,47 @@ public class SubscriptionChannelFactory {
 		myChannelFactory = theChannelFactory;
 	}
 
-	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = newConfigForDeliveryChannel(theOptions);
+	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
+		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = newConfigForDeliveryChannel(theOptions);
+	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
+		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
 		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
-	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = newConfigForMatchingChannel(theOptions);
+	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
+		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = newConfigForMatchingChannel(theOptions);
+	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
+		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
 		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
-	protected ChannelConsumerSettings newConfigForDeliveryChannel(ChannelConsumerSettings theOptions) {
+	protected ChannelProducerSettings newProducerConfigForDeliveryChannel(ChannelProducerSettings theOptions) {
+		ChannelProducerSettings config = new ChannelProducerSettings();
+		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
+		return config;
+	}
+
+	protected ChannelConsumerSettings newConsumerConfigForDeliveryChannel(ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
 		return config;
 	}
 
-	protected ChannelConsumerSettings newConfigForMatchingChannel(ChannelConsumerSettings theOptions) {
+	protected ChannelProducerSettings newProducerConfigForMatchingChannel(ChannelProducerSettings theOptions) {
+		ChannelProducerSettings config = new ChannelProducerSettings();
+		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
+		return config;
+	}
+
+	protected ChannelConsumerSettings newConsumerConfigForMatchingChannel(ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		return config;
