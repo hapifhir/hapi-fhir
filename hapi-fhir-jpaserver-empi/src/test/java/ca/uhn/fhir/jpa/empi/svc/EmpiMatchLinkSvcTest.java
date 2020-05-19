@@ -399,7 +399,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testPatientThatUndergoesSufficientChangeIsReassignedToNewPerson() {
+	public void testPatientUpdateOverwritesPersonDataOnChanges() {
 		Patient janePatient= createPatientAndUpdateLinks(buildJanePatient());
 		Person janePerson = getPersonFromTarget(janePatient);
 
@@ -416,9 +416,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
 	}
 
-
 	@Test
-	public void testPatientCreateDoesNotOverwritePersonAttributes() {
+	public void testPatientCreateDoesNotOverwritePersonAttributesThatAreInvolvedInLinking() {
 		Patient paul = buildPaulPatient();
 		paul.setGender(Enumerations.AdministrativeGender.MALE);
 		paul = createPatientAndUpdateLinks(paul);
@@ -455,5 +454,24 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		personFromTarget = getPersonFromTarget(paul);
 		assertThat(personFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
 		assertLinkCount(1);
+	}
+
+	@Test
+	public void testUpdatedEidThatWouldRelinkAlsoCausesPossibleDuplicate() {
+		String EID_1 = "123";
+		String EID_2 = "456";
+		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
+		Person originalPaulPerson = getPersonFromTarget(paul);
+
+		Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), EID_2));
+		Person originalJanePerson = getPersonFromTarget(jane);
+
+		clearExternalEIDs(paul);
+		addExternalEID(paul, EID_2);
+		updatePatientAndUpdateLinks(paul);
+
+		assertThat(originalJanePerson, is(possibleDuplicateOf(originalPaulPerson)));
+		assertThat(jane, is(samePersonAs(paul)));
+
 	}
 }

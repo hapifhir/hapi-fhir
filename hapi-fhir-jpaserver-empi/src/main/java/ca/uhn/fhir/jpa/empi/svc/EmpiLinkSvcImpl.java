@@ -106,6 +106,14 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		}
 	}
 
+	@Override
+	public void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+		myPersonHelper.removeLink(theExistingPerson, theResource.getIdElement(), theEmpiTransactionContext);
+		EmpiLink empiLink = getEmpiLinkForPersonTargetPair(theExistingPerson, theResource);
+		log(theEmpiTransactionContext, "Deleting EmpiLink ["+ theExistingPerson.getIdElement().toVersionless() +" -> "  + theResource.getIdElement().toVersionless()+ "] with result: " + empiLink.getMatchResult());
+		myEmpiLinkDaoSvc.deleteLink(empiLink);
+	}
+
 	private IBaseBackboneElement personLinkFromEmpiLink(EmpiLink empiLink) {
 		IIdType resourceId = myIdHelperService.resourceIdFromPidOrThrowException(empiLink.getTargetPid());
 		CanonicalIdentityAssuranceLevel assuranceLevel = AssuranceLevelUtil.getAssuranceLevel(empiLink.getMatchResult(), empiLink.getLinkSource());
@@ -115,7 +123,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	/**
 	 * Helper function which runs various business rules about what types of requests are allowed.
 	 */
-	private void validateRequestIsLegal(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
+	private void validateRequestIsLegal(IAnyResource thePerson, IAnyResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		EmpiLink existingLink = getEmpiLinkForPersonTargetPair(thePerson, theResource);
 		if (existingLink != null && systemIsAttemptingToModifyManualLink(theLinkSource, existingLink)) {
 			throw new InternalErrorException("EMPI system is not allowed to modify links on manually created links");
@@ -140,7 +148,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		return theIncomingSource == EmpiLinkSourceEnum.AUTO && theExistingSource.isManual();
 	}
 
-	private EmpiLink getEmpiLinkForPersonTargetPair(IBaseResource thePerson, IBaseResource theCandidate) {
+	private EmpiLink getEmpiLinkForPersonTargetPair(IAnyResource thePerson, IAnyResource theCandidate) {
 		if (thePerson.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
 			return null;
 		} else {
