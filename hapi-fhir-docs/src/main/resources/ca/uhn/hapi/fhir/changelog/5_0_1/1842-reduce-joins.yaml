@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 1842
+title: "When performing queries with multiple chained search parameters, such as 'Observation?subject.identifier=FOO&specimen.identifier=BAR',
+   an unnecessary SQL join was introduced into the resulting query. This was inefficient, and made it particularly hard for the RDBMS optimizer
+   to pick an efficient query plan in some cases. This is not fixing a regression (this issue has always existed in HAPI FHIR JPA) but it
+   was deemed sufficiently important to merit a dedicated point release."

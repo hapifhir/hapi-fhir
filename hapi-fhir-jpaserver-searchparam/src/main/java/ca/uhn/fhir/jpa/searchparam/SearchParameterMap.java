@@ -677,4 +677,18 @@ public class SearchParameterMap implements Serializable {
 	public int size() {
 		return mySearchParameterMap.size();
 	}
+
+	public static SearchParameterMap newSynchronous() {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		return retVal;
+	}
+
+	public static SearchParameterMap newSynchronous(String theName, IQueryParameterType theParam) {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		retVal.add(theName, theParam);
+		return retVal;
+	}
+
 }

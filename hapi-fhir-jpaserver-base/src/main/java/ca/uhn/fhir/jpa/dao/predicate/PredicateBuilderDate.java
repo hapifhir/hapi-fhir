@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,7 +48,7 @@ import java.util.Map;
 public class PredicateBuilderDate extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
 
-	private Map<String, Join<ResourceTable, ResourceIndexedSearchParamDate>> myJoinMap;
+	private Map<String, From<?, ResourceIndexedSearchParamDate>> myJoinMap;
 
 	PredicateBuilderDate(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
@@ -69,9 +67,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		}
 		String key = theResourceName + " " + theParamName;
 
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
+		From<?, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
 		if (join == null) {
-			join = createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+			join = myQueryStack.createJoin(SearchBuilderJoinEnum.DATE, theParamName);
 			myJoinMap.put(key, join);
 			newJoin = true;
 		}
@@ -95,12 +93,11 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 		Predicate orPredicates = myCriteriaBuilder.or(toArray(codePredicates));
 
-		myQueryRoot.setHasIndexJoins();
 		if (newJoin) {
 			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, theRequestPartitionId);
-			myQueryRoot.addPredicate(identityAndValuePredicate);
+			myQueryStack.addPredicateWithImplicitTypeSelection(identityAndValuePredicate);
 		} else {
-			myQueryRoot.addPredicate(orPredicates);
+			myQueryStack.addPredicateWithImplicitTypeSelection(orPredicates);
 		}
 
 		return orPredicates;

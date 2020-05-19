@@ -35,13 +35,12 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactory;
-import ca.uhn.fhir.jpa.dao.predicate.QueryRoot;
+import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryStack;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -73,6 +72,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -101,7 +101,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -113,6 +112,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -137,7 +137,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
-	private final QueryRoot myQueryRoot = new QueryRoot();
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
 	private final IDao myCallingDao;
@@ -147,6 +146,7 @@ public class SearchBuilder implements ISearchBuilder {
 	protected IResourceTagDao myResourceTagDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+	private QueryStack myQueryStack;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
@@ -275,94 +275,16 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
-		myParams = theParams;
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
+		myQueryStack = new QueryStack(myCriteriaBuilder, myResourceName, theParams, theRequestPartitionId);
+		myParams = theParams;
 		mySearchUuid = theSearchUuid;
 		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
 
-	private List<TypedQuery<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
-															 SearchRuntimeDetails theSearchRuntimeDetails) {
-		List<ResourcePersistentId> pids = new ArrayList<>();
-
-		/*
-		 * Fulltext or lastn search
-		 */
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
-			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null) {
-					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-					}
-				}
-
-				if (myParams.getEverythingMode() != null) {
-					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-				} else {
-					pids = myFulltextSearchSvc.search(myResourceName, myParams);
-				}
-			} else if (myParams.isLastN()) {
-				if (myIElasticsearchSvc == null) {
-					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-					}
-				}
-				Integer myMaxObservationsPerCode;
-				if(myParams.getLastNMax() != null) {
-					myMaxObservationsPerCode = myParams.getLastNMax();
-				} else {
-					throw new InvalidRequestException("Max parameter is required for $lastn operation");
-				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
-				for (String lastnResourceId : lastnResourceIds) {
-					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
-				}
-			}
-			if (theSearchRuntimeDetails != null) {
-				theSearchRuntimeDetails.setFoundIndexMatchesCount(pids.size());
-				HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(SearchRuntimeDetails.class, theSearchRuntimeDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
-			}
-
-			if (pids.isEmpty()) {
-				// Will never match
-				pids = Collections.singletonList(new ResourcePersistentId(-1L));
-			}
-
-		}
-
-		ArrayList<TypedQuery<Long>> myQueries = new ArrayList<>();
-
-		if (!pids.isEmpty()) {
-			if (theMaximumResults != null && pids.size() > theMaximumResults) {
-				pids.subList(0,theMaximumResults-1);
-			}
-			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t->{
-				doCreateChunkedQueries(t, sort, theCount, theRequest, myQueries);
-			});
-		} else {
-			myQueries.add(createChunkedQuery(sort,theMaximumResults, theCount, theRequest, null));
-		}
-
-		return myQueries;
-	}
-
-	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
-		if(thePids.size() < getMaximumPageSize()) {
-			normalizeIdListForLastNInClause(thePids);
-		}
-		theQueries.add(createChunkedQuery(sort, thePids.size(), theCount, theRequest, thePids));
-	}
-
-	private TypedQuery<Long> createChunkedQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
-		CriteriaQuery<Long> outerQuery;
+	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
 		/*
 		 * Sort
 		 *
@@ -372,36 +294,24 @@ public class SearchBuilder implements ISearchBuilder {
 		if (sort != null) {
 			assert !theCount;
 
-			outerQuery = myCriteriaBuilder.createQuery(Long.class);
-			myQueryRoot.push(outerQuery);
-			if (theCount) {
-				outerQuery.multiselect(myCriteriaBuilder.countDistinct(myQueryRoot.getRoot()));
-			} else {
-				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
-			}
+			myQueryStack.pushResourceTableQuery();
 
-			List<Order> orders = Lists.newArrayList();
-
-			createSort(myCriteriaBuilder, myQueryRoot, sort, orders);
+			List<Order> orders = createSort(myCriteriaBuilder, myQueryStack, sort);
 			if (orders.size() > 0) {
-				outerQuery.orderBy(orders);
+				myQueryStack.orderBy(orders);
 			}
 
 		} else {
 
-			outerQuery = myCriteriaBuilder.createQuery(Long.class);
-			myQueryRoot.push(outerQuery);
 			if (theCount) {
-				outerQuery.multiselect(myCriteriaBuilder.countDistinct(myQueryRoot.getRoot()));
+				myQueryStack.pushResourceTableCountQuery();
 			} else {
-				outerQuery.multiselect(myQueryRoot.get("myId").as(Long.class));
-				// KHS This distinct call is causing performance issues in large installations
-//				outerQuery.distinct(true);
+				myQueryStack.pushResourceTableQuery();
 			}
 		}
 
 		if (myParams.getEverythingMode() != null) {
-			Join<ResourceTable, ResourceLink> join = myQueryRoot.join("myResourceLinks", JoinType.LEFT);
+			From<?, ResourceLink> join = myQueryStack.createJoin(SearchBuilderJoinEnum.REFERENCE, null);
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
@@ -410,11 +320,11 @@ public class SearchBuilder implements ISearchBuilder {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
 				myAlsoIncludePids.add(pid);
-				myQueryRoot.addPredicate(myCriteriaBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid.getIdAsLong()));
+				myQueryStack.addPredicate(myCriteriaBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid.getIdAsLong()));
 			} else {
 				Predicate targetTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName);
-				Predicate sourceTypePredicate = myCriteriaBuilder.equal(myQueryRoot.get("myResourceType").as(String.class), myResourceName);
-				myQueryRoot.addPredicate(myCriteriaBuilder.or(sourceTypePredicate, targetTypePredicate));
+				Predicate sourceTypePredicate = myCriteriaBuilder.equal(myQueryStack.get("myResourceType").as(String.class), myResourceName);
+				myQueryStack.addPredicate(myCriteriaBuilder.or(sourceTypePredicate, targetTypePredicate));
 			}
 
 		} else {
@@ -422,43 +332,43 @@ public class SearchBuilder implements ISearchBuilder {
 			searchForIdsWithAndOr(myParams, theRequest);
 		}
 
-		// Add PID list predicate for full text search and/or lastn operation
-		if (thePidList != null && thePidList.size() > 0) {
-			myQueryRoot.addPredicate(myQueryRoot.get("myId").as(Long.class).in(thePidList));
-		}
-
 		/*
-		 * Add a predicate to make sure we only include non-deleted resources, and only include
-		 * resources of the right type.
-		 *
-		 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
-		 * need an explicit predicate for it.
+		 * Fulltext search
 		 */
-		if (!myQueryRoot.hasIndexJoins()) {
-			if (myParams.getEverythingMode() == null) {
-				myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myResourceType"), myResourceName));
-			}
-			myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myDeleted")));
-			if (!myRequestPartitionId.isAllPartitions()) {
-				if (myRequestPartitionId.getPartitionId() != null) {
-					myQueryRoot.addPredicate(myCriteriaBuilder.equal(myQueryRoot.get("myPartitionIdValue").as(Integer.class), myRequestPartitionId.getPartitionId()));
-				} else {
-					myQueryRoot.addPredicate(myCriteriaBuilder.isNull(myQueryRoot.get("myPartitionIdValue").as(Integer.class)));
+		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
+			if (myFulltextSearchSvc == null) {
+				if (myParams.containsKey(Constants.PARAM_TEXT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 				}
 			}
+
+			List<ResourcePersistentId> pids;
+			if (myParams.getEverythingMode() != null) {
+				pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+			} else {
+				pids = myFulltextSearchSvc.search(myResourceName, myParams);
+			}
+			if (pids.isEmpty()) {
+				// Will never match
+				pids = Collections.singletonList(new ResourcePersistentId(-1L));
+			}
+
+			myQueryStack.addPredicate(myQueryStack.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(pids)));
 		}
 
 		// Last updated
 		DateRangeParam lu = myParams.getLastUpdated();
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myCriteriaBuilder, myQueryRoot.getRoot());
-		myQueryRoot.addPredicates(lastUpdatedPredicates);
-
-		myQueryRoot.where(myCriteriaBuilder.and(myQueryRoot.getPredicateArray()));
+		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myCriteriaBuilder);
+		myQueryStack.addPredicates(lastUpdatedPredicates);
 
 		/*
 		 * Now perform the search
 		 */
+		CriteriaQuery<Long> outerQuery = (CriteriaQuery<Long>) myQueryStack.pop();
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
+		assert myQueryStack.isEmpty();
 
 		if (theMaximumResults != null) {
 			query.setMaxResults(theMaximumResults);
@@ -505,32 +415,35 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @return Returns {@literal true} if any search parameter sorts were found, or false if
 	 * no sorts were found, or only non-search parameters ones (e.g. _id, _lastUpdated)
 	 */
-	private boolean createSort(CriteriaBuilder theBuilder, QueryRoot theQueryRoot, SortSpec theSort, List<Order> theOrders) {
+	private List<Order> createSort(CriteriaBuilder theBuilder, QueryStack theQueryStack, SortSpec theSort) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
-			return false;
+			return Collections.emptyList();
 		}
 
+		List<Order> orders = new ArrayList<>(1);
 		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
-			From<?, ?> forcedIdJoin = theQueryRoot.join("myForcedId", JoinType.LEFT);
+			From<?, ?> forcedIdJoin = theQueryStack.createJoin(SearchBuilderJoinEnum.FORCED_ID, null);
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
-				theOrders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
-				theOrders.add(theBuilder.asc(theQueryRoot.get("myId")));
+				orders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
+				orders.add(theBuilder.asc(theQueryStack.get("myId")));
 			} else {
-				theOrders.add(theBuilder.desc(forcedIdJoin.get("myForcedId")));
-				theOrders.add(theBuilder.desc(theQueryRoot.get("myId")));
+				orders.add(theBuilder.desc(forcedIdJoin.get("myForcedId")));
+				orders.add(theBuilder.desc(theQueryStack.get("myId")));
 			}
 
-			return createSort(theBuilder, theQueryRoot, theSort.getChain(), theOrders);
+			orders.addAll(createSort(theBuilder, theQueryStack, theSort.getChain()));
+			return orders;
 		}
 
 		if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
-				theOrders.add(theBuilder.asc(theQueryRoot.get("myUpdated")));
+				orders.add(theBuilder.asc(theQueryStack.get("myUpdated")));
 			} else {
-				theOrders.add(theBuilder.desc(theQueryRoot.get("myUpdated")));
+				orders.add(theBuilder.desc(theQueryStack.get("myUpdated")));
 			}
 
-			return createSort(theBuilder, theQueryRoot, theSort.getChain(), theOrders);
+			orders.addAll(createSort(theBuilder, theQueryStack, theSort.getChain()));
+			return orders;
 		}
 
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
@@ -539,43 +452,35 @@ public class SearchBuilder implements ISearchBuilder {
 			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
 
-		String joinAttrName;
 		String[] sortAttrName;
 		SearchBuilderJoinEnum joinType;
 
 		switch (param.getParamType()) {
 			case STRING:
-				joinAttrName = "myParamsString";
 				sortAttrName = new String[]{"myValueExact"};
 				joinType = SearchBuilderJoinEnum.STRING;
 				break;
 			case DATE:
-				joinAttrName = "myParamsDate";
 				sortAttrName = new String[]{"myValueLow"};
 				joinType = SearchBuilderJoinEnum.DATE;
 				break;
 			case REFERENCE:
-				joinAttrName = "myResourceLinks";
 				sortAttrName = new String[]{"myTargetResourcePid"};
 				joinType = SearchBuilderJoinEnum.REFERENCE;
 				break;
 			case TOKEN:
-				joinAttrName = "myParamsToken";
 				sortAttrName = new String[]{"mySystem", "myValue"};
 				joinType = SearchBuilderJoinEnum.TOKEN;
 				break;
 			case NUMBER:
-				joinAttrName = "myParamsNumber";
 				sortAttrName = new String[]{"myValue"};
 				joinType = SearchBuilderJoinEnum.NUMBER;
 				break;
 			case URI:
-				joinAttrName = "myParamsUri";
 				sortAttrName = new String[]{"myUri"};
 				joinType = SearchBuilderJoinEnum.URI;
 				break;
 			case QUANTITY:
-				joinAttrName = "myParamsQuantity";
 				sortAttrName = new String[]{"myValue"};
 				joinType = SearchBuilderJoinEnum.QUANTITY;
 				break;
@@ -591,37 +496,40 @@ public class SearchBuilder implements ISearchBuilder {
 		 * sorting on, we'll also sort with it. Otherwise we need a new join.
 		 */
 		SearchBuilderJoinKey key = new SearchBuilderJoinKey(theSort.getParamName(), joinType);
-		Join<?, ?> join = theQueryRoot.getIndexJoin(key);
-		if (join == null) {
-			join = theQueryRoot.join(joinAttrName, JoinType.LEFT);
+		Optional<Join<?, ?>> joinOpt = theQueryStack.getExistingJoin(key);
+
+		From<?, ?> join;
+		if (!joinOpt.isPresent()) {
+			join = theQueryStack.createJoin(joinType, theSort.getParamName());
 
 			if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-				theQueryRoot.addPredicate(join.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
+				theQueryStack.addPredicate(join.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
 			} else {
 				if (myDaoConfig.getDisableHashBasedSearches()) {
 					Predicate joinParam1 = theBuilder.equal(join.get("myParamName"), theSort.getParamName());
-					theQueryRoot.addPredicate(joinParam1);
+					theQueryStack.addPredicate(joinParam1);
 				} else {
 					Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, myRequestPartitionId, myResourceName, theSort.getParamName());
 					Predicate joinParam1 = theBuilder.equal(join.get("myHashIdentity"), hashIdentity);
-					theQueryRoot.addPredicate(joinParam1);
+					theQueryStack.addPredicate(joinParam1);
 				}
 			}
 		} else {
 			ourLog.debug("Reusing join for {}", theSort.getParamName());
+			join = joinOpt.get();
 		}
 
 		for (String next : sortAttrName) {
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
-				theOrders.add(theBuilder.asc(join.get(next)));
+				orders.add(theBuilder.asc(join.get(next)));
 			} else {
-				theOrders.add(theBuilder.desc(join.get(next)));
+				orders.add(theBuilder.desc(join.get(next)));
 			}
 		}
 
-		createSort(theBuilder, theQueryRoot, theSort.getChain(), theOrders);
+		orders.addAll(createSort(theBuilder, theQueryStack, theSort.getChain()));
 
-		return true;
+		return orders;
 	}
 
 
@@ -736,8 +644,8 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
-		new QueryChunker<ResourcePersistentId>().chunk(pids, t->{
-			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position);
+		new QueryChunker<ResourcePersistentId>().chunk(pids, t -> {
+			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
 		});
 
 	}
@@ -1005,17 +913,16 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, RequestPartitionId theRequestPartitionId) {
-		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myQueryRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+		From<?, ResourceIndexedCompositeStringUnique> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COMPOSITE_UNIQUE, null);
 
 		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getPartitionId();
 			Predicate predicate = myCriteriaBuilder.equal(join.get("myPartitionIdValue").as(Integer.class), partitionId);
-			myQueryRoot.addPredicate(predicate);
+			myQueryStack.addPredicate(predicate);
 		}
 
-		myQueryRoot.setHasIndexJoins();
 		Predicate predicate = myCriteriaBuilder.equal(join.get("myIndexString"), theIndexedString);
-		myQueryRoot.addPredicate(predicate);
+		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
 
 		// Remove any empty parameters remaining after this
 		theParams.clean();
@@ -1044,8 +951,8 @@ public class SearchBuilder implements ISearchBuilder {
 		return myCriteriaBuilder;
 	}
 
-	public QueryRoot getQueryRoot() {
-		return myQueryRoot;
+	public QueryStack getQueryStack() {
+		return myQueryStack;
 	}
 
 	public Class<? extends IBaseResource> getResourceType() {
@@ -1059,6 +966,22 @@ public class SearchBuilder implements ISearchBuilder {
 	@VisibleForTesting
 	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
+	}
+
+	private List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder) {
+		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
+		if (theLastUpdated != null) {
+			if (theLastUpdated.getLowerBoundAsInstant() != null) {
+				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
+				Predicate predicateLower = builder.greaterThanOrEqualTo(myQueryStack.getLastUpdatedColumn(), theLastUpdated.getLowerBoundAsInstant());
+				lastUpdatedPredicates.add(predicateLower);
+			}
+			if (theLastUpdated.getUpperBoundAsInstant() != null) {
+				Predicate predicateUpper = builder.lessThanOrEqualTo(myQueryStack.getLastUpdatedColumn(), theLastUpdated.getUpperBoundAsInstant());
+				lastUpdatedPredicates.add(predicateUpper);
+			}
+		}
+		return lastUpdatedPredicates;
 	}
 
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {

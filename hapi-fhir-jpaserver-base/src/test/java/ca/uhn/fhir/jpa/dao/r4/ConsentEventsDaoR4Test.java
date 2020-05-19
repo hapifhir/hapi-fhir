@@ -434,8 +434,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			IPreResourceAccessDetails accessDetails = theArgs.get(IPreResourceAccessDetails.class);
 
-			// FIXME: restore
-//			assertThat(accessDetails.size(), greaterThan(0));
+			assertThat(accessDetails.size(), greaterThan(0));
 
 			List<String> currentPassIds = new ArrayList<>();
 			for (int i = 0; i < accessDetails.size(); i++) {
