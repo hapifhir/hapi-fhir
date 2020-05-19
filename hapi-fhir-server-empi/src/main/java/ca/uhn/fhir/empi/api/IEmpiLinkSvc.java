@@ -41,4 +41,12 @@ public interface IEmpiLinkSvc {
 	 * @param thePersonResource the person to correct the links on.
 	 */
 	void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext);
+
+	/**
+	 * Delete a link between given Person and target patient/practitioner
+	 * @param theExistingPerson
+	 * @param theResource
+	 */
+	void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext);
+
 }

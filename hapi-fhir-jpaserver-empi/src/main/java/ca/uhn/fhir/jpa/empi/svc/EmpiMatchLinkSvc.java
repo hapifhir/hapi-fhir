@@ -185,7 +185,12 @@ public class EmpiMatchLinkSvc {
 			//This is a new linking scenario. we have to break the existing link and link to the new person. For now, we create duplicate.
 			createNewPersonAndFlagAsDuplicate(theResource, theEmpiTransactionContext, person);
 		} else if (hasEidsInCommon && !remainsMatchedToSamePerson) {
-			//updated patient has an EID that matches to a new candidate. Link?
+			//updated patient has an EID that matches to a new candidate. Link them, and set the persons possible duplicates
+			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			Long personPid = theExistingMatchLink.get().getPersonPid();
+			IAnyResource existingPerson= myEmpiResourceDaoSvc.readPersonByPid(new ResourcePersistentId(personPid));
+			myEmpiLinkSvc.deleteLink(existingPerson, theResource, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(existingPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		}
 	}
 
@@ -196,8 +201,8 @@ public class EmpiMatchLinkSvc {
 		}
 	}
 
-	private boolean candidateIsSameAsEmpiLinkPerson(EmpiLink theOExistingMatchLink, MatchedPersonCandidate thePersonCandidate) {
-		return theOExistingMatchLink.getPersonPid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
+	private boolean candidateIsSameAsEmpiLinkPerson(EmpiLink theExistingMatchLink, MatchedPersonCandidate thePersonCandidate) {
+		return theExistingMatchLink.getPersonPid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
 	}
 
 	private void createNewPersonAndFlagAsDuplicate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext, IAnyResource thePerson) {

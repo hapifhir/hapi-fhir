@@ -455,4 +455,23 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(personFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
 		assertLinkCount(1);
 	}
+
+	@Test
+	public void testUpdatedEidThatWouldRelinkAlsoCausesPossibleDuplicate() {
+		String EID_1 = "123";
+		String EID_2 = "456";
+		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
+		Person originalPaulPerson = getPersonFromTarget(paul);
+
+		Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), EID_2));
+		Person originalJanePerson = getPersonFromTarget(jane);
+
+		clearExternalEIDs(paul);
+		addExternalEID(paul, EID_2);
+		updatePatientAndUpdateLinks(paul);
+
+		assertThat(originalJanePerson, is(possibleDuplicateOf(originalPaulPerson)));
+		assertThat(jane, is(samePersonAs(paul)));
+
+	}
 }

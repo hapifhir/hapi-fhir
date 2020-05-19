@@ -189,7 +189,7 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.save(theEmpiLink);
 	}
 
-    public List<EmpiLink> findEmpiLinkByExample(Example<EmpiLink> theExampleLink) {
+   public List<EmpiLink> findEmpiLinkByExample(Example<EmpiLink> theExampleLink) {
 		return myEmpiLinkDao.findAll(theExampleLink);
-    }
+   }
 }
