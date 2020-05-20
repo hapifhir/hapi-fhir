@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -14,9 +15,13 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -81,12 +86,37 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	public void createStandardPatients() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-birthdate");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setCode("birthdate");
+		sp.setExpression("Patient.birthDate");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-birthdate-unique");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-birthdate");
+		sp.addExtension()
+			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
 		Patient p = new Patient();
 		p.setId("PT-ONEVERSION");
 		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
 		p.getMeta().setSource("http://foo_source");
 		p.setActive(true);
 		p.addIdentifier().setSystem("foo").setValue("bar");
+		p.setBirthDateElement(new DateType("2020-01"));
 		p.addName().setFamily("FAM");
 		myOneVersionPatientId = myPatientDao.update(p).getId();
 

@@ -595,7 +595,6 @@
 
 
 	<properties>
-		<skip-hib4>false</skip-hib4>
 		<jackson.version>2.7.1</jackson.version>
 	</properties>
 
@@ -815,12 +814,6 @@
 	</reporting>
 
 	<profiles>
-		<profile>
-			<id>JENKINS</id>
-			<properties>
-				<skip-hib4>true</skip-hib4>
-			</properties>
-		</profile>
 		<profile>
 			<id>NOPARALLEL</id>
 			<build>
