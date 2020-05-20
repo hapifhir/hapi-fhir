@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+
 /**
  * This interface is the factory for Queue Channels, which are the low level abstraction over a
  * queue (e.g. memory queue, JMS queue, Kafka stream, etc.) for any purpose.
@@ -54,4 +56,8 @@ public interface IChannelFactory {
 	 */
 	IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
 
+	/**
+	 * @return the IChannelNamer used by this factory
+	 */
+	IChannelNamer getChannelNamer();
 }
