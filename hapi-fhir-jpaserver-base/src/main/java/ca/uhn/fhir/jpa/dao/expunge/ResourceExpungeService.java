@@ -25,7 +25,21 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -74,6 +88,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 	@Autowired
 	private IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
 	@Autowired
+	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	private IResourceTagDao myResourceTagDao;
@@ -87,6 +103,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IResourceProvenanceDao myResourceHistoryProvenanceTableDao;
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
 
 	@Override
 	@Transactional
@@ -172,7 +190,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 		theRemainingCount.addAndGet(-1 * counter.get());
 	}
 
-
 	@Override
 	@Transactional
 	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount) {
@@ -218,10 +235,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 		myResourceTableDao.deleteByPid(resource.getId());
 	}
 
-
-	@Autowired
-	private ISearchParamPresentDao mySearchParamPresentDao;
-
 	@Override
 	@Transactional
 	public void deleteAllSearchParams(Long theResourceId) {
@@ -232,8 +245,10 @@ class ResourceExpungeService implements IResourceExpungeService {
 		myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
 		myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
 		myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
+		myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId);
 		mySearchParamPresentDao.deleteByResourceId(theResourceId);
 		myResourceLinkDao.deleteByResourceId(theResourceId);
+
 
 		myResourceTagDao.deleteByResourceId(theResourceId);
 	}
