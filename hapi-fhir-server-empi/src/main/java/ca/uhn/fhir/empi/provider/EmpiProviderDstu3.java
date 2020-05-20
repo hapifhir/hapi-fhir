@@ -93,6 +93,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
 		IAnyResource personToDelete = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonIdToDelete.getValue());
 		IAnyResource personToKeep = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonIdToKeep.getValue());
+		validateMergeResources(personToDelete, personToKeep);
 
 		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(theRequestDetails));
 	}

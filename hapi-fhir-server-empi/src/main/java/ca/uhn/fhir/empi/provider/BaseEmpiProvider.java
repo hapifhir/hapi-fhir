@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -87,6 +88,21 @@ public abstract class BaseEmpiProvider {
 			throw new InvalidRequestException("personIdToDelete must be different from personToKeep");
 		}
  	}
+
+ 	protected void validateMergeResources(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep) {
+		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonToDelete);
+		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonToKeep);
+	}
+
+	private void validateIsEmpiManaged(String theName, IAnyResource thePerson) {
+		// FIXME KHS test
+		if (!"Person".equals(myFhirContext.getResourceType(thePerson))) {
+			throw new InvalidRequestException("Only Person resources can be merged.  The " + theName + " points to a " + myFhirContext.getResourceType(thePerson));
+		}
+		if (!EmpiUtil.isEmpiManaged(thePerson)) {
+			throw new InvalidRequestException("Only EMPI managed resources can be merged.  Empi managed resource have the " + EmpiConstants.CODE_HAPI_EMPI_MANAGED + " tag.");
+		}
+	}
 
 	private void validateNotNull(String theName, IPrimitiveType<String> theString) {
 		if (theString == null || theString.getValue() == null) {

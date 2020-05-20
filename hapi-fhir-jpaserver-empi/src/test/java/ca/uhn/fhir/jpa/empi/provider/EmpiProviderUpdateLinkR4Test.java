@@ -68,7 +68,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testUpdateStrangePerson() {
-		Person person = createPerson();
+		Person person = createUnmanagedPerson();
 		try {
 			myEmpiProviderR4.updateLink(new StringType(person.getIdElement().toVersionless().getValue()), myPatientId, myNoMatch, myRequestDetails);
 			fail();

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
@@ -102,8 +103,13 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
+	protected Person createUnmanagedPerson() {
+		return createPerson(new Person(), false);
+	}
+
+	@Nonnull
 	protected Person createPerson() {
-		return createPerson(new Person());
+		return createPerson(new Person(), true);
 	}
 
 	@Nonnull
@@ -113,6 +119,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Person createPerson(Person thePerson) {
+		return createPerson(thePerson, true);
+	}
+
+	@Nonnull
+	protected Person createPerson(Person thePerson, boolean theEmpiManaged) {
+		if (theEmpiManaged) {
+			thePerson.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		}
 		DaoMethodOutcome outcome = myPersonDao.create(thePerson);
 		Person person = (Person) outcome.getResource();
 		person.setId(outcome.getId());
@@ -219,20 +233,21 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long personPid = matchedLinkForTargetPid.get().getPersonPid();
-			return (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
+			return (Person) myPersonDao.readByPid(new ResourcePersistentId(personPid));
 		} else {
 			return null;
 		}
 	}
 
 	protected Person getPersonFromEmpiLink(EmpiLink theEmpiLink) {
-		return (Person)myPersonDao.readByPid(new ResourcePersistentId(theEmpiLink.getPersonPid()));
+		return (Person) myPersonDao.readByPid(new ResourcePersistentId(theEmpiLink.getPersonPid()));
 	}
 
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
 		thePatient.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
 		return thePatient;
 	}
+
 	protected Patient clearExternalEIDs(Patient thePatient) {
 		thePatient.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
 		return thePatient;
@@ -243,12 +258,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForCreate());
 		return thePatient;
 	}
+
 	protected EmpiTransactionContext createContextForCreate() {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
 		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
 	}
+
 	protected EmpiTransactionContext createContextForUpdate() {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
 		ctx.setRestOperation(EmpiTransactionContext.OperationType.UPDATE);
@@ -286,7 +303,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
 
-	protected Matcher<IAnyResource> possibleDuplicateOf(IAnyResource...theBaseResource) {
+	protected Matcher<IAnyResource> possibleDuplicateOf(IAnyResource... theBaseResource) {
 		return IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
 

@@ -52,6 +52,31 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	}
 
 	@Test
+	public void testUnmanagedMerge() {
+		StringType deletePersonId = new StringType(createUnmanagedPerson().getIdElement().toVersionless().getValue());
+		StringType keepPersonId = new StringType(createUnmanagedPerson().getIdElement().toVersionless().getValue());
+		try {
+			myEmpiProviderR4.mergePersons(deletePersonId, keepPersonId, myRequestDetails);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Only EMPI managed resources can be merged.  Empi managed resource have the HAPI-EMPI tag.", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testMergePatients() {
+		try {
+			StringType patientId = new StringType(createPatient().getIdElement().toVersionless().getValue());
+			StringType otherPatientId = new StringType(createPatient().getIdElement().toVersionless().getValue());
+			myEmpiProviderR4.mergePersons(patientId, otherPatientId, myRequestDetails);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("personIdToDelete must have form Person/<id> where <id> is the id of the person", e.getMessage());
+		}
+
+	}
+
+	@Test
 	public void testNullParams() {
 		try {
 			myEmpiProviderR4.mergePersons(null, null, myRequestDetails);
