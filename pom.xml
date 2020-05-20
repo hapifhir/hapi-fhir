@@ -2609,7 +2609,7 @@
 		<profile>
 			<id>CI</id>
 			<properties>
-				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx1400m -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none  -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=1400M</surefire_jvm_args>
+				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Xverify:none  -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M</surefire_jvm_args>
 			</properties>
 			<build>
 				<plugins>
@@ -2632,6 +2632,13 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<forkCount>1</forkCount>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
