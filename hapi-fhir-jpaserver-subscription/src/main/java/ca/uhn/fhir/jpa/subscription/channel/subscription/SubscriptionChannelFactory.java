@@ -101,6 +101,10 @@ public class SubscriptionChannelFactory {
 		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
 	}
 
+	public IChannelFactory getChannelFactory() {
+		return myChannelFactory;
+	}
+
 	public static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements IChannelReceiver, DisposableBean {
 
 		private final IChannelReceiver myWrappedChannel;

@@ -64,6 +64,11 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
+	@Override
+	public IChannelNamer getChannelNamer() {
+		return myChannelNamer;
+	}
+
 	private LinkedBlockingChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers, IChannelSettings theChannelSettings) {
 		final String channelName = myChannelNamer.getChannelName(theChannelName, theChannelSettings);
 

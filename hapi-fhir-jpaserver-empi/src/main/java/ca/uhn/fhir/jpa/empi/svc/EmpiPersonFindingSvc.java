@@ -108,19 +108,20 @@ public class EmpiPersonFindingSvc {
 	/**
 	 * Attempt to find a currently matching Person, based on the presence of an {@link EmpiLink} entity.
 	 *
-	 * @param theBaseResource the {@link IBaseResource} which we want to find candidate Persons for.
+	 * @param theBaseResource the {@link IAnyResource} that we want to find candidate Persons for.
 	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
 	 */
-	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromEmpiLinkTable(IBaseResource theBaseResource) {
+	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromEmpiLinkTable(IAnyResource theBaseResource) {
 		List<MatchedPersonCandidate> retval = new ArrayList<>();
 
 		Long targetPid = myIdHelperService.getPidOrNull(theBaseResource);
-		Optional<EmpiLink> oLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(targetPid);
-		if (oLink.isPresent()) {
-			ResourcePersistentId pid = new ResourcePersistentId(oLink.get().getPersonPid());
-			// FIXME EMPI ensure we aren't changing this link
-			ourLog.debug("Resource previously linked.  Using existing link.");
-			retval.add(new MatchedPersonCandidate(pid, oLink.get().getMatchResult()));
+		if (targetPid != null) {
+			Optional<EmpiLink> oLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(targetPid);
+			if (oLink.isPresent()) {
+				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getPersonPid());
+				ourLog.debug("Resource previously linked.  Using existing link.");
+				retval.add(new MatchedPersonCandidate(personPid, oLink.get().getMatchResult()));
+			}
 		}
 		return retval;
 	}
