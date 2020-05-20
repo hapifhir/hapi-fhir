@@ -157,7 +157,7 @@ public class PatchServerDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Invalid Content-Type for PATCH operation: text/plain; charset=UTF-8\"/></issue></OperationOutcome>", responseContent);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

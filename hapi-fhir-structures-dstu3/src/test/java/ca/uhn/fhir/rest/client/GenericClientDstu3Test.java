@@ -202,6 +202,37 @@ public class GenericClientDstu3Test {
 	}
 
 	@Test
+	public void testPatchByIdNoType() {
+
+		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		try {
+			client
+				.patch()
+				.withBody(patch)
+				.withId(new IdType("234"))
+				.execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: 234", e.getMessage());
+		}
+
+		try {
+			client
+				.patch()
+				.withBody(patch)
+				.withId("234")
+				.execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: 234", e.getMessage());
+		}
+
+	}
+
+
+	@Test
 	public void testPatchJsonByConditionalString() throws Exception {
 		OperationOutcome conf = new OperationOutcome();
 		conf.getText().setDivAsString("OK!");

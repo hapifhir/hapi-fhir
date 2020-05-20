@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
@@ -263,6 +264,11 @@ public class TestRestfulServer extends RestfulServer {
 		 * Bulk Export
 		 */
 		registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
+
+		/*
+		 * $diff operation
+		 */
+		registerProvider(myAppCtx.getBean(DiffProvider.class));
 
 	}
 

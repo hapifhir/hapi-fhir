@@ -87,7 +87,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestDataBuilder {
+public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningR4Test.class);
 
@@ -2353,23 +2353,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 				addCreateDefaultPartition();
 			}
 		};
-	}
-
-	@Override
-	public IIdType doCreateResource(IBaseResource theResource) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
-	}
-
-	@Override
-	public IIdType doUpdateResource(IBaseResource theResource) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirCtx;
 	}
 
 	@Interceptor
