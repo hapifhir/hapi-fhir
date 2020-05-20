@@ -66,7 +66,6 @@ public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
 		assertLinkCount(1);
 	}
 
-
 	@Test
 	public void testCreatePerson() throws InterruptedException {
 		myPersonDao.create(new Person());
