@@ -38,6 +38,8 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
@@ -78,7 +80,11 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
 
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personId, targetId);
+		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personId, targetId);
+		if (!oEmpiLink.isPresent()) {
+			throw new InvalidRequestException("No link exists between " + thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless());
+		}
+		EmpiLink empiLink = oEmpiLink.get();
 		if (empiLink.getMatchResult() == theMatchResult) {
 			ourLog.warn("EMPI Link for " + thePerson.getIdElement().toVersionless() + ", " + theTarget.getIdElement().toVersionless() + " already has value " + theMatchResult + ".  Nothing to do.");
 			return thePerson;

@@ -69,9 +69,9 @@ public class EmpiLinkDaoSvc {
 
 	@Nonnull
 	public EmpiLink getOrCreateEmpiLinkByPersonPidAndTargetPid(Long thePersonPid, Long theResourcePid) {
-		EmpiLink existing = getLinkByPersonPidAndTargetPid(thePersonPid, theResourcePid);
-		if (existing != null) {
-			return existing;
+		Optional<EmpiLink> oExisting = getLinkByPersonPidAndTargetPid(thePersonPid, theResourcePid);
+		if (oExisting.isPresent()) {
+			return oExisting.get();
 		} else {
 			EmpiLink empiLink = new EmpiLink();
 			empiLink.setPersonPid(thePersonPid);
@@ -80,16 +80,16 @@ public class EmpiLinkDaoSvc {
 		}
 	}
 
-	public EmpiLink getLinkByPersonPidAndTargetPid(Long thePersonPid, Long theTargetPid) {
+	public Optional<EmpiLink> getLinkByPersonPidAndTargetPid(Long thePersonPid, Long theTargetPid) {
 
 		if (theTargetPid == null || thePersonPid == null) {
-			return null;
+			return Optional.empty();
 		}
 		EmpiLink link = new EmpiLink();
 		link.setTargetPid(theTargetPid);
 		link.setPersonPid(thePersonPid);
 		Example<EmpiLink> example = Example.of(link);
-		return myEmpiLinkDao.findOne(example).orElse(null);
+		return myEmpiLinkDao.findOne(example);
 	}
 
 	public List<EmpiLink> getEmpiLinksByTargetPidAndMatchResult(Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
