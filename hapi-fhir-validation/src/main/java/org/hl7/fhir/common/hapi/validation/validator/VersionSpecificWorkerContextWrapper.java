@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
@@ -89,6 +90,7 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 				if (canonical instanceof StructureDefinition) {
 					if (((StructureDefinition) canonical).getSnapshot().isEmpty()) {
 						fetched = myValidationSupport.generateSnapshot(myValidationSupport, fetched, "", null, "");
+						Validate.isTrue(fetched != null, "StructureDefinition %s has no snapshot, and no snapshot generator is configured", key.getUri());
 						canonical = myModelConverter.toCanonical(fetched);
 					}
 				}
