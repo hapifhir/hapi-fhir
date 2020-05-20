@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -62,7 +63,8 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	public IBaseResource getPayload(FhirContext theCtx) {
 		IBaseResource retVal = myPayload;
 		if (retVal == null && isNotBlank(myPayloadString)) {
-			retVal = theCtx.newJsonParser().parseResource(myPayloadString);
+			IParser parser = EncodingEnum.detectEncoding(myPayloadString).newParser(theCtx);
+			retVal = parser.parseResource(myPayloadString);
 			myPayload = retVal;
 		}
 		return retVal;
@@ -93,7 +95,13 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	}
 
 	public void setPayload(FhirContext theCtx, IBaseResource thePayload, EncodingEnum theEncoding) {
-		myPayload = thePayload;
+		/*
+		 * Note that we populate the raw string but don't keep the parsed resource around when we set this. This
+		 * has two reasons:
+		 *  - If we build up a big queue of these on an in-memory queue, we aren't taking up double the memory
+		 *  - If use a serializing queue, we aren't behaving differently (and therefore possibly missing things
+		 *    in tests)
+		 */
 		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
 		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
 	}
