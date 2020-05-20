@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -109,8 +110,9 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	@Override
 	public void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		myPersonHelper.removeLink(theExistingPerson, theResource.getIdElement(), theEmpiTransactionContext);
-		EmpiLink empiLink = getEmpiLinkForPersonTargetPair(theExistingPerson, theResource);
-		if (empiLink != null) {
+		Optional<EmpiLink> oEmpiLink = getEmpiLinkForPersonTargetPair(theExistingPerson, theResource);
+		if (oEmpiLink.isPresent()) {
+			EmpiLink empiLink = oEmpiLink.get();
 			log(theEmpiTransactionContext, "Deleting EmpiLink [" + theExistingPerson.getIdElement().toVersionless() + " -> " + theResource.getIdElement().toVersionless() + "] with result: " + empiLink.getMatchResult());
 			myEmpiLinkDaoSvc.deleteLink(empiLink);
 		}
@@ -126,8 +128,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	 * Helper function which runs various business rules about what types of requests are allowed.
 	 */
 	private void validateRequestIsLegal(IAnyResource thePerson, IAnyResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
-		EmpiLink existingLink = getEmpiLinkForPersonTargetPair(thePerson, theResource);
-		if (existingLink != null && systemIsAttemptingToModifyManualLink(theLinkSource, existingLink)) {
+		Optional<EmpiLink> oExistingLink = getEmpiLinkForPersonTargetPair(thePerson, theResource);
+		if (oExistingLink.isPresent() && systemIsAttemptingToModifyManualLink(theLinkSource, oExistingLink.get())) {
 			throw new InternalErrorException("EMPI system is not allowed to modify links on manually created links");
 		}
 
@@ -150,9 +152,9 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		return theIncomingSource == EmpiLinkSourceEnum.AUTO && theExistingSource.isManual();
 	}
 
-	private EmpiLink getEmpiLinkForPersonTargetPair(IAnyResource thePerson, IAnyResource theCandidate) {
+	private Optional<EmpiLink> getEmpiLinkForPersonTargetPair(IAnyResource thePerson, IAnyResource theCandidate) {
 		if (thePerson.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
-			return null;
+			return Optional.empty();
 		} else {
 			return myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(
 				myIdHelperService.getPidOrNull(thePerson),
