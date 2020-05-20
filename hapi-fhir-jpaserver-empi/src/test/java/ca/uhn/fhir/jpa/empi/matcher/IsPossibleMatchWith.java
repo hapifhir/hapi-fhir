@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
  */
 public class IsPossibleMatchWith extends BasePersonMatcher {
 
-	protected IsPossibleMatchWith(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+	protected IsPossibleMatchWith(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	@Override
-	protected boolean matchesSafely(IBaseResource theIncomingResource) {
+	protected boolean matchesSafely(IAnyResource theIncomingResource) {
 		List<EmpiLink> empiLinks = getEmpiLinksForTarget(theIncomingResource, EmpiMatchResultEnum.POSSIBLE_MATCH);
 
 		List<Long> personPidsToMatch = myBaseResources.stream()
@@ -47,12 +47,12 @@ public class IsPossibleMatchWith extends BasePersonMatcher {
 	}
 
 	@Override
-	protected void describeMismatchSafely(IBaseResource item, Description mismatchDescription) {
+	protected void describeMismatchSafely(IAnyResource item, Description mismatchDescription) {
 		super.describeMismatchSafely(item, mismatchDescription);
 		mismatchDescription.appendText("No Empi Link With POSSIBLE_MATCH was found");
 	}
 
-	public static Matcher<IBaseResource> possibleMatchWith(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleMatchWith(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleMatchWith(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
 	}
 }

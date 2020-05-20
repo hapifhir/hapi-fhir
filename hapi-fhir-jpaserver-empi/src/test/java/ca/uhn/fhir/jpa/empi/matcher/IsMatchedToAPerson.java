@@ -6,11 +6,11 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import java.util.Optional;
 
-public class IsMatchedToAPerson extends TypeSafeMatcher<IBaseResource> {
+public class IsMatchedToAPerson extends TypeSafeMatcher<IAnyResource> {
 
 	private final IdHelperService myIdHelperService;
 	private final EmpiLinkDaoSvc myEmpiLinkDaoSvc;
@@ -21,7 +21,7 @@ public class IsMatchedToAPerson extends TypeSafeMatcher<IBaseResource> {
 	}
 
 	@Override
-	protected boolean matchesSafely(IBaseResource theIncomingResource) {
+	protected boolean matchesSafely(IAnyResource theIncomingResource) {
 		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theIncomingResource));
 		return matchedLinkForTargetPid.isPresent();
 	}
@@ -31,7 +31,7 @@ public class IsMatchedToAPerson extends TypeSafeMatcher<IBaseResource> {
 		theDescription.appendText("patient/practitioner was not linked to a Person.");
 	}
 
-	public static Matcher<IBaseResource> matchedToAPerson(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc) {
+	public static Matcher<IAnyResource> matchedToAPerson(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc) {
 		return new IsMatchedToAPerson(theIdHelperService, theEmpiLinkDaoSvc);
 	}
 }

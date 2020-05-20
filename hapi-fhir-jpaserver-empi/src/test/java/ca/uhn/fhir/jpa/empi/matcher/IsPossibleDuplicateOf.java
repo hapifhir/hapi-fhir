@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,17 +19,17 @@ public class IsPossibleDuplicateOf extends BasePersonMatcher {
 	 */
 	private Long incomingPersonPid;
 
-	protected IsPossibleDuplicateOf(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+	protected IsPossibleDuplicateOf(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	@Override
-	protected boolean matchesSafely(IBaseResource theIncomingResource) {
+	protected boolean matchesSafely(IAnyResource theIncomingResource) {
 
 		incomingPersonPid = getMatchedPersonPidFromResource(theIncomingResource);
 
 		List<Long> personPidsToMatch = myBaseResources.stream()
-			.map(br -> getMatchedPersonPidFromResource(br))
+			.map(this::getMatchedPersonPidFromResource)
 			.collect(Collectors.toList());
 
 
@@ -50,12 +50,12 @@ public class IsPossibleDuplicateOf extends BasePersonMatcher {
 	}
 
 	@Override
-	protected void describeMismatchSafely(IBaseResource item, Description mismatchDescription) {
+	protected void describeMismatchSafely(IAnyResource item, Description mismatchDescription) {
 		super.describeMismatchSafely(item, mismatchDescription);
 		mismatchDescription.appendText("No Empi Link With POSSIBLE_DUPLICATE was found");
 	}
 
-	public static Matcher<IBaseResource> possibleDuplicateOf(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IBaseResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleDuplicateOf(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleDuplicateOf(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
 	}
 }
