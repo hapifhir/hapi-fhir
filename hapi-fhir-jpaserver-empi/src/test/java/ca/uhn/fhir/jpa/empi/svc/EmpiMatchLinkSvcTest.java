@@ -460,6 +460,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testUpdatedEidThatWouldRelinkAlsoCausesPossibleDuplicate() {
 		String EID_1 = "123";
 		String EID_2 = "456";
+
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
 		Person originalPaulPerson = getPersonFromTarget(paul);
 
@@ -490,13 +491,17 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		paul = updatePatientAndUpdateLinks(paul);
 
-		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
-		assertThat(possibleDuplicates, hasSize(0));
+		assertNoDuplicates();
 
 		Person newlyFoundPaulPerson = getPersonFromTarget(paul);
 		assertThat(originalPaulPerson, is(samePersonAs(newlyFoundPaulPerson)));
 		String newEid = myEidHelper.getExternalEid(newlyFoundPaulPerson).get(0).getValue();
 		assertThat(newEid, is(equalTo(EID_2)));
+	}
+
+	private void assertNoDuplicates() {
+		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
+		assertThat(possibleDuplicates, hasSize(0));
 	}
 
 	@Test
@@ -516,8 +521,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
 		assertThat(patient2, is(samePersonAs(patient3)));
-		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
-		assertThat(possibleDuplicates, hasSize(0));
+		assertNoDuplicates();
 		//	Person A -> {P1}
 		//	Person B -> {P2, P3}
 
@@ -531,7 +535,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		assertThat(patient2, is(samePersonAs(patient1)));
 
-		possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
+		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 

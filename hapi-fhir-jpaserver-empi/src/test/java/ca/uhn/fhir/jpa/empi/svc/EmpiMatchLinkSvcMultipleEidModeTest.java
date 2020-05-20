@@ -78,6 +78,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 
 
 	@Test
+	// Test Case #4
 	public void testHavingMultipleEIDsOnIncomingPatientMatchesCorrectly() {
 
 		Patient patient1 = buildJanePatient();
@@ -97,11 +98,18 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		clearExternalEIDs(patient2);
 		addExternalEID(patient2, "id_6");
 
+		//At this point, there should be 5 EIDs on the person
+		Person personFromTarget = getPersonFromTarget(patient2);
+		assertThat(personFromTarget.getIdentifier(), hasSize(5));
+
 		updatePatientAndUpdateLinks(patient2);
+
 		assertThat(patient1, is(samePersonAs(patient2)));
 
-		Person personFromTarget = getPersonFromTarget(patient2);
+
+		personFromTarget = getPersonFromTarget(patient2);
 		assertThat(personFromTarget.getIdentifier(), hasSize(6));
+
 	}
 
 	@Test
@@ -168,11 +176,4 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 	}
-
-	@Test
-	public void testWhenPatientUpdatesMaterialInformationThatWouldRelinkThatPossibleMatchesAreCreatedAndADuplicateIsMade() {
-
-
-	}
-
 }

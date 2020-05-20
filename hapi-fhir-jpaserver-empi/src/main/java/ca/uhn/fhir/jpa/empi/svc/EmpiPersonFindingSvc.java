@@ -175,4 +175,8 @@ public class EmpiPersonFindingSvc {
 		return new ResourcePersistentId(thePersonPid);
 	}
 
+	public IAnyResource getPersonFromMatchedPersonCandidate(MatchedPersonCandidate theMatchedPersonCandidate) {
+		ResourcePersistentId personPid = theMatchedPersonCandidate.getCandidatePersonPid();
+		return myEmpiResourceDaoSvc.readPersonByPid(personPid);
+	}
 }
