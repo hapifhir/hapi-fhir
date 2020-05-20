@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -105,6 +106,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 

@@ -83,7 +83,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
-				activateOrRegisterSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
+				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
 			case DELETE:
 			case MANUALLY_TRIGGERED:
@@ -93,7 +93,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 	}
 
-	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
+	public boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
 		CanonicalSubscriptionChannelType subscriptionChannelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);
