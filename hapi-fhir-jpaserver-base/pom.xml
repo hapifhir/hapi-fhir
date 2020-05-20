@@ -672,7 +672,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError -XX:+CrashOnOutOfMemoryError</argLine>
+					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 					<forkCount>0.6C</forkCount>
 					<excludes>*StressTest*</excludes>
 				</configuration>
@@ -838,6 +838,7 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<forkCount>1</forkCount>
+							<runOrder>alphabetical</runOrder>
 						</configuration>
 					</plugin>
 				</plugins>
