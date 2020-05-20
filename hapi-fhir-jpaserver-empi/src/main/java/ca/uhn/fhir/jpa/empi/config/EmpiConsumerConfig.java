@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkQuerySvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkUpdaterSvcImpl;
@@ -89,6 +90,11 @@ public class EmpiConsumerConfig {
 	@Bean
 	EmpiMatchLinkSvc empiMatchLinkSvc() {
 		return new EmpiMatchLinkSvc();
+	}
+
+	@Bean
+	EmpiEidUpdateService eidUpdateService() {
+		return new EmpiEidUpdateService();
 	}
 
 	@Bean

@@ -609,4 +609,11 @@ public class PersonHelper {
 		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
 	}
+
+	public void handleExternalEidAddition(IAnyResource thePerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
+		if (!eidFromResource.isEmpty()) {
+			updatePersonExternalEidFromEmpiTarget(thePerson, theResource, theEmpiTransactionContext);
+		}
+	}
 }
