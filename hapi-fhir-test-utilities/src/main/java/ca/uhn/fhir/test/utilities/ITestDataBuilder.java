@@ -107,10 +107,12 @@ public interface ITestDataBuilder {
 	}
 
 	default <T extends IBaseResource> Consumer<T> withId(String theId) {
-		return t -> {
-			assertThat(theId, matchesPattern("[a-zA-Z0-9]+"));
-			t.setId(theId);
-		};
+		assertThat(theId, matchesPattern("[a-zA-Z0-9-]+"));
+		return t -> t.setId(theId);
+	}
+
+	default <T extends IBaseResource> Consumer<T> withId(IIdType theId) {
+		return withId(theId.getIdPart());
 	}
 
 	default Consumer<IBaseResource> withTag(String theSystem, String theCode) {

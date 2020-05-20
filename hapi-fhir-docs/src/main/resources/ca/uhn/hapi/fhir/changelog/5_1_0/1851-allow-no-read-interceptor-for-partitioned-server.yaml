@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1851
+title: "In HAPI FHIR 5.0.0, partitioned JPA servers were introduced. The documentation claimed that an interceptor implementing
+   the STORAGE_PARTITION_IDENTIFY_READ was optional, but the server incorrectly made this mandatory. This has been
+   corrected."
