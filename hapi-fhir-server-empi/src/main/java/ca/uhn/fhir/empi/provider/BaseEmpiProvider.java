@@ -95,7 +95,6 @@ public abstract class BaseEmpiProvider {
 	}
 
 	private void validateIsEmpiManaged(String theName, IAnyResource thePerson) {
-		// FIXME KHS test
 		if (!"Person".equals(myFhirContext.getResourceType(thePerson))) {
 			throw new InvalidRequestException("Only Person resources can be merged.  The " + theName + " points to a " + myFhirContext.getResourceType(thePerson));
 		}
