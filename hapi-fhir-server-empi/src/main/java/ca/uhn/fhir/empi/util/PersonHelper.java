@@ -207,7 +207,7 @@ public class PersonHelper {
 	 * @param theSourceResource The Patient that will be used as the starting point for the person.
 	 * @return the Person that is created.
 	 */
-	public IAnyResource createPersonFromEmpiTarget(IBaseResource theSourceResource) {
+	public IAnyResource createPersonFromEmpiTarget(IAnyResource theSourceResource) {
 		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
 		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theSourceResource);
 		if (eidsToApply.isEmpty()) {
@@ -377,25 +377,24 @@ public class PersonHelper {
 	 * Update a Person's EID based on the incoming target resource. If the incoming resource has an external EID, it is applied
 	 * to the Person, unless that person already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
 	 *
+	 * If running in multiple EID mode, then incoming EIDs are simply added to the Person without checking for matches.
+	 *
 	 * @param thePerson     The person to update the external EID on.
 	 * @param theEmpiTarget The target we will retrieve the external EID from.
 	 * @return the modified {@link IBaseResource} representing the person.
 	 */
-	public IBaseResource updatePersonExternalEidFromEmpiTarget(IBaseResource thePerson, IBaseResource theEmpiTarget) {
+	public IAnyResource updatePersonExternalEidFromEmpiTarget(IAnyResource thePerson, IAnyResource theEmpiTarget, EmpiTransactionContext theEmpiTransactionContext) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
 		List<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theEmpiTarget);
 		List<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(thePerson);
 
+
 		if (!incomingTargetEid.isEmpty()) {
-			//The person has no EID. This should be impossible given that we auto-assign an EID at creation time.
-			if (personOfficialEid.isEmpty()) {
-				ourLog.debug("Incoming resource:{} with EID {} is applying this EID to its related Person, as this person does not yet have an external EID", theEmpiTarget.getIdElement().toUnqualifiedVersionless(), incomingTargetEid.stream().map(eid -> eid.toString()).collect(Collectors.joining(",")));
+			if (personOfficialEid.isEmpty() || !myEmpiConfig.isPreventMultipleEids()) {
+				log(theEmpiTransactionContext, "Incoming resource:" + theEmpiTarget.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " is applying this EIDs to its related Person, as this person does not yet have an external EID");
 				addCanonicalEidsToPersonIfAbsent(thePerson, incomingTargetEid);
 			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)) {
-				//FIXME GGG handle multiple new EIDs. What are the rules here?
-				ourLog.debug("incoming resource:{} with EIDs {} does not need to overwrite person, as this EID is already present",
-					theEmpiTarget.getIdElement().toUnqualifiedVersionless(),
-					incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")));
+				log(theEmpiTransactionContext, "incoming resource:" + theEmpiTarget.getIdElement().toVersionless() + " with EIDs "+incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(","))  +" does not need to overwrite person, as this EID is already present");
 			} else {
 				throw new IllegalArgumentException("This would create a duplicate person!");
 			}
@@ -529,7 +528,7 @@ public class PersonHelper {
 	 * @param theComparingPerson
 	 * @return
 	 */
-	public boolean isPotentialDuplicate(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
+	public boolean isPotentialDuplicate(IAnyResource theExistingPerson, IAnyResource theComparingPerson) {
 		List<CanonicalEID> externalEidsPerson = myEIDHelper.getExternalEid(theExistingPerson);
 		List<CanonicalEID> externalEidsResource = myEIDHelper.getExternalEid(theComparingPerson);
 		return !externalEidsPerson.isEmpty() && !externalEidsResource.isEmpty() && !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsPerson);
@@ -604,5 +603,10 @@ public class PersonHelper {
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
+	}
+
+	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
+		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
+		ourLog.debug(theMessage);
 	}
 }

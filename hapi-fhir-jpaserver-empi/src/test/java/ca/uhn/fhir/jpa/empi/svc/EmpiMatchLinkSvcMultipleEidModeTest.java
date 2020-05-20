@@ -28,7 +28,7 @@ import static org.junit.Assert.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @TestPropertySource(properties = {
-	"empi.allow_multiple_eids=true"
+	"empi.prevent_multiple_eids=false"
 })
 public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 	private static final Logger ourLog = getLogger(EmpiMatchLinkSvcMultipleEidModeTest.class);
@@ -90,9 +90,18 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		Patient patient2 = buildPaulPatient();
 		addExternalEID(patient2, "id_5");
 		addExternalEID(patient2, "id_1");
-		createPatientAndUpdateLinks(patient2);
+		patient2 = createPatientAndUpdateLinks(patient2);
 
 		assertThat(patient1, is(samePersonAs(patient2)));
+
+		clearExternalEIDs(patient2);
+		addExternalEID(patient2, "id_6");
+
+		updatePatientAndUpdateLinks(patient2);
+		assertThat(patient1, is(samePersonAs(patient2)));
+
+		Person personFromTarget = getPersonFromTarget(patient2);
+		assertThat(personFromTarget.getIdentifier(), hasSize(6));
 	}
 
 	@Test
@@ -124,6 +133,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 	}
 
 	@Test
+	// Test Case #5
 	public void testWhenPatientEidUpdateWouldCauseALinkChangeThatDuplicatePersonIsCreatedInstead() {
 		Patient patient1 = buildJanePatient();
 		addExternalEID(patient1, "eid-1");

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public final class EIDHelper {
 	}
 
 	/**
-	 * Given an {@link IBaseResource} representing a patient/practitioner/person, retrieve their externally-assigned EID,
+	 * Given an {@link IAnyResource} representing a patient/practitioner/person, retrieve their externally-assigned EID,
 	 * represented as a {@link CanonicalEID}
 	 *
 	 * @param theResource the resource to extract the EID from.
@@ -65,14 +66,14 @@ public final class EIDHelper {
 	}
 
 	/**
-	 * Given an {@link IBaseResource} representing a patient/practitioner/person, retrieve their internally-assigned EID,
+	 * Given an {@link IAnyResource} representing a patient/practitioner/person, retrieve their internally-assigned EID,
 	 * represented as a {@link CanonicalEID}
 	 *
 	 * @param theResource the resource to extract the EID from.
 	 *
 	 * @return An optional {@link CanonicalEID} representing the internal EID. Absent if the EID is not present.
 	 */
-	public List<CanonicalEID> getHapiEid(IBaseResource theResource) {
+	public List<CanonicalEID> getHapiEid(IAnyResource theResource) {
 		return CanonicalEID.extractFromResource(myFhirContext, EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
 	}
 
@@ -102,7 +103,7 @@ public final class EIDHelper {
 	 * @param theComparingPerson
 	 * @return
 	 */
-	public boolean hasEidOverlap(IBaseResource theExistingPerson, IBaseResource theComparingPerson) {
+	public boolean hasEidOverlap(IAnyResource theExistingPerson, IAnyResource theComparingPerson) {
 		List<CanonicalEID> firstEids = this.getExternalEid(theExistingPerson);
 		List<CanonicalEID> secondEids = this.getExternalEid(theComparingPerson);
 		if (firstEids.isEmpty() || secondEids.isEmpty()) {

@@ -87,7 +87,7 @@ public class EmpiPersonFindingSvc {
 		return matchedPersonCandidates;
 	}
 
-	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromIncomingEID(IBaseResource theBaseResource) {
+	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromIncomingEID(IAnyResource theBaseResource) {
 		List<MatchedPersonCandidate> retval = new ArrayList<>();
 
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);

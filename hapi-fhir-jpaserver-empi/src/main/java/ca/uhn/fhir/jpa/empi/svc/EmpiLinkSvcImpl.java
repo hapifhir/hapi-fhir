@@ -110,8 +110,10 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	public void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		myPersonHelper.removeLink(theExistingPerson, theResource.getIdElement(), theEmpiTransactionContext);
 		EmpiLink empiLink = getEmpiLinkForPersonTargetPair(theExistingPerson, theResource);
-		log(theEmpiTransactionContext, "Deleting EmpiLink ["+ theExistingPerson.getIdElement().toVersionless() +" -> "  + theResource.getIdElement().toVersionless()+ "] with result: " + empiLink.getMatchResult());
-		myEmpiLinkDaoSvc.deleteLink(empiLink);
+		if (empiLink != null) {
+			log(theEmpiTransactionContext, "Deleting EmpiLink [" + theExistingPerson.getIdElement().toVersionless() + " -> " + theResource.getIdElement().toVersionless() + "] with result: " + empiLink.getMatchResult());
+			myEmpiLinkDaoSvc.deleteLink(empiLink);
+		}
 	}
 
 	private IBaseBackboneElement personLinkFromEmpiLink(EmpiLink empiLink) {

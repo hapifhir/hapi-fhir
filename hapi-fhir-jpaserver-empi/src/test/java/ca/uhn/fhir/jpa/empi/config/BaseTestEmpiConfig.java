@@ -16,11 +16,11 @@ import java.io.IOException;
 @Configuration
 public abstract class BaseTestEmpiConfig {
 
-	@Value("${empi.prevent_eid_updates:false}")
+	@Value("${empi.prevent_eid_updates:true}")
 	boolean myPreventEidUpdates;
 
-	@Value("${empi.allow_multiple_eids:false}")
-	boolean myAllowMultipleEids;
+	@Value("${empi.prevent_multiple_eids:true}")
+	boolean myPreventMultipleEids;
 
 	@Bean
     IEmpiSettings empiProperties() throws IOException {
@@ -31,7 +31,7 @@ public abstract class BaseTestEmpiConfig {
 			.setEnabled(false)
 			.setScriptText(json)
 			.setPreventEidUpdates(myPreventEidUpdates)
-			.setPreventMultipleEids(myAllowMultipleEids);
+			.setPreventMultipleEids(myPreventMultipleEids);
 	}
 
 	@Bean

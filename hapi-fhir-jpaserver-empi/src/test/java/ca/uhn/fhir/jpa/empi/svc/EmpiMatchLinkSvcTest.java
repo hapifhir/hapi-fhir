@@ -398,6 +398,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(linkFirstRep.getAssurance(), is(equalTo(Person.IdentityAssuranceLevel.LEVEL4)));
 	}
 
+	//Case #1
 	@Test
 	public void testPatientUpdateOverwritesPersonDataOnChanges() {
 		Patient janePatient= createPatientAndUpdateLinks(buildJanePatient());
@@ -437,6 +438,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
+	//Test Case #1
 	public void testPatientUpdatesOverwritePersonData() {
 		Patient paul = buildPaulPatient();
 		String incorrectBirthdate = "1980-06-27";
@@ -457,6 +459,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
+	// Test Case #3
 	public void testUpdatedEidThatWouldRelinkAlsoCausesPossibleDuplicate() {
 		String EID_1 = "123";
 		String EID_2 = "456";
@@ -472,6 +475,68 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		assertThat(originalJanePerson, is(possibleDuplicateOf(originalPaulPerson)));
 		assertThat(jane, is(samePersonAs(paul)));
+	}
+
+	@Test
+	//Test Case #2
+	public void testSinglyLinkedPersonThatGetsAnUpdatedEidSimplyUpdatesEID() {
+		String EID_1 = "123";
+		String EID_2 = "456";
+
+		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
+		Person originalPaulPerson = getPersonFromTarget(paul);
+		String oldEid = myEidHelper.getExternalEid(originalPaulPerson).get(0).getValue();
+		assertThat(oldEid, is(equalTo(EID_1)));
+
+		clearExternalEIDs(paul);
+		addExternalEID(paul, EID_2);
+
+		paul = updatePatientAndUpdateLinks(paul);
+
+		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
+		assertThat(possibleDuplicates, hasSize(0));
+
+		Person newlyFoundPaulPerson = getPersonFromTarget(paul);
+		assertThat(originalPaulPerson, is(samePersonAs(newlyFoundPaulPerson)));
+		String newEid = myEidHelper.getExternalEid(newlyFoundPaulPerson).get(0).getValue();
+		assertThat(newEid, is(equalTo(EID_2)));
+	}
+
+	@Test
+	//Test Case #3
+	public void testWhenAnEidChangeWouldCauseARelinkingThatAPossibleDuplicateIsCreated() {
+		Patient patient1 = buildJanePatient();
+		addExternalEID(patient1, "eid-1");
+		patient1 = createPatientAndUpdateLinks(patient1);
+
+		Patient patient2 = buildPaulPatient();
+		addExternalEID(patient2, "eid-2");
+		patient2 = createPatientAndUpdateLinks(patient2);
+
+		Patient patient3 = buildPaulPatient();
+		addExternalEID(patient3, "eid-2");
+		patient3 = createPatientAndUpdateLinks(patient3);
+
+		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
+		assertThat(patient2, is(samePersonAs(patient3)));
+		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
+		assertThat(possibleDuplicates, hasSize(0));
+		//	Person A -> {P1}
+		//	Person B -> {P2, P3}
+
+		patient2.getIdentifier().clear();
+		addExternalEID(patient2, "eid-1");
+		patient2 = updatePatientAndUpdateLinks(patient2);
+
+		// Person A -> {P1, P2}
+		// Person B -> {P3}
+		// Possible duplicates A<->B
+
+		assertThat(patient2, is(samePersonAs(patient1)));
+
+		possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
+		assertThat(possibleDuplicates, hasSize(1));
+		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 
 	}
 }

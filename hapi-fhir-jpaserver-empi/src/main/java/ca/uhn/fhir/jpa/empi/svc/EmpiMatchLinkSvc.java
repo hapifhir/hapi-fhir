@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -34,7 +35,6 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,6 +64,8 @@ public class EmpiMatchLinkSvc {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	@Autowired
+	private IEmpiSettings myEmpiSettings;
 
 	/**
 	 * Given an Empi Target (consisting of either a Patient or a Practitioner), find a suitable Person candidate for them,
@@ -135,7 +137,7 @@ public class EmpiMatchLinkSvc {
 			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else {
 			if (thePersonCandidate.isMatch()) {
-				handleExternalEidAddition(person, theResource);
+				handleExternalEidAddition(person, theResource, theEmpiTransactionContext);
 				myPersonHelper.updatePersonFromNewlyCreatedEmpiTarget(person, theResource, theEmpiTransactionContext);
 			}
 			myEmpiLinkSvc.updateLink(person, theResource, thePersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
@@ -153,48 +155,55 @@ public class EmpiMatchLinkSvc {
 	}
 
 	private void handleEmpiUpdate(IAnyResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
-		IAnyResource person = getPersonFromMatchedPersonCandidate(theMatchedPersonCandidate);
-		boolean hasEidsInCommon = myEIDHelper.hasEidOverlap(person, theResource);
+		IAnyResource matchedPerson = getPersonFromMatchedPersonCandidate(theMatchedPersonCandidate);
+		boolean hasEidsInCommon = myEIDHelper.hasEidOverlap(matchedPerson, theResource);
 		boolean incomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
 		Optional<EmpiLink> theExistingMatchLink = myEmpiLinkDaoSvc.getMatchedLinkForTarget(theResource);
-
+		IAnyResource existingPerson = null;
 		boolean remainsMatchedToSamePerson;
+		Long existingPersonPid = theExistingMatchLink.get().getPersonPid();
+
 		if (theExistingMatchLink.isPresent()) {
+			existingPerson =  myEmpiResourceDaoSvc.readPersonByPid(new ResourcePersistentId(existingPersonPid));
 			remainsMatchedToSamePerson = candidateIsSameAsEmpiLinkPerson(theExistingMatchLink.get(), theMatchedPersonCandidate);
 		} else {
 			remainsMatchedToSamePerson = false;
 		}
 
 		if (remainsMatchedToSamePerson) {
-			myPersonHelper.updatePersonFromUpdatedEmpiTarget(person, theResource, theEmpiTransactionContext);
+			myPersonHelper.updatePersonFromUpdatedEmpiTarget(matchedPerson, theResource, theEmpiTransactionContext);
 		}
 
 		if (remainsMatchedToSamePerson && (!incomingResourceHasAnEid || hasEidsInCommon)) {
 			//update to patient that uses internal EIDs only.
-			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(matchedPerson, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		}
 
 		if (remainsMatchedToSamePerson && !hasEidsInCommon) {
 			// the user is simply updating their EID. We propagate this change to the Person.
 			//overwrite. No EIDS in common, but still same person.
-			if (theMatchedPersonCandidate.isMatch()) {
-				handleExternalEidOverwrite(person, theResource);
+			if (myEmpiSettings.isPreventMultipleEids()) {
+
+				if (myPersonHelper.getLinkCount(matchedPerson) <= 1 ) { // If there is only 0/1 link on the person, we can safely overwrite the EID.
+					handleExternalEidOverwrite(matchedPerson, theResource, theEmpiTransactionContext);
+				} else { // If the person has multiple patients tied to it, we can't just overwrite the EID, so we split the person.
+					createNewPersonAndFlagAsDuplicate(theResource, theEmpiTransactionContext, existingPerson);
+				}
+			} else {
+				handleExternalEidAddition(matchedPerson, theResource, theEmpiTransactionContext);
 			}
-			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(matchedPerson, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else if (!hasEidsInCommon && !remainsMatchedToSamePerson) {
 			//This is a new linking scenario. we have to break the existing link and link to the new person. For now, we create duplicate.
-			createNewPersonAndFlagAsDuplicate(theResource, theEmpiTransactionContext, person);
+			linkToNewPersonAndFlagAsDuplicate(theResource, existingPerson, matchedPerson, theEmpiTransactionContext);
+
 		} else if (hasEidsInCommon && !remainsMatchedToSamePerson) {
 			//updated patient has an EID that matches to a new candidate. Link them, and set the persons possible duplicates
-			myEmpiLinkSvc.updateLink(person, theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
-			Long personPid = theExistingMatchLink.get().getPersonPid();
-			IAnyResource existingPerson= myEmpiResourceDaoSvc.readPersonByPid(new ResourcePersistentId(personPid));
-			myEmpiLinkSvc.deleteLink(existingPerson, theResource, theEmpiTransactionContext);
-			myEmpiLinkSvc.updateLink(existingPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			linkToNewPersonAndFlagAsDuplicate(theResource, existingPerson, matchedPerson, theEmpiTransactionContext);
 		}
 	}
 
-	private void handleExternalEidOverwrite(IBaseResource thePerson, IBaseResource theResource) {
+	private void handleExternalEidOverwrite(IAnyResource thePerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
 		if (!eidFromResource.isEmpty()) {
 			myPersonHelper.overwriteExternalEids(thePerson, eidFromResource);
@@ -205,11 +214,19 @@ public class EmpiMatchLinkSvc {
 		return theExistingMatchLink.getPersonPid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
 	}
 
-	private void createNewPersonAndFlagAsDuplicate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext, IAnyResource thePerson) {
+	private void createNewPersonAndFlagAsDuplicate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext, IAnyResource theOldPerson) {
 		log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
-		myEmpiLinkSvc.updateLink(newPerson, thePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(newPerson, theOldPerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+	}
+
+	private void linkToNewPersonAndFlagAsDuplicate(IAnyResource theResource, IAnyResource theOldPerson, IAnyResource theNewPerson, EmpiTransactionContext theEmpiTransactionContext) {
+		log(theEmpiTransactionContext, "Changing a match link!");
+		myEmpiLinkSvc.deleteLink(theOldPerson, theResource, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(theNewPerson, theResource, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
+		myEmpiLinkSvc.updateLink(theNewPerson, theOldPerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private IAnyResource getPersonFromMatchedPersonCandidate(MatchedPersonCandidate theMatchedPersonCandidate) {
@@ -217,10 +234,10 @@ public class EmpiMatchLinkSvc {
 		return myEmpiResourceDaoSvc.readPersonByPid(personPid);
 	}
 
-	private void handleExternalEidAddition(IBaseResource thePerson, IBaseResource theResource) {
+	private void handleExternalEidAddition(IAnyResource thePerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
 		if (!eidFromResource.isEmpty()) {
-			myPersonHelper.updatePersonExternalEidFromEmpiTarget(thePerson, theResource);
+			myPersonHelper.updatePersonExternalEidFromEmpiTarget(thePerson, theResource, theEmpiTransactionContext);
 		}
 	}
 

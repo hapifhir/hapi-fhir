@@ -19,10 +19,10 @@ public class EmpiHelperConfig {
 	}
 
 	@Value("${empi.prevent_eid_updates:false}")
-	boolean myStrictMode;
+	boolean myPreventEidUpdates;
 
-	@Value("${empi.allow_multiple_eids:false}")
-	boolean myAllowMultipleEids;
+	@Value("${empi.prevent_multiple_eids:true}")
+	boolean myPreventMultipleEids;
 
 	@Primary
 	@Bean
@@ -35,7 +35,7 @@ public class EmpiHelperConfig {
 		return new EmpiSettings()
 			.setEnabled(true)
 			.setScriptText(json)
-			.setPreventEidUpdates(myStrictMode)
-			.setPreventMultipleEids(myAllowMultipleEids);
+			.setPreventEidUpdates(myPreventEidUpdates)
+			.setPreventMultipleEids(myPreventMultipleEids);
 	}
 }
