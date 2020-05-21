@@ -119,7 +119,7 @@ public class EmpiPersonFindingSvc {
 			Optional<EmpiLink> oLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(targetPid);
 			if (oLink.isPresent()) {
 				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getPersonPid());
-				ourLog.debug("Resource previously linked.  Using existing link.");
+				ourLog.debug("Resource previously linked. Using existing link.");
 				retval.add(new MatchedPersonCandidate(personPid, oLink.get().getMatchResult()));
 			}
 		}
