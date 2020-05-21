@@ -12,8 +12,8 @@ When the $diff operation is invoked at the instance level (meaning it is invoked
 
 ## Parameters
 
-* `[[#{T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_FROM_VERSION_PARAMETER}]]=[versionId]`: (*optional*) If specified, compare using this version as the source. If not specified, the immediately previous version will be compared.
-* `[[#{T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_INCLUDE_META_PARAMETER}]]=true`: (*optional*) If specified, changes to Resource.meta will be included in the diff. This element is omitted by default.  
+* `[[${T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_FROM_VERSION_PARAMETER}]]=[versionId]`: (*optional*) If specified, compare using this version as the source. If not specified, the immediately previous version will be compared.
+* `[[${T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_INCLUDE_META_PARAMETER}]]=true`: (*optional*) If specified, changes to Resource.meta will be included in the diff. This element is omitted by default.  
 
 To invoke:
 
@@ -51,14 +51,14 @@ When the $diff operation is invoked at the instance level (meaning it is invoked
 
 ## Parameters
 
-* `[[#{T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_FROM_PARAMETER}]]=[reference]`: Specifies the source of the comparison. The value must include a resource type and a resource ID, and can optionally include a version, e.g. `Patient/123` or `Patient/123/_history/2`.
-* `[[#{T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_TO_PARAMETER}]]=[reference]`: Specifies the target of the comparison. The value must include a resource type and a resource ID, and can optionally include a version, e.g. `Patient/123` or `Patient/123/_history/2`.
-* `[[#{T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_INCLUDE_META_PARAMETER}]]=true`: (*optional*) If specified, changes to Resource.meta will be included in the diff. This element is omitted by default.  
+* `[[${T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_FROM_PARAMETER}]]=[reference]`: Specifies the source of the comparison. The value must include a resource type and a resource ID, and can optionally include a version, e.g. `Patient/123` or `Patient/123/_history/2`.
+* `[[${T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_TO_PARAMETER}]]=[reference]`: Specifies the target of the comparison. The value must include a resource type and a resource ID, and can optionally include a version, e.g. `Patient/123` or `Patient/123/_history/2`.
+* `[[${T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_INCLUDE_META_PARAMETER}]]=true`: (*optional*) If specified, changes to Resource.meta will be included in the diff. This element is omitted by default.  
 
 To invoke:
 
 ```http
-GET http://fhir.example.com/baseR4/$diff?[[#{T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_FROM_PARAMETER}]]=Patient/1&[[#{T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_TO_PARAMETER}]]=Patient/2
+GET http://fhir.example.com/baseR4/$diff?[[${T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_FROM_PARAMETER}]]=Patient/1&[[${T(ca.uhn.fhir.jpa.model.util.ProviderConstants).DIFF_TO_PARAMETER}]]=Patient/2
 ```
 
 The server will produce a response resembling the following:
