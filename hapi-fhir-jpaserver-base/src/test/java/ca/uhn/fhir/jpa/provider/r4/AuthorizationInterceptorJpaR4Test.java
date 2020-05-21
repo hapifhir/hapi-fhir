@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.model.util.ProviderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -33,9 +34,11 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -181,8 +184,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 								return patient
 									.getIdentifier()
 									.stream()
-									.filter(t-> "http://uhn.ca/mrns".equals(t.getSystem()))
-									.anyMatch(t-> "100".equals(t.getValue()));
+									.filter(t -> "http://uhn.ca/mrns".equals(t.getSystem()))
+									.anyMatch(t -> "100".equals(t.getValue()));
 							}
 							return false;
 						}
@@ -726,6 +729,87 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			assertEquals(403, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
+		}
+
+	}
+
+
+	@Test
+	public void testDiffOperation_AllowedByType_Instance() {
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("A"), withActiveFalse());
+		createObservation(withId("B"), withStatus("final"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onAnyInstance().andAllowAllResponses().andThen()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onServer().andAllowAllResponses().andThen()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Parameters diff;
+
+		diff = ourClient.operation().onInstance("Patient/A").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+		assertEquals(1, diff.getParameter().size());
+
+		 diff = ourClient.operation().onInstanceVersion(new IdType("Patient/A/_history/2")).named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+		assertEquals(1, diff.getParameter().size());
+
+		try {
+			ourClient.operation().onInstance("Observation/B").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+
+	}
+
+	@Test
+	public void testDiffOperation_AllowedByType_Server() {
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveFalse());
+		createObservation(withId("C"), withStatus("final"));
+		createObservation(withId("D"), withStatus("amended"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onAnyInstance().andAllowAllResponses().andThen()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onServer().andAllowAllResponses().andThen()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Parameters diff;
+
+		diff = ourClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.DIFF_OPERATION_NAME)
+			.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Patient/A"))
+			.andParameter( ProviderConstants.DIFF_TO_PARAMETER, new StringType("Patient/B"))
+			.execute();
+		assertEquals(2, diff.getParameter().size());
+
+		try {
+			ourClient
+				.operation()
+				.onServer()
+				.named(ProviderConstants.DIFF_OPERATION_NAME)
+				.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Observation/C"))
+				.andParameter( ProviderConstants.DIFF_TO_PARAMETER, new StringType("Observation/D"))
+				.execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
 		}
 
 	}

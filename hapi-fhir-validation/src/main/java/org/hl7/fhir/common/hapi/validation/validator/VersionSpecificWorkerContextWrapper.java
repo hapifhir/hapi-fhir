@@ -26,7 +26,6 @@ import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.r5.utils.INarrativeGenerator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.cache.NpmPackage;
@@ -320,11 +319,6 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 
 	@Override
 	public String getAbbreviation(String name) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public INarrativeGenerator getNarrativeGenerator(String prefix, String basePath) {
 		throw new UnsupportedOperationException();
 	}
 

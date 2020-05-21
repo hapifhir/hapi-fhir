@@ -103,11 +103,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public org.hl7.fhir.r5.utils.INarrativeGenerator getNarrativeGenerator(String thePrefix, String theBasePath) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public IParser getParser(ParserType theType) {
 		throw new UnsupportedOperationException();
 	}
