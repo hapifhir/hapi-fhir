@@ -266,7 +266,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			return false;
 		}
 		StringParam string = (StringParam) theParam;
-		String normalizedString = StringNormalizer.normalizeString(defaultString(string.getValue()));
+		String normalizedString = StringNormalizer.normalizeStringForSearchIndexing(defaultString(string.getValue()));
 		return defaultString(getValueNormalized()).startsWith(normalizedString);
 	}
 

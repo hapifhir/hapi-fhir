@@ -56,10 +56,10 @@ public class NameSimilarity implements IEmpiFieldSimilarity {
 		List<String> rightGivenNames = NameUtil.extractGivenNames(theFhirContext, theRightBase);
 
 		if (!exact) {
-			leftFamilyName = StringNormalizer.normalizeString(leftFamilyName);
-			rightFamilyName = StringNormalizer.normalizeString(rightFamilyName);
-			leftGivenNames = leftGivenNames.stream().map(StringNormalizer::normalizeString).collect(Collectors.toList());
-			rightGivenNames = rightGivenNames.stream().map(StringNormalizer::normalizeString).collect(Collectors.toList());
+			leftFamilyName = StringNormalizer.normalizeStringForSearchIndexing(leftFamilyName);
+			rightFamilyName = StringNormalizer.normalizeStringForSearchIndexing(rightFamilyName);
+			leftGivenNames = leftGivenNames.stream().map(StringNormalizer::normalizeStringForSearchIndexing).collect(Collectors.toList());
+			rightGivenNames = rightGivenNames.stream().map(StringNormalizer::normalizeStringForSearchIndexing).collect(Collectors.toList());
 		}
 
 		for (String leftGivenName : leftGivenNames) {

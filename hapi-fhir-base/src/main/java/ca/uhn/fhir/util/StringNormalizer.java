@@ -24,7 +24,7 @@ import java.io.CharArrayWriter;
 import java.text.Normalizer;
 
 public class StringNormalizer {
-	public static String normalizeString(String theString) {
+	public static String normalizeStringForSearchIndexing(String theString) {
 		CharArrayWriter outBuffer = new CharArrayWriter(theString.length());
 
 		/*

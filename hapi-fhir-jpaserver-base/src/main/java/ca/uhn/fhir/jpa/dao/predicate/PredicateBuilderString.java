@@ -131,7 +131,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 		}
 
 		if (myDontUseHashesForSearch) {
-			String likeExpression = StringNormalizer.normalizeString(rawSearchTerm);
+			String likeExpression = StringNormalizer.normalizeStringForSearchIndexing(rawSearchTerm);
 			if (myDaoConfig.isAllowContainsSearches()) {
 				if (theParameter instanceof StringParam) {
 					if (((StringParam) theParameter).isContains()) {
@@ -161,7 +161,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 			return theBuilder.equal(theFrom.get("myHashExact").as(Long.class), hash);
 		} else {
 			// Normalized Match
-			String normalizedString = StringNormalizer.normalizeString(rawSearchTerm);
+			String normalizedString = StringNormalizer.normalizeStringForSearchIndexing(rawSearchTerm);
 			String likeExpression;
 			if ((theParameter instanceof StringParam) &&
 				(((((StringParam) theParameter).isContains()) &&

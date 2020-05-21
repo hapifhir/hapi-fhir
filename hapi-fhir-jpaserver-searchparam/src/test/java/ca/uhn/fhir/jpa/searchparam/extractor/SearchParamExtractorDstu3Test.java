@@ -74,7 +74,7 @@ public class SearchParamExtractorDstu3Test {
 		String value = IntStream.range(1, 200).mapToObj(v -> "a").collect(Collectors.joining()) + "ئ";
 		assertEquals(value.length(), 200);
 		assertEquals(Normalizer.normalize(value, Normalizer.Form.NFD).length(), 201);
-		assertEquals(StringNormalizer.normalizeString(value).length(), 201);
+		assertEquals(StringNormalizer.normalizeStringForSearchIndexing(value).length(), 201);
 
 		Questionnaire questionnaire = new Questionnaire();
 		questionnaire.setDescription(value);

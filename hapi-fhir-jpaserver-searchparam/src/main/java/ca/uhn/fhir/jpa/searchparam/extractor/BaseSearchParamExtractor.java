@@ -933,7 +933,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			String searchParamName = theSearchParam.getName();
-			String valueNormalized = StringNormalizer.normalizeString(value);
+			String valueNormalized = StringNormalizer.normalizeStringForSearchIndexing(value);
 			if (valueNormalized.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
 				valueNormalized = valueNormalized.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 			}
