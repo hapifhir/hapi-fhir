@@ -10,7 +10,7 @@ Note: The following sections describe linking between Patient and Person resourc
 
 ## Working Example
 
-The [hapi-fhir-jpaserver-starter](https://github.com/hapifhir/hapi-fhir-jpaserver-starter) project contains a complete working example of the HAPI EMPI feature and documentation about how to enable and configure it. You may wish to browse its source to see how this works.
+The [JPA Server Starter](/hapi-fhir/docs/server_jpa/get_started.html) project contains a complete working example of the HAPI EMPI feature and documentation about how to enable and configure it. You may wish to browse its source to see how this works.
 
 ## Person linking in FHIR
 
@@ -156,4 +156,3 @@ When EMPI is enabled, the HAPI FHIR JPA Server does the following things on star
 1. It creates two MESSAGE subscriptions, called 'empi-patient' and 'empi-practitioner' that match all incoming Patient and Practitioner resources and send them to an internal queue called "empi".  The JPA Server listens to this queue and links incoming resources to Persons.
 1. It registers the `Patient/$match` operation.  See [$match](https://www.hl7.org/fhir/operation-patient-match.html) for a description of this operation.
 1. It registers a new dao interceptor that restricts access to EMPI managed Person records.
-
