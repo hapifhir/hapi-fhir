@@ -108,7 +108,7 @@ public class EmpiMessageHandler implements MessageHandler {
 				break;
 			case DELETE:
 			default:
-				ourLog.warn("Not creating an EmpiTransactionContext for {}", theMsg.getOperationType());
+				ourLog.trace("Not creating an EmpiTransactionContext for {}", theMsg.getOperationType());
 				throw new InvalidRequestException("We can't handle non-update/create operations in EMPI");
 		}
 		return new EmpiTransactionContext(transactionLogMessages, empiOperation);
