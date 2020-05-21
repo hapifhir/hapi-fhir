@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.FileUtil;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
@@ -15,11 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
+import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This {@link IValidationSupport validation support module} can be used to validate codes against common
@@ -36,10 +38,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String CURRENCIES_CODESYSTEM_URL = "urn:iso:std:iso:4217";
 	public static final String CURRENCIES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/currencies";
 	public static final String UCUM_CODESYSTEM_URL = "http://unitsofmeasure.org";
+	public static final String UCUM_VALUESET_URL = "http://hl7.org/fhir/ValueSet/ucum-units";
 	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
 	private static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
 	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
-	public static final String UCUM_VALUESET_URL = "http://hl7.org/fhir/ValueSet/ucum-units";
 	private static Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private final FhirContext myFhirContext;
@@ -56,7 +58,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Override
 	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		String url = getValueSetUrl(theValueSet);
+		return validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, url);
+	}
 
+	@Override
+	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		/* **************************************************************************************
 		 * NOTE: Update validation_support_modules.html if any of the support in this module
 		 * changes in any way!
@@ -64,7 +70,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		Map<String, String> handlerMap = null;
 		String expectSystem = null;
-		switch (url) {
+		switch (defaultString(theValueSetUrl)) {
 			case USPS_VALUESET_URL:
 				handlerMap = USPS_CODES;
 				expectSystem = USPS_CODESYSTEM_URL;
@@ -87,13 +93,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				if (system == null && theOptions.isInferSystem()) {
 					system = UCUM_CODESYSTEM_URL;
 				}
-				LookupCodeResult lookupResult = lookupCode(theRootValidationSupport, system, theCode);
-				if (lookupResult != null) {
-					if (lookupResult.isFound()) {
-						return new CodeValidationResult()
-							.setCode(lookupResult.getSearchedForCode())
-							.setDisplay(lookupResult.getCodeDisplay());
-					}
+				CodeValidationResult validationResult = validateLookupCode(theRootValidationSupport, theCode, system);
+				if (validationResult != null) {
+					return validationResult;
 				}
 			}
 		}
@@ -113,8 +115,30 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				.setMessage("Code \"" + theCode + "\" is not in system: " + USPS_CODESYSTEM_URL);
 		}
 
+		if (isBlank(theValueSetUrl)) {
+			CodeValidationResult validationResult = validateLookupCode(theRootValidationSupport, theCode, theCodeSystem);
+			if (validationResult != null) {
+				return validationResult;
+			}
+		}
+
 		return null;
 	}
+
+	@Nullable
+	public CodeValidationResult validateLookupCode(IValidationSupport theRootValidationSupport, String theCode, String theSystem) {
+		LookupCodeResult lookupResult = lookupCode(theRootValidationSupport, theSystem, theCode);
+		CodeValidationResult validationResult = null;
+		if (lookupResult != null) {
+			if (lookupResult.isFound()) {
+				validationResult = new CodeValidationResult()
+					.setCode(lookupResult.getSearchedForCode())
+					.setDisplay(lookupResult.getCodeDisplay());
+			}
+		}
+		return validationResult;
+	}
+
 
 	@Override
 	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
