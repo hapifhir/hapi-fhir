@@ -932,6 +932,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IHistoryUntyped onInstance(String theId) {
+			Validate.notBlank(theId, "theId must not be null or blank");
+			IIdType id = myContext.getVersion().newIdType();
+			id.setValue(theId);
+			return onInstance(id);
+		}
+
+		@Override
 		public IHistoryUntyped onServer() {
 			return this;
 		}
@@ -1297,7 +1305,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				return retVal;
 			}
 			IClientResponseHandler handler = new ResourceOrBinaryResponseHandler()
-					.setPreferResponseTypes(getPreferResponseTypes(myType));
+				.setPreferResponseTypes(getPreferResponseTypes(myType));
 
 			if (myReturnMethodOutcome) {
 				handler = new MethodOutcomeResponseHandler(handler);
@@ -1337,6 +1345,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IOperationUnnamed onInstance(IIdType theId) {
 			myId = theId.toVersionless();
 			return this;
+		}
+
+		@Override
+		public IOperationUnnamed onInstance(String theId) {
+			Validate.notBlank(theId, "theId must not be null or blank");
+			IIdType id = myContext.getVersion().newIdType();
+			id.setValue(theId);
+			return onInstance(id);
 		}
 
 		@Override
@@ -1478,7 +1494,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 
-	private final class MethodOutcomeResponseHandler  implements IClientResponseHandler<MethodOutcome> {
+	private final class MethodOutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
 		private final IClientResponseHandler<? extends IBaseResource> myWrap;
 
 		private MethodOutcomeResponseHandler(IClientResponseHandler<? extends IBaseResource> theWrap) {

@@ -84,6 +84,14 @@ class OperationRule extends BaseRule implements IAuthRule {
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
+		// Operation rules apply to the execution of the operation itself, not to side effects like
+		// loading resources (that will presumably be reflected in the response). Those loads need
+		// to be explicitly authorized
+		boolean isResourceAccess = thePointcut.equals(Pointcut.STORAGE_PREACCESS_RESOURCES) || thePointcut.equals(Pointcut.STORAGE_PRESHOW_RESOURCES);
+		if (isResourceAccess) {
+			return null;
+		}
+
 		boolean applies = false;
 		switch (theOperation) {
 			case ADD_TAGS:
@@ -126,7 +134,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 					}
 					if (requestResourceId != null) {
 						if (myAppliesToIds != null) {
-							String instanceId = requestResourceId .toUnqualifiedVersionless().getValue();
+							String instanceId = requestResourceId.toUnqualifiedVersionless().getValue();
 							for (IIdType next : myAppliesToIds) {
 								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
 									applies = true;
@@ -138,7 +146,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 							// TODO: Convert to a map of strings and keep the result
 							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
 								String resName = ctx.getResourceDefinition(next).getName();
-								if (resName.equals(requestResourceId .getResourceType())) {
+								if (resName.equals(requestResourceId.getResourceType())) {
 									applies = true;
 									break;
 								}
