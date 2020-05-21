@@ -66,6 +66,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
+		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		return retVal;
 	}
 

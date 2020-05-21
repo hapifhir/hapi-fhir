@@ -1618,13 +1618,22 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IPatchWithBody withFhirPatch(IBaseParameters thePatchBody) {
+			Validate.notNull(thePatchBody, "thePatchBody must not be null");
+
+			myPatchType = PatchTypeEnum.FHIR_PATCH_JSON;
+			myPatchBody = myContext.newJsonParser().encodeResourceToString(thePatchBody);
+
+			return this;
+		}
+
+		@Override
 		public IPatchExecutable withId(IIdType theId) {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");
 			}
-			if (theId.hasIdPart() == false) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId.getValue());
-			}
+			Validate.notBlank(theId.getIdPart(), "theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: %s", UrlUtil.sanitizeUrlPart(theId.getValue()));
+			Validate.notBlank(theId.getResourceType(), "theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: %s", UrlUtil.sanitizeUrlPart(theId.getValue()));
 			myId = theId;
 			return this;
 		}
@@ -1634,11 +1643,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");
 			}
-			if (isBlank(theId)) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
-			}
-			myId = new IdDt(theId);
-			return this;
+			return withId(new IdDt(theId));
 		}
 
 	}

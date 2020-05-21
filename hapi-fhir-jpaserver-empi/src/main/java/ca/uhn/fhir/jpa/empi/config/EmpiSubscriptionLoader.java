@@ -26,6 +26,7 @@ import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,8 +34,11 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.Semaphore;
+
 @Service
 public class EmpiSubscriptionLoader {
+	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	public static final String EMPI_PATIENT_SUBSCRIPTION_ID = "empi-patient";
 	public static final String EMPI_PRACTITIONER_SUBSCRIPTION_ID = "empi-practitioner";
 	@Autowired
@@ -43,26 +47,53 @@ public class EmpiSubscriptionLoader {
 	public DaoRegistry myDaoRegistry;
 	@Autowired
 	IChannelNamer myChannelNamer;
+	private Semaphore myUpdateSubscriptionsSemaphore = new Semaphore(1);
+	private final Object myUpdateSubscriptionsLock = new Object();
+	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
+	private IBaseResource myPatientSub;
+	private IBaseResource myPractitionerSub;
 
-	synchronized public void daoUpdateEmpiSubscriptions() {
-		IBaseResource patientSub;
-		IBaseResource practitionerSub;
+	public void daoUpdateEmpiSubscriptions() {
+		mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				patientSub = buildEmpiSubscriptionDstu3(EMPI_PATIENT_SUBSCRIPTION_ID, "Patient?");
-				practitionerSub = buildEmpiSubscriptionDstu3(EMPI_PRACTITIONER_SUBSCRIPTION_ID, "Practitioner?");
+				myPatientSub = buildEmpiSubscriptionDstu3(EMPI_PATIENT_SUBSCRIPTION_ID, "Patient?");
+				myPractitionerSub = buildEmpiSubscriptionDstu3(EMPI_PRACTITIONER_SUBSCRIPTION_ID, "Practitioner?");
 				break;
 			case R4:
-				patientSub = buildEmpiSubscriptionR4(EMPI_PATIENT_SUBSCRIPTION_ID, "Patient?");
-				practitionerSub = buildEmpiSubscriptionR4(EMPI_PRACTITIONER_SUBSCRIPTION_ID, "Practitioner?");
+				myPatientSub = buildEmpiSubscriptionR4(EMPI_PATIENT_SUBSCRIPTION_ID, "Patient?");
+				myPractitionerSub = buildEmpiSubscriptionR4(EMPI_PRACTITIONER_SUBSCRIPTION_ID, "Practitioner?");
 				break;
 			default:
 				throw new ConfigurationException("EMPI not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 
-		IFhirResourceDao<IBaseResource> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-		subscriptionDao.update(patientSub);
-		subscriptionDao.update(practitionerSub);
+		updateSubscriptions();
+	}
+
+	private void updateSubscriptions() {
+		if (!myUpdateSubscriptionsSemaphore.tryAcquire()) {
+			return;
+		}
+		try {
+			doUpdateSubscriptionsWithRetry();
+		} finally {
+			myUpdateSubscriptionsSemaphore.release();
+		}
+	}
+
+	private Boolean doUpdateSubscriptionsWithRetry() {
+		Retrier<Boolean> updateSubscriptionRetrier = new Retrier<>(this::doUpdateSubscriptions, MAX_RETRIES);
+		return updateSubscriptionRetrier.runWithRetry();
+	}
+
+	private Boolean doUpdateSubscriptions() {
+		synchronized (myUpdateSubscriptionsLock) {
+			mySubscriptionDao.update(myPatientSub);
+			mySubscriptionDao.update(myPractitionerSub);
+			return true;
+		}
 	}
 
 	private org.hl7.fhir.dstu3.model.Subscription buildEmpiSubscriptionDstu3(String theId, String theCriteria) {
