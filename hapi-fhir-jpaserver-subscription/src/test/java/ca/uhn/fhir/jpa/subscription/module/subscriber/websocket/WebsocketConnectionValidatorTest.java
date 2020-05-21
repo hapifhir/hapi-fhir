@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -63,6 +64,8 @@ public class WebsocketConnectionValidatorTest {
 	ISchedulerService mySchedulerService;
 	@MockBean
 	SubscriptionRegistry mySubscriptionRegistry;
+	@MockBean
+	ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
 	WebsocketConnectionValidator myWebsocketConnectionValidator;

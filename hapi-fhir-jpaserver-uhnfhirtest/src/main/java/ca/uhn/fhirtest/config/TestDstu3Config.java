@@ -66,6 +66,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setReindexThreadCount(1);
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
+		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		return retVal;
 	}
 

@@ -67,6 +67,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setWebsocketContextPath("/");
 		retVal.setFilterParameterEnabled(true);
+		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		return retVal;
 	}
 

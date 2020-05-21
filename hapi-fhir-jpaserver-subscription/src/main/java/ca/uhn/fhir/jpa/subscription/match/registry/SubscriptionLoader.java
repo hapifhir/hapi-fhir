@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -59,6 +60,8 @@ public class SubscriptionLoader {
 	private ISchedulerService mySchedulerService;
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor
@@ -120,9 +123,12 @@ public class SubscriptionLoader {
 		synchronized (mySyncSubscriptionsLock) {
 			ourLog.debug("Starting sync subscriptions");
 			SearchParameterMap map = new SearchParameterMap();
-			map.add(Subscription.SP_STATUS, new TokenOrListParam()
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
+
+			if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
+				map.add(Subscription.SP_STATUS, new TokenOrListParam()
+					.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
+					.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
+			}
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 
 			IBundleProvider subscriptionBundleList =  myDaoRegistry.getSubscriptionDao().search(map);
@@ -143,7 +149,7 @@ public class SubscriptionLoader {
 				String nextId = resource.getIdElement().getIdPart();
 				allIds.add(nextId);
 
-				boolean activated = mySubscriptionActivatingInterceptor.activateOrRegisterSubscriptionIfRequired(resource);
+				boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(resource);
 				if (activated) {
 					activatedCount++;
 				}

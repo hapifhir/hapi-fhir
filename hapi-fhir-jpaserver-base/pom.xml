@@ -261,7 +261,6 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.199</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -567,6 +566,11 @@
 			<artifactId>embedded-elasticsearch</artifactId>
 			<version>2.10.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hl7.fhir.testcases</groupId>
+			<artifactId>fhir-test-cases</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
@@ -581,8 +585,6 @@
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
-			<version>16.0.3</version>
-			<scope>compile</scope>
 		</dependency>
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
@@ -680,7 +682,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError -XX:+CrashOnOutOfMemoryError</argLine>
+					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 					<forkCount>0.6C</forkCount>
 					<excludes>*StressTest*</excludes>
 				</configuration>
@@ -826,6 +828,21 @@
 							<excludes>
 								<exclude>**/stresstest/*</exclude>
 							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<forkCount>1</forkCount>
+							<runOrder>alphabetical</runOrder>
 						</configuration>
 					</plugin>
 				</plugins>
