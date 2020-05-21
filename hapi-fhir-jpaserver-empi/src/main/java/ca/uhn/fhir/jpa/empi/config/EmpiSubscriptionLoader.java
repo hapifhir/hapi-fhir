@@ -24,17 +24,23 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmpiSubscriptionLoader {
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
+
 	public static final String EMPI_PATIENT_SUBSCRIPTION_ID = "empi-patient";
 	public static final String EMPI_PRACTITIONER_SUBSCRIPTION_ID = "empi-practitioner";
 	@Autowired
@@ -42,7 +48,10 @@ public class EmpiSubscriptionLoader {
 	@Autowired
 	public DaoRegistry myDaoRegistry;
 	@Autowired
+	public IdHelperService myIdHelperService;
+	@Autowired
 	IChannelNamer myChannelNamer;
+	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
 
 	synchronized public void daoUpdateEmpiSubscriptions() {
 		IBaseResource patientSub;
@@ -60,9 +69,18 @@ public class EmpiSubscriptionLoader {
 				throw new ConfigurationException("EMPI not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 
-		IFhirResourceDao<IBaseResource> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-		subscriptionDao.update(patientSub);
-		subscriptionDao.update(practitionerSub);
+		mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+		updateIfNotPresent(patientSub);
+		updateIfNotPresent(practitionerSub);
+	}
+
+	private synchronized void updateIfNotPresent(IBaseResource theSubscription) {
+		try {
+			mySubscriptionDao.read(theSubscription.getIdElement());
+		} catch (ResourceNotFoundException e) {
+			ourLog.info("Creating subsription " + theSubscription.getIdElement());
+			mySubscriptionDao.update(theSubscription);
+		}
 	}
 
 	private org.hl7.fhir.dstu3.model.Subscription buildEmpiSubscriptionDstu3(String theId, String theCriteria) {

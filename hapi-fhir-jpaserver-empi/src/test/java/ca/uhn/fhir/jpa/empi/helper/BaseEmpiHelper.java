@@ -79,7 +79,8 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterEmpiLatch);
 
-		// We need to call this because subscriptions will get deleted in @After cleanpu
+		// We need to call this because subscriptions will get deleted in @After cleanup
+		waitForActivatedSubscriptionCount(0);
 		myEmpiSubscriptionLoader.daoUpdateEmpiSubscriptions();
 		mySubscriptionLoader.syncSubscriptions();
 		waitForActivatedSubscriptionCount(2);
