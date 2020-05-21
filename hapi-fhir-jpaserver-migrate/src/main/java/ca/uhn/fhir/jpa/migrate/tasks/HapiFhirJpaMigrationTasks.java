@@ -74,7 +74,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	private void init510() { // 20200520 - present
 		Builder version = forVersion(VersionEnum.V5_1_0);
-		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		Builder.BuilderWithTableName spidxDate = version.onTable("MPI_LINK");
 		spidxDate.addIndex("20200520.1", "IDX_EMPI_PERSON_PID").unique(false).withColumns("PERSON_PID");
 		spidxDate.addIndex("20200520.2", "IDX_EMPI_TARGET_PID").unique(false).withColumns("TARGET_PID");
 	}
