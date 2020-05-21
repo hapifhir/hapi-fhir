@@ -859,11 +859,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myServerName = theServerName;
 	}
 
-	public IResourceProvider getServerProfilesProvider() {
-		IFhirVersionServer versionServer = (IFhirVersionServer) getFhirContext().getVersion().getServerVersion();
-		return versionServer.createServerProfilesProvider(this);
-	}
-
 	/**
 	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only,
 	 * but can be helpful to set with something appropriate.
@@ -1242,8 +1237,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				// 'true' tells registerProviders() that
 				// this call is part of initialization
 				registerProviders(providers, true);
-
-				findResourceMethods(getServerProfilesProvider());
 
 				confProvider = getServerConformanceProvider();
 				if (confProvider == null) {
