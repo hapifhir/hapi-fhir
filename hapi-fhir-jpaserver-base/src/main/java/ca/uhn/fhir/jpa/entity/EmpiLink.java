@@ -75,22 +75,18 @@ public class EmpiLink {
 
 	@Column(name = "MATCH_RESULT", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
-	@OptimisticLock(excluded = true)
 	private EmpiMatchResultEnum myMatchResult;
 
 	@Column(name = "LINK_SOURCE", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
-	@OptimisticLock(excluded = true)
 	private EmpiLinkSourceEnum myLinkSource;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false)
-	@OptimisticLock(excluded = true)
 	private Date myCreated;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "UPDATED", nullable = false)
-	@OptimisticLock(excluded = true)
 	private Date myUpdated;
 
 	public Long getId() {
