@@ -546,6 +546,8 @@ public class FhirContext {
 	/**
 	 * Returns an unmodifiable set containing all resource names known to this
 	 * context
+	 *
+	 * @since 5.1.0
 	 */
 	public Set<String> getResourceTypes() {
 		Set<String> resourceNames = new HashSet<>();
