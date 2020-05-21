@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,8 +108,8 @@ public class EmpiMessageHandler implements MessageHandler {
 				break;
 			case DELETE:
 			default:
-				ourLog.trace("Not creating an EmpiTransactionContext for {}", theMsg.getOperationType());
-				return null;
+				ourLog.warn("Not creating an EmpiTransactionContext for {}", theMsg.getOperationType());
+				throw new InvalidRequestException("We can't handle non-update/create operations in EMPI");
 		}
 		return new EmpiTransactionContext(transactionLogMessages, empiOperation);
 	}
