@@ -44,9 +44,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = {EmpiHelperConfig.class})
-public class EmpiStorageInterceptorTest extends BaseEmpiR4Test {
+public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 
-	private static final Logger ourLog = getLogger(EmpiStorageInterceptorTest.class);
+	private static final Logger ourLog = getLogger(EmpiStorageInterceptorIT.class);
 
 	@Rule
 	@Autowired

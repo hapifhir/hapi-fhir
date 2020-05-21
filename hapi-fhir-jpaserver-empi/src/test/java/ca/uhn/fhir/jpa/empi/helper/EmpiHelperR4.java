@@ -6,18 +6,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EmpiHelperR4 extends BaseEmpiHelper {
-	@Autowired
-	private IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	private IFhirResourceDao<Practitioner> myPractitionerDao;
-	@Autowired
-	private IFhirResourceDao<Person> myPersonDao;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
