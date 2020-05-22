@@ -113,7 +113,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 				} else if (myAppliesToTypes != null) {
 					// TODO: Convert to a map of strings and keep the result
 					for (Class<? extends IBaseResource> next : myAppliesToTypes) {
-						String resName = ctx.getResourceDefinition(next).getName();
+						String resName = ctx.getResourceType(next);
 						if (resName.equals(theRequestDetails.getResourceName())) {
 							applies = true;
 							break;
@@ -145,8 +145,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 						if (myAppliesToInstancesOfType != null) {
 							// TODO: Convert to a map of strings and keep the result
 							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
-								String resName = ctx.getResourceDefinition(next).getName();
-								if (resName.equals(requestResourceId.getResourceType())) {
+								String resName = ctx.getResourceType(next);
+								if (resName.equals(requestResourceId .getResourceType())) {
 									applies = true;
 									break;
 								}

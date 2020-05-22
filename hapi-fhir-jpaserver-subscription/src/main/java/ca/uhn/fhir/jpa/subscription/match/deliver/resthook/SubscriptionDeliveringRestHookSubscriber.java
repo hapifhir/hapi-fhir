@@ -60,12 +60,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDeliverySubscriber {
+	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
-
 
 	/**
 	 * Constructor

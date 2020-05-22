@@ -21,12 +21,26 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory;
+import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.ValueSet.*;
-import org.junit.*;
+import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,8 +48,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @SuppressWarnings("Duplicates")
 public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {

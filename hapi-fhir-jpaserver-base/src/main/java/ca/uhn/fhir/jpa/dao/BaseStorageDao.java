@@ -85,7 +85,7 @@ public abstract class BaseStorageDao {
 	 * @param theResource The resource that is about to be stored
 	 */
 	protected void preProcessResourceForStorage(IBaseResource theResource) {
-		String type = getContext().getResourceDefinition(theResource).getName();
+		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
 			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
 		}

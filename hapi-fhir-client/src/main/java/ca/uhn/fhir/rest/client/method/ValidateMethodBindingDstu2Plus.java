@@ -29,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -72,7 +71,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 		IBaseParameters parameters = (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
 		ParametersUtil.addParameterToParameters(theContext, parameters, "resource", theResource);
 		
-		String resourceName = theContext.getResourceDefinition(theResource).getName();
+		String resourceName = theContext.getResourceType(theResource);
 		String resourceId = theResource.getIdElement().getIdPart();
 		
 		BaseHttpClientInvocation retVal = createOperationInvocation(theContext, resourceName, resourceId, null,Constants.EXTOP_VALIDATE, parameters, false);

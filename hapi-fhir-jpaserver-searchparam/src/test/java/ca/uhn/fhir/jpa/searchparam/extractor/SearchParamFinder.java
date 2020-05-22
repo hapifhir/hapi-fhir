@@ -28,7 +28,7 @@ public class SearchParamFinder {
 	}
 
 	public static void process(FhirContext theCtx, RestSearchParameterTypeEnum theWantType) {
-		for (String nextResourceName : theCtx.getResourceNames()) {
+		for (String nextResourceName : theCtx.getResourceTypes()) {
 			RuntimeResourceDefinition nextResDef = theCtx.getResourceDefinition(nextResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				if (nextSp.getName().equals("_id")){

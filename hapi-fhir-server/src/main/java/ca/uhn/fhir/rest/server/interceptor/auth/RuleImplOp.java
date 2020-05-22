@@ -411,7 +411,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case TYPES:
 				if (appliesToResource != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-						String type = theRequestDetails.getFhirContext().getResourceDefinition(appliesToResource).getName();
+						String type = theRequestDetails.getFhirContext().getResourceType(appliesToResource);
 						if (myAppliesToTypes.contains(type) == false) {
 							return null;
 						}
@@ -555,7 +555,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 	private boolean requestAppliesToTransaction(FhirContext theContext, RuleOpEnum theOp, IBaseResource theInputResource) {
-		if (!"Bundle".equals(theContext.getResourceDefinition(theInputResource).getName())) {
+		if (!"Bundle".equals(theContext.getResourceType(theInputResource))) {
 			return false;
 		}
 

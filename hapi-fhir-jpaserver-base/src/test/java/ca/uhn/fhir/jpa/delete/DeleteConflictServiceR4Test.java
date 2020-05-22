@@ -3,9 +3,9 @@ package ca.uhn.fhir.jpa.delete;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictServiceR4Test.class);

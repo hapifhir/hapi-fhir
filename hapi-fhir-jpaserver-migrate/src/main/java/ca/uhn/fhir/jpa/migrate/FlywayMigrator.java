@@ -65,8 +65,6 @@ public class FlywayMigrator extends BaseMigrator {
 			if (isDryRun()) {
 				StringBuilder statementBuilder = buildExecutedStatementsString();
 				ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
-			} else {
-				ourLog.info("Schema migrated successfully.");
 			}
 		} catch (Exception e) {
 			throw e;

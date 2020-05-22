@@ -388,7 +388,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public Set<String> getResourceNamesAsSet() {
-		return myCtx.getResourceNames();
+		return myCtx.getResourceTypes();
 	}
 
 	@Override
