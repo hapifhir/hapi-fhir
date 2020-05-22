@@ -8,7 +8,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-
 	@Test
 	public void testMultipleThreadsDontBlock() throws InterruptedException {
 		SubscriptionLoader svc = new SubscriptionLoader();
@@ -25,5 +24,4 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 		latch.await(10, TimeUnit.SECONDS);
 		svc.syncSubscriptions();
 	}
-
 }

@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -54,8 +53,8 @@ public class SubscriptionLoader {
 	private final Object mySyncSubscriptionsLock = new Object();
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired(required = false)
-	private DaoRegistry myDaoRegistry;
+	@Autowired
+	DaoRegistry myDaoRegistry;
 	private Semaphore mySyncSubscriptionsSemaphore = new Semaphore(1);
 	@Autowired
 	private ISchedulerService mySchedulerService;
@@ -132,8 +131,7 @@ public class SubscriptionLoader {
 			}
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 
-			IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-			IBundleProvider subscriptionBundleList = subscriptionDao.search(map);
+			IBundleProvider subscriptionBundleList =  myDaoRegistry.getSubscriptionDao().search(map);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;

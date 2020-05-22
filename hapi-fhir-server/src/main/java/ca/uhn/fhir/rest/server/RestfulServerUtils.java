@@ -590,7 +590,7 @@ public class RestfulServerUtils {
 			if (theResource != null && isBlank(resName)) {
 				FhirContext context = theServer.getFhirContext();
 				context = getContextForVersion(context, theResource.getStructureFhirVersionEnum());
-				resName = context.getResourceDefinition(theResource).getName();
+				resName = context.getResourceType(theResource);
 			}
 			if (isNotBlank(resName)) {
 				retVal = theResourceId.withServerBase(theServerBase, resName);
@@ -862,7 +862,7 @@ public class RestfulServerUtils {
 			 * parts, we're not streaming just the narrative as HTML (since bundles don't even
 			 * have one)
 			 */
-			if ("Bundle".equals(theServer.getFhirContext().getResourceDefinition(theResource).getName())) {
+			if ("Bundle".equals(theServer.getFhirContext().getResourceType(theResource))) {
 				encodingDomainResourceAsText = false;
 			}
 		}

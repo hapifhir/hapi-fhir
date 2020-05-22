@@ -130,7 +130,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
-			String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
+			String resourceName = myFhirContext.getResourceType(theResource);
 			validatePartition(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
 
 			return normalizeAndNotifyHooks(requestPartitionId, theRequest);

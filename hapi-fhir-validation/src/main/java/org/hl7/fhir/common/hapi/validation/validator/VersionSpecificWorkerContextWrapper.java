@@ -334,12 +334,12 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 
 	@Override
 	public List<String> getResourceNames() {
-		return new ArrayList<>(myValidationSupport.getFhirContext().getResourceNames());
+		return new ArrayList<>(myValidationSupport.getFhirContext().getResourceTypes());
 	}
 
 	@Override
 	public Set<String> getResourceNamesAsSet() {
-		return myValidationSupport.getFhirContext().getResourceNames();
+		return myValidationSupport.getFhirContext().getResourceTypes();
 	}
 
 	@Override

@@ -28,11 +28,12 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -42,12 +43,17 @@ import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +66,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -84,12 +91,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService {
+	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
+	private static final String RESOURCE_PID = "RESOURCE_PID";
 
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-	@Autowired(required = true)
+	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -106,7 +115,6 @@ public class IdHelperService {
 		myResourceLookupCache = newCache();
 		myForcedIdCache = newCache();
 	}
-
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.deleteByPid(forcedId.getId());
@@ -460,4 +468,48 @@ public class IdHelperService {
 	public static boolean isValidPid(String theIdPart) {
 		return StringUtils.isNumeric(theIdPart);
 	}
+
+	@Nullable
+	public Long getPidOrNull(IBaseResource theResource) {
+		IAnyResource anyResource = (IAnyResource) theResource;
+		Long retVal = (Long) anyResource.getUserData(RESOURCE_PID);
+		if (retVal == null) {
+			IIdType id = theResource.getIdElement();
+			try {
+				retVal = this.resolveResourcePersistentIds(null, id.getResourceType(), id.getIdPart()).getIdAsLong();
+			} catch (ResourceNotFoundException e) {
+				return null;
+			}
+		}
+		return retVal;
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IIdType theId) {
+		return getPidOrThrowException(theId, null);
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IAnyResource theResource) {
+		return (Long) theResource.getUserData(RESOURCE_PID);
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
+		List<IIdType> ids = Collections.singletonList(theId);
+		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
+		return resourcePersistentIds.get(0).getIdAsLong();
+	}
+
+	public Map<Long, IIdType> getPidToIdMap(Collection<IIdType> theIds, RequestDetails theRequestDetails) {
+		return theIds.stream().collect(Collectors.toMap(t->getPidOrThrowException(t), Function.identity()));
+	}
+
+    public IIdType resourceIdFromPidOrThrowException(Long thePid) {
+		 Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
+		 if (!optionalResource.isPresent()) {
+		 	throw new ResourceNotFoundException("Requested resource not found");
+		 }
+		 return optionalResource.get().getIdDt().toVersionless();
+    }
 }

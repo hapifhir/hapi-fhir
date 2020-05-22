@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.util.ProviderConstants;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.HumanName;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValue;
 import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValuePrimitive;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class DiffProviderR4Test extends BaseResourceProviderR4Test {

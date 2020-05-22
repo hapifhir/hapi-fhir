@@ -6,14 +6,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -164,6 +164,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			deliveryMsg.setPayload(myFhirContext, payload, encoding);
 			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
+			deliveryMsg.setParentTransactionGuid(theMsg.getParentTransactionGuid());
 			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
 
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED

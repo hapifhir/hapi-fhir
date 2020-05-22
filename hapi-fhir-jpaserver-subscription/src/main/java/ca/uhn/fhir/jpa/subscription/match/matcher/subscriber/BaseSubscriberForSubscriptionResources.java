@@ -44,7 +44,7 @@ public abstract class BaseSubscriberForSubscriptionResources implements MessageH
 		if (isBlank(payloadIdType)) {
 			IBaseResource payload = theNewResource.getNewPayload(myFhirContext);
 			if (payload != null) {
-				payloadIdType = myFhirContext.getResourceDefinition(payload).getName();
+				payloadIdType = myFhirContext.getResourceType(payload);
 			}
 		}
 

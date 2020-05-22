@@ -129,7 +129,7 @@ public class ExampleDataUploader extends BaseCommand {
 			}
 			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
-			if (ctx.getResourceDefinition(parsed).getName().equals("Bundle")) {
+			if (ctx.getResourceType(parsed).equals("Bundle")) {
 				BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
 				BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 
@@ -139,13 +139,13 @@ public class ExampleDataUploader extends BaseCommand {
 						continue;
 					}
 					for (IBase nextResource : resources) {
-						if (!ctx.getResourceDefinition(parsed).getName().equals("Bundle") && ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+						if (!ctx.getResourceType(parsed).equals("Bundle") && ctx.getResourceType(parsed).equals("SearchParameter")) {
 							bundle.addEntry().setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST)).setResource((IResource) nextResource);
 						}
 					}
 				}
 			} else {
-				if (ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+				if (ctx.getResourceType(parsed).equals("SearchParameter")) {
 					continue;
 				}
 				bundle.addEntry().setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST)).setResource((IResource) parsed);
@@ -205,7 +205,7 @@ public class ExampleDataUploader extends BaseCommand {
 				continue;
 			}
 
-			if (ctx.getResourceDefinition(parsed).getName().equals("Bundle")) {
+			if (ctx.getResourceType(parsed).equals("Bundle")) {
 				BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
 				BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 
@@ -227,7 +227,7 @@ public class ExampleDataUploader extends BaseCommand {
 					}
 				}
 			} else {
-				if (ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+				if (ctx.getResourceType(parsed).equals("SearchParameter")) {
 					continue;
 				}
 				BundleEntryComponent entry = bundle.addEntry();
@@ -289,7 +289,7 @@ public class ExampleDataUploader extends BaseCommand {
 				continue;
 			}
 
-			if (ctx.getResourceDefinition(parsed).getName().equals("Bundle")) {
+			if (ctx.getResourceType(parsed).equals("Bundle")) {
 				BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
 				BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 
@@ -311,7 +311,7 @@ public class ExampleDataUploader extends BaseCommand {
 					}
 				}
 			} else {
-				if (ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+				if (ctx.getResourceType(parsed).equals("SearchParameter")) {
 					continue;
 				}
 				org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry = bundle.addEntry();
@@ -663,7 +663,7 @@ public class ExampleDataUploader extends BaseCommand {
 		for (Iterator<IBaseResource> iter = resources.iterator(); iter.hasNext(); ) {
 			IBaseResource next = iter.next();
 
-			String nextType = ctx.getResourceDefinition(next).getName();
+			String nextType = ctx.getResourceType(next);
 			if (nextType.endsWith("Definition")) {
 				iter.remove();
 			} else if (nextType.contains("ValueSet")) {

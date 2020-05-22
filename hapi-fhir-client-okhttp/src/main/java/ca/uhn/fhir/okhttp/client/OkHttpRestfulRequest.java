@@ -1,5 +1,15 @@
 package ca.uhn.fhir.okhttp.client;
 
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
+import okhttp3.Call;
+import okhttp3.Call.Factory;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -24,16 +34,6 @@ import java.util.Map;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
-import okhttp3.Call;
-import okhttp3.Call.Factory;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 
 /**
  * Adapter for building an OkHttp-specific request.

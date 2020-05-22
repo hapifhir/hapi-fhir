@@ -964,11 +964,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
-		return myContext.getResourceDefinition(theResourceType).getName();
+		return myContext.getResourceType(theResourceType);
 	}
 
 	String toResourceName(IBaseResource theResource) {
-		return myContext.getResourceDefinition(theResource).getName();
+		return myContext.getResourceType(theResource);
 	}
 
 	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
@@ -997,7 +997,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					validateResourceForStorage((T) theResource, entity);
 				}
 			}
-			String resourceType = myContext.getResourceDefinition(theResource).getName();
+			String resourceType = myContext.getResourceType(theResource);
 			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
 				throw new UnprocessableEntityException(
 					"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
@@ -1346,7 +1346,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						allowAny = true;
 						break;
 					}
-					validTypes.add(getContext().getResourceDefinition(nextValidType).getName());
+					validTypes.add(getContext().getResourceType(nextValidType));
 				}
 
 				if (allowAny) {
@@ -1417,7 +1417,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
 
-		String resName = getContext().getResourceDefinition(theResource).getName();
+		String resName = getContext().getResourceType(theResource);
 		validateChildReferences(theResource, resName);
 
 		validateMetaCount(totalMetaCount);
