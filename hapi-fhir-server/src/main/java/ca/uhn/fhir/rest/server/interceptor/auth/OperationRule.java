@@ -87,8 +87,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		// Operation rules apply to the execution of the operation itself, not to side effects like
 		// loading resources (that will presumably be reflected in the response). Those loads need
 		// to be explicitly authorized
-		boolean isResourceAccess = thePointcut.equals(Pointcut.STORAGE_PREACCESS_RESOURCES) || thePointcut.equals(Pointcut.STORAGE_PRESHOW_RESOURCES);
-		if (isResourceAccess) {
+		if (isResourceAccess(thePointcut)) {
 			return null;
 		}
 
