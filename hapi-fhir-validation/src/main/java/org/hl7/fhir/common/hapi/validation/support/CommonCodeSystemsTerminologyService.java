@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
@@ -56,13 +57,13 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		String url = getValueSetUrl(theValueSet);
-		return validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, url);
+		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		/* **************************************************************************************
 		 * NOTE: Update validation_support_modules.html if any of the support in this module
 		 * changes in any way!
@@ -93,7 +94,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				if (system == null && theOptions.isInferSystem()) {
 					system = UCUM_CODESYSTEM_URL;
 				}
-				CodeValidationResult validationResult = validateLookupCode(theRootValidationSupport, theCode, system);
+				CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, system);
 				if (validationResult != null) {
 					return validationResult;
 				}
@@ -116,7 +117,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		}
 
 		if (isBlank(theValueSetUrl)) {
-			CodeValidationResult validationResult = validateLookupCode(theRootValidationSupport, theCode, theCodeSystem);
+			CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
 			if (validationResult != null) {
 				return validationResult;
 			}
@@ -126,8 +127,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	@Nullable
-	public CodeValidationResult validateLookupCode(IValidationSupport theRootValidationSupport, String theCode, String theSystem) {
-		LookupCodeResult lookupResult = lookupCode(theRootValidationSupport, theSystem, theCode);
+	public CodeValidationResult validateLookupCode(ValidationSupportContext theValidationSupportContext, String theCode, String theSystem) {
+		LookupCodeResult lookupResult = lookupCode(theValidationSupportContext, theSystem, theCode);
 		CodeValidationResult validationResult = null;
 		if (lookupResult != null) {
 			if (lookupResult.isFound()) {
@@ -141,9 +142,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 
 	@Override
-	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 
-		if (UCUM_CODESYSTEM_URL.equals(theSystem) && theRootValidationSupport.getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+		if (UCUM_CODESYSTEM_URL.equals(theSystem) && theValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 
 			InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
 			try {
@@ -172,7 +173,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 
 		switch (theSystem) {
 			case UCUM_CODESYSTEM_URL:

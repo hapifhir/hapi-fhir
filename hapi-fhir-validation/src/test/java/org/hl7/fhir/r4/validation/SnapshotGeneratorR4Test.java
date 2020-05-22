@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
@@ -36,11 +37,11 @@ public class SnapshotGeneratorR4Test {
 		ValidationSupportChain chain = new ValidationSupportChain(defaultSupport, snapshotGenerator);
 
 		// Generate the snapshot
-		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(chain, differential, "http://foo", null, "THE BEST PROFILE");
+		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(new ValidationSupportContext(chain), differential, "http://foo", null, "THE BEST PROFILE");
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshot));
 
-		assertEquals(51, snapshot.getSnapshot().getElement().size());
+		assertEquals(54, snapshot.getSnapshot().getElement().size());
 	}
 
 

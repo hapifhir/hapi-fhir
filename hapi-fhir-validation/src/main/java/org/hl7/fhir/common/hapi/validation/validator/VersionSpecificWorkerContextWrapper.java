@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -52,14 +53,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
 	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new VersionTypeConverterR5();
 	private static FhirContext ourR5Context = FhirContext.forR5();
-	private final IValidationSupport myValidationSupport;
+	private final ValidationSupportContext myValidationSupportContext;
 	private final IVersionTypeConverter myModelConverter;
 	private volatile List<StructureDefinition> myAllStructures;
 	private LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
-	public VersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport, IVersionTypeConverter theModelConverter) {
-		myValidationSupport = theValidationSupport;
+	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, IVersionTypeConverter theModelConverter) {
+		myValidationSupportContext = theValidationSupportContext;
 		myModelConverter = theModelConverter;
 
 		long timeoutMillis = 10 * DateUtils.MILLIS_PER_SECOND;
@@ -73,13 +74,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			.build(key -> {
 
 				String fetchResourceName = key.getResourceName();
-				if (myValidationSupport.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+				if (myValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
 					if ("CodeSystem".equals(fetchResourceName)) {
 						fetchResourceName = "ValueSet";
 					}
 				}
-				Class<? extends IBaseResource> fetchResourceType = myValidationSupport.getFhirContext().getResourceDefinition(fetchResourceName).getImplementingClass();
-				IBaseResource fetched = myValidationSupport.fetchResource(fetchResourceType, key.getUri());
+				Class<? extends IBaseResource> fetchResourceType = myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceDefinition(fetchResourceName).getImplementingClass();
+				IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, key.getUri());
 
 				if (fetched == null) {
 					return null;
@@ -92,7 +93,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					StructureDefinition canonicalSd = (StructureDefinition) canonical;
 					if (canonicalSd.getSnapshot().isEmpty()) {
 						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-						fetched = myValidationSupport.generateSnapshot(myValidationSupport, fetched, "", null, "");
+						fetched = myValidationSupportContext.getRootValidationSupport().generateSnapshot(theValidationSupportContext, fetched, "", null, "");
 						Validate.isTrue(fetched != null, "StructureDefinition %s has no snapshot, and no snapshot generator is configured", key.getUri());
 						canonical = myModelConverter.toCanonical(fetched);
 					}
@@ -166,7 +167,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 		List<StructureDefinition> retVal = myAllStructures;
 		if (retVal == null) {
 			retVal = new ArrayList<>();
-			for (IBaseResource next : myValidationSupport.fetchAllStructureDefinitions()) {
+			for (IBaseResource next : myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions()) {
 				try {
 					Resource converted = myModelConverter.toCanonical(next);
 					retVal.add((StructureDefinition) converted);
@@ -233,7 +234,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(myValidationSupport, null, convertedSource);
+		IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupportContext.getRootValidationSupport().expandValueSet(myValidationSupportContext, null, convertedSource);
 
 		org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 		if (expanded.getValueSet() != null) {
@@ -262,7 +263,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 	@Override
 	public Locale getLocale() {
-		return myValidationSupport.getFhirContext().getLocalizer().getLocale();
+		return myValidationSupportContext.getRootValidationSupport().getFhirContext().getLocalizer().getLocale();
 	}
 
 	@Override
@@ -272,7 +273,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 	@Override
 	public org.hl7.fhir.r5.model.CodeSystem fetchCodeSystem(String system) {
-		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
+		IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchCodeSystem(system);
 		if (fetched == null) {
 			return null;
 		}
@@ -338,12 +339,12 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 	@Override
 	public List<String> getResourceNames() {
-		return new ArrayList<>(myValidationSupport.getFhirContext().getResourceNames());
+		return new ArrayList<>(myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceNames());
 	}
 
 	@Override
 	public Set<String> getResourceNamesAsSet() {
-		return myValidationSupport.getFhirContext().getResourceNames();
+		return myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceNames();
 	}
 
 	@Override
@@ -394,7 +395,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 	@Override
 	public String getVersion() {
-		return myValidationSupport.getFhirContext().getVersion().getVersion().getFhirVersionString();
+		return myValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion().getFhirVersionString();
 	}
 
 	@Override
@@ -449,7 +450,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 	@Override
 	public boolean supportsSystem(String system) {
-		return myValidationSupport.isCodeSystemSupported(myValidationSupport, system);
+		return myValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(myValidationSupportContext, system);
 	}
 
 	@Override
@@ -459,7 +460,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
-		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(theOptions), system, code, display, null);
+		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCode(myValidationSupportContext, convertConceptValidationOptions(theOptions), system, code, display, null);
 		return convertValidationResult(result);
 	}
 
@@ -475,7 +476,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, display, convertedVs);
+		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions), theSystem, theCode, display, convertedVs);
 		return convertValidationResult(result);
 	}
 
@@ -490,7 +491,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions).setInferSystem(true), null, code, null, convertedVs);
+		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions).setInferSystem(true), null, code, null, convertedVs);
 		return convertValidationResult(result);
 	}
 
@@ -506,7 +507,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions), code.getSystem(), code.getCode(), code.getDisplay(), convertedVs);
+		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions), code.getSystem(), code.getCode(), code.getDisplay(), convertedVs);
 		return convertValidationResult(result);
 	}
 

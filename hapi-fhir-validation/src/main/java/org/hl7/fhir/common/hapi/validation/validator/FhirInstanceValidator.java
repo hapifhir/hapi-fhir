@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import org.apache.commons.lang3.Validate;
@@ -253,7 +254,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 					throw new IllegalStateException();
 			}
 
-			wrappedWorkerContext = new VersionSpecificWorkerContextWrapper(myValidationSupport, converter);
+			wrappedWorkerContext = new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), converter);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 

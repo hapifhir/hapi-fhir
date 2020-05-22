@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -131,7 +132,7 @@ public class FhirInstanceValidatorDstu3Test {
 				ValueSet arg = (ValueSet) theInvocation.getArgument(0, IBaseResource.class);
 				ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 				if (retVal == null) {
-					ValueSet expandedVs = (ValueSet) myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, null, arg).getValueSet();
+					ValueSet expandedVs = (ValueSet) myDefaultValidationSupport.expandValueSet(new ValidationSupportContext(myDefaultValidationSupport), null, arg).getValueSet();
 					retVal = expandedVs.getExpansion();
 				}
 				ourLog.debug("expandValueSet({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
@@ -201,7 +202,7 @@ public class FhirInstanceValidatorDstu3Test {
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
 					retVal = found.map(t -> new IValidationSupport.CodeValidationResult().setCode(t.getCode())).orElse(null);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, options, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;
