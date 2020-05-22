@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
@@ -17,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,6 +29,9 @@ import static org.junit.Assert.*;
 
 public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictServiceR4Test.class);
+
+	@Autowired
+	DaoConfig myDaoConfig;
 
 	private DeleteConflictInterceptor myDeleteInterceptor = new DeleteConflictInterceptor();
 	private int myInterceptorDeleteCount;
@@ -134,6 +139,48 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDeleteHookDeletesLargeNumberOfConflicts() {
+
+		Organization organization = new Organization();
+		organization.setName("FOO");
+		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
+
+		// Create 12 conflicts.
+		for (int j=0; j < 12 ; j++) {
+			Patient patient = new Patient();
+			patient.setManagingOrganization(new Reference(organizationId));
+			myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		DeleteConflictService.setMaxRetryAttempts(3);
+		myDaoConfig.setMaximumDeleteConflictQueryCount(5);
+		myDeleteInterceptor.deleteConflictFunction = this::deleteConflictsFixedRetryCount;
+		try {
+			myOrganizationDao.delete(organizationId);
+			// Needs a fourth pass to ensure that all conflicts are now gone.
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertEquals(DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
+		}
+
+		// Try again with Maximum conflict count set to 6.
+		myDeleteInterceptor.myCallCount=0;
+		myInterceptorDeleteCount = 0;
+		myDaoConfig.setMaximumDeleteConflictQueryCount(6);
+
+		try {
+			myOrganizationDao.delete(organizationId);
+		} catch (ResourceVersionConflictException e) {
+			fail();
+		}
+
+		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
+		assertEquals(3, myDeleteInterceptor.myCallCount);
+		assertEquals(12, myInterceptorDeleteCount);
+
+	}
+
+	@Test
 	public void testBadInterceptorNoInfiniteLoop() {
 		Organization organization = new Organization();
 		organization.setName("FOO");
@@ -150,7 +197,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			myOrganizationDao.delete(organizationId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals("Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
+			assertEquals(DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
 		assertEquals(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS, myDeleteInterceptor.myCallCount);
 	}
@@ -196,6 +243,21 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			}
 		}
 		return new DeleteConflictOutcome().setShouldRetryCount(myInterceptorDeleteCount);
+	}
+
+	private DeleteConflictOutcome deleteConflictsFixedRetryCount(DeleteConflictList theList) {
+		Iterator<DeleteConflict> iterator = theList.iterator();
+		while (iterator.hasNext()) {
+			DeleteConflict next = iterator.next();
+			IdDt source = next.getSourceId();
+			if ("Patient".equals(source.getResourceType())) {
+				ourLog.info("Deleting {}", source);
+				myPatientDao.delete(source, theList, null, null);
+//				myPatientDao.delete(source);
+				++myInterceptorDeleteCount;
+			}
+		}
+		return new DeleteConflictOutcome().setShouldRetryCount(DeleteConflictService.MAX_RETRY_ATTEMPTS);
 	}
 
 	private static class DeleteConflictInterceptor {

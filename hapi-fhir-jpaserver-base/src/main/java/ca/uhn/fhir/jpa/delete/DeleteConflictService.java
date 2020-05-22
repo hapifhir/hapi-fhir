@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,8 @@ import java.util.List;
 public class DeleteConflictService {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.class);
 	public static final int FIRST_QUERY_RESULT_COUNT = 1;
-	public static final int RETRY_QUERY_RESULT_COUNT = 60;
-	public static final int MAX_RETRY_ATTEMPTS = 10;
+	public static int MAX_RETRY_ATTEMPTS = 10;
+	public static String MAX_RETRY_ATTEMPTS_EXCEEDED_MSG = "Requested delete operation stopped before all conflicts were handled. May need to increase the configured Maximum Delete Conflict Query Count.";
 
 	@Autowired
 	DeleteConflictFinderService myDeleteConflictFinderService;
@@ -81,11 +82,16 @@ public class DeleteConflictService {
 		while (outcome != null) {
 			int shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
 			if (!(retryCount < shouldRetryCount)) break;
-			newConflicts = new DeleteConflictList();
-			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT, theTransactionDetails);
+			newConflicts = new DeleteConflictList(newConflicts);
+			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, myDaoConfig.getMaximumDeleteConflictQueryCount(), theTransactionDetails);
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);
+		if(retryCount >= MAX_RETRY_ATTEMPTS && !newConflicts.isEmpty()) {
+			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, MAX_RETRY_ATTEMPTS_EXCEEDED_MSG,null, "processing");
+			throw new ResourceVersionConflictException(MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, oo);
+		}
 		return retryCount;
 	}
 
@@ -161,5 +167,10 @@ public class DeleteConflictService {
 		}
 
 		throw new ResourceVersionConflictException(firstMsg, oo);
+	}
+
+	@VisibleForTesting
+	static void setMaxRetryAttempts(Integer theMaxRetryAttempts) {
+		MAX_RETRY_ATTEMPTS = theMaxRetryAttempts;
 	}
 }
