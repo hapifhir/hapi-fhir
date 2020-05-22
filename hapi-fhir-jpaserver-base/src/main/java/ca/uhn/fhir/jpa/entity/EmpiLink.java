@@ -36,7 +36,6 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -49,11 +48,7 @@ import java.util.Date;
 @Entity
 @Table(name = "MPI_LINK", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
-}, indexes = {
-	@Index(name = "IDX_EMPI_PERSON_PID", columnList = "PERSON_PID"),
-	@Index(name = "IDX_EMPI_TARGET_PID", columnList = "TARGET_PID")
 })
-
 public class EmpiLink {
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;

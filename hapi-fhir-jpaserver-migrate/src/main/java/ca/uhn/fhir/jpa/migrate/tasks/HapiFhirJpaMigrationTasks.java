@@ -68,15 +68,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init420(); // 20191015 - 20200217
 		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - 20200513
-		init501(); // 20200514 - 20200519
-		init510(); // 20200520 - present
-	}
-
-	private void init510() { // 20200520 - present
-		Builder version = forVersion(VersionEnum.V5_1_0);
-		Builder.BuilderWithTableName spidxDate = version.onTable("MPI_LINK");
-		spidxDate.addIndex("20200520.1", "IDX_EMPI_PERSON_PID").unique(false).withColumns("PERSON_PID");
-		spidxDate.addIndex("20200520.2", "IDX_EMPI_TARGET_PID").unique(false).withColumns("TARGET_PID");
+		init501(); // 20200514 - present
 	}
 
 	private void init501() { //20200514 - present
