@@ -32,6 +32,8 @@ import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -47,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
+public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
 	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new VersionTypeConverterR5();
 	private static FhirContext ourR5Context = FhirContext.forR5();
 	private final IValidationSupport myValidationSupport;
@@ -87,7 +89,9 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 				Resource canonical = myModelConverter.toCanonical(fetched);
 
 				if (canonical instanceof StructureDefinition) {
-					if (((StructureDefinition) canonical).getSnapshot().isEmpty()) {
+					StructureDefinition canonicalSd = (StructureDefinition) canonical;
+					if (canonicalSd.getSnapshot().isEmpty()) {
+						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
 						fetched = myValidationSupport.generateSnapshot(myValidationSupport, fetched, "", null, "");
 						Validate.isTrue(fetched != null, "StructureDefinition %s has no snapshot, and no snapshot generator is configured", key.getUri());
 						canonical = myModelConverter.toCanonical(fetched);
@@ -99,7 +103,7 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 
 		setValidationMessageLanguage(getLocale());
 	}
-
+private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
 	@Override
 	public List<CanonicalResource> allConformanceResources() {
 		throw new UnsupportedOperationException();

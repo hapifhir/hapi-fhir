@@ -1,0 +1,254 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-practitionerrole",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitionerrole",
+  "version": "2.0.3",
+  "name": "nl-core-practitionerrole",
+  "title": "nl-core-practitionerrole",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Functional requirements taken from Health and Care Information models (Zorginformatiebouwsteen) HealthProfessional v3.2 (release 2017). Names and addresses are also in compliance with HL7 V3 Basic Components.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v1.2.1(2015EN)",
+      "name": "HCIM HealthProfessional-v1.2.1(2015EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v3.0(2016EN)",
+      "name": "HCIM HealthProfessional-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v3.2-2017EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v3.2(2017EN)",
+      "name": "HCIM HealthProfessional-v3.2(2017EN)"
+    },
+    {
+      "identity": "hcim-contactinformation-v2.0.1-2015EN",
+      "uri": "https://zibs.nl/wiki/Patient-v2.0.1(2015EN)",
+      "name": "HCIM Patient-v2.0.1(2015EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs."
+    },
+    {
+      "identity": "hcim-contactinformation-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.0(2016EN)",
+      "name": "HCIM Patient-v3.0(2016EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs."
+    },
+    {
+      "identity": "hcim-contactinformation-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/ContactInformation-v1.0(2017EN)",
+      "name": "HCIM ContactInformation-v1.0(2017EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs."
+    },
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "PractitionerRole",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "PractitionerRole",
+        "path": "PractitionerRole",
+        "short": "HealthProfessionalRole",
+        "alias": [
+          "ZorgverlenerRol"
+        ]
+      },
+      {
+        "id": "PractitionerRole.identifier",
+        "path": "PractitionerRole.identifier",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "PractitionerRole.practitioner",
+        "path": "PractitionerRole.practitioner",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          }
+        ]
+      },
+      {
+        "id": "PractitionerRole.organization",
+        "path": "PractitionerRole.organization",
+        "short": "HealthcareProvider",
+        "alias": [
+          "Zorgaanbieder"
+        ],
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.6",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.6",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.6",
+            "comment": "HealthcareProvider"
+          }
+        ]
+      },
+      {
+        "id": "PractitionerRole.code",
+        "path": "PractitionerRole.code",
+        "comment": "A person may have more than one role. Note: in earlier versions of this profile there used to be an association with the HCIM element NL-CM:17.1.5 HealthcareProviderRole. This mapping was semantically incorrect. The HCIM element is a property of the association of PractitionerRole to some healthcare act. In a number of FHIR Resources the association is implicit from the semantics of the resource element like in Observation.performer. In others you can make this explicit like Encounter.participant.type, CareTeam.participant.role and Procedure.performer.role. Please refer to the relevant profiles on those resources for associations with HCIM NL-CM:17.1.5 HealthcareProviderRole"
+      },
+      {
+        "id": "PractitionerRole.specialty",
+        "path": "PractitionerRole.specialty",
+        "short": "Specialty",
+        "definition": "Healthcare provider’s medical specialty. This refers to the recognized medical specialties as stated in the BIG Act. A PractitionerRole instance SHALL be a singular assocation between a person acting in a certain specialty for a certain organization. It's possible however that either specialty or organization or both is/are uknown. It is also possible that equivalent specialisms are available in multiple coding systems e.g. 01.015 UZI (Huisarts) and 0101 AGB (Huisartsen, niet apotheekhoudend). For this reason you may use multiple coding elements, each indicating the relevant code from a different system",
+        "alias": [
+          "Specialisme"
+        ],
+        "max": "1",
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.4",
+            "comment": "Specialty"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.4",
+            "comment": "Specialty"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.4",
+            "comment": "Specialty"
+          }
+        ]
+      },
+      {
+        "id": "PractitionerRole.specialty.coding",
+        "path": "PractitionerRole.specialty.coding",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "PractitionerRole.specialty.coding:SpecialtyUZI",
+        "path": "PractitionerRole.specialty.coding",
+        "sliceName": "SpecialtyUZI",
+        "short": "SpecialtyUZI",
+        "alias": [
+          "SpecialismeUZI"
+        ],
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "PractitionerSpecialty"
+            }
+          ],
+          "strength": "extensible",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.17.1.6--20171231000000",
+            "display": "SpecialismeUZICodelijst"
+          }
+        }
+      },
+      {
+        "id": "PractitionerRole.specialty.coding:SpecialtyAGB",
+        "path": "PractitionerRole.specialty.coding",
+        "sliceName": "SpecialtyAGB",
+        "short": "SpecialtyAGB",
+        "alias": [
+          "SpecialismeAGB"
+        ],
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "PractitionerSpecialty"
+            }
+          ],
+          "strength": "extensible",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.17.1.7--20171231000000",
+            "display": "SpecialismeAGBCodelijst"
+          }
+        }
+      },
+      {
+        "id": "PractitionerRole.telecom",
+        "path": "PractitionerRole.telecom",
+        "short": "ContactInformation",
+        "alias": [
+          "Contactgegevens"
+        ],
+        "type": [
+          {
+            "code": "ContactPoint",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-contactpoint"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.8",
+            "comment": "TelephoneE-mail"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.8",
+            "comment": "TelephoneE-mail"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.8",
+            "comment": "ContactInformation"
+          }
+        ]
+      }
+    ]
+  }
+}

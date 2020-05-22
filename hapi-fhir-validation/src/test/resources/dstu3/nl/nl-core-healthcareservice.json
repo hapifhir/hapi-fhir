@@ -1,0 +1,115 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-healthcareservice",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-healthcareservice",
+  "version": "2.0.1",
+  "name": "nl-core-healthcareservice",
+  "title": "nl-core-healthcareservice",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "A HealthcareService resource as defined for the Dutch realm",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-contactinformation-v2.0.1-2015EN",
+      "uri": "https://zibs.nl/wiki/Patient-v2.0.1(2015EN)",
+      "name": "HCIM Patient-v2.0.1(2015EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-contactinformation-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.0(2016EN)",
+      "name": "HCIM Patient-v3.0(2016EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs."
+    },
+    {
+      "identity": "hcim-contactinformation-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/ContactInformation-v1.0(2017EN)",
+      "name": "HCIM ContactInformation-v1.0(2017EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs."
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "HealthcareService",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/HealthcareService",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "HealthcareService.providedBy",
+        "path": "HealthcareService.providedBy",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          }
+        ]
+      },
+      {
+        "id": "HealthcareService.location",
+        "path": "HealthcareService.location",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-location"
+          }
+        ]
+      },
+      {
+        "id": "HealthcareService.telecom",
+        "path": "HealthcareService.telecom",
+        "short": "ContactInformation",
+        "alias": [
+          "Contactgegevens"
+        ],
+        "type": [
+          {
+            "code": "ContactPoint",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-contactpoint"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "TelephoneNumber"
+          },
+          {
+            "identity": "hcim-contactinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "TelephoneNumber"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.4",
+            "comment": "TelephoneNumber"
+          }
+        ]
+      },
+      {
+        "id": "HealthcareService.coverageArea",
+        "path": "HealthcareService.coverageArea",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-location"
+          }
+        ]
+      }
+    ]
+  }
+}
