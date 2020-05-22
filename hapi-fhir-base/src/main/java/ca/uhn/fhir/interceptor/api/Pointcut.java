@@ -1282,7 +1282,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a resource delete operation is about to fail due to referential integrity checks. Intended for use with ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor.
+	 * Invoked when a resource delete operation is about to fail due to referential integrity checks. Intended for use with {@literal ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor}.
 	 * <p>
 	 * Hooks will have access to the list of resources that have references to the resource being deleted.
 	 * </p>
