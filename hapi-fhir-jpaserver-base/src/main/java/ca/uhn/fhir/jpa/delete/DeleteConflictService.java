@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -87,7 +86,7 @@ public class DeleteConflictService {
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);
-		if(retryCount >= MAX_RETRY_ATTEMPTS && !newConflicts.isEmpty()) {
+		if(retryCount >= MAX_RETRY_ATTEMPTS && !theDeleteConflicts.isEmpty()) {
 			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
 			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, MAX_RETRY_ATTEMPTS_EXCEEDED_MSG,null, "processing");
 			throw new ResourceVersionConflictException(MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, oo);
@@ -149,17 +148,13 @@ public class DeleteConflictService {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
 		String firstMsg = null;
 
-		Iterator<DeleteConflict> iterator = theDeleteConflicts.iterator();
-		while (iterator.hasNext()) {
-			DeleteConflict next = iterator.next();
-			StringBuilder b = new StringBuilder();
-			b.append("Unable to delete ");
-			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
-			b.append(" because at least one resource has a reference to this resource. First reference found was resource ");
-			b.append(next.getSourceId().toUnqualifiedVersionless().getValue());
-			b.append(" in path ");
-			b.append(next.getSourcePath());
-			String msg = b.toString();
+		for (DeleteConflict next : theDeleteConflicts) {
+			String msg = "Unable to delete " +
+				next.getTargetId().toUnqualifiedVersionless().getValue() +
+				" because at least one resource has a reference to this resource. First reference found was resource " +
+				next.getSourceId().toUnqualifiedVersionless().getValue() +
+				" in path " +
+				next.getSourcePath();
 			if (firstMsg == null) {
 				firstMsg = msg;
 			}

@@ -84,8 +84,6 @@ public class DaoConfig {
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
-	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_RETRY_ATTEMPTS = 10;
-
 
 	/**
 	 * Child Configurations

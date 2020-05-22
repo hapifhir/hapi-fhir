@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -33,7 +32,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	@Autowired
 	DaoConfig myDaoConfig;
 
-	private DeleteConflictInterceptor myDeleteInterceptor = new DeleteConflictInterceptor();
+	private final DeleteConflictInterceptor myDeleteInterceptor = new DeleteConflictInterceptor();
 	private int myInterceptorDeleteCount;
 
 	@Before
@@ -157,7 +156,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myDeleteInterceptor.deleteConflictFunction = this::deleteConflictsFixedRetryCount;
 		try {
 			myOrganizationDao.delete(organizationId);
-			// Needs a fourth pass to ensure that all conflicts are now gone.
+			// Needs a fourth and final pass to ensure that all conflicts are now gone.
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertEquals(DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
@@ -188,7 +187,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 
 		Patient patient = new Patient();
 		patient.setManagingOrganization(new Reference(organizationId));
-		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		// Always returning true is bad behaviour.  Our infinite loop checker should halt it
 		myDeleteInterceptor.deleteConflictFunction = t -> new DeleteConflictOutcome().setShouldRetryCount(Integer.MAX_VALUE);
@@ -232,9 +231,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	private DeleteConflictOutcome deleteConflicts(DeleteConflictList theList) {
-		Iterator<DeleteConflict> iterator = theList.iterator();
-		while (iterator.hasNext()) {
-			DeleteConflict next = iterator.next();
+		for (DeleteConflict next : theList) {
 			IdDt source = next.getSourceId();
 			if ("Patient".equals(source.getResourceType())) {
 				ourLog.info("Deleting {}", source);
@@ -246,14 +243,11 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	private DeleteConflictOutcome deleteConflictsFixedRetryCount(DeleteConflictList theList) {
-		Iterator<DeleteConflict> iterator = theList.iterator();
-		while (iterator.hasNext()) {
-			DeleteConflict next = iterator.next();
+		for (DeleteConflict next : theList) {
 			IdDt source = next.getSourceId();
 			if ("Patient".equals(source.getResourceType())) {
 				ourLog.info("Deleting {}", source);
 				myPatientDao.delete(source, theList, null, null);
-//				myPatientDao.delete(source);
 				++myInterceptorDeleteCount;
 			}
 		}
