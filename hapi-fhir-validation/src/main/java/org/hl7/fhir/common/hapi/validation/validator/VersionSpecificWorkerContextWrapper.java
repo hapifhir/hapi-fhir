@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
@@ -25,7 +26,6 @@ import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.r5.utils.INarrativeGenerator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.cache.NpmPackage;
@@ -89,6 +89,7 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 				if (canonical instanceof StructureDefinition) {
 					if (((StructureDefinition) canonical).getSnapshot().isEmpty()) {
 						fetched = myValidationSupport.generateSnapshot(myValidationSupport, fetched, "", null, "");
+						Validate.isTrue(fetched != null, "StructureDefinition %s has no snapshot, and no snapshot generator is configured", key.getUri());
 						canonical = myModelConverter.toCanonical(fetched);
 					}
 				}
@@ -322,11 +323,6 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 	}
 
 	@Override
-	public INarrativeGenerator getNarrativeGenerator(String prefix, String basePath) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public IParser getParser(ParserType type) {
 		throw new UnsupportedOperationException();
 	}
@@ -338,12 +334,12 @@ class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerCon
 
 	@Override
 	public List<String> getResourceNames() {
-		return new ArrayList<>(myValidationSupport.getFhirContext().getResourceNames());
+		return new ArrayList<>(myValidationSupport.getFhirContext().getResourceTypes());
 	}
 
 	@Override
 	public Set<String> getResourceNamesAsSet() {
-		return myValidationSupport.getFhirContext().getResourceNames();
+		return myValidationSupport.getFhirContext().getResourceTypes();
 	}
 
 	@Override

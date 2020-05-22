@@ -34,11 +34,8 @@ public class SubscriptionModelConfig {
 		return new SubscriptionCanonicalizer(theFhirContext);
 	}
 
-
 	@Bean
 	public SubscriptionStrategyEvaluator subscriptionStrategyEvaluator() {
 		return new SubscriptionStrategyEvaluator();
 	}
-
-
 }

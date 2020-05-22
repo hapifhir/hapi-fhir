@@ -361,7 +361,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private String toResourceName(Class<? extends IBaseResource> theType) {
-		return myContext.getResourceDefinition(theType).getName();
+		return myContext.getResourceType(theType);
 	}
 
 	@Override
@@ -787,7 +787,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType) {
 			Validate.notNull(theResourceType, "theResourceType can not be null");
 			myConditional = true;
-			myResourceType = myContext.getResourceDefinition(theResourceType).getName();
+			myResourceType = myContext.getResourceType(theResourceType);
 			return this;
 		}
 
@@ -904,7 +904,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			String resourceName;
 			String id;
 			if (myType != null) {
-				resourceName = myContext.getResourceDefinition(myType).getName();
+				resourceName = myContext.getResourceType(myType);
 				id = null;
 			} else if (myId != null) {
 				resourceName = myId.getResourceType();
@@ -929,6 +929,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 			myId = theId;
 			return this;
+		}
+
+		@Override
+		public IHistoryUntyped onInstance(String theId) {
+			Validate.notBlank(theId, "theId must not be null or blank");
+			IIdType id = myContext.getVersion().newIdType();
+			id.setValue(theId);
+			return onInstance(id);
 		}
 
 		@Override
@@ -1274,7 +1282,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			String id;
 			String version;
 			if (myType != null) {
-				resourceName = myContext.getResourceDefinition(myType).getName();
+				resourceName = myContext.getResourceType(myType);
 				id = null;
 				version = null;
 			} else if (myId != null) {
@@ -1297,7 +1305,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				return retVal;
 			}
 			IClientResponseHandler handler = new ResourceOrBinaryResponseHandler()
-					.setPreferResponseTypes(getPreferResponseTypes(myType));
+				.setPreferResponseTypes(getPreferResponseTypes(myType));
 
 			if (myReturnMethodOutcome) {
 				handler = new MethodOutcomeResponseHandler(handler);
@@ -1337,6 +1345,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IOperationUnnamed onInstance(IIdType theId) {
 			myId = theId.toVersionless();
 			return this;
+		}
+
+		@Override
+		public IOperationUnnamed onInstance(String theId) {
+			Validate.notBlank(theId, "theId must not be null or blank");
+			IIdType id = myContext.getVersion().newIdType();
+			id.setValue(theId);
+			return onInstance(id);
 		}
 
 		@Override
@@ -1478,7 +1494,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 
-	private final class MethodOutcomeResponseHandler  implements IClientResponseHandler<MethodOutcome> {
+	private final class MethodOutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
 		private final IClientResponseHandler<? extends IBaseResource> myWrap;
 
 		private MethodOutcomeResponseHandler(IClientResponseHandler<? extends IBaseResource> theWrap) {
@@ -1543,7 +1559,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IPatchWithQuery conditional(Class<? extends IBaseResource> theClass) {
 			Validate.notNull(theClass, "theClass must not be null");
-			String resourceType = myContext.getResourceDefinition(theClass).getName();
+			String resourceType = myContext.getResourceType(theClass);
 			return conditional(resourceType);
 		}
 
@@ -1618,13 +1634,22 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IPatchWithBody withFhirPatch(IBaseParameters thePatchBody) {
+			Validate.notNull(thePatchBody, "thePatchBody must not be null");
+
+			myPatchType = PatchTypeEnum.FHIR_PATCH_JSON;
+			myPatchBody = myContext.newJsonParser().encodeResourceToString(thePatchBody);
+
+			return this;
+		}
+
+		@Override
 		public IPatchExecutable withId(IIdType theId) {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");
 			}
-			if (theId.hasIdPart() == false) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId.getValue());
-			}
+			Validate.notBlank(theId.getIdPart(), "theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: %s", UrlUtil.sanitizeUrlPart(theId.getValue()));
+			Validate.notBlank(theId.getResourceType(), "theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: %s", UrlUtil.sanitizeUrlPart(theId.getValue()));
 			myId = theId;
 			return this;
 		}
@@ -1634,11 +1659,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");
 			}
-			if (isBlank(theId)) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
-			}
-			myId = new IdDt(theId);
-			return this;
+			return withId(new IdDt(theId));
 		}
 
 	}

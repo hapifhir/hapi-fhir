@@ -1,19 +1,20 @@
 package ca.uhn.fhir.jpa.search.r4;
 
-import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
-
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
-import org.springframework.test.util.AopTestUtils;
-
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.springframework.test.util.AopTestUtils;
+
+import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertThat;
 
 public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 

@@ -20,13 +20,14 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.Message;
@@ -36,46 +37,57 @@ import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 
 public class SubscriptionChannelFactory {
-
-	private final IChannelFactory myQueueChannelFactory;
+	private final IChannelFactory myChannelFactory;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionChannelFactory(IChannelFactory theQueueChannelFactory) {
-		Validate.notNull(theQueueChannelFactory);
-		myQueueChannelFactory = theQueueChannelFactory;
+	public SubscriptionChannelFactory(IChannelFactory theChannelFactory) {
+		Validate.notNull(theChannelFactory);
+		myChannelFactory = theChannelFactory;
 	}
 
-	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = newConfigForDeliveryChannel(theOptions);
-		return myQueueChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
+	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
+		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
+		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = newConfigForDeliveryChannel(theOptions);
-		IChannelReceiver channel = myQueueChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
+	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
+		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
+		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
-	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = newConfigForMatchingChannel(theOptions);
-		return myQueueChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
+	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
+		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
+		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = newConfigForMatchingChannel(theOptions);
-		IChannelReceiver channel = myQueueChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
+	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
+		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
+		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
-	protected ChannelConsumerSettings newConfigForDeliveryChannel(ChannelConsumerSettings theOptions) {
+	protected ChannelProducerSettings newProducerConfigForDeliveryChannel(ChannelProducerSettings theOptions) {
+		ChannelProducerSettings config = new ChannelProducerSettings();
+		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
+		return config;
+	}
+
+	protected ChannelConsumerSettings newConsumerConfigForDeliveryChannel(ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
 		return config;
 	}
 
-	protected ChannelConsumerSettings newConfigForMatchingChannel(ChannelConsumerSettings theOptions) {
+	protected ChannelProducerSettings newProducerConfigForMatchingChannel(ChannelProducerSettings theOptions) {
+		ChannelProducerSettings config = new ChannelProducerSettings();
+		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
+		return config;
+	}
+
+	protected ChannelConsumerSettings newConsumerConfigForMatchingChannel(ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		return config;
@@ -87,6 +99,10 @@ public class SubscriptionChannelFactory {
 
 	public int getMatchingChannelConcurrentConsumers() {
 		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
+	}
+
+	public IChannelFactory getChannelFactory() {
+		return myChannelFactory;
 	}
 
 	public static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements IChannelReceiver, DisposableBean {
@@ -124,5 +140,9 @@ public class SubscriptionChannelFactory {
 		}
 
 
+		@Override
+		public String getName() {
+			return myWrappedChannel.getName();
+		}
 	}
 }

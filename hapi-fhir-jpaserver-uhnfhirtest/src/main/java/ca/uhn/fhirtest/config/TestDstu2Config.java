@@ -1,7 +1,7 @@
 package ca.uhn.fhirtest.config;
 
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
@@ -67,6 +67,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setWebsocketContextPath("/");
 		retVal.setFilterParameterEnabled(true);
+		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		return retVal;
 	}
 

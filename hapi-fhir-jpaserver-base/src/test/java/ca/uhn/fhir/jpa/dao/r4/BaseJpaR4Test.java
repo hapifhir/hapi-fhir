@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.rp.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -79,6 +78,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -89,6 +90,7 @@ import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
@@ -175,7 +177,7 @@ import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
-public abstract class BaseJpaR4Test extends BaseJpaTest {
+public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
@@ -533,6 +535,23 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+	}
+
+	@Override
+	public IIdType doCreateResource(IBaseResource theResource) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		return dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	@Override
+	public IIdType doUpdateResource(IBaseResource theResource) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirCtx;
 	}
 
 	@Override

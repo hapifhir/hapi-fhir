@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1853
+title: "The `@Interceptor` annotation was not marked as inheritable, meaning that the order attribute was lost when
+   using Spring proxies. Thanks to Tue Toft Nørgård for the pull request!"

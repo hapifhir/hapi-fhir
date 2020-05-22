@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
@@ -56,8 +57,8 @@ public abstract class BaseSubscriptionTest {
 		}
 
 		@Bean
-		public SubscriptionChannelFactory mySubscriptionChannelFactory() {
-			return new SubscriptionChannelFactory(new LinkedBlockingChannelFactory());
+		public SubscriptionChannelFactory mySubscriptionChannelFactory(IChannelNamer theChannelNamer) {
+			return new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(theChannelNamer));
 		}
 
 		@Bean
@@ -65,6 +66,10 @@ public abstract class BaseSubscriptionTest {
 			return new InterceptorService();
 		}
 
-
+		@Bean
+		// Default implementation returns the name unchanged
+		public IChannelNamer channelNamer() {
+			return (theNameComponent, theChannelSettings) -> theNameComponent;
+		}
 	}
 }

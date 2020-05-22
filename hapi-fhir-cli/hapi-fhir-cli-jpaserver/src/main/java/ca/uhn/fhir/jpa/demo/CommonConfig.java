@@ -22,10 +22,10 @@ package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.H2Dialect;
@@ -70,7 +70,7 @@ public class CommonConfig {
 	/**
 	 * The following bean configures the database connection. The 'url' property value of "jdbc:h2:file:target./jpaserver_h2_files" indicates that the server should save resources in a
 	 * directory called "jpaserver_h2_files".
-	 *
+	 * <p>
 	 * A URL to a remote database could also be placed here, along with login credentials and other properties supported by BasicDataSource.
 	 */
 	@Bean(destroyMethod = "close")
@@ -105,7 +105,7 @@ public class CommonConfig {
 		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.default.worker.execution", "async");
-		
+
 		if (System.getProperty("lowmem") != null) {
 			extraProperties.put("hibernate.search.autoregister_listeners", "false");
 		}
@@ -159,6 +159,11 @@ public class CommonConfig {
 	@PreDestroy
 	public void stop() {
 		embeddedElasticSearch().stop();
+	}
+
+	@Bean
+	public PartitionSettings partitionSettings() {
+		return new PartitionSettings();
 	}
 
 }

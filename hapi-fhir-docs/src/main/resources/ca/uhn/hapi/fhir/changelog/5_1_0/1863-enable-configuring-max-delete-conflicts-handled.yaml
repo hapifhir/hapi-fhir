@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1863
+title: "Cascade deletes were failing in cases where the resource being deleted had more than 600 conflicts due to a hard-coded limit
+   on the number of conflicts that the CascadingDeleteInterceptor was allowed to process at a time. This hard-coded limit has been
+   replaced with an optional configuration parameter."

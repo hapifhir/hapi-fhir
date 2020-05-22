@@ -1,0 +1,8 @@
+---
+- item:
+     issue: "1857"
+     type: "change"
+     title: "**Breaking Change**:
+     The method `FhirContext#getResourceNames()` has been renamed to `FhirContext#getResourceTypes()`. HAPI currently
+     goes back and forth between the two, but is consolidating on `Types`.
+    "

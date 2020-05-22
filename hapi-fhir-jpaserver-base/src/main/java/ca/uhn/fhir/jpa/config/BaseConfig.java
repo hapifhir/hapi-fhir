@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
@@ -102,7 +103,8 @@ import java.util.Date;
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*\\.test\\..*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*Test.*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.searchparam.*")
+	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.searchparam.*"),
+	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.empi.*")
 })
 @Import({
 	SearchParamConfig.class
@@ -121,6 +123,8 @@ public abstract class BaseConfig {
 
 	@Autowired
 	protected Environment myEnv;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
@@ -243,12 +247,18 @@ public abstract class BaseConfig {
 	 * Subclasses may override
 	 */
 	protected boolean isSupported(String theResourceType) {
-		return daoRegistry().getResourceDaoOrNull(theResourceType) != null;
+		return myDaoRegistry.getResourceDaoOrNull(theResourceType) != null;
 	}
 
 	@Bean
 	public IConsentContextServices consentContextServices() {
 		return new JpaConsentContextServices();
+	}
+
+	@Bean
+	@Lazy
+	public DiffProvider diffProvider() {
+		return new DiffProvider();
 	}
 
 	@Bean

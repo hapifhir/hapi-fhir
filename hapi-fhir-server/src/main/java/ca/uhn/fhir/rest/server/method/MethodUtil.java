@@ -197,7 +197,8 @@ public class MethodUtil {
 							throw new ConfigurationException(b.toString());
 						}
 						boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
-						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode, methodIsOperation);
+						boolean methodIsPatch = theMethod.getAnnotation(Patch.class) != null;
+						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode, methodIsOperation, methodIsPatch);
 					} else if (nextAnnotation instanceof IdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {

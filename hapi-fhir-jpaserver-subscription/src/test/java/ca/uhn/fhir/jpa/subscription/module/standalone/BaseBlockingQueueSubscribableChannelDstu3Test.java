@@ -131,11 +131,6 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return theResource;
 	}
 
-	protected void initSubscriptionLoader(List<Subscription> subscriptions, String uuid) throws InterruptedException {
-//		myMockFhirClientSubscriptionProvider.setBundleProvider(new SimpleBundleProvider(new ArrayList<>(subscriptions), uuid));
-		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
-	}
-
 	protected Subscription sendSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
 		Subscription subscription = makeActiveSubscription(theCriteria, thePayload, theEndpoint);
 		mySubscriptionActivatedPost.setExpectedCount(1);

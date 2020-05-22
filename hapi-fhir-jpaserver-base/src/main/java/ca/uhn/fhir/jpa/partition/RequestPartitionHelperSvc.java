@@ -42,6 +42,7 @@ import java.util.HashSet;
 
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
+import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.hasHooks;
 
 public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
@@ -74,7 +75,10 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	}
 
 	/**
-	 * Invoke the <code>STORAGE_PARTITION_IDENTIFY_READ</code> interceptor pointcut to determine the tenant for a read request
+	 * Invoke the {@link Pointcut#STORAGE_PARTITION_IDENTIFY_READ} interceptor pointcut to determine the tenant for a read request.
+	 *
+	 * If no interceptors are registered with a hook for {@link Pointcut#STORAGE_PARTITION_IDENTIFY_READ}, return
+	 * {@link RequestPartitionId#allPartitions()} instead.
 	 */
 	@Nonnull
 	@Override
@@ -88,10 +92,14 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			}
 
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
+			if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
+			} else {
+				requestPartitionId = RequestPartitionId.allPartitions();
+			}
 
 			validatePartition(requestPartitionId, theResourceType, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
@@ -102,7 +110,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	}
 
 	/**
-	 * Invoke the <code>STORAGE_PARTITION_IDENTIFY_CREATE</code> interceptor pointcut to determine the tenant for a read request
+	 * Invoke the {@link Pointcut#STORAGE_PARTITION_IDENTIFY_CREATE} interceptor pointcut to determine the tenant for a create request.
 	 */
 	@Nonnull
 	@Override
@@ -122,7 +130,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
-			String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
+			String resourceName = myFhirContext.getResourceType(theResource);
 			validatePartition(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
 
 			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
@@ -179,7 +187,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	}
 
-	private void validatePartition(@Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
+	private void validatePartition(@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
 		Validate.notNull(theRequestPartitionId, "Interceptor did not provide a value for pointcut: %s", thePointcut);
 
 		if (theRequestPartitionId.getPartitionId() != null) {

@@ -19,6 +19,7 @@ import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -116,6 +117,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<>();
+	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
 	private CachingValidationSupport myValidationSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
@@ -149,7 +151,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		IValidationSupport mockSupport = mock(IValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 
-		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx));
+		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
 		myValidationSupport = new CachingValidationSupport(chain);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
@@ -187,7 +189,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				IBaseResource retVal;
 				Class<IBaseResource> clazz = (Class<IBaseResource>) theInvocation.getArguments()[0];
 				String id = theInvocation.getArgument(1, String.class);
-				if ("Questionnaire/q_jon".equals(id)) {
+				if (myStructureDefinitionMap.containsKey(id)) {
+					retVal = myStructureDefinitionMap.get(id);
+				} else if ("Questionnaire/q_jon".equals(id)) {
 					retVal = ourCtx.newJsonParser().parseResource(loadResource("/q_jon.json"));
 				} else {
 					retVal = myDefaultValidationSupport.fetchResource(clazz, id);
@@ -236,7 +240,13 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(mockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) {
-				IBaseResource retVal = myDefaultValidationSupport.fetchStructureDefinition((String) theInvocation.getArguments()[0]);
+				String id = (String) theInvocation.getArguments()[0];
+				IBaseResource retVal;
+				if (myStructureDefinitionMap.containsKey(id)) {
+					retVal = myStructureDefinitionMap.get(id);
+				} else {
+					retVal = myDefaultValidationSupport.fetchStructureDefinition(id);
+				}
 				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}
@@ -244,7 +254,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(mockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
-				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions();
+				List<StructureDefinition> retVal =new ArrayList<>(myDefaultValidationSupport.fetchAllStructureDefinitions());
+				retVal.addAll(myStructureDefinitionMap.values());
 				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
 				return retVal;
 			}
@@ -392,7 +403,26 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
 	}
-	
+
+	/**
+	 * TODO: unignore when https://github.com/hapifhir/org.hl7.fhir.core/pull/201 is merged
+	 */
+	@Test
+	@Ignore
+	public void testValidateFixedBindingOnQuantity() throws IOException {
+		StructureDefinition sd = loadResource(ourCtx, StructureDefinition.class, "/r4/bbl-fixed-binding-structuredef.json");
+		myStructureDefinitionMap.put("http://example.org/fhir/StructureDefinition/MyObservation", sd);
+
+		Observation obs = loadResource(ourCtx, Observation.class, "/r4/bbl-fixed-binding-observation.json");
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+		ValidationResult result = val.validateWithResult(obs);
+		logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+	}
+
+
 	/**
 	 * See #1676 - We should ignore schema location
 	 */
@@ -1330,8 +1360,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.getValueQuantity().setCode("Heck");
 		output = myVal.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, all.size());
-		assertThat(all.get(0).getMessage(), containsString("The value provided (\"Heck\") is not in the value set http://hl7.org/fhir/ValueSet/ucum-bodytemp"));
+		assertEquals(2, all.size());
+		assertThat(all.get(0).getMessage(), containsString("Validation failed for \"http://unitsofmeasure.org#Heck\""));
+		assertThat(all.get(1).getMessage(), containsString("The value provided (\"Heck\") is not in the value set http://hl7.org/fhir/ValueSet/ucum-bodytemp"));
 
 	}
 

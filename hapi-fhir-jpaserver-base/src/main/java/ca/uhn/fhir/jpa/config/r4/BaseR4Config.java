@@ -50,6 +50,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class BaseR4Config extends BaseConfigDstu3Plus {
 
+	public static FhirContext ourFhirContext = FhirContext.forR4();
+
 	@Override
 	public FhirContext fhirContext() {
 		return fhirContextR4();
@@ -64,7 +66,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	@Bean
 	@Primary
 	public FhirContext fhirContextR4() {
-		FhirContext retVal = FhirContext.forR4();
+		FhirContext retVal = ourFhirContext;
 
 		// Don't strip versions in some places
 		ParserOptions parserOptions = retVal.getParserOptions();

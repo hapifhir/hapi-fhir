@@ -29,7 +29,14 @@ import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -64,67 +71,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init501(); // 20200514 - present
 	}
 
-
-	/**
-	 * Partway through the 4.3.0 releaase cycle we renumbered to
-	 * 5.0.0 - We have a bunch of NOP tasks here to avoid breakage for anyone
-	 * who installed a prerelease before we made the switch
-	 */
-	@SuppressWarnings("deprecation")
-	private void init430() {
-		Builder version = forVersion(VersionEnum.V4_3_0);
-		version.addNop("20200218.1");
-		version.addNop("20200218.2");
-		version.addNop("20200218.3");
-		version.addNop("20200220.1");
-		version.addNop("20200419.1");
-		version.addNop("20200419.2");
-		version.addNop("20200420.0");
-		version.addNop("20200420.1");
-		version.addNop("20200420.2");
-		version.addNop("20200420.3");
-		version.addNop("20200420.4");
-		version.addNop("20200420.5");
-		version.addNop("20200420.6");
-		version.addNop("20200420.7");
-		version.addNop("20200420.8");
-		version.addNop("20200420.9");
-		version.addNop("20200420.10");
-		version.addNop("20200420.11");
-		version.addNop("20200420.12");
-		version.addNop("20200420.13");
-		version.addNop("20200420.14");
-		version.addNop("20200420.15");
-		version.addNop("20200420.16");
-		version.addNop("20200420.17");
-		version.addNop("20200420.18");
-		version.addNop("20200420.19");
-		version.addNop("20200420.20");
-		version.addNop("20200420.21");
-		version.addNop("20200420.22");
-		version.addNop("20200420.23");
-		version.addNop("20200420.24");
-		version.addNop("20200420.25");
-		version.addNop("20200420.26");
-		version.addNop("20200420.27");
-		version.addNop("20200420.28");
-		version.addNop("20200420.29");
-		version.addNop("20200420.30");
-		version.addNop("20200420.31");
-		version.addNop("20200420.32");
-		version.addNop("20200420.33");
-		version.addNop("20200420.34");
-		version.addNop("20200420.35");
-		version.addNop("20200420.36");
-		version.addNop("20200420.37");
-		version.addNop("20200420.38");
-		version.addNop("20200420.39");
-		version.addNop("20200420.40");
-		version.addNop("20200420.41");
-		version.addNop("20200420.42");
-	}
-
-
 	private void init501() { //20200514 - present
 		Builder version = forVersion(VersionEnum.V5_0_1);
 
@@ -132,6 +78,31 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
 		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
 		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
+
+		// MPI_LINK
+		version.addIdGenerator("20200517.1", "SEQ_EMPI_LINK_ID");
+		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200517.2", "MPI_LINK", "PID");
+		empiLink.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+
+		empiLink.addColumn("PERSON_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200517.3", "FK_EMPI_LINK_PERSON")
+			.toColumn("PERSON_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("TARGET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200517.4", "FK_EMPI_LINK_TARGET")
+			.toColumn("TARGET_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("MATCH_RESULT").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		empiLink.addColumn("LINK_SOURCE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		empiLink.addColumn("CREATED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		empiLink.addColumn("UPDATED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+
+
+		empiLink.addIndex("20200517.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
 	}
 
 	protected void init500() { // 20200218 - 20200519
@@ -209,7 +180,65 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
 			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
 		);
+	}
 
+	/**
+	 * Partway through the 4.3.0 releaase cycle we renumbered to
+	 * 5.0.0 - We have a bunch of NOP tasks here to avoid breakage for anyone
+	 * who installed a prerelease before we made the switch
+	 */
+	@SuppressWarnings("deprecation")
+	private void init430() {
+		Builder version = forVersion(VersionEnum.V4_3_0);
+		version.addNop("20200218.1");
+		version.addNop("20200218.2");
+		version.addNop("20200218.3");
+		version.addNop("20200220.1");
+		version.addNop("20200419.1");
+		version.addNop("20200419.2");
+		version.addNop("20200420.0");
+		version.addNop("20200420.1");
+		version.addNop("20200420.2");
+		version.addNop("20200420.3");
+		version.addNop("20200420.4");
+		version.addNop("20200420.5");
+		version.addNop("20200420.6");
+		version.addNop("20200420.7");
+		version.addNop("20200420.8");
+		version.addNop("20200420.9");
+		version.addNop("20200420.10");
+		version.addNop("20200420.11");
+		version.addNop("20200420.12");
+		version.addNop("20200420.13");
+		version.addNop("20200420.14");
+		version.addNop("20200420.15");
+		version.addNop("20200420.16");
+		version.addNop("20200420.17");
+		version.addNop("20200420.18");
+		version.addNop("20200420.19");
+		version.addNop("20200420.20");
+		version.addNop("20200420.21");
+		version.addNop("20200420.22");
+		version.addNop("20200420.23");
+		version.addNop("20200420.24");
+		version.addNop("20200420.25");
+		version.addNop("20200420.26");
+		version.addNop("20200420.27");
+		version.addNop("20200420.28");
+		version.addNop("20200420.29");
+		version.addNop("20200420.30");
+		version.addNop("20200420.31");
+		version.addNop("20200420.32");
+		version.addNop("20200420.33");
+		version.addNop("20200420.34");
+		version.addNop("20200420.35");
+		version.addNop("20200420.36");
+		version.addNop("20200420.37");
+		version.addNop("20200420.38");
+		version.addNop("20200420.39");
+		version.addNop("20200420.40");
+		version.addNop("20200420.41");
+		version.addNop("20200420.42");
 	}
 
 	protected void init420() { // 20191015 - 20200217

@@ -125,7 +125,7 @@ public interface IValidationSupport {
 		Validate.notNull(theClass, "theClass must not be null or blank");
 		Validate.notBlank(theUri, "theUri must not be null or blank");
 
-		switch (getFhirContext().getResourceDefinition(theClass).getName()) {
+		switch (getFhirContext().getResourceType(theClass)) {
 			case "StructureDefinition":
 				return theClass.cast(fetchStructureDefinition(theUri));
 			case "ValueSet":

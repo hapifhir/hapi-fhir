@@ -83,6 +83,7 @@ public class DaoConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 
 	/**
 	 * Child Configurations
@@ -153,6 +154,10 @@ public class DaoConfig {
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	private Integer myMaximumDeleteConflictQueryCount = DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT;
 	/**
 	 * Do not change default of {@code true}!
 	 *
@@ -2021,4 +2026,33 @@ public class DaoConfig {
 		 */
 		ANY
 	}
+
+	/**
+	 * <p>
+	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 60}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public Integer getMaximumDeleteConflictQueryCount() {
+		return myMaximumDeleteConflictQueryCount;
+	}
+
+	/**
+	 * <p>
+	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 60}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public void setMaximumDeleteConflictQueryCount(Integer theMaximumDeleteConflictQueryCount) {
+		myMaximumDeleteConflictQueryCount = theMaximumDeleteConflictQueryCount;
+	}
+
 }
