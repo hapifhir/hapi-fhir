@@ -2049,7 +2049,7 @@ public class DaoConfig {
 	 * The default value for this setting is {@code 60}.
 	 * </p>
 	 *
-	 * @since 4.1.0
+	 * @since 5.1.0
 	 */
 	public void setMaximumDeleteConflictQueryCount(Integer theMaximumDeleteConflictQueryCount) {
 		myMaximumDeleteConflictQueryCount = theMaximumDeleteConflictQueryCount;
