@@ -208,7 +208,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				return OperationExamineDirection.NONE;
 
 			case GRAPHQL_REQUEST:
-				return OperationExamineDirection.IN;
+				return OperationExamineDirection.BOTH;
 
 			default:
 				// Should not happen

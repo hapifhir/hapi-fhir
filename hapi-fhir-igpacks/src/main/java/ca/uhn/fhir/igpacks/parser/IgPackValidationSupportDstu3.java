@@ -23,6 +23,7 @@ package ca.uhn.fhir.igpacks.parser;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -101,17 +102,17 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		return false;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return null;
 	}
 

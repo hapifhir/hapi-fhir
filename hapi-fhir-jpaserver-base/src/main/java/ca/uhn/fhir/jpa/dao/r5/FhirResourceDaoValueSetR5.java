@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  */
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -91,7 +92,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	private ValueSet doExpand(ValueSet theSource) {
-		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, null, theSource);
+		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, theSource);
 		validateHaveExpansionOrThrowInternalErrorException(retVal);
 		return (ValueSet) retVal.getValueSet();
 
@@ -101,7 +102,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(theOffset)
 			.setCount(theCount);
-		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, options, theSource);
+		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, theSource);
 		validateHaveExpansionOrThrowInternalErrorException(retVal);
 		return (ValueSet) retVal.getValueSet();
 	}

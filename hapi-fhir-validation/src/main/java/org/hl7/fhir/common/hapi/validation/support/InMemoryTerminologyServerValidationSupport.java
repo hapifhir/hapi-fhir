@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
@@ -52,9 +53,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 
-		org.hl7.fhir.r5.model.ValueSet expansionR5 = expandValueSetToCanonical(theRootValidationSupport, theValueSetToExpand, null, null);
+		org.hl7.fhir.r5.model.ValueSet expansionR5 = expandValueSetToCanonical(theValidationSupportContext, theValueSetToExpand, null, null);
 		if (expansionR5 == null) {
 			return null;
 		}
@@ -86,24 +87,24 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return new ValueSetExpansionOutcome(expansion, null);
 	}
 
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(IValidationSupport theRootValidationSupport, IBaseResource theValueSetToExpand, @Nullable String theWantSystem, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(ValidationSupportContext theValidationSupportContext, IBaseResource theValueSetToExpand, @Nullable String theWantSystem, @Nullable String theWantCode) {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
 		switch (myCtx.getVersion().getVersion()) {
 			case DSTU2:
 			case DSTU2_HL7ORG: {
-				expansionR5 = expandValueSetDstu2Hl7Org(theRootValidationSupport, (ValueSet) theValueSetToExpand, theWantSystem, theWantCode);
+				expansionR5 = expandValueSetDstu2Hl7Org(theValidationSupportContext, (ValueSet) theValueSetToExpand, theWantSystem, theWantCode);
 				break;
 			}
 			case DSTU3: {
-				expansionR5 = expandValueSetDstu3(theRootValidationSupport, (org.hl7.fhir.dstu3.model.ValueSet) theValueSetToExpand, theWantSystem, theWantCode);
+				expansionR5 = expandValueSetDstu3(theValidationSupportContext, (org.hl7.fhir.dstu3.model.ValueSet) theValueSetToExpand, theWantSystem, theWantCode);
 				break;
 			}
 			case R4: {
-				expansionR5 = expandValueSetR4(theRootValidationSupport, (org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand, theWantSystem, theWantCode);
+				expansionR5 = expandValueSetR4(theValidationSupportContext, (org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand, theWantSystem, theWantCode);
 				break;
 			}
 			case R5: {
-				expansionR5 = expandValueSetR5(theRootValidationSupport, (org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand);
+				expansionR5 = expandValueSetR5(theValidationSupportContext, (org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand);
 				break;
 			}
 			case DSTU2_1:
@@ -118,20 +119,20 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-	org.hl7.fhir.r5.model.ValueSet expansion = expandValueSetToCanonical(theRootValidationSupport, theValueSet, theCodeSystem, theCode);
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	org.hl7.fhir.r5.model.ValueSet expansion = expandValueSetToCanonical(theValidationSupportContext, theValueSet, theCodeSystem, theCode);
 		if (expansion == null) {
 			return null;
 		}
-		return validateCodeInExpandedValueSet(theRootValidationSupport, theOptions, theCodeSystem, theCode, expansion);
+		return validateCodeInExpandedValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, expansion);
 	}
 
 
 	@Override
-	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		IBaseResource vs;
 		if (isNotBlank(theValueSetUrl)) {
-			vs = theRootValidationSupport.fetchValueSet(theValueSetUrl);
+			vs = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
 			if (vs == null) {
 				return null;
 			}
@@ -164,24 +165,24 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 		}
 
-		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theRootValidationSupport, null, vs);
+		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theValidationSupportContext, null, vs);
 		if (valueSetExpansionOutcome == null) {
 			return null;
 		}
 
 		IBaseResource expansion = valueSetExpansionOutcome.getValueSet();
 
-		return validateCodeInExpandedValueSet(theRootValidationSupport, theOptions, theCodeSystem, theCode, expansion);
+		return validateCodeInExpandedValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, expansion);
 
 	}
 
-	private CodeValidationResult validateCodeInExpandedValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, IBaseResource theExpansion) {
+	private CodeValidationResult validateCodeInExpandedValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, IBaseResource theExpansion) {
 		assert theExpansion != null;
 
 		boolean caseSensitive = true;
 		IBaseResource system = null;
 		if (!theOptions.isInferSystem() && isNotBlank(theCodeSystem)) {
-			system = theRootValidationSupport.fetchCodeSystem(theCodeSystem);
+			system = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
 			if (system == null) {
 				return null;
 			}
@@ -283,36 +284,36 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
-		return validateCode(theRootValidationSupport, new ConceptValidationOptions(), theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+		return validateCode(theValidationSupportContext, new ConceptValidationOptions(), theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2Hl7Org(IValidationSupport theRootValidationSupport, ValueSet theInput, @Nullable String theWantSystem, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2Hl7Org(ValidationSupportContext theValidationSupportContext, ValueSet theInput, @Nullable String theWantSystem, @Nullable String theWantCode) {
 		Function<String, CodeSystem> codeSystemLoader = t -> {
-			org.hl7.fhir.dstu2.model.ValueSet codeSystem = (org.hl7.fhir.dstu2.model.ValueSet) theRootValidationSupport.fetchCodeSystem(t);
+			org.hl7.fhir.dstu2.model.ValueSet codeSystem = (org.hl7.fhir.dstu2.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 			CodeSystem retVal = new CodeSystem();
 			addCodesDstu2Hl7Org(codeSystem.getCodeSystem().getConcept(), retVal.getConcept());
 			return retVal;
 		};
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> {
-			org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) theRootValidationSupport.fetchValueSet(t);
+			org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 			return ValueSet10_50.convertValueSet(valueSet);
 		};
 
 		org.hl7.fhir.r5.model.ValueSet input = ValueSet10_50.convertValueSet(theInput);
-		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theRootValidationSupport, input, codeSystemLoader, valueSetLoader, theWantSystem, theWantCode);
+		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystem, theWantCode);
 		return (output);
 	}
 
 
 	@Override
-	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		if (isBlank(theSystem)) {
 			return false;
 		}
 
-		IBaseResource cs = theRootValidationSupport.fetchCodeSystem(theSystem);
+		IBaseResource cs = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theSystem);
 
 		if (!myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU2_1)) {
 			return cs != null;
@@ -329,8 +330,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
-		return isNotBlank(theValueSetUrl) && theRootValidationSupport.fetchValueSet(theValueSetUrl) != null;
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		return isNotBlank(theValueSetUrl) && theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl) != null;
 	}
 
 
@@ -343,52 +344,52 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu3(IValidationSupport theRootValidationSupport, org.hl7.fhir.dstu3.model.ValueSet theInput, @Nullable String theWantSystem, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu3(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.dstu3.model.ValueSet theInput, @Nullable String theWantSystem, @Nullable String theWantCode) {
 		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> {
-			org.hl7.fhir.dstu3.model.CodeSystem codeSystem = (org.hl7.fhir.dstu3.model.CodeSystem) theRootValidationSupport.fetchCodeSystem(t);
+			org.hl7.fhir.dstu3.model.CodeSystem codeSystem = (org.hl7.fhir.dstu3.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 			return CodeSystem30_50.convertCodeSystem(codeSystem);
 		};
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> {
-			org.hl7.fhir.dstu3.model.ValueSet valueSet = (org.hl7.fhir.dstu3.model.ValueSet) theRootValidationSupport.fetchValueSet(t);
+			org.hl7.fhir.dstu3.model.ValueSet valueSet = (org.hl7.fhir.dstu3.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 			return ValueSet30_50.convertValueSet(valueSet);
 		};
 
 		org.hl7.fhir.r5.model.ValueSet input = ValueSet30_50.convertValueSet(theInput);
-		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theRootValidationSupport, input, codeSystemLoader, valueSetLoader, theWantSystem, theWantCode);
+		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystem, theWantCode);
 		return (output);
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4(IValidationSupport theRootValidationSupport, org.hl7.fhir.r4.model.ValueSet theInput, @Nullable String theWantSystem, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r4.model.ValueSet theInput, @Nullable String theWantSystem, @Nullable String theWantCode) {
 		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> {
-			org.hl7.fhir.r4.model.CodeSystem codeSystem = (org.hl7.fhir.r4.model.CodeSystem) theRootValidationSupport.fetchCodeSystem(t);
+			org.hl7.fhir.r4.model.CodeSystem codeSystem = (org.hl7.fhir.r4.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 			return CodeSystem40_50.convertCodeSystem(codeSystem);
 		};
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> {
-			org.hl7.fhir.r4.model.ValueSet valueSet = (org.hl7.fhir.r4.model.ValueSet) theRootValidationSupport.fetchValueSet(t);
+			org.hl7.fhir.r4.model.ValueSet valueSet = (org.hl7.fhir.r4.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 			return ValueSet40_50.convertValueSet(valueSet);
 		};
 
 		org.hl7.fhir.r5.model.ValueSet input = ValueSet40_50.convertValueSet(theInput);
-		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theRootValidationSupport, input, codeSystemLoader, valueSetLoader, theWantSystem, theWantCode);
+		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystem, theWantCode);
 		return (output);
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(IValidationSupport theRootValidationSupport, org.hl7.fhir.r5.model.ValueSet theInput) {
-		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> (org.hl7.fhir.r5.model.CodeSystem) theRootValidationSupport.fetchCodeSystem(t);
-		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> (org.hl7.fhir.r5.model.ValueSet) theRootValidationSupport.fetchValueSet(t);
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r5.model.ValueSet theInput) {
+		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> (org.hl7.fhir.r5.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
+		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> (org.hl7.fhir.r5.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 
-		return expandValueSetR5(theRootValidationSupport, theInput, codeSystemLoader, valueSetLoader, null, null);
+		return expandValueSetR5(theValidationSupportContext, theInput, codeSystemLoader, valueSetLoader, null, null);
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(IValidationSupport theRootValidationSupport, org.hl7.fhir.r5.model.ValueSet theInput, Function<String, CodeSystem> theCodeSystemLoader, Function<String, org.hl7.fhir.r5.model.ValueSet> theValueSetLoader, @Nullable String theWantSystem, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r5.model.ValueSet theInput, Function<String, CodeSystem> theCodeSystemLoader, Function<String, org.hl7.fhir.r5.model.ValueSet> theValueSetLoader, @Nullable String theWantSystem, @Nullable String theWantCode) {
 		Set<VersionIndependentConcept> concepts = new HashSet<>();
 
 		try {
-			expandValueSetR5IncludeOrExclude(theRootValidationSupport, concepts, theCodeSystemLoader, theValueSetLoader, theInput.getCompose().getInclude(), true, theWantSystem, theWantCode);
-			expandValueSetR5IncludeOrExclude(theRootValidationSupport, concepts, theCodeSystemLoader, theValueSetLoader, theInput.getCompose().getExclude(), false, theWantSystem, theWantCode);
+			expandValueSetR5IncludeOrExclude(theValidationSupportContext, concepts, theCodeSystemLoader, theValueSetLoader, theInput.getCompose().getInclude(), true, theWantSystem, theWantCode);
+			expandValueSetR5IncludeOrExclude(theValidationSupportContext, concepts, theCodeSystemLoader, theValueSetLoader, theInput.getCompose().getExclude(), false, theWantSystem, theWantCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			return null;
 		}
@@ -404,7 +405,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return retVal;
 	}
 
-	private void expandValueSetR5IncludeOrExclude(IValidationSupport theRootValidationSupport, Set<VersionIndependentConcept> theConcepts, Function<String, CodeSystem> theCodeSystemLoader, Function<String, org.hl7.fhir.r5.model.ValueSet> theValueSetLoader, List<org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent> theComposeList, boolean theComposeListIsInclude, @Nullable String theWantSystem, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
+	private void expandValueSetR5IncludeOrExclude(ValidationSupportContext theValidationSupportContext, Set<VersionIndependentConcept> theConcepts, Function<String, CodeSystem> theCodeSystemLoader, Function<String, org.hl7.fhir.r5.model.ValueSet> theValueSetLoader, List<org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent> theComposeList, boolean theComposeListIsInclude, @Nullable String theWantSystem, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		for (org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent nextInclude : theComposeList) {
 
 			List<VersionIndependentConcept> nextCodeList = new ArrayList<>();
@@ -430,7 +431,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				if (codeSystem == null) {
 
 					if (theWantCode != null) {
-						LookupCodeResult lookup = theRootValidationSupport.lookupCode(theRootValidationSupport, system, theWantCode);
+						LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, system, theWantCode);
 						if (lookup != null && lookup.isFound()) {
 							CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
 								.addConcept()
@@ -467,7 +468,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			for (CanonicalType nextValueSetInclude : nextInclude.getValueSet()) {
 				org.hl7.fhir.r5.model.ValueSet vs = theValueSetLoader.apply(nextValueSetInclude.getValueAsString());
 				if (vs != null) {
-					org.hl7.fhir.r5.model.ValueSet subExpansion = expandValueSetR5(theRootValidationSupport, vs, theCodeSystemLoader, theValueSetLoader, theWantSystem, theWantCode);
+					org.hl7.fhir.r5.model.ValueSet subExpansion = expandValueSetR5(theValidationSupportContext, vs, theCodeSystemLoader, theValueSetLoader, theWantSystem, theWantCode);
 					if (subExpansion == null) {
 						throw new ExpansionCouldNotBeCompletedInternallyException();
 					}

@@ -4,13 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.convertors.VersionConvertor_10_50;
-import org.hl7.fhir.convertors.VersionConvertor_14_50;
-import org.hl7.fhir.convertors.VersionConvertor_30_50;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -233,47 +231,17 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				}
 
 				case DSTU2_1: {
-					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
-						@Override
-						public org.hl7.fhir.r5.model.Resource toCanonical(IBaseResource theNonCanonical) {
-							return VersionConvertor_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theNonCanonical);
-						}
-
-						@Override
-						public IBaseResource fromCanonical(org.hl7.fhir.r5.model.Resource theCanonical) {
-							return VersionConvertor_14_50.convertResource(theCanonical);
-						}
-					};
+					converter = new VersionTypeConverterDstu21();
 					break;
 				}
 
 				case DSTU3: {
-					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
-						@Override
-						public Resource toCanonical(IBaseResource theNonCanonical) {
-							return VersionConvertor_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical, true);
-						}
-
-						@Override
-						public IBaseResource fromCanonical(Resource theCanonical) {
-							return VersionConvertor_30_50.convertResource(theCanonical, true);
-						}
-					};
+					converter = new VersionTypeConverterDstu3();
 					break;
 				}
 
 				case R4: {
-					converter = new VersionSpecificWorkerContextWrapper.IVersionTypeConverter() {
-						@Override
-						public org.hl7.fhir.r5.model.Resource toCanonical(IBaseResource theNonCanonical) {
-							return VersionConvertor_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theNonCanonical);
-						}
-
-						@Override
-						public IBaseResource fromCanonical(org.hl7.fhir.r5.model.Resource theCanonical) {
-							return VersionConvertor_40_50.convertResource(theCanonical);
-						}
-					};
+					converter = new VersionTypeConverterR4();
 					break;
 				}
 
@@ -286,7 +254,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 					throw new IllegalStateException();
 			}
 
-			wrappedWorkerContext = new VersionSpecificWorkerContextWrapper(myValidationSupport, converter);
+			wrappedWorkerContext = new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), converter);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
@@ -165,7 +166,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			ValueSet arg = (ValueSet) t.getArgument(2, IBaseResource.class);
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 			if (retVal == null) {
-				IBaseResource outcome = myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, null, arg).getValueSet();
+				IBaseResource outcome = myDefaultValidationSupport.expandValueSet(new ValidationSupportContext(myDefaultValidationSupport), null, arg).getValueSet();
 				return outcome;
 			}
 			ourLog.debug("expandValueSet({}) : {}", new Object[]{t.getArguments()[0], retVal});
@@ -214,7 +215,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				} else if (myValidSystems.contains(system)) {
 					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, options, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;

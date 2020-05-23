@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -208,7 +209,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private DaoConfig myDaoConfig;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
-	private int myFetchSize = DEFAULT_FETCH_SIZE;
+	private final int myFetchSize = DEFAULT_FETCH_SIZE;
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
@@ -230,7 +231,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private volatile IValidationSupport myValidationSupport;
 
 	@Override
-	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		return supportsSystem(theSystem);
 	}
 
@@ -1920,18 +1921,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 
 		IPrimitiveType<?> urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
 		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
-			return validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, url);
+			return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
 		}
 		return null;
 	}
 
-	Optional<VersionIndependentConcept> validateCodeInValueSet(IValidationSupport theValidationSupport, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
-		IBaseResource valueSet = theValidationSupport.fetchValueSet(theValueSetUrl);
+	Optional<VersionIndependentConcept> validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
+		IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
 
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not
@@ -2026,7 +2027,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = (CodeSystem) fetchCanonicalCodeSystemFromCompleteContext(theSystem);
+		CodeSystem system = fetchCanonicalCodeSystemFromCompleteContext(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -2051,7 +2052,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		CodeSystem system = (CodeSystem) fetchCanonicalCodeSystemFromCompleteContext(theSystem);
+		CodeSystem system = fetchCanonicalCodeSystemFromCompleteContext(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}

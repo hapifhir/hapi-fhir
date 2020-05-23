@@ -50,7 +50,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withParameter(Parameters.class, "definition", sd)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(51, response.getSnapshot().getElement().size());
+		assertEquals(54, response.getSnapshot().getElement().size());
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withNoParameters(Parameters.class)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(51, response.getSnapshot().getElement().size());
+		assertEquals(54, response.getSnapshot().getElement().size());
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withParameter(Parameters.class, "url", new StringType("http://example.com/fhir/StructureDefinition/patient-1a-extensions"))
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(51, response.getSnapshot().getElement().size());
+		assertEquals(54, response.getSnapshot().getElement().size());
 	}
 
 	@Test

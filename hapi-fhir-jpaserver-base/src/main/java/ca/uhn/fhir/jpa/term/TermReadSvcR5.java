@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -60,7 +61,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 
 	@Override
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
-	public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand));
 		return new ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expandedR4));
@@ -86,12 +87,12 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	}
 
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
 		boolean haveValidated = false;
 
 		if (isNotBlank(theValueSetUrl)) {
-			codeOpt = super.validateCodeInValueSet(theRootValidationSupport, theOptions, theValueSetUrl, theCodeSystem, theCode);
+			codeOpt = super.validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode);
 			haveValidated = true;
 		}
 
@@ -116,7 +117,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return super.lookupCode(theSystem, theCode);
 	}
 

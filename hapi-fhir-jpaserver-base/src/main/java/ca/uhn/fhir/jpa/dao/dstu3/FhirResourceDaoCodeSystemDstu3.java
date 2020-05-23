@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -108,9 +109,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		ourLog.debug("Looking up {} / {}", system, code);
 
-		if (myValidationSupport.isCodeSystemSupported(myValidationSupport, system)) {
+		if (myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system)) {
 			ourLog.debug("Code system {} is supported", system);
-			IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(myValidationSupport, system, code);
+			IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code);
 			if (result != null) {
 				return result;
 			}
