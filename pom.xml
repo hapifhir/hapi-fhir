@@ -639,6 +639,16 @@
 			<name>Craig Appl</name>
 			<organization>ONA</organization>
 		</developer>
+		<developer>
+			<id>IanMMarshall</id>
+			<name>Ian Marshall</name>
+			<organization>Smile CDR</organization>
+		</developer>
+		<developer>
+			<id>markiantorno</id>
+			<name>Mark Iantorno</name>
+			<organization>Smile CDR</organization>
+		</developer>
 	</developers>
 
 	<licenses>
