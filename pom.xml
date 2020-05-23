@@ -295,7 +295,7 @@
 		<developer>
 			<id>vadi2</id>
 			<name>Vadim Peretokin</name>
-			<organization>Furore Informatica</organization>
+			<organization>Firely</organization>
 		</developer>
 		<developer>
 			<id>lawley</id>
@@ -321,7 +321,7 @@
 		<developer>
 			<id>daliboz</id>
 			<name>Jenny Syed</name>
-			<organization>Cerner</organization>
+			<organization>Cerner Corporation</organization>
 		</developer>
 		<developer>
 			<id>sekaijin</id>
@@ -355,7 +355,7 @@
 		<developer>
 			<id>ohr</id>
 			<name>Christian Ohr</name>
-			<organization>Open eHealth Foundation</organization>
+			<organization>InterComponentWare AG</organization>
 		</developer>
 		<developer>
 			<id>eug48</id>
@@ -443,10 +443,6 @@
 			<name>Andreas Keil</name>
 		</developer>
 		<developer>
-			<id>dgileadi</id>
-			<name>David Gileadi</name>
-		</developer>
-		<developer>
 			<id>RuthAlk</id>
 			<name>Ruth Alkema</name>
 		</developer>
@@ -492,6 +488,7 @@
 		<developer>
 			<id>volsch</id>
 			<name>Volker Schmidt</name>
+			<organization>DHIS2 / University of Oslo</organization>
 		</developer>
 		<developer>
 			<id>magnuswatn</id>
@@ -531,7 +528,7 @@
 		<developer>
 			<id>tadgh</id>
 			<name>Gary Graham</name>
-			<organization>Centre for Global eHealth Innovation</organization>
+			<organization>Smile CDR</organization>
 		</developer>
 		<developer>
 			<id>nerdydrew</id>
@@ -553,10 +550,6 @@
 		<developer>
 			<id>uurl</id>
 			<name>Raul Estrada</name>
-		</developer>
-		<developer>
-			<id>anthonys123</id>
-			<name>Anthony Sute</name>
 		</developer>
 		<developer>
 			<id>nickrobison-usds</id>
