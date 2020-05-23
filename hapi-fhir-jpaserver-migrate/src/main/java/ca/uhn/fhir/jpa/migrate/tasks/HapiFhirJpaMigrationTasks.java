@@ -180,6 +180,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
 			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
 		);
+
+		// TRM_CONCEPT_PROPERTY
+		version.onTable("TRM_CONCEPT_PROPERTY").addIndex("20200523.1", "IDX_CONCEPTPROP_CONCEPTPID").unique(false).withColumns("CONCEPT_PID");
 	}
 
 	/**
@@ -243,9 +246,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	protected void init420() { // 20191015 - 20200217
 		Builder version = forVersion(VersionEnum.V4_2_0);
-
-		// TRM_CONCEPT_PROPERTY
-		version.onTable("TRM_CONCEPT_PROPERTY").addIndex("20191217.1", "IDX_CONCEPTPROP_CONCEPTPID").unique(false).withColumns("CONCEPT_PID");
 
     // TermValueSetConceptDesignation
 		version.onTable("TRM_VALUESET_C_DESIGNATION").dropIndex("20200202.1", "IDX_VALUESET_C_DSGNTN_VAL").failureAllowed();

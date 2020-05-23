@@ -633,6 +633,11 @@
 			<id>ibacher</id>
 			<name>Ian</name>
 		</developer>
+		<developer>
+			<id>jasmdk</id>
+			<name>Jacob Stampe Mikkelsen</name>
+			<organization>Systematik A/S</organization>
+		</developer>
 	</developers>
 
 	<licenses>
