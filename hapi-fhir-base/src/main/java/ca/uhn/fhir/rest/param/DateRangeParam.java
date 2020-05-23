@@ -6,12 +6,17 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.time.DateUtils;
+import ca.uhn.fhir.util.DateUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -263,6 +268,67 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return this;
 	}
 
+	/**
+	 * Return the current lower bound as an integer representative of the date.
+	 *
+	 * e.g. 2019-02-22T04:22:00-0500 -> 20120922
+	 */
+	public Integer getLowerBoundAsDateInteger() {
+		if (myLowerBound == null || myLowerBound.getValue() == null) {
+			return null;
+		}
+		int retVal = DateUtils.convertDatetoDayInteger(myLowerBound.getValue());
+
+		if (myLowerBound.getPrefix() != null) {
+			switch (myLowerBound.getPrefix()) {
+				case GREATERTHAN:
+				case STARTS_AFTER:
+					retVal += 1;
+					break;
+				case EQUAL:
+				case GREATERTHAN_OR_EQUALS:
+					break;
+				case LESSTHAN:
+				case APPROXIMATE:
+				case LESSTHAN_OR_EQUALS:
+				case ENDS_BEFORE:
+				case NOT_EQUAL:
+					throw new IllegalStateException("Invalid lower bound comparator: " + myLowerBound.getPrefix());
+			}
+		}
+		return retVal;
+	}
+
+	/**
+	 * Return the current upper bound as an integer representative of the date
+	 *
+	 * e.g. 2019-02-22T04:22:00-0500 -> 2019122
+	 */
+	public Integer getUpperBoundAsDateInteger() {
+		if (myUpperBound == null || myUpperBound.getValue() == null) {
+			return null;
+		}
+		int retVal = DateUtils.convertDatetoDayInteger(myUpperBound.getValue());
+		if (myUpperBound.getPrefix() != null) {
+			switch (myUpperBound.getPrefix()) {
+				case LESSTHAN:
+				case ENDS_BEFORE:
+					retVal -= 1;
+					break;
+				case EQUAL:
+				case LESSTHAN_OR_EQUALS:
+					break;
+				case GREATERTHAN_OR_EQUALS:
+				case GREATERTHAN:
+				case APPROXIMATE:
+				case NOT_EQUAL:
+				case STARTS_AFTER:
+					throw new IllegalStateException("Invalid upper bound comparator: " + myUpperBound.getPrefix());
+			}
+		}
+		return retVal;
+	}
+
 	public Date getLowerBoundAsInstant() {
 		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
@@ -270,10 +336,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		Date retVal = myLowerBound.getValue();
 
 		if (myLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
-			Calendar cal = DateUtils.toCalendar(retVal);
-			cal.setTimeZone(TimeZone.getTimeZone("GMT-11:30"));
-			cal = DateUtils.truncate(cal, Calendar.DATE);
-			retVal = cal.getTime();
+			retVal = DateUtils.getLowestInstantFromDate(retVal);
 		}
 
 		if (myLowerBound.getPrefix() != null) {
@@ -335,10 +398,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		Date retVal = myUpperBound.getValue();
 
 		if (myUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
-			Calendar cal = DateUtils.toCalendar(retVal);
-			cal.setTimeZone(TimeZone.getTimeZone("GMT+11:30"));
-			cal = DateUtils.truncate(cal, Calendar.DATE);
-			retVal = cal.getTime();
+			retVal = DateUtils.getHighestInstantFromDate(retVal);
 		}
 
 		if (myUpperBound.getPrefix() != null) {

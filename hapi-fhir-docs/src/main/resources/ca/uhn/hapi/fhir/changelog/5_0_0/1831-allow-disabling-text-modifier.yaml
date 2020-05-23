@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1831
+title: "Indexing for the :text modifier can now be globally or selectively disabled in the JPA server. This can have a measurable
+   impact on index sizes and write speed in servers with large numbers of token indexes."

@@ -102,10 +102,6 @@ public class RestfulServerTest {
 			};
 		}
 
-		@Override
-		public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-			return new MyResourceProvider();
-		}
 	}
 
 	@SuppressWarnings("unused")

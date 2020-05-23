@@ -74,7 +74,7 @@ public class ServeMediaResourceRawInterceptor {
 
 
 		FhirContext context = theRequestDetails.getFhirContext();
-		String resourceName = context.getResourceDefinition(theResponseObject).getName();
+		String resourceName = context.getResourceType(theResponseObject);
 
 		// Are we serving a FHIR read request on the Media resource type
 		if (!"Media".equals(resourceName) || !RESPOND_TO_OPERATION_TYPES.contains(theRequestDetails.getRestOperationType())) {

@@ -20,18 +20,20 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+
+import java.util.List;
+import java.util.Map;
 
 public class HttpSimpleGetClientInvocation extends BaseHttpClientInvocation {
 
 	private final String myUrl;
+	private UrlSourceEnum myUrlSource = UrlSourceEnum.GENERATED;
 
 	public HttpSimpleGetClientInvocation(FhirContext theContext, String theUrlPath) {
 		super(theContext);
@@ -40,7 +42,12 @@ public class HttpSimpleGetClientInvocation extends BaseHttpClientInvocation {
 
 	@Override
 	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
-		return createHttpRequest(myUrl, theEncoding, RequestTypeEnum.GET);
+		IHttpRequest retVal = createHttpRequest(myUrl, theEncoding, RequestTypeEnum.GET);
+		retVal.setUrlSource(myUrlSource);
+		return retVal;
 	}
 
+	public void setUrlSource(UrlSourceEnum theUrlSource) {
+		myUrlSource = theUrlSource;
+	}
 }

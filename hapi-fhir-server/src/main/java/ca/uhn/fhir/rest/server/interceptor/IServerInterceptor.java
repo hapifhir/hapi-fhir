@@ -55,7 +55,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Provides methods to intercept requests and responses. Note that implementations of this interface may wish to use
  * {@link InterceptorAdapter} in order to not need to implement every method.
  * <p>
- * <b>See:</b> See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html">server
+ * <b>See:</b> See the <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/">server
  * interceptor documentation</a> for more information on how to use this class.
  * </p>
  * Note that unless otherwise stated, it is possible to throw any subclass of
@@ -311,7 +311,7 @@ public interface IServerInterceptor {
 		}
 
 		public ActionRequestDetails(RequestDetails theRequestDetails, FhirContext theContext, IBaseResource theResource) {
-			this(theRequestDetails, theContext, theContext.getResourceDefinition(theResource).getName(), theResource.getIdElement());
+			this(theRequestDetails, theContext, theContext.getResourceType(theResource), theResource.getIdElement());
 			myResource = theResource;
 		}
 
@@ -327,7 +327,7 @@ public interface IServerInterceptor {
 		}
 
 		public ActionRequestDetails(RequestDetails theRequestDetails, IBaseResource theResource) {
-			this(theRequestDetails, theRequestDetails.getServer().getFhirContext().getResourceDefinition(theResource).getName(), theResource.getIdElement());
+			this(theRequestDetails, theRequestDetails.getServer().getFhirContext().getResourceType(theResource), theResource.getIdElement());
 			myResource = theResource;
 		}
 

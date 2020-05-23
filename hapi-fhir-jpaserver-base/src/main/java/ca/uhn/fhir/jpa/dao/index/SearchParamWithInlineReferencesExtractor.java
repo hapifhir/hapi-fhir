@@ -23,19 +23,20 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
-import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -57,7 +58,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -71,7 +71,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Lazy
 public class SearchParamWithInlineReferencesExtractor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamWithInlineReferencesExtractor.class);
-
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
@@ -85,30 +86,30 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
-	private ResourceLinkExtractor myResourceLinkExtractor;
-	@Autowired
 	private DaoResourceLinkResolver myDaoResourceLinkResolver;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
+	public void populateFromResource(ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
+		extractInlineReferences(theResource, theRequest);
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
-		mySearchParamExtractorService.extractFromResource(theRequest, theParams, theEntity, theResource);
+		RequestPartitionId partitionId;
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			partitionId = theEntity.getPartitionId();
+		} else {
+			partitionId = RequestPartitionId.allPartitions();
+		}
+
+		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, true);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
-			theParams.findMissingSearchParams(myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
+			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
 		}
-
-		theParams.setUpdatedTime(theUpdateTime);
-
-		extractInlineReferences(theResource, theRequest);
-
-		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver, true, theRequest);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
@@ -210,7 +211,6 @@ public class SearchParamWithInlineReferencesExtractor {
 			}
 		}
 	}
-
 
 
 	/**

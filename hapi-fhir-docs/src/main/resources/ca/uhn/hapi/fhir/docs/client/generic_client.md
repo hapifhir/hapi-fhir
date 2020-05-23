@@ -181,6 +181,14 @@ Conditional deletions are also possible, which is a form where instead of deleti
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|deleteConditional}}
 ```
 
+## Cascading Delete
+
+The following snippet shows now to request a cascading delete. Note that this is a HAPI FHIR specific feature and is not supported on all servers.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|deleteCascade}}
+```
+
 # Update - Instance
 
 Updating a resource is similar to creating one, except that an ID must be supplied since you are updating a previously existing resource instance.
@@ -200,6 +208,22 @@ FHIR also specifies a type of update called "conditional updates", where instead
 ```
 
 **See Also:** See the description of [Update ETags](#update_etags) below for information on specifying a matching version in the client request.
+
+# Patch - Instance
+
+The PATCH operation can be used to modify a resource in place by supplying a delta
+
+The following example shows how to perform a patch using a [FHIR Patch](http://hl7.org/fhir/fhirpatch.html)
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|patchFhir}}
+```
+
+The following example shows how to perform a patch using a [JSON Patch](https://tools.ietf.org/html/rfc6902.)
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|patchJson}}
+```
 
 # History - Server/Type/Instance
 

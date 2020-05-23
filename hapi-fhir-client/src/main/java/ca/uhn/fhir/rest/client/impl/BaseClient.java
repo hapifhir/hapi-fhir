@@ -297,6 +297,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 			HookParams requestParams = new HookParams();
 			requestParams.add(IHttpRequest.class, httpRequest);
+			requestParams.add(IRestfulClient.class, this);
 			getInterceptorService().callHooks(Pointcut.CLIENT_REQUEST, requestParams);
 
 			response = httpRequest.execute();
@@ -304,6 +305,7 @@ public abstract class BaseClient implements IRestfulClient {
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
+			responseParams.add(IRestfulClient.class, this);
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
 
 			String mimeType;

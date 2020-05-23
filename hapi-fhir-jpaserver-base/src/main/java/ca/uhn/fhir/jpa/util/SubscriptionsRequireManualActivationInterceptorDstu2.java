@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
@@ -48,14 +48,14 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-		if (myDao.getContext().getResourceDefinition(theResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
+		if (myDao.getContext().getResourceType(theResource).equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
 		}
 	}
 
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
+		if (myDao.getContext().getResourceType(theNewResource).equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);
 		}
 	}

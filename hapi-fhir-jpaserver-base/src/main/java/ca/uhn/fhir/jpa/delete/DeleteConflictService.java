@@ -24,33 +24,35 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DeleteConflict;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Iterator;
 import java.util.List;
 
 @Service
 public class DeleteConflictService {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.class);
 	public static final int FIRST_QUERY_RESULT_COUNT = 1;
-	public static final int RETRY_QUERY_RESULT_COUNT = 60;
-	public static final int MAX_RETRY_ATTEMPTS = 10;
+	public static int MAX_RETRY_ATTEMPTS = 10;
+	public static String MAX_RETRY_ATTEMPTS_EXCEEDED_MSG = "Requested delete operation stopped before all conflicts were handled. May need to increase the configured Maximum Delete Conflict Query Count.";
 
 	@Autowired
 	DeleteConflictFinderService myDeleteConflictFinderService;
@@ -63,7 +65,7 @@ public class DeleteConflictService {
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest) {
+	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
 		// We want the list of resources that are marked to be the same list even as we
 		// drill into conflict resolution stacks.. this allows us to not get caught by
@@ -73,30 +75,35 @@ public class DeleteConflictService {
 		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
 		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
 
-		DeleteConflictOutcome outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
+		DeleteConflictOutcome outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT, theTransactionDetails);
 
 		int retryCount = 0;
 		while (outcome != null) {
 			int shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
 			if (!(retryCount < shouldRetryCount)) break;
-			newConflicts = new DeleteConflictList();
-			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
+			newConflicts = new DeleteConflictList(newConflicts);
+			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, myDaoConfig.getMaximumDeleteConflictQueryCount(), theTransactionDetails);
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);
+		if(retryCount >= MAX_RETRY_ATTEMPTS && !theDeleteConflicts.isEmpty()) {
+			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, MAX_RETRY_ATTEMPTS_EXCEEDED_MSG,null, "processing");
+			throw new ResourceVersionConflictException(MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, oo);
+		}
 		return retryCount;
 	}
 
-	private DeleteConflictOutcome findAndHandleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount) {
+	private DeleteConflictOutcome findAndHandleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount, TransactionDetails theTransactionDetails) {
 		List<ResourceLink> resultList = myDeleteConflictFinderService.findConflicts(theEntity, theMinQueryResultCount);
 		if (resultList.isEmpty()) {
 			return null;
 		}
 
-		return handleConflicts(theRequest, theDeleteConflicts, theEntity, theForValidate, resultList);
+		return handleConflicts(theRequest, theDeleteConflicts, theEntity, theForValidate, resultList, theTransactionDetails);
 	}
 
-	private DeleteConflictOutcome handleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList) {
+	private DeleteConflictOutcome handleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList, TransactionDetails theTransactionDetails) {
 		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete() && !theForValidate) {
 			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", theResultList.size());
 			myResourceLinkDao.deleteAll(theResultList);
@@ -113,7 +120,8 @@ public class DeleteConflictService {
 		HookParams hooks = new HookParams()
 			.add(DeleteConflictList.class, theDeleteConflicts)
 			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(TransactionDetails.class, theTransactionDetails);
 		return (DeleteConflictOutcome)JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
 	}
 
@@ -140,17 +148,13 @@ public class DeleteConflictService {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
 		String firstMsg = null;
 
-		Iterator<DeleteConflict> iterator = theDeleteConflicts.iterator();
-		while (iterator.hasNext()) {
-			DeleteConflict next = iterator.next();
-			StringBuilder b = new StringBuilder();
-			b.append("Unable to delete ");
-			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
-			b.append(" because at least one resource has a reference to this resource. First reference found was resource ");
-			b.append(next.getSourceId().toUnqualifiedVersionless().getValue());
-			b.append(" in path ");
-			b.append(next.getSourcePath());
-			String msg = b.toString();
+		for (DeleteConflict next : theDeleteConflicts) {
+			String msg = "Unable to delete " +
+				next.getTargetId().toUnqualifiedVersionless().getValue() +
+				" because at least one resource has a reference to this resource. First reference found was resource " +
+				next.getSourceId().toUnqualifiedVersionless().getValue() +
+				" in path " +
+				next.getSourcePath();
 			if (firstMsg == null) {
 				firstMsg = msg;
 			}
@@ -158,5 +162,10 @@ public class DeleteConflictService {
 		}
 
 		throw new ResourceVersionConflictException(firstMsg, oo);
+	}
+
+	@VisibleForTesting
+	static void setMaxRetryAttempts(Integer theMaxRetryAttempts) {
+		MAX_RETRY_ATTEMPTS = theMaxRetryAttempts;
 	}
 }

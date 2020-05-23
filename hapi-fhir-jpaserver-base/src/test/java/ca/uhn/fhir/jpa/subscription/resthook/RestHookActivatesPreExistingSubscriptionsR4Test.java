@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -46,18 +45,12 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@After
-	public void afterResetSubscriptionActivatingInterceptor() {
-		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
-	}
-
-	@After
 	public void afterUnregisterRestHookListener() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@Before
 	public void beforeSetSubscriptionActivatingInterceptor() {
-		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 

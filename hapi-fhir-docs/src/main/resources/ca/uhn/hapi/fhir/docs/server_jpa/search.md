@@ -2,10 +2,6 @@
 
 The HAPI FHIR JPA Server fully implements most [FHIR search](https://www.hl7.org/fhir/search.html) operations for most versions of FHIR.  However, there are some known limitations of the current implementation.  Here is a partial list of search functionality that is not currently supported in HAPI FHIR:
 
-### Date searches without timestamp
-
-Searching by date with no timestamp currently doesn't match all records it should.  See [Issue 1499](https://github.com/jamesagnew/hapi-fhir/issues/1499).
-
 ### Chains within _has
 
 Chains within _has are not currently supported for performance reasons.  For example, this search is not currently supported

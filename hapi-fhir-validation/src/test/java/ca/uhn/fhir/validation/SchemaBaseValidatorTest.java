@@ -7,7 +7,9 @@ import org.junit.Test;
 import javax.xml.transform.Source;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class SchemaBaseValidatorTest {
 
@@ -26,7 +28,7 @@ public class SchemaBaseValidatorTest {
 			validator.loadXml("foo.xsd");
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("Schema not found"));
+			assertThat(e.getMessage(), containsString("Unable to find classpath resource"));
 		}
 	}
 }

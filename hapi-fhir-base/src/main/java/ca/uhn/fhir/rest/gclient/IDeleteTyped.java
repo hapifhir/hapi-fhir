@@ -20,10 +20,15 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, IBaseOperationOutcome> {
-	
-	// nothing for now
+public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, MethodOutcome> {
+
+	/**
+	 * Delete cascade mode - Note that this is a HAPI FHIR specific feature and is not supported on all servers.
+	 */
+	IDeleteTyped cascade(DeleteCascadeModeEnum theDelete);
 
 }

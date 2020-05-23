@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -8,16 +9,20 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -30,6 +35,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 
 	@After
 	public final void after() {
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@Test
@@ -210,7 +216,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSortOnSparselyPopulatedFields() {
-//		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
 		IIdType pid1, pid2, pid3, pid4, pid5, pid6;
 		{
@@ -257,7 +263,9 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSortOnSparselyPopulatedSearchParameter() throws Exception {
+	public void testSortOnSparselyPopulatedSearchParameter() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		Patient pCA = new Patient();
 		pCA.setId("CA");
 		pCA.setActive(false);
@@ -314,6 +322,46 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+	}
+
+	@Test
+	public void testSortWithChainedSearch() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		Patient pCA = new Patient();
+		pCA.setId("CA");
+		pCA.addIdentifier().setSystem("PCA").setValue("PCA");
+		myPatientDao.update(pCA);
+
+		Observation obs1 = new Observation();
+		obs1.setId("OBS1");
+		obs1.getSubject().setReference("Patient/CA");
+		obs1.setEffective(new DateTimeType("2000-01-01"));
+		myObservationDao.update(obs1);
+
+		Observation obs2 = new Observation();
+		obs2.setId("OBS2");
+		obs2.getSubject().setReference("Patient/CA");
+		obs2.setEffective(new DateTimeType("2000-02-02"));
+		myObservationDao.update(obs2);
+
+		SearchParameterMap map;
+		List<String> ids;
+
+		runInTransaction(()->{
+			ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient", "identifier", "PCA|PCA"));
+		map.setSort(new SortSpec("date").setOrder(SortOrderEnum.DESC));
+		myCaptureQueriesListener.clear();
+		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
+		ourLog.info("IDS: {}", ids);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids.toString(), ids, contains("Observation/OBS2", "Observation/OBS1"));
+
 	}
 
 	@AfterClass

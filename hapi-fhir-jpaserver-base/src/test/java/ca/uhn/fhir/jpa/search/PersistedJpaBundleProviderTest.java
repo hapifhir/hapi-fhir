@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -24,7 +24,7 @@ public class PersistedJpaBundleProviderTest {
 		String searchUuid = "this is not a hat";
 		myDao = mock(IDao.class);
 		mySearchBuilderFactory = mock(SearchBuilderFactory.class);
-		myPersistedJpaBundleProvider = new PersistedJpaBundleProvider(request, searchUuid, myDao, mySearchBuilderFactory);
+		myPersistedJpaBundleProvider = new PersistedJpaBundleProvider(request, searchUuid);
 	}
 
 	@Test

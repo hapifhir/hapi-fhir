@@ -1,0 +1,4 @@
+---
+type: add
+issue: 1804
+title: Support for HAPI FHIR cascading deletes has been added to the Generic Client.

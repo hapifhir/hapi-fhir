@@ -11,6 +11,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -55,7 +56,7 @@ public class QuestionnaireValidatorR4Test {
 
 	@Test
 	public void testQuestionnaireWithPredefinedExtensionDomainsForCoding() {
-		String[] extensionDomainsToTest = new String[] {
+		String[] extensionDomainsToTest = new String[]{
 			"http://example.org/questionnaire-color-control-1",
 			"https://example.org/questionnaire-color-control-2",
 			"http://acme.com/questionnaire-color-control-3",
@@ -72,18 +73,18 @@ public class QuestionnaireValidatorR4Test {
 				.setType(QuestionnaireItemType.STRING)
 				.addExtension()
 				.setUrl(extensionDomainToTest)
-				.setValue(new Coding(null, "text-box", null));
+				.setValue(new CodeType("text-box"));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().stream().filter(t->t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
+			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
 		}
 	}
 
 	@Test
 	public void testQuestionnaireWithPredefinedExtensionDomainsForCodeableConcept() {
-		String[] extensionDomainsToTest = new String[] {
+		String[] extensionDomainsToTest = new String[]{
 			"http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
 		};
 		for (String extensionDomainToTest : extensionDomainsToTest) {
@@ -111,7 +112,7 @@ public class QuestionnaireValidatorR4Test {
 			.setType(QuestionnaireItemType.STRING)
 			.addExtension()
 			.setUrl(extensionUrl + "questionnaire-itemControl")
-			.setValue(new Coding(null, "text-box", null));
+			.setValue(new CodeType("text-box"));
 
 		ValidationResult errors = myVal.validateWithResult(q);
 

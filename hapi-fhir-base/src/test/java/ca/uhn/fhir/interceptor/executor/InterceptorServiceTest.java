@@ -365,11 +365,12 @@ public class InterceptorServiceTest {
 		params.add(String.class, "C");
 		params.add(String.class, "D");
 		params.add(String.class, "E");
+		params.add(String.class, "F");
 		try {
 			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Wrong number of params for pointcut " + Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED + " - Wanted ca.uhn.fhir.rest.api.server.RequestDetails,ca.uhn.fhir.rest.server.servlet.ServletRequestDetails,org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [String, String, String, String, String]", e.getMessage());
+			assertEquals("Wrong number of params for pointcut STORAGE_PRECOMMIT_RESOURCE_UPDATED - Wanted ca.uhn.fhir.rest.api.server.RequestDetails,ca.uhn.fhir.rest.api.server.storage.TransactionDetails,ca.uhn.fhir.rest.server.servlet.ServletRequestDetails,org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [String, String, String, String, String, String]", e.getMessage());
 		}
 	}
 
@@ -383,6 +384,7 @@ public class InterceptorServiceTest {
 		params.add((Class) String.class, 2);
 		params.add((Class) String.class, 3);
 		params.add((Class) String.class, 4);
+		params.add((Class) String.class, 5);
 		try {
 			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail();

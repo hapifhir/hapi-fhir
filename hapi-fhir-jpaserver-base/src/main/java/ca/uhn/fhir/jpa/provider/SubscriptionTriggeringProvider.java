@@ -22,12 +22,13 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.subscription.ISubscriptionTriggeringSvc;
+import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,8 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 public class SubscriptionTriggeringProvider implements IResourceProvider {
-	public static final String RESOURCE_ID = "resourceId";
-	public static final String SEARCH_URL = "searchUrl";
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -47,8 +46,8 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
-		@OperationParam(name = RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "uri") List<IPrimitiveType<String>> theResourceIds,
-		@OperationParam(name = SEARCH_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theSearchUrls
+		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "uri") List<IPrimitiveType<String>> theResourceIds,
+		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theSearchUrls
 	) {
 		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null);
 	}
@@ -56,8 +55,8 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
 		@IdParam IIdType theSubscriptionId,
-		@OperationParam(name = RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "uri") List<IPrimitiveType<String>> theResourceIds,
-		@OperationParam(name = SEARCH_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theSearchUrls
+		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "uri") List<IPrimitiveType<String>> theResourceIds,
+		@OperationParam(name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theSearchUrls
 	) {
 		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, theSubscriptionId);
 	}

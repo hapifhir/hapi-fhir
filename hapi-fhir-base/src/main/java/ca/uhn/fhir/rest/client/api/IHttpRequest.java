@@ -60,8 +60,17 @@ public interface IHttpRequest {
 
 	/**
 	 * Return the request URI, or null
+	 *
+	 * @see #getUri()
 	 */
 	String getUri();
+
+	/**
+	 * Modify the request URI, or null
+	 *
+	 * @see #setUrlSource(UrlSourceEnum)
+	 */
+	void setUri(String theUrl);
 
 	/**
 	 * Return the HTTP verb (e.g. "GET")
@@ -74,4 +83,19 @@ public interface IHttpRequest {
 	 * @param theHeaderName The header name, e.g. "Accept" (must not be null or blank)
 	 */
 	void removeHeaders(String theHeaderName);
+
+	/**
+	 * Where was the URL from?
+	 *
+	 * @since 5.0.0
+	 */
+	UrlSourceEnum getUrlSource();
+
+	/**
+	 * Where was the URL from?
+	 *
+	 * @since 5.0.0
+	 */
+	void setUrlSource(UrlSourceEnum theUrlSource);
+
 }

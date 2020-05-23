@@ -20,13 +20,12 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.demo.ContextHolder;
 import ca.uhn.fhir.jpa.demo.FhirServerConfig;
 import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
 import ca.uhn.fhir.jpa.demo.FhirServerConfigR4;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;

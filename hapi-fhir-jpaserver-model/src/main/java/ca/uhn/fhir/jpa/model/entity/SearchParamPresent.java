@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -32,7 +34,7 @@ import java.io.Serializable;
 	@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
 	@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 })
-public class SearchParamPresent implements Serializable {
+public class SearchParamPresent extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -46,12 +48,14 @@ public class SearchParamPresent implements Serializable {
 	@ManyToOne()
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;
-	@Column(name="RES_ID", nullable = false, insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
 	private Long myResourcePid;
 	@Transient
 	private transient String myParamName;
 	@Column(name = "HASH_PRESENCE")
 	private Long myHashPresence;
+	@Transient
+	private transient PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -63,11 +67,11 @@ public class SearchParamPresent implements Serializable {
 	@SuppressWarnings("unused")
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashPresence == null) {
+		if (myHashPresence == null && getParamName() != null) {
 			String resourceType = getResource().getResourceType();
 			String paramName = getParamName();
 			boolean present = myPresent;
-			setHashPresence(calculateHashPresence(resourceType, paramName, present));
+			setHashPresence(calculateHashPresence(getPartitionSettings(), getPartitionId(), resourceType, paramName, present));
 		}
 	}
 
@@ -110,12 +114,21 @@ public class SearchParamPresent implements Serializable {
 		b.append("resPid", myResource.getIdDt().toUnqualifiedVersionless().getValue());
 		b.append("paramName", myParamName);
 		b.append("present", myPresent);
+		b.append("partition", getPartitionId());
 		return b.build();
 	}
 
-	public static long calculateHashPresence(String theResourceType, String theParamName, Boolean thePresent) {
+	public PartitionSettings getPartitionSettings() {
+		return myPartitionSettings;
+	}
+
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
+	public static long calculateHashPresence(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
-		return BaseResourceIndexedSearchParam.hash(theResourceType, theParamName, string);
+		return BaseResourceIndexedSearchParam.hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
 	}
 
 }

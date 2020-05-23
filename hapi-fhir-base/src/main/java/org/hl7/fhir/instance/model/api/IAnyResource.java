@@ -23,6 +23,9 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * #L%
  */
 
+/**
+ * An IBaseResource that has a FHIR version of DSTU3 or higher
+ */
 public interface IAnyResource extends IBaseResource {
 
 	/**
