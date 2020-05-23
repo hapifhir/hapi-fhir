@@ -97,7 +97,7 @@
 		<developer>
 			<id>jamesagnew</id>
 			<name>James Agnew</name>
-			<organization>University Health Network</organization>
+			<organization>Smile CDR</organization>
 		</developer>
 		<developer>
 			<id>grahamegrieve</id>
@@ -243,6 +243,7 @@
 		<developer>
 			<id>karlmdavis</id>
 			<name>Karl M. Davis</name>
+			<organization>CMS</organization>
 		</developer>
 		<developer>
 			<id>matt-blanchette</id>
@@ -341,6 +342,7 @@
 		<developer>
 			<id>joelsch</id>
 			<name>Joel Schneider</name>
+			<organization>National Marrow Donor Program</organization>
 		</developer>
 		<developer>
 			<id>dangerousben</id>
@@ -353,6 +355,7 @@
 		<developer>
 			<id>ohr</id>
 			<name>Christian Ohr</name>
+			<organization>Open eHealth Foundation</organization>
 		</developer>
 		<developer>
 			<id>eug48</id>
