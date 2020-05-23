@@ -52,11 +52,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
 	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new VersionTypeConverterR5();
-	private static FhirContext ourR5Context = FhirContext.forR5();
+	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
+	private static final FhirContext ourR5Context = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final IVersionTypeConverter myModelConverter;
 	private volatile List<StructureDefinition> myAllStructures;
-	private LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
+	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
 	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, IVersionTypeConverter theModelConverter) {
@@ -104,7 +105,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		setValidationMessageLanguage(getLocale());
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
+
 	@Override
 	public List<CanonicalResource> allConformanceResources() {
 		throw new UnsupportedOperationException();
@@ -121,7 +122,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 	}
 
 	@Override
-	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FileNotFoundException, IOException, FHIRException {
+	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
 
 	}
 
@@ -138,7 +139,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 		org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(ourR5Context);
 		ArrayList<ValidationMessage> messages = new ArrayList<>();
-		org.hl7.fhir.r5.model.StructureDefinition base = (org.hl7.fhir.r5.model.StructureDefinition) fetchResource(StructureDefinition.class, input.getBaseDefinition());
+		org.hl7.fhir.r5.model.StructureDefinition base = fetchResource(StructureDefinition.class, input.getBaseDefinition());
 		if (base == null) {
 			throw new PreconditionFailedException("Unknown base definition: " + input.getBaseDefinition());
 		}
@@ -339,12 +340,12 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 	@Override
 	public List<String> getResourceNames() {
-		return new ArrayList<>(myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceNames());
+		return new ArrayList<>(myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceTypes());
 	}
 
 	@Override
 	public Set<String> getResourceNamesAsSet() {
-		return myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceNames();
+		return myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceTypes();
 	}
 
 	@Override
@@ -537,8 +538,8 @@ private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWork
 
 	private static class ResourceKey {
 		private final int myHashCode;
-		private String myResourceName;
-		private String myUri;
+		private final String myResourceName;
+		private final String myUri;
 
 		private ResourceKey(String theResourceName, String theUri) {
 			myResourceName = theResourceName;

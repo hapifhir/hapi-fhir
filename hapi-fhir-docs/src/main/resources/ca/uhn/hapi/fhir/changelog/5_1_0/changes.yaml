@@ -11,3 +11,10 @@
     title: "**Breaking Change**: The IValidationSupport interface has had one further change after the rewrite in HAPI FHIR 5.0.0.
        Instead of passing an IValidationSupport object as an argument to many methods on the interface, a context object is
        now used instead."
+- item:
+     issue: "1857"
+     type: "change"
+     title: "**Breaking Change**:
+     The method `FhirContext#getResourceNames()` has been renamed to `FhirContext#getResourceTypes()`. HAPI currently
+     goes back and forth between the two, but is consolidating on `Types`.
+    "

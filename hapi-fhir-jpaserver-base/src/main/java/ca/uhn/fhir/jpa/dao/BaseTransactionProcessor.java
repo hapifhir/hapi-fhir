@@ -649,7 +649,7 @@ public abstract class BaseTransactionProcessor {
 				}
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
-				String resourceType = res != null ? myContext.getResourceDefinition(res).getName() : null;
+				String resourceType = res != null ? myContext.getResourceType(res) : null;
 				Integer order = theOriginalRequestOrder.get(nextReqEntry);
 				IBase nextRespEntry = (IBase) myVersionAdapter.getEntries(theResponse).get(order);
 
@@ -997,7 +997,7 @@ public abstract class BaseTransactionProcessor {
 
 
 	private String toResourceName(Class<? extends IBaseResource> theResourceType) {
-		return myContext.getResourceDefinition(theResourceType).getName();
+		return myContext.getResourceType(theResourceType);
 	}
 
 	public void setContext(FhirContext theContext) {

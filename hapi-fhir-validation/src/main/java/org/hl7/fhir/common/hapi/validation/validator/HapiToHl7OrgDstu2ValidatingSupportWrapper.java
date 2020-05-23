@@ -61,7 +61,7 @@ public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSup
 	}
 
 	private Class<? extends IBaseResource> translateTypeToHapi(Class<? extends IBaseResource> theCodeSystemType) {
-		String resName = getFhirContext().getResourceDefinition(theCodeSystemType).getName();
+		String resName = getFhirContext().getResourceType(theCodeSystemType);
 		return myHapiCtx.getResourceDefinition(resName).getImplementingClass();
 	}
 

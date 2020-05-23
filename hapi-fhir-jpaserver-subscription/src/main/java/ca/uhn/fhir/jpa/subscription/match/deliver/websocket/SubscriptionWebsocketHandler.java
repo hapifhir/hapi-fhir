@@ -20,10 +20,9 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -56,9 +55,6 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 	public SubscriptionWebsocketHandler() {
 		super();
 	}
-
-	@Autowired
-	private FhirContext myCtx;
 
 	private IState myState = new InitialState();
 

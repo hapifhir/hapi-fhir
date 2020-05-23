@@ -445,7 +445,7 @@ public abstract class BaseParser implements IParser {
 				"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
-		String resourceName = myContext.getResourceDefinition(theResource).getName();
+		String resourceName = myContext.getResourceType(theResource);
 		theEncodeContext.pushPath(resourceName, true);
 
 		doEncodeResourceToWriter(theResource, theWriter, theEncodeContext);
@@ -995,7 +995,7 @@ public abstract class BaseParser implements IParser {
 			retVal = false;
 		} else {
 			if (myDontEncodeElements != null) {
-				String resourceName = myContext.getResourceDefinition(theResource).getName();
+				String resourceName = myContext.getResourceType(theResource);
 				if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath(resourceName + ".id"))) {
 					retVal = false;
 				} else if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath("*.id"))) {
@@ -1020,7 +1020,7 @@ public abstract class BaseParser implements IParser {
 	 */
 	protected boolean shouldEncodePath(IResource theResource, String thePath) {
 		if (myDontEncodeElements != null) {
-			String resourceName = myContext.getResourceDefinition(theResource).getName();
+			String resourceName = myContext.getResourceType(theResource);
 			if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath(resourceName + "." + thePath))) {
 				return false;
 			} else return myDontEncodeElements.stream().noneMatch(t -> t.equalsPath("*." + thePath));

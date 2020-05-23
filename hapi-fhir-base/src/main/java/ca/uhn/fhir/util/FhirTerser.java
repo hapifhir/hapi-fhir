@@ -687,7 +687,7 @@ public class FhirTerser {
 						IBaseResource nextTarget = nextValue.getResource();
 						nextTargetId = nextTarget.getIdElement().toUnqualifiedVersionless();
 						if (!nextTargetId.hasResourceType()) {
-							String resourceType = myContext.getResourceDefinition(nextTarget).getName();
+							String resourceType = myContext.getResourceType(nextTarget);
 							nextTargetId.setParts(null, resourceType, nextTargetId.getIdPart(), null);
 						}
 						nextRef = nextTargetId.getValue();

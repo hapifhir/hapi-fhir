@@ -759,6 +759,46 @@ public enum Pointcut {
 
 	/**
 	 * <b>Subscription Hook:</b>
+	 * Invoked immediately after the delivery of MESSAGE subscription.
+	 * <p>
+	 * When this hook is called, all processing is complete so this hook should not
+	 * make any changes to the parameters.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_AFTER_MESSAGE_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+
+	/**
+	 * <b>Subscription Hook:</b>
+	 * Invoked immediately before the delivery of a MESSAGE subscription.
+	 * <p>
+	 * Hooks may make changes to the delivery payload, or make changes to the
+	 * canonical subscription such as adding headers, modifying the channel
+	 * endpoint, etc.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, processing will be aborted.
+	 * </p>
+	 */
+	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+
+
+	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) is about to be checked for whether any subscriptions
 	 * were triggered as a result of the operation.
@@ -1244,7 +1284,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked before a resource will be created
+	 * Invoked before a resource will be deleted
 	 * <p>
 	 * Hooks will have access to the contents of the resource being deleted
 	 * but should not make any changes as storage has already occurred
@@ -1282,7 +1322,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a resource delete operation is about to fail due to referential integrity hcts.
+	 * Invoked when a resource delete operation is about to fail due to referential integrity checks. Intended for use with {@literal ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor}.
 	 * <p>
 	 * Hooks will have access to the list of resources that have references to the resource being deleted.
 	 * </p>
@@ -1521,6 +1561,23 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
+
+	/**
+	 * <b>EMPI Hook:</b>
+	 * Invoked whenever a persisted Patient/Practitioner resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) has been matched against related resources and EMPI links have been updated.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
+	 * <li>ca.uhn.fhir.empi.model.TransactionLogMessages - This parameter is for informational messages provided by the EMPI module during EMPI procesing. .</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage", "ca.uhn.fhir.rest.server.TransactionLogMessages"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>

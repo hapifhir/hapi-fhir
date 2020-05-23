@@ -2072,11 +2072,17 @@
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
+								<copy todir="target/site/apidocs-jpaserver-empi">
+									<fileset dir="hapi-fhir-jpaserver-empi/target/site/apidocs"/>
+								</copy>
 								<copy todir="target/site/apidocs-client">
 									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-server">
 									<fileset dir="hapi-fhir-server/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-server-empi">
+									<fileset dir="hapi-fhir-server-empi/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
@@ -2530,10 +2536,12 @@
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-docs</module>
 				<module>hapi-fhir-test-utilities</module>
+				<module>hapi-fhir-jpaserver-test-utilities</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
+				<module>hapi-fhir-server-empi</module>
 				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-validation</module>
 				<!--<module>hapi-fhir-narrativegenerator</module>-->
@@ -2556,6 +2564,7 @@
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
+				<module>hapi-fhir-jpaserver-empi</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
 				<module>restful-server-example</module>
 				<module>hapi-fhir-testpage-overlay</module>
