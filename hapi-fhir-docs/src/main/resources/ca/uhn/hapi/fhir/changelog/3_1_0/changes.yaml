@@ -4,7 +4,7 @@
     title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Spring (JPA): 4.3.10 -&gt; 5.0.0</li> <li>Jackson (JPA): 2.8.1 -&gt; 2.9.2</li> </ul>"
 - item:
     type: "fix"
-    title: "The Android client module has been restored to working order, and no longer requires a special classifier or an XML parser to be present in order to work. This means that the hapi-fhir-android library is much less likely to cause conflicts with other libraries imported into an Android application via Gradle. <br/><br/> See the <a href=\"http://hapifhir.io/doc_android.html\">HAPI FHIR Android Documentation</a> for more information. As a part of this fix, all dependencies on the StAX API have been removed in environments where StAX is not present (such as Android). The client will now detect this case, and explicitly request JSON payloads from servers, meaning that Android clients no longer need to include two parser stacks"
+    title: "The Android client module has been restored to working order, and no longer requires a special classifier or an XML parser to be present in order to work. This means that the hapi-fhir-android library is much less likely to cause conflicts with other libraries imported into an Android application via Gradle. <br/><br/> See the HAPI FHIR Android Documentation for more information. As a part of this fix, all dependencies on the StAX API have been removed in environments where StAX is not present (such as Android). The client will now detect this case, and explicitly request JSON payloads from servers, meaning that Android clients no longer need to include two parser stacks"
 - item:
     type: "add"
     title: "A performance to the JPA server has been made which reduces the number of writes to index tables when updating a resource with contents that only make minor changes to the resource content. In many cases this can noticeably improve update performance."
@@ -17,7 +17,7 @@
     title: "Fix an error in JPA server when using Derby Database, where search queries with a search URL longer than 255 characters caused a mysterious failure. Thanks to Chris Schuler and Bryn Rhodes for all of their help in reproducing this issue."
 - item:
     type: "add"
-    title: "JPA server now supports the use of the <code>Cache-Control</code> header in order to allow the client to selectively disable the search result cache. This directive can also be used to disable result paging and return results faster when only a small number of results is needed. See the <a href=\"http://hapifhir.io/doc_jpa.html\">JPA Page</a> for more information."
+    title: "JPA server now supports the use of the <code>Cache-Control</code> header in order to allow the client to selectively disable the search result cache. This directive can also be used to disable result paging and return results faster when only a small number of results is needed. See the JPA Page for more information."
 - item:
     type: "fix"
     title: "In certain cases in the JPA server, if multiple threads all attempted to update the same resource simultaneously, the optimistic lock failure caused a \"gap\" in the history numbers to occur. This would then cause a mysterious failure when trying to update this resource further. This has been resolved."

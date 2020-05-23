@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> {
+public class ModifyColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ModifyColumnTask.class);
 
@@ -62,10 +62,17 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 		}
 
 		Long taskColumnLength = getColumnLength();
-		if (taskColumnLength != null && isNoColumnShrink()) {
+		boolean isShrinkOnly = false;
+		if (taskColumnLength != null) {
 			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
 			if (existingLength > taskColumnLength) {
-				taskColumnLength = existingLength;
+				if (isNoColumnShrink()) {
+					taskColumnLength = existingLength;
+				} else {
+					if (existingType.getColumnTypeEnum() == getColumnType()) {
+						isShrinkOnly = true;
+					}
+				}
 			}
 		}
 
@@ -129,6 +136,10 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 				throw new IllegalStateException("Dont know how to handle " + getDriverType());
 		}
 
+		if (!isFailureAllowed() && isShrinkOnly) {
+			setFailureAllowed(true);
+		}
+
 		logInfo(ourLog, "Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
 		if (sql != null) {
 			executeSql(getTableName(), sql);
@@ -139,4 +150,5 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			executeSql(getTableName(), sqlNotNull);
 		}
 	}
+
 }

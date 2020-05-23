@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,25 +25,40 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.thymeleaf.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
 
-public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseTableTask<T> {
+public abstract class BaseTableColumnTask extends BaseTableTask {
 
-	private String myColumnName;
+	protected Map<String, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>> myCalculators = new HashMap<>();
+	protected String myColumnName;
+	//If a concrete class decides to, they can define a custom WHERE clause for the task.
+	protected String myWhereClause;
 
 	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
 
-	@SuppressWarnings("unchecked")
-	public T setColumnName(String theColumnName) {
+	public BaseTableColumnTask setColumnName(String theColumnName) {
 		myColumnName = StringUtils.toUpperCase(theColumnName, Locale.US);
-		return (T) this;
+		return this;
 	}
-
 
 	public String getColumnName() {
 		return myColumnName;
+	}
+
+	protected void setWhereClause(String theWhereClause) {
+		this.myWhereClause = theWhereClause;
+	}
+	protected String getWhereClause() {
+		if (myWhereClause == null) {
+			return getColumnName() + " IS NULL";
+		} else {
+			return myWhereClause;
+		}
 	}
 
 	@Override
@@ -53,24 +68,21 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseT
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof BaseTableColumnTask)) return false;
-
-		BaseTableColumnTask<?> that = (BaseTableColumnTask<?>) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myColumnName, that.myColumnName)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		BaseTableColumnTask otherObject = (BaseTableColumnTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myColumnName, otherObject.myColumnName);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myColumnName)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myColumnName);
+	}
+
+	public BaseTableColumnTask addCalculator(String theColumnName, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object> theConsumer) {
+		Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
+		myCalculators.put(theColumnName, theConsumer);
+		return this;
 	}
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,25 +152,25 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (theRequest.getRequestType() == RequestTypeEnum.OPTIONS) {
 			if (theRequest.getOperation() == null && theRequest.getResourceName() == null) {
-				return true;
+				return MethodMatchEnum.EXACT;
 			}
 		}
 
 		if (theRequest.getResourceName() != null) {
-			return false;
+			return MethodMatchEnum.NONE;
 		}
 
 		if ("metadata".equals(theRequest.getOperation())) {
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-				return true;
+				return MethodMatchEnum.EXACT;
 			}
 			throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
 		}
 
-		return false;
+		return MethodMatchEnum.NONE;
 	}
 
 	@Nonnull

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class Migrator {
 
 		myConnectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword);
 		try {
-			for (BaseTask<?> next : myTasks) {
+			for (BaseTask next : myTasks) {
 				next.setDriverType(myDriverType);
 				next.setConnectionProperties(myConnectionProperties);
 				next.setDryRun(myDryRun);
@@ -125,11 +125,13 @@ public class Migrator {
 
 	}
 
-	public void addTasks(List<BaseTask<?>> theTasks) {
+	public void addTasks(List<BaseTask> theTasks) {
 		theTasks.forEach(this::addTask);
 	}
 
 	public void setNoColumnShrink(boolean theNoColumnShrink) {
 		myNoColumnShrink = theNoColumnShrink;
 	}
+
+
 }

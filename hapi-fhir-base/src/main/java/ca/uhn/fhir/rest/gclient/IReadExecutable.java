@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,7 @@ public interface IReadExecutable<T extends IBaseResource> extends IClientExecuta
 	 * that the server return an "HTTP 301 Not Modified" if the newest version of the resource
 	 * on the server has the same version as the version ID specified by <code>theVersion</code>.
 	 * In this case, the client operation will perform the linked operation.
-	 * <p>
-	 * See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_etag.html">ETag Documentation</a>
-	 * for more information.
-	 * </p>
+	 *
 	 * @param theVersion The version ID (e.g. "123")
 	 */
 	IReadIfNoneMatch<T> ifVersionMatches(String theVersion);

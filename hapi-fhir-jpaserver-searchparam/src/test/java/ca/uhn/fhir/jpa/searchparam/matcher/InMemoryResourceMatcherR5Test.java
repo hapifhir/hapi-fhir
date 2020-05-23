@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -28,7 +30,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -66,6 +70,11 @@ public class InMemoryResourceMatcherR5Test {
 		@Bean
 		FhirContext fhirContext() {
 			return FhirContext.forR5();
+		}
+
+		@Bean
+		ModelConfig modelConfig() {
+			return new ModelConfig();
 		}
 	}
 
@@ -142,8 +151,8 @@ public class InMemoryResourceMatcherR5Test {
 
 	@Test
 	public void testDateSupportedOps() {
-		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
 		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN, true, false, false);
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
 		testDateSupportedOp(ParamPrefixEnum.EQUAL, false, true, false);
 		testDateSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, false, true, true);
 		testDateSupportedOp(ParamPrefixEnum.LESSTHAN, false, false, true);
@@ -159,7 +168,7 @@ public class InMemoryResourceMatcherR5Test {
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBSERVATION_DATE, myObservation, mySearchParams);
 			assertTrue(result.getUnsupportedReason(), result.supported());
-			assertEquals(result.matched(), theSame);
+			assertEquals(theSame, result.matched());
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + LATE_DATE, myObservation, mySearchParams);
@@ -202,7 +211,7 @@ public class InMemoryResourceMatcherR5Test {
 	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
 		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
 		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
-		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate("Patient", "date", dateValue.getValue(), dateValue.getValue(), dateValue.getValueAsString());
+		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
 		retval.myDateParams.add(dateParam);
 		return retval;
 	}

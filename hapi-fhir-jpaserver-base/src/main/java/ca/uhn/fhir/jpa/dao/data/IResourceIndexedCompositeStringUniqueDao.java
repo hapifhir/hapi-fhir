@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,21 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 
 public interface IResourceIndexedCompositeStringUniqueDao extends JpaRepository<ResourceIndexedCompositeStringUnique, Long> {
 
 	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myIndexString = :str")
 	ResourceIndexedCompositeStringUnique findByQueryString(@Param("str") String theQueryString);
 
-	@Query("SELECT r.myResourceId FROM ResourceIndexedCompositeStringUnique r WHERE r.myIndexString IN :str")
-	Collection<Long> findResourcePidsByQueryStrings(@Param("str") Collection<String> theQueryString);
+	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myResourceId = :resId")
+	List<ResourceIndexedCompositeStringUnique> findAllForResourceIdForUnitTest(@Param("resId") Long theResourceId);
 
+	@Modifying
+	@Query("delete from ResourceIndexedCompositeStringUnique t WHERE t.myResourceId = :resid")
+	void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -99,7 +100,7 @@ public class TransactionProcessorVersionAdapterR4 implements TransactionProcesso
 	}
 
 	@Override
-	public String getEntryRequestVerb(Bundle.BundleEntryComponent theEntry) {
+	public String getEntryRequestVerb(FhirContext theContext, Bundle.BundleEntryComponent theEntry) {
 		String retVal = null;
 		Bundle.HTTPVerb value = theEntry.getRequest().getMethodElement().getValue();
 		if (value != null) {

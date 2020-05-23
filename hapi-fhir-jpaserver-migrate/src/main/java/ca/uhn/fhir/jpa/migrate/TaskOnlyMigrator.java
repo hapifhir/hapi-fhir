@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,20 +38,24 @@ import java.util.Optional;
 public class TaskOnlyMigrator extends BaseMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TaskOnlyMigrator.class);
-	private List<BaseTask<?>> myTasks = new ArrayList<>();
+	private List<BaseTask> myTasks = new ArrayList<>();
 
 	@Override
 	public void migrate() {
-		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getConnectionUrl(), getUsername(), getPassword());
+		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource());
 
-		for (BaseTask<?> next : myTasks) {
+		for (BaseTask next : myTasks) {
 			next.setDriverType(getDriverType());
 			next.setDryRun(isDryRun());
 			next.setNoColumnShrink(isNoColumnShrink());
 			next.setConnectionProperties(connectionProperties);
 
 			try {
-				ourLog.info("Executing task of type: {}", next.getClass().getSimpleName());
+				if (isDryRun()) {
+					ourLog.info("Dry run {} {}", next.getFlywayVersion(), next.getDescription());
+				} else {
+					ourLog.info("Executing {} {}", next.getFlywayVersion(), next.getDescription());
+				}
 				next.execute();
 				addExecutedStatements(next.getExecutedStatements());
 			} catch (SQLException e) {
@@ -62,7 +66,6 @@ public class TaskOnlyMigrator extends BaseMigrator {
 			StringBuilder statementBuilder = buildExecutedStatementsString();
 			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
 		}
-
 	}
 
 	@Override
@@ -71,7 +74,7 @@ public class TaskOnlyMigrator extends BaseMigrator {
 	}
 
 	@Override
-	public void addTasks(List<BaseTask<?>> theMigrationTasks) {
+	public void addTasks(List<BaseTask> theMigrationTasks) {
 		myTasks.addAll(theMigrationTasks);
 	}
 }

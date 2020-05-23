@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,8 +10,9 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken("Patient", "NAME", "SYSTEM", "VALUE");
+		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
+		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
 		assertEquals(-8558989679010582575L, token.getHashSystem().longValue());
@@ -20,8 +22,9 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testHashFunctionsWithOverlapNames() {
-		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken("Patient", "NAME", "SYSTEM", "VALUE");
+		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
+		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
 		assertEquals(-8558989679010582575L, token.getHashSystem().longValue());
@@ -33,9 +36,11 @@ public class ResourceIndexedSearchParamTokenTest {
 	public void testEquals() {
 		ResourceIndexedSearchParamToken val1 = new ResourceIndexedSearchParamToken()
 			.setValue("AAA");
+		val1.setPartitionSettings(new PartitionSettings());
 		val1.calculateHashes();
 		ResourceIndexedSearchParamToken val2 = new ResourceIndexedSearchParamToken()
 			.setValue("AAA");
+		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);

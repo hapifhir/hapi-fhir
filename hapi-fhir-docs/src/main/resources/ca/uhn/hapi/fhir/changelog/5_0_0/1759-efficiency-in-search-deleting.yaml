@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1759
+title: When deleting searches from the query cache where a large number of searches with a large
+   number of results were present, the system would repeatedly mark the same rows as deletion
+   candidates. This put unneccessary pressure on the database and has been corrected.

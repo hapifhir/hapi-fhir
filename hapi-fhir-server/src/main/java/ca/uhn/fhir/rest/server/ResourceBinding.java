@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 
 /**
- * Created by dsotnikov on 2/25/2014.
+ * Holds all method bindings for an individual resource type
  */
 public class ResourceBinding {
 
@@ -36,9 +37,16 @@ public class ResourceBinding {
 	private String resourceName;
 	private List<BaseMethodBinding<?>> myMethodBindings = new ArrayList<>();
 
+	/**
+	 * Constructor
+	 */
 	public ResourceBinding() {
+		super();
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ResourceBinding(String resourceName, List<BaseMethodBinding<?>> methods) {
 		this.resourceName = resourceName;
 		this.myMethodBindings = methods;
@@ -51,14 +59,28 @@ public class ResourceBinding {
 		}
 
 		ourLog.debug("Looking for a handler for {}", theRequest);
+
+		/*
+		 * Look for the method with the highest match strength
+		 */
+
+		BaseMethodBinding<?> matchedMethod = null;
+		MethodMatchEnum matchedMethodStrength = null;
+
 		for (BaseMethodBinding<?> rm : myMethodBindings) {
-			if (rm.incomingServerRequestMatchesMethod(theRequest)) {
-				ourLog.debug("Handler {} matches", rm);
-				return rm;
+			MethodMatchEnum nextMethodMatch = rm.incomingServerRequestMatchesMethod(theRequest);
+			if (nextMethodMatch != MethodMatchEnum.NONE) {
+				if (matchedMethodStrength == null || matchedMethodStrength.ordinal() < nextMethodMatch.ordinal()) {
+					matchedMethod = rm;
+					matchedMethodStrength = nextMethodMatch;
+				}
+				if (matchedMethodStrength == MethodMatchEnum.EXACT) {
+					break;
+				}
 			}
-			ourLog.trace("Handler {} does not match", rm);
 		}
-		return null;
+
+		return matchedMethod;
 	}
 
 	public String getResourceName() {

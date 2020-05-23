@@ -1,0 +1,86 @@
+{
+	"resourceType" : "CodeSystem",
+	"id" : "ehealth-message-category",
+	"text" : {
+		"status" : "generated",
+		"div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>MessageCategory</h2><div><p>Message category types</p>\n</div><p>This code system http://ehealth.sundhed.dk/cs/message-category defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">message<a name=\"ehealth-message-category-message\"> </a></td><td>Message</td><td/></tr><tr><td style=\"white-space:nowrap\">notification<a name=\"ehealth-message-category-notification\"> </a></td><td>Notification</td><td/></tr><tr><td style=\"white-space:nowrap\">advice<a name=\"ehealth-message-category-advice\"> </a></td><td>Advice</td><td/></tr><tr><td style=\"white-space:nowrap\">note<a name=\"ehealth-message-category-note\"> </a></td><td>Note</td><td/></tr></table></div>"
+	},
+	"url" : "http://ehealth.sundhed.dk/cs/message-category",
+	"version" : "0.6.0",
+	"name" : "MessageCategory",
+	"status" : "active",
+	"experimental" : false,
+	"date" : "2019-01-29T00:00:00+00:00",
+	"publisher" : "ehealth.sundhed.dk",
+	"contact" : [
+		{
+			"telecom" : [
+				{
+					"system" : "url",
+					"value" : "http://ehealth.sundhed.dk/terminology"
+				}
+			]
+		}
+	],
+	"description" : "Message category types",
+	"caseSensitive" : true,
+	"content" : "complete",
+	"concept" : [
+		{
+			"code" : "message",
+			"display" : "Message",
+			"designation" : [
+				{
+					"language" : "en-US",
+					"value" : "Message"
+				},
+				{
+					"language" : "da",
+					"value" : "Besked"
+				}
+			]
+		},
+		{
+			"code" : "notification",
+			"display" : "Notification",
+			"designation" : [
+				{
+					"language" : "en-US",
+					"value" : "Notification"
+				},
+				{
+					"language" : "da",
+					"value" : "Notifikation"
+				}
+			]
+		},
+		{
+			"code" : "advice",
+			"display" : "Advice",
+			"designation" : [
+				{
+					"language" : "en-US",
+					"value" : "Advice"
+				},
+				{
+					"language" : "da",
+					"value" : "Advisering"
+				}
+			]
+		},
+		{
+			"code" : "note",
+			"display" : "Note",
+			"designation" : [
+				{
+					"language" : "en-US",
+					"value" : "Note"
+				},
+				{
+					"language" : "da",
+					"value" : "Note"
+				}
+			]
+		}
+	]
+}

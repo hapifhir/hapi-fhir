@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,9 @@ import org.hl7.fhir.instance.model.api.*;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
-import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -92,7 +90,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 
 							IdDt id = nextRes.getId();
 							if (id.hasResourceType() == false) {
-								String resName = myContext.getResourceDefinition(nextRes).getName();
+								String resName = myContext.getResourceType(nextRes);
 								id = id.withResourceType(resName);
 							}
 
@@ -207,7 +205,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		} else {
 			if (isNotBlank(myBase) && next.getId().hasIdPart()) {
 				IdDt id = next.getId().toVersionless();
-				id = id.withServerBase(myBase, myContext.getResourceDefinition(next).getName());
+				id = id.withServerBase(myBase, myContext.getResourceType(next));
 				entry.setFullUrl(id.getValue());
 			}
 		}

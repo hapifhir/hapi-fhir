@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -17,10 +19,10 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -39,7 +41,10 @@ import java.util.Collections;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
@@ -49,6 +54,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private ITermReadSvc myTermReadSvc;
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvcc;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
@@ -102,32 +109,32 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("non-existing-code").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://loinc.org#non-existing-code)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a code from this value set is required) (codes = http://loinc.org#non-existing-code)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Valid code with no system
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem(null).setCode("CODE3").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = null#CODE3)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a code from this value set is required) (codes = null#CODE3)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Valid code with wrong system
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://foo").setCode("CODE3").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://foo#CODE3)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a code from this value set is required) (codes = http://foo#CODE3)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Code that exists but isn't in the valueset
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a code from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Invalid code in built-in VS/CS
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Unknown code: http://terminology.hl7.org/CodeSystem/observation-category / FOO", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "Unknown code {http://terminology.hl7.org/CodeSystem/observation-category}FOO", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 
@@ -147,6 +154,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
 
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
 		// Create a valueset
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
@@ -154,7 +163,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myValueSetDao.create(vs);
 		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		await().until(()->myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
+		await().until(() -> myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
 
 		// Load the profile, which is just the Vital Signs profile modified to accept all loinc codes
 		// and not just certain ones
@@ -183,39 +192,58 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("non-existing-code").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://loinc.org#non-existing-code)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a code from this value set is required) (codes = http://loinc.org#non-existing-code)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Valid code with no system
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem(null).setCode("CODE3").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = null#CODE3)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a code from this value set is required) (codes = null#CODE3)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Valid code with wrong system
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://foo").setCode("CODE3").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://foo#CODE3)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a code from this value set is required) (codes = http://foo#CODE3)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Code that exists but isn't in the valueset
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a code from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssueFirstRep().getDiagnostics());
 
 		// Invalid code in built-in VS/CS
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Unknown code: http://terminology.hl7.org/CodeSystem/observation-category / FOO", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(encode(oo), "Unknown code {http://terminology.hl7.org/CodeSystem/observation-category}FOO", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 
+	@Test
+	public void testValidateCodeableConceptWithNoSystem() {
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.getText().setStatus(Narrative.NarrativeStatus.GENERATED).getDiv().setValue("<div>hi!</div>");
+		allergy.getClinicalStatus().addCoding().setSystem(null).setCode("active").setDisplay("Active");
+		allergy.getVerificationStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification").setCode("confirmed").setDisplay("Confirmed");
+		allergy.setPatient(new Reference("Patient/123"));
 
-	private OperationOutcome validateAndReturnOutcome(Observation theObs) {
+		allergy.addNote()
+			.setText("This is text")
+			.setAuthor(new Reference("Patient/123"));
+
+		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(allergy));
+
+		OperationOutcome oo = validateAndReturnOutcome(allergy);
+		assertThat(encode(oo), containsString("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/allergyintolerance-clinical"));
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IBaseResource> OperationOutcome validateAndReturnOutcome(T theObs) {
+		IFhirResourceDao<T> dao = (IFhirResourceDao<T>) myDaoRegistry.getResourceDao(theObs.getClass());
 		try {
-			MethodOutcome outcome = myObservationDao.validate(theObs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+			MethodOutcome outcome = dao.validate(theObs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			return (OperationOutcome) outcome.getOperationOutcome();
 		} catch (PreconditionFailedException e) {
 			return (OperationOutcome) e.getOperationOutcome();
@@ -318,7 +346,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// It would be ok for this to produce 0 issues, or just an information message too
 		assertEquals(1, OperationOutcomeUtil.getIssueCount(myFhirCtx, oo));
-		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code) (codes = http://foo#bar)", OperationOutcomeUtil.getFirstIssueDetails(myFhirCtx, oo));
+		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type), and a code should come from this value set unless it has no suitable code) (codes = http://foo#bar)", OperationOutcomeUtil.getFirstIssueDetails(myFhirCtx, oo));
 
 	}
 
@@ -380,7 +408,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testValidateResourceContainingProfileDeclarationInvalid() throws Exception {
+	public void testValidateResourceContainingProfileDeclarationInvalid() {
 		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
 		Observation input = new Observation();
@@ -399,12 +427,47 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(ooString);
-			assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
+			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
 		}
+	}
 
+	@Test
+	public void testValidateBundleContainingResourceContainingProfileDeclarationInvalid() {
+		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
+		Observation observation = new Observation();
+		String profileUri = "http://example.com/StructureDefinition/" + methodName;
+		observation.getMeta().getProfile().add(new CanonicalType(profileUri));
+		observation.addIdentifier().setSystem("http://acme").setValue("12345");
+		observation.getEncounter().setReference("http://foo.com/Encounter/9");
+		observation.setStatus(ObservationStatus.FINAL);
+		observation.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(observation)
+			.setFullUrl("http://example.com/Observation")
+			.getRequest()
+			.setUrl("http://example.com/Observation")
+			.setMethod(Bundle.HTTPVerb.POST);
+
+		ValidationModeEnum mode = ValidationModeEnum.CREATE;
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		ourLog.info(encoded);
+
+		try {
+			myBundleDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
+			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info(outputString);
+			assertThat(outputString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
+		}
 	}
 
 	@Test
@@ -618,6 +681,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		upload("/r4/uscore/ValueSet-omb-race-category.json");
 		upload("/r4/uscore/ValueSet-us-core-usps-state.json");
 
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
 		{
 			String resource = loadResource("/r4/uscore/patient-resource-badcode.json");
 			IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(resource);
@@ -679,7 +744,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			fail("Didn't fail- response was " + encode);
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("No response found for required item with id = 'link0'", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals("No response answer found for required item \"link0\"", oo.getIssueFirstRep().getDiagnostics());
 		}
 
 	}
@@ -697,7 +762,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
 		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaireElement().setValue("Questionnaire/q");
+		qa.getQuestionnaireElement().setValue("http://foo/q");
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 
 		try {
@@ -708,7 +773,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			fail("Didn't fail- response was " + encode);
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("No response found for required item with id = 'link0'", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals("No response answer found for required item \"link0\"", oo.getIssueFirstRep().getDiagnostics());
 		}
 
 	}
@@ -726,12 +791,16 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
 		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaireElement().setValue("Questionnaire/DOES_NOT_EXIST");
+		qa.getQuestionnaireElement().setValue("http://foo/Questionnaire/DOES_NOT_EXIST");
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 
-		MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
-		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
-		assertEquals("The questionnaire \"Questionnaire/DOES_NOT_EXIST\" could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
+		try {
+			MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+			OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+			assertEquals("The questionnaire \"http://foo/Questionnaire/DOES_NOT_EXIST\" could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
+		} catch (PreconditionFailedException e) {
+			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
 	}
 
 
@@ -748,7 +817,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/condition-clinical"));
 		}
 	}
-
 
 
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {

@@ -133,7 +133,7 @@
     title: "Fix issue in testpage-overlay's new Java configuration where only the first configured server actually gets used."
 - item:
     type: "add"
-    title: "Introduce <a href=\"./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html\">IJpaServerInterceptor</a> interceptors for JPA server which can be used for more fine grained operations."
+    title: "Introduce IJpaServerInterceptor interceptors for JPA server which can be used for more fine grained operations."
 - item:
     issue: "241"
     type: "fix"

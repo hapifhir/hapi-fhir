@@ -4,7 +4,7 @@ package ca.uhn.fhir.igpacks.parser;
  * #%L
  * hapi-fhir-igpacks
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,10 @@ public abstract class BaseIgPackParser<T> {
 		Validate.isTrue(theCtx.getVersion().getVersion() == expectedVersion, "theCtx is not for the correct version, expecting " + expectedVersion);
 
 		myCtx = theCtx;
+	}
+
+	public FhirContext getCtx() {
+		return myCtx;
 	}
 
 	protected abstract T createValidationSupport(Map<IIdType, IBaseResource> theIgResources);

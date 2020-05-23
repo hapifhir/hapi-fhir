@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ public class SimpleBundleProvider implements IBundleProvider {
 	private Integer myPreferredPageSize;
 	private Integer mySize;
 	private IPrimitiveType<Date> myPublished = InstantDt.withCurrentTime();
-	public SimpleBundleProvider(List<? extends IBaseResource> theList) {
-		this(theList, null);
-	}
 
+	/**
+	 * Constructor
+	 */
 	public SimpleBundleProvider(IBaseResource theResource) {
 		this(Collections.singletonList(theResource));
 	}
@@ -50,6 +50,13 @@ public class SimpleBundleProvider implements IBundleProvider {
 	 */
 	public SimpleBundleProvider() {
 		this(Collections.emptyList());
+	}
+
+	/**
+	 * Constructor
+	 */
+	public SimpleBundleProvider(List<? extends IBaseResource> theList) {
+		this(theList, null);
 	}
 
 	public SimpleBundleProvider(List<? extends IBaseResource> theList, String theUuid) {

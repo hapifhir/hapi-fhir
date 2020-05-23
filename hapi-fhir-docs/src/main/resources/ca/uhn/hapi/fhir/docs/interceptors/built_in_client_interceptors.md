@@ -75,6 +75,17 @@ The following example shows how to configure your client to inject a bearer toke
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ClientExamples.java|cookie}}
 ```
 
+# Multitenancy: Add tenant ID to path
+
+When communicating with a server that supports [URL Base Multitenancy](/docs/server_plain/multitenancy.html#url-base-multitenancy), an extra element needs to be added to the request path. This can be done by simply appending the path to the base URL supplied to the client, but it can also be dynamically appended using this interceptor.
+
+* [UrlTenantSelectionInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/UrlTenantSelectionInterceptor.html)
+* [UrlTenantSelectionInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/UrlTenantSelectionInterceptor.java)
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ClientExamples.java|tenantId}}
+```
+
 # Performance: GZip Outgoing Request Bodies
 
 The GZipContentInterceptor compresses outgoing contents. With this interceptor, if the client is transmitting resources to the server (e.g. for a create, update, transaction, etc.) the content will be GZipped before transmission to the server.

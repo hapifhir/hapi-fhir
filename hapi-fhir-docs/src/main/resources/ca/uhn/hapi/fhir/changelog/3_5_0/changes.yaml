@@ -4,7 +4,7 @@
     title: "HAPI FHIR now supports JDK 9 and JDK 10, both for building HAPI FHIR as well as for use. JDK 8 remains supported and is the minimum requirement in order to build or use HAPI FHIR."
 - item:
     type: "add"
-    title: "A new command has been added to the HAPI FHIR CLI tool: \"migrate-database\". This command performs the schema modifications required when upgrading HAPI FHIR JPA to a new version (previously this was a manual process involving running scripts and reindexing everything). <br/><br/> See the <a href=\"http://hapifhir.io/doc_cli.html#migrate-database\">command documentation</a> for more information on how to use this tool. Please post in the HAPI FHIR Google Group if you run into issues, as this is a brand new framework and we still need lots of help with testing."
+    title: "A new command has been added to the HAPI FHIR CLI tool: \"migrate-database\". This command performs the schema modifications required when upgrading HAPI FHIR JPA to a new version (previously this was a manual process involving running scripts and reindexing everything). <br/><br/> See the command documentation for more information on how to use this tool. Please post in the HAPI FHIR Google Group if you run into issues, as this is a brand new framework and we still need lots of help with testing."
 - item:
     type: "add"
     title: "The version of a few dependencies have been bumped to the latest versions (dependent HAPI modules listed in brackets): <ul> <li>Gson (JSON Parser): 2.8.1 -&gt; 2.8.5</li> <li>Spring Framework (JPA): 5.0.3.RELEASE -&gt; 5.0.8.RELEASE</li> <li>Hibernate ORM (JPA): 5.2.16.Final -&gt; 5.3.6.Final</li> <li>Hibernate Search (JPA): 5.7.1.Final -&gt; 5.10.3.Final</li> <li>Jetty (CLI): 9.4.8.v20171121 -&gt; 9.4.12.v20180830</li> <li>Commons-Codec (All): 1.10 -&gt; 1.11</li> <li>Commons-Lang (All): 3.7 -&gt; 3.8</li> <li>Commons-IO (All): 2.5 -&gt; 2.6</li> <li>Spring-Data (JPA): 1.11.6.RELEASE -&gt; 2.0.7.RELEASE</li> </ul>"
@@ -60,7 +60,7 @@
     title: "A bug in the HAPI FHIR CLI was fixed, where uploading terminology for R4 could cause an error about the incorrect FHIR version. Thanks to Rob Hausam for the pull request!"
 - item:
     type: "add"
-    title: "A new method has been added to AuthorizationInterceptor that can be used to create rules allowing FHIR patch operations. See <a href=\"http://hapifhir.io/doc_rest_server_security.html#Authorizing_Patch_Operations\">Authorizing Patch Operations</a> for more information."
+    title: "A new method has been added to AuthorizationInterceptor that can be used to create rules allowing FHIR patch operations. See Authorizing Patch Operations for more information."
 - item:
     issue: "1018"
     type: "add"

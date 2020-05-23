@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,28 @@ public interface IAuthRuleTester {
 	 * THIS IS AN EXPERIMENTAL API! Feedback is welcome, and this API
 	 * may change.
 	 *
+	 * @param theOperation The FHIR operation being performed - Note that this is not necessarily the same as the value obtained from invoking
+	 *                     {@link RequestDetails#getRestOperationType()} on {@literal theRequestDetails} because multiple operations can be nested within
+	 *                     an HTTP request using FHIR transaction and batch operations
 	 * @since 3.4.0
 	 */
-	boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource);
+	default boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource) {
+		return true;
+	}
+
+	/**
+	 * Allows user-supplied logic for authorization rules.
+	 * <p>
+	 * THIS IS AN EXPERIMENTAL API! Feedback is welcome, and this API
+	 * may change.
+	 *
+	 * @param theOperation The FHIR operation being performed - Note that this is not necessarily the same as the value obtained from invoking
+	 *                     {@link RequestDetails#getRestOperationType()} on {@literal theRequestDetails} because multiple operations can be nested within
+	 *                     an HTTP request using FHIR transaction and batch operations
+	 * @since 5.0.0
+	 */
+	default boolean matchesOutput(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theOutputResource) {
+		return true;
+	}
 
 }

@@ -1,10 +1,10 @@
 ---
 - item:
     type: "add"
-    title: "<b>API CHANGE:</b> The \"FHIR structures\" for DSTU1 (the classes which model the resources and composite datatypes) have been moved out of the core JAR into their own JAR, in order to allow support for DEV resources, and DSTU2 resources when thast version is finalized. See the <a href=\"./doc_dstu2.html\">DSTU2 page</a> for more information."
+    title: "<b>API CHANGE:</b> The \"FHIR structures\" for DSTU1 (the classes which model the resources and composite datatypes) have been moved out of the core JAR into their own JAR, in order to allow support for DEV resources, and DSTU2 resources when thast version is finalized. See the DSTU2 page for more information."
 - item:
     type: "fix"
-    title: "<b>Deprecated API Removal</b>: The following classes (which were deprocated previously) have now been removed: <ul> <li><b>ISecurityManager</b>: If you are using this class, the same functionality is available through the more general purpose <a href=\"http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html\">server interceptor</a> capabilities.</li> <li><b>CodingListParam</b>: This class was made redundant by the <a href=\"http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/param/TokenOrListParam.html\">TokenOrListParam</a> class, which can be used in its place.</li> </ul>"
+    title: "<b>Deprecated API Removal</b>: The following classes (which were deprocated previously) have now been removed: <ul> <li><b>ISecurityManager</b>: If you are using this class, the same functionality is available through the more general purpose server interceptor capabilities.</li> <li><b>CodingListParam</b>: This class was made redundant by the TokenOrListParam class, which can be used in its place.</li> </ul>"
 - item:
     type: "add"
     title: "<b>API Change</b>: The IResource#getResourceMetadata() method has been changed from returning <code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;</code> to returning a new type called <code>ResourceMetadataMap</code>. This new type implements <code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;</code> itself, so this change should not break existing code, but may require a clean build in order to run correctly."
@@ -109,7 +109,7 @@
 - item:
     issue: "59"
     type: "fix"
-    title: "Clean up the way that Profile resources are automatically exported by the server for custom resource profile classes. See the <a href=\"http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/model/api/annotation/ResourceDef.html\">@ResourceDef</a> JavaDoc for information on how this works."
+    title: "Clean up the way that Profile resources are automatically exported by the server for custom resource profile classes. See the @ResourceDef JavaDoc for information on how this works."
 - item:
     issue: "73"
     type: "add"

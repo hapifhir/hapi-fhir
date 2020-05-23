@@ -5,7 +5,7 @@ package org.hl7.fhir.instance.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,26 @@ package org.hl7.fhir.instance.model.api;
  */
 
 
-public interface IPrimitiveType<T> extends IBaseDatatype {
+import javax.annotation.Nullable;
 
-	void setValueAsString(String theValue) throws IllegalArgumentException;
+public interface IPrimitiveType<T> extends IBaseDatatype {
 
 	String getValueAsString();
 
+	void setValueAsString(String theValue) throws IllegalArgumentException;
+
 	T getValue();
 
-	boolean hasValue();
-	
 	IPrimitiveType<T> setValue(T theValue) throws IllegalArgumentException;
-	
+
+	boolean hasValue();
+
+	/**
+	 * If the supplied argument is non-null, returns the results of {@link #getValue()}. If the supplied argument is null, returns null.
+	 */
+	@Nullable
+	static <T> T toValueOrNull(@Nullable IPrimitiveType<T> thePrimitiveType) {
+		return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
+	}
+
 }

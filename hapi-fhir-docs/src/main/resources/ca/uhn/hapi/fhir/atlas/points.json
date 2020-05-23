@@ -20,6 +20,7 @@
 			"contactName": "Kevin Mayfield",
 			"contactEmail": "Kevin.mayfield@mayfield-is.co.uk",
 			"link": "https://data.developer.nhs.uk/ccri/exp",
+            "city": "UK",
 			"lat": 55.378052,
 			"lon": -3.435973,
 			"added": "2019-08-19"
@@ -27,8 +28,9 @@
 		{
 			"title": "clinFHIR",
 			"contactName": "David Hay",
-			"contactEmail": "davidhay@gmail.com",
+			"contactEmail": "david.hay25@gmail.com",
 			"link": "http://clinfhir.com",
+            "city": "New Zealand",
 			"lat": -42.651737,
 			"lon": 171.926909,
 			"added": "2019-08-18"
@@ -151,7 +153,7 @@
 		{
 			"title": "Trifork",
 			"description": "National Telemedicine Project",
-			"link": "https://ehealth-documentation.s3-eu-west-1.amazonaws.com/latest/ig/index.html",
+			"link": "https://docs.ehealth.sundhed.dk/latest/ig/index.html",
 			"contactName": "Jens Villadsen",
 			"contactEmail": "jvi@trifork.com",
 			"city": "Aarhus, Denmark",
@@ -226,17 +228,6 @@
 			"added": "2019-09-29"
 		},
 		{
-			"title": "ResMed",
-			"description": "Digital Health Technologies: The largest tele-monitored device fleet in the world. Focus on various respiratory diseases from Sleep Disordered breathing (sleep apnea) to COPD.",
-			"link": null,
-			"contactName": null,
-			"contactEmail": null,
-			"city": "San Diego, California",
-			"lat": 32.8246,
-			"lon": -117.1971,
-			"added": "2019-09-29"
-		},
-		{
 			"title": "Highmark",
 			"description": "FHIR-based Provider Directory Message Model: Using R4 FHIR we created a standard provider directory message model that captures all practitioners, practitioner roles, vendors, vendor roles, locations, healthcare services, affiliated directory networks and tiered insurance plans. We supply this FHIR-based extract to a well-known transparency vendor whom processes our FHIR message model extract and loads the data to be consumed and accessed on a web-based provider search application. Members can then access this provider search app to search for practitioners whom participate in their products and networks.",
 			"link": "https://highmark.sapphirecareselect.com",
@@ -304,6 +295,48 @@
 			"lat": -6.914744,
 			"lon": 107.609810,
 			"added": "2019-11-22"
+		},
+		{
+			"title": "Ivido",
+			"description": "Revolutionary personal healthcare environment",
+			"link": "https://ivido.nl/",
+			"contactName": "Jari Maijenburg",
+			"contactEmail": "info@ivido.nl",
+			"city": "The Hague, The Netherlands",
+			"lat": 52.070499,
+			"lon": 4.300700,
+			"added": "2019-12-18"
+		},
+		{
+			"title": "CDSS for EHR",
+			"description": "\"Hospital Italiano de Buenos Aires\", founded in 1853, is a non-profit civil association dedicated to general and highly complex medicine.",
+			"link": null,
+			"contactName": "Natalia Pérez López",
+			"contactEmail": "natalia.perez@hospitalitaliano.org.ar",
+			"city": "Buenos Aires, Argentina",
+			"lat": -34.603683,
+			"lon": -58.381557,
+			"added": "2019-12-27"
+		},
+		{
+			"title": "German Society for Wound Healing and Wound Treatment",
+			"description": "Establishment of regional registers based on HAPI FHIR for the global exchange of health data/eHealth Ressort of the DGfW e.V.: As the eHealth department of the DGfW e.V. we are looking for partners with whom we can jointly develop projects based on open standards for the national and global exchange of health information in the field of chronic wound care. In this context, we rely on open standards such as HAPI FHIR. In one of our latest projects \"EsmAiL\" we use HAPI FHIR together with the synaptor medical collaboration platform.",
+			"contactName": "Falk Huneke",
+			"link": "http://www.dgfw.de/akneinversa.html",
+			"city": "Germany",
+			"lat": 51.165691,
+			"lon": 10.451526
+		},
+		{
+			"title": "VEIG",
+			"description": "Vietnam Ehealth Innovation Group",
+			"link": "http://emr.com.vn",
+			"contactName": "Nguyen Hai Phong",
+			"contactEmail": "haiphong.nguyen@gmail.com",
+			"city": "Hanoi,Vietnam",
+			"lat": 21.026058,
+			"lon": 105.822715,
+			"added": "2020-03-06"
 		}
 
 	]

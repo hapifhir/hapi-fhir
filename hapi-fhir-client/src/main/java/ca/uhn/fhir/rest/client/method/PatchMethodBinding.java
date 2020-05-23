@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	@Override
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
 		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(getContext().getResourceDefinition(theResource).getName());
+		urlExtension.append(getContext().getResourceType(theResource));
 
 		return new HttpPostClientInvocation(getContext(), theResource, urlExtension.toString());
 	}

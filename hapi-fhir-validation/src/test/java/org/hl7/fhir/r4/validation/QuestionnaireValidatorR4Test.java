@@ -1,15 +1,17 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -23,26 +25,30 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class QuestionnaireValidatorR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorR4Test.class);
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forR4();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 
 	@Before
 	public void before() {
 		IValidationSupport myValSupport = mock(IValidationSupport.class);
+		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport);
+		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -50,7 +56,7 @@ public class QuestionnaireValidatorR4Test {
 
 	@Test
 	public void testQuestionnaireWithPredefinedExtensionDomainsForCoding() {
-		String[] extensionDomainsToTest = new String[] {
+		String[] extensionDomainsToTest = new String[]{
 			"http://example.org/questionnaire-color-control-1",
 			"https://example.org/questionnaire-color-control-2",
 			"http://acme.com/questionnaire-color-control-3",
@@ -67,18 +73,18 @@ public class QuestionnaireValidatorR4Test {
 				.setType(QuestionnaireItemType.STRING)
 				.addExtension()
 				.setUrl(extensionDomainToTest)
-				.setValue(new Coding(null, "text-box", null));
+				.setValue(new CodeType("text-box"));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages(), Matchers.empty());
+			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
 		}
 	}
 
 	@Test
 	public void testQuestionnaireWithPredefinedExtensionDomainsForCodeableConcept() {
-		String[] extensionDomainsToTest = new String[] {
+		String[] extensionDomainsToTest = new String[]{
 			"http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
 		};
 		for (String extensionDomainToTest : extensionDomainsToTest) {
@@ -106,7 +112,7 @@ public class QuestionnaireValidatorR4Test {
 			.setType(QuestionnaireItemType.STRING)
 			.addExtension()
 			.setUrl(extensionUrl + "questionnaire-itemControl")
-			.setValue(new Coding(null, "text-box", null));
+			.setValue(new CodeType("text-box"));
 
 		ValidationResult errors = myVal.validateWithResult(q);
 

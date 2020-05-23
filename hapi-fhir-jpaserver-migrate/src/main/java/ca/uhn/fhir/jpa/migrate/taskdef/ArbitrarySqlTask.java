@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
+public class ArbitrarySqlTask extends BaseTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
 	private final String myDescription;
@@ -103,6 +103,17 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 		myConditionalOnExistenceOf.add(new TableAndColumn(theTableName, theColumnName));
 	}
 
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		ArbitrarySqlTask otherObject = (ArbitrarySqlTask) theOtherObject;
+		theBuilder.append(myTableName, otherObject.myTableName);
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myTableName);
+	}
+
 	public enum QueryModeEnum {
 		BATCH_UNTIL_NO_MORE
 	}
@@ -113,12 +124,10 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	private class QueryTask extends Task {
 		private final String mySql;
-		private final QueryModeEnum myMode;
 		private final Consumer<Map<String, Object>> myConsumer;
 
 		public QueryTask(String theSql, QueryModeEnum theMode, Consumer<Map<String, Object>> theConsumer) {
 			mySql = theSql;
-			myMode = theMode;
 			myConsumer = theConsumer;
 			setDescription("Execute raw sql");
 		}
@@ -134,7 +143,7 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 			do {
 				logInfo(ourLog, "Querying for up to {} rows", myBatchSize);
 				rows = getTxTemplate().execute(t -> {
-					JdbcTemplate jdbcTemplate = newJdbcTemnplate();
+					JdbcTemplate jdbcTemplate = newJdbcTemplate();
 					jdbcTemplate.setMaxRows(myBatchSize);
 					return jdbcTemplate.query(mySql, new ColumnMapRowMapper());
 				});
@@ -167,27 +176,5 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 		public String getColumn() {
 			return myColumn;
 		}
-	}
-
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof ArbitrarySqlTask)) return false;
-
-		ArbitrarySqlTask that = (ArbitrarySqlTask) theO;
-
-		return new EqualsBuilder()
-			.append(myTableName, that.myTableName)
-			.append(myExecuteOnlyIfTableExists, that.myExecuteOnlyIfTableExists)
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myTableName)
-			.append(myExecuteOnlyIfTableExists)
-			.toHashCode();
 	}
 }

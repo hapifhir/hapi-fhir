@@ -22,7 +22,7 @@ Note that most fluent operations end with an `execute()` statement which actuall
 
 # Search
 
-Searching is a very powerful part of the FHIR API specification itself, and HAPI FHIR aims to proide a complete implementation of the FHIR API search specification via the generic client API.
+Searching is a very powerful part of the FHIR API specification itself, and HAPI FHIR aims to provide a complete implementation of the FHIR API search specification via the generic client API.
 
 ## Search - By Type
 
@@ -66,7 +66,7 @@ If the server supports paging results, the client has a page method which can be
 
 ## Search - Composite Parameters
 
-If a composite parameter is being searched on, the parameter takes a "left" and "right" operand, each of which is a parameter from the resource being seached. The following example shows the syntax.
+If a composite parameter is being searched on, the parameter takes a "left" and "right" operand, each of which is a parameter from the resource being searched. The following example shows the syntax.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|searchComposite}}
@@ -181,6 +181,14 @@ Conditional deletions are also possible, which is a form where instead of deleti
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|deleteConditional}}
 ```
 
+## Cascading Delete
+
+The following snippet shows now to request a cascading delete. Note that this is a HAPI FHIR specific feature and is not supported on all servers.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|deleteCascade}}
+```
+
 # Update - Instance
 
 Updating a resource is similar to creating one, except that an ID must be supplied since you are updating a previously existing resource instance.
@@ -193,13 +201,29 @@ The following example shows how to perform an update operation using the generic
 
 ## Conditional Updates
 
-FHIR also specifies a type of update called "conditional updates", where insetad of using the logical ID of a resource to update, a set of search parameters is provided. If a single resource matches that set of parameters, that resource is updated. See the FHIR specification for information on how conditional updates work.
+FHIR also specifies a type of update called "conditional updates", where instead of using the logical ID of a resource to update, a set of search parameters is provided. If a single resource matches that set of parameters, that resource is updated. See the FHIR specification for information on how conditional updates work.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|updateConditional}}
 ```
 
 **See Also:** See the description of [Update ETags](#update_etags) below for information on specifying a matching version in the client request.
+
+# Patch - Instance
+
+The PATCH operation can be used to modify a resource in place by supplying a delta
+
+The following example shows how to perform a patch using a [FHIR Patch](http://hl7.org/fhir/fhirpatch.html)
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|patchFhir}}
+```
+
+The following example shows how to perform a patch using a [JSON Patch](https://tools.ietf.org/html/rfc6902.)
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|patchJson}}
+```
 
 # History - Server/Type/Instance
 
@@ -233,7 +257,7 @@ To retrieve the server's capability statement, simply call the [`capabilities()`
 
 # Extended Operations
 
-FHIR also supports a set of *extended operatioons*, which are operatons beyond the basic CRUD operations defined in the specificiation. These operations are an RPC style of invocation, with a set of named input parameters passed to the server and a set of named output parameters returned back.
+FHIR also supports a set of *extended operations*, which are operations beyond the basic CRUD operations defined in the specification. These operations are an RPC style of invocation, with a set of named input parameters passed to the server and a set of named output parameters returned back.
 
 To invoke an operation using the client, you simply need to create the input [Parameters](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/Parameters.html) resource, then pass that to the [`operation()`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IGenericClient.html#operation()) fluent method.
 

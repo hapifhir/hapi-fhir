@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,25 +21,42 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.flywaydb.core.api.MigrationInfoService;
+import org.apache.commons.lang3.Validate;
+import org.flywaydb.core.api.callback.Callback;
 
+import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
-public abstract class BaseMigrator {
-
+public abstract class BaseMigrator implements IMigrator {
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 	private boolean myOutOfOrderPermitted;
 	private DriverTypeEnum myDriverType;
-	private String myConnectionUrl;
-	private String myUsername;
-	private String myPassword;
+	private DataSource myDataSource;
 	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
+	private List<Callback> myCallbacks = Collections.emptyList();
 
-	public abstract void migrate();
+	@Nonnull
+	public List<Callback> getCallbacks() {
+		return myCallbacks;
+	}
+
+	public void setCallbacks(@Nonnull List<Callback> theCallbacks) {
+		Validate.notNull(theCallbacks);
+		myCallbacks = theCallbacks;
+	}
+
+	public DataSource getDataSource() {
+		return myDataSource;
+	}
+
+	public void setDataSource(DataSource theDataSource) {
+		myDataSource = theDataSource;
+	}
 
 	public boolean isDryRun() {
 		return myDryRun;
@@ -57,40 +74,12 @@ public abstract class BaseMigrator {
 		myNoColumnShrink = theNoColumnShrink;
 	}
 
-	public abstract Optional<MigrationInfoService> getMigrationInfo();
-
-	public abstract void addTasks(List<BaseTask<?>> theMigrationTasks);
-
 	public DriverTypeEnum getDriverType() {
 		return myDriverType;
 	}
 
 	public void setDriverType(DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
-	}
-
-	public String getConnectionUrl() {
-		return myConnectionUrl;
-	}
-
-	public void setConnectionUrl(String theConnectionUrl) {
-		myConnectionUrl = theConnectionUrl;
-	}
-
-	public String getUsername() {
-		return myUsername;
-	}
-
-	public void setUsername(String theUsername) {
-		myUsername = theUsername;
-	}
-
-	public String getPassword() {
-		return myPassword;
-	}
-
-	public void setPassword(String thePassword) {
-		myPassword = thePassword;
 	}
 
 	public boolean isOutOfOrderPermitted() {

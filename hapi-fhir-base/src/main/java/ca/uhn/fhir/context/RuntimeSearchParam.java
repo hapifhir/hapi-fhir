@@ -5,7 +5,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -27,7 +26,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,19 +104,30 @@ public class RuntimeSearchParam {
 		}
 	}
 
+	/**
+	 * Constructor
+	 */
 	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
 		this(null, null, theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
 	}
 
 	/**
-	 * Retrieve user data - This can be used to store any application-specific data
-	 *
-	 * @return
+	 * Copy constructor
 	 */
+	public RuntimeSearchParam(RuntimeSearchParam theSp) {
+		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getCompositeOf(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.getBase());
+	}
+
+	/**
+	 * Retrieve user data - This can be used to store any application-specific data
+	 */
+	@Nonnull
 	public List<IBaseExtension<?, ?>> getExtensions(String theKey) {
 		List<IBaseExtension<?, ?>> retVal = myExtensions.get(theKey);
 		if (retVal != null) {
 			retVal = Collections.unmodifiableList(retVal);
+		} else {
+			retVal = Collections.emptyList();
 		}
 		return retVal;
 	}

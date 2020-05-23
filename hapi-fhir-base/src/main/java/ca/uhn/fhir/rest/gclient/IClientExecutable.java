@@ -12,7 +12,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public interface IClientExecutable<T extends IClientExecutable<?, Y>, Y> {
 	 * If set to true, the client will log the request and response to the SLF4J logger. This can be useful for
 	 * debugging, but is generally not desirable in a production situation.
 	 *
-	 * @deprecated Use the client logging interceptor to log requests and responses instead. See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client.html#req_resp_logging">here</a> for more information.
+	 * @deprecated Use the client logging interceptor to log requests and responses instead. See <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/built_in_client_interceptors.html">here</a> for more information.
 	 */
 	@Deprecated
 	T andLogRequestAndResponse(boolean theLogRequestAndResponse);

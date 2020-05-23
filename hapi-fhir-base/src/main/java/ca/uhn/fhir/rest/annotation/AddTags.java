@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * Note that for a
  * server implementation, the {@link #type()} annotation is optional if the
  * method is defined in a <a href=
- * "http://jamesagnew.github.io/hapi-fhir/doc_rest_server.html#resource_providers"
+ * "https://hapifhir.io/hapi-fhir/docs/server_plain/resource_providers.html"
  * >resource provider</a>, since the type is implied.</li>
  * <li>
  * To add tag(s) on the server <b>to the given version of the
@@ -63,7 +63,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * operation.
  * Note that for a server implementation, the
  * {@link #type()} annotation is optional if the method is defined in a <a href=
- * "http://jamesagnew.github.io/hapi-fhir/doc_rest_server.html#resource_providers"
+ * "https://hapifhir.io/hapi-fhir/docs/server_plain/resource_providers.html"
  * >resource provider</a>, since the type is implied.</li>
  * </ul>
  */

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -53,17 +54,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ResourceParameter implements IParameter {
 
-	private final boolean myMethodIsOperation;
+	private final boolean myMethodIsOperationOrPatch;
 	private Mode myMode;
 	private Class<? extends IBaseResource> myResourceType;
 
-	public ResourceParameter(Class<? extends IBaseResource> theParameterType, Object theProvider, Mode theMode, boolean theMethodIsOperation) {
+	public ResourceParameter(Class<? extends IBaseResource> theParameterType, Object theProvider, Mode theMode, boolean theMethodIsOperation, boolean theMethodIsPatch) {
 		Validate.notNull(theParameterType, "theParameterType can not be null");
 		Validate.notNull(theMode, "theMode can not be null");
 
 		myResourceType = theParameterType;
 		myMode = theMode;
-		myMethodIsOperation = theMethodIsOperation;
+		myMethodIsOperationOrPatch = theMethodIsOperation || theMethodIsPatch;
 
 		Class<? extends IBaseResource> providerResourceType = null;
 		if (theProvider instanceof IResourceProvider) {
@@ -107,7 +108,7 @@ public class ResourceParameter implements IParameter {
 			case RESOURCE:
 			default:
 				Class<? extends IBaseResource> resourceTypeToParse = myResourceType;
-				if (myMethodIsOperation) {
+				if (myMethodIsOperationOrPatch) {
 					// Operations typically have a Parameters resource as the body
 					resourceTypeToParse = null;
 				}
@@ -223,7 +224,15 @@ public class ResourceParameter implements IParameter {
 			}
 		}
 
-		if (retVal == null) {
+		boolean isNonFhirPatch = false;
+		if (theRequest.getRequestType() == RequestTypeEnum.PATCH) {
+			EncodingEnum requestEncoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest, true);
+			if (requestEncoding == null) {
+				isNonFhirPatch = true;
+			}
+		}
+
+		if (retVal == null && !isNonFhirPatch) {
 			retVal = loadResourceFromRequest(theRequest, theMethodBinding, theResourceType);
 		}
 

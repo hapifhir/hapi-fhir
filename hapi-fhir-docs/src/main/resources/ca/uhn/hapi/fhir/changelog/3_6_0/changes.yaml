@@ -19,7 +19,7 @@
     title: "When invoking an operation using the fluent client on an instance, the operation would accidentally invoke against the server if the provided ID did not include a type. This has been corrected so that an IllegalArgumentException is now thrown."
 - item:
     type: "add"
-    title: "A new operation has been added to the JPA server called <code>$trigger-subscription</code> . This can be used to cause a transaction to redeliver a resource that previously triggered. See <a href=\"https://smilecdr.com/docs/current/fhir_repository/subscription.html#manually-triggering-subscriptions\">this link</a> for a description of how this feature works. Note that you must add the SubscriptionRetriggeringProvider as shown in the sample project <a href=\"https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/JpaServerDemo.java\">here</a>."
+    title: "A new operation has been added to the JPA server called <code>$trigger-subscription</code> . This can be used to cause a transaction to redeliver a resource that previously triggered. See <a href=\"https://smilecdr.com/docs/current/fhir_repository/subscription.html#manually-triggering-subscriptions\">this link</a> for a description of how this feature works. Note that you must add the SubscriptionRetriggeringProvider as shown in the sample project."
 - item:
     type: "add"
     title: "When operating in R4 mode, the HAPI FHIR server will now populate Bundle.entry.response for history and search results, which is did not previously do."

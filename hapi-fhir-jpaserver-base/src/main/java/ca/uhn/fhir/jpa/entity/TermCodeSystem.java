@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class TermCodeSystem implements Serializable {
 	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;
 
-	@OneToOne()
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CURRENT_VERSION_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_CURVER"))
 	private TermCodeSystemVersion myCurrentVersion;
 	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = false, updatable = false)
@@ -57,7 +57,7 @@ public class TermCodeSystem implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEM_PID")
 	@Column(name = "PID")
 	private Long myPid;
-	@OneToOne()
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
 	private ResourceTable myResource;
 	@Column(name = "RES_ID", insertable = false, updatable = false)

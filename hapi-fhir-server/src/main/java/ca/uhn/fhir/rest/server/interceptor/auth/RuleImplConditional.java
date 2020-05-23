@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
 									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
-
-		if (isOtherTenant(theRequestDetails)) {
-			return null;
-		}
+		assert !(theInputResource != null && theOutputResource != null);
 
 		if (theInputResourceId != null && theInputResourceId.hasIdPart()) {
 			return null;
@@ -67,7 +64,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 							return null;
 						}
 					} else {
-						String inputResourceName = theRequestDetails.getFhirContext().getResourceDefinition(theInputResource).getName();
+						String inputResourceName = theRequestDetails.getFhirContext().getResourceType(theInputResource);
 						if (theInputResource == null || !myAppliesToTypes.contains(inputResourceName)) {
 							return null;
 						}
@@ -75,17 +72,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 					break;
 			}
 
-			if (getTenantApplicabilityChecker() != null) {
-				if (!getTenantApplicabilityChecker().applies(theRequestDetails)) {
-					return null;
-				}
-			}
-
-			if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
-				return null;
-			}
-
-			return newVerdict();
+			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 		}
 
 		return null;

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class ServeMediaResourceRawInterceptor {
 
 
 		FhirContext context = theRequestDetails.getFhirContext();
-		String resourceName = context.getResourceDefinition(theResponseObject).getName();
+		String resourceName = context.getResourceType(theResponseObject);
 
 		// Are we serving a FHIR read request on the Media resource type
 		if (!"Media".equals(resourceName) || !RESPOND_TO_OPERATION_TYPES.contains(theRequestDetails.getRestOperationType())) {

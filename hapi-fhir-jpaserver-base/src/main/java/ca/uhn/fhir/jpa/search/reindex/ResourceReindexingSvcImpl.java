@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ package ca.uhn.fhir.jpa.search.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -46,7 +47,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.search.util.impl.Executors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,13 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -142,10 +148,16 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		myContext = theContext;
 	}
 
+	@VisibleForTesting
+	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
+		mySchedulerService = theSchedulerService;
+	}
+
 	@PostConstruct
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 		initExecutor();
+		scheduleJob();
 	}
 
 	public void initExecutor() {
@@ -158,6 +170,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			myReindexingThreadFactory,
 			rejectHandler
 		);
+	}
+
+	public void scheduleJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	@Override
@@ -187,12 +206,14 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		return job.getId();
 	}
 
-	@PostConstruct
-	public void registerScheduledJob() {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(ResourceReindexingSvcImpl.class.getName());
-		jobDetail.setJobClass(ResourceReindexingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, true, jobDetail);
+	public static class Job implements HapiJob {
+		@Autowired
+		private IResourceReindexingSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.runReindexingPass();
+		}
 	}
 
 	@VisibleForTesting
@@ -543,16 +564,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			}
 
 			return myUpdated;
-		}
-	}
-
-	public static class SubmitJob implements Job {
-		@Autowired
-		private IResourceReindexingSvc myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.runReindexingPass();
 		}
 	}
 }

@@ -23,7 +23,11 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -32,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +77,7 @@ public abstract class RequestDetails {
 	private Map<Object, Object> myUserData;
 	private IBaseResource myResource;
 	private String myRequestId;
+	private String myTransactionGuid;
 	private String myFixedConditionalUrl;
 
 	/**
@@ -462,6 +467,15 @@ public abstract class RequestDetails {
 		if (myRequestContents == null) {
 			myRequestContents = getByteStreamRequestContents();
 		}
+		return getRequestContentsIfLoaded();
+	}
+
+	/**
+	 * Returns the request contents if they were loaded, returns <code>null</code> otherwise
+	 *
+	 * @see #loadRequestContents()
+	 */
+	public byte[] getRequestContentsIfLoaded() {
 		return myRequestContents;
 	}
 
@@ -504,6 +518,14 @@ public abstract class RequestDetails {
 		deferredCallback.playDeferredActions();
 		myInterceptorBroadcaster = deferredCallback.getWrap();
 		myDeferredInterceptorBroadcaster = null;
+	}
+
+	public String getTransactionGuid() {
+		return myTransactionGuid;
+	}
+
+	public void setTransactionGuid(String theTransactionGuid) {
+		myTransactionGuid = theTransactionGuid;
 	}
 
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,20 +77,6 @@ public interface ISearchCacheSvc {
 	 * @return A collection of candidate searches
 	 */
 	Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, int theQueryStringHash, Date theCreatedAfter);
-
-	/**
-	 * Mark a search as having been "last used" at the given time. This method may (and probably should) be implemented
-	 * to work asynchronously in order to avoid hammering the database if the search gets reused many times.
-	 *
-	 * @param theSearch The search
-	 * @param theDate   The "last returned" timestamp
-	 */
-	void updateSearchLastReturned(Search theSearch, Date theDate);
-
-	/**
-	 * This is mostly public for unit tests
-	 */
-	void flushLastUpdated();
 
 	/**
 	 * This method will be called periodically to delete stale searches. Implementations are not required to do anything

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.interceptor;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.interceptor;
  */
 
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.ICallable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,7 +57,6 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	public IBaseResource getResource(int theIndex) {
 		if (myResources == null) {
 			myResources = new ArrayList<>(myResourcePids.size());
-			// FIXME: JA don't call interceptors for this query
 			mySearchBuilderSupplier.call().loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
 		}
 		return myResources.get(theIndex);

@@ -22,7 +22,7 @@
     title: "<b>New Feature</b>: Support for the new R5 draft resources has been added. This support includes the client, server, and JPA server. Note that these definitions will change as the R5 standard is modified until it is released, so use with caution!"
 - item:
     type: "add"
-    title: "<b>New Feature</b>: A new interceptor called <code>ConsentInterceptor</code> has been added. This interceptor allows JPA based servers to make appropriate consent decisions related to resources that and operations that are being returned. See <a href=\"http://hapifhir.io/doc_rest_server_security.html\">Server Security</a> for more information."
+    title: "<b>New Feature</b>: A new interceptor called <code>ConsentInterceptor</code> has been added. This interceptor allows JPA based servers to make appropriate consent decisions related to resources that and operations that are being returned. See Server Security for more information."
 - item:
     type: "add"
     title: "<b>New Feature</b>: The JPA server now supports GraphQL for DSTU3 / R4 / R5 servers."

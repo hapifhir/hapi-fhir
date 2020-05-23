@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,8 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 public interface IAuthRuleBuilderGraphQL {
 
 	/**
-	 * Note that this is an all-or-nothing grant for now, it
-	 * is not yet possible to specify individual resource security when
-	 * using GraphQL.
+	 * Allow any GraphQL request. Note that this does not mean that any specific sub-operations are permitted, as
+	 * other rules may be required in order to actually access specific resources
 	 */
 	IAuthRuleFinished any();
 }

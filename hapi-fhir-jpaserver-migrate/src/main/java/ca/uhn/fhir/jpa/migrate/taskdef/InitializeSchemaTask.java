@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,16 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
+public class InitializeSchemaTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
+	public static final String DESCRIPTION_PREFIX = "Initialize schema for ";
+
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
 
 	public InitializeSchemaTask(String theProductVersion, String theSchemaVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		super(theProductVersion, theSchemaVersion);
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
-		setDescription("Initialize schema");
+		setDescription(DESCRIPTION_PREFIX + mySchemaInitializationProvider.getSchemaDescription());
 	}
 
 	@Override
@@ -58,32 +60,29 @@ public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
 			return;
 		}
 
-		logInfo(ourLog, "Initializing schema for {}", driverType);
+		logInfo(ourLog, "Initializing {} schema for {}", driverType, mySchemaInitializationProvider.getSchemaDescription());
 
 		List<String> sqlStatements = mySchemaInitializationProvider.getSqlStatements(driverType);
 
 		for (String nextSql : sqlStatements) {
 			executeSql(null, nextSql);
 		}
+
+		logInfo(ourLog, "{} schema for {} initialized successfully", driverType, mySchemaInitializationProvider.getSchemaDescription());
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		InitializeSchemaTask that = (InitializeSchemaTask) theO;
-
-		return new EqualsBuilder()
-			.append(mySchemaInitializationProvider, that.mySchemaInitializationProvider)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		InitializeSchemaTask otherObject = (InitializeSchemaTask) theOtherObject;
+		theBuilder.append(mySchemaInitializationProvider, otherObject.mySchemaInitializationProvider);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(mySchemaInitializationProvider)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(mySchemaInitializationProvider);
+	}
+
+	public ISchemaInitializationProvider getSchemaInitializationProvider() {
+		return mySchemaInitializationProvider;
 	}
 }

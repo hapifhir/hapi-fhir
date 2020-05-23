@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1824
+title: Native support for UCUM has been added to the validation stack, meaning that UCUM codes can be validated 
+   at runtime without the need for any external validation.

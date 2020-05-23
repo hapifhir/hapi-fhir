@@ -24,14 +24,24 @@ This interceptor will then produce output similar to the following:
 2014-09-04 03:30:00.443 Source[127.0.0.1] Operation[search-type Organization] UA[Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)] Params[]
 ```
 
+<a name="request-tenant-partition-interceptor"/>
+
+# Partitioning: Multitenant Request Partition
+
+If the JPA server has [partitioning](/docs/server_jpa_partitioning/partitioning.html) enabled, the RequestTenantPartitionInterceptor can be used in combination with a [Tenant Identification Strategy](/docs/server_plain/multitenancy.html) in order to achieve a multitenant solution. See [JPA Server Partitioning](/docs/server_jpa_partitioning/partitioning.html) for more information on partitioning.
+
+* [RequestTenantPartitionInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.html)
+* [RequestTenantPartitionInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.java)
+
+
 # Response Customizing: Syntax Highlighting
 
-The ResponseHighlighterInterceptor detects when a request is coming from a browser and returns HTML with syntax highlighted XML/JSON instead of just the raw text. In other words, if a user uses a browser to request `http://foo/Patient/1` by typing this address into their URL bar, they will get nice formatted HTML back with a human readable version of the content. This is particularly helpful for testers and public/development APIs where users are likely to invoke the API directly to see how it works.
+The ResponseHighlighterInterceptor detects when a request is coming from a browser and returns HTML with syntax highlighted XML/JSON instead of just the raw text. In other words, if a user uses a browser to request `http://foo/Patient/1` by typing this address into their URL bar, they will get a nicely formatted HTML back with a human readable version of the content. This is particularly helpful for testers and public/development APIs where users are likely to invoke the API directly to see how it works.
 
 * [ResponseHighlighterInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseHighlighterInterceptor.html)
 * [ResponseHighlighterInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseHighlighterInterceptor.java)
 
-To see an example of how the output of this interceptor looks, see our demo server using the following example query: [http://hapi.fhir.org/baseR4/Patient](http://hapi.fhir.org/baseR4/Patient). The HTML view you see no that page with colour and indenting is provided by ResponseHighlighterInterceptor. Without this interceptor the respnose will simply by raw JSON/XML (as it will also be with this interceptor if the request is not coming from a browser, or is invoked by JavaScript).
+To see an example of how the output of this interceptor looks, see our demo server using the following example query: [http://hapi.fhir.org/baseR4/Patient](http://hapi.fhir.org/baseR4/Patient). The HTML view you see in that page with colour and indenting is provided by ResponseHighlighterInterceptor. Without this interceptor the response will simply be raw JSON/XML (as it will also be with this interceptor if the request is not coming from a browser, or is invoked by JavaScript).
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|responseHighlighterInterceptor}}
@@ -50,6 +60,52 @@ The following example shows how to register the ExceptionHandlingInterceptor.
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|exceptionInterceptor}}
 ```
 
+# Response Customizing: Evaluate FHIRPath
+
+The FhirPathFilterInterceptor looks for a request URL parameter in the form `_fhirpath=(expression)` in all REST requests. If this parameter is found, the value is treated as a [FHIRPath](http://hl7.org/fhirpath/) expression. The response resource will be replaced with a [Parameters](http://hl7.org/fhir/parameters.html) resource containing the results of the given expression applied against the response resource.   
+
+* [FhirPathFilterInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/FhirPathFilterInterceptor.html)
+* [FhirPathFilterInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/FhirPathFilterInterceptor.java)
+
+The following example shows how to register the ExceptionHandlingInterceptor.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|exceptionInterceptor}}
+```
+
+An example URL to invoke this function is shown below:
+
+```url
+https://hapi.fhir.org/baseR4/Patient?_fhirpath=Bundle.entry.resource.as(Patient).name&_pretty=true
+```
+
+A sample response to this query is shown below:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "result",
+    "part": [ {
+      "name": "expression",
+      "valueString": "Bundle.entry.resource.as(Patient).name"
+    }, {
+      "name": "result",
+      "valueHumanName": {
+        "family": "Simpson",
+        "given": [ "Homer", "Jay" ]
+      }
+    }, {
+      "name": "result",
+      "valueHumanName": {
+        "family": "Simpson",
+        "given": [ "Grandpa" ]
+      }
+    } ]
+  } ]
+}
+```
+
 # Validation: Request and Response Validation
 
 HAPI FHIR provides a pair of interceptors that can be used to validate incoming requests received by the server, as well as outgoing responses generated by the server.
@@ -65,7 +121,7 @@ The RequestValidatingInterceptor looks at resources coming into the server (e.g.
 
 These interceptors can be configured to add headers to the response, fail the response (returning an HTTP 422 and throwing an exception in the process), or to add to the OperationOutcome returned by the server.
 
-See [Profile Validator](/docs/validation/profile_validator.html) for information on how validation works in HAPI FHIR.
+See [Instance Validator](/docs/validation/instance_validator.html) for information on how validation works in HAPI FHIR.
 
 The following example shows how to register this interceptor within a HAPI FHIR REST server.
 
@@ -100,6 +156,13 @@ Some security audit tools require that servers return an HTTP 405 if an unsuppor
 * [BanUnsupportedHttpMethodsInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/BanUnsupportedHttpMethodsInterceptor.html)
 * [BanUnsupportedHttpMethodsInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/BanUnsupportedHttpMethodsInterceptor.java)
 
+# Subscription: Subscription Debug Log Interceptor
+
+When using Subscriptions, the debug log interceptor can be used to add a number of additional lines to the server logs showing the internals of the subscription processing pipeline.
+
+* [SubscriptionDebugLogInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-subscription/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.html)
+* [SubscriptionDebugLogInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-subscription/src/main/java/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.java)
+
 
 # Request Pre-Processing: Override Meta.source
 
@@ -107,4 +170,11 @@ If you wish to override the value of `Resource.meta.source` using the value	supp
 
 * [CaptureResourceSourceFromHeaderInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.html)
 * [CaptureResourceSourceFromHeaderInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.java)
+
+# Utility: ResponseSizeCapturingInterceptor
+
+The ResponseSizeCapturingInterceptor can be used to capture the number of characters written in each HTTP FHIR response.
+
+* [ResponseSizeCapturingInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseSizeCapturingInterceptor.html)
+* [ResponseSizeCapturingInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseSizeCapturingInterceptor.java)
 

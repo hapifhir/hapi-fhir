@@ -157,7 +157,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidatorDstu2());
+		requestValidator.addValidatorModule(instanceValidator());
 
 		return requestValidator;
 	}

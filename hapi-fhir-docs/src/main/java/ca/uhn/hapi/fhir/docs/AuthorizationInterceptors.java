@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -140,6 +141,10 @@ public class AuthorizationInterceptors {
       // let's pretend there is some storage code here.
       theResource.setId(theId.withVersion("2"));
 
+      // One TransactionDetails object should be created for each FHIR operation. Interceptors
+		// may use it for getting/setting details about the running transaction.
+		TransactionDetails transactionDetails = new TransactionDetails();
+
       // Notify the interceptor framework when we're about to perform an update. This is
 		// useful as the authorization interceptor will pick this event up and use it
 		// to factor into a decision about whether the operation should be allowed to proceed.
@@ -149,7 +154,8 @@ public class AuthorizationInterceptors {
 			.add(IBaseResource.class, previousContents)
 			.add(IBaseResource.class, newContents)
 			.add(RequestDetails.class, theRequestDetails)
-			.add(ServletRequestDetails.class, theRequestDetails);
+			.add(ServletRequestDetails.class, theRequestDetails)
+			.add(TransactionDetails.class, transactionDetails);
 		theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
 
       MethodOutcome retVal = new MethodOutcome();

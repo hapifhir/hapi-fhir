@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class ClientInvocationHandlerFactory {
 	class RegisterInterceptorLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
-			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
+			Object interceptor = theArgs[0];
 			theTarget.registerInterceptor(interceptor);
 			return null;
 		}
@@ -130,7 +130,7 @@ public class ClientInvocationHandlerFactory {
 	class UnregisterInterceptorLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
-			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
+			Object interceptor = theArgs[0];
 			theTarget.unregisterInterceptor(interceptor);
 			return null;
 		}

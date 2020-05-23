@@ -4,12 +4,17 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
 public class DropTableTest extends BaseTest {
+
+	public DropTableTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testDropExistingTable() throws SQLException {
@@ -32,7 +37,7 @@ public class DropTableTest extends BaseTest {
 	public void testDropTableWithForeignKey() throws SQLException {
 		executeSql("create table FOREIGNTABLE (PID bigint not null, TEXTCOL varchar(255), primary key (PID))");
 		executeSql("create table SOMETABLE (PID bigint not null, REMOTEPID bigint not null, primary key (PID))");
-		executeSql("alter table SOMETABLE add constraint FK_MYFK foreign key (REMOTEPID) references FOREIGNTABLE;");
+		executeSql("alter table SOMETABLE add constraint FK_MYFK foreign key (REMOTEPID) references FOREIGNTABLE");
 
 		DropTableTask task = new DropTableTask("1",  "1");
 		task.setTableName("SOMETABLE");

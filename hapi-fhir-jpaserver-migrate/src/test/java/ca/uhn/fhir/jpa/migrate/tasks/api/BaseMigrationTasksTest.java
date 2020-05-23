@@ -17,7 +17,7 @@ public class BaseMigrationTasksTest {
 	@Test
 	public void testValidateCorrectOrder() {
 		MyMigrationTasks migrationTasks = new MyMigrationTasks();
-		List<BaseTask<?>> tasks = new ArrayList<>();
+		List<BaseTask> tasks = new ArrayList<>();
 		tasks.add(new DropTableTask("1", "20191029.1"));
 		tasks.add(new DropTableTask("1", "20191029.2"));
 		migrationTasks.validate(tasks);
@@ -26,7 +26,7 @@ public class BaseMigrationTasksTest {
 	@Test
 	public void testValidateVersionWrongOrder() {
 		MyMigrationTasks migrationTasks = new MyMigrationTasks();
-		List<BaseTask<?>> tasks = new ArrayList<>();
+		List<BaseTask> tasks = new ArrayList<>();
 		tasks.add(new DropTableTask("1", "20191029.2"));
 		tasks.add(new DropTableTask("1", "20191029.1"));
 		try {
@@ -40,7 +40,7 @@ public class BaseMigrationTasksTest {
 	@Test
 	public void testValidateSameVersion() {
 		MyMigrationTasks migrationTasks = new MyMigrationTasks();
-		List<BaseTask<?>> tasks = new ArrayList<>();
+		List<BaseTask> tasks = new ArrayList<>();
 		tasks.add(new DropTableTask("1", "20191029.1"));
 		tasks.add(new DropTableTask("1", "20191029.1"));
 		try {
@@ -54,7 +54,7 @@ public class BaseMigrationTasksTest {
 	@Test
 	public void testValidateWrongDateOrder() {
 		MyMigrationTasks migrationTasks = new MyMigrationTasks();
-		List<BaseTask<?>> tasks = new ArrayList<>();
+		List<BaseTask> tasks = new ArrayList<>();
 		tasks.add(new DropTableTask("1", "20191029.1"));
 		tasks.add(new DropTableTask("1", "20191028.1"));
 		try {

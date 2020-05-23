@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ public interface IPatchWithBody extends IPatchExecutable {
 
 	/**
 	 * Build a conditional URL using fluent constants on resource types
-	 * 
+	 *
 	 * @param theResourceType
 	 *           The resource type to patch (e.g. "Patient.class")
 	 */
-	IPatchWithQuery conditional(Class<? extends IBaseResource> theClass);
+	IPatchWithQuery conditional(Class<? extends IBaseResource> theResourceType);
 
 	/**
 	 * Build a conditional URL using fluent constants on resource types
@@ -53,12 +53,12 @@ public interface IPatchWithBody extends IPatchExecutable {
 	IPatchExecutable conditionalByUrl(String theSearchUrl);
 
 	/**
-	 * The resource ID to patch
+	 * The resource ID to patch (must include both a resource type and an ID, e.g. <code>Patient/123</code>)
 	 */
 	IPatchExecutable withId(IIdType theId);
 
 	/**
-	 * The resource ID to patch
+	 * The resource ID to patch (must include both a resource type and an ID, e.g. <code>Patient/123</code>)
 	 */
 	IPatchExecutable withId(String theId);
 

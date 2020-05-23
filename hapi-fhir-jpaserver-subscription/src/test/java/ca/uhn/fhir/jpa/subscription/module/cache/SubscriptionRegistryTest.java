@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.Test;
 
@@ -52,7 +53,7 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		assertRegistrySize(0);
 		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 		assertRegistrySize(1);
-		mySubscriptionRegistry.unregisterSubscription(subscription.getId());
+		mySubscriptionRegistry.unregisterSubscriptionIfRegistered(subscription.getId());
 		assertRegistrySize(0);
 	}
 

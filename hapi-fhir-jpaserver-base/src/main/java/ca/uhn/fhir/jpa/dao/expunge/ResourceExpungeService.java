@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,23 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -50,7 +64,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 class ResourceExpungeService implements IResourceExpungeService {
@@ -75,6 +88,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 	@Autowired
 	private IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
 	@Autowired
+	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	private IResourceTagDao myResourceTagDao;
@@ -88,6 +103,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IResourceProvenanceDao myResourceHistoryProvenanceTableDao;
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
 
 	@Override
 	@Transactional
@@ -151,7 +168,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 			myResourceHistoryProvenanceTableDao.deleteByPid(version.getProvenance().getId());
 		}
 
-		myResourceHistoryTagDao.deleteByPid(version.getTags().stream().map(t->t.getId()).collect(Collectors.toList()));
+		myResourceHistoryTagDao.deleteByPid(version.getId());
 		myResourceHistoryTableDao.deleteByPid(version.getId());
 
 		theRemainingCount.decrementAndGet();
@@ -160,7 +177,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private void callHooks(RequestDetails theRequestDetails, AtomicInteger theRemainingCount, ResourceHistoryTable theVersion, IdDt theId) {
 		final AtomicInteger counter = new AtomicInteger();
 		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
-			IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
+			IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
 			IBaseResource resource = resourceDao.toResource(theVersion, false);
 			HookParams params = new HookParams()
 				.add(AtomicInteger.class, counter)
@@ -172,7 +189,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 		}
 		theRemainingCount.addAndGet(-1 * counter.get());
 	}
-
 
 	@Override
 	@Transactional
@@ -219,10 +235,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 		myResourceTableDao.deleteByPid(resource.getId());
 	}
 
-
-	@Autowired
-	private ISearchParamPresentDao mySearchParamPresentDao;
-
 	@Override
 	@Transactional
 	public void deleteAllSearchParams(Long theResourceId) {
@@ -233,8 +245,10 @@ class ResourceExpungeService implements IResourceExpungeService {
 		myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
 		myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
 		myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
+		myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId);
 		mySearchParamPresentDao.deleteByResourceId(theResourceId);
 		myResourceLinkDao.deleteByResourceId(theResourceId);
+
 
 		myResourceTagDao.deleteByResourceId(theResourceId);
 	}

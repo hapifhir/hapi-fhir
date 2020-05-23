@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -102,7 +103,7 @@ public class TransactionProcessorVersionAdapterDstu3 implements TransactionProce
 	}
 
 	@Override
-	public String getEntryRequestVerb(Bundle.BundleEntryComponent theEntry) {
+	public String getEntryRequestVerb(FhirContext theContext, Bundle.BundleEntryComponent theEntry) {
 		String retVal = null;
 		Bundle.HTTPVerb value = theEntry.getRequest().getMethodElement().getValue();
 		if (value != null) {
@@ -115,7 +116,7 @@ public class TransactionProcessorVersionAdapterDstu3 implements TransactionProce
 		 */
 		if (isBlank(retVal)) {
 			Resource resource = theEntry.getResource();
-			boolean isPatch = BundleUtil.isDstu3TransactionPatch(resource);
+			boolean isPatch = BundleUtil.isDstu3TransactionPatch(theContext, resource);
 
 			if (isPatch) {
 				retVal = "PATCH";

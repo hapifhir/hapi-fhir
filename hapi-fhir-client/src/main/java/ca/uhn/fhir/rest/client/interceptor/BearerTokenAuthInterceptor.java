@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * where the token portion (at the end of the header) is supplied by the invoking code.
  * </p>
  * <p>
- * See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client_interceptor.html#Security_HTTP_Bearer_Token_Authorization">HAPI Documentation</a> for information on how to use this class.
+ * See the <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/built_in_client_interceptors.html">HAPI Documentation</a> for information on how to use this class.
  * </p>
  */
 public class BearerTokenAuthInterceptor implements IClientInterceptor {

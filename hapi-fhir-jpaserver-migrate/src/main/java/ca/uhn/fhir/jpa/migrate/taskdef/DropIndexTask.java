@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class DropIndexTask extends BaseTableTask<DropIndexTask> {
+public class DropIndexTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
 	private String myIndexName;
@@ -78,6 +78,19 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 		return this;
 	}
 
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		DropIndexTask otherObject = (DropIndexTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myIndexName, otherObject.myIndexName);
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myIndexName);
+	}
+
 	static List<String> createDropIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theIndexName, DriverTypeEnum theDriverType) throws SQLException {
 		Validate.notBlank(theIndexName, "theIndexName must not be blank");
 		Validate.notBlank(theTableName, "theTableName must not be blank");
@@ -98,8 +111,10 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 					sql.add("alter table " + theTableName + " drop index " + theIndexName);
 					break;
 				case H2_EMBEDDED:
-				case DERBY_EMBEDDED:
 					sql.add("drop index " + theIndexName);
+					break;
+				case DERBY_EMBEDDED:
+					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
 					break;
 				case POSTGRES_9_4:
 					sql.add("alter table " + theTableName + " drop constraint if exists " + theIndexName + " cascade");
@@ -129,27 +144,5 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 			}
 		}
 		return sql;
-	}
-
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		DropIndexTask that = (DropIndexTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myIndexName, that.myIndexName)
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myIndexName)
-			.toHashCode();
 	}
 }

@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -79,7 +78,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			throw new ConfigurationException("Unable to determine resource type for method: " + theMethod);
 		}
 
-		myResourceName = theContext.getResourceDefinition(myResourceType).getName();
+		myResourceName = theContext.getResourceType(myResourceType);
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParamIndex != null) {
 			myIdParamType = (Class<? extends IIdType>) theMethod.getParameterTypes()[myIdParamIndex];

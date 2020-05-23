@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.sp;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ package ca.uhn.fhir.jpa.sp;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -36,6 +37,9 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -63,9 +67,11 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 			String paramName = next.getKey();
 
 			SearchParamPresent present = new SearchParamPresent();
+			present.setPartitionSettings(myPartitionSettings);
 			present.setResource(theResource);
 			present.setParamName(paramName);
 			present.setPresent(next.getValue());
+			present.setPartitionId(theResource.getPartitionId());
 			present.calculateHashes();
 
 			newHashToPresence.put(present.getHashPresence(), present);

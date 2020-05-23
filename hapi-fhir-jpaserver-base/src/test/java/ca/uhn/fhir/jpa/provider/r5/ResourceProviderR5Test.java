@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -220,6 +220,27 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.execute();
 		List<IIdType> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualified()).collect(Collectors.toList());
 		assertThat(ids, containsInAnyOrder(oid));
+	}
+
+
+	@Test
+	public void testCount0() {
+		Observation observation = new Observation();
+		observation.setEffective(new DateTimeType("1965-08-09"));
+		myObservationDao.create(observation).getId().toUnqualified();
+
+		observation = new Observation();
+		observation.setEffective(new DateTimeType("1965-08-10"));
+		myObservationDao.create(observation).getId().toUnqualified();
+
+		Bundle output = ourClient
+			.search()
+			.byUrl("Observation?_count=0")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(2, output.getTotal());
+		assertEquals(0, output.getEntry().size());
 	}
 
 	@AfterClass

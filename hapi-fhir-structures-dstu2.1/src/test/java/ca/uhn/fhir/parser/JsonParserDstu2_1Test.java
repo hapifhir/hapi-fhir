@@ -13,6 +13,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -1098,8 +1099,8 @@ public class JsonParserDstu2_1Test {
 		assertEquals(null, parsed.getGenderElement().getValueAsString());
 		
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq(""), msgCaptor.capture());
-		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
+		verify(errorHandler, times(1)).invalidValue(any(IParseLocation.class), eq(""), msgCaptor.capture());
+		assertEquals("Attribute value must not be empty (\"\")", msgCaptor.getValue());
 		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		assertEquals("{\"resourceType\":\"Patient\"}", encoded);
@@ -1118,7 +1119,7 @@ public class JsonParserDstu2_1Test {
 		assertEquals("foo", parsed.getGenderElement().getValueAsString());
 		
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(any(IParseLocation.class), eq("foo"), msgCaptor.capture());
 		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
 		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1138,7 +1139,7 @@ public class JsonParserDstu2_1Test {
 		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
 		
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(any(IParseLocation.class), eq("foo"), msgCaptor.capture());
 		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
 		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1168,44 +1169,6 @@ public class JsonParserDstu2_1Test {
 		String out = ourCtx.newXmlParser().encodeResourceToString(l);
 		ourLog.info(out);
 		assertEquals("<Linkage xmlns=\"http://hl7.org/fhir\"><item><resource><display value=\"FOO\"/></resource></item></Linkage>", out);
-	}
-
-	// FIXME: this should pass
-	@Test
-	@Ignore
-	public void testNamespacePreservationEncode() throws Exception {
-		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" + 
-				"<text>" + 
-				"<xhtml:div>" + 
-				"<xhtml:img src=\"foo\"/>" + 
-				"@fhirabend" + 
-				"</xhtml:div>" + 
-				"</text>" + 
-				"</Patient>";
-		//@formatter:on
-		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
-
-		String expected = "<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>";
-		assertEquals(expected, parsed.getText().getDiv().getValueAsString());
-
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
-		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
-	}
-
-	// TODO: this should pass
-	@Test
-	@Ignore
-	public void testNamespacePreservationParse() throws Exception {
-		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
-		XhtmlNode div = parsed.getText().getDiv();
-
-		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", div.getValueAsString());
-
-		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>", encoded);
 	}
 
 	@Test
@@ -1556,13 +1519,13 @@ public class JsonParserDstu2_1Test {
 			ourCtx.newJsonParser().parseResource("FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
 		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());
@@ -1692,25 +1655,6 @@ public class JsonParserDstu2_1Test {
 
 	}
 
-
-	/**
-	 * See #484
-	 */
-	@Test
-	public void testParseNarrativeWithEmptyDiv() {
-		String input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div/>\"}}";
-		Basic basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals(null, basic.getText().getDivAsString());
-
-		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div></div>\"}}";
-		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals(null, basic.getText().getDivAsString());
-
-		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div> </div>\"}}";
-		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>", basic.getText().getDivAsString());
-
-	}
 
 	/**
 	 * See #163

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
+public class AddTableByColumnTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
 
 	private List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
-	private String myPkColumn;
+	private List<String> myPkColumns;
 
 	public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -53,8 +53,8 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		myAddColumnTasks.add(theTask);
 	}
 
-	public void setPkColumn(String thePkColumn) {
-		myPkColumn = thePkColumn;
+	public void setPkColumns(List<String> thePkColumns) {
+		myPkColumns = thePkColumns;
 	}
 
 	@Override
@@ -82,7 +82,12 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 		}
 
 		sb.append(" PRIMARY KEY (");
-		sb.append(myPkColumn);
+		for (int i = 0; i < myPkColumns.size(); i++) {
+			if (i > 0) {
+				sb.append(", ");
+			}
+			sb.append(myPkColumns.get(i));
+		}
 		sb.append(")");
 
 		sb.append(" ) ");
@@ -105,26 +110,17 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		AddTableByColumnTask that = (AddTableByColumnTask) theO;
-
-		return new EqualsBuilder()
-			.appendSuper(super.equals(theO))
-			.append(myAddColumnTasks, that.myAddColumnTasks)
-			.append(myPkColumn, that.myPkColumn)
-			.isEquals();
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+		AddTableByColumnTask otherObject = (AddTableByColumnTask) theOtherObject;
+		theBuilder.append(myAddColumnTasks, otherObject.myAddColumnTasks);
+		theBuilder.append(myPkColumns, otherObject.myPkColumns);
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.appendSuper(super.hashCode())
-			.append(myAddColumnTasks)
-			.append(myPkColumn)
-			.toHashCode();
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myAddColumnTasks);
+		theBuilder.append(myPkColumns);
 	}
 }

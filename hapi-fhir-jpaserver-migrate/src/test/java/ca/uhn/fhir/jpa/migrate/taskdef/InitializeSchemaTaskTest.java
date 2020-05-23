@@ -9,11 +9,16 @@ import org.junit.Test;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
 public class InitializeSchemaTaskTest extends BaseTest {
+
+	public InitializeSchemaTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void testInitializeTwice() throws SQLException {
@@ -41,6 +46,16 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		}
 
 		@Override
+		public String getSchemaDescription() {
+			return "TEST";
+		}
+
+		@Override
+		public ISchemaInitializationProvider setSchemaDescription(String theSchemaDescription) {
+			return this;
+		}
+
+		@Override
 		public boolean equals(Object theO) {
 			if (this == theO) return true;
 
@@ -52,7 +67,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		}
 
 		private int size() {
-			return getSqlStatements(DriverTypeEnum.H2_EMBEDDED).size();
+			return getSqlStatements(getDriverType()).size();
 		}
 
 		// This could be stricter, but we don't want this to be brittle.

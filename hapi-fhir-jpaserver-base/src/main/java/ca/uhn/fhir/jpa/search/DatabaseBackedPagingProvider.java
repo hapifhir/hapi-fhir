@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
@@ -35,6 +35,10 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
+	@Autowired
+	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 
 	/**
 	 * Constructor
@@ -54,8 +58,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 
 	@Override
 	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
-		IFhirSystemDao<?, ?> systemDao = myDaoRegistry.getSystemDao();
-		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theRequestDetails, theId, systemDao);
+		PersistedJpaBundleProvider provider = myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, theId);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;
 		}

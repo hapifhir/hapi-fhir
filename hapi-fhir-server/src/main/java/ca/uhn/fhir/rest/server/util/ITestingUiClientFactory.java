@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.util;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 /**
  * This interface isn't used by hapi-fhir-base, but is used by the 
- * <a href="http://jamesagnew.github.io/hapi-fhir/doc_server_tester.html">Web Testing UI</a>
+ * <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/web_testpage_overlay.html">Web Testing UI</a>
  */
 public interface ITestingUiClientFactory {
 

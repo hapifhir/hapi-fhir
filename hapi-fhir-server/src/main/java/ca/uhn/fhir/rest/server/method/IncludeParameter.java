@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,11 @@ class IncludeParameter extends BaseQueryParameter {
 	}
 
 	@Override
+	protected boolean supportsRepetition() {
+		return myInstantiableCollectionType != null;
+	}
+
+	@Override
 	public boolean handlesMissing() {
 		return true;
 	}
@@ -154,7 +159,7 @@ class IncludeParameter extends BaseQueryParameter {
 				}
 				return new Include(value, recurse);
 			}
-			//FIXME null access
+
 			retValCollection.add(new Include(value, recurse));
 		}
 

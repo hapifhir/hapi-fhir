@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,14 @@ import java.io.Serializable;
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CHILD_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
 	private TermConcept myChild;
 
 	@Column(name = "CHILD_PID", insertable = false, updatable = false)
 	private Long myChildPid;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CODESYSTEM_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
@@ -47,7 +47,7 @@ public class TermConceptParentChildLink implements Serializable {
 	@Fields({@Field(name = "myCodeSystemVersionPid")})
 	private long myCodeSystemVersionPid;
 
-	@ManyToOne(cascade = {})
+	@ManyToOne(fetch = FetchType.LAZY, cascade = {})
 	@JoinColumn(name = "PARENT_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
 

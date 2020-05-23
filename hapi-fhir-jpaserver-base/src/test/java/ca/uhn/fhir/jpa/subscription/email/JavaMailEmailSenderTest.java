@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.JavaMailEmailSender;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;

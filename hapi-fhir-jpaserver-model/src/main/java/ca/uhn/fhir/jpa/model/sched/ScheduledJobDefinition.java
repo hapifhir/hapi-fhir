@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.sched;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.sched;
  */
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.quartz.Job;
 
 import java.util.Collections;
@@ -28,10 +29,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ScheduledJobDefinition {
-
-
 	private Class<? extends Job> myJobClass;
 	private String myId;
+	private String myGroup;
 	private Map<String, String> myJobData;
 
 	public Map<String, String> getJobData() {
@@ -60,6 +60,15 @@ public class ScheduledJobDefinition {
 		return this;
 	}
 
+	public String getGroup() {
+		return myGroup;
+	}
+
+	public ScheduledJobDefinition setGroup(String theGroup) {
+		myGroup = theGroup;
+		return this;
+	}
+
 	public void addJobData(String thePropertyName, String thePropertyValue) {
 		Validate.notBlank(thePropertyName);
 		if (myJobData == null) {
@@ -67,5 +76,14 @@ public class ScheduledJobDefinition {
 		}
 		Validate.isTrue(myJobData.containsKey(thePropertyName) == false);
 		myJobData.put(thePropertyName, thePropertyValue);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myJobClass", myJobClass)
+			.append("myId", myId)
+			.append("myGroup", myGroup)
+			.toString();
 	}
 }

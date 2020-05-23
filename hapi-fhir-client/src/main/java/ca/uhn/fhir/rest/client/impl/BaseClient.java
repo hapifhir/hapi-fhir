@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,6 +297,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 			HookParams requestParams = new HookParams();
 			requestParams.add(IHttpRequest.class, httpRequest);
+			requestParams.add(IRestfulClient.class, this);
 			getInterceptorService().callHooks(Pointcut.CLIENT_REQUEST, requestParams);
 
 			response = httpRequest.execute();
@@ -304,6 +305,7 @@ public abstract class BaseClient implements IRestfulClient {
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
+			responseParams.add(IRestfulClient.class, this);
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
 
 			String mimeType;
@@ -373,6 +375,10 @@ public abstract class BaseClient implements IRestfulClient {
 						keepResponseAndLogIt(theLogRequestAndResponse, response, responseString);
 						inputStreamToReturn = new ByteArrayInputStream(responseString.getBytes(Charsets.UTF_8));
 					}
+				}
+
+				if (inputStreamToReturn == null) {
+					inputStreamToReturn = new ByteArrayInputStream(new byte[]{});
 				}
 
 				return binding.invokeClient(mimeType, inputStreamToReturn, response.getStatus(), headers);

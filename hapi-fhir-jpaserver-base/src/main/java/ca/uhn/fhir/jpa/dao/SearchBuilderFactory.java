@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,19 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import org.springframework.beans.factory.annotation.Lookup;
-import org.springframework.stereotype.Service;
+import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.config.BaseConfig;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
-@Service
-public abstract class SearchBuilderFactory {
-	@Lookup
-	public abstract SearchBuilder newSearchBuilder(BaseHapiFhirDao theBaseHapiFhirResourceDao);
+public class SearchBuilderFactory {
+
+	@Autowired
+	private ApplicationContext myApplicationContext;
+
+	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		return (ISearchBuilder) myApplicationContext.getBean(BaseConfig.SEARCH_BUILDER, theDao, theResourceName, theResourceType);
+	}
+
 }

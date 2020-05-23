@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 	@Test
 	public void testValidateAllBuiltInSearchParams() {
 
-		for (String nextResource : myCtx.getResourceNames()) {
+		for (String nextResource : myCtx.getResourceTypes()) {
 			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextResource);
 			for (RuntimeSearchParam nextp : nextResDef.getSearchParams()) {
 				if (nextp.getName().equals("_id")) {

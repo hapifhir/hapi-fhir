@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,10 @@ package ca.uhn.fhir.model.api;
 import java.io.InputStream;
 import java.util.Date;
 
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 
 /**
@@ -39,9 +38,7 @@ import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
  */
 public interface IFhirVersion {
 
-	IFluentPath createFluentPathExecutor(FhirContext theFhirContext);
-
-	IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport();
+	IFhirPath createFhirPathExecutor(FhirContext theFhirContext);
 
 	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 

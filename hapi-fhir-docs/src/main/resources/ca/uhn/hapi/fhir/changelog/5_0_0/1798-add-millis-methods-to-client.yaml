@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1798
+title: New mthods have been added to DateClientParam allowing searching at MILLIS precision. Thanks to
+    David Gileadi for the pull request!
