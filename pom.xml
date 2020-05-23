@@ -638,6 +638,11 @@
 			<name>Jacob Stampe Mikkelsen</name>
 			<organization>Systematik A/S</organization>
 		</developer>
+		<developer>
+			<id>craigappl</id>
+			<name>Craig Appl</name>
+			<organization>ONA</organization>
+		</developer>
 	</developers>
 
 	<licenses>
