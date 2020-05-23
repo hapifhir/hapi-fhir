@@ -12,7 +12,7 @@ On servers where a large amount of data will be ingested, the following consider
 
 # Disabling :text Indexing
 
-On servers storing large numbers of Codings and CodeableConcepts (as well as any other token SearchParameter target where the `:text` modifier is supported), the indexes required to support the `:text` modifier can consume a large amount of index space, and cause a masurable impact on write times.
+On servers storing large numbers of Codings and CodeableConcepts (as well as any other token SearchParameter target where the `:text` modifier is supported), the indexes required to support the `:text` modifier can consume a large amount of index space, and cause a measurable impact on write times.
 
 This modifier can be disabled globally by using the ModelConfig#setSuppressStringIndexingInTokens setting.
 
