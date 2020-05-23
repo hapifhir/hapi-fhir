@@ -244,7 +244,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init420() { // 20191015 - 20200217
 		Builder version = forVersion(VersionEnum.V4_2_0);
 
-		// TermValueSetConceptDesignation
+		// TRM_CONCEPT_PROPERTY
+		version.onTable("TRM_CONCEPT_PROPERTY").addIndex("20191217.1", "IDX_CONCEPTPROP_CONCEPTPID").unique(false).withColumns("CONCEPT_PID");
+
+    // TermValueSetConceptDesignation
 		version.onTable("TRM_VALUESET_C_DESIGNATION").dropIndex("20200202.1", "IDX_VALUESET_C_DSGNTN_VAL").failureAllowed();
 		Builder.BuilderWithTableName searchTable = version.onTable("HFJ_SEARCH");
 		searchTable.dropIndex("20200203.1", "IDX_SEARCH_LASTRETURNED");
