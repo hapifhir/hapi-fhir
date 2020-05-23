@@ -1,0 +1,166 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-observation",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-observation",
+  "version": "1.0.0",
+  "name": "nl-core-observation",
+  "title": "nl-core-observation",
+  "status": "active",
+  "publisher": "Nictiz",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "A Observation Resource as defined by the Dutch Health and Care Information models or HCIM (Dutch: Zorginformatiebouwsteen or ZIB).",
+  "purpose": "Purpose is to make an universal observation core profile on which other HCIM Observation can be based, greatly reducing double administration.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Observation",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Observation.identifier",
+        "path": "Observation.identifier",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "Observation.subject",
+        "path": "Observation.subject",
+        "min": 1,
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/Group"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/Device"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-location"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.11",
+            "comment": "Subject"
+          }
+        ]
+      },
+      {
+        "id": "Observation.context",
+        "path": "Observation.context",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-episodeofcare"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-Encounter"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/gp-Encounter"
+          }
+        ]
+      },
+      {
+        "id": "Observation.effective[x]",
+        "path": "Observation.effective[x]",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.14",
+            "comment": "DateTime"
+          }
+        ]
+      },
+      {
+        "id": "Observation.performer",
+        "path": "Observation.performer",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-relatedperson"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.7",
+            "comment": "Author"
+          }
+        ]
+      },
+      {
+        "id": "Observation.performer.extension",
+        "path": "Observation.performer.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Observation.performer.extension:practitionerRole",
+        "path": "Observation.performer.extension",
+        "sliceName": "practitionerRole",
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      }
+    ]
+  }
+}

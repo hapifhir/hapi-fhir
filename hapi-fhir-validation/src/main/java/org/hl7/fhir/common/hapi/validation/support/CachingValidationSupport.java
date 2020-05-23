@@ -2,6 +2,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -63,23 +64,23 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		String key = "isCodeSystemSupported " + theSystem;
-		Boolean retVal = loadFromCache(myCache, key, t -> super.isCodeSystemSupported(theRootValidationSupport, theSystem));
+		Boolean retVal = loadFromCache(myCache, key, t -> super.isCodeSystemSupported(theValidationSupportContext, theSystem));
 		assert retVal != null;
 		return retVal;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
-		return loadFromCache(myValidateCodeCache, key, t -> super.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
+		return loadFromCache(myValidateCodeCache, key, t -> super.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		String key = "lookupCode " + theSystem + " " + theCode;
-		return loadFromCache(myLookupCodeCache, key, t -> super.lookupCode(theRootValidationSupport, theSystem, theCode));
+		return loadFromCache(myLookupCodeCache, key, t -> super.lookupCode(theValidationSupportContext, theSystem, theCode));
 	}
 
 	@SuppressWarnings("OptionalAssignedToNull")

@@ -1,0 +1,261 @@
+{
+	"resourceType": "Patient",
+	"id": "nl-core-patient-01",
+	"meta": {
+		"profile": [
+			"http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+		]
+	},
+	"identifier": [
+		{
+			"use": "official",
+			"system": "http://fhir.nl/fhir/NamingSystem/bsn",
+			"value": "999911120"
+		}
+	],
+	"active": true,
+	"name": [
+		{
+			"extension": [
+				{
+					"url": "http://hl7.org/fhir/StructureDefinition/humanname-assembly-order",
+					"valueCode": "NL4"
+				}
+			],
+			"use": "official",
+			"family": "XXX_Helleman",
+			"_family": {
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/humanname-own-name",
+						"valueString": "XXX_Helleman"
+					}
+				]
+			},
+			"given": [
+				"Johan",
+				"J."
+			],
+			"_given": [
+				{
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier",
+							"valueCode": "CL"
+						}
+					]
+				},
+				{
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier",
+							"valueCode": "IN"
+						}
+					]
+				}
+			]
+		}
+	],
+	"telecom": [
+		{
+			"system": "phone",
+			"value": "06-12345678",
+			"use": "mobile"
+		},
+		{
+			"system": "email",
+			"value": "XXX_Helleman@hotmail.com",
+			"use": "home"
+		}
+	],
+	"gender": "male",
+	"birthDate": "1964-07-25",
+	"deceasedBoolean": false,
+	"address": [
+		{
+			"extension": [
+				{
+					"url": "http://fhir.nl/fhir/StructureDefinition/nl-core-address-official",
+					"valueBoolean": true
+				}
+			],
+			"use": "home",
+			"type": "both",
+			"line": [
+				"Knolweg 1000"
+			],
+			"_line": [
+				{
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetName",
+							"valueString": "Knolweg"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber",
+							"valueString": "1000"
+						}
+					]
+				}
+			],
+			"city": "Stitswerd",
+			"district": "Nederland",
+			"postalCode": "9999XA",
+			"country": "NLD",
+			"_country": {
+				"extension": [
+					{
+						"url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "urn:oid:2.16.840.1.113883.2.4.4.16.34",
+									"code": "6030",
+									"display": "Nederland"
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	],
+	"maritalStatus": {
+		"coding": [
+			{
+				"system": "http://hl7.org/fhir/v3/MaritalStatus",
+				"code": "M",
+				"display": "Married"
+			}
+		]
+	},
+	"multipleBirthBoolean": false,
+	"contact": [
+		{
+			"relationship": [
+				{
+					"coding": [
+						{
+							"system": "urn:oid:2.16.840.1.113883.2.4.3.11.22.472",
+							"code": "1",
+							"display": "Eerste relatie/contactpersoon"
+						}
+					]
+				},
+				{
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v3/RoleCode",
+							"code": "WIFE",
+							"display": "Wife"
+						}
+					]
+				}
+			],
+			"name": {
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/humanname-assembly-order",
+						"valueCode": "NL4"
+					}
+				],
+				"use": "official",
+				"family": "van Putten XXX_Helleman",
+				"_family": {
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/humanname-own-prefix",
+							"valueString": "van"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/humanname-own-name",
+							"valueString": "Putten"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/humanname-partner-name",
+							"valueString": "XXX_Helleman"
+						}
+					]
+				},
+				"given": [
+					"Jannie",
+					"J.P.M."
+				],
+				"_given": [
+					{
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier",
+								"valueCode": "CL"
+							}
+						]
+					},
+					{
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier",
+								"valueCode": "IN"
+							}
+						]
+					}
+				]
+			},
+			"telecom": [
+				{
+					"system": "phone",
+					"value": "06-12345645",
+					"use": "mobile"
+				},
+				{
+					"system": "email",
+					"value": "j.vanderjutte@example.com"
+				}
+			],
+			"address": {
+				"use": "home",
+				"line": [
+					"Knolweg 1000"
+				],
+				"_line": [
+					{
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetName",
+								"valueString": "Knolweg"
+							},
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber",
+								"valueString": "1000"
+							}
+						]
+					}
+				],
+				"city": "Sitswerd",
+				"postalCode": "9999XA",
+				"country": "Nederland",
+				"_country": {
+					"extension": [
+						{
+							"url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+							"valueCodeableConcept": {
+								"coding": [
+									{
+										"system": "urn:oid:2.16.840.1.113883.2.4.4.16.34",
+										"code": "6030",
+										"display": "Nederland"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		}
+	],
+	"generalPractitioner": [
+		{
+			"reference": "Organization/nl-core-organization-01",
+			"display": "Maatschap Vaste Huisarts"
+		}
+	]
+}

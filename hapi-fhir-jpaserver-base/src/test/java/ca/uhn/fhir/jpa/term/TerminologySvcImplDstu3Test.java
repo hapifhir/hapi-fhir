@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -1950,7 +1951,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	@Ignore
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
-		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myValidationSupport, new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
+		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
 		assertEquals(true, code.isOk());
 		assertEquals(2, code.getProperties().size());
 	}
