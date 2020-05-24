@@ -592,6 +592,11 @@
 			<name>Tue Toft Nørgård</name>
 		</developer>
 		<developer>
+			<id>mzgtrifork</id>
+			<organization>Trifork</organization>
+			<name>Martin Zacho Grønhøj</name>
+		</developer>
+		<developer>
 			<id>augla</id>
 			<name>August Langhout</name>
 		</developer>
