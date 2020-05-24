@@ -68,7 +68,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init420(); // 20191015 - 20200217
 		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - 20200513
-		init501(); // 20200514 - present
+		init501(); // 20200514 - 20200515
+		init510(); // 20200516 - present
+	}
+
+	private void init510() {
+		Builder version = forVersion(VersionEnum.V5_1_0);
+
+		version.addTableByColumns("20200524.1", "")
+
 	}
 
 	private void init501() { //20200514 - present

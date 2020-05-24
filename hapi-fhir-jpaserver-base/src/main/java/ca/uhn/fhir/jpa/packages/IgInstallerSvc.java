@@ -27,8 +27,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class IgInstallerSvc {
 
@@ -45,7 +43,7 @@ public class IgInstallerSvc {
 
 	private PackageCacheManager packageCacheManager;
 
-	private String[] SUPPORTED_RESOURCE_TYPES = new String[]
+	private String[] DEFAULT_SUPPORTED_RESOURCE_TYPES = new String[]
 		{ "NamingSystem",
 			"CodeSystem",
 			"ValueSet",
@@ -73,7 +71,7 @@ public class IgInstallerSvc {
 		try {
 			packageCacheManager = new PackageCacheManager(true, 1);
 		} catch (IOException e) {
-			ourLog.error("Unable to initialize PackageCacheManager: {}", e);
+			ourLog.error("Unable to initialize PackageCacheManager", e);
 			enabled = false;
 		}
 	}
@@ -151,10 +149,10 @@ public class IgInstallerSvc {
 		fetchAndInstallDependencies(npmPackage);
 
 		ourLog.info("Installing package: {}#{}", name, version);
-		int[] count = new int[SUPPORTED_RESOURCE_TYPES.length];
+		int[] count = new int[DEFAULT_SUPPORTED_RESOURCE_TYPES.length];
 
-		for (int i = 0; i < SUPPORTED_RESOURCE_TYPES.length; i++) {
-			Collection<IBaseResource> resources = parseResourcesOfType(SUPPORTED_RESOURCE_TYPES[i], npmPackage);
+		for (int i = 0; i < DEFAULT_SUPPORTED_RESOURCE_TYPES.length; i++) {
+			Collection<IBaseResource> resources = parseResourcesOfType(DEFAULT_SUPPORTED_RESOURCE_TYPES[i], npmPackage);
 			count[i] = resources.size();
 
 			try {
@@ -169,7 +167,7 @@ public class IgInstallerSvc {
 		ourLog.info(String.format("Finished installation of package %s#%s:", name, version));
 
 		for (int i = 0; i < count.length; i++) {
-			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], SUPPORTED_RESOURCE_TYPES[i]));
+			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], DEFAULT_SUPPORTED_RESOURCE_TYPES[i]));
 		}
 	}
 
@@ -272,7 +270,6 @@ public class IgInstallerSvc {
 	}
 
 	private SearchParameterMap createSearchParameterMapFor(IBaseResource resource) {
-		FhirTerser terser = fhirContext.newTerser();
 		if (resource.getClass().getSimpleName().equals("NamingSystem")) {
 			String uniqueId = extractUniqeIdFromNamingSystem(resource);
 			return new SearchParameterMap().add("value", new StringParam(uniqueId).setExact(true));
