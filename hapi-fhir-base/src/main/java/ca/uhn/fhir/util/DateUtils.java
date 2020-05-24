@@ -23,7 +23,12 @@ package ca.uhn.fhir.util;
 import java.lang.ref.SoftReference;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * A utility class for parsing and formatting HTTP dates as used in cookies and
@@ -64,6 +69,8 @@ public final class DateUtils {
 	 */
 	@SuppressWarnings("WeakerAccess")
 	public static final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
+
+	private static final String PATTERN_INTEGER_DATE = "yyyyMMdd";
 
 	private static final String[] DEFAULT_PATTERNS = new String[]{
 		PATTERN_RFC1123,
@@ -151,6 +158,35 @@ public final class DateUtils {
 			}
 		}
 		return null;
+	}
+
+
+	public static Date getHighestInstantFromDate(Date theDateValue) {
+		return getInstantFromDateWithTimezone(theDateValue, TimeZone.getTimeZone("GMT+11:30"));
+
+	}
+	public static Date getLowestInstantFromDate(Date theDateValue) {
+		return getInstantFromDateWithTimezone(theDateValue, TimeZone.getTimeZone("GMT-11:30"));
+	}
+
+	public static Date getInstantFromDateWithTimezone(Date theDateValue, TimeZone theTimezone) {
+		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
+		cal.setTimeZone(theTimezone);
+		cal = org.apache.commons.lang3.time.DateUtils.truncate(cal, Calendar.DATE);
+		return cal.getTime();
+	}
+
+	public static int convertDatetoDayInteger(final Date theDateValue) {
+		notNull(theDateValue, "Date value");
+		SimpleDateFormat format = new SimpleDateFormat(PATTERN_INTEGER_DATE);
+		String theDateString = format.format(theDateValue);
+		return Integer.parseInt(theDateString);
+	}
+
+	public static String convertDateToIso8601String(final Date theDateValue){
+		notNull(theDateValue, "Date value");
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+		return format.format(theDateValue);
 	}
 
 	/**

@@ -22,8 +22,9 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -39,7 +40,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -73,7 +74,17 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -117,7 +128,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
-		return myIdHelperService.resolveResourcePersistentIds(theIdType.getResourceType(), theIdType.getIdPart());
+		return myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theIdType.getResourceType(), theIdType.getIdPart());
 	}
 
 	@Transactional
@@ -291,7 +302,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource);
-		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(csId.getResourceType(), csId.getIdPart());
+		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
@@ -551,7 +562,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private ResourcePersistentId getCodeSystemResourcePid(IIdType theIdType) {
-		return myIdHelperService.resolveResourcePersistentIds(theIdType.getResourceType(), theIdType.getIdPart());
+		return myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theIdType.getResourceType(), theIdType.getIdPart());
 	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {

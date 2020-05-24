@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.bulk;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -33,7 +34,7 @@ import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -231,7 +232,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				map.setLastUpdated(new DateRangeParam(job.getSince(), null));
 			}
 
-			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null);
+			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null, RequestPartitionId.allPartitions());
 			storeResultsToFiles(nextCollection, sb, resultIterator, jobResourceCounter, jobStopwatch);
 		}
 
@@ -377,7 +378,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			// This is probably not a useful default, but having the default be "download the whole
 			// server" seems like a risky default too. We'll deal with that by having the default involve
 			// only returning a small time span
-			resourceTypes = myContext.getResourceNames();
+			resourceTypes = myContext.getResourceTypes();
 			if (since == null) {
 				since = DateUtils.addDays(new Date(), -1);
 			}

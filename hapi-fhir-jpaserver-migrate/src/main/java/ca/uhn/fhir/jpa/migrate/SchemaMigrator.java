@@ -24,20 +24,24 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.MigrationInfoService;
+import org.flywaydb.core.api.callback.Callback;
 import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
 public class SchemaMigrator {
-	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
+	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
+	private final String mySchemaName;
 	private final DataSource myDataSource;
 	private final boolean mySkipValidation;
 	private final String myMigrationTableName;
@@ -45,11 +49,13 @@ public class SchemaMigrator {
 	private boolean myDontUseFlyway;
 	private boolean myOutOfOrderPermitted;
 	private DriverTypeEnum myDriverType;
+	private List<Callback> myCallbacks = Collections.emptyList();
 
 	/**
 	 * Constructor
 	 */
-	public SchemaMigrator(String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks) {
+	public SchemaMigrator(String theSchemaName, String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks) {
+		mySchemaName = theSchemaName;
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
@@ -59,6 +65,11 @@ public class SchemaMigrator {
 		} else {
 			mySkipValidation = false;
 		}
+	}
+
+	public void setCallbacks(List<Callback> theCallbacks) {
+		Assert.notNull(theCallbacks);
+		myCallbacks = theCallbacks;
 	}
 
 	public void setDontUseFlyway(boolean theDontUseFlyway) {
@@ -96,7 +107,14 @@ public class SchemaMigrator {
 			ourLog.warn("Database running in hibernate auto-update mode.  Skipping schema migration.");
 			return;
 		}
-		newMigrator().migrate();
+		try {
+			ourLog.info("Migrating " + mySchemaName);
+			newMigrator().migrate();
+			ourLog.info(mySchemaName + " migrated successfully.");
+		} catch (Exception e) {
+			ourLog.error("Failed to migrate " + mySchemaName, e);
+			throw e;
+		}
 	}
 
 	private BaseMigrator newMigrator() {
@@ -110,6 +128,7 @@ public class SchemaMigrator {
 			migrator.setOutOfOrderPermitted(myOutOfOrderPermitted);
 		}
 		migrator.addTasks(myMigrationTasks);
+		migrator.setCallbacks(myCallbacks);
 		return migrator;
 	}
 

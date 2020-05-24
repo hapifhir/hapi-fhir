@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class StringNormalizerTest {
 	@Test
 	public void testNormalizeString() {
-		assertEquals("TEST TEST", StringNormalizer.normalizeString("TEST teSt"));
-		assertEquals("AEIØU", StringNormalizer.normalizeString("åéîøü"));
-		assertEquals("杨浩", StringNormalizer.normalizeString("杨浩"));
+		assertEquals("TEST TEST", StringNormalizer.normalizeStringForSearchIndexing("TEST teSt"));
+		assertEquals("AEIØU", StringNormalizer.normalizeStringForSearchIndexing("åéîøü"));
+		assertEquals("杨浩", StringNormalizer.normalizeStringForSearchIndexing("杨浩"));
 	}
 }

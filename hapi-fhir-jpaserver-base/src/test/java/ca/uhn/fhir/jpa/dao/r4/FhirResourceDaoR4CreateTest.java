@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -40,6 +41,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void afterResetDao() {
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
+		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Test
@@ -174,7 +176,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.setActive(false);
 		try {
-			myPatientDao.create(p).getId();
+			myPatientDao.create(p);
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
@@ -302,6 +304,26 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Organization org = (Organization) p.getManagingOrganization().getResource();
 		assertEquals("#1", org.getId());
 		assertEquals(1, org.getMeta().getTag().size());
+
+	}
+
+	@Test
+	public void testOverrideBuiltInSearchParamFailsIfDisabled() {
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-birthdate");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setCode("birthdate");
+		sp.setExpression("Patient.birthDate");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		try {
+			mySearchParameterDao.update(sp);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
+		}
 
 	}
 

@@ -3,6 +3,7 @@ package org.hl7.fhir.r5.hapi.ctx;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -15,13 +16,24 @@ import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.CanonicalResource;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.ResourceType;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.StructureMap;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
@@ -39,7 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public final class HapiWorkerContext extends I18nBase implements IWorkerContext {
 	private final FhirContext myCtx;
 	private final Cache<String, Resource> myFetchedResourceCache;
-	private IValidationSupport myValidationSupport;
+	private final IValidationSupport myValidationSupport;
 	private Parameters myExpansionProfile;
 	private String myOverrideVersionNs;
 
@@ -90,11 +102,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public org.hl7.fhir.r5.utils.INarrativeGenerator getNarrativeGenerator(String thePrefix, String theBasePath) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public IParser getParser(ParserType theType) {
 		throw new UnsupportedOperationException();
 	}
@@ -139,7 +146,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		if (myValidationSupport == null) {
 			return false;
 		} else {
-			return myValidationSupport.isCodeSystemSupported(myValidationSupport, theSystem);
+			return myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), theSystem);
 		}
 	}
 
@@ -166,7 +173,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
-		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, null);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
@@ -183,9 +190,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 		IValidationSupport.CodeValidationResult outcome;
 		if (isNotBlank(theVs.getUrl())) {
-			outcome = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs.getUrl());
+			outcome = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs.getUrl());
 		} else {
-			outcome = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs);
+			outcome = myValidationSupport.validateCodeInValueSet(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs);
 		}
 
 		if (outcome != null && outcome.isOk()) {
@@ -211,7 +218,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public void generateSnapshot(StructureDefinition p) throws FHIRException {
-		myValidationSupport.generateSnapshot(myValidationSupport, p, "", "", "");
+		myValidationSupport.generateSnapshot(new ValidationSupportContext(myValidationSupport), p, "", "", "");
 	}
 
 	@Override
@@ -244,7 +251,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical) throws TerminologyServiceException {
 		ValueSet input = new ValueSet();
 		input.getCompose().addInclude(theInc);
-		IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, null, input);
+		IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
 		return new ValueSetExpander.ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
 	}
 
@@ -330,7 +337,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResource(Class<T> theClass, String theUri) {
-		if (myValidationSupport == null) {
+		if (myValidationSupport == null || theUri == null) {
 			return null;
 		} else {
 			@SuppressWarnings("unchecked")
@@ -349,6 +356,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, CanonicalResource canonicalForSource) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public org.hl7.fhir.r5.model.Resource fetchResourceById(String theType, String theUri) {
 		throw new UnsupportedOperationException();
 	}
@@ -364,8 +376,18 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public void cacheResourceFromPackage(Resource res, PackageVersion packageDetails) throws FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void cachePackage(PackageVersion packageDetails, List<PackageVersion> dependencies) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public Set<String> getResourceNamesAsSet() {
-		return myCtx.getResourceNames();
+		return myCtx.getResourceTypes();
 	}
 
 	@Override
@@ -380,7 +402,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public Map<String, byte[]> getBinaries() {
-		return null;
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean hasPackage(String id, String ver) {
+		throw new UnsupportedOperationException();
 	}
 
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {

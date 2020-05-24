@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.riot.Lang;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -36,8 +37,18 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 
 /*
  * #%L
@@ -177,7 +188,12 @@ public class FhirContext {
 			ourLog.info("Creating new FhirContext with auto-detected version [{}]. It is recommended to explicitly select a version for future compatibility by invoking FhirContext.forDstuX()",
 				myVersion.getVersion().name());
 		} else {
-			ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
+			if ("true".equals(System.getProperty("unit_test_mode"))) {
+				String calledAt = ExceptionUtils.getStackFrames(new Throwable())[4];
+				ourLog.info("Creating new FHIR context for FHIR version [{}]{}", myVersion.getVersion().name(), calledAt);
+			} else {
+				ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
+			}
 		}
 
 		myResourceTypesToScan = theResourceTypes;
@@ -448,6 +464,36 @@ public class FhirContext {
 	}
 
 	/**
+	 * Returns the name of a given resource class.
+	 * @param theResourceType
+	 * @return
+	 */
+	public String getResourceType(final Class<? extends IBaseResource> theResourceType) {
+		return getResourceDefinition(theResourceType).getName();
+	}
+
+	/**
+	 * Returns the name of the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
+	 */
+	public String getResourceType(final IBaseResource theResource) {
+		return getResourceDefinition(theResource).getName();
+	}
+
+	/*
+	 * Returns the type of the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
+	 * <p>
+	 * Note that this method is case insensitive!
+	 * </p>
+	 *
+	 * @throws DataFormatException If the resource name is not known
+	 */
+	public String getResourceType(final String theResourceName) throws DataFormatException {
+		return getResourceDefinition(theResourceName).getName();
+	}
+
+	/*
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 * <p>
@@ -476,7 +522,6 @@ public class FhirContext {
 				retVal = scanResourceType(clazz);
 			}
 		}
-
 		return retVal;
 	}
 
@@ -501,8 +546,10 @@ public class FhirContext {
 	/**
 	 * Returns an unmodifiable set containing all resource names known to this
 	 * context
+	 *
+	 * @since 5.1.0
 	 */
-	public Set<String> getResourceNames() {
+	public Set<String> getResourceTypes() {
 		Set<String> resourceNames = new HashSet<>();
 
 		if (myNameToResourceDefinition.isEmpty()) {
@@ -695,7 +742,7 @@ public class FhirContext {
 	 * cases to contain methods for each of the RESTful operations you wish to implement (e.g. "read ImagingStudy",
 	 * "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its
 	 * sub-interface {@link IBasicClient}). See the <a
-	 * href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more
+	 * href="https://hapifhir.io/hapi-fhir/docs/client/introduction.html">RESTful Client</a> documentation for more
 	 * information on how to define this interface.
 	 *
 	 * <p>

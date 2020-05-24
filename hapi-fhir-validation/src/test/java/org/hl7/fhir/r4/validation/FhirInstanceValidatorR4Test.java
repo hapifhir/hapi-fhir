@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
@@ -19,6 +20,7 @@ import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -26,10 +28,34 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.Base64BinaryType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Media;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RelatedPerson;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
@@ -92,6 +118,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<>();
+	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
 	private CachingValidationSupport myValidationSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
@@ -125,7 +152,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		IValidationSupport mockSupport = mock(IValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 
-		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx));
+		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
 		myValidationSupport = new CachingValidationSupport(chain);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
@@ -139,7 +166,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			ValueSet arg = (ValueSet) t.getArgument(2, IBaseResource.class);
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 			if (retVal == null) {
-				IBaseResource outcome = myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, null, arg).getValueSet();
+				IBaseResource outcome = myDefaultValidationSupport.expandValueSet(new ValidationSupportContext(myDefaultValidationSupport), null, arg).getValueSet();
 				return outcome;
 			}
 			ourLog.debug("expandValueSet({}) : {}", new Object[]{t.getArguments()[0], retVal});
@@ -163,7 +190,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				IBaseResource retVal;
 				Class<IBaseResource> clazz = (Class<IBaseResource>) theInvocation.getArguments()[0];
 				String id = theInvocation.getArgument(1, String.class);
-				if ("Questionnaire/q_jon".equals(id)) {
+				if (myStructureDefinitionMap.containsKey(id)) {
+					retVal = myStructureDefinitionMap.get(id);
+				} else if ("Questionnaire/q_jon".equals(id)) {
 					retVal = ourCtx.newJsonParser().parseResource(loadResource("/q_jon.json"));
 				} else {
 					retVal = myDefaultValidationSupport.fetchResource(clazz, id);
@@ -186,7 +215,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				} else if (myValidSystems.contains(system)) {
 					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, options, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;
@@ -195,7 +224,16 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(mockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
-				CodeSystem retVal = (CodeSystem) myDefaultValidationSupport.fetchCodeSystem((String) theInvocation.getArguments()[0]);
+				String system = theInvocation.getArgument(0, String.class);
+				if ("http://loinc.org".equals(system)) {
+					CodeSystem retVal = new CodeSystem();
+					retVal.setUrl("http://loinc.org");
+					retVal.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+					ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
+					return retVal;
+				}
+
+				CodeSystem retVal = (CodeSystem) myDefaultValidationSupport.fetchCodeSystem(system);
 				ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}
@@ -203,7 +241,13 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(mockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) {
-				IBaseResource retVal = myDefaultValidationSupport.fetchStructureDefinition((String) theInvocation.getArguments()[0]);
+				String id = (String) theInvocation.getArguments()[0];
+				IBaseResource retVal;
+				if (myStructureDefinitionMap.containsKey(id)) {
+					retVal = myStructureDefinitionMap.get(id);
+				} else {
+					retVal = myDefaultValidationSupport.fetchStructureDefinition(id);
+				}
 				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 				return retVal;
 			}
@@ -211,10 +255,28 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(mockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
-				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions();
+				List<StructureDefinition> retVal =new ArrayList<>(myDefaultValidationSupport.fetchAllStructureDefinitions());
+				retVal.addAll(myStructureDefinitionMap.values());
 				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
 				return retVal;
 			}
+		});
+		when(mockSupport.lookupCode(any(), any(), any())).thenAnswer(t -> {
+			String system = t.getArgument(1, String.class);
+			String code = t.getArgument(2, String.class);
+			if (myValidConcepts.contains(system + "___" + code)) {
+				return new IValidationSupport.LookupCodeResult().setFound(true);
+			} else {
+				return null;
+			}
+		});
+		when(mockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
+			String system = t.getArgument(2, String.class);
+			String code = t.getArgument(3, String.class);
+			if (myValidConcepts.contains(system + "___" + code)) {
+				return new IValidationSupport.CodeValidationResult().setCode(code).setDisplay(code);
+			}
+			return null;
 		});
 
 	}
@@ -288,7 +350,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("@value cannot be empty", all.get(0).getMessage());
+		assertEquals("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]", all.get(0).getMessage());
 	}
 
 	/**
@@ -316,6 +378,51 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertFalse(result.isSuccessful());
 		assertEquals("This property must be an Array, not a a primitive property", all.get(0).getMessage());
 	}
+
+	@Test
+	public void testValidateMeta() {
+		String input = "{" +
+			"   \"resourceType\": \"Parameters\"," +
+			"   \"parameter\": [" +
+			"      {" +
+			"         \"name\": \"meta\"," +
+			"         \"valueMeta\": {" +
+			"            \"tag\": [" +
+			"               {" +
+			"                  \"system\": \"urn:test-fake-system\"," +
+			"                  \"code\": \"420\"" +
+			"               }" +
+			"            ]" +
+			"         }" +
+			"      }" +
+			"   ]" +
+			"}";
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+		assertTrue(result.isSuccessful());
+	}
+
+	/**
+	 * TODO: unignore when https://github.com/hapifhir/org.hl7.fhir.core/pull/201 is merged
+	 */
+	@Test
+	@Ignore
+	public void testValidateFixedBindingOnQuantity() throws IOException {
+		StructureDefinition sd = loadResource(ourCtx, StructureDefinition.class, "/r4/bbl-fixed-binding-structuredef.json");
+		myStructureDefinitionMap.put("http://example.org/fhir/StructureDefinition/MyObservation", sd);
+
+		Observation obs = loadResource(ourCtx, Observation.class, "/r4/bbl-fixed-binding-observation.json");
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+		ValidationResult result = val.validateWithResult(obs);
+		logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+	}
+
 
 	/**
 	 * See #1676 - We should ignore schema location
@@ -529,7 +636,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(1, errors.size());
-		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/report-codes (http://hl7.org/fhir/ValueSet/report-codes, and a code is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
+		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/report-codes (http://hl7.org/fhir/ValueSet/report-codes), and a code is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -930,7 +1037,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, res.size(), output.toString());
+		assertEquals(output.toString(), 1, res.size());
+		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	/**
@@ -1102,7 +1210,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided (\"notvalidcode\") is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
+			"The value provided (\"notvalidcode\") is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.1 (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -1239,6 +1347,26 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	}
 
+
+	@Test
+	public void testValidateWithUcum() throws IOException {
+		addValidConcept("http://loinc.org", "8310-5");
+
+		Observation input = loadResource(ourCtx, Observation.class, "/r4/observation-with-body-temp-ucum.json");
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(all, empty());
+
+		// Change the unit to something not supported
+		input.getValueQuantity().setCode("Heck");
+		output = myVal.validateWithResult(input);
+		all = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(2, all.size());
+		assertThat(all.get(0).getMessage(), containsString("Validation failed for \"http://unitsofmeasure.org#Heck\""));
+		assertThat(all.get(1).getMessage(), containsString("The value provided (\"Heck\") is not in the value set http://hl7.org/fhir/ValueSet/ucum-bodytemp"));
+
+	}
+
 	@Test
 	public void testMultiplePerformer() {
 		Observation o = new Observation();
@@ -1283,7 +1411,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(14)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).fetch(any(), anyString());
 	}
@@ -1338,7 +1466,45 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	}
 
-	@AfterAll
+	@Test
+	public void testValidateReferenceTargetType_Correct() {
+
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active").setDisplay("Active");
+		allergy.getVerificationStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification").setCode("confirmed").setDisplay("Confirmed");
+		allergy.setPatient(new Reference("Patient/123"));
+
+		allergy.addNote()
+			.setText("This is text")
+			.setAuthor(new Reference("Patient/123"));
+
+		ValidationResult output = myVal.validateWithResult(allergy);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(errors.toString(), 0, errors.size());
+
+	}
+
+	@Test
+	@Ignore
+	public void testValidateReferenceTargetType_Incorrect() {
+
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active").setDisplay("Active");
+		allergy.getVerificationStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification").setCode("confirmed").setDisplay("Confirmed");
+		allergy.setPatient(new Reference("Patient/123"));
+
+		allergy.addNote()
+			.setText("This is text")
+			.setAuthor(new Reference("CodeSystems/123"));
+
+		ValidationResult output = myVal.validateWithResult(allergy);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(errors.toString(), 0, errors.size());
+		assertThat(errors.get(0).getMessage(), containsString("The value provided (\"BLAH\") is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
+
+	}
+
+	@AfterClass
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;

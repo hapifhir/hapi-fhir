@@ -6,7 +6,24 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.GraphQL;
+import ca.uhn.fhir.rest.annotation.GraphQLQuery;
+import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -14,6 +31,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -926,7 +944,7 @@ public class AuthorizationInterceptorR4Test {
 	 */
 	@Test
 	public void testDenyByCompartmentWithType() throws Exception {
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder().deny("Rule 1").read().resourcesOfType(CarePlan.class).inCompartment("Patient", new IdType("Patient/845bd9f1-3635-4866-a6c8-1ca085df5c1a")).andThen().allowAll()
@@ -1830,7 +1848,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization().withTester(new IAuthRuleTester() {
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization().withTester(null /* null should be ignored */ ).withTester(new IAuthRuleTester() {
 						@Override
 						public boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource) {
 							return theInputResourceId.getIdPart().equals("1");
@@ -3724,7 +3742,8 @@ public class AuthorizationInterceptorR4Test {
 				HookParams params = new HookParams()
 					.add(IBaseResource.class, next)
 					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(TransactionDetails.class, new TransactionDetails());
 				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 			}
 			return new MethodOutcome();
@@ -3882,7 +3901,8 @@ public class AuthorizationInterceptorR4Test {
 					HookParams params = new HookParams()
 						.add(IBaseResource.class, next)
 						.add(RequestDetails.class, theRequestDetails)
-						.add(ServletRequestDetails.class, theRequestDetails);
+						.add(ServletRequestDetails.class, theRequestDetails)
+						.add(TransactionDetails.class, new TransactionDetails());
 					theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 				}
 			}

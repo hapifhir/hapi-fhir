@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #L%
  */
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.cfg.Environment;
 import org.hibernate.search.elasticsearch.cfg.ElasticsearchEnvironment;
 import org.hibernate.search.elasticsearch.cfg.ElasticsearchIndexStatus;
@@ -63,8 +64,12 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		theProperties.put("hibernate.search." + ElasticsearchEnvironment.ANALYSIS_DEFINITION_PROVIDER, ElasticsearchMappingProvider.class.getName());
 
 		theProperties.put("hibernate.search.default.elasticsearch.host", myRestUrl);
-		theProperties.put("hibernate.search.default.elasticsearch.username", myUsername);
-		theProperties.put("hibernate.search.default.elasticsearch.password", myPassword);
+		if (StringUtils.isNotBlank(myUsername)) {
+			theProperties.put("hibernate.search.default.elasticsearch.username", myUsername);
+		}
+		if (StringUtils.isNotBlank(myPassword)) {
+			theProperties.put("hibernate.search.default.elasticsearch.password", myPassword);
+		}
 
 		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_SCHEMA_MANAGEMENT_STRATEGY, myIndexSchemaManagementStrategy.getExternalName());
 		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_MANAGEMENT_WAIT_TIMEOUT, Long.toString(myIndexManagementWaitTimeoutMillis));

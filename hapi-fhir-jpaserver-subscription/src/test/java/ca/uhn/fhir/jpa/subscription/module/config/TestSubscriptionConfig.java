@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.mockito.Mockito;
@@ -15,6 +15,11 @@ import org.springframework.test.context.TestPropertySource;
 	"scheduling_disabled=true"
 })
 public class TestSubscriptionConfig {
+
+	@Bean
+	public PartitionSettings partitionSettings() {
+		return new PartitionSettings();
+	}
 
 	@Bean
 	public ModelConfig modelConfig() {

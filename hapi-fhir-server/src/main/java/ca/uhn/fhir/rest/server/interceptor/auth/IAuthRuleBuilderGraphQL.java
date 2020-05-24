@@ -23,9 +23,8 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 public interface IAuthRuleBuilderGraphQL {
 
 	/**
-	 * Note that this is an all-or-nothing grant for now, it
-	 * is not yet possible to specify individual resource security when
-	 * using GraphQL.
+	 * Allow any GraphQL request. Note that this does not mean that any specific sub-operations are permitted, as
+	 * other rules may be required in order to actually access specific resources
 	 */
 	IAuthRuleFinished any();
 }

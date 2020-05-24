@@ -133,20 +133,19 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 	protected Subscription newSubscription(String theCriteria, String thePayload) {
-		Topic topic = new Topic();
+		SubscriptionTopic topic = new SubscriptionTopic();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(theCriteria);
 
 		Subscription subscription = new Subscription();
 		subscription.getTopic().setResource(topic);
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setStatus(Enumerations.SubscriptionState.REQUESTED);
 
-		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
-		channel.getType().addCoding()
+		subscription.getChannelType()
 			.setSystem(CanonicalSubscriptionChannelType.RESTHOOK.getSystem())
 			.setCode(CanonicalSubscriptionChannelType.RESTHOOK.toCode());
-		channel.getPayload().setContentType(thePayload);
-		channel.setEndpoint(ourListenerServerBase);
+		subscription.setContentType(thePayload);
+		subscription.setEndpoint(ourListenerServerBase);
 		return subscription;
 	}
 

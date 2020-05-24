@@ -59,8 +59,8 @@ import org.springframework.test.util.AopTestUtils;
 import com.google.common.base.Charsets;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -2121,15 +2121,15 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testSearchWithInvalidSort() {
 		try {
-			Observation o = new Observation();
-			o.getCode().setText("testSearchWithInvalidSort");
-			myObservationDao.create(o, mySrd);
-			IBaseBundle bundle = ourClient
-				.search()
-				.forResource(Observation.class)
-				.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
-				.prettyPrint()
-				.execute();
+		Observation o = new Observation();
+		o.getCode().setText("testSearchWithInvalidSort");
+		myObservationDao.create(o, mySrd);
+		IBaseBundle bundle = ourClient
+			.search()
+			.forResource(Observation.class)
+			.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
+			.prettyPrint()
+			.execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("", e.getMessage());

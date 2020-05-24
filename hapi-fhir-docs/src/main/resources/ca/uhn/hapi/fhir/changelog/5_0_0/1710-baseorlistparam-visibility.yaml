@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1710
+title: The classes BaseOrListParam and BaseParam now have public visibility in order to make it easier to 
+    create more generic APIs. Thanks to GitHub user @ibacher for the pull request!

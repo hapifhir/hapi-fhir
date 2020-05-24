@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface IAuthRuleFinished {
@@ -45,7 +46,9 @@ public interface IAuthRuleFinished {
 	 * ..the tester will be invoked on any $everything operations on Patient
 	 * resources as a final check as to whether the rule applies or not. In this
 	 * example, the tester is not invoked for other operations.
+	 *
+	 * @param theTester The tester to add, or <code>null</code>
 	 */
-	IAuthRuleFinished withTester(IAuthRuleTester theTester);
+	IAuthRuleFinished withTester(@Nullable IAuthRuleTester theTester);
 
 }

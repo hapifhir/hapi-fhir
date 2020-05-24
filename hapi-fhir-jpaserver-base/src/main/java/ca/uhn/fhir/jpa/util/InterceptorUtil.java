@@ -36,24 +36,28 @@ public class InterceptorUtil {
 	/**
 	 * Fires {@link Pointcut#STORAGE_PRESHOW_RESOURCES} interceptor hook, and potentially remove resources
 	 * from the resource list
+	 * @return
 	 */
-	public static void fireStoragePreshowResource(List<IBaseResource> theResources, RequestDetails theRequest, IInterceptorBroadcaster theInterceptorBroadcaster) {
-		theResources.removeIf(t -> t == null);
+	public static List<IBaseResource> fireStoragePreshowResource(List<IBaseResource> theResources, RequestDetails theRequest, IInterceptorBroadcaster theInterceptorBroadcaster) {
+		List<IBaseResource> retVal = theResources;
+		retVal.removeIf(t -> t == null);
 
 		// Interceptor call: STORAGE_PRESHOW_RESOURCE
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
-		if (theResources.size() > 0) {
-			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(theResources);
+		if (retVal.size() > 0) {
+			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(retVal);
 			HookParams params = new HookParams()
 				.add(IPreResourceShowDetails.class, accessDetails)
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			JpaInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
-			theResources.removeIf(t -> t == null);
+			retVal = accessDetails.toList();
+			retVal.removeIf(t -> t == null);
 		}
 
+		return retVal;
 	}
 
 }

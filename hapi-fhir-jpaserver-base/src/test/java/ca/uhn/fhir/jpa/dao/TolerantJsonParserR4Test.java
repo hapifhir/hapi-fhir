@@ -15,7 +15,7 @@ public class TolerantJsonParserR4Test {
 	private FhirContext myFhirContext = FhirContext.forR4();
 
 	@Test
-	public void testParseInvalidNumeric() {
+	public void testParseInvalidNumeric_LeadingDecimal() {
 		String input = "{\n" +
 			"\"resourceType\": \"Observation\",\n" +
 			"\"valueQuantity\": {\n" +
@@ -28,6 +28,38 @@ public class TolerantJsonParserR4Test {
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
+	}
+
+	@Test
+	public void testParseInvalidNumeric_LeadingZeros() {
+		String input = "{\n" +
+			"\"resourceType\": \"Observation\",\n" +
+			"\"valueQuantity\": {\n" +
+			"      \"value\": 00.5\n" +
+			"   }\n" +
+			"}";
+
+
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		Observation obs = parser.parseResource(Observation.class, input);
+
+		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
+	}
+
+	@Test
+	public void testParseInvalidNumeric_DoubleZeros() {
+		String input = "{\n" +
+			"\"resourceType\": \"Observation\",\n" +
+			"\"valueQuantity\": {\n" +
+			"      \"value\": 00\n" +
+			"   }\n" +
+			"}";
+
+
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		Observation obs = parser.parseResource(Observation.class, input);
+
+		assertEquals("0", obs.getValueQuantity().getValueElement().getValueAsString());
 	}
 
 	@Test

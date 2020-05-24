@@ -41,7 +41,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -53,7 +59,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * has permission to perform the given action.
  * <p>
  * See the HAPI FHIR
- * <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_security.html">Documentation on Server Security</a>
+ * <a href="https://hapifhir.io/hapi-fhir/docs/security/introduction.html">Documentation on Server Security</a>
  * for information on how to use this interceptor.
  * </p>
  *
@@ -114,8 +120,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
-			ourLog.trace("Rule being applied - {}",
-				nextRule);
+			ourLog.trace("Rule being applied - {}", nextRule);
 			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this, flags, thePointcut);
 			if (verdict != null) {
 				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
@@ -203,7 +208,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				return OperationExamineDirection.NONE;
 
 			case GRAPHQL_REQUEST:
-				return OperationExamineDirection.IN;
+				return OperationExamineDirection.BOTH;
 
 			default:
 				// Should not happen
@@ -224,9 +229,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 *
 	 * @param theDefaultPolicy The policy (must not be <code>null</code>)
 	 */
-	public void setDefaultPolicy(PolicyEnum theDefaultPolicy) {
+	public AuthorizationInterceptor setDefaultPolicy(PolicyEnum theDefaultPolicy) {
 		Validate.notNull(theDefaultPolicy, "theDefaultPolicy must not be null");
 		myDefaultPolicy = theDefaultPolicy;
+		return this;
 	}
 
 	/**

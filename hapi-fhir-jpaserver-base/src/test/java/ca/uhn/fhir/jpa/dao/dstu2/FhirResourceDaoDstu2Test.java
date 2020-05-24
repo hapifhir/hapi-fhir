@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3Test;
 import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -22,7 +23,18 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.resource.BaseResource;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
+import ca.uhn.fhir.model.dstu2.resource.Device;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
@@ -43,6 +55,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -78,6 +91,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1109,6 +1123,9 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertGone(org2Id);
 	}
 
+	@Autowired
+	private IForcedIdDao myForcedIdDao;
+
 	@Test
 	public void testHistoryByForcedId() {
 		IIdType idv1;
@@ -1124,6 +1141,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			patient.setId(patient.getId().toUnqualifiedVersionless());
 			idv2 = myPatientDao.update(patient, mySrd).getId();
 		}
+
+		runInTransaction(()->{
+			ourLog.info("Forced IDs:\n{}", myForcedIdDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n")));
+		});
 
 		List<Patient> patients = toList(myPatientDao.history(idv1.toVersionless(), null, null, mySrd));
 		assertTrue(patients.size() == 2);
@@ -1169,7 +1190,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
-			assertEquals(expected, actual);
+			assertEquals("Failure at " + i, expected, actual);
 		}
 
 		// By type
@@ -1697,7 +1718,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			found = toList(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01"))));
 			assertEquals(0, found.size());
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter birthdateAAAA for resource type Patient", e.getMessage());
+			assertEquals("Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 
 	}

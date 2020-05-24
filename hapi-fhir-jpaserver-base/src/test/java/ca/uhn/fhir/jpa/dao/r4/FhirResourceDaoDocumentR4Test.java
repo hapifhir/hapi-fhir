@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import java.nio.charset.StandardCharsets;
-
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.util.TestUtil;
+import java.nio.charset.StandardCharsets;
 
 public class FhirResourceDaoDocumentR4Test extends BaseJpaR4Test {
 

@@ -25,16 +25,18 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.parser.JsonParser;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 class TolerantJsonParser extends JsonParser {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(TolerantJsonParser.class);
 
 	TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
@@ -45,31 +47,33 @@ class TolerantJsonParser extends JsonParser {
 		try {
 			return super.parseResource(theResourceType, theMessageString);
 		} catch (DataFormatException e) {
-			if (defaultString(e.getMessage()).contains("Unexpected character ('.' (code 46))")) {
 
-				/*
-				 * The following is a hacky and gross workaround until the following PR is hopefully merged:
-				 * https://github.com/FasterXML/jackson-core/pull/611
-				 *
-				 * The issue this solves is that under Gson it was possible to store JSON containing
-				 * decimal numbers with no leading integer, e.g. .123
-				 *
-				 * These don't parse in Jackson, meaning we can be stuck with data in the database
-				 * that can't be loaded back out.
-				 *
-				 * Note that if we fix this in the future to rely on Jackson natively handing this
-				 * nicely we may or may not be able to remove some code from
-				 * ParserState.Primitive state too.
-				 */
+			/*
+			 * The following is a hacky and gross workaround until the following PR is hopefully merged:
+			 * https://github.com/FasterXML/jackson-core/pull/611
+			 *
+			 * The issue this solves is that under Gson it was possible to store JSON containing
+			 * decimal numbers with no leading integer (e.g. .123) and numbers with double leading
+			 * zeros (e.g. 000.123).
+			 *
+			 * These don't parse in Jackson (which is valid behaviour, these aren't ok according to the
+			 * JSON spec), meaning we can be stuck with data in the database that can't be loaded back out.
+			 *
+			 * Note that if we fix this in the future to rely on Jackson natively handing this
+			 * nicely we may or may not be able to remove some code from
+			 * ParserState.Primitive state too.
+			 */
 
+			String msg = defaultString(e.getMessage());
+			if (msg.contains("Unexpected character ('.' (code 46))") || msg.contains("Invalid numeric value: Leading zeroes not allowed")) {
 				Gson gson = new Gson();
 
 				JsonObject object = gson.fromJson(theMessageString, JsonObject.class);
 				String corrected = gson.toJson(object);
 
 				return super.parseResource(theResourceType, corrected);
-
 			}
+
 			throw e;
 		}
 	}

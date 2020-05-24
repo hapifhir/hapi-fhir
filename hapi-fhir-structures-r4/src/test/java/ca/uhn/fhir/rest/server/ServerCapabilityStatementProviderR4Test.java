@@ -130,6 +130,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
 		ServletRequestDetails retVal = new ServletRequestDetails(null);
 		retVal.setServer(theServer);
+		retVal.setFhirServerBase("http://localhost/baseR4");
 		return retVal;
 	}
 
@@ -138,6 +139,7 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
@@ -262,6 +264,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	public void testOperationAcrossMultipleTypes() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiTypePatientProvider(), new MultiTypeEncounterProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
@@ -646,6 +649,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	public void testSystemLevelNamedQueryWithParameters() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryPlainProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
@@ -690,6 +694,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	public void testResourceLevelNamedQueryWithParameters() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryResourceProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
@@ -733,6 +738,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	public void testExtendedOperationAtTypeLevel() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new TypeLevelOperationProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);

@@ -6,7 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;

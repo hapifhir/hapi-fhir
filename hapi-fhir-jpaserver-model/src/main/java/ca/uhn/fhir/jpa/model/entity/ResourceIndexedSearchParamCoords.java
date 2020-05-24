@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -27,7 +28,15 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 @Embeddable
 @Entity
@@ -61,26 +70,20 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamCoords() {
 	}
 
-	public ResourceIndexedSearchParamCoords(String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+	public ResourceIndexedSearchParamCoords(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setLatitude(theLatitude);
 		setLongitude(theLongitude);
+		calculateHashes();
 	}
 
 	@Override
-	@PrePersist
 	public void calculateHashes() {
-		if (myHashIdentity == null) {
-			String resourceType = getResourceType();
-			String paramName = getParamName();
-			setHashIdentity(calculateHashIdentity(resourceType, paramName));
-		}
-	}
-
-	@Override
-	protected void clearHashes() {
-		myHashIdentity = null;
+		String resourceType = getResourceType();
+		String paramName = getParamName();
+		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
 
 	@Override
@@ -104,6 +107,15 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return b.isEquals();
 	}
 
+	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		super.copyMutableValuesFrom(theSource);
+		ResourceIndexedSearchParamCoords source = (ResourceIndexedSearchParamCoords) theSource;
+		myLatitude = source.getLatitude();
+		myLongitude = source.getLongitude();
+		myHashIdentity = source.myHashIdentity;
+	}
+
 	public void setHashIdentity(Long theHashIdentity) {
 		myHashIdentity = theHashIdentity;
 	}
@@ -115,7 +127,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 
 	@Override
 	public void setId(Long theId) {
-		myId =theId;
+		myId = theId;
 	}
 
 

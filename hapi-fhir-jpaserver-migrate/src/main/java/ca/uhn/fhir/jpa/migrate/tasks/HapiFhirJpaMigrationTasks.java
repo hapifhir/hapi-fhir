@@ -25,9 +25,18 @@ import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -57,23 +66,188 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init400(); // 20190401 - 20190814
 		init410(); // 20190815 - 20191014
 		init420(); // 20191015 - 20200217
-		init430(); // 20200218 - present
+		init430(); // Replaced by 5.0.0
+		init500(); // 20200218 - 20200513
+		init501(); // 20200514 - present
 	}
 
-	protected void init430() { // 20200218 - present
-		Builder version = forVersion(VersionEnum.V4_3_0);
+	private void init501() { //20200514 - present
+		Builder version = forVersion(VersionEnum.V5_0_1);
+
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
+		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
+		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
+
+		// MPI_LINK
+		version.addIdGenerator("20200517.1", "SEQ_EMPI_LINK_ID");
+		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200517.2", "MPI_LINK", "PID");
+		empiLink.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+
+		empiLink.addColumn("PERSON_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200517.3", "FK_EMPI_LINK_PERSON")
+			.toColumn("PERSON_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("TARGET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200517.4", "FK_EMPI_LINK_TARGET")
+			.toColumn("TARGET_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("MATCH_RESULT").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		empiLink.addColumn("LINK_SOURCE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		empiLink.addColumn("CREATED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		empiLink.addColumn("UPDATED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+
+
+		empiLink.addIndex("20200517.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
+	}
+
+	protected void init500() { // 20200218 - 20200519
+		Builder version = forVersion(VersionEnum.V5_0_0);
 
 		// Eliminate circular dependency.
 		version.onTable("HFJ_RESOURCE").dropColumn("20200218.1", "FORCED_ID_PID");
 		version.onTable("HFJ_RES_VER").dropColumn("20200218.2", "FORCED_ID_PID");
 		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		//
+
+		// Drop unused column
+		version.onTable("HFJ_RESOURCE").dropIndex("20200419.1", "IDX_RES_PROFILE");
+		version.onTable("HFJ_RESOURCE").dropColumn("20200419.2", "RES_PROFILE").failureAllowed();
+
+		// Add Partitioning
+		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200420.0", "HFJ_PARTITION", "PART_ID");
+		partition.addColumn("PART_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		partition.addColumn("PART_NAME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		partition.addColumn("PART_DESC").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		partition.addIndex("20200420.1", "IDX_PART_NAME").unique(true).withColumns("PART_NAME");
+
+		// Partition columns on individual tables
+		version.onTable("HFJ_RESOURCE").addColumn("20200420.2", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RESOURCE").addColumn("20200420.3", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_VER").addColumn("20200420.4", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_VER").addColumn("20200420.5", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.6", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.7", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.8", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.9", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_HISTORY_TAG").addColumn("20200420.10", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_HISTORY_TAG").addColumn("20200420.11", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_TAG").addColumn("20200420.12", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_TAG").addColumn("20200420.13", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_FORCED_ID").addColumn("20200420.14", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_FORCED_ID").addColumn("20200420.15", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_LINK").addColumn("20200420.16", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_LINK").addColumn("20200420.17", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_STRING").addColumn("20200420.18", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_STRING").addColumn("20200420.19", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_COORDS").addColumn("20200420.20", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_COORDS").addColumn("20200420.21", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_NUMBER").addColumn("20200420.22", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_NUMBER").addColumn("20200420.23", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_TOKEN").addColumn("20200420.24", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_TOKEN").addColumn("20200420.25", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_DATE").addColumn("20200420.26", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_DATE").addColumn("20200420.27", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_URI").addColumn("20200420.28", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_URI").addColumn("20200420.29", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_QUANTITY").addColumn("20200420.30", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_QUANTITY").addColumn("20200420.31", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.32", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.33", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.34", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.35", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200420.36", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20200420.37", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20200420.38", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20200420.39", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20200420.40", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20200420.41", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20200420.42", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+
+		// Add support for integer comparisons during day-precision date search.
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.addColumn("20200501.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		spidxDate.addColumn("20200501.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+
+		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V5_0_0, "20200501.3")
+			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))
+			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
+			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
+		);
+
+		// TRM_CONCEPT_PROPERTY
+		version.onTable("TRM_CONCEPT_PROPERTY").addIndex("20200523.1", "IDX_CONCEPTPROP_CONCEPTPID").unique(false).withColumns("CONCEPT_PID");
+	}
+
+	/**
+	 * Partway through the 4.3.0 releaase cycle we renumbered to
+	 * 5.0.0 - We have a bunch of NOP tasks here to avoid breakage for anyone
+	 * who installed a prerelease before we made the switch
+	 */
+	@SuppressWarnings("deprecation")
+	private void init430() {
+		Builder version = forVersion(VersionEnum.V4_3_0);
+		version.addNop("20200218.1");
+		version.addNop("20200218.2");
+		version.addNop("20200218.3");
+		version.addNop("20200220.1");
+		version.addNop("20200419.1");
+		version.addNop("20200419.2");
+		version.addNop("20200420.0");
+		version.addNop("20200420.1");
+		version.addNop("20200420.2");
+		version.addNop("20200420.3");
+		version.addNop("20200420.4");
+		version.addNop("20200420.5");
+		version.addNop("20200420.6");
+		version.addNop("20200420.7");
+		version.addNop("20200420.8");
+		version.addNop("20200420.9");
+		version.addNop("20200420.10");
+		version.addNop("20200420.11");
+		version.addNop("20200420.12");
+		version.addNop("20200420.13");
+		version.addNop("20200420.14");
+		version.addNop("20200420.15");
+		version.addNop("20200420.16");
+		version.addNop("20200420.17");
+		version.addNop("20200420.18");
+		version.addNop("20200420.19");
+		version.addNop("20200420.20");
+		version.addNop("20200420.21");
+		version.addNop("20200420.22");
+		version.addNop("20200420.23");
+		version.addNop("20200420.24");
+		version.addNop("20200420.25");
+		version.addNop("20200420.26");
+		version.addNop("20200420.27");
+		version.addNop("20200420.28");
+		version.addNop("20200420.29");
+		version.addNop("20200420.30");
+		version.addNop("20200420.31");
+		version.addNop("20200420.32");
+		version.addNop("20200420.33");
+		version.addNop("20200420.34");
+		version.addNop("20200420.35");
+		version.addNop("20200420.36");
+		version.addNop("20200420.37");
+		version.addNop("20200420.38");
+		version.addNop("20200420.39");
+		version.addNop("20200420.40");
+		version.addNop("20200420.41");
+		version.addNop("20200420.42");
 	}
 
 	protected void init420() { // 20191015 - 20200217
 		Builder version = forVersion(VersionEnum.V4_2_0);
 
-		// TermValueSetConceptDesignation
+    // TermValueSetConceptDesignation
 		version.onTable("TRM_VALUESET_C_DESIGNATION").dropIndex("20200202.1", "IDX_VALUESET_C_DSGNTN_VAL").failureAllowed();
 		Builder.BuilderWithTableName searchTable = version.onTable("HFJ_SEARCH");
 		searchTable.dropIndex("20200203.1", "IDX_SEARCH_LASTRETURNED");
@@ -342,10 +516,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
 		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
 		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+
+		// This index turned out not to be needed so it is disabled
 		termValueSetConceptDesignationTable
 			.addIndex("20190801.6", "IDX_VALUESET_C_DSGNTN_VAL")
 			.unique(false)
-			.withColumns("VAL");
+			.withColumns("VAL")
+			.doNothing();
 
 		// TermCodeSystemVersion
 		version.startSectionWithMessage("Processing table: TRM_CODESYSTEM_VER");
@@ -466,8 +643,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("HASH_IDENTITY", "SP_LATITUDE", "SP_LONGITUDE");
 			spidxCoords
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.5")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY")
-					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
 				);
 		}
 
@@ -489,8 +666,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.dropIndex("20180903.9", "IDX_SP_DATE");
 			spidxDate
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.10")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY")
-					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
 				);
 		}
 
@@ -510,8 +687,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("HASH_IDENTITY", "SP_VALUE");
 			spidxNumber
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.14")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY")
-					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
 				);
 		}
 
@@ -547,10 +724,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE");
 			spidxQuantity
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.22")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")))
+					.addCalculator("HASH_IDENTITY_AND_UNITS", t -> ResourceIndexedSearchParamQuantity.calculateHashUnits(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_UNITS")))
+					.addCalculator("HASH_IDENTITY_SYS_UNITS", t -> ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_SYSTEM"), t.getString("SP_UNITS")))
 					.setColumnName("HASH_IDENTITY")
-					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-					.addCalculator("HASH_IDENTITY_AND_UNITS", t -> ResourceIndexedSearchParamQuantity.calculateHashUnits(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_UNITS")))
-					.addCalculator("HASH_IDENTITY_SYS_UNITS", t -> ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_SYSTEM"), t.getString("SP_UNITS")))
 				);
 		}
 
@@ -579,8 +756,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxString
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.28")
 					.setColumnName("HASH_NORM_PREFIX")
-					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new ModelConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
-					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
+					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new PartitionSettings(), null, new ModelConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
+					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
 				);
 		}
 
@@ -627,10 +804,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxToken
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.39")
 					.setColumnName("HASH_IDENTITY")
-					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-					.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")))
-					.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")))
-					.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")))
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")))
+					.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")))
+					.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")))
+					.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")))
 				);
 		}
 
@@ -657,8 +834,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxUri
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.44")
 					.setColumnName("HASH_IDENTITY")
-					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-					.addCalculator("HASH_URI", t -> ResourceIndexedSearchParamUri.calculateHashUri(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_URI")))
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")))
+					.addCalculator("HASH_URI", t -> ResourceIndexedSearchParamUri.calculateHashUri(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_URI")))
 				);
 		}
 
@@ -691,7 +868,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Boolean present = columnToBoolean(t.get("SP_PRESENT"));
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
-			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);
+			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), null, resType, paramName, present);
 			consolidateSearchParamPresenceIndexesTask.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
 		});
 		version.addTask(consolidateSearchParamPresenceIndexesTask);

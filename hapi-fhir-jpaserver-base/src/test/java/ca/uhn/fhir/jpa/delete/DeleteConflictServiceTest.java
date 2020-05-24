@@ -2,9 +2,10 @@ package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,8 @@ public class DeleteConflictServiceTest {
 		DeleteConflictService myDeleteConflictService() { return new DeleteConflictService(); }
 		@Bean
 		DaoConfig myDaoConfig() { return new DaoConfig(); }
+		@Bean
+		PartitionSettings partitionSettings() { return new PartitionSettings(); }
 	}
 
 	@Test
@@ -62,7 +65,7 @@ public class DeleteConflictServiceTest {
 		link.setSourceResource(entity);
 		list.add(link);
 		when(myDeleteConflictFinderService.findConflicts(any(), anyInt())).thenReturn(list);
-		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null);
+		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null, new TransactionDetails());
 		assertEquals(0, retryCount);
 	}
 }

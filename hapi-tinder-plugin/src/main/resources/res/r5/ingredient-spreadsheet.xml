@@ -16,7 +16,7 @@
   
   
   <TabRatio>837</TabRatio>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1600,7 +1600,6 @@
     <VerticalResolution>600</VerticalResolution>
    </Print>
    <Zoom>90</Zoom>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -2109,8 +2108,8 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=Search!R1C1:R1C5"/>
   </Names>
-  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="29" ss:StyleID="s89" x:FullColumns="1" x:FullRows="1">
-   <Column ss:AutoFitWidth="0" ss:StyleID="s89" ss:Width="76.0"/>
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="31" ss:StyleID="s89" x:FullColumns="1" x:FullRows="1">
+   <Column ss:AutoFitWidth="0" ss:StyleID="s89" ss:Width="142.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s89" ss:Width="61.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s89" ss:Width="117.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s89" ss:Width="223.0"/>
@@ -2127,6 +2126,24 @@
     <Cell ss:StyleID="s94"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s94"/>
     <Cell ss:StyleID="s95"><Data ss:Type="String">Ingredient.identifier</Data></Cell>
+    <Cell ss:StyleID="s95"/>
+    <Cell ss:StyleID="s95"/>
+    <Cell ss:StyleID="s96"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s93"><Data ss:Type="String">substance</Data></Cell>
+    <Cell ss:StyleID="s94"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s94"/>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">Ingredient.substance.codeCodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s95"/>
+    <Cell ss:StyleID="s95"/>
+    <Cell ss:StyleID="s96"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s93"><Data ss:Type="String">specified-substance</Data></Cell>
+    <Cell ss:StyleID="s94"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s94"/>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">Ingredient.specifiedSubstance.codeCodeableConcept</Data></Cell>
     <Cell ss:StyleID="s95"/>
     <Cell ss:StyleID="s95"/>
     <Cell ss:StyleID="s96"/>
@@ -2314,6 +2331,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>

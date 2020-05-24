@@ -1,0 +1,66 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-address-official",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-address-official",
+  "version": "2.0.0",
+  "name": "nl core address official",
+  "title": "nl-core-address-official",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Mark an address as an 'officially registered' address. In Dutch context that means it is registered in the Basisregistratie persoonsgegevens (BRP)",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "kind": "complex-type",
+  "abstract": false,
+  "contextType": "resource",
+  "context": [
+    "Address"
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://fhir.nl/fhir/StructureDefinition/nl-core-address-official"
+      },
+      {
+        "id": "Extension.value[x]:valueBoolean",
+        "path": "Extension.valueBoolean",
+        "sliceName": "valueBoolean",
+        "short": "true if part of an official registry. false if it is not",
+        "definition": "When the value is true, this address is marked to be part of an official registry (Dutch realm: BRP). When the value is false, this address is explicitly marked as not part of an official registry.",
+        "alias": [
+          "true als deze deel is van een officieel register. false indien dat niet het geval is"
+        ],
+        "min": 1,
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ],
+        "meaningWhenMissing": "When an address is not marked explicitly as official=true|false then no information can be inferred from that.",
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "AD/@use[.='OR']"
+          }
+        ]
+      }
+    ]
+  }
+}

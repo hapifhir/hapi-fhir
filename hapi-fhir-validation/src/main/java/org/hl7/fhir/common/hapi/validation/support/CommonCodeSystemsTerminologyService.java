@@ -1,16 +1,28 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.Validate;
+import org.fhir.ucum.UcumEssenceService;
+import org.fhir.ucum.UcumException;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This {@link IValidationSupport validation support module} can be used to validate codes against common
@@ -26,12 +38,13 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String MIMETYPES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/mimetypes";
 	public static final String CURRENCIES_CODESYSTEM_URL = "urn:iso:std:iso:4217";
 	public static final String CURRENCIES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/currencies";
+	public static final String UCUM_CODESYSTEM_URL = "http://unitsofmeasure.org";
+	public static final String UCUM_VALUESET_URL = "http://hl7.org/fhir/ValueSet/ucum-units";
 	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
 	private static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
+	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
 	private static Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
-
-
 	private final FhirContext myFhirContext;
 
 	/**
@@ -44,9 +57,13 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		String url = getValueSetUrl(theValueSet);
+		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
+	}
 
+	@Override
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		/* **************************************************************************************
 		 * NOTE: Update validation_support_modules.html if any of the support in this module
 		 * changes in any way!
@@ -54,7 +71,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		Map<String, String> handlerMap = null;
 		String expectSystem = null;
-		switch (url) {
+		switch (defaultString(theValueSetUrl)) {
 			case USPS_VALUESET_URL:
 				handlerMap = USPS_CODES;
 				expectSystem = USPS_CODESYSTEM_URL;
@@ -71,8 +88,18 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				return new CodeValidationResult()
 					.setCode(theCode)
 					.setDisplay(theDisplay);
-		}
 
+			case UCUM_VALUESET_URL: {
+				String system = theCodeSystem;
+				if (system == null && theOptions.isInferSystem()) {
+					system = UCUM_CODESYSTEM_URL;
+				}
+				CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, system);
+				if (validationResult != null) {
+					return validationResult;
+				}
+			}
+		}
 
 		if (handlerMap != null) {
 			String display = handlerMap.get(theCode);
@@ -89,8 +116,73 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				.setMessage("Code \"" + theCode + "\" is not in system: " + USPS_CODESYSTEM_URL);
 		}
 
+		if (isBlank(theValueSetUrl)) {
+			CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
+			if (validationResult != null) {
+				return validationResult;
+			}
+		}
+
 		return null;
 	}
+
+	@Nullable
+	public CodeValidationResult validateLookupCode(ValidationSupportContext theValidationSupportContext, String theCode, String theSystem) {
+		LookupCodeResult lookupResult = lookupCode(theValidationSupportContext, theSystem, theCode);
+		CodeValidationResult validationResult = null;
+		if (lookupResult != null) {
+			if (lookupResult.isFound()) {
+				validationResult = new CodeValidationResult()
+					.setCode(lookupResult.getSearchedForCode())
+					.setDisplay(lookupResult.getCodeDisplay());
+			}
+		}
+		return validationResult;
+	}
+
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+
+		if (UCUM_CODESYSTEM_URL.equals(theSystem) && theValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+
+			InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
+			try {
+				UcumEssenceService svc = new UcumEssenceService(input);
+				String outcome = svc.analyse(theCode);
+				if (outcome != null) {
+
+					LookupCodeResult retVal = new LookupCodeResult();
+					retVal.setSearchedForCode(theCode);
+					retVal.setSearchedForSystem(theSystem);
+					retVal.setFound(true);
+					retVal.setCodeDisplay(outcome);
+					return retVal;
+
+				}
+			} catch (UcumException e) {
+				ourLog.debug("Failed parse UCUM code: {}", theCode, e);
+				return null;
+			} finally {
+				ClasspathUtil.close(input);
+			}
+
+		}
+
+		return null;
+	}
+
+	@Override
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+
+		switch (theSystem) {
+			case UCUM_CODESYSTEM_URL:
+				return true;
+		}
+
+		return false;
+	}
+
 
 	public String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
 		String url;

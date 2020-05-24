@@ -322,7 +322,7 @@ public class SearchParameter extends BaseQueryParameter {
 		} else if (HasParam.class.isAssignableFrom(theType)) {
 			myParamType = RestSearchParameterTypeEnum.STRING;
 		} else {
-			throw new ConfigurationException("Unknown search parameter theType: " + theType);
+			throw new ConfigurationException("Unknown search parameter type: " + theType);
 		}
 
 		// NB: Once this is enabled, we should return true from handlesMissing if

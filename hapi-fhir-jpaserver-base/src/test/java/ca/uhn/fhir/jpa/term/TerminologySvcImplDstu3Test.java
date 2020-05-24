@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -9,8 +10,9 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -222,7 +224,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		cs = new TermCodeSystemVersion();
 		TermConcept parentA = new TermConcept(cs, "ParentA");
 		cs.getConcepts().add(parentA);
-		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd).getId().toUnqualified();
+		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd, new TransactionDetails()).getId().toUnqualified();
 		table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 		cs.setResource(table);
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
@@ -1949,7 +1951,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	@Disabled
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
-		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myValidationSupport, new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
+		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
 		assertEquals(true, code.isOk());
 		assertEquals(2, code.getProperties().size());
 	}

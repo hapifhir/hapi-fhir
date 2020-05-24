@@ -28,7 +28,7 @@ public class SchemaBaseValidatorTest {
 			validator.loadXml("foo.xsd");
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("Schema not found"));
+			assertThat(e.getMessage(), containsString("Unable to find classpath resource"));
 		}
 	}
 }

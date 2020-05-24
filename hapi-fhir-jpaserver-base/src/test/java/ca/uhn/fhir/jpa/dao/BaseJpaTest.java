@@ -9,8 +9,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -26,7 +28,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.BaseTest;
-import ca.uhn.fhir.test.utilities.LoggingExtension;
+import ca.uhn.fhir.test.utilities.LoggingRule;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -116,6 +118,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
 	protected ISearchCacheSvc mySearchCacheSvc;
+	@Autowired
+	protected IPartitionLookupSvc myPartitionConfigSvc;
+	@Autowired
+	private IdHelperService myIdHelperService;
 
 	@AfterEach
 	public void afterPerformCleanup() {
@@ -123,6 +129,13 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myCaptureQueriesListener != null) {
 			myCaptureQueriesListener.clear();
 		}
+		if (myPartitionConfigSvc != null) {
+			myPartitionConfigSvc.clearCaches();
+		}
+		if (myIdHelperService != null) {
+			myIdHelperService.clearCache();
+		}
+
 	}
 
 	@AfterEach
@@ -152,7 +165,14 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	@BeforeEach
+	@Before
+	public void beforeInitPartitions() {
+		if (myPartitionConfigSvc != null) {
+			myPartitionConfigSvc.start();
+		}
+	}
+
+	@Before
 	public void beforeInitMocks() {
 		myRequestOperationCallback = new InterceptorService();
 

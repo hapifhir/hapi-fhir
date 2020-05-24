@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +27,7 @@ public class SubscriptionChannelRegistryTest {
 	private static final String TEST_CHANNEL_NAME = "TEST_CHANNEL";
 	@Autowired
 	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+
 	@MockBean
 	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@MockBean

@@ -133,6 +133,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
@@ -257,6 +258,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public void testOperationAcrossMultipleTypes() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiTypePatientProvider(), new MultiTypeEncounterProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
@@ -660,6 +662,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public void testSystemLevelNamedQueryWithParameters() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryPlainProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
@@ -704,6 +707,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public void testResourceLevelNamedQueryWithParameters() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryResourceProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);
@@ -747,6 +751,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public void testExtendedOperationAtTypeLevel() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new TypeLevelOperationProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);

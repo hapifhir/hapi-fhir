@@ -68,6 +68,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myCaptureQueriesListener.setCaptureQueryStackTrace(false);
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	private void create200Patients() {
@@ -102,6 +103,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testFetchCountWithMultipleIndexesOnOneResource() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		create200Patients();
 
 		// Already have 200, let's add number 201 with a bunch of similar names
@@ -690,7 +692,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, true);
-		assertThat(selectQuery, containsString("HASH_VALUE in"));
+		assertThat(selectQuery, containsString("HASH_VALUE="));
 		assertThat(selectQuery, not(containsString("HASH_SYS")));
 
 	}
@@ -753,6 +755,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testWritesPerformMinimalSqlStatements() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("sys1").setValue("val1");
 		p.addIdentifier().setSystem("sys2").setValue("val2");

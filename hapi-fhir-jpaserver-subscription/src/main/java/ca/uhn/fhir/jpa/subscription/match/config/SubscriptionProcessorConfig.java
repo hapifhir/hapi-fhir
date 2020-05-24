@@ -23,9 +23,9 @@ package ca.uhn.fhir.jpa.subscription.match.config;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
-import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.CompositeInMemoryDaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.DaoSubscriptionMatcher;
@@ -35,10 +35,9 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.MatchingQueueSubscr
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringSubscriber;
-import ca.uhn.fhir.jpa.subscription.match.registry.DaoSubscriptionProvider;
-import ca.uhn.fhir.jpa.subscription.match.registry.ISubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -82,11 +81,6 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public ISubscriptionProvider subscriptionProvider() {
-		return new DaoSubscriptionProvider();
-	}
-
-	@Bean
 	public SubscriptionLoader subscriptionLoader() {
 		return new SubscriptionLoader();
 	}
@@ -105,6 +99,12 @@ public class SubscriptionProcessorConfig {
 	@Scope("prototype")
 	public SubscriptionDeliveringRestHookSubscriber subscriptionDeliveringRestHookSubscriber() {
 		return new SubscriptionDeliveringRestHookSubscriber();
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SubscriptionDeliveringMessageSubscriber subscriptionDeliveringMessageSubscriber() {
+		return new SubscriptionDeliveringMessageSubscriber();
 	}
 
 	@Bean

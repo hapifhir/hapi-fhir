@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -29,9 +30,11 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.BaseValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.validation.IValidatorModule;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -49,21 +52,63 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.AuditEvent;
+import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.dstu3.model.Basic;
+import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.Device;
+import org.hl7.fhir.dstu3.model.DocumentManifest;
+import org.hl7.fhir.dstu3.model.DocumentReference;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.ImagingStudy;
+import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.Media;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationAdministration;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.ProcedureRequest;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
@@ -844,15 +889,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		myDaoConfig.setAllowMultipleDelete(true);
 
-		//@formatter:off
-		IBaseOperationOutcome response = ourClient
+		MethodOutcome response = ourClient
 			.delete()
 			.resourceConditionalByType(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().code(methodName))
 			.execute();
-		//@formatter:on
 
-		String encoded = myFhirCtx.newXmlParser().encodeResourceToString(response);
+		String encoded = myFhirCtx.newXmlParser().encodeResourceToString(response.getOperationOutcome());
 		ourLog.info(encoded);
 		assertThat(encoded, containsString(
 			"<issue><severity value=\"information\"/><code value=\"informational\"/><diagnostics value=\"Successfully deleted 2 resource(s) in "));
@@ -1058,8 +1101,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p.addName().setFamily("FAM");
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		IBaseOperationOutcome resp = ourClient.delete().resourceById(id).execute();
-		OperationOutcome oo = (OperationOutcome) resp;
+		MethodOutcome resp = ourClient.delete().resourceById(id).execute();
+		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
 	}
 
@@ -2106,24 +2149,31 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testMetaOperations() {
 		String methodName = "testMetaOperations";
+		ourClient.registerInterceptor(new LoggingInterceptor(true));
+		ourClient.setPrettyPrint(true);
+		IValidatorModule module = new FhirInstanceValidator(myFhirCtx);
+		BaseValidatingInterceptor<String> validatingInterceptor = new RequestValidatingInterceptor().addValidatorModule(module);
+		ourRestServer.registerInterceptor(validatingInterceptor);
+		try {
+			Patient pt = new Patient();
+			pt.addName().setFamily(methodName);
+			IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
-		Patient pt = new Patient();
-		pt.addName().setFamily(methodName);
-		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+			Meta meta = ourClient.meta().get(Meta.class).fromResource(id).execute();
+			assertEquals(0, meta.getTag().size());
 
-		Meta meta = ourClient.meta().get(Meta.class).fromResource(id).execute();
-		assertEquals(0, meta.getTag().size());
+			Meta inMeta = new Meta();
+			inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+			meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
+			assertEquals(1, meta.getTag().size());
 
-		Meta inMeta = new Meta();
-		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
-		meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
-		assertEquals(1, meta.getTag().size());
-
-		inMeta = new Meta();
-		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
-		meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
-		assertEquals(0, meta.getTag().size());
-
+			inMeta = new Meta();
+			inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+			meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
+			assertEquals(0, meta.getTag().size());
+		} finally {
+			ourRestServer.unregisterInterceptor(validatingInterceptor);
+		}
 	}
 
 	@Test
@@ -3308,16 +3358,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testSearchWithInvalidSort() {
 		try {
-			Observation o = new Observation();
-			o.getCode().setText("testSearchWithInvalidSort");
-			myObservationDao.create(o, mySrd);
-			ourClient
-				.search()
-				.forResource(Observation.class)
-				.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
-				.prettyPrint()
-				.returnBundle(Bundle.class)
-				.execute();
+		Observation o = new Observation();
+		o.getCode().setText("testSearchWithInvalidSort");
+		myObservationDao.create(o, mySrd);
+		ourClient
+			.search()
+			.forResource(Observation.class)
+			.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
+			.prettyPrint()
+			.returnBundle(Bundle.class)
+			.execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("", e.getMessage());

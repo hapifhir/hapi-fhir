@@ -84,7 +84,7 @@ public class SchedulerServiceImplTest {
 		ourLog.info("Fired {} times", CountingJob.ourCount);
 
 		await().until(() -> CountingJob.ourCount, greaterThan(3));
-		assertThat(CountingJob.ourCount, lessThan(20));
+		assertThat(CountingJob.ourCount, lessThan(50));
 	}
 
 	@Test

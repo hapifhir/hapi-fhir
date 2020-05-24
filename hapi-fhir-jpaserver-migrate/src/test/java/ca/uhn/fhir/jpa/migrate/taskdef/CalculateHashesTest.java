@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.util.VersionEnum;
@@ -26,10 +27,10 @@ public class CalculateHashesTest extends BaseTest {
 		CalculateHashesTask task = new CalculateHashesTask(VersionEnum.V3_5_0, "1");
 		task.setTableName("HFJ_SPIDX_TOKEN");
 		task.setColumnName("HASH_IDENTITY");
-		task.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")));
-		task.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")));
-		task.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")));
-		task.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")));
+		task.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")));
+		task.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")));
+		task.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")));
+		task.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")));
 		task.setBatchSize(1);
 		getMigrator().addTask(task);
 
@@ -73,10 +74,10 @@ public class CalculateHashesTest extends BaseTest {
 		CalculateHashesTask task = new CalculateHashesTask(VersionEnum.V3_5_0, "1");
 		task.setTableName("HFJ_SPIDX_TOKEN");
 		task.setColumnName("HASH_IDENTITY");
-		task.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")));
-		task.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")));
-		task.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")));
-		task.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")));
+		task.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")));
+		task.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")));
+		task.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")));
+		task.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")));
 		task.setBatchSize(3);
 		getMigrator().addTask(task);
 

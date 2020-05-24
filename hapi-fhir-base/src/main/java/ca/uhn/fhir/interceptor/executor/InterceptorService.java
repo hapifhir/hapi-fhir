@@ -20,7 +20,13 @@ package ca.uhn.fhir.interceptor.executor;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.api.*;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -41,6 +47,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class InterceptorService implements IInterceptorService, IInterceptorBroadcaster {
@@ -143,6 +150,16 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 		if (theInterceptors != null) {
 			theInterceptors.forEach(t -> registerInterceptor(t));
 		}
+	}
+
+	@Override
+	public void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction) {
+		unregisterInterceptorsIf(theShouldUnregisterFunction, myGlobalInvokers);
+		unregisterInterceptorsIf(theShouldUnregisterFunction, myAnonymousInvokers);
+	}
+
+	private void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction, ListMultimap<Pointcut, BaseInvoker> theGlobalInvokers) {
+		theGlobalInvokers.entries().removeIf(t->theShouldUnregisterFunction.test(t.getValue().getInterceptor()));
 	}
 
 	@Override

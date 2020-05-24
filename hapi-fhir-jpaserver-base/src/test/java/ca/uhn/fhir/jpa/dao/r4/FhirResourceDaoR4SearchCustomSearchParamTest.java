@@ -21,8 +21,21 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ChargeItem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
@@ -363,34 +376,12 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		memberSp.setType(Enumerations.SearchParamType.REFERENCE);
 		memberSp.setExpression("Group.member.entity");
 		memberSp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		mySearchParameterDao.create(memberSp, mySrd);
-
-		SearchParameter identifierSp = new SearchParameter();
-		identifierSp.setCode("identifier");
-		identifierSp.addBase("Group");
-		identifierSp.setType(Enumerations.SearchParamType.TOKEN);
-		identifierSp.setExpression("Group.identifier");
-		identifierSp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		mySearchParameterDao.create(identifierSp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
-		Patient p = new Patient();
-		p.addName().addGiven("G");
-		IIdType pid = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-
-		Group g = new Group();
-		g.addIdentifier().setSystem("urn:foo").setValue("bar");
-		g.addMember().getEntity().setReferenceElement(pid);
-		myGroupDao.create(g);
-
-		assertThat(myResourceLinkDao.findAll(), not(empty()));
-		assertThat(ListUtil.filter(myResourceIndexedSearchParamTokenDao.findAll(), new ListUtil.Filter<ResourceIndexedSearchParamToken>() {
-			@Override
-			public boolean isOut(ResourceIndexedSearchParamToken object) {
-				return !object.getResourceType().equals("Group") || object.isMissing();
-			}
-		}), not(empty()));
+		try {
+			mySearchParameterDao.create(memberSp, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not override built-in search parameter Group:member because overriding is disabled on this server", e.getMessage());
+		}
 	}
 
 	@Test
@@ -1318,7 +1309,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -1356,7 +1347,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 
 		// Try with normal gender SP

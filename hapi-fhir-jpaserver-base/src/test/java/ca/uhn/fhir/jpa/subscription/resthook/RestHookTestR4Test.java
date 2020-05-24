@@ -237,6 +237,34 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForSize(100, ourUpdatedObservations);
 	}
 
+
+	@Test
+	public void testSubscriptionRegistryLoadsSubscriptionsFromDatabase() throws Exception {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?";
+
+		createSubscription(criteria1, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		// Manually unregister all subscriptions
+		mySubscriptionRegistry.unregisterAllSubscriptions();
+		waitForActivatedSubscriptionCount(0);
+
+		// Force a reload
+		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
+
+		// Send a matching observation
+		Observation observation = new Observation();
+		observation.getIdentifierFirstRep().setSystem("foo").setValue("ID");
+		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.create(observation);
+
+		waitForSize(1, ourUpdatedObservations);
+	}
+
 	@Test
 	public void testActiveSubscriptionShouldntReActivate() throws Exception {
 		String criteria = "Observation?code=111111111&_format=xml";

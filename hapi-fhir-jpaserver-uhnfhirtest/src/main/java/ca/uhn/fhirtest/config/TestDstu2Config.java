@@ -1,7 +1,7 @@
 package ca.uhn.fhirtest.config;
 
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,6 +67,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setWebsocketContextPath("/");
 		retVal.setFilterParameterEnabled(true);
+		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		return retVal;
 	}
 
@@ -86,6 +88,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		retVal.setDefaultQueryTimeout(20);
+		retVal.setMaxConnLifetimeMillis(5 * DateUtils.MILLIS_PER_MINUTE);
 		return retVal;
 	}
 

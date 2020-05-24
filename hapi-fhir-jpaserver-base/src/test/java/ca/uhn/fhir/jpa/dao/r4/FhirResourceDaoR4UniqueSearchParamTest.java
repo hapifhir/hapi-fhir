@@ -398,7 +398,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
 			"IDX_STRING='Patient?identifier=urn%7C111'",
-			"HASH_SYS_AND_VALUE in ('-3122824860083758210')"
+			"HASH_SYS_AND_VALUE='-3122824860083758210'"
 		));
 		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
 		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
@@ -535,7 +535,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
 			"IDX_STRING='ServiceRequest?identifier=sys%7C111&patient=Patient%2F" + ptId.getIdPart() + "&performer=Practitioner%2F" + practId.getIdPart() + "'",
-			"HASH_SYS_AND_VALUE in ('6795110643554413877')"
+			"HASH_SYS_AND_VALUE='6795110643554413877'"
 		));
 		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
 		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
@@ -700,7 +700,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
 		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
@@ -717,7 +717,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		myResourceReindexingSvc.forceReindexingPass();
 		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));

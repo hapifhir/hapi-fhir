@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.interceptor;
  */
 
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.ICallable;
 import org.hl7.fhir.instance.model.api.IBaseResource;

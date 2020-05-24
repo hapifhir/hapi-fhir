@@ -123,6 +123,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.REST_HOOK);
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setEndpoint("http://example.com");
 		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
 
 		subs.setId(id);

@@ -1,15 +1,20 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.consent.*;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
+import ca.uhn.fhir.rest.server.interceptor.consent.DelegatingConsentService;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;

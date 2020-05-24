@@ -31,12 +31,15 @@ public class SubscriptionChannelFactoryTest {
 
 	@Mock
 	private ChannelInterceptor myInterceptor;
+	@Mock
+	private IChannelNamer myChannelNamer;
 	@Captor
 	private ArgumentCaptor<Exception> myExceptionCaptor;
 
 	@BeforeEach
 	public void before() {
-		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory());
+		when(myChannelNamer.getChannelName(any(), any())).thenReturn("CHANNEL_NAME");
+		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(myChannelNamer));
 	}
 
 	/**

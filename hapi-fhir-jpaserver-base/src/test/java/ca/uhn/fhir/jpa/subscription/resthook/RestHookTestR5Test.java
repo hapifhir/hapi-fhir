@@ -306,7 +306,6 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(observation1.getIdElement().getVersionIdPart(), idElement.getVersionIdPart());
 
 		subscription1
-			.getChannel()
 			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 
@@ -383,7 +382,6 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		Subscription subscription = newSubscription(criteria1, payload);
 		subscription
-			.getChannel()
 			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
 		ourClient.create().resource(subscription).execute();
 
@@ -446,7 +444,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
-		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
+		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
 
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -528,7 +526,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
-		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
+		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
 
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -605,8 +603,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
-		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
+		Assert.assertNotNull(subscriptionTemp);
+		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
@@ -734,7 +732,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertNotNull(subscriptionTemp);
 		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
+		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteriaGood);
 
 		ourLog.info("** About to update subscription");
@@ -804,9 +802,9 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscription = createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		subscription.getChannel().addHeader("X-Foo: FOO");
-		subscription.getChannel().addHeader("X-Bar: BAR");
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.addHeader("X-Foo: FOO");
+		subscription.addHeader("X-Bar: BAR");
+		subscription.setStatus(Enumerations.SubscriptionState.REQUESTED);
 		ourClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
 
@@ -839,7 +837,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(1, ourUpdatedObservations);
 
 		// Disable
-		subscription.setStatus(Subscription.SubscriptionStatus.OFF);
+		subscription.setStatus(Enumerations.SubscriptionState.OFF);
 		ourClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
 
@@ -856,30 +854,30 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test
 	public void testInvalidProvenanceParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
-			String payload = "application/fhir+json";
-			String criteriabad = "Provenance?foo=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
-			Subscription subscription = newSubscription(criteriabad, payload);
-			ourClient.create().resource(subscription).execute();
+		String payload = "application/fhir+json";
+		String criteriabad = "Provenance?foo=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
+		Subscription subscription = newSubscription(criteriabad, payload);
+		ourClient.create().resource(subscription).execute();
 		});
 	}
 
 	@Test
 	public void testInvalidProcedureRequestParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
-			String payload = "application/fhir+json";
-			String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
-			Subscription subscription = newSubscription(criteriabad, payload);
-			ourClient.create().resource(subscription).execute();
+		String payload = "application/fhir+json";
+		String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
+		Subscription subscription = newSubscription(criteriabad, payload);
+		ourClient.create().resource(subscription).execute();
 		});
 	}
 
 	@Test
 	public void testInvalidBodySiteParam() {
 		assertThrows(UnprocessableEntityException.class, () -> {
-			String payload = "application/fhir+json";
-			String criteriabad = "BodySite?accessType=Catheter";
-			Subscription subscription = newSubscription(criteriabad, payload);
-			ourClient.create().resource(subscription).execute();
+		String payload = "application/fhir+json";
+		String criteriabad = "BodySite?accessType=Catheter";
+		Subscription subscription = newSubscription(criteriabad, payload);
+		ourClient.create().resource(subscription).execute();
 		});
 	}
 

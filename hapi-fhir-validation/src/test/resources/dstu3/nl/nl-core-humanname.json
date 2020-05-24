@@ -1,0 +1,497 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-humanname",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-humanname",
+  "version": "2.0.5",
+  "name": "nl-core-humanname",
+  "title": "nl-core-humanname",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Base datatype for HumanName Type with additions for Dutch realm names. Dutch names break down the family into maximum of 4 parts that are important to know separately in some if not most use cases.",
+  "purpose": "Name information is used to identify and address person.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-nameinformation-v2.0.1-2015EN",
+      "uri": "https://zibs.nl/wiki/Patient-v2.0.1(2015EN)",
+      "name": "NameInformation as part of HCIM Patient-v2.0.1(2015EN)",
+      "comment": "NameInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-nameinformation-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.0(2016EN)",
+      "name": "NameInformation as part of HCIM Patient-v3.0(2016EN)",
+      "comment": "NameInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-nameinformation-v1.0.1-2017EN",
+      "uri": "https://zibs.nl/wiki/NameInformation-v1.0.1(2017EN)",
+      "name": "HCIM NameInformation-v1.0.1(2017EN)"
+    },
+    {
+      "identity": "BRP",
+      "uri": "https://nl.wikipedia.org/wiki/Basisregistratie_Personen",
+      "name": "Basisregistratie Personen",
+      "comment": "Voorheen GBA - Gemeentelijke basisregistratie"
+    }
+  ],
+  "kind": "complex-type",
+  "abstract": false,
+  "type": "HumanName",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/HumanName",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "HumanName",
+        "path": "HumanName",
+        "comment": "Names may be changed, or repudiated, or people may have different names in different contexts. Names may be divided into parts of different type that have variable significance depending on context, though the division into parts does not always matter. With personal names, the different parts may or may not be imbued with some implicit meaning; various cultures associate different importance with the name parts and the degree to which systems must care about name parts around the world varies widely.\r\n\r\nA Dutch HumanName is a proper FHIR HumanName. Systems that do not understand any of the extensions, will be able to render and work with a Dutch name. Dutch names make certain name parts seaprately communicable. These parts are required for use in true Dutch systems when dealing with Dutch names, but may not have value for international systems when information gets sent abroad.\r\n\r\nTo have true compatibility an implementer SHOULD use the core HumanName parts as intended. To have names work for Dutch context, the implementer SHOULD in addition use the extension elements.\r\n\r\nThe extension elements cover birth name (NL: eigennaam / geslachtsnaam) and partner/spouse name. Both may have a prefix (NL: voorvoegsel). When a person marries, he or she may keep their own name, assume the partner name, append the partner name to their own name, or the other way around.\r\n\r\nFor this reason, there are extensions for marking each part for what it is. \r\n\r\nExample: miss Irma Jongeneel marries mister de Haas and assumes the name Irma Jongeneel-de Haas\r\nfamily = \"Jongeneel-de Haas\"\r\ngiven = \"Irma\"\r\nhumanname-own-name = \"Jongeneel\"\r\nhumanname-partner-prefix = \"de \"\r\nhumanname-partner-name = \"Haas\"",
+        "example": [
+          {
+            "label": "Structured HumanName (preferred above unstructured)",
+            "valueHumanName": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/humanname-assembly-order",
+                  "valueCode": "NL4"
+                }
+              ],
+              "use": "official",
+              "family": "Jongeneel-de Haas",
+              "_family": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/humanname-own-name",
+                    "valueString": "Jongeneel"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/humanname-partner-prefix",
+                    "valueString": "de"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/humanname-partner-name",
+                    "valueString": "Haas"
+                  }
+                ]
+              },
+              "given": [
+                "Irma",
+                "I."
+              ],
+              "_given": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier",
+                      "valueCode": "CL"
+                    }
+                  ]
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier",
+                      "valueCode": "IN"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "label": "Unstructured HumanName",
+            "valueHumanName": {
+              "use": "official",
+              "text": "Irma Jongeneel-de Haas"
+            }
+          }
+        ],
+        "constraint": [
+          {
+            "key": "nl-core-humanname-1",
+            "severity": "error",
+            "human": "if you specify a prefix for an own name then an own name is also expected",
+            "expression": "name.family.extension('http://hl7.org/fhir/StructureDefinition/humanname-own-prefix').empty().not() implies name.family.extension('http://hl7.org/fhir/StructureDefinition/humanname-own-name').empty().not()",
+            "xpath": "not(f:extension[@url='http://hl7.org/fhir/StructureDefinition/humanname-own-prefix']) or f:extension[@url='http://hl7.org/fhir/StructureDefinition/humanname-own-name']"
+          },
+          {
+            "key": "nl-core-humanname-2",
+            "severity": "error",
+            "human": "if you specify a voorvoegsel for a partner name then a partner name is also expected",
+            "expression": "name.family.extension('http://hl7.org/fhir/StructureDefinition/humanname-partner-prefix').empty().not() implies name.family.extension('http://hl7.org/fhir/StructureDefinition/humanname-partner-name').empty().not()",
+            "xpath": "not(f:extension[@url='http://hl7.org/fhir/StructureDefinition/humanname-partner-prefix']) or f:extension[@url='http://hl7.org/fhir/StructureDefinition/humanname-partner-name']"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.6",
+            "comment": "NameInformation"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.6",
+            "comment": "NameInformation"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.1",
+            "comment": "NameInformation"
+          },
+          {
+            "identity": "BRP",
+            "map": "02",
+            "comment": "Naam"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.extension",
+        "path": "HumanName.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "HumanName.extension:humannameAssemblyOrder",
+        "path": "HumanName.extension",
+        "sliceName": "humannameAssemblyOrder",
+        "alias": [
+          "Voorkeursvolgorde van de naamdelen."
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://hl7.org/fhir/StructureDefinition/humanname-assembly-order"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.34",
+            "comment": "NameUsage. Use FHIR Core ConceptMap for HCIM mapping: http://nictiz.nl/fhir/ConceptMap/NaamgebruikCodelijst-to-HumanNameAssemblyOrder"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.34",
+            "comment": "NameUsage. Use FHIR Core ConceptMap for HCIM mapping: http://nictiz.nl/fhir/ConceptMap/NaamgebruikCodelijst-to-HumanNameAssemblyOrder"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.7",
+            "comment": "NameUsage. Use FHIR Core ConceptMap for HCIM mapping: http://nictiz.nl/fhir/ConceptMap/NaamgebruikCodelijst-to-HumanNameAssemblyOrder"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.text",
+        "path": "HumanName.text",
+        "mapping": [
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.5",
+            "comment": "PayerName"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.5",
+            "comment": "PayerName"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.5",
+            "comment": "PayerName"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.family",
+        "path": "HumanName.family",
+        "short": "Surname",
+        "alias": [
+          "Achternaam"
+        ]
+      },
+      {
+        "id": "HumanName.family.extension",
+        "path": "HumanName.family.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "HumanName.family.extension:humannameOwnPrefix",
+        "path": "HumanName.family.extension",
+        "sliceName": "humannameOwnPrefix",
+        "short": "PrefixOwnName",
+        "definition": "The prefix portion (e.g. voorvoegsel) inclusive of the space between the prefix and the surname, if applicable, of the family name that is derived from the person's own surname, as distinguished from any portion that is derived from the surname of the person's partner or spouse.",
+        "alias": [
+          "VoorvoegselGeslachtsnaam"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://hl7.org/fhir/StructureDefinition/humanname-own-prefix"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.38",
+            "comment": "Prefix"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.38",
+            "comment": "Prefix"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.11",
+            "comment": "Prefix"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.family.extension:humannameOwnPrefix.valueString:valueString",
+        "path": "HumanName.family.extension.valueString",
+        "sliceName": "valueString"
+      },
+      {
+        "id": "HumanName.family.extension:humannameOwnName",
+        "path": "HumanName.family.extension",
+        "sliceName": "humannameOwnName",
+        "short": "OwnName",
+        "definition": "The person’s official last name.",
+        "comment": "The portion of the family name that is derived from the person's own surname, as distinguished from any portion that is derived from the surname of the person's partner or spouse. If the person's surname has legally changed to become (or incorporate) the surname of the person's partner or spouse, this is the person's surname immediately prior to such change. Often this is the person's \"maiden name\".",
+        "alias": [
+          "Geslachtsnaam"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://hl7.org/fhir/StructureDefinition/humanname-own-name"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.24",
+            "comment": "LastName"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.24",
+            "comment": "LastName"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.10",
+            "comment": "LastName"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.family.extension:humannameOwnName.valueString:valueString",
+        "path": "HumanName.family.extension.valueString",
+        "sliceName": "valueString"
+      },
+      {
+        "id": "HumanName.family.extension:humannamePartnerPrefix",
+        "path": "HumanName.family.extension",
+        "sliceName": "humannamePartnerPrefix",
+        "short": "PrefixSurname",
+        "definition": "Voorvoegsel derived from person's partner's surname inclusive of the space between the prefix and the surname, if applicable.",
+        "alias": [
+          "VoorvoegselGeslachtsnaamPartner"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://hl7.org/fhir/StructureDefinition/humanname-partner-prefix"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.39",
+            "comment": "PartnerPrefix"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.39",
+            "comment": "PartnerPrefix"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.9",
+            "comment": "PartnerPrefix"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.family.extension:humannamePartnerPrefix.valueString:valueString",
+        "path": "HumanName.family.extension.valueString",
+        "sliceName": "valueString"
+      },
+      {
+        "id": "HumanName.family.extension:humannamePartnerName",
+        "path": "HumanName.family.extension",
+        "sliceName": "humannamePartnerName",
+        "short": "LastNamePartner",
+        "definition": "Partner’s official last name.",
+        "comment": "The portion of the family name that is derived from the person's partner's surname, as distinguished from any portion that is derived from the surname of the person's own name. If the person's surname has legally changed to become (or incorporate) the surname of the person's partner or spouse, this is the person's surname immediately prior to such change. Often this is the person's \"maiden name\".",
+        "alias": [
+          "GeslachtsnaamPartner"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://hl7.org/fhir/StructureDefinition/humanname-partner-name"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.25",
+            "comment": "PartnerLastName"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.25",
+            "comment": "PartnerLastName"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.8",
+            "comment": "PartnerLastName"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.family.extension:humannamePartnerName.valueString:valueString",
+        "path": "HumanName.family.extension.valueString",
+        "sliceName": "valueString"
+      },
+      {
+        "id": "HumanName.given",
+        "path": "HumanName.given",
+        "short": "Given",
+        "definition": "Note that in order to mark the type of a given name, that you use the FHIR standard extension for ISO 21090 EN Qualifiers. Examples include call me name (Dutch: roepnaam) and initials. Each initial is expected to be delimited by a dot.",
+        "comment": "To be conformant to the Zib for NameInformation, at least the following qualifiers SHALL be supported: BR, IN and CL. The qualifier 'BR' maps to the Zib concept FirstNames, 'IN' maps to Initials and 'CL' to GivenName.",
+        "alias": [
+          "Voornamen",
+          "Initialen",
+          "Roepnaam"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.26",
+            "comment": "FirstNames. Qualifier 'BR'"
+          },
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.35",
+            "comment": "Initials. Qualifier 'IN'"
+          },
+          {
+            "identity": "hcim-nameinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.27",
+            "comment": "GivenName. Qualifier 'CL'"
+          },
+          {
+            "identity": "BRP",
+            "map": "02.10",
+            "comment": "Voornamen"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.26",
+            "comment": "FirstNames. Qualifier 'BR'"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.35",
+            "comment": "Initials. Qualifier 'IN'"
+          },
+          {
+            "identity": "hcim-nameinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.27",
+            "comment": "GivenName. Qualifier 'CL'"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.4",
+            "comment": "FirstNames. Qualifier 'BR'"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.5",
+            "comment": "Initials. Qualifier 'IN'"
+          },
+          {
+            "identity": "hcim-nameinformation-v1.0.1-2017EN",
+            "map": "NL-CM:20.4.6",
+            "comment": "GivenName. Qualifier 'CL'"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.given.extension",
+        "path": "HumanName.given.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "HumanName.given.extension:iso21090EnQualifier",
+        "path": "HumanName.given.extension",
+        "sliceName": "iso21090EnQualifier",
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier"
+          }
+        ]
+      },
+      {
+        "id": "HumanName.given.extension:iso21090EnQualifier.valueCode:valueCode",
+        "path": "HumanName.given.extension.valueCode",
+        "sliceName": "valueCode"
+      }
+    ]
+  }
+}

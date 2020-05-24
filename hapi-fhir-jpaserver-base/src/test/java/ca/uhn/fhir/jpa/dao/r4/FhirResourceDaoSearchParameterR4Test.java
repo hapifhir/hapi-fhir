@@ -43,7 +43,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 	@Test
 	public void testValidateAllBuiltInSearchParams() {
 
-		for (String nextResource : myCtx.getResourceNames()) {
+		for (String nextResource : myCtx.getResourceTypes()) {
 			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextResource);
 			for (RuntimeSearchParam nextp : nextResDef.getSearchParams()) {
 				if (nextp.getName().equals("_id")) {

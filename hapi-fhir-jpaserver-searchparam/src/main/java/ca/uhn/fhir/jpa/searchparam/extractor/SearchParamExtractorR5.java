@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
@@ -56,8 +58,8 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	/**
 	 * Constructor for unit tests
 	 */
-	public SearchParamExtractorR5(FhirContext theCtx, DefaultProfileValidationSupport theDefaultProfileValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theCtx, theSearchParamRegistry);
+	public SearchParamExtractorR5(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, DefaultProfileValidationSupport theDefaultProfileValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+		super(theModelConfig, thePartitionSettings, theCtx, theSearchParamRegistry);
 		initFhirPath(theDefaultProfileValidationSupport);
 		start();
 	}

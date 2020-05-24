@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
@@ -125,7 +126,7 @@ public class FhirInstanceValidatorR5Test {
 			ValueSet arg = (ValueSet) theInvocation.getArgument(2, IBaseResource.class);
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 			if (retVal == null) {
-				IValidationSupport.ValueSetExpansionOutcome outcome = myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, null, arg);
+				IValidationSupport.ValueSetExpansionOutcome outcome = myDefaultValidationSupport.expandValueSet(new ValidationSupportContext(myDefaultValidationSupport), null, arg);
 				return outcome;
 			}
 			ourLog.debug("expandValueSet({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
@@ -171,7 +172,7 @@ public class FhirInstanceValidatorR5Test {
 				} else if (myValidSystems.contains(system)) {
 					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.WARNING).setMessage("Unknown code: " + system + " / " + code);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, options, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;
@@ -620,8 +621,8 @@ public class FhirInstanceValidatorR5Test {
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals( 3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(messages.get(1).getMessage(), containsString("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]"));
-		assertThat(messages.get(2).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
+		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
+		assertThat(messages.get(2).getMessage(), containsString("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]"));
 	}
 
 	@Test
@@ -656,7 +657,8 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals( 0, res.size(), output.toString());
+		assertEquals(output.toString(), 1, res.size());
+		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -848,7 +850,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided (\"notvalidcode\") is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.2.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
+			"The value provided (\"notvalidcode\") is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.4.0 (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -951,7 +953,7 @@ public class FhirInstanceValidatorR5Test {
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
-			"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code) (codes = http://example.com/foo/bar#bar)",
+			"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type), and a code should come from this value set unless it has no suitable code) (codes = http://example.com/foo/bar#bar)",
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 

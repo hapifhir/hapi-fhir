@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -27,13 +28,30 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Appointment;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.EpisodeOfCare;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
@@ -632,7 +650,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(()->{
 			myEntityManager
-				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = null")
+				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = 0")
 				.executeUpdate();
 		});
 
@@ -644,6 +662,15 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
+
+		runInTransaction(()->{
+			ResourceIndexedSearchParamString param = myResourceIndexedSearchParamStringDao.findAll()
+				.stream()
+				.filter(t -> t.getParamName().equals("family"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(-6332913947530887803L, param.getHashNormalizedPrefix().longValue());
+		});
 
 		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
 	}
@@ -661,16 +688,16 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(()->{
 			Long i = myEntityManager
-				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
 			assertEquals(0L, i.longValue());
 
 			myEntityManager
-				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashIdentity = null")
+				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashIdentity = 0")
 				.executeUpdate();
 
 			i = myEntityManager
-				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
 			assertThat(i, greaterThan(1L));
 
@@ -681,7 +708,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(()->{
 			Long i = myEntityManager
-				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
 			assertEquals(0L, i.longValue());
 		});

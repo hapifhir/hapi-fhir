@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 public class ResourceIndexedSearchParamQuantityTest {
 
 	private ResourceIndexedSearchParamQuantity createParam(String theParamName, String theValue, String theSystem, String theUnits) {
-		ResourceIndexedSearchParamQuantity token = new ResourceIndexedSearchParamQuantity("Patient", theParamName, new BigDecimal(theValue), theSystem, theUnits);
+		ResourceIndexedSearchParamQuantity token = new ResourceIndexedSearchParamQuantity(new PartitionSettings(), "Patient", theParamName, new BigDecimal(theValue), theSystem, theUnits);
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 		return token;
 	}
@@ -18,6 +18,7 @@ public class ResourceIndexedSearchParamQuantityTest {
 	@Test
 	public void testHashFunctions() {
 		ResourceIndexedSearchParamQuantity token = createParam("NAME", "123.001", "value", "VALUE");
+		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
 		assertEquals(834432764963581074L, token.getHashIdentity().longValue());
@@ -29,9 +30,11 @@ public class ResourceIndexedSearchParamQuantityTest {
 	public void testEquals() {
 		ResourceIndexedSearchParamQuantity val1 = new ResourceIndexedSearchParamQuantity()
 			.setValue(new BigDecimal(123));
+		val1.setPartitionSettings(new PartitionSettings());
 		val1.calculateHashes();
 		ResourceIndexedSearchParamQuantity val2 = new ResourceIndexedSearchParamQuantity()
 			.setValue(new BigDecimal(123));
+		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);

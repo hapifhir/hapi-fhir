@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.api.svc;
  */
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -37,7 +37,7 @@ public interface ISearchCoordinatorSvc {
 
 	List<ResourcePersistentId> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
 
-	IBundleProvider registerSearch(IFhirResourceDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
+	IBundleProvider registerSearch(IFhirResourceDao<?> theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
 
 	/**
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and

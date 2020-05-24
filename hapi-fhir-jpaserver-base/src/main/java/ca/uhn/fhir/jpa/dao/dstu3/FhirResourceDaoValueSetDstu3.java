@@ -22,12 +22,14 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -98,7 +100,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 		validateIncludes("include", theSource.getCompose().getInclude());
 		validateIncludes("exclude", theSource.getCompose().getExclude());
 
-		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, null, theSource);
+		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, theSource);
 		validateHaveExpansionOrThrowInternalErrorException(retVal);
 		return (ValueSet) retVal.getValueSet();
 
@@ -111,7 +113,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(theOffset)
 			.setCount(theCount);
-		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(myValidationSupport, options, theSource);
+		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, theSource);
 		validateHaveExpansionOrThrowInternalErrorException(retVal);
 		return (ValueSet) retVal.getValueSet();
 	}
@@ -373,8 +375,8 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
+												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
 		if (myDaoConfig.isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {

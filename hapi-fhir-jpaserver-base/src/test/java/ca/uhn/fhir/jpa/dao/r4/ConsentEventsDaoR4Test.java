@@ -4,8 +4,8 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -59,6 +59,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	@AfterEach
 	public void after() {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@Override
@@ -181,6 +182,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearchAndBlockSomeOnRevIncludes() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -205,6 +208,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearchAndBlockSomeOnRevIncludes_LoadSynchronous() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -217,11 +221,14 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		map.setLoadSynchronous(true);
 		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
 		map.addRevInclude(IBaseResource.INCLUDE_ALL);
+
+		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 100);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 		assertEquals(2, hitCount.get());
@@ -316,7 +323,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
-		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		ourLog.info("Returned values: {}", returnedIdValues);

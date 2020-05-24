@@ -20,12 +20,25 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity()
-@Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
+@Table(name = ForcedId.HFJ_FORCED_ID, uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
 	@UniqueConstraint(name = ForcedId.IDX_FORCEDID_TYPE_FID, columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
 }, indexes = {
@@ -36,10 +49,11 @@ import javax.persistence.*;
 	 * so don't reuse these names
 	 */
 })
-public class ForcedId {
+public class ForcedId extends BasePartitionable {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
 	public static final String IDX_FORCEDID_TYPE_FID = "IDX_FORCEDID_TYPE_FID";
+	public static final String HFJ_FORCED_ID = "HFJ_FORCED_ID";
 
 	@Column(name = "FORCED_ID", nullable = false, length = MAX_FORCED_ID_LENGTH, updatable = false)
 	private String myForcedId;
@@ -92,5 +106,19 @@ public class ForcedId {
 
 	public Long getId() {
 		return myId;
+	}
+
+	public Long getResourceId() {
+		return myResourcePid;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("pid", myId)
+			.append("resourceType", myResourceType)
+			.append("forcedId", myForcedId)
+			.append("resourcePid", myResourcePid)
+			.toString();
 	}
 }

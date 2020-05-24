@@ -273,48 +273,6 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingDisabled() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
-
-		SearchParameter memberSp = new SearchParameter();
-		memberSp.setCode("member");
-		memberSp.setBase(ResourceTypeEnum.GROUP);
-		memberSp.setType(SearchParamTypeEnum.REFERENCE);
-		memberSp.setXpath("Group.member.entity");
-		memberSp.setXpathUsage(XPathUsageTypeEnum.NORMAL);
-		memberSp.setStatus(ConformanceResourceStatusEnum.RETIRED);
-		mySearchParameterDao.create(memberSp, mySrd);
-
-		SearchParameter identifierSp = new SearchParameter();
-		identifierSp.setCode("identifier");
-		identifierSp.setBase(ResourceTypeEnum.GROUP);
-		identifierSp.setType(SearchParamTypeEnum.TOKEN);
-		identifierSp.setXpath("Group.identifier");
-		identifierSp.setXpathUsage(XPathUsageTypeEnum.NORMAL);
-		identifierSp.setStatus(ConformanceResourceStatusEnum.RETIRED);
-		mySearchParameterDao.create(identifierSp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
-		Patient p = new Patient();
-		p.addName().addGiven("G");
-		IIdType pid = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-
-		Group g = new Group();
-		g.addIdentifier().setSystem("urn:foo").setValue("bar");
-		g.addMember().getEntity().setReference(pid);
-		myGroupDao.create(g);
-
-		assertThat(myResourceLinkDao.findAll(), not(empty()));
-		assertThat(ListUtil.filter(myResourceIndexedSearchParamTokenDao.findAll(), new ListUtil.Filter<ResourceIndexedSearchParamToken>() {
-			@Override
-			public boolean isOut(ResourceIndexedSearchParamToken object) {
-				return !object.getResourceType().equals("Group") || object.isMissing();
-			}
-		}), not(empty()));
-	}
-
-	@Test
 	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingEnabled() {
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
@@ -1029,7 +987,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -1066,7 +1024,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 
 		// Try with normal gender SP

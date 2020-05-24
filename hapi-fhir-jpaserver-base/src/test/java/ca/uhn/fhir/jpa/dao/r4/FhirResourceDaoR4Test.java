@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -51,15 +52,43 @@ import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Age;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.CompartmentDefinition;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.MolecularSequence;
+import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationDefinition;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
@@ -116,6 +145,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@BeforeEach
@@ -1628,7 +1658,32 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDeleteByTagWrongType() {
+		Organization org = new Organization();
+		org.getMeta().addTag().setCode("term");
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		myPatientDao.deleteByUrl("Patient?_tag=term", mySrd);
+		// The organization is still there
+		myOrganizationDao.read(orgId);
+	}
+
+	@Test
+	public void testSearchByTagWrongType() {
+		Organization org = new Organization();
+		org.getMeta().addTag().setCode("term");
+		myOrganizationDao.create(org, mySrd);
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("_tag", new UriParam("term"));
+		map.setLoadSynchronous(true);
+		IBundleProvider result = myPatientDao.search(map);
+		List<IBaseResource> resources = result.getResources(0, 1);
+		assertEquals(0, resources.size());
+	}
+
+	@Test
 	public void testDeleteWithMatchUrlQualifierMissing() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		String methodName = "testDeleteWithMatchUrlChainedProfile";
 
 		/*
@@ -2435,7 +2490,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 			assertEquals(0, found.size());
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter birthdateAAAA for resource type Patient", e.getMessage());
+			assertEquals("Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -3046,6 +3101,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testSortByDate() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
 		p.addName().setFamily("testSortF1").addGiven("testSortG1");
@@ -3375,6 +3432,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testSortByString01() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 		Patient p = new Patient();
 		String string = "testSortByString01";
 		p.addIdentifier().setSystem("urn:system").setValue(string);
