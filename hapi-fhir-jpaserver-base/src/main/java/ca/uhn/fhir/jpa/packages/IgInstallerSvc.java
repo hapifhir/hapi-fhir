@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -56,9 +57,14 @@ public class IgInstallerSvc {
 	@PostConstruct
 	public void initialize() {
 		switch (fhirContext.getVersion().getVersion()) {
-			case R5: 
+			case R5:
 			case R4:
-			case DSTU3: break;
+			case DSTU3:
+				break;
+
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
 			default: {
 				ourLog.info("IG installation not supported for version: {}", fhirContext.getVersion().getVersion());
 				enabled = false;
@@ -258,7 +264,7 @@ public class IgInstallerSvc {
 
 	private IBaseResource generateSnapshot(IBaseResource sd) {
 		try {
-			return validationSupport.generateSnapshot(validationSupport, sd, null, null, null);
+			return validationSupport.generateSnapshot(new ValidationSupportContext(validationSupport), sd, null, null, null);
 		} catch (Exception e) {
 			throw new ImplementationGuideInstallationException(String.format(
 				"Failure when generating snapshot of StructureDefinition: %s", sd.getIdElement()), e);
