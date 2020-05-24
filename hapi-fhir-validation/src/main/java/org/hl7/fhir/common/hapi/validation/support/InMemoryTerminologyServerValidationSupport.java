@@ -222,6 +222,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		String codeSystemName = null;
 		String codeSystemVersion = null;
+		String codeSystemContentMode = null;
 		if (system != null) {
 			switch (system.getStructureFhirVersionEnum()) {
 				case DSTU2_HL7ORG: {
@@ -233,6 +234,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					caseSensitive = systemDstu3.getCaseSensitive();
 					codeSystemName = systemDstu3.getName();
 					codeSystemVersion = systemDstu3.getVersion();
+					codeSystemContentMode = systemDstu3.getContentElement().getValueAsString();
 					break;
 				}
 				case R4: {
@@ -240,6 +242,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					caseSensitive = systemR4.getCaseSensitive();
 					codeSystemName = systemR4.getName();
 					codeSystemVersion = systemR4.getVersion();
+					codeSystemContentMode = systemR4.getContentElement().getValueAsString();
 					break;
 				}
 				case R5: {
@@ -247,6 +250,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					caseSensitive = systemR5.getCaseSensitive();
 					codeSystemName = systemR5.getName();
 					codeSystemVersion = systemR5.getVersion();
+					codeSystemContentMode = systemR5.getContentElement().getValueAsString();
 					break;
 				}
 				case DSTU2:
@@ -275,9 +279,16 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 		}
 
-		ValidationMessage.IssueSeverity severity = ValidationMessage.IssueSeverity.ERROR;
+		ValidationMessage.IssueSeverity severity;
+		String message;
+		if ("fragment".equals(codeSystemContentMode)) {
+			severity = ValidationMessage.IssueSeverity.WARNING;
+			message = "Unknown code in fragment CodeSystem '" + (isNotBlank(theCodeSystem) ? theCodeSystem + "#" : "") + theCode + "'";
+		} else {
+			severity = ValidationMessage.IssueSeverity.ERROR;
+			message = "Unknown code '" + (isNotBlank(theCodeSystem) ? theCodeSystem + "#" : "") + theCode + "'";
+		}
 
-		String message = "Unknown code '" + (isNotBlank(theCodeSystem) ? theCodeSystem + "#" : "") + theCode + "'";
 		return new CodeValidationResult()
 			.setSeverityCode(severity.toCode())
 			.setMessage(message);

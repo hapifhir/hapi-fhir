@@ -1,0 +1,25 @@
+{
+	"resourceType": "CodeSystem",
+	"id": "22472",
+	"meta": {
+		"versionId": "3",
+		"lastUpdated": "2017-01-27T10:53:39.457-05:00"
+	},
+	"url": "http://example.com/codesystem",
+	"name": "AddressUse",
+	"status": "active",
+	"publisher": "x1v1-mci",
+	"date": "2016-04-07",
+	"description": "AddressUse",
+	"caseSensitive": true,
+	"compositional": false,
+	"versionNeeded": false,
+	"content": "fragment",
+	"concept": [
+		{
+			"code": "some-code",
+			"display": "Some Code",
+			"definition": "Blah blah"
+		}
+	]
+}
