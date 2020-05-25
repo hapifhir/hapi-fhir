@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.lastn.entity;
+package ca.uhn.fhir.jpa.model.entity;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.IndexedEmbedded;

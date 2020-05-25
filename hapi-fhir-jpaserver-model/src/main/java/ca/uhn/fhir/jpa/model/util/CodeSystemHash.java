@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.lastn.util;
+package ca.uhn.fhir.jpa.model.util;
 
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;

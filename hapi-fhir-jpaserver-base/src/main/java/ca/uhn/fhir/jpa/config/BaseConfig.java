@@ -355,8 +355,7 @@ public abstract class BaseConfig {
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));
-		// TODO: Looking at moving the lastn entities into jpa.model.entity package. Note that moving the lastn entities may require re-building elasticsearch indexes.
-		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.dao.lastn.entity");
+		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
 		theFactory.setPersistenceProvider(new HibernatePersistenceProvider());
 	}
 

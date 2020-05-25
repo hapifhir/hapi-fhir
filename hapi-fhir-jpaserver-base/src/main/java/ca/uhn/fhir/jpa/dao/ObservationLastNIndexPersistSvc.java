@@ -1,10 +1,14 @@
-package ca.uhn.fhir.jpa.dao.lastn;
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodingSearchParamDao;
 import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
-import ca.uhn.fhir.jpa.dao.lastn.entity.*;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCategoryCodeableConceptEntity;
+import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCategoryCodingEntity;
+import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity;
+import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodingEntity;
+import ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;

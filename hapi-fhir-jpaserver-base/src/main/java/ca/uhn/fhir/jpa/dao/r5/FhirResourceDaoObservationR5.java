@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  */
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.dao.lastn.ObservationLastNIndexPersistSvc;
+import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
