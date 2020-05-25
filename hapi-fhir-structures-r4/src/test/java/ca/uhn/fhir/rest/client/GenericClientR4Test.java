@@ -258,7 +258,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(Patient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals("foo=bar", capt.getAllValues().get(0).getFirstHeader("Cookie").getValue());
@@ -449,7 +449,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(CustomTypeR4Test.MyCustomPatient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals(1, resp.getEntry().size());
@@ -692,7 +692,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		Bundle outcome = client
 			.history()
-			.onServer().andReturnBundle(Bundle.class)
+			.onServer().returnBundle(Bundle.class)
 			.at(new DateRangeParam().setLowerBound("2011").setUpperBound("2018"))
 			.execute();
 
@@ -2296,7 +2296,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		client.fetchConformance().ofType(CapabilityStatement.class).execute();
+		client.capabilities().ofType(CapabilityStatement.class).execute();
 		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 	}
@@ -2321,7 +2321,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(Patient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 	}

@@ -97,7 +97,7 @@
 		<developer>
 			<id>jamesagnew</id>
 			<name>James Agnew</name>
-			<organization>University Health Network</organization>
+			<organization>Smile CDR</organization>
 		</developer>
 		<developer>
 			<id>grahamegrieve</id>
@@ -243,6 +243,7 @@
 		<developer>
 			<id>karlmdavis</id>
 			<name>Karl M. Davis</name>
+			<organization>CMS</organization>
 		</developer>
 		<developer>
 			<id>matt-blanchette</id>
@@ -294,7 +295,7 @@
 		<developer>
 			<id>vadi2</id>
 			<name>Vadim Peretokin</name>
-			<organization>Furore Informatica</organization>
+			<organization>Firely</organization>
 		</developer>
 		<developer>
 			<id>lawley</id>
@@ -320,7 +321,7 @@
 		<developer>
 			<id>daliboz</id>
 			<name>Jenny Syed</name>
-			<organization>Cerner</organization>
+			<organization>Cerner Corporation</organization>
 		</developer>
 		<developer>
 			<id>sekaijin</id>
@@ -341,6 +342,7 @@
 		<developer>
 			<id>joelsch</id>
 			<name>Joel Schneider</name>
+			<organization>National Marrow Donor Program</organization>
 		</developer>
 		<developer>
 			<id>dangerousben</id>
@@ -353,6 +355,7 @@
 		<developer>
 			<id>ohr</id>
 			<name>Christian Ohr</name>
+			<organization>InterComponentWare AG</organization>
 		</developer>
 		<developer>
 			<id>eug48</id>
@@ -440,10 +443,6 @@
 			<name>Andreas Keil</name>
 		</developer>
 		<developer>
-			<id>dgileadi</id>
-			<name>David Gileadi</name>
-		</developer>
-		<developer>
 			<id>RuthAlk</id>
 			<name>Ruth Alkema</name>
 		</developer>
@@ -489,6 +488,7 @@
 		<developer>
 			<id>volsch</id>
 			<name>Volker Schmidt</name>
+			<organization>DHIS2 / University of Oslo</organization>
 		</developer>
 		<developer>
 			<id>magnuswatn</id>
@@ -528,7 +528,7 @@
 		<developer>
 			<id>tadgh</id>
 			<name>Gary Graham</name>
-			<organization>Centre for Global eHealth Innovation</organization>
+			<organization>Smile CDR</organization>
 		</developer>
 		<developer>
 			<id>nerdydrew</id>
@@ -550,10 +550,6 @@
 		<developer>
 			<id>uurl</id>
 			<name>Raul Estrada</name>
-		</developer>
-		<developer>
-			<id>anthonys123</id>
-			<name>Anthony Sute</name>
 		</developer>
 		<developer>
 			<id>nickrobison-usds</id>
@@ -596,6 +592,11 @@
 			<name>Tue Toft Nørgård</name>
 		</developer>
 		<developer>
+			<id>mzgtrifork</id>
+			<organization>Trifork</organization>
+			<name>Martin Zacho Grønhøj</name>
+		</developer>
+		<developer>
 			<id>augla</id>
 			<name>August Langhout</name>
 		</developer>
@@ -632,6 +633,26 @@
 		<developer>
 			<id>ibacher</id>
 			<name>Ian</name>
+		</developer>
+		<developer>
+			<id>jasmdk</id>
+			<name>Jacob Stampe Mikkelsen</name>
+			<organization>Systematik A/S</organization>
+		</developer>
+		<developer>
+			<id>craigappl</id>
+			<name>Craig Appl</name>
+			<organization>ONA</organization>
+		</developer>
+		<developer>
+			<id>IanMMarshall</id>
+			<name>Ian Marshall</name>
+			<organization>Smile CDR</organization>
+		</developer>
+		<developer>
+			<id>markiantorno</id>
+			<name>Mark Iantorno</name>
+			<organization>Smile CDR</organization>
 		</developer>
 	</developers>
 
