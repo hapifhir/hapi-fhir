@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -170,9 +171,13 @@ public class FhirPatchApplyR4Test {
 		return ((IPrimitiveType) part.getValue()).getValueAsString();
 	}
 
+	@Nullable
 	public static <T extends IBase> T extractPartValue(Parameters theDiff, int theIndex, String theParameterName, String thePartName, Class<T> theExpectedType) {
 		Parameters.ParametersParameterComponent component = theDiff.getParameter().stream().filter(t -> t.getName().equals(theParameterName)).collect(Collectors.toList()).get(theIndex);
-		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElse(null);
+		if (part == null) {
+			return null;
+		}
 
 		if (IBaseResource.class.isAssignableFrom(theExpectedType)) {
 			return (T) part.getResource();
