@@ -13,6 +13,8 @@ import java.util.*;
 @Indexed(index = "observation_index")
 public class ObservationIndexedSearchParamLastNEntity {
 
+	public static final int MAX_LENGTH = 200;
+
 	@Id
 	@SequenceGenerator(name = "SEQ_LASTN", sequenceName = "SEQ_LASTN")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_LASTN")
@@ -20,7 +22,7 @@ public class ObservationIndexedSearchParamLastNEntity {
 	private Long myId;
 
 	@Field(name = "subject", analyze = Analyze.NO)
-	@Column(name = "LASTN_SUBJECT_ID", nullable = true)
+	@Column(name = "LASTN_SUBJECT_ID", nullable = true, length = MAX_LENGTH)
 	private String mySubject;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -29,7 +31,7 @@ public class ObservationIndexedSearchParamLastNEntity {
 	private ObservationIndexedCodeCodeableConceptEntity myObservationCode;
 
 	@Field(name = "codeconceptid", analyze = Analyze.NO)
-	@Column(name = "CODEABLE_CONCEPT_ID", nullable = false, updatable = false, insertable = false)
+	@Column(name = "CODEABLE_CONCEPT_ID", nullable = false, updatable = false, insertable = false, length = MAX_LENGTH)
 	private String myCodeNormalizedId;
 
 	@IndexedEmbedded(depth = 2, prefix = "categoryconcept")
@@ -42,7 +44,7 @@ public class ObservationIndexedSearchParamLastNEntity {
 	private Date myEffectiveDtm;
 
 	@DocumentId(name = "identifier")
-	@Column(name = "RESOURCE_IDENTIFIER", nullable = false)
+	@Column(name = "RESOURCE_IDENTIFIER", nullable = false, length = MAX_LENGTH)
 	private String myIdentifier;
 
 	public ObservationIndexedSearchParamLastNEntity() {

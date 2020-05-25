@@ -224,7 +224,7 @@ public class SearchBuilder implements ISearchBuilder {
 		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			if (myParams.isLastN() && LastNParameterHelper.isLastNParameter(nextParamName, myContext)) {
-				// Skip parameters for Subject, Patient, Code and Category for LastN
+				// Skip parameters for Subject, Patient, Code and Category for LastN as these will be filtered by Elasticsearch
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();

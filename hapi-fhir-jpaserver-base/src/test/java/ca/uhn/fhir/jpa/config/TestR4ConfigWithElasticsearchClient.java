@@ -10,7 +10,6 @@ public class TestR4ConfigWithElasticsearchClient extends TestR4ConfigWithElastic
 	@Bean()
 	public ElasticsearchSvcImpl myElasticsearchSvc() {
 		int elasticsearchPort = embeddedElasticSearch().getHttpPort();
-//		int elasticsearchPort = 9301;
 		return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUserId, elasticsearchPassword);
 	}
 

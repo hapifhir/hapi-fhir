@@ -145,6 +145,13 @@
 			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-elasticsearch-6</artifactId>
+			<version>${project.version}</version>
+			<classifier>shaded6</classifier>
+		</dependency>
+
 
 		<dependency>
 			<groupId>net.ttddyy</groupId>
@@ -587,18 +594,6 @@
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-elasticsearch-6</artifactId>
-			<version>1.0-SNAPSHOT</version>
-			<classifier>shaded6</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>42.2.9</version>
-		</dependency>
-
 	</dependencies>
 
 

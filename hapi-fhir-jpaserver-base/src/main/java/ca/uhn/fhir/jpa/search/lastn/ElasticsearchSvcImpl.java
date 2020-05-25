@@ -44,6 +44,7 @@ import org.shadehapi.elasticsearch.search.sort.SortOrder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -134,7 +135,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		if (!createIndex(OBSERVATION_INDEX, observationMapping)) {
 			throw new RuntimeException("Failed to create observation index");
 		}
-
 	}
 
 	private void createCodeIndexIfMissing() throws IOException {
@@ -182,23 +182,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	}
 
-	@VisibleForTesting
-	boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
-		IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
-			RequestOptions.DEFAULT);
-
-		return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
-	}
-
-	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
-		IndexRequest request = new IndexRequest(theIndexName);
-		request.id(theDocumentId);
-		request.type(theDocumentType);
-
-		request.source(theObservationDocument, XContentType.JSON);
-		return request;
-	}
-
 	private boolean indexExists(String theIndexName) throws IOException {
 		GetIndexRequest request = new GetIndexRequest();
 		request.indices(theIndexName);
@@ -209,90 +192,79 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch) {
 		String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
 		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
-		try {
-			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theFhirContext, topHitsInclude);
-			List<String> observationIds = new ArrayList<>();
-			for (SearchResponse response : responses) {
-				Integer maxResultsToAdd = null;
-				if (theMaxResultsToFetch != null) {
-					maxResultsToAdd = theMaxResultsToFetch - observationIds.size();
-				}
-				observationIds.addAll(buildObservationList(response, ObservationJson::getIdentifier, theSearchParameterMap, theFhirContext, maxResultsToAdd));
-			}
-			return observationIds;
-		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to execute LastN request", theE);
-		}
+		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, topHitsInclude,
+			ObservationJson::getIdentifier, theMaxResultsToFetch);
 	}
 
-	private List<SearchResponse> buildAndExecuteSearch(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext,
-																		String[] topHitsInclude) {
-		List<SearchResponse> responses = new ArrayList<>();
+	private <T> List<T> buildAndExecuteSearch(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext,
+																		String[] topHitsInclude, Function<ObservationJson,T> setValue, Integer theMaxResultsToFetch) {
 		String patientParamName = LastNParameterHelper.getPatientParamName(theFhirContext);
 		String subjectParamName = LastNParameterHelper.getSubjectParamName(theFhirContext);
+		List<T> searchResults = new ArrayList<>();
 		if (theSearchParameterMap.containsKey(patientParamName)
 			|| theSearchParameterMap.containsKey(subjectParamName)) {
-			ArrayList<String> subjectReferenceCriteria = new ArrayList<>();
-			List<List<IQueryParameterType>> patientParams = new ArrayList<>();
-			if (theSearchParameterMap.get(patientParamName) != null) {
-				patientParams.addAll(theSearchParameterMap.get(patientParamName));
-			}
-			if (theSearchParameterMap.get(subjectParamName) != null) {
-				patientParams.addAll(theSearchParameterMap.get(subjectParamName));
-			}
-			for (List<? extends IQueryParameterType> nextSubjectList : patientParams) {
-				subjectReferenceCriteria.addAll(getReferenceValues(nextSubjectList));
-			}
-			for (String subject : subjectReferenceCriteria) {
+			for (String subject : getSubjectReferenceCriteria(patientParamName, subjectParamName, theSearchParameterMap)) {
+				if (theMaxResultsToFetch != null && searchResults.size() >= theMaxResultsToFetch) {
+					break;
+				}
 				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, theFhirContext,
-					createCompositeAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
+					createObservationSubjectAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
 				try {
 					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
-					responses.add(lastnResponse);
+					searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
+						theMaxResultsToFetch));
 				} catch (IOException theE) {
 					throw new InvalidRequestException("Unable to execute LastN request", theE);
 				}
 			}
 		} else {
-			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, theFhirContext, createObservationCodeAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
+			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, theFhirContext,
+				createObservationCodeAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
 			try {
 				SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
-				responses.add(lastnResponse);
+				searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
+					theMaxResultsToFetch));
 			} catch (IOException theE) {
 				throw new InvalidRequestException("Unable to execute LastN request", theE);
 			}
-
 		}
-		return responses;
+		return searchResults;
 	}
 
-	@VisibleForTesting
-	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
-		try {
-			List<SearchResponse> responses = buildAndExecuteSearch(theSearchParameterMap, theFhirContext, null);
-			List<ObservationJson> observationDocuments = new ArrayList<>();
-			for (SearchResponse response : responses) {
-				observationDocuments.addAll(buildObservationList(response, t -> t, theSearchParameterMap, theFhirContext, 100));
+	private List<String> getSubjectReferenceCriteria(String thePatientParamName, String theSubjectParamName, SearchParameterMap theSearchParameterMap) {
+		List<String> subjectReferenceCriteria = new ArrayList<>();
+
+		List<List<IQueryParameterType>> patientParams = new ArrayList<>();
+		if (theSearchParameterMap.get(thePatientParamName) != null) {
+			patientParams.addAll(theSearchParameterMap.get(thePatientParamName));
+		}
+		if (theSearchParameterMap.get(theSubjectParamName) != null) {
+			patientParams.addAll(theSearchParameterMap.get(theSubjectParamName));
+		}
+		for (List<? extends IQueryParameterType> nextSubjectList : patientParams) {
+			subjectReferenceCriteria.addAll(getReferenceValues(nextSubjectList));
+		}
+		return subjectReferenceCriteria;
+	}
+
+	private TreeSet<String> getReferenceValues(List<? extends IQueryParameterType> referenceParams) {
+		TreeSet<String> referenceList = new TreeSet<>();
+
+		for (IQueryParameterType nextOr : referenceParams) {
+
+			if (nextOr instanceof ReferenceParam) {
+				ReferenceParam ref = (ReferenceParam) nextOr;
+				if (isBlank(ref.getChain())) {
+					referenceList.add(ref.getValue());
+				}
+			} else {
+				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 			}
-			return observationDocuments;
-		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to execute LastN request", theE);
 		}
+		return referenceList;
 	}
 
-	@VisibleForTesting
-	List<CodeJson> queryAllIndexedObservationCodes() throws IOException {
-		SearchRequest codeSearchRequest = new SearchRequest(CODE_INDEX);
-		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		// Query
-		searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-		searchSourceBuilder.size(1000);
-		codeSearchRequest.source(searchSourceBuilder);
-		SearchResponse codeSearchResponse = executeSearchRequest(codeSearchRequest);
-		return buildCodeResult(codeSearchResponse);
-	}
-
-	private CompositeAggregationBuilder createCompositeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
+	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
 		CompositeValuesSourceBuilder<?> subjectValuesBuilder = new TermsValuesSourceBuilder("subject").field("subject");
 		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList();
 		compositeAggSubjectSources.add(subjectValuesBuilder);
@@ -395,16 +367,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return parsedTopHits.getHits().getHits();
 	}
 
-	private List<CodeJson> buildCodeResult(SearchResponse theSearchResponse) throws JsonProcessingException {
-		SearchHits codeHits = theSearchResponse.getHits();
-		List<CodeJson> codes = new ArrayList<>();
-		for (SearchHit codeHit : codeHits) {
-			CodeJson code = objectMapper.readValue(codeHit.getSourceAsString(), CodeJson.class);
-			codes.add(code);
-		}
-		return codes;
-	}
-
 	private SearchRequest buildObservationsSearchRequest(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, AggregationBuilder theAggregationBuilder) {
 		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -451,23 +413,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				|| theSearchParameterMap.containsKey(LastNParameterHelper.getSubjectParamName(theFhirContext))
 				|| theSearchParameterMap.containsKey(LastNParameterHelper.getCategoryParamName(theFhirContext))
 				|| theSearchParameterMap.containsKey(LastNParameterHelper.getCodeParamName(theFhirContext)));
-	}
-
-	private List<String> getReferenceValues(List<? extends IQueryParameterType> referenceParams) {
-		ArrayList<String> referenceList = new ArrayList<>();
-
-		for (IQueryParameterType nextOr : referenceParams) {
-
-			if (nextOr instanceof ReferenceParam) {
-				ReferenceParam ref = (ReferenceParam) nextOr;
-				if (isBlank(ref.getChain())) {
-					referenceList.add(ref.getValue());
-				}
-			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
-			}
-		}
-		return referenceList;
 	}
 
 	private void addCategoriesCriteria(BoolQueryBuilder theBoolQueryBuilder, SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
@@ -601,6 +546,50 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 		}
 
+	}
+
+	@VisibleForTesting
+	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
+		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, null, t -> t, 100);
+	}
+
+	@VisibleForTesting
+	List<CodeJson> queryAllIndexedObservationCodes() throws IOException {
+		SearchRequest codeSearchRequest = new SearchRequest(CODE_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		// Query
+		searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+		searchSourceBuilder.size(1000);
+		codeSearchRequest.source(searchSourceBuilder);
+		SearchResponse codeSearchResponse = executeSearchRequest(codeSearchRequest);
+		return buildCodeResult(codeSearchResponse);
+	}
+
+	private List<CodeJson> buildCodeResult(SearchResponse theSearchResponse) throws JsonProcessingException {
+		SearchHits codeHits = theSearchResponse.getHits();
+		List<CodeJson> codes = new ArrayList<>();
+		for (SearchHit codeHit : codeHits) {
+			CodeJson code = objectMapper.readValue(codeHit.getSourceAsString(), CodeJson.class);
+			codes.add(code);
+		}
+		return codes;
+	}
+
+	@VisibleForTesting
+	boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
+		IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
+			RequestOptions.DEFAULT);
+
+		return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
+	}
+
+	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
+		IndexRequest request = new IndexRequest(theIndexName);
+		request.id(theDocumentId);
+		request.type(theDocumentType);
+
+		request.source(theObservationDocument, XContentType.JSON);
+		return request;
 	}
 
 	@VisibleForTesting

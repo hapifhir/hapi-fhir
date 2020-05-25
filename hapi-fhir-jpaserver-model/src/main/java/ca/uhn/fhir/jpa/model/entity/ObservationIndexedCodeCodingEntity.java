@@ -11,6 +11,8 @@ import javax.persistence.*;
 @Table(name = "HFJ_SPIDX_LASTN_CODING")
 public class ObservationIndexedCodeCodingEntity {
 
+	public static final int MAX_LENGTH = 200;
+
 	// TODO: Fix this to allow multiple codings for observation code
 //    @Id
 //    @SequenceGenerator(name = "SEQ_CODING_FIELD", sequenceName = "SEQ_CODING_FIELD")
@@ -18,7 +20,7 @@ public class ObservationIndexedCodeCodingEntity {
 //    private Long myId;
 
 	@Id
-    @Column(name="CODEABLE_CONCEPT_ID")
+    @Column(name="CODEABLE_CONCEPT_ID", length = MAX_LENGTH)
     private String myCodeableConceptId;
 
     @Field (name = "code", analyze = Analyze.NO)

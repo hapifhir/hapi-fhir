@@ -10,16 +10,18 @@ import javax.persistence.*;
 @Entity
 @Indexed(index = "code_index")
 @Embeddable
-@Table(name = "HFJ_SPIDX_LASTN_CODEABLE_CONCEPT")
+@Table(name = "HFJ_SPIDX_LASTN_CODE_CONCEPT")
 public class ObservationIndexedCodeCodeableConceptEntity {
 
-    @Id
+	public static final int MAX_LENGTH = 200;
+
+	@Id
     @DocumentId(name = "codeable_concept_id")
-    @Column(name="CODEABLE_CONCEPT_ID")
+    @Column(name="CODEABLE_CONCEPT_ID", length = MAX_LENGTH)
     private String myCodeableConceptId;
 
     @Field(name = "text")
-    @Column(name = "CODEABLE_CONCEPT_TEXT", nullable = true)
+    @Column(name = "CODEABLE_CONCEPT_TEXT", nullable = true, length = MAX_LENGTH)
     private String myCodeableConceptText;
 
     // TODO: Make coding a Collection. Need to first figure out how to maintain this over time.
