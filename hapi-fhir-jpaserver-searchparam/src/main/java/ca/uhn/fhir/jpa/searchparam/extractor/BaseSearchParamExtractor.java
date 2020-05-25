@@ -399,12 +399,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return new DateExtractor(theResource);
 	}
 
-	@Override
-	public Date extractDateFromResource(IBase theValue, String thePath) {
-		DateExtractor extractor = new DateExtractor("DateType");
-		return extractor.get(theValue, thePath).getValueHigh();
-	}
-
 	private class DateExtractor implements IExtractor<ResourceIndexedSearchParamDate> {
 
 		String myResourceType;
@@ -506,6 +500,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				theValue, thePath);
 			return myIndexedSearchParamDate;
 		}
+	}
+
+	@Override
+	public Date extractDateFromResource(IBase theValue, String thePath) {
+		DateExtractor extractor = new DateExtractor("DateType");
+		return extractor.get(theValue, thePath).getValueHigh();
 	}
 
 	@Override
