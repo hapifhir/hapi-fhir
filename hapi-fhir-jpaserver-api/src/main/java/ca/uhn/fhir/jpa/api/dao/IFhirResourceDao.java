@@ -165,7 +165,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Read a resource by its internal PID
 	 */
-	IBaseResource readByPid(ResourcePersistentId thePid);
+	T readByPid(ResourcePersistentId thePid);
 
 	/**
 	 * @param theId

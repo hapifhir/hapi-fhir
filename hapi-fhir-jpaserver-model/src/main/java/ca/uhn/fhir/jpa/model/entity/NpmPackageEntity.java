@@ -15,10 +15,15 @@ import javax.persistence.Table;
 public class NpmPackageEntity {
 
 	protected static final int PACKAGE_ID_LENGTH = 200;
-
 	@Id
 	@Column(name = "PACKAGE_ID", length = PACKAGE_ID_LENGTH, nullable = false)
 	private String myPackageId;
+	@Column(name = "CUR_VERSION_ID", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = true)
+	private String myCurrentVersionId;
+
+	public void setPackageId(String thePackageId) {
+		myPackageId = thePackageId;
+	}
 
 	@Override
 	public boolean equals(Object theO) {
@@ -44,5 +49,11 @@ public class NpmPackageEntity {
 			.toHashCode();
 	}
 
+	public String getCurrentVersionId() {
+		return myCurrentVersionId;
+	}
 
+	public void setCurrentVersionId(String theCurrentVersionId) {
+		myCurrentVersionId = theCurrentVersionId;
+	}
 }

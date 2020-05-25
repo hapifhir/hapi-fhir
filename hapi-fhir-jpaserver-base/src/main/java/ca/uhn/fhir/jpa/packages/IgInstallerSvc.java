@@ -15,8 +15,8 @@ import com.google.gson.Gson;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.utilities.cache.IPackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
-import org.hl7.fhir.utilities.cache.PackageCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +40,8 @@ public class IgInstallerSvc {
 	private DaoRegistry daoRegistry;
 	@Autowired
 	private IValidationSupport validationSupport;
-
-	private PackageCacheManager packageCacheManager;
+	@Autowired
+	private IPackageCacheManager packageCacheManager;
 
 	private String[] DEFAULT_SUPPORTED_RESOURCE_TYPES = new String[]
 		{ "NamingSystem",
@@ -67,12 +67,6 @@ public class IgInstallerSvc {
 				ourLog.info("IG installation not supported for version: {}", fhirContext.getVersion().getVersion());
 				enabled = false;
 			}
-		}
-		try {
-			packageCacheManager = new PackageCacheManager(true, 1);
-		} catch (IOException e) {
-			ourLog.error("Unable to initialize PackageCacheManager", e);
-			enabled = false;
 		}
 	}
 
@@ -107,7 +101,7 @@ public class IgInstallerSvc {
 
 	/**
 	 * Loads and installs an IG from a file on disk or the Simplifier repo using
-	 * the {@link PackageCacheManager}.
+	 * the {@link IPackageCacheManager}.
 	 *
 	 * Installs the IG by persisting instances of the following types of resources:
 	 *

@@ -1,7 +1,14 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
+import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntityPk;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 /*
  * #%L
@@ -23,6 +30,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * #L%
  */
 
-public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEntity, Long> {
+public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEntity, NpmPackageVersionEntityPk> {
 
 }

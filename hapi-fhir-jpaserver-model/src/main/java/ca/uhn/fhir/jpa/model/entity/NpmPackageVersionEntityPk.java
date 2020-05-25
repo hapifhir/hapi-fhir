@@ -5,19 +5,32 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import java.io.Serializable;
 
 @Embeddable
-public class NpmPackageVersionEntityPk {
+public class NpmPackageVersionEntityPk implements Serializable {
 
-	@ManyToOne
-	@JoinColumn(name = "PACKAGE_ID", nullable = false)
-	private NpmPackageEntity myPackage;
-	@Column(name = "VERSION_ID", length = 200, nullable = false)
+	@Column(name = "PACKAGE_ID", nullable = false, length = NpmPackageEntity.PACKAGE_ID_LENGTH)
+	private String myPackageId;
+	@Column(name = "VERSION_ID", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = false)
 	private String myVersionId;
 
-	@Override
+	/**
+	 * Constructor
+	 */
+	public NpmPackageVersionEntityPk() {
+		super();
+	}
+
+	/**
+	 * Constructor
+	 */
+	public NpmPackageVersionEntityPk(String thePackageId, String theVersionId) {
+		setPackageId(thePackageId);
+		setVersionId(theVersionId);
+	}
+
+    @Override
 	public boolean equals(Object theO) {
 		if (this == theO) {
 			return true;
@@ -30,25 +43,25 @@ public class NpmPackageVersionEntityPk {
 		NpmPackageVersionEntityPk that = (NpmPackageVersionEntityPk) theO;
 
 		return new EqualsBuilder()
-			.append(myPackage, that.myPackage)
-			.append(myVersionId, that.myVersionId)
+			.append(getPackageId(), that.getPackageId())
+			.append(getVersionId(), that.getVersionId())
 			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(myPackage)
-			.append(myVersionId)
+			.append(getPackageId())
+			.append(getVersionId())
 			.toHashCode();
 	}
 
-	public NpmPackageEntity getPackage() {
-		return myPackage;
+	public String getPackageId() {
+		return myPackageId;
 	}
 
-	public void setPackage(NpmPackageEntity thePackage) {
-		myPackage = thePackage;
+	public void setPackageId(String thePackageId) {
+		myPackageId = thePackageId;
 	}
 
 	public String getVersionId() {
