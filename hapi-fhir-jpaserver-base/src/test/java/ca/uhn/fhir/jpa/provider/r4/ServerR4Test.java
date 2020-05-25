@@ -142,10 +142,4 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

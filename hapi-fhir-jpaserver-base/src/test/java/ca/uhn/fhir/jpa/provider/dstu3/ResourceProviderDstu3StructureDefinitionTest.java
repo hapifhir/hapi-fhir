@@ -18,10 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourceProviderDstu3Test {
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	@Test
 	public void testSnapshotWithResourceParameter() throws IOException {

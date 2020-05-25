@@ -16,10 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class AddIdGeneratorTaskTest extends BaseTest {
 
 
-	public AddIdGeneratorTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
-
 	@Test
 	public void testAddIdGenerator() throws SQLException {
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());

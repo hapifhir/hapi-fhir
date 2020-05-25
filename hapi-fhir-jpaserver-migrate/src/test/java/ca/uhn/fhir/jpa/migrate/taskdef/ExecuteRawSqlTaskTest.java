@@ -12,9 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExecuteRawSqlTaskTest extends BaseTest {
 
-	public ExecuteRawSqlTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
 	@Test
 	public void testExecuteSql() {

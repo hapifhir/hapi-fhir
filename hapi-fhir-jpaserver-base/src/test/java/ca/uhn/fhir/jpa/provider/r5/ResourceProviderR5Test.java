@@ -243,9 +243,5 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(0, output.getEntry().size());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

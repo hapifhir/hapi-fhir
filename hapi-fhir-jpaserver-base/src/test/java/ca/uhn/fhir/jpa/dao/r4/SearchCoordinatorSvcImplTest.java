@@ -27,11 +27,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Autowired
 	private ISearchDao mySearchDao;

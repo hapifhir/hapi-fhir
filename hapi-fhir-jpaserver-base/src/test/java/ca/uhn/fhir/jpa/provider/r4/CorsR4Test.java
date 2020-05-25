@@ -29,9 +29,5 @@ public class CorsR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

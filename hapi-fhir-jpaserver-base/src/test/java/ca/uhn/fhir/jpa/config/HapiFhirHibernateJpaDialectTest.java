@@ -14,6 +14,7 @@ import org.springframework.dao.DataAccessException;
 import javax.persistence.PersistenceException;
 import java.sql.SQLException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 

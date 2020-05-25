@@ -136,9 +136,5 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		assertEquals("1", p.getIdElement().getVersionIdPart());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

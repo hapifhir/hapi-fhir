@@ -19,10 +19,6 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 	private IIdType myConceptMapId;
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	@BeforeEach
 	@Transactional

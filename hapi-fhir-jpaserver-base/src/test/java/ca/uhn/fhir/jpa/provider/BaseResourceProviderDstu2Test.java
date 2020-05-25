@@ -153,7 +153,6 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		ourHttpClient = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

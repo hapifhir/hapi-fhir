@@ -3,6 +3,7 @@ package ca.uhn.fhir.jaxrs.server.util;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,14 +67,18 @@ public class JaxRsRequestTest {
 		assertTrue(response == details.getResponse());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testGetReader() throws IOException {
-		details.getReader();
+		assertThrows(UnsupportedOperationException.class,()->{
+			details.getReader();
+		});
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testGetInputStream() {
-		details.getInputStream();
+		assertThrows(UnsupportedOperationException.class, ()->{
+			details.getInputStream();
+		});
 	}
 
 	@Test

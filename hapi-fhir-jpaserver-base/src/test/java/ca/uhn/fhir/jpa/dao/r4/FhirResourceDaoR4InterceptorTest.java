@@ -641,8 +641,4 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		}
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 }

@@ -9,10 +9,10 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -30,13 +30,14 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class BaseDateTimeDtDstu2Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static Locale ourDefaultLocale;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
 	private SimpleDateFormat myDateInstantParser;
 	private FastDateFormat myDateInstantZoneParser;
 
@@ -49,13 +50,13 @@ public class BaseDateTimeDtDstu2Test {
 		Date from = Date.from(ldt.toInstant(ZoneOffset.UTC));
 		InstantDt type = (InstantDt) new InstantDt(from).setTimeZoneZulu(true);
 		String encoded = type.getValueAsString();
-		
-		ourLog.info("LDT:      "+ ldt.toString());
-		ourLog.info("Expected: "+"1960-09-07T00:44:25.012");
-		ourLog.info("Actual:   "+encoded);
-		
+
+		ourLog.info("LDT:      " + ldt.toString());
+		ourLog.info("Expected: " + "1960-09-07T00:44:25.012");
+		ourLog.info("Actual:   " + encoded);
+
 		assertEquals("1960-09-07T00:44:25.012Z", encoded);
-		
+
 		type = new InstantDt(encoded);
 		assertEquals(1960, type.getYear().intValue());
 		assertEquals(8, type.getMonth().intValue()); // 0-indexed unlike LocalDateTime.of
@@ -71,11 +72,11 @@ public class BaseDateTimeDtDstu2Test {
 	public void testFromTime() {
 		long millis;
 		InstantDt dt;
-		
+
 		millis = 1466022208001L;
 		String expected = "2016-06-15T20:23:28.001Z";
 		validate(millis, expected);
-		
+
 		millis = 1466022208123L;
 		expected = "2016-06-15T20:23:28.123Z";
 		validate(millis, expected);
@@ -83,11 +84,11 @@ public class BaseDateTimeDtDstu2Test {
 		millis = 1466022208100L;
 		expected = "2016-06-15T20:23:28.100Z";
 		validate(millis, expected);
-		
+
 		millis = 1466022208000L;
 		expected = "2016-06-15T20:23:28.000Z";
 		validate(millis, expected);
-		
+
 	}
 
 
@@ -99,13 +100,13 @@ public class BaseDateTimeDtDstu2Test {
 
 		assertEquals(millis % 1000, dt.getMillis().longValue());
 		assertEquals((millis % 1000) * BaseDateTimeDt.NANOS_PER_MILLIS, dt.getNanos().longValue());
-		
+
 		dt = new InstantDt();
 		dt.setTimeZone(TimeZone.getTimeZone("GMT+0:00"));
 		dt.setValue(new Date(millis));
 		assertEquals(expected.replace("Z", "+00:00"), dt.getValueAsString());
 	}
-	
+
 
 	@Test
 	public void testSetPartialsYearFromExisting() {
@@ -268,7 +269,7 @@ public class BaseDateTimeDtDstu2Test {
 		verifyFails("1974-A2-25");
 		verifyFails("1974-12-A5");
 
-		
+
 		// Date shouldn't have a time zone
 		verifyFails("1974-12-25Z");
 		verifyFails("1974-12-25+10:00");
@@ -514,9 +515,11 @@ public class BaseDateTimeDtDstu2Test {
 		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseMalformatted() throws DataFormatException {
-		new DateTimeDt("20120102");
+		assertThrows(DataFormatException.class, () -> {
+			new DateTimeDt("20120102");
+		});
 	}
 
 	@Test
@@ -569,10 +572,12 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals("2013-02", myDateInstantParser.format(dt.getValue()).substring(0, 7));
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseMonthNoDashes() throws DataFormatException {
-		DateTimeDt dt = new DateTimeDt();
-		dt.setValueAsString("201302");
+		assertThrows(DataFormatException.class, () -> {
+			DateTimeDt dt = new DateTimeDt();
+			dt.setValueAsString("201302");
+		});
 	}
 
 	@Test
@@ -819,12 +824,9 @@ public class BaseDateTimeDtDstu2Test {
 		}
 	}
 
-	public static void afterClass() {
-		Locale.setDefault(ourDefaultLocale);
-	}
-
 	@AfterAll
 	public static void afterClassClearContext() {
+		Locale.setDefault(ourDefaultLocale);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
@@ -835,7 +837,7 @@ public class BaseDateTimeDtDstu2Test {
 		 */
 		ourDefaultLocale = Locale.getDefault();
 
-		Locale[] available = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
+		Locale[] available = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 		Locale newLocale = available[(int) (Math.random() * available.length)];
 		Locale.setDefault(newLocale);
 

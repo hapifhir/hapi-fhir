@@ -20,11 +20,6 @@ import ca.uhn.fhir.validation.ValidationResult;
 public class ValidatorAcrossVersionsTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidatorAcrossVersionsTest.class);
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@Test
 	public void testWrongContextVersion() {
 		FhirContext ctxDstu2 = FhirContext.forDstu2();

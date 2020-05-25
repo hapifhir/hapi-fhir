@@ -3506,10 +3506,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		myConsentDao.create(consent);
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	public static void assertConflictException(ResourceVersionConflictException e) {
 		assertThat(e.getMessage(), matchesPattern(

@@ -40,7 +40,7 @@ public class CompartmentDstu2Test {
 			ourCtx.newTerser().isSourceInCompartmentForTarget("Patient", o, new IdDt("123"));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("theTarget must have a populated resource type (theTarget.getResourceType() does not return a value)", e.getMessage());
 		}
 	}
 

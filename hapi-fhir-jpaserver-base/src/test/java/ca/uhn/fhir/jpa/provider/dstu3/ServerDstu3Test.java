@@ -61,9 +61,5 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

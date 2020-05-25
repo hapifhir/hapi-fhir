@@ -53,6 +53,13 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -91,6 +98,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -2250,7 +2258,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void testTransactionFailsWithDuplicateIds() {
 		Bundle request = new Bundle();
 
@@ -2264,7 +2272,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
 		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST);
 
-		mySystemDao.transaction(mySrd, request);
+		assertThrows(InvalidRequestException.class, ()->{
+			mySystemDao.transaction(mySrd, request);
+		});
 	}
 
 	@Test
@@ -3926,11 +3936,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		id = myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless()).getIdElement();
 		assertEquals("3", id.getVersionIdPart());
 
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

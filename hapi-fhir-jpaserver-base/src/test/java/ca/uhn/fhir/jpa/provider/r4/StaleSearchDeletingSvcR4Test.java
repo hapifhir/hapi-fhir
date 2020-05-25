@@ -18,8 +18,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +29,13 @@ import java.util.Date;
 import java.util.UUID;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
@@ -200,11 +205,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		assertEquals(0, mySearchEntityDao.count());
 
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

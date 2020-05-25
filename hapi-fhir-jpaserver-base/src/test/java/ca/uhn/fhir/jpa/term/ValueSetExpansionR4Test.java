@@ -33,12 +33,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -73,13 +73,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(24, myTermValueSetConceptDao.count());
 		});
 
 		myValueSetDao.delete(valueSet.getIdElement());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(0, myTermValueSetConceptDao.count());
 		});
 
@@ -560,11 +560,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(expanded, 2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals(expanded, "offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(expanded, 0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals(expanded, "count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(expanded, 0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size(), expanded);
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName(), expanded);
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue(), expanded);
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName(), expanded);
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue(), expanded);
 
 		assertFalse(expandedValueSet.getExpansion().hasContains());
 	}

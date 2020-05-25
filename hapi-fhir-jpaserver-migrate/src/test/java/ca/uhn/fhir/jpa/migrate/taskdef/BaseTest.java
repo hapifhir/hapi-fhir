@@ -8,8 +8,8 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -23,26 +23,21 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 
-@RunWith(Parameterized.class)
 public abstract class BaseTest {
 
 	private static final String DATABASE_NAME = "DATABASE";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
 	private static int ourDatabaseUrl = 0;
-	private final Supplier<TestDatabaseDetails> myTestDatabaseDetails;
 	private BasicDataSource myDataSource;
 	private String myUrl;
 	private FlywayMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
-	public BaseTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		myTestDatabaseDetails = theTestDatabaseDetails;
-	}
-
 	@BeforeEach
-	public void before() {
-		TestDatabaseDetails testDatabaseDetails = myTestDatabaseDetails.get();
-
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void before(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		TestDatabaseDetails testDatabaseDetails = theTestDatabaseDetails.get();
 		myUrl = testDatabaseDetails.myUrl;
 		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
 		myDataSource = testDatabaseDetails.myDataSource;
@@ -111,7 +106,6 @@ public abstract class BaseTest {
 
 	}
 
-	@Parameterized.Parameters(name = "{0}")
 	public static Collection<Supplier<TestDatabaseDetails>> data() {
 		ourLog.info("H2: {}", org.h2.Driver.class.toString());
 

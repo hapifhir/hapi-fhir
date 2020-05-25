@@ -22,12 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
 	

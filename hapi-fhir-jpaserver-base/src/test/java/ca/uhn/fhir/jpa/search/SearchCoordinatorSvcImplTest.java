@@ -757,9 +757,4 @@ public class SearchCoordinatorSvcImplTest {
 		}
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

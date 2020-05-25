@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.util;
 
+import ca.uhn.fhir.util.StringNormalizer;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

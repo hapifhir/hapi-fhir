@@ -12,9 +12,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AddTableTest extends BaseTest {
 
-	public AddTableTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
 	@Test
 	public void testTableDoesntAlreadyExist() throws SQLException {

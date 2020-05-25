@@ -47,9 +47,5 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 	}
 
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

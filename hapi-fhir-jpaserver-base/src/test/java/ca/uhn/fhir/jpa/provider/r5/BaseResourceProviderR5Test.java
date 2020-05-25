@@ -230,7 +230,6 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {

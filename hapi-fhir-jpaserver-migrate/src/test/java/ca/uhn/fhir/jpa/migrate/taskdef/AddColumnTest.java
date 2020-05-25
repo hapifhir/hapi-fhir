@@ -2,26 +2,18 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
-import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
 import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AddColumnTest extends BaseTest {
-
-	public AddColumnTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
 	@Test
 	public void testColumnDoesntAlreadyExist() throws SQLException {

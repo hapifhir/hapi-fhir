@@ -89,10 +89,5 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 }

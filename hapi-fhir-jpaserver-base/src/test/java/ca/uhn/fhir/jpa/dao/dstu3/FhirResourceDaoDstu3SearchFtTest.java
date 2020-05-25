@@ -46,12 +46,6 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@Test
 	public void testCodeTextSearch() {
 		Observation obs1 = new Observation();

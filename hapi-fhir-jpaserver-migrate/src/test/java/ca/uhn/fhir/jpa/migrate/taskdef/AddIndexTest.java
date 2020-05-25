@@ -4,17 +4,13 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AddIndexTest extends BaseTest {
 
-	public AddIndexTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
 	@Test
 	public void testUniqueConstraintAlreadyExists() throws SQLException {

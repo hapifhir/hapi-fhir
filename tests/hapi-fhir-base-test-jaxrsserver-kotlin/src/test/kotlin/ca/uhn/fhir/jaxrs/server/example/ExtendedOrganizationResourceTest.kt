@@ -7,11 +7,11 @@ import org.apache.commons.lang3.StringUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.MatcherAssert.assertThat
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
 import org.junit.jupiter.api.AfterAll
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.jupiter.api.BeforeEachClass
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import javax.ws.rs.core.Response
 

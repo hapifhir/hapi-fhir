@@ -17,10 +17,6 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ContainedTest.class);
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 	@Test

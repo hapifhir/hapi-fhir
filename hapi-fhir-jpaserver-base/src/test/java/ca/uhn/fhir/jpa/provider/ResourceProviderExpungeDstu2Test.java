@@ -288,9 +288,5 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 		assertGone(myDeletedObservationId);
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

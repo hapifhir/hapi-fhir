@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {

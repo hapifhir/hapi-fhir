@@ -5665,9 +5665,5 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

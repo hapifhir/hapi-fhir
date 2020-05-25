@@ -32,7 +32,6 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public static void afterClassClearContext() {
 		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

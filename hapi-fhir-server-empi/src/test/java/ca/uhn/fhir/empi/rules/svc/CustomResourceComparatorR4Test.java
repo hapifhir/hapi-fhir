@@ -7,10 +7,10 @@ import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomResourceComparatorR4Test extends BaseR4Test {
 
@@ -24,7 +24,7 @@ public class CustomResourceComparatorR4Test extends BaseR4Test {
 	private static Patient ourHenryJohn;
 	private static Patient ourHenryJOHN;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourJohnHenry = buildPatientWithNames("Henry", "John");
 		ourJohnHENRY = buildPatientWithNames("HENRY", "John");

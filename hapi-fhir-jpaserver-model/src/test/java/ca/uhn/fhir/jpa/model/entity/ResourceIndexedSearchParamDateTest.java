@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -7,7 +8,10 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamDateTest {
 
@@ -36,7 +40,7 @@ public class ResourceIndexedSearchParamDateTest {
 	@Test
 	public void equalsIsTrueForMatchingNullDates() {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", null, null, null, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -45,8 +49,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", date1B, null, date2B, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1B, null, date2B, null, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -55,8 +59,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingTimeStampsThatMatch() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", timestamp1B, null, timestamp2B, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1B, null, timestamp2B, null, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -67,8 +71,8 @@ public class ResourceIndexedSearchParamDateTest {
 	// other will be equivalent but will be a java.sql.Timestamp. Equals should work in both directions.
 	@Test
 	public void equalsIsTrueForMixedTimestampsAndDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -77,8 +81,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", date2A, null, date1A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date2A, null, date1A, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -87,8 +91,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingDatesNullCase() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", null, null, null, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -97,8 +101,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingTimeStamps() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -107,8 +111,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForMixedTimestampsAndDatesThatDoNotMatch() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),"Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));

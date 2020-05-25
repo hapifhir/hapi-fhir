@@ -12,9 +12,16 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
-import org.junit.jupiter.api.AfterEach;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test {
 
@@ -70,7 +79,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 
 		Observation o = new Observation();
 		o.setStatus(Observation.ObservationStatus.FINAL);
-		o.setSubject( new Reference(myPatientId));
+		o.setSubject(new Reference(myPatientId));
 		o.setEncounter(new Reference(myEncounterId));
 		myObservationId = ourClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 
@@ -221,10 +230,6 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		}
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 }

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
@@ -58,11 +59,6 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
 		}
 
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -120,7 +121,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatus) null);
+			subs.setStatus(null);
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -151,7 +152,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatus) null);
+			subs.setStatus(null);
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -162,10 +163,6 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		ourClient.update().resource(subs).execute();
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	public class BaseSocket {
 		protected String myError;

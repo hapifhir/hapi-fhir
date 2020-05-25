@@ -90,11 +90,14 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.junit.jupiter.api.Test;
+import org.hl7.fhir.r4.model.Substance;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -2110,7 +2113,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchStringParam() throws Exception {
+	public void testSearchStringParam() {
 		IIdType pid1;
 		IIdType pid2;
 		{
@@ -3474,9 +3477,5 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		return b.toString();
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

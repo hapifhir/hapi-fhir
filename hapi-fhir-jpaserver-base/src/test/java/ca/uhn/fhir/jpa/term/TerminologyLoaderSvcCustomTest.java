@@ -179,9 +179,5 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

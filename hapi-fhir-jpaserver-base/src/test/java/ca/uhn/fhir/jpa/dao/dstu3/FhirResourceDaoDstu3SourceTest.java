@@ -219,11 +219,6 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		}
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
 		assertThat(e.getMessage(), matchesPattern(
 			"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource " + theResourceType + "/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));

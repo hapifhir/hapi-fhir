@@ -33,7 +33,6 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -219,7 +218,7 @@ public class XmlParserDstu2Test {
 			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [49,11]]: Resource has contained child resource with no ID", e.getMessage());
 		}
 	}
 
@@ -283,7 +282,7 @@ public class XmlParserDstu2Test {
 			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [47,7]]: Resource has invalid reference: #1", e.getMessage());
 		}
 	}
 
@@ -2588,7 +2587,7 @@ public class XmlParserDstu2Test {
 			parser.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 	}
 
@@ -2830,7 +2829,7 @@ public class XmlParserDstu2Test {
 
 		// Check no NPE if base server not configure
 		newPatient = ourCtx.newXmlParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertNull("myName", newPatient.getPetName().getValue());
+		assertNull(newPatient.getPetName().getValue());
 		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 	}
 

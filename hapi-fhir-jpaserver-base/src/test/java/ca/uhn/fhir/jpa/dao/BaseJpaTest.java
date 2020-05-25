@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.BaseTest;
-import ca.uhn.fhir.test.utilities.LoggingRule;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -44,11 +44,11 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -165,14 +165,14 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeInitPartitions() {
 		if (myPartitionConfigSvc != null) {
 			myPartitionConfigSvc.start();
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeInitMocks() {
 		myRequestOperationCallback = new InterceptorService();
 
@@ -402,12 +402,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
 		randomizeLocale();
-	}
-
-	@SuppressWarnings("RedundantThrows")
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@AfterAll

@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -289,7 +290,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	private List<String> toIds(Bundle theRespBundle) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (Entry next : theRespBundle.getEntry()) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
@@ -299,7 +300,6 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

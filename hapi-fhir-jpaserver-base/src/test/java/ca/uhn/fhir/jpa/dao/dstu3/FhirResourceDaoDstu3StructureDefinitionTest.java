@@ -30,9 +30,4 @@ public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Tes
 	}
 
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

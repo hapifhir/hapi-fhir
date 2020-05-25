@@ -21,12 +21,6 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
 	

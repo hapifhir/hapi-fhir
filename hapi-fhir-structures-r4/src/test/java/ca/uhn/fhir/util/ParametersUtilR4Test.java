@@ -12,7 +12,11 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ParametersUtilR4Test {
 	private static final String TEST_PERSON_ID = "Person/32768";
@@ -30,7 +34,7 @@ public class ParametersUtilR4Test {
 	}
 
 	@Test
-	public void testGetValues(){
+	public void testGetValues() {
 		Parameters p = new Parameters();
 		p.addParameter()
 			.setName("foo")
@@ -51,7 +55,7 @@ public class ParametersUtilR4Test {
 	}
 
 	@Test
-	public void testGetValueAsInteger(){
+	public void testGetValueAsInteger() {
 		Parameters p = new Parameters();
 		p.addParameter()
 			.setName("foo")

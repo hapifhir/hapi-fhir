@@ -15,7 +15,6 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 

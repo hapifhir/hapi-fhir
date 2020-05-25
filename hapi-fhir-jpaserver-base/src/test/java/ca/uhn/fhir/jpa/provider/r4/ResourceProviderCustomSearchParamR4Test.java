@@ -38,8 +38,8 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
@@ -52,13 +52,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
@@ -464,15 +463,15 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			String queries = " * " + myCaptureQueriesListener
 				.getSelectQueries()
 				.stream()
-				.map(t->t.getSql(true, false))
+				.map(t -> t.getSql(true, false))
 				.collect(Collectors.joining("\n * "));
 
 			ourLog.info("Found: {}", found);
 
 			runInTransaction(() -> {
 
-				List currentResults = myEntityManager.createNativeQuery("select distinct resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_ left outer join HFJ_SPIDX_STRING myparamsst1_ on resourceta0_.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'")					.getResultList();
-				List currentResources = myEntityManager.createNativeQuery("select resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_")					.getResultList();
+				List currentResults = myEntityManager.createNativeQuery("select distinct resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_ left outer join HFJ_SPIDX_STRING myparamsst1_ on resourceta0_.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'").getResultList();
+				List currentResources = myEntityManager.createNativeQuery("select resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_").getResultList();
 
 				List<Search> searches = mySearchEntityDao.findAll();
 				assertEquals(1, searches.size());
@@ -485,21 +484,21 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 					search.toString() +
 					"\nQueries :\n" + queries;
 
-				for (Long next :ids) {
+				for (Long next : ids) {
 					if (!actualIds.contains(next)) {
 						List<ResourceIndexedSearchParamString> indexes = myResourceIndexedSearchParamStringDao
 							.findAll()
 							.stream()
-							.filter(t->t.getResourcePid().equals(next))
+							.filter(t -> t.getResourcePid().equals(next))
 							.collect(Collectors.toList());
-						message += "\n\nResource " + next + " has prefixes:\n * " + indexes.stream().map(t->t.toString()).collect(Collectors.joining("\n * "));
+						message += "\n\nResource " + next + " has prefixes:\n * " + indexes.stream().map(t -> t.toString()).collect(Collectors.joining("\n * "));
 						break;
 					}
 				}
 
-				assertEquals(message, 200, search.getNumFound());
-				assertEquals(message, 200, search.getTotalCount().intValue());
-				assertEquals(message, SearchStatusEnum.FINISHED, search.getStatus());
+				assertEquals(200, search.getNumFound(), message);
+				assertEquals(200, search.getTotalCount().intValue(), message);
+				assertEquals(SearchStatusEnum.FINISHED, search.getStatus(), message);
 			});
 
 			assertEquals(200, foundCount);
@@ -509,9 +508,5 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	}
 
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

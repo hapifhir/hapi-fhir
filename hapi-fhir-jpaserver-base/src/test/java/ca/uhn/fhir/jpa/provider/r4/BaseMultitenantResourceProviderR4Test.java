@@ -19,8 +19,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 	protected AuthorizationInterceptor myAuthorizationInterceptor;
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -66,7 +66,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 

@@ -1314,9 +1314,5 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		return retVal;
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

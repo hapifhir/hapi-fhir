@@ -256,10 +256,6 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		assertTrue(result.isResult(), result.getMessage());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 }

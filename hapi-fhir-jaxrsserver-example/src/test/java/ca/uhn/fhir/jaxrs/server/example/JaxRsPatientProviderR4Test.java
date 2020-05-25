@@ -17,7 +17,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -255,7 +255,7 @@ public class JaxRsPatientProviderR4Test {
 				.execute();
 		String resultValue = outParams.getParameter().get(0).getValue().toString();
 		System.out.println(resultValue);
-		assertEquals("expected but found : " + resultValue, resultValue.contains("myAwesomeDummyValue"), true);
+		assertEquals(resultValue.contains("myAwesomeDummyValue"), true, "expected but found : " + resultValue);
 	}
 
 	@Test
@@ -276,7 +276,7 @@ public class JaxRsPatientProviderR4Test {
 				.execute();
 		String resultValue = outParams.getParameter().get(0).getValue().toString();
 		System.out.println(resultValue);
-		assertEquals("expected but found : " + resultValue, resultValue.contains("myAwesomeDummyValue"), true);
+		assertEquals(resultValue.contains("myAwesomeDummyValue"), true, "expected but found : " + resultValue);
 	}
 
 	@Test

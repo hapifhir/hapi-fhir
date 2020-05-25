@@ -43,11 +43,6 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@BeforeEach
 	@Transactional

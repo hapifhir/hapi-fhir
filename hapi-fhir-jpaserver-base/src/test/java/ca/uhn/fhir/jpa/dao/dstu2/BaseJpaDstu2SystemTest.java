@@ -19,12 +19,6 @@ import static org.mockito.Mockito.when;
 public abstract class BaseJpaDstu2SystemTest extends BaseJpaDstu2Test {
 	private RestfulServer myServer;
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	public void before() throws ServletException {

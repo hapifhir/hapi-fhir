@@ -35,10 +35,5 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 }

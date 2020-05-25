@@ -5,10 +5,8 @@ import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Parameters;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -23,38 +21,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@RunWith(Parameterized.class)
-public abstract class BaseFhirPatchCoreTest extends BaseTest {
+public class FhirPatchCoreTest extends BaseTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseFhirPatchCoreTest.class);
-	private final String myName;
-	private final String myMode;
-	private final IBaseResource myInput;
-	private final IBaseResource myPatch;
-	private final IBaseResource myOutput;
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatchCoreTest.class);
 
-	public BaseFhirPatchCoreTest(String theName, String theMode, IBaseResource theInput, IBaseResource thePatch, IBaseResource theOutput) {
-		myName = theName;
-		myMode = theMode;
-		myInput = theInput;
-		myPatch = thePatch;
-		myOutput = theOutput;
-	}
-
-	@Test
-	public void testApply() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("parameters")
+	public void testApply(String myName, String myMode, IBaseResource myInput, IBaseResource myPatch, IBaseResource myOutput, FhirContext theContext) {
 		ourLog.info("Testing diff in {} mode: {}", myMode, myName);
 
 		if (myMode.equals("both") || myMode.equals("forwards")) {
 
-			FhirPatch patch = new FhirPatch(getContext());
+			FhirPatch patch = new FhirPatch(theContext);
 			patch.apply(myInput, myPatch);
 
-			String expected = getContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(myOutput);
-			String actual = getContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(myInput);
+			String expected = theContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(myOutput);
+			String actual = theContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(myInput);
 			assertEquals(expected, actual);
 
 		} else {
@@ -63,7 +48,19 @@ public abstract class BaseFhirPatchCoreTest extends BaseTest {
 
 	}
 
-	protected abstract FhirContext getContext();
+	public static List<Object[]> parameters() throws TransformerException, SAXException, IOException {
+		String testSpecR4 = "/org/hl7/fhir/testcases/r4/patch/fhir-path-tests.xml";
+		Collection<Object[]> retValR4 = loadTestSpec(FhirContext.forR4(), testSpecR4);
+
+		String testSpecR5 = "/org/hl7/fhir/testcases/r5/patch/fhir-path-tests.xml";
+		Collection<Object[]> retValR5 = loadTestSpec(FhirContext.forR5(), testSpecR5);
+
+		ArrayList<Object[]> retVal = new ArrayList<>();
+		retVal.addAll(retValR4);
+		retVal.addAll(retValR5);
+
+		return retVal;
+	}
 
 
 	@Nonnull
@@ -96,7 +93,7 @@ public abstract class BaseFhirPatchCoreTest extends BaseTest {
 			String outputEncoded = XmlUtil.encodeDocument(outputResourceElement);
 			IBaseResource output = theContext.newXmlParser().parseResource(outputEncoded);
 
-			retVal.add(new Object[]{name, mode, input, diff, output});
+			retVal.add(new Object[]{name, mode, input, diff, output, theContext});
 
 		}
 

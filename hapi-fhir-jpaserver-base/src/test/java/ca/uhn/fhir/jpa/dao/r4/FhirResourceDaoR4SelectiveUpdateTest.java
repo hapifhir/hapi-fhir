@@ -78,11 +78,6 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	public static Identifier getEuidIdentifier(Patient thePt, boolean theCreate) {
 		return thePt
 			.getIdentifier()

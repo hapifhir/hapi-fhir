@@ -6,11 +6,11 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import javax.annotation.Nonnull;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected Patient myPatient;
@@ -22,7 +22,8 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected StringType myPossibleMatch;
 	protected StringType myPossibleDuplicate;
 
-	@Before
+	@Override
+	@BeforeEach
 	public void before() {
 		super.before();
 

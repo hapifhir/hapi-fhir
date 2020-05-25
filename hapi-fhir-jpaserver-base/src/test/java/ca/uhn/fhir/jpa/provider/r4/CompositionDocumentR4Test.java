@@ -184,8 +184,4 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		return bundle;
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 }

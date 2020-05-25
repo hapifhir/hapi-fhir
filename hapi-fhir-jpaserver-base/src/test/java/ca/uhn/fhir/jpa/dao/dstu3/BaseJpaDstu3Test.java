@@ -102,15 +102,15 @@ import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -125,7 +125,7 @@ import java.util.Map;
 import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu3Config.class})
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
@@ -331,11 +331,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 	@Autowired
+	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Autowired
 	private IValidationSupport myJpaValidationSupportChainDstu3;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
-	@Autowired
-	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -430,7 +430,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		if (ourJpaValidationSupportChainDstu3 != null) {
 			ourJpaValidationSupportChainDstu3.invalidateCaches();
 		}
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	/**

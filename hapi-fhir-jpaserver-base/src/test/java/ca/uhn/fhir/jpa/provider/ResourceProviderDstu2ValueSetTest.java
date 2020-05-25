@@ -31,12 +31,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	private IIdType myExtensionalVsId;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2ValueSetTest.class);
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {

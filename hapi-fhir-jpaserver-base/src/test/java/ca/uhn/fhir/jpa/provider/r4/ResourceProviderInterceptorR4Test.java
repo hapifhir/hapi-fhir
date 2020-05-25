@@ -30,6 +30,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -45,6 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.*;
@@ -420,11 +425,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	}
 	
 	
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	public static void verifyDaoInterceptor(IServerInterceptor theDaoInterceptor) {
 		ArgumentCaptor<ActionRequestDetails> ardCaptor;
 		ArgumentCaptor<RestOperationTypeEnum> opTypeCaptor;

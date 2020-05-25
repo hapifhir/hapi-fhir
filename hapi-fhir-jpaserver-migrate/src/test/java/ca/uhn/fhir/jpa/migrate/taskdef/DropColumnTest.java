@@ -11,10 +11,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class DropColumnTest extends BaseTest {
 
-	public DropColumnTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
-
 	@Test
 	public void testDropColumn() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");

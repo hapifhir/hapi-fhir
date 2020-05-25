@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -62,14 +63,11 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -107,12 +105,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	@RegisterExtension
-	public TestRule watcher = new TestWatcher() {
-		@Override
-		protected void starting(Description description) {
-			ourLog.info("Starting test: " + description.getMethodName());
-		}
-	};
+	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	private FhirInstanceValidator myInstanceVal;
 	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
@@ -255,7 +248,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(mockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
-				List<StructureDefinition> retVal =new ArrayList<>(myDefaultValidationSupport.fetchAllStructureDefinitions());
+				List<StructureDefinition> retVal = new ArrayList<>(myDefaultValidationSupport.fetchAllStructureDefinitions());
 				retVal.addAll(myStructureDefinitionMap.values());
 				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
 				return retVal;
@@ -409,7 +402,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	 * TODO: unignore when https://github.com/hapifhir/org.hl7.fhir.core/pull/201 is merged
 	 */
 	@Test
-	@Ignore
 	public void testValidateFixedBindingOnQuantity() throws IOException {
 		StructureDefinition sd = loadResource(ourCtx, StructureDefinition.class, "/r4/bbl-fixed-binding-structuredef.json");
 		myStructureDefinitionMap.put("http://example.org/fhir/StructureDefinition/MyObservation", sd);
@@ -1037,7 +1029,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(output.toString(), 1, res.size());
+		assertEquals(1, res.size(), output.toString());
 		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
@@ -1480,12 +1472,12 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(allergy);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 0, errors.size());
+		assertEquals(0, errors.size(), errors.toString());
 
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateReferenceTargetType_Incorrect() {
 
 		AllergyIntolerance allergy = new AllergyIntolerance();
@@ -1499,12 +1491,12 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(allergy);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 0, errors.size());
+		assertEquals(0, errors.size(), errors.toString());
 		assertThat(errors.get(0).getMessage(), containsString("The value provided (\"BLAH\") is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;

@@ -126,9 +126,4 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 	}
 
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

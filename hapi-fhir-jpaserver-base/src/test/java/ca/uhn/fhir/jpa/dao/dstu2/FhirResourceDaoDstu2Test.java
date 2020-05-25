@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3Test;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -77,11 +76,12 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -114,6 +114,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2Test.class);
+	@Autowired
+	private IForcedIdDao myForcedIdDao;
 
 	@AfterEach
 	public final void after() {
@@ -1123,9 +1125,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertGone(org2Id);
 	}
 
-	@Autowired
-	private IForcedIdDao myForcedIdDao;
-
 	@Test
 	public void testHistoryByForcedId() {
 		IIdType idv1;
@@ -1142,8 +1141,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			idv2 = myPatientDao.update(patient, mySrd).getId();
 		}
 
-		runInTransaction(()->{
-			ourLog.info("Forced IDs:\n{}", myForcedIdDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n")));
+		runInTransaction(() -> {
+			ourLog.info("Forced IDs:\n{}", myForcedIdDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n")));
 		});
 
 		List<Patient> patients = toList(myPatientDao.history(idv1.toVersionless(), null, null, mySrd));
@@ -2944,11 +2943,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		} catch (PreconditionFailedException e) {
 			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

@@ -72,9 +72,4 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

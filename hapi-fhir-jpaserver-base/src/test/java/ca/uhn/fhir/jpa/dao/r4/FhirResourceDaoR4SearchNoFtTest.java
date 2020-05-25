@@ -114,11 +114,17 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.Substance;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Timing;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -2583,7 +2589,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchResourceLinkWithChainWithMultipleTypes() throws Exception {
+	public void testSearchResourceLinkWithChainWithMultipleTypes() {
 		Patient patient = new Patient();
 		patient.addName().setFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
 		patient.addName().setFamily("testSearchResourceLinkWithChainWithMultipleTypesXX");
@@ -3020,8 +3026,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 
 		String searchQuery = queries.get(0);
-		assertEquals(searchQuery, 3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
-		assertEquals(searchQuery, 4, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+		assertEquals(3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"), searchQuery);
+		assertEquals(4, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
 	}
 
 
@@ -4734,9 +4740,5 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		return b.toString();
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

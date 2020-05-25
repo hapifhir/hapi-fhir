@@ -20,12 +20,6 @@ public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 	protected ServletRequestDetails mySrd;
 	private RestfulServer myServer;
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	public void before() throws ServletException {

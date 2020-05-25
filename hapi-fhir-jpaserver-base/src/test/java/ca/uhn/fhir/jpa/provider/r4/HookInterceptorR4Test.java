@@ -7,13 +7,14 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
@@ -71,7 +72,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, (thePointcut, t) -> {
 			IAnyResource resource = (IAnyResource) t.get(IBaseResource.class, 0);
 			Long resourcePid = (Long) resource.getUserData("RESOURCE_PID");
-			assertNotNull("Expecting RESOURCE_PID to be set on resource user data.", resourcePid);
+			assertNotNull(resourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
 			pid.set(resourcePid);
 		});
 		ourClient.create().resource(new Patient()).execute();
@@ -86,12 +87,12 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 			IAnyResource oldResource = (IAnyResource) t.get(IBaseResource.class, 0);
 			Long oldResourcePid = (Long) oldResource.getUserData("RESOURCE_PID");
-			assertNotNull("Expecting RESOURCE_PID to be set on resource user data.", oldResourcePid);
+			assertNotNull(oldResourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
 			oldPid.set(oldResourcePid);
 
 			IAnyResource newResource = (IAnyResource) t.get(IBaseResource.class, 1);
 			Long newResourcePid = (Long) newResource.getUserData("RESOURCE_PID");
-			assertNotNull("Expecting RESOURCE_PID to be set on resource user data.", newResourcePid);
+			assertNotNull(newResourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
 			newPid.set(newResourcePid);
 		});
 		Patient patient = new Patient();
@@ -151,10 +152,6 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 }

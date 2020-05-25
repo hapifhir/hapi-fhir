@@ -172,7 +172,6 @@ public class JpaGraphQLR4ProviderTest {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeAll

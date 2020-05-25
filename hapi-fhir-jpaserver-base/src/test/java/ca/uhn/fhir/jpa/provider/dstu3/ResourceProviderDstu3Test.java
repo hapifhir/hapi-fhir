@@ -4365,9 +4365,5 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

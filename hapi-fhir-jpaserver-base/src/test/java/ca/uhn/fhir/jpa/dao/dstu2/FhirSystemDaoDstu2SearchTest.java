@@ -7,11 +7,6 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSystemDaoDstu2SearchTest extends BaseJpaDstu2SystemTest {
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Test
 	public void testSearchByParans() {

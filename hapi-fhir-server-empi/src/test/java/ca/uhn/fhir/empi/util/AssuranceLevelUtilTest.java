@@ -1,8 +1,7 @@
 package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import junit.framework.TestCase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.empi.api.EmpiLinkSourceEnum.AUTO;
 import static ca.uhn.fhir.empi.api.EmpiLinkSourceEnum.MANUAL;
@@ -13,11 +12,13 @@ import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_MATCH;
 import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.LEVEL2;
 import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.LEVEL3;
 import static ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel.LEVEL4;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class AssuranceLevelUtilTest extends TestCase {
+public class AssuranceLevelUtilTest {
 
 	@Test
 	public void testValidPersonLinkLevels() {

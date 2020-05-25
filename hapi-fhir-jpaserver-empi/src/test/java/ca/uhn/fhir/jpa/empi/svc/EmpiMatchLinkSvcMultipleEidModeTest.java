@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @TestPropertySource(properties = {
@@ -169,8 +169,8 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		patient2 = updatePatientAndUpdateLinks(patient2);
 
 		assertThat(patient2, is(not(matchedToAPerson())));
-		assertThat(patient2,is(possibleMatchWith(patient1)));
-		assertThat(patient2,is(possibleMatchWith(patient3)));
+		assertThat(patient2, is(possibleMatchWith(patient1)));
+		assertThat(patient2, is(possibleMatchWith(patient3)));
 
 		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));

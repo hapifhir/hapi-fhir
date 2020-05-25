@@ -35,11 +35,6 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@Test
 	public void testSuggestIgnoresBase64Content() {
 		Patient patient = new Patient();

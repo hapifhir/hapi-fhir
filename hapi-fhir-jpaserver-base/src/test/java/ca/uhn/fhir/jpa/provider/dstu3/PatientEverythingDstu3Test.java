@@ -254,9 +254,5 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		return bundle;
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

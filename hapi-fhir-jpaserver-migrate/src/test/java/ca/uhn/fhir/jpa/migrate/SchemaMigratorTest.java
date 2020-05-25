@@ -17,15 +17,14 @@ import java.util.function.Supplier;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SchemaMigratorTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaMigratorTest.class);
 
-	public SchemaMigratorTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
 	@Test
 	public void testMigrationRequired() {
@@ -63,7 +62,7 @@ public class SchemaMigratorTest extends BaseTest {
 		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "2");
 		schemaMigrator.migrate();
 
-		schemaMigrator = createSchemaMigrator("SOMETABLE" ,"create table SOMEOTHERTABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
+		schemaMigrator = createSchemaMigrator("SOMETABLE", "create table SOMEOTHERTABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
 
 		try {
 			schemaMigrator.migrate();

@@ -3,22 +3,22 @@ package ca.uhn.fhir.empi.rules.json;
 import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.util.JsonUtil;
-import junit.framework.TestCase;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiRulesJsonR4Test extends BaseR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiRulesJsonR4Test.class);
 	private EmpiRulesJson myRules;
 
-	@Before
+	@Override
+	@BeforeEach
 	public void before() {
 		super.before();
 
@@ -34,7 +34,7 @@ public class EmpiRulesJsonR4Test extends BaseR4Test {
 		assertEquals(EmpiMatchResultEnum.MATCH, rulesDeser.getMatchResult(myBothNameFields));
 		EmpiFieldMatchJson second = rulesDeser.get(1);
 		assertEquals("name.family", second.getResourcePath());
-		TestCase.assertEquals(DistanceMetricEnum.JARO_WINKLER, second.getMetric());
+		assertEquals(DistanceMetricEnum.JARO_WINKLER, second.getMetric());
 	}
 
 	@Test

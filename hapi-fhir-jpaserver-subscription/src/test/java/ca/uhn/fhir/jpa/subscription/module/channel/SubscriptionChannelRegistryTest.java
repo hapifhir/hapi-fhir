@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class SubscriptionChannelRegistryTest {
 	private static final String TEST_CHANNEL_NAME = "TEST_CHANNEL";
 	@Autowired
@@ -34,15 +34,6 @@ public class SubscriptionChannelRegistryTest {
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 	@MockBean
 	ModelConfig myModelConfig;
-
-	@Configuration
-	static class SpringConfig {
-		@Bean
-		SubscriptionChannelRegistry subscriptionChannelRegistry() {
-			return new SubscriptionChannelRegistry();
-		}
-	}
-
 
 	@Test
 	public void testAddAddRemoveRemove() {
@@ -63,5 +54,13 @@ public class SubscriptionChannelRegistryTest {
 		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.remove(activeSubscriptionA);
 		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+	}
+
+	@Configuration
+	static class SpringConfig {
+		@Bean
+		SubscriptionChannelRegistry subscriptionChannelRegistry() {
+			return new SubscriptionChannelRegistry();
+		}
 	}
 }

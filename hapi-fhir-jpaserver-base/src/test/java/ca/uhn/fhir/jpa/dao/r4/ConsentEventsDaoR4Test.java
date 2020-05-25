@@ -27,7 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.servlet.ServletException;
 import java.util.ArrayList;
@@ -36,14 +36,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
@@ -129,14 +131,14 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
 		assertEquals(1, hitCount.get());
-		assertEquals("Wrong response from " + outcome.getClass(), myObservationIds.subList(0, 20), interceptedResourceIds);
+		assertEquals(myObservationIds.subList(0, 20), interceptedResourceIds, "Wrong response from " + outcome.getClass());
 
 		// Fetch the next 30 (do cross a fetch boundary)
 		String searchId = outcome.getUuid();
 		outcome = myPagingProvider.retrieveResultList(mySrd, searchId);
 		resources = outcome.getResources(10, 40);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		if (!myObservationIdsEvenOnly.subList(10,25).equals(returnedIdValues)) {
+		if (!myObservationIdsEvenOnly.subList(10, 25).equals(returnedIdValues)) {
 			if (resources.size() != 1) {
 				runInTransaction(() -> {
 					Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).get();
@@ -144,7 +146,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				});
 			}
 		}
-		assertEquals("Wrong response from " + outcome.getClass(), myObservationIdsEvenOnly.subList(10, 25), returnedIdValues);
+		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues, "Wrong response from " + outcome.getClass());
 		assertEquals(2, hitCount.get());
 	}
 
@@ -333,7 +335,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		 */
 		assertEquals(1, hitCount.get());
 		assertEquals(myObservationIdsWithVersions.subList(90, myObservationIdsWithVersions.size()), sort(interceptedResourceIds));
-		returnedIdValues.forEach(t-> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
+		returnedIdValues.forEach(t -> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
 
 	}
 

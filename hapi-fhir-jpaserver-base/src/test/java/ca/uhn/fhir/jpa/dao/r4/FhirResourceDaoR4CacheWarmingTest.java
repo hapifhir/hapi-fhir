@@ -105,10 +105,4 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		assertTrue(resultCasted.isCacheHit());
 	}
 
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

@@ -28,10 +28,4 @@ public class CorsDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

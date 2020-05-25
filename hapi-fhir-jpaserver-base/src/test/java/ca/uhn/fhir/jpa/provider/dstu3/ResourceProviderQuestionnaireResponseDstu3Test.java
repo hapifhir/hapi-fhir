@@ -41,7 +41,6 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	public static void afterClassClearContext() {
 		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

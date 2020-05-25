@@ -73,7 +73,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,7 +85,7 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
@@ -283,10 +283,5 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		return retVal;
 	}
 
-	@SuppressWarnings("RedundantThrows")
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

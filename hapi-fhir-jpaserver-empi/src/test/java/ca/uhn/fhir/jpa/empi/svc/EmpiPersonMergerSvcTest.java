@@ -19,19 +19,19 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public static final String GIVEN_NAME = "Jenn";
@@ -58,7 +58,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	private Patient myTargetPatient2;
 	private Patient myTargetPatient3;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDeletePerson = createPerson();
 		myDeletePersonId = myDeletePerson.getIdElement().toUnqualifiedVersionless();
@@ -77,12 +77,13 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myInterceptorService.registerInterceptor(myEmpiStorageInterceptor);
 	}
 
-	@After
+	@Override
+	@AfterEach
 	public void after() {
 		myInterceptorService.unregisterInterceptor(myEmpiStorageInterceptor);
 		super.after();
 	}
-	
+
 	@Test
 	public void emptyMerge() {
 		assertEquals(2, getAllPersons().size());

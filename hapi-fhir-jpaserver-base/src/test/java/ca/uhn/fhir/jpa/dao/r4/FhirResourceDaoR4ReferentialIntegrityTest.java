@@ -17,11 +17,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@AfterEach
 	public void afterResetConfig() {
 		myDaoConfig.setEnforceReferentialIntegrityOnWrite(new DaoConfig().isEnforceReferentialIntegrityOnWrite());

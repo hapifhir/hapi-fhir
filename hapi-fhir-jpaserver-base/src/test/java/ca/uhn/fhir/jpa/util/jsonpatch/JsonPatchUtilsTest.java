@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +20,7 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 	private static final FhirContext ourCtx = FhirContext.forR4();
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonPatchUtilsTest.class);
 
+	@SuppressWarnings("JsonStandardCompliance")
 	@Test
 	public void testInvalidPatchJsonError() {
 

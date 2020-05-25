@@ -131,15 +131,15 @@ import org.hl7.fhir.r5.model.Task;
 import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -154,7 +154,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest {
 	private static IValidationSupport ourJpaValidationSupportChainR5;
@@ -398,6 +398,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
+	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
+	@Autowired
 	private IValidationSupport myJpaValidationSupportChain;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
@@ -405,8 +407,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
-	@Autowired
-	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -522,7 +522,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	public static void afterClassClearContextBaseJpaR5Test() {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainR5.invalidateCaches();
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	/**

@@ -5,18 +5,18 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CommonCodeSystemsTerminologyServiceTest {
 
 	private CommonCodeSystemsTerminologyService mySvc;
 	private FhirContext myCtx;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myCtx = FhirContext.forR4();
 		mySvc = new CommonCodeSystemsTerminologyService(myCtx);

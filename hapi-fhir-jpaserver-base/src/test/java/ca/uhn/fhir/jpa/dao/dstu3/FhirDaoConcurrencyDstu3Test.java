@@ -144,9 +144,5 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

@@ -83,9 +83,4 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 		theFiles.addFileZip("/imgthla/", TermLoaderSvcImpl.IMGTHLA_HLA_XML);
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

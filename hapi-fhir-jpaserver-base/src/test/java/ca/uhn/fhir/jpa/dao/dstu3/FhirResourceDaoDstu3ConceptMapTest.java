@@ -98,8 +98,4 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 		});
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 }

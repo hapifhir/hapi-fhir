@@ -603,7 +603,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();

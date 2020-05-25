@@ -8,8 +8,8 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +20,13 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
-private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLinkR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLinkR4Test.class);
 	private StringType myLinkSource;
 	private IdType myPerson1Id;
 	private IdType myPerson2Id;
 
-	@Before
+	@Override
+	@BeforeEach
 	public void before() {
 		super.before();
 

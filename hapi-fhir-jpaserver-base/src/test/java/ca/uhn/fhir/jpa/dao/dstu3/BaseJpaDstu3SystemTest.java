@@ -20,12 +20,6 @@ public abstract class BaseJpaDstu3SystemTest extends BaseJpaDstu3Test {
 	protected ServletRequestDetails mySrd;
 	private RestfulServer myServer;
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	public void before() throws ServletException {

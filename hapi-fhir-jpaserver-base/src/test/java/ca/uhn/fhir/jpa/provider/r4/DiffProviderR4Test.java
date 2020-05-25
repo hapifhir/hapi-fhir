@@ -10,14 +10,14 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValue;
 import static ca.uhn.fhir.jpa.patch.FhirPatchApplyR4Test.extractPartValuePrimitive;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -54,7 +54,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals("SMITH", extractPartValue(diff, 1, "operation", "value", HumanName.class).getFamily());
 	}
 
-	
+
 	@Test
 	public void testLatestVersion_2_to_3() {
 		// Create and 2 updates
@@ -81,7 +81,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals("replace", extractPartValuePrimitive(diff, 1, "operation", "type"));
 		assertEquals("Patient.meta.lastUpdated", extractPartValuePrimitive(diff, 1, "operation", "path"));
-		
+
 		assertEquals("replace", extractPartValuePrimitive(diff, 2, "operation", "type"));
 		assertEquals("Patient.text.div", extractPartValuePrimitive(diff, 2, "operation", "path"));
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody/></table></div>", extractPartValuePrimitive(diff, 2, "operation", "previousValue"));
@@ -101,7 +101,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		createPatient(withId(id), withActiveTrue());
 		createPatient(withId(id), withActiveTrue(), withFamily("SMITH"));
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			ResourceHistoryTable version2 = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
 			myResourceHistoryTableDao.deleteByPid(version2.getId());
 		});
@@ -173,7 +173,6 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals("3", extractPartValuePrimitive(diff, 0, "operation", "value"));
 
 	}
-
 
 
 	@Test

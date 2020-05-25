@@ -1262,7 +1262,7 @@ public class GenericClientDstu2Test {
 				.execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Don't know how to handle parameter of type class ca.uhn.fhir.rest.client.GenericClientDstu2Test$22", e.getMessage());
 		}
 	}
 

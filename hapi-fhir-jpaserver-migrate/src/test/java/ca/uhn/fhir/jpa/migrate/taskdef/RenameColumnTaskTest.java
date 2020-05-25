@@ -6,18 +6,13 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Set;
-import java.util.function.Supplier;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RenameColumnTaskTest extends BaseTest {
-
-	public RenameColumnTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
 	@Test
 	public void testColumnAlreadyExists() throws SQLException {

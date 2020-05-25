@@ -146,9 +146,5 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 		assertEquals(10, outcome.getEntry().size());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

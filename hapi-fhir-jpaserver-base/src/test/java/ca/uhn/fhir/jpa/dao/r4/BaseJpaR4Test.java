@@ -149,15 +149,15 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -169,15 +169,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class})
-public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBuilder {
+public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
@@ -451,11 +451,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
+	protected DaoRegistry myDaoRegistry;
+	@Autowired
 	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
@@ -524,7 +524,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
-	@After
+	@AfterEach
 	public void afterPurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
@@ -632,7 +632,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 	public static void afterClassClearContextBaseJpaR4Test() {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainR4.invalidateCaches();
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	/**

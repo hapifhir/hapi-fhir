@@ -16,9 +16,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AddTableByColumnTaskTest extends BaseTest {
-	public AddTableByColumnTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
 	@Test
 	public void testAddTable() throws SQLException {

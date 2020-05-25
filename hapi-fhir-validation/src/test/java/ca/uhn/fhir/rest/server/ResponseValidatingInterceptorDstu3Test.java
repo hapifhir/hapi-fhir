@@ -33,7 +33,6 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,14 +43,14 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class ResponseValidatingInterceptorDstu3Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorDstu3Test.class);
 	public static IBaseResource myReturnResource;
-
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
@@ -70,7 +69,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 		ourServlet.registerInterceptor(myInterceptor);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testInterceptorExceptionNpeNoIgnore() throws Exception {
@@ -87,7 +86,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
 		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -117,7 +116,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
 		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -147,7 +146,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
 		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -177,7 +176,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
 		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -191,7 +190,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
 	}
 
-	
+
 	/**
 	 * Test for #345
 	 */
@@ -279,7 +278,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), (Matchers.containsString(
-				"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
+			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
 	}
 
 	/**
@@ -465,6 +464,28 @@ public class ResponseValidatingInterceptorDstu3Test {
 		assertThat(status.toString(), (Matchers.containsString("X-FHIR-Response-Validation")));
 	}
 
+	public static class PatientProvider implements IResourceProvider {
+
+		@Delete
+		public MethodOutcome delete(@IdParam IdType theId) {
+			return new MethodOutcome(theId.withVersion("2"));
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Search
+		public ArrayList<IBaseResource> search(@OptionalParam(name = "foo") StringParam theString) {
+			ArrayList<IBaseResource> retVal = new ArrayList<>();
+			myReturnResource.setId("1");
+			retVal.add(myReturnResource);
+			return retVal;
+		}
+
+	}
+
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -486,34 +507,12 @@ public class ResponseValidatingInterceptorDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
-	}
-
-	public static class PatientProvider implements IResourceProvider {
-
-		@Delete
-		public MethodOutcome delete(@IdParam IdType theId) {
-			return new MethodOutcome(theId.withVersion("2"));
-		}
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Patient.class;
-		}
-
-		@Search
-		public ArrayList<IBaseResource> search(@OptionalParam(name = "foo") StringParam theString) {
-			ArrayList<IBaseResource> retVal = new ArrayList<>();
-			myReturnResource.setId("1");
-			retVal.add(myReturnResource);
-			return retVal;
-		}
 
 	}
 

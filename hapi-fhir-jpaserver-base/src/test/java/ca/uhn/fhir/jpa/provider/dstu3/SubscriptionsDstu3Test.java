@@ -168,10 +168,6 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		ourClient.update().resource(subs).execute();
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	public class BaseSocket {
 		protected String myError;

@@ -12,9 +12,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AddForeignKeyTaskTest extends BaseTest {
 
-	public AddForeignKeyTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
 	@Test
 	public void testAddForeignKey() throws SQLException {

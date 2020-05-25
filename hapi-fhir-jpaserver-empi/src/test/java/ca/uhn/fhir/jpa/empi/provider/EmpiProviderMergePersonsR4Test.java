@@ -6,13 +6,13 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
@@ -21,7 +21,8 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	private Person myKeepPerson;
 	private StringType myKeepPersonId;
 
-	@Before
+	@Override
+	@BeforeEach
 	public void before() {
 		super.before();
 
@@ -101,7 +102,7 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	@Test
 	public void testBadParams() {
 		try {
-		myEmpiProviderR4.mergePersons(new StringType("Patient/1"), new StringType("Patient/2"), myRequestDetails);
+			myEmpiProviderR4.mergePersons(new StringType("Patient/1"), new StringType("Patient/2"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("personIdToDelete must have form Person/<id> where <id> is the id of the person", e.getMessage());

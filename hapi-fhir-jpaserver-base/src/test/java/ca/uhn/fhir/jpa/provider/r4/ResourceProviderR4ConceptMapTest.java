@@ -18,12 +18,6 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ConceptMapTest.class);
 
 	private IIdType myConceptMapId;
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@BeforeEach
 	@Transactional
 	public void before02() {

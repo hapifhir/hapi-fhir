@@ -11,11 +11,12 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParserWithValidationDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ParserWithValidationDstu3Test.class);

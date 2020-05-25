@@ -406,7 +406,7 @@ public class GenericClientTest {
 		oo = (OperationOutcome) outcome.getOperationOutcome();
 		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
-		Assert.assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
+		assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
 	}
@@ -467,7 +467,7 @@ public class GenericClientTest {
 		oo = (OperationOutcome) outcome.getOperationOutcome();
 		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
-		Assert.assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
+		assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
 	}

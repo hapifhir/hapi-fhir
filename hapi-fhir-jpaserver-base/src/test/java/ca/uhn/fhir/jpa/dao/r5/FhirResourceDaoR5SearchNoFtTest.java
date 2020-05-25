@@ -136,10 +136,4 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		assertEquals(0, outcome.getResources(0, 3).size());
 	}
 
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 }

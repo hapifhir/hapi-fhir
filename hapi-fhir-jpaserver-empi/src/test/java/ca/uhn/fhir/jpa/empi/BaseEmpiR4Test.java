@@ -40,12 +40,12 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -53,20 +53,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {EmpiSubmitterConfig.class, EmpiConsumerConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
-	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
-
-	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
-	protected static final String JANE_ID = "ID.JANE.123";
 	public static final String NAME_GIVEN_JANE = "Jane";
-	protected static final String PAUL_ID = "ID.PAUL.456";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
+	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
+	protected static final String JANE_ID = "ID.JANE.123";
+	protected static final String PAUL_ID = "ID.PAUL.456";
+	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
@@ -96,7 +95,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
-	@After
+	@Override
+	@AfterEach
 	public void after() {
 		myEmpiLinkDao.deleteAll();
 		super.after();

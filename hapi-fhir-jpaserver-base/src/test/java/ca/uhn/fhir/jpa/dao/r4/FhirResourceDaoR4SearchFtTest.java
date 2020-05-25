@@ -568,9 +568,5 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

@@ -30,7 +30,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Subscription;
-import org.hl7.fhir.r5.model.Topic;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,28 +48,22 @@ import java.util.List;
 @Disabled
 public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR5Test.class);
-
-	private static Server ourListenerServer;
-    protected static int ourListenerPort;
+	protected static int ourListenerPort;
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
+	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static Server ourListenerServer;
 	private static SingleQueryCountHolder ourCountHolder;
-
-	@Autowired
-	private SingleQueryCountHolder myCountHolder;
+	private static String ourListenerServerBase;
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
 	protected SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-
 	protected CountingInterceptor myCountingInterceptor;
-
-	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static String ourListenerServerBase;
-
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-
+	@Autowired
+	private SingleQueryCountHolder myCountHolder;
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -178,7 +172,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 
-
 	public static class ObservationListener implements IResourceProvider {
 
 		@Create
@@ -230,7 +223,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR5());
-		
+
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
 
@@ -245,8 +238,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);
-        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterAll

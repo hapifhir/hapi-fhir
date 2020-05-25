@@ -65,7 +65,7 @@ public class PropertyDstu3Test {
 			property.getChildProperties("birthdate", null);
 			fail();
 		} catch (Error e) {
-    		assertEquals("", e.getMessage());
+    		assertEquals("types == 0, and no children found", e.getMessage());
 		}
     }
 }

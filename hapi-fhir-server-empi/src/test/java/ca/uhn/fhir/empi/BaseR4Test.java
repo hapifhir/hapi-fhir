@@ -10,21 +10,19 @@ import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 public abstract class BaseR4Test {
-	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	public static final String PATIENT_GIVEN = "patient-given";
 	public static final String PATIENT_LAST = "patient-last";
-	public static final String PATIENT_GENERAL_PRACTITIONER= "patient-practitioner";
-
-
+	public static final String PATIENT_GENERAL_PRACTITIONER = "patient-practitioner";
 	public static final double NAME_THRESHOLD = 0.8;
+	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	protected EmpiFieldMatchJson myGivenNameMatchField;
 	protected EmpiFieldMatchJson myParentMatchField;
 	protected String myBothNameFields;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myGivenNameMatchField = new EmpiFieldMatchJson()
 			.setName(PATIENT_GIVEN)

@@ -16,10 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class InitializeSchemaTaskTest extends BaseTest {
 
-	public InitializeSchemaTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
-
 	@Test
 	public void testInitializeTwice() throws SQLException {
 		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider());

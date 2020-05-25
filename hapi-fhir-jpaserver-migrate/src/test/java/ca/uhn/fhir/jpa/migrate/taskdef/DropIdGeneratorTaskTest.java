@@ -16,10 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class DropIdGeneratorTaskTest extends BaseTest {
 
 
-	public DropIdGeneratorTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
-
 	@Test
 	public void testAddIdGenerator() throws SQLException {
 		executeSql("create sequence SEQ_FOO start with 1 increment by 50");

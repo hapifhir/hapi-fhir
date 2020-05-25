@@ -24,19 +24,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirContextDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContextDstu2Test.class);
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	@Test
 	public void testScanInvalid() {
@@ -45,7 +40,7 @@ public class FhirContextDstu2Test {
 			ctx.getResourceDefinition("InvalidResource");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
 
@@ -56,24 +51,23 @@ public class FhirContextDstu2Test {
 		assertEquals(FhirVersionEnum.DSTU2, ctx.getVersion().getVersion());
 	}
 
-	
 	@Test
 	public void testQueryBoundCode() {
 		RuntimeResourceDefinition patientType = ourCtx.getResourceDefinition(Patient.class);
 		String childName = "gender";
 		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
 		ourLog.trace(genderChild.getClass().getName());
-		
+
 		assertEquals(AdministrativeGenderEnum.class, genderChild.getBoundEnumType());
 	}
-	
+
 	@Test
 	public void testQueryBoundCodeableConcept() {
 		RuntimeResourceDefinition patientType = ourCtx.getResourceDefinition(Patient.class);
 		String childName = "maritalStatus";
 		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
 		ourLog.trace(genderChild.getClass().getName());
-		
+
 		assertEquals(MaritalStatusCodesEnum.class, genderChild.getBoundEnumType());
 	}
 
@@ -136,6 +130,11 @@ public class FhirContextDstu2Test {
 		iParser.encodeResourceToString(iBaseResource2);
 	}
 
+	@AfterAll
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 	//Source: https://github.com/junit-team/junit4/wiki/multithreaded-code-and-concurrency
 	public static void assertConcurrent(final String message, final List<? extends Runnable> runnables, final int maxTimeoutSeconds) throws InterruptedException {
 		final int numThreads = runnables.size();
@@ -166,7 +165,7 @@ public class FhirContextDstu2Test {
 			assertTrue(allExecutorThreadsReady.await(runnables.size() * 10, TimeUnit.MILLISECONDS), "Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent");
 			// start all test runners
 			afterInitBlocker.countDown();
-			assertTrue(allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS), message +" timeout! More than" + maxTimeoutSeconds + "seconds");
+			assertTrue(allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS), message + " timeout! More than" + maxTimeoutSeconds + "seconds");
 		} finally {
 			threadPool.shutdownNow();
 		}

@@ -1195,9 +1195,5 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		return retVal;
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

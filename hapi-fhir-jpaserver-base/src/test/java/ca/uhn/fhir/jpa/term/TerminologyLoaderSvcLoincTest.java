@@ -506,9 +506,5 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("LP52960-9", doublyNestedChildCode.getChildren().get(2).getChild().getCode());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

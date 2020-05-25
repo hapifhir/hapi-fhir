@@ -231,7 +231,7 @@ public class JaxRsPatientProviderDstu3Test {
            .execute();
         String resultValue = outParams.getParameter().get(0).getValue().toString();
         System.out.println(resultValue);
-        assertEquals("expected but found : "+ resultValue, resultValue.contains("myAwesomeDummyValue"), true);
+        assertEquals(resultValue.contains("myAwesomeDummyValue"), true, "expected but found : "+ resultValue);
     }
     
     @Test
@@ -252,7 +252,7 @@ public class JaxRsPatientProviderDstu3Test {
                 .execute();
         String resultValue = outParams.getParameter().get(0).getValue().toString();
         System.out.println(resultValue);
-        assertEquals("expected but found : "+ resultValue, resultValue.contains("myAwesomeDummyValue"), true);
+        assertEquals(resultValue.contains("myAwesomeDummyValue"), true, "expected but found : "+ resultValue);
     }
     
     @Test

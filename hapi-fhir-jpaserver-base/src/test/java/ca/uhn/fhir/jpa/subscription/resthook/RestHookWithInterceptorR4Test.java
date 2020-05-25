@@ -1,16 +1,16 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
-import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.apache.commons.lang3.Validate;
@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -42,6 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -64,6 +64,10 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+	@Autowired
+	private IInterceptorService myInterceptorRegistry;
+	@Autowired
+	private MyTestInterceptor myTestInterceptor;
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
@@ -129,7 +133,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourHeaders, hasItem("X-Foo: Bar"));
 	}
 
-
 	@Test
 	public void testAttributesAreCopiedAlongPipeline() throws Exception {
 		AttributeCarryingInterceptor interceptor = new AttributeCarryingInterceptor();
@@ -159,7 +162,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}
 	}
 
-
 	@Test
 	public void testBeforeRestHookDelivery_AbortDelivery() throws Exception {
 		ourNextBeforeRestHookDeliveryReturn = false;
@@ -174,7 +176,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		Thread.sleep(1000);
 		assertEquals(0, ourUpdatedObservations.size());
 	}
-
 
 	@Test
 	public void testDeliveryFailed() throws Exception {
@@ -200,7 +201,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 		latch.await(10, TimeUnit.SECONDS);
 	}
-
 
 	protected Observation sendObservation() {
 		Observation observation = new Observation();
@@ -300,12 +300,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			myFinishedLatch.countDown();
 		}
 	}
-
-	@Autowired
-	private IInterceptorService myInterceptorRegistry;
-
-	@Autowired
-	private MyTestInterceptor myTestInterceptor;
 
 	@Configuration
 	static class MyTestCtxConfig {

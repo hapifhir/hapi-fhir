@@ -600,8 +600,4 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myCodeSystemDao.create(cs);
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 }

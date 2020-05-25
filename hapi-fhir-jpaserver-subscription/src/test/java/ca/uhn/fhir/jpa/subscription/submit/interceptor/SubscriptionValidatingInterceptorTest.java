@@ -6,14 +6,14 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Subscription;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -21,8 +21,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-
+@ExtendWith(SpringExtension.class)
 public class SubscriptionValidatingInterceptorTest {
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
@@ -31,25 +30,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MockBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
-	@Configuration
-	public static class SpringConfig {
-		@Bean
-		FhirContext fhirContext() {
-			return FhirContext.forR4();
-		}
-
-		@Bean
-		SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
-			return new SubscriptionValidatingInterceptor();
-		}
-
-		@Bean
-		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-			return new SubscriptionCanonicalizer(theFhirContext);
-		}
-	}
-
-	@Before
+	@BeforeEach
 	public void before() {
 		when(myDaoRegistry.isResourceTypeSupported(any())).thenReturn(true);
 	}
@@ -153,5 +134,23 @@ public class SubscriptionValidatingInterceptorTest {
 		// Happy path
 		channel.setEndpoint("channel:my-queue-name");
 		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+	}
+
+	@Configuration
+	public static class SpringConfig {
+		@Bean
+		FhirContext fhirContext() {
+			return FhirContext.forR4();
+		}
+
+		@Bean
+		SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
+			return new SubscriptionValidatingInterceptor();
+		}
+
+		@Bean
+		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
+			return new SubscriptionCanonicalizer(theFhirContext);
+		}
 	}
 }

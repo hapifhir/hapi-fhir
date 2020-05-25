@@ -1171,9 +1171,5 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

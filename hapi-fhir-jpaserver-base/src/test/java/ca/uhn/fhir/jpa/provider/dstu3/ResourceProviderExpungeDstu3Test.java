@@ -366,9 +366,5 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(p));
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

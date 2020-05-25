@@ -145,9 +145,5 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	}
 
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

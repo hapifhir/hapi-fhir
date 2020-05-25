@@ -4,8 +4,8 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingS
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,11 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test {
-	@Autowired
-	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
-
 	@RegisterExtension
 	public ExpectedException exception = ExpectedException.none();
+	@Autowired
+	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	@Test
 	public void testInMemory() {

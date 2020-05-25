@@ -22,6 +22,8 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.*;
 
 import com.google.common.base.Charsets;
@@ -97,7 +99,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		wrongEnc1.getServiceProvider().setReference(orgId);
 		myWrongEnc1 = ourClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
 
-		myObsIds = new ArrayList<String>();
+		myObsIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
@@ -209,11 +211,6 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		}
 		
 		return bundle;
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

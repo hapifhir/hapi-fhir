@@ -12,9 +12,11 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 	@Autowired

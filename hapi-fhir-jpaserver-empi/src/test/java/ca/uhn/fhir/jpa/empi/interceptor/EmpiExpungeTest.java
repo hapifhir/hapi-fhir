@@ -13,15 +13,15 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiExpungeTest extends BaseEmpiR4Test {
 
@@ -37,7 +37,7 @@ public class EmpiExpungeTest extends BaseEmpiR4Test {
 	private ResourceTable myPersonEntity;
 	private IdDt myTargetId;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setExpungeEnabled(true);
 
@@ -72,7 +72,7 @@ public class EmpiExpungeTest extends BaseEmpiR4Test {
 		assertEquals(0, myEmpiLinkDao.count());
 	}
 
-	@After
+	@AfterEach
 	public void afterUnregisterInterceptor() {
 		myInterceptorService.unregisterInterceptor(myEmpiStorageInterceptor);
 	}

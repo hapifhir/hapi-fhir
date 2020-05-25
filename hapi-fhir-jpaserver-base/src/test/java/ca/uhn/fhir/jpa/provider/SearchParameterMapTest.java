@@ -16,12 +16,6 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class SearchParameterMapTest {
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	
 	

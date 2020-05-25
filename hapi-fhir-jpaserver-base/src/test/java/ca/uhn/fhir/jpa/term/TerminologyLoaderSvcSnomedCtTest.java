@@ -146,9 +146,5 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		}
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

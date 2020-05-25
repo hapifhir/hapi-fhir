@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 

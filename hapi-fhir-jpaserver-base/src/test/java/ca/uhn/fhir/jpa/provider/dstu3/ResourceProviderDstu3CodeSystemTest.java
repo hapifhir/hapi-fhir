@@ -328,10 +328,6 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		return ourCtx.newJsonParser().parseResource(theType, loadResource(theFilename));
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 }

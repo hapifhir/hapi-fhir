@@ -16,16 +16,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu3Config.class})
 public class MatchUrlServiceTest extends BaseJpaTest {
 
@@ -33,11 +35,6 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 	@Autowired
 	MatchUrlService myMatchUrlService;
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	@Test
 	public void testTranslateMatchUrl() {
@@ -110,5 +107,6 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	protected PlatformTransactionManager getTxManager() {
 		return null;
 	}
+
 
 }

@@ -13,10 +13,6 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 	@Test

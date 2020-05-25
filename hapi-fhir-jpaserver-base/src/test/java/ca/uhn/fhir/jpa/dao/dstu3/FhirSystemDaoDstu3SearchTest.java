@@ -7,12 +7,6 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSystemDaoDstu3SearchTest extends BaseJpaDstu3SystemTest {
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@Test
 	public void testSearchByParans() {
 		// code to come.. just here to prevent a failure 

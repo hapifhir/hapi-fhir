@@ -36,11 +36,6 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-	
 	@BeforeEach
 	@AfterEach
 	public void resetDefaultBehaviour() {
