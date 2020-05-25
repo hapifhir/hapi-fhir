@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -318,6 +320,30 @@ public class FhirPatchDiffR4Test {
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
+
+	@Test
+	public void testInsertContact() {
+		Patient oldValue = new Patient();
+
+		Patient newValue = new Patient();
+		newValue.addContact().getName().setFamily("My Family");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertEquals(2, diff.getParameter().size());
+		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.contact", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals(null, extractPartValue(diff, 0, "operation", "value", IBase.class));
+		assertEquals("insert", extractPartValuePrimitive(diff, 1, "operation", "type"));
+		assertEquals("Patient.contact[0].name", extractPartValuePrimitive(diff, 1, "operation", "path"));
+		assertEquals("My Family", extractPartValue(diff, 1, "operation", "value", HumanName.class).getFamily());
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
 
 	@Test
 	public void testIgnoreElementComposite_Resource() {
