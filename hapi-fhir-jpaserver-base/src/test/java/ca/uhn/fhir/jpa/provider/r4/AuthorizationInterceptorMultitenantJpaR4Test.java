@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -55,7 +54,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
-			ourClient.read().resource(Patient.class).withId(idB).execute();
+			myClient.read().resource(Patient.class).withId(idB).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -72,7 +71,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.build());
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		Patient p = ourClient.read().resource(Patient.class).withId(idA).execute();
+		Patient p = myClient.read().resource(Patient.class).withId(idA).execute();
 		assertTrue(p.getActive());
 	}
 
@@ -87,7 +86,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
-			ourClient.read().resource(Patient.class).withId(idB).execute();
+			myClient.read().resource(Patient.class).withId(idB).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -103,7 +102,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.build());
 
 		myTenantClientInterceptor.setTenantId("DEFAULT");
-		Patient p = ourClient.read().resource(Patient.class).withId(idA).execute();
+		Patient p = myClient.read().resource(Patient.class).withId(idA).execute();
 		assertTrue(p.getActive());
 	}
 
@@ -117,7 +116,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		try {
-			ourClient.read().resource(Patient.class).withId(idA).execute();
+			myClient.read().resource(Patient.class).withId(idA).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -137,7 +136,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 
-		Bundle output = ourClient
+		Bundle output = myClient
 			.search()
 			.forResource("Observation")
 			.include(Observation.INCLUDE_ALL)
@@ -160,7 +159,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 
 		try {
-			ourClient
+			myClient
 				.search()
 				.forResource("Observation")
 				.include(Observation.INCLUDE_ALL)
@@ -193,7 +192,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 
 		// Search and fetch the first 3
-		Bundle bundle = ourClient
+		Bundle bundle = myClient
 			.search()
 			.forResource("Observation")
 			.include(Observation.INCLUDE_ALL)
@@ -205,7 +204,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		assertThat(toUnqualifiedVersionlessIds(bundle).toString(), toUnqualifiedVersionlessIds(bundle), contains(observationIds.get(0), observationIds.get(1), observationIds.get(2), patientIdA));
 
 		// Fetch the next 3
-		bundle = ourClient
+		bundle = myClient
 			.loadPage()
 			.next(bundle)
 			.execute();
@@ -214,7 +213,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		// Fetch the next 3 - This should fail as the last observation has a cross-partition reference
 		try {
-			bundle = ourClient
+			bundle = myClient
 				.loadPage()
 				.next(bundle)
 				.execute();

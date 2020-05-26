@@ -89,7 +89,7 @@ public class JpaStorageServicesTest extends BaseJpaR4Test {
 		try {
 			mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			assertEquals("", e.getMessage());
 		}
 	}

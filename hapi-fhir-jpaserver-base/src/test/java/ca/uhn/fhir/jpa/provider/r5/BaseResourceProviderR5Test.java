@@ -67,7 +67,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
 	protected static Server ourServer;
-	protected IGenericClient ourClient;
+	protected IGenericClient myClient;
 	ResourceCountCache ourResourceCountsCache;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
@@ -85,7 +85,9 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 	@AfterEach
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		if (ourRestServer != null) {
+			ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		}
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -181,9 +183,9 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
 
-		ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 		if (shouldLogClient()) {
-			ourClient.registerInterceptor(new LoggingInterceptor());
+			myClient.registerInterceptor(new LoggingInterceptor());
 		}
 	}
 

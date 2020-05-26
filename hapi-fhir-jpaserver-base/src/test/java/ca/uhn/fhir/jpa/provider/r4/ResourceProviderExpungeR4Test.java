@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -14,7 +13,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -144,7 +142,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = ourClient
+		Parameters output = myClient
 			.operation()
 			.onInstance(myTwoVersionPatientId)
 			.named("expunge")
@@ -184,7 +182,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setValue(new BooleanType(true));
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myTwoVersionPatientId)
 				.named("expunge")
@@ -217,7 +215,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = ourClient
+		Parameters output = myClient
 			.operation()
 			.onServer()
 			.named("expunge")
@@ -256,7 +254,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = ourClient
+		Parameters output = myClient
 			.operation()
 			.onType(Patient.class)
 			.named("expunge")
@@ -302,7 +300,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = ourClient
+		Parameters output = myClient
 			.operation()
 			.onInstanceVersion(myTwoVersionPatientId.withVersion("1"))
 			.named("expunge")

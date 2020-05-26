@@ -73,14 +73,14 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		for (IIdType next : mySubscriptionIds) {
 			IIdType nextId = next.toUnqualifiedVersionless();
 			ourLog.info("Deleting: {}", nextId);
-			ourClient.delete().resourceById(nextId).execute();
+			myClient.delete().resourceById(nextId).execute();
 		}
 		mySubscriptionIds.clear();
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
@@ -100,10 +100,10 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		ourHeaders.clear();
 
 		// Delete all Subscriptions
-		if (ourClient != null) {
-			Bundle allSubscriptions = ourClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
+		if (myClient != null) {
+			Bundle allSubscriptions = myClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
 			for (IBaseResource next : BundleUtil.toListOfResources(myFhirCtx, allSubscriptions)) {
-				ourClient.delete().resource(next).execute();
+				myClient.delete().resource(next).execute();
 			}
 			waitForActivatedSubscriptionCount(0);
 		}
@@ -122,7 +122,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected Subscription createSubscription(String theCriteria, String thePayload) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 

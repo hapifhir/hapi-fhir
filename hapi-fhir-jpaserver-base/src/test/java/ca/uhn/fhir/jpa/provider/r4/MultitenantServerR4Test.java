@@ -19,7 +19,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	@Test
 	public void testFetchCapabilityStatement() {
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		CapabilityStatement cs = ourClient.capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
 		assertEquals("HAPI FHIR Server", cs.getSoftware().getName());
 		assertEquals(ourServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
@@ -36,12 +36,12 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Now read back
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		Patient response = ourClient.read().resource(Patient.class).withId(idA).execute();
+		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
 		assertTrue(response.getActive());
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
-			ourClient.read().resource(Patient.class).withId(idA).execute();
+			myClient.read().resource(Patient.class).withId(idA).execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
@@ -55,7 +55,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		Patient patientA = new Patient();
 		patientA.setActive(true);
 		try {
-			ourClient.create().resource(patientA).execute();
+			myClient.create().resource(patientA).execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage(), containsString("Partition name \"TENANT-ZZZ\" is not valid"));

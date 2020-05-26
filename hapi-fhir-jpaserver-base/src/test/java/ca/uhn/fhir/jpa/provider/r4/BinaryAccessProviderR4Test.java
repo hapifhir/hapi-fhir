@@ -289,7 +289,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("0000-1111") );
 
 		try {
-			ourClient.create().resource(dr).execute();
+			myClient.create().resource(dr).execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Can not find the requested binary content. It may have been deleted."));
@@ -353,7 +353,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
 
-		IIdType id = ourClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
@@ -420,7 +420,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
 
-		IIdType id = ourClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
 
 		// Write using the operation
 
@@ -485,7 +485,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(documentReference));
 
-		return ourClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless();
+		return myClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless();
 	}
 
 
@@ -516,9 +516,9 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(15, capture.size());
 
 		// Now delete (logical delete- should not expunge the binary)
-		ourClient.delete().resourceById(id).execute();
+		myClient.delete().resourceById(id).execute();
 		try {
-			ourClient.read().resource("DocumentReference").withId(id).execute();
+			myClient.read().resource("DocumentReference").withId(id).execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -531,7 +531,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		// Now expunge
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES).setValue(new BooleanType(true));
-		ourClient
+		myClient
 			.operation()
 			.onInstance(id)
 			.named(JpaConstants.OPERATION_EXPUNGE)

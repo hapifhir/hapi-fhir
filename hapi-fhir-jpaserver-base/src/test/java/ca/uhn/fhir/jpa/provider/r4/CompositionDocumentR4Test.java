@@ -7,14 +7,12 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -69,18 +67,18 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 		Organization org = new Organization();
 		org.setName("an org");
-		orgId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
+		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
 		ourLog.info("OrgId: {}", orgId);
 
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setReference(orgId);
-		patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		patId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc = new Encounter();
 		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
 		enc.getSubject().setReference(patId);
 		enc.getServiceProvider().setReference(orgId);
-		encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless().getValue();
+		encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless().getValue();
 
 		ListResource listResource = new ListResource();
 
@@ -90,13 +88,13 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
 			obs.setStatus(Observation.ObservationStatus.FINAL);
-			String obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			String obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
 			listResource.addEntry(new ListResource.ListEntryComponent().setItem(new Reference(obs)));
 			myObs.add(obs);
 			myObsIds.add(obsId);
 		}
 
-		listId = ourClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
+		listId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Composition composition = new Composition();
 		composition.setSubject(new Reference(patId));
@@ -108,7 +106,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		for (String obsId : myObsIds) {
 			composition.addSection().addEntry(new Reference(obsId));
 		}
-		compId = ourClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
+		compId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
 	}
 
 	@Test

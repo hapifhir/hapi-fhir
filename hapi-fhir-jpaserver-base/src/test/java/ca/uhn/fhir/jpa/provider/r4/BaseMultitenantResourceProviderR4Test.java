@@ -55,12 +55,12 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		ourRestServer.setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 
 		myCapturingInterceptor = new CapturingInterceptor();
-		ourClient.getInterceptorService().registerInterceptor(myCapturingInterceptor);
+		myClient.getInterceptorService().registerInterceptor(myCapturingInterceptor);
 
 		myTenantClientInterceptor = new UrlTenantSelectionInterceptor();
-		ourClient.getInterceptorService().registerInterceptor(myTenantClientInterceptor);
+		myClient.getInterceptorService().registerInterceptor(myTenantClientInterceptor);
 
-		ourClient.getInterceptorService().registerInterceptor(new LoggingInterceptor());
+		myClient.getInterceptorService().registerInterceptor(new LoggingInterceptor());
 
 		createTenants();
 	}
@@ -78,7 +78,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		ourRestServer.unregisterProvider(myPartitionManagementProvider);
 		ourRestServer.setTenantIdentificationStrategy(null);
 
-		ourClient.getInterceptorService().unregisterAllInterceptors();
+		myClient.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 	private void createTenants() {
 		myTenantClientInterceptor.setTenantId(DEFAULT_PERSISTED_PARTITION_NAME);
 
-		ourClient
+		myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
@@ -98,7 +98,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_A))
 			.execute();
 
-		ourClient
+		myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
@@ -125,12 +125,12 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
-		return ourClient.create().resource(theResource).execute().getId();
+		return myClient.create().resource(theResource).execute().getId();
 	}
 
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
-		return ourClient.update().resource(theResource).execute().getId();
+		return myClient.update().resource(theResource).execute().getId();
 	}
 
 	@Override

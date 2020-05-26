@@ -66,7 +66,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	private static DatabaseBackedPagingProvider ourPagingProvider;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
-	protected IGenericClient ourClient;
+	protected IGenericClient myClient;
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
@@ -181,9 +181,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
 
-		ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 		if (shouldLogClient()) {
-			ourClient.registerInterceptor(new LoggingInterceptor());
+			myClient.registerInterceptor(new LoggingInterceptor());
 		}
 	}
 

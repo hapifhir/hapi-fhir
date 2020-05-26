@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Attachment;
@@ -17,7 +16,6 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.UriType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -78,7 +76,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		byte[] packageBytes = createSctZip();
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
@@ -95,7 +93,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	public void testUploadLoinc() throws Exception {
 		byte[] packageBytes = createLoincZip();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
@@ -113,7 +111,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		 * Try uploading a second time
 		 */
 
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
@@ -129,7 +127,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testUploadMissingPackage() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
@@ -146,7 +144,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		byte[] packageBytes = createSctZip();
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
@@ -163,7 +161,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	public void testUploadSct() throws Exception {
 		byte[] packageBytes = createSctZip();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
@@ -187,7 +185,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		fos.write(packageBytes);
 		fos.close();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
@@ -215,8 +213,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.setUrl("file:/foo/hierarchy.csv");
 
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
-		ourClient.registerInterceptor(interceptor);
-		Parameters outcome = ourClient
+		myClient.registerInterceptor(interceptor);
+		Parameters outcome = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
@@ -225,7 +223,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
 			.prettyPrint()
 			.execute();
-		ourClient.unregisterInterceptor(interceptor);
+		myClient.unregisterInterceptor(interceptor);
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
@@ -248,8 +246,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		micro.addConcept().setCode("C&S").setDisplay("Culture And Sensitivity");
 
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
-		ourClient.registerInterceptor(interceptor);
-		Parameters outcome = ourClient
+		myClient.registerInterceptor(interceptor);
+		Parameters outcome = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
@@ -257,7 +255,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
 			.prettyPrint()
 			.execute();
-		ourClient.unregisterInterceptor(interceptor);
+		myClient.unregisterInterceptor(interceptor);
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
@@ -287,12 +285,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			codeSystem.setUrl("https://good.health");
 
 			LoggingInterceptor interceptor = new LoggingInterceptor(true);
-			ourClient.registerInterceptor(interceptor);
-			ourClient
+			myClient.registerInterceptor(interceptor);
+			myClient
 				.create()
 				.resource(codeSystem)
 				.execute();
-			ourClient.unregisterInterceptor(interceptor);
+			myClient.unregisterInterceptor(interceptor);
 		}
 
 		// Add a child with a really long description
@@ -301,14 +299,14 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			Parameters inputBundle = loadResourceFromClasspath(Parameters.class, "/term-delta-json.json");
 
 			LoggingInterceptor interceptor = new LoggingInterceptor(true);
-			ourClient.registerInterceptor(interceptor);
-			outcome = ourClient
+			myClient.registerInterceptor(interceptor);
+			outcome = myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
 				.withParameters(inputBundle)
 				.execute();
-			ourClient.unregisterInterceptor(interceptor);
+			myClient.unregisterInterceptor(interceptor);
 		}
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -348,8 +346,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			chem.addConcept().setCode("HB").setDisplay("Hemoglobin");
 
 			LoggingInterceptor interceptor = new LoggingInterceptor(true);
-			ourClient.registerInterceptor(interceptor);
-			Parameters outcome = ourClient
+			myClient.registerInterceptor(interceptor);
+			Parameters outcome = myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
@@ -357,7 +355,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
 				.prettyPrint()
 				.execute();
-			ourClient.unregisterInterceptor(interceptor);
+			myClient.unregisterInterceptor(interceptor);
 		}
 
 		// Add a child with a really long description
@@ -369,8 +367,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.addConcept().setCode("HBA").setDisplay(leftPad("", 500, 'Z'));
 
 			LoggingInterceptor interceptor = new LoggingInterceptor(true);
-			ourClient.registerInterceptor(interceptor);
-			outcome = ourClient
+			myClient.registerInterceptor(interceptor);
+			outcome = myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
@@ -378,7 +376,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
 				.prettyPrint()
 				.execute();
-			ourClient.unregisterInterceptor(interceptor);
+			myClient.unregisterInterceptor(interceptor);
 		}
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -406,10 +404,10 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.setUrl("file:/foo/concepts.csv");
 
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
-		ourClient.registerInterceptor(interceptor);
+		myClient.registerInterceptor(interceptor);
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
@@ -420,17 +418,17 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Missing mandatory parameter: system"));
 		}
-		ourClient.unregisterInterceptor(interceptor);
+		myClient.unregisterInterceptor(interceptor);
 
 	}
 
 	@Test
 	public void testApplyDeltaAdd_MissingFile() {
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
-		ourClient.registerInterceptor(interceptor);
+		myClient.registerInterceptor(interceptor);
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
@@ -441,7 +439,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Missing mandatory parameter: file"));
 		}
-		ourClient.unregisterInterceptor(interceptor);
+		myClient.unregisterInterceptor(interceptor);
 	}
 
 	@Test
@@ -458,7 +456,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.setUrl("file:/foo/hierarchy.csv");
 
 		// Add the codes
-		ourClient
+		myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
@@ -470,8 +468,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		// And remove them
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
-		ourClient.registerInterceptor(interceptor);
-		Parameters outcome = ourClient
+		myClient.registerInterceptor(interceptor);
+		Parameters outcome = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
@@ -480,7 +478,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
 			.prettyPrint()
 			.execute();
-		ourClient.unregisterInterceptor(interceptor);
+		myClient.unregisterInterceptor(interceptor);
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);

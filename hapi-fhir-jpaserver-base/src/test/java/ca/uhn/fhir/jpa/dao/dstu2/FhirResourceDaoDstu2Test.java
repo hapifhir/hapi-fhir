@@ -1189,7 +1189,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
-			assertEquals("Failure at " + i, expected, actual);
+			assertEquals(expected, actual, "Failure at " + i);
 		}
 
 		// By type
@@ -2863,15 +2863,15 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		sort(published);
 		assertEquals(3, published.size());
-		assertEquals(published.toString(), "Dog", published.get(0).getTerm());
-		assertEquals(published.toString(), "Puppies", published.get(0).getLabel());
-		assertEquals(published.toString(), null, published.get(0).getScheme());
-		assertEquals(published.toString(), "Cat", published.get(1).getTerm());
-		assertEquals(published.toString(), "Kittens", published.get(1).getLabel());
-		assertEquals(published.toString(), "http://foo", published.get(1).getScheme());
-		assertEquals(published.toString(), "Cow", published.get(2).getTerm());
-		assertEquals(published.toString(), "Calves", published.get(2).getLabel());
-		assertEquals(published.toString(), "http://foo", published.get(2).getScheme());
+		assertEquals( "Dog", published.get(0).getTerm());
+		assertEquals( "Puppies", published.get(0).getLabel());
+		assertEquals(null, published.get(0).getScheme());
+		assertEquals( "Cat", published.get(1).getTerm());
+		assertEquals( "Kittens", published.get(1).getLabel());
+		assertEquals( "http://foo", published.get(1).getScheme());
+		assertEquals( "Cow", published.get(2).getTerm());
+		assertEquals( "Calves", published.get(2).getLabel());
+		assertEquals( "http://foo", published.get(2).getScheme());
 
 		secLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved);
 		sortCodings(secLabels);

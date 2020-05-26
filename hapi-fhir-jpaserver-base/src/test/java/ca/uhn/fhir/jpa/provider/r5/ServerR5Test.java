@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.ExtensionConstants;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -14,7 +13,6 @@ import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Patient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +94,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	public void testMetadataIncludesResourceCounts() {
 		Patient p = new Patient();
 		p.setActive(true);
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		/*
 		 * Initial fetch after a clear should return
@@ -104,7 +102,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 		 */
 		myResourceCountsCache.clear();
 
-		CapabilityStatement capabilityStatement = ourClient
+		CapabilityStatement capabilityStatement = myClient
 			.capabilities()
 			.ofType(CapabilityStatement.class)
 			.execute();
@@ -126,7 +124,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 		 */
 		myResourceCountsCache.update();
 
-		capabilityStatement = ourClient
+		capabilityStatement = myClient
 			.capabilities()
 			.ofType(CapabilityStatement.class)
 			.execute();

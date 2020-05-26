@@ -110,7 +110,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
-		Bundle result = ourClient
+		Bundle result = myClient
 			.search()
 			.forResource("Observation")
 			.sort()
@@ -123,7 +123,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
 
 		// Fetch the next page
-		result = ourClient
+		result = myClient
 			.loadPage()
 			.next(result)
 			.execute();
@@ -141,7 +141,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		create50Observations();
 
 		CapturingInterceptor capture = new CapturingInterceptor();
-		ourClient.registerInterceptor(capture);
+		myClient.registerInterceptor(capture);
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
@@ -149,7 +149,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Perform a search and only allow even
 		consentService.setTarget(new ConsentSvcCantSeeOddNumbered());
-		Bundle result = ourClient
+		Bundle result = myClient
 			.search()
 			.forResource("Observation")
 			.sort()
@@ -165,7 +165,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Perform a search and only allow odd
 		consentService.setTarget(new ConsentSvcCantSeeEvenNumbered());
-		result = ourClient
+		result = myClient
 			.search()
 			.forResource("Observation")
 			.sort()
@@ -181,7 +181,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Perform a search and allow all with a PROCEED
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
-		result = ourClient
+		result = myClient
 			.search()
 			.forResource("Observation")
 			.sort()
@@ -197,7 +197,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Perform a search and allow all with an AUTHORIZED (no further checking)
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
-		result = ourClient
+		result = myClient
 			.search()
 			.forResource("Observation")
 			.sort()
@@ -214,7 +214,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		// Perform a second search and allow all with an AUTHORIZED (no further checking)
 		// which means we should finally get one from the cache
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
-		result = ourClient
+		result = myClient
 			.search()
 			.forResource("Observation")
 			.sort()
@@ -228,7 +228,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
 		assertThat(cacheOutcome.get(0), matchesPattern("^HIT from .*"));
 
-		ourClient.unregisterInterceptor(capture);
+		myClient.unregisterInterceptor(capture);
 	}
 
 	@Test
@@ -240,7 +240,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
-		Bundle result = ourClient
+		Bundle result = myClient
 			.search()
 			.forResource("Observation")
 			.sort()
@@ -256,7 +256,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		});
 
 		// Fetch the next page
-		result = ourClient
+		result = myClient
 			.loadPage()
 			.next(result)
 			.execute();
@@ -277,7 +277,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
-		Bundle result = ourClient
+		Bundle result = myClient
 			.history()
 			.onServer()
 			.returnBundle(Bundle.class)
@@ -297,17 +297,17 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
-		ourClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(0))).execute();
-		ourClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(1))).execute();
+		myClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(0))).execute();
+		myClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(1))).execute();
 
 		try {
-			ourClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(0))).execute();
+			myClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(0))).execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 		try {
-			ourClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(1))).execute();
+			myClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(1))).execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
@@ -363,7 +363,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType id = ourClient.create().resource(patient).prefer(PreferReturnEnum.REPRESENTATION).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(patient).prefer(PreferReturnEnum.REPRESENTATION).execute().getId().toUnqualifiedVersionless();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);

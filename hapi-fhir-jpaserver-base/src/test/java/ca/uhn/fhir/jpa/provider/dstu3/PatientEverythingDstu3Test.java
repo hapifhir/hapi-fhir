@@ -64,6 +64,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
 	}
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();

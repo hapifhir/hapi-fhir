@@ -147,6 +147,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();

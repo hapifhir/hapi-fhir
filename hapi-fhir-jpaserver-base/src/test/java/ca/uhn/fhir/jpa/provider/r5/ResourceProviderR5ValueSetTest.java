@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -43,7 +42,6 @@ import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -242,7 +240,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testExpandById() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -275,7 +273,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -305,7 +303,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testExpandByIdWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -327,7 +325,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -346,7 +344,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testExpandByUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -367,7 +365,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -386,7 +384,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -410,7 +408,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		try {
-			Parameters respParam = ourClient
+			Parameters respParam = myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -428,7 +426,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -453,7 +451,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -474,7 +472,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -494,7 +492,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertNotNull(myLocalVs);
 		myLocalVs.setId("");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -516,7 +514,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -529,7 +527,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case-r4.xml");
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -543,7 +541,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case.xml");
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -556,7 +554,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		}
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -568,7 +566,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		}
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -585,7 +583,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myLocalValueSetId)
 			.named("expand")
@@ -604,7 +602,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myLocalValueSetId)
 			.named("expand")
@@ -626,7 +624,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -649,7 +647,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertNotNull(myLocalValueSetId);
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myLocalValueSetId)
 				.named("expand")
@@ -668,15 +666,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		cs.setContent(CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://foo1");
 		cs.addConcept().setCode("foo1").setDisplay("foo1");
-		ourClient.update().resource(cs).execute();
+		myClient.update().resource(cs).execute();
 
 		ValueSet vs = new ValueSet();
 		vs.setId("ValueSet/VS179789");
 		vs.setUrl("http://bar");
 		vs.getCompose().addInclude().setSystem("http://foo1").addConcept().setCode("foo1");
-		ourClient.update().resource(vs).execute();
+		myClient.update().resource(vs).execute();
 
-		ValueSet expanded = ourClient
+		ValueSet expanded = myClient
 			.operation()
 			.onInstance(new IdType("ValueSet/VS179789"))
 			.named("$expand")
@@ -692,15 +690,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		cs.setContent(CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://foo2");
 		cs.addConcept().setCode("foo2").setDisplay("foo2");
-		ourClient.update().resource(cs).execute();
+		myClient.update().resource(cs).execute();
 
 		vs = new ValueSet();
 		vs.setId("ValueSet/VS179789");
 		vs.setUrl("http://bar");
 		vs.getCompose().addInclude().setSystem("http://foo2").addConcept().setCode("foo2");
-		ourClient.update().resource(vs).execute();
+		myClient.update().resource(vs).execute();
 
-		expanded = ourClient
+		expanded = myClient
 			.operation()
 			.onInstance(new IdType("ValueSet/VS179789"))
 			.named("$expand")
@@ -784,7 +782,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		ValueSet updatedValueSet = valueSet;
 		updatedValueSet.setName(valueSet.getName().concat(" - MODIFIED"));
 
-		String url = ourClient.getServerBase().concat("/").concat(myExtensionalVsId.getValueAsString());
+		String url = myClient.getServerBase().concat("/").concat(myExtensionalVsId.getValueAsString());
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle
@@ -795,7 +793,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.setMethod(Bundle.HTTPVerb.PUT)
 			.setUrl(url);
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		ourClient.transaction().withBundle(bundle).execute();
+		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
@@ -901,7 +899,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("validate-code")
@@ -962,7 +960,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testValidateCodeOperationByCodeAndSystemType() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
@@ -980,7 +978,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testValidateCodeAgainstBuiltInSystem() {
 		// Good code and system, good valueset
 		{
-			Parameters respParam = ourClient
+			Parameters respParam = myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("validate-code")
@@ -1004,7 +1002,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		}
 		// Good code and system, but not in specified valueset
 		{
-			Parameters respParam = ourClient
+			Parameters respParam = myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("validate-code")

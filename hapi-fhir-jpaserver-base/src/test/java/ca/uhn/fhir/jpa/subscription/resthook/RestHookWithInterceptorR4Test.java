@@ -186,7 +186,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		Subscription subscription = newSubscription("Observation?status=final", "application/fhir+json");
 		subscription.getChannel().setEndpoint("http://localhost:" + ourListenerPort + "/this/url/does/not/exist"); // this better not succeed!
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -205,7 +205,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	protected Observation sendObservation() {
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.FINAL);
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 		observation.setId(methodOutcome.getId());
 		return observation;
 	}
@@ -248,11 +248,11 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
 
-			Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+			Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 			assertNotNull(subscriptionTemp);
 
 			subscriptionTemp.setCriteria(criteria1);
-			ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+			myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 			waitForQueueToDrain();
 
 			sendObservation(code, "SNOMED-CT");

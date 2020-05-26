@@ -19,7 +19,6 @@ import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertT
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
@@ -71,7 +70,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		qr1.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
-			ourClient.create().resource(qr1).execute();
+			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of type string"));

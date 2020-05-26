@@ -80,13 +80,13 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		p.addName()
 			.addGiven("GivenOnly1")
 			.addGiven("GivenOnly2");
-		myPatientId0 = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		myPatientId0 = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addName()
 			.addGiven("GivenOnlyB1")
 			.addGiven("GivenOnlyB2");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 	}
 
 

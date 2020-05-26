@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -38,7 +37,6 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,6 +71,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 	}
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
@@ -112,7 +111,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		sp.setTitle("Foo Param");
 
 		try {
-			ourClient.create().resource(sp).execute();
+			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid", e.getMessage());
@@ -123,7 +122,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void testConformanceOverrideAllowed() {
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
-		CapabilityStatement conformance = ourClient
+		CapabilityStatement conformance = myClient
 			.fetchConformance()
 			.ofType(CapabilityStatement.class)
 			.execute();
@@ -175,7 +174,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			}
 		});
 
-		conformance = ourClient
+		conformance = myClient
 			.fetchConformance()
 			.ofType(CapabilityStatement.class)
 			.execute();
@@ -281,7 +280,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
-		ourClient
+		myClient
 			.create()
 			.resource(eyeColourSp)
 			.execute();
@@ -300,7 +299,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
-		Bundle bundle = ourClient
+		Bundle bundle = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(new TokenClientParam("eyecolour").exactly().code("blue"))
@@ -347,7 +346,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		List<String> foundResources;
 		Bundle result;
 
-		result = ourClient
+		result = myClient
 			.search()
 			.forResource(Observation.class)
 			.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))
@@ -387,7 +386,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		List<String> foundResources;
 		Bundle result;
 
-		result = ourClient
+		result = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(new TokenClientParam("foo").exactly().code("male"))
@@ -443,13 +442,13 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			do {
 
 				if (bundle == null) {
-					bundle = ourClient
+					bundle = myClient
 						.search()
 						.byUrl(ourServerBase + "/Patient?identifier=FOO")
 						.returnBundle(Bundle.class)
 						.execute();
 				} else {
-					bundle = ourClient
+					bundle = myClient
 						.loadPage()
 						.next(bundle)
 						.execute();

@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,7 +19,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,33 +65,33 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	public void createResources() {
 		Patient p = new Patient();
 		p.setActive(true);
-		myPatientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		myPatientId = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		Encounter e = new Encounter();
 		e.setSubject(new Reference(myPatientId));
-		myEncounterId = ourClient.create().resource(e).execute().getId().toUnqualifiedVersionless();
+		myEncounterId = myClient.create().resource(e).execute().getId().toUnqualifiedVersionless();
 
 		CarePlan cp = new CarePlan();
 		cp.setEncounter(new Reference(myEncounterId));
-		ourClient.create().resource(cp).execute();
+		myClient.create().resource(cp).execute();
 
 		Observation o = new Observation();
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSubject(new Reference(myPatientId));
 		o.setEncounter(new Reference(myEncounterId));
-		myObservationId = ourClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+		myObservationId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 
 		DiagnosticReport dr = new DiagnosticReport();
 		dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 		dr.addResult().setReference(myObservationId.getValue());
 		dr.setEncounter(new Reference(myEncounterId));
-		myDiagnosticReportId = ourClient.create().resource(dr).execute().getId().toUnqualifiedVersionless();
+		myDiagnosticReportId = myClient.create().resource(dr).execute().getId().toUnqualifiedVersionless();
 
 		Condition condition = new Condition();
 		condition.setSubject(new Reference(myPatientId));
 		condition.setAsserter(new Reference(myPatientId));
 		condition.setEncounter(new Reference(myEncounterId));
-		myConditionId = ourClient.create().resource(condition).execute().getId().toUnqualifiedVersionless();
+		myConditionId = myClient.create().resource(condition).execute().getId().toUnqualifiedVersionless();
 	}
 
 	@Test
@@ -101,7 +99,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		createResources();
 
 		try {
-			ourClient.delete().resourceById(myPatientId).execute();
+			myClient.delete().resourceById(myPatientId).execute();
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
@@ -130,7 +128,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
 
 		try {
-			ourClient.delete().resourceById(myPatientId).execute();
+			myClient.delete().resourceById(myPatientId).execute();
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			String output = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
@@ -156,7 +154,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 
 		try {
 			ourLog.info("Reading {}", myPatientId);
-			ourClient.read().resource(Patient.class).withId(myPatientId).execute();
+			myClient.read().resource(Patient.class).withId(myPatientId).execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -191,14 +189,14 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 
 		try {
 			ourLog.info("Reading {}", o0id);
-			ourClient.read().resource(Organization.class).withId(o0id).execute();
+			myClient.read().resource(Organization.class).withId(o0id).execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 		try {
 			ourLog.info("Reading {}", o1id);
-			ourClient.read().resource(Organization.class).withId(o1id).execute();
+			myClient.read().resource(Organization.class).withId(o1id).execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -223,7 +221,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 
 		try {
 			ourLog.info("Reading {}", myPatientId);
-			ourClient.read().resource(Patient.class).withId(myPatientId).execute();
+			myClient.read().resource(Patient.class).withId(myPatientId).execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good

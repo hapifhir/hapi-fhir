@@ -31,7 +31,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		createPatient(withId(id), withActiveTrue());
 		createPatient(withId(id), withActiveTrue(), withFamily("SMITH"));
 
-		Parameters diff = ourClient
+		Parameters diff = myClient
 			.operation()
 			.onInstance(id)
 			.named(ProviderConstants.DIFF_OPERATION_NAME)
@@ -62,7 +62,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		createPatient(withId(id), withActiveTrue());
 		createPatient(withId(id), withActiveTrue(), withFamily("SMITH"));
 
-		Parameters diff = ourClient
+		Parameters diff = myClient
 			.operation()
 			.onInstance(id)
 			.named(ProviderConstants.DIFF_OPERATION_NAME)
@@ -106,7 +106,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			myResourceHistoryTableDao.deleteByPid(version2.getId());
 		});
 
-		Parameters diff = ourClient
+		Parameters diff = myClient
 			.operation()
 			.onInstance(id)
 			.named(ProviderConstants.DIFF_OPERATION_NAME)
@@ -130,7 +130,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		// Create only
 		IIdType id = createPatient(withActiveTrue()).toUnqualifiedVersionless();
 
-		Parameters diff = ourClient
+		Parameters diff = myClient
 			.operation()
 			.onInstance(id)
 			.named(ProviderConstants.DIFF_OPERATION_NAME)
@@ -155,7 +155,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		createPatient(withId(id), withActiveTrue());
 		createPatient(withId(id), withActiveTrue(), withFamily("SMITH"));
 
-		Parameters diff = ourClient
+		Parameters diff = myClient
 			.operation()
 			.onInstance(id)
 			.named(ProviderConstants.DIFF_OPERATION_NAME)
@@ -181,7 +181,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id1 = createPatient(withId("A"), withActiveFalse()).toUnqualifiedVersionless();
 		IIdType id2 = createPatient(withId("B"), withActiveTrue()).toUnqualifiedVersionless();
 
-		Parameters diff = ourClient
+		Parameters diff = myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.DIFF_OPERATION_NAME)
@@ -210,7 +210,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id2 = createPatient(withId("B"), withActiveFalse()).toUnqualifiedVersionless();
 		id2 = createPatient(withId(id2), withActiveTrue(), withFamily("JONES")).toUnqualified();
 
-		Parameters diff = ourClient
+		Parameters diff = myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.DIFF_OPERATION_NAME)
@@ -233,7 +233,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testDifferentResources_DifferentTypes() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onServer()
 				.named(ProviderConstants.DIFF_OPERATION_NAME)

@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -35,7 +34,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -44,7 +42,6 @@ import org.mockito.Mock;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,7 +93,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		ourLog.info("About to perform search...");
 
-		Bundle results = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+		Bundle results = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
 		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
 		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
@@ -109,7 +106,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		// Load the next (and final) page
 		reset(interceptor);
-		results = ourClient.loadPage().next(results).execute();
+		results = myClient.loadPage().next(results).execute();
 		assertNotNull(results);
 		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
 		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
@@ -226,9 +223,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 			Patient p = new Patient();
 			p.setActive(true);
-			IIdType pid = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+			IIdType pid = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-			Bundle observations = ourClient
+			Bundle observations = myClient
 				.search()
 				.forResource("Observation")
 				.where(Observation.SUBJECT.hasId(pid))
@@ -249,7 +246,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		Organization org = new Organization();
 		org.setName("orgName");
-		IIdType orgId = ourClient.create().resource(org).execute().getId().toUnqualified();
+		IIdType orgId = myClient.create().resource(org).execute().getId().toUnqualified();
 		assertNotNull(orgId.getVersionIdPartAsLong());
 
 		Patient pt = new Patient();
@@ -345,7 +342,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 				Observation observation = new Observation();
 				observation.setSubject(new Reference(createdPatient.getId()));
 
-				ourClient.create().resource(observation).execute();
+				myClient.create().resource(observation).execute();
 			}
 		}
 	}
@@ -408,7 +405,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		try {
 			ourRestServer.registerInterceptor(interceptor);
 
-			Bundle bundle = ourClient
+			Bundle bundle = myClient
 				.search()
 				.forResource(Observation.class)
 				.where(Observation.SUBJECT.hasId("Patient/p1"))

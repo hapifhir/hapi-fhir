@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorR4;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -13,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +54,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setCriteria("Observation?identifier=123");
 		try {
-			ourClient.create().resource(subs).execute();
+			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
@@ -64,14 +62,14 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 		subs.setId("ABC");
 		try {
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.REQUESTED);
-		ourClient.update().resource(subs).execute();
+		myClient.update().resource(subs).execute();
 	}
 
 	@Test
@@ -83,7 +81,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		subs.setStatus(SubscriptionStatus.ACTIVE);
 		subs.setCriteria("Observation?identifier=123");
 		try {
-			ourClient.create().resource(subs).execute();
+			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
@@ -91,7 +89,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 		subs.setId("ABC");
 		try {
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
@@ -108,13 +106,13 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setStatus(SubscriptionStatus.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
-		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
 
 		subs.setId(id);
 
 		try {
 			subs.setStatus(SubscriptionStatus.ACTIVE);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
@@ -122,7 +120,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			subs.setStatus(null);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
@@ -140,12 +138,12 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setCriteria("Observation?identifier=123");
 		subs.setStatus(SubscriptionStatus.REQUESTED);
-		IIdType id = ourClient.create().resource(subs).execute().getId();
+		IIdType id = myClient.create().resource(subs).execute().getId();
 		subs.setId(id);
 
 		try {
 			subs.setStatus(SubscriptionStatus.ACTIVE);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
@@ -153,14 +151,14 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			subs.setStatus(null);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.OFF);
-		ourClient.update().resource(subs).execute();
+		myClient.update().resource(subs).execute();
 	}
 
 

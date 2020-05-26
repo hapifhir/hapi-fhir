@@ -4,13 +4,12 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AopTestUtils;
 
@@ -33,6 +32,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 		myDaoConfig.setDefaultTotalMode(null);
 	}
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
@@ -62,7 +62,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchWithCount() {
-		Bundle outcome = ourClient
+		Bundle outcome = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.ACTIVE.exactly().code("true"))
@@ -79,7 +79,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchWithTotalAccurate() {
-		Bundle outcome = ourClient
+		Bundle outcome = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.ACTIVE.exactly().code("true"))
@@ -98,7 +98,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	public void testSearchWithTotalAccurateSpecifiedAsDefault() {
 		myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
 
-		Bundle outcome = ourClient
+		Bundle outcome = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.ACTIVE.exactly().code("true"))
@@ -115,7 +115,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchWithNoSummaryMode() {
-		Bundle outcome = ourClient
+		Bundle outcome = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.ACTIVE.exactly().code("true"))
@@ -134,7 +134,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	public void testSearchTotalNoneOverridingDefault() {
 		myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
 
-		Bundle outcome = ourClient
+		Bundle outcome = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.ACTIVE.exactly().code("true"))

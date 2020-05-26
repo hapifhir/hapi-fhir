@@ -1,11 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,12 +25,12 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 	public void testCreateUnsupportedType() {
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Elizabeth");
-		ourClient.create().resource(pt1).execute();
+		myClient.create().resource(pt1).execute();
 
 		Practitioner pract = new Practitioner();
 		pract.setActive(true);
 		try {
-			ourClient.create().resource(pract).execute();
+			myClient.create().resource(pract).execute();
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage(), containsString("Unknown resource type 'Practitioner' - Server knows how to handle:"));
 		}
