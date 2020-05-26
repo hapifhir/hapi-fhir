@@ -20,13 +20,17 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.DateTimeType;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,6 +54,8 @@ public class ModelConfig {
 		"http://hl7.org/fhir/StructureDefinition/*")));
 
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
+	protected static final String DEFAULT_PERIOD_INDEX_START_OF_TIME = "1700-01-01";
+	protected static final String DEFAULT_PERIOD_INDEX_END_OF_TIME = "2600-01-01";
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -67,11 +73,15 @@ public class ModelConfig {
 	private boolean myUseOrdinalDatesForDayPrecisionSearches = true;
 	private boolean mySuppressStringIndexingInTokens = false;
 
+	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
+	private IPrimitiveType<Date> myPeriodIndexEndOfTime;
+
 	/**
 	 * Constructor
 	 */
 	public ModelConfig() {
-		super();
+		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
+		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));
 	}
 
 	/**
@@ -373,8 +383,8 @@ public class ModelConfig {
 	/**
 	 * <p>
 	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
-	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
-	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
+	 * {@link ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
+	 * precision of {@link TemporalPrecisionEnum#DAY}.
 	 * <p>
 	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
 	 * integer representing the ordinal date {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
@@ -392,8 +402,8 @@ public class ModelConfig {
 	/**
 	 * <p>
 	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
-	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
-	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
+	 * {@link ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
+	 * precision of {@link TemporalPrecisionEnum#DAY}.
 	 * <p>
 	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
 	 * ordinal {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
@@ -417,6 +427,7 @@ public class ModelConfig {
 	 *    <li>Coding.display</li>
 	 *    <li>Identifier.use.text</li>
 	 * </ul>
+	 *
 	 * @since 5.0.0
 	 */
 	public boolean isSuppressStringIndexingInTokens() {
@@ -432,11 +443,83 @@ public class ModelConfig {
 	 *    <li>Coding.display</li>
 	 *    <li>Identifier.use.text</li>
 	 * </ul>
+	 *
 	 * @since 5.0.0
 	 */
 	public void setSuppressStringIndexingInTokens(boolean theSuppressStringIndexingInTokens) {
 		mySuppressStringIndexingInTokens = theSuppressStringIndexingInTokens;
 	}
+
+	/**
+	 * When indexing a Period (e.g. Encounter.period) where the period has an upper bound
+	 * but not a lower bound, a canned "start of time" value can be used as the lower bound
+	 * in order to allow range searches to correctly identify all values in the range.
+	 * <p>
+	 * The default value for this is {@link #DEFAULT_PERIOD_INDEX_START_OF_TIME} which
+	 * is probably good enough for almost any application, but this can be changed if
+	 * needed.
+	 * </p>
+	 *
+	 * @see #getPeriodIndexEndOfTime()
+	 * @since 5.1.0
+	 */
+	public IPrimitiveType<Date> getPeriodIndexStartOfTime() {
+		return myPeriodIndexStartOfTime;
+	}
+
+	/**
+	 * When indexing a Period (e.g. Encounter.period) where the period has an upper bound
+	 * but not a lower bound, a canned "start of time" value can be used as the lower bound
+	 * in order to allow range searches to correctly identify all values in the range.
+	 * <p>
+	 * The default value for this is {@link #DEFAULT_PERIOD_INDEX_START_OF_TIME} which
+	 * is probably good enough for almost any application, but this can be changed if
+	 * needed.
+	 * </p>
+	 *
+	 * @see #getPeriodIndexEndOfTime()
+	 * @since 5.1.0
+	 */
+	public void setPeriodIndexStartOfTime(IPrimitiveType<Date> thePeriodIndexStartOfTime) {
+		Validate.notNull(thePeriodIndexStartOfTime, "thePeriodIndexStartOfTime must not be null");
+		myPeriodIndexStartOfTime = thePeriodIndexStartOfTime;
+	}
+
+	/**
+	 * When indexing a Period (e.g. Encounter.period) where the period has a lower bound
+	 * but not an upper bound, a canned "end of time" value can be used as the upper bound
+	 * in order to allow range searches to correctly identify all values in the range.
+	 * <p>
+	 * The default value for this is {@link #DEFAULT_PERIOD_INDEX_START_OF_TIME} which
+	 * is probably good enough for almost any application, but this can be changed if
+	 * needed.
+	 * </p>
+	 *
+	 * @see #getPeriodIndexStartOfTime()
+	 * @since 5.1.0
+	 */
+	public IPrimitiveType<Date> getPeriodIndexEndOfTime() {
+		return myPeriodIndexEndOfTime;
+	}
+
+	/**
+	 * When indexing a Period (e.g. Encounter.period) where the period has an upper bound
+	 * but not a lower bound, a canned "start of time" value can be used as the lower bound
+	 * in order to allow range searches to correctly identify all values in the range.
+	 * <p>
+	 * The default value for this is {@link #DEFAULT_PERIOD_INDEX_START_OF_TIME} which
+	 * is probably good enough for almost any application, but this can be changed if
+	 * needed.
+	 * </p>
+	 *
+	 * @see #getPeriodIndexStartOfTime()
+	 * @since 5.1.0
+	 */
+	public void setPeriodIndexEndOfTime(IPrimitiveType<Date> thePeriodIndexEndOfTime) {
+		Validate.notNull(thePeriodIndexEndOfTime, "thePeriodIndexEndOfTime must not be null");
+		myPeriodIndexEndOfTime = thePeriodIndexEndOfTime;
+	}
+
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
