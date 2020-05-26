@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.FhirTerser;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,17 +48,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @since 5.1.0
  */
-public class IgInstallerSvc {
+public class NpmInstallerSvc {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(IgInstallerSvc.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(NpmInstallerSvc.class);
+	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
+		"NamingSystem",
+		"CodeSystem",
+		"ValueSet",
+		"StructureDefinition",
+		"ConceptMap",
+		"SearchParameter",
+		"Subscription"
+	));
 
 	boolean enabled = true;
-
 	@Autowired
 	private FhirContext fhirContext;
 	@Autowired
@@ -65,16 +75,7 @@ public class IgInstallerSvc {
 	@Autowired
 	private IValidationSupport validationSupport;
 	@Autowired
-	private IPackageCacheManager packageCacheManager;
-
-	private String[] DEFAULT_SUPPORTED_RESOURCE_TYPES = new String[]
-		{"NamingSystem",
-			"CodeSystem",
-			"ValueSet",
-			"StructureDefinition",
-			"ConceptMap",
-			"SearchParameter",
-			"Subscription"};
+	private IHapiPackageCacheManager packageCacheManager;
 
 	@PostConstruct
 	public void initialize() {
@@ -105,20 +106,23 @@ public class IgInstallerSvc {
 	 * <p>
 	 * Creates the resources if non-existent, updates them otherwise.
 	 *
-	 * @param id      of the package, or name of folder in filesystem
-	 * @param version of package, or path to folder in filesystem
+	 * @param theInstallationSpec The details about what should be installed
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
-	public void install(String id, String version) throws ImplementationGuideInstallationException {
+	public void install(NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		if (enabled) {
 			try {
-				NpmPackage npmPackage = packageCacheManager.loadPackage(id, version);
+				NpmPackage npmPackage = packageCacheManager.loadPackage(theInstallationSpec);
 				if (npmPackage == null) {
 					throw new IOException("Package not found");
 				}
-				install(npmPackage);
+
+				if (theInstallationSpec.getInstallMode() == NpmInstallationSpec.InstallModeEnum.CACHE_AND_INSTALL) {
+					install(npmPackage, theInstallationSpec);
+				}
+
 			} catch (IOException e) {
-				throw new ImplementationGuideInstallationException("Could not load NPM package " + id + "#" + version, e);
+				throw new ImplementationGuideInstallationException("Could not load NPM package " + theInstallationSpec.getPackageId() + "#" + theInstallationSpec.getPackageVersion(), e);
 			}
 		}
 	}
@@ -130,7 +134,7 @@ public class IgInstallerSvc {
 	 *
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
-	private void install(NpmPackage npmPackage) throws ImplementationGuideInstallationException {
+	private void install(NpmPackage npmPackage, NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		String name = npmPackage.getNpm().get("name").getAsString();
 		String version = npmPackage.getNpm().get("version").getAsString();
 		String fhirVersion = npmPackage.fhirVersion();
@@ -138,13 +142,20 @@ public class IgInstallerSvc {
 
 		assertFhirVersionsAreCompatible(fhirVersion, currentFhirVersion);
 
-		fetchAndInstallDependencies(npmPackage);
+		fetchAndInstallDependencies(npmPackage, theInstallationSpec);
+
+		List<String> installTypes;
+		if (!theInstallationSpec.getInstallResourceTypes().isEmpty()) {
+			installTypes = theInstallationSpec.getInstallResourceTypes();
+		} else {
+			installTypes = DEFAULT_INSTALL_TYPES;
+		}
 
 		ourLog.info("Installing package: {}#{}", name, version);
-		int[] count = new int[DEFAULT_SUPPORTED_RESOURCE_TYPES.length];
+		int[] count = new int[installTypes.size()];
 
-		for (int i = 0; i < DEFAULT_SUPPORTED_RESOURCE_TYPES.length; i++) {
-			Collection<IBaseResource> resources = parseResourcesOfType(DEFAULT_SUPPORTED_RESOURCE_TYPES[i], npmPackage);
+		for (int i = 0; i < installTypes.size(); i++) {
+			Collection<IBaseResource> resources = parseResourcesOfType(installTypes.get(i), npmPackage);
 			count[i] = resources.size();
 
 			try {
@@ -158,11 +169,11 @@ public class IgInstallerSvc {
 		ourLog.info(String.format("Finished installation of package %s#%s:", name, version));
 
 		for (int i = 0; i < count.length; i++) {
-			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], DEFAULT_SUPPORTED_RESOURCE_TYPES[i]));
+			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], installTypes.get(i)));
 		}
 	}
 
-	private void fetchAndInstallDependencies(NpmPackage npmPackage) throws ImplementationGuideInstallationException {
+	private void fetchAndInstallDependencies(NpmPackage npmPackage, NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		if (npmPackage.getNpm().has("dependencies")) {
 			Map<String, String> dependencies = new Gson().fromJson(npmPackage.getNpm().get("dependencies"), HashMap.class);
 			for (Map.Entry<String, String> d : dependencies.entrySet()) {
@@ -180,8 +191,8 @@ public class IgInstallerSvc {
 					NpmPackage dependency = packageCacheManager.loadPackage(id, ver);
 					// recursive call to install dependencies of a package before
 					// installing the package
-					fetchAndInstallDependencies(dependency);
-					install(dependency);
+					fetchAndInstallDependencies(dependency, theInstallationSpec);
+					install(dependency, theInstallationSpec);
 				} catch (IOException e) {
 					throw new ImplementationGuideInstallationException(String.format(
 						"Cannot resolve dependency %s#%s", id, ver), e);

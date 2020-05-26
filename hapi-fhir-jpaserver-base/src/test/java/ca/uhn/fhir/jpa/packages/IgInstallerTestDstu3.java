@@ -18,7 +18,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 	@Autowired
 	private DaoConfig daoConfig;
 	@Autowired
-	private IgInstallerSvc igInstaller;
+	private NpmInstallerSvc igInstaller;
 	@Autowired
 	private IPackageCacheManager myPackageCacheManager;
 
@@ -40,7 +40,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 	public void negativeTestInstallFromCache() {
 		// Unknown base of StructureDefinitions
 		try {
-			igInstaller.install("erroneous-ig", "1.0.0");
+			igInstaller.install(new NpmInstallationSpec().setPackageId("erroneous-ig").setPackageVersion("1.0.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_AND_INSTALL));
 			fail();
 		} catch (ImplementationGuideInstallationException e) {
 			assertEquals("Error installing IG erroneous-ig#1.0.2: ca.uhn.fhir.jpa.packages.ImplementationGuideInstallationException: Failure when generating snapshot of StructureDefinition: StructureDefinition/ff1cb7e5-041d-425b-9410-3b538445bce9/_history/1", e.getMessage());
@@ -50,11 +50,11 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 	@Test
 	public void installFromCache() {
 		daoConfig.setAllowExternalReferences(true);
-		igInstaller.install("NHSD.Assets.STU3", "1.0.0");
+		igInstaller.install(new NpmInstallationSpec().setPackageId("NHSD.Assets.STU3").setPackageVersion("1.0.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_AND_INSTALL));
 	}
 
 	@Test
 	public void installFromCache2() {
-		igInstaller.install("basisprofil.de", "0.2.40");
+		igInstaller.install(new NpmInstallationSpec().setPackageId("basisprofil.de").setPackageVersion("0.2.40").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_AND_INSTALL));
 	}
 }

@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntityPk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -34,7 +35,7 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class JpaPackageCache extends BasePackageCacheManager {
+public class JpaPackageCache extends BasePackageCacheManager implements IHapiPackageCacheManager {
 
 	@Autowired
 	private INpmPackageDao myPackageDao;
@@ -81,6 +82,10 @@ public class JpaPackageCache extends BasePackageCacheManager {
 
 	@Override
 	public NpmPackage addPackageToCache(String thePackageId, String thePackageVersion, InputStream thePackageTgzInputStream, String theSourceDesc) throws IOException {
+		Validate.notBlank(thePackageId, "thePackageId must not be null");
+		Validate.notBlank(thePackageVersion, "thePackageVersion must not be null");
+		Validate.notNull(thePackageTgzInputStream, "thePackageTgzInputStream must not be null");
+
 		byte[] bytes = IOUtils.toByteArray(thePackageTgzInputStream);
 
 		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(bytes));
@@ -102,9 +107,17 @@ public class JpaPackageCache extends BasePackageCacheManager {
 			packageVersion.setDescription(npmPackage.description());
 			myPackageVersionDao.save(packageVersion);
 
+			NpmPackage.NpmPackageFolder packageFolder = npmPackage.getFolders().get("package");
+			packageFolder.
+
 			for (Map.Entry<String, NpmPackage.NpmPackageFolder> nextEntry : npmPackage.getFolders().entrySet()) {
 
 				NpmPackage.NpmPackageFolder packageFolder = nextEntry.getValue();
+
+				for (String nextType : npmPackage.get) {
+
+				}
+
 				for (String nextFile : packageFolder.listFiles()) {
 
 					IBaseResource resource = null;
@@ -139,10 +152,35 @@ public class JpaPackageCache extends BasePackageCacheManager {
 
 	@Override
 	public NpmPackage loadPackage(String thePackageId, String thePackageVersion) throws FHIRException, IOException {
-		return loadPackageFromCacheOnly(thePackageId, thePackageVersion);
+		NpmPackage cachedPackage = loadPackageFromCacheOnly(thePackageId, thePackageVersion);
+		if (cachedPackage != null) {
+			return cachedPackage;
+		}
+
+		InputStreamWithSrc pkg = super.loadFromPackageServer(thePackageId, thePackageVersion);
+		if (pkg == null) {
+			throw new ResourceNotFoundException("Unable to locate package " + thePackageId + "#" + thePackageVersion);
+		}
+
+		try {
+			return addPackageToCache(thePackageId, thePackageVersion == null ? pkg.version : thePackageVersion, pkg.stream, pkg.url);
+		} finally {
+			pkg.stream.close();
+		}
+
 	}
 
 	private TransactionTemplate newTxTemplate() {
 		return new TransactionTemplate(myTxManager);
+	}
+
+	@Override
+	public NpmPackage loadPackage(NpmInstallationSpec theInstallationSpec) throws IOException {
+
+		if (isNotBlank(theInstallationSpec.getPackageId()) && isNotBlank(theInstallationSpec.getPackageVersion())) {
+			return loadPackage(theInstallationSpec.getPackageId(), theInstallationSpec.getPackageVersion());
+		}
+
+		throw new IllegalArgumentException("Invalid arguments");
 	}
 }

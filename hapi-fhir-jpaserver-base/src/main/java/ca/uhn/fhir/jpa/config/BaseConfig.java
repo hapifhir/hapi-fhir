@@ -21,8 +21,9 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.packages.IgInstallerSvc;
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.JpaPackageCache;
+import ca.uhn.fhir.jpa.packages.NpmInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
@@ -53,7 +54,6 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.cache.IPackageCacheManager;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -120,10 +120,9 @@ public abstract class BaseConfig {
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER = "PersistedJpaSearchFirstPageBundleProvider";
-	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
-
+	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 	@Autowired
 	protected Environment myEnv;
 	@Autowired
@@ -191,7 +190,7 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public IPackageCacheManager packageCacheManager() {
+	public IHapiPackageCacheManager packageCacheManager() {
 		return new JpaPackageCache();
 	}
 
@@ -259,7 +258,9 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public IgInstallerSvc igInstallerSvc() { return new IgInstallerSvc(); }
+	public NpmInstallerSvc igInstallerSvc() {
+		return new NpmInstallerSvc();
+	}
 
 	@Bean
 	public IConsentContextServices consentContextServices() {
