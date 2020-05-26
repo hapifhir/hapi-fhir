@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Embeddable
 public class NpmPackageVersionEntityPk implements Serializable {
 
-	@Column(name = "PACKAGE_ID", nullable = false, length = NpmPackageEntity.PACKAGE_ID_LENGTH)
+	@Column(name = "PACKAGE_ID", length = NpmPackageEntity.PACKAGE_ID_LENGTH, nullable = false)
 	private String myPackageId;
 	@Column(name = "VERSION_ID", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = false)
 	private String myVersionId;
@@ -30,7 +30,7 @@ public class NpmPackageVersionEntityPk implements Serializable {
 		setVersionId(theVersionId);
 	}
 
-    @Override
+	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) {
 			return true;

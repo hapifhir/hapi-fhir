@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.cache.BasePackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -84,13 +88,46 @@ public class JpaPackageCache extends BasePackageCacheManager {
 		IBaseBinary binary = BinaryUtil.newBinary(myCtx);
 		BinaryUtil.setData(myCtx, binary, bytes, "application/gzip");
 
-		newTxTemplate().executeWithoutResult(t->{
+		newTxTemplate().executeWithoutResult(t -> {
 			ResourceTable persistedPackage = (ResourceTable) getBinaryDao().create(binary).getEntity();
 			NpmPackageEntity pkg = myPackageDao.findById(thePackageId).orElseGet(() -> createPackage(npmPackage));
-			NpmPackageVersionEntity packageVersion = my
+			NpmPackageVersionEntityPk id = new NpmPackageVersionEntityPk(thePackageId, thePackageVersion);
+			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findById(id).orElseGet(() -> new NpmPackageVersionEntity());
+			packageVersion.setId(id);
+			packageVersion.setPackage(pkg);
+			packageVersion.setPackageBinary(persistedPackage);
+			packageVersion.setBytes(bytes.length);
+			packageVersion.setSavedTime(new Date());
+			packageVersion.setFhirVersion(npmPackage.fhirVersion());
+			packageVersion.setDescription(npmPackage.description());
+			myPackageVersionDao.save(packageVersion);
+
+			for (Map.Entry<String, NpmPackage.NpmPackageFolder> nextEntry : npmPackage.getFolders().entrySet()) {
+
+				NpmPackage.NpmPackageFolder packageFolder = nextEntry.getValue();
+				for (String nextFile : packageFolder.listFiles()) {
+
+					IBaseResource resource = null;
+					try {
+						if (nextFile.toLowerCase().endsWith(".xml")) {
+							resource = tryToLoadResourceAsXml(packageFolder.fetchFile(nextFile));
+						}
+					} catch (IOException e) {
+						throw new InternalErrorException(e);
+					}
+
+				}
+
+			}
+
 		});
 
 		return npmPackage;
+	}
+
+	private IBaseResource tryToLoadResourceAsXml(byte[] theFetchFile) {
+		String contents = new String(theFetchFile, StandardCharsets.UTF_8);
+		return null;
 	}
 
 	private NpmPackageEntity createPackage(NpmPackage theNpmPackage) {

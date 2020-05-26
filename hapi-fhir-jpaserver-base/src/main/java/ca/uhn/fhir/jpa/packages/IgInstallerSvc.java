@@ -43,11 +43,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * @since 5.1.0
+ */
 public class IgInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(IgInstallerSvc.class);
@@ -64,13 +68,13 @@ public class IgInstallerSvc {
 	private IPackageCacheManager packageCacheManager;
 
 	private String[] DEFAULT_SUPPORTED_RESOURCE_TYPES = new String[]
-		{ "NamingSystem",
+		{"NamingSystem",
 			"CodeSystem",
 			"ValueSet",
 			"StructureDefinition",
 			"ConceptMap",
 			"SearchParameter",
-			"Subscription" };
+			"Subscription"};
 
 	@PostConstruct
 	public void initialize() {
@@ -91,63 +95,37 @@ public class IgInstallerSvc {
 	}
 
 	/**
-	 * Loads and installs an IG tarball (with its dependencies) from the specified url.
-	 *
-	 * Installs the IG by persisting instances of the following types of resources:
-	 *
-	 * - NamingSystem, CodeSystem, ValueSet, StructureDefinition (with snapshots),
-	 *   ConceptMap, SearchParameter, Subscription
-	 *
-	 * Creates the resources if non-existent, updates them otherwise.
-	 *
-	 * @param url of IG tarball
-	 * @throws ImplementationGuideInstallationException if installation fails
-	 */
-	public void install(String url) throws ImplementationGuideInstallationException {
-		if (enabled) {
-			try  {
-				install(NpmPackage.fromPackage(toInputStream(url)));
-			} catch (IOException e) {
-				ourLog.error("Could not load implementation guide from URL {}", url, e);
-			}
-		}
-	}
-
-	private InputStream toInputStream(String url) throws IOException {
-		URL u = new URL(url);
-		URLConnection c = u.openConnection();
-		return c.getInputStream();
-	}
-
-	/**
 	 * Loads and installs an IG from a file on disk or the Simplifier repo using
 	 * the {@link IPackageCacheManager}.
-	 *
+	 * <p>
 	 * Installs the IG by persisting instances of the following types of resources:
-	 *
+	 * <p>
 	 * - NamingSystem, CodeSystem, ValueSet, StructureDefinition (with snapshots),
-	 *   ConceptMap, SearchParameter, Subscription
-	 *
+	 * ConceptMap, SearchParameter, Subscription
+	 * <p>
 	 * Creates the resources if non-existent, updates them otherwise.
 	 *
-	 * @param id of the package, or name of folder in filesystem
+	 * @param id      of the package, or name of folder in filesystem
 	 * @param version of package, or path to folder in filesystem
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
 	public void install(String id, String version) throws ImplementationGuideInstallationException {
 		if (enabled) {
 			try {
-				install(packageCacheManager.loadPackage(id, version));
+				NpmPackage npmPackage = packageCacheManager.loadPackage(id, version);
+				if (npmPackage == null) {
+					throw new IOException("Package not found");
+				}
+				install(npmPackage);
 			} catch (IOException e) {
-				ourLog.error("Could not load implementation guide from packages.fhir.org or " +
-					"file on disk using ID {} and version {}", id, version, e);
+				throw new ImplementationGuideInstallationException("Could not load NPM package " + id + "#" + version, e);
 			}
 		}
 	}
 
 	/**
 	 * Installs a package and its dependencies.
-	 *
+	 * <p>
 	 * Fails fast if one of its dependencies could not be installed.
 	 *
 	 * @throws ImplementationGuideInstallationException if installation fails
@@ -174,8 +152,7 @@ public class IgInstallerSvc {
 					.map(r -> isStructureDefinitionWithoutSnapshot(r) ? generateSnapshot(r) : r)
 					.forEach(r -> createOrUpdate(r));
 			} catch (Exception e) {
-				throw new ImplementationGuideInstallationException(String.format(
-					"Error installing IG %s#%s: ", name, version), e);
+				throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e.toString()), e);
 			}
 		}
 		ourLog.info(String.format("Finished installation of package %s#%s:", name, version));
@@ -323,16 +300,6 @@ public class IgInstallerSvc {
 		}
 	}
 
-	private static IBaseResource getFirstResourceFrom(IBundleProvider searchResult) {
-		try {
-			return searchResult.getResources(0, 0).get(0);
-		} catch (IndexOutOfBoundsException e) {
-			ourLog.warn("Error when extracting resource from search result " +
-				"(search result should have been non-empty))", e);
-			return null;
-		}
-	}
-
 	private String extractUniqeIdFromNamingSystem(IBaseResource resource) {
 		FhirTerser terser = fhirContext.newTerser();
 		IBase uniqueIdComponent = (IBase) terser.getSingleValueOrNull(resource, "uniqueId");
@@ -353,5 +320,15 @@ public class IgInstallerSvc {
 		FhirTerser terser = fhirContext.newTerser();
 		IPrimitiveType asPrimitiveType = (IPrimitiveType) terser.getSingleValueOrNull(resource, "url");
 		return (String) asPrimitiveType.getValue();
+	}
+
+	private static IBaseResource getFirstResourceFrom(IBundleProvider searchResult) {
+		try {
+			return searchResult.getResources(0, 0).get(0);
+		} catch (IndexOutOfBoundsException e) {
+			ourLog.warn("Error when extracting resource from search result " +
+				"(search result should have been non-empty))", e);
+			return null;
+		}
 	}
 }

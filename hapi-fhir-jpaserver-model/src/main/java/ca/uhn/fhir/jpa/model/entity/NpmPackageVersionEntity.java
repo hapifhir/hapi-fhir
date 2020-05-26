@@ -23,7 +23,7 @@ public class NpmPackageVersionEntity {
 	@EmbeddedId
 	private NpmPackageVersionEntityPk myId;
 	@ManyToOne
-	@JoinColumn(name = "PACKAGE_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKV_PKG"))
+	@JoinColumn(name = "PACKAGE_ID", insertable = false, updatable = false, nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKV_PKG"))
 	private NpmPackageEntity myPackage;
 	@OneToOne
 	@JoinColumn(name = "BINARY_RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
@@ -33,6 +33,18 @@ public class NpmPackageVersionEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SAVED_TIME", nullable = false)
 	private Date mySavedTime;
+	@Column(name = "FHIR_VERSION", nullable = false, length = 50)
+	private String myFhirVersion;
+	@Column(name = "DESC", nullable = false, length = 500)
+	private String myDescription;
+
+	public String getFhirVersion() {
+		return myFhirVersion;
+	}
+
+	public void setFhirVersion(String theFhirVersion) {
+		myFhirVersion = theFhirVersion;
+	}
 
 	public NpmPackageVersionEntityPk getId() {
 		return myId;
@@ -58,4 +70,19 @@ public class NpmPackageVersionEntity {
 		myPackageBinary = thePackageBinary;
 	}
 
+	public void setBytes(long theBytes) {
+		myBytes = theBytes;
+	}
+
+	public void setSavedTime(Date theSavedTime) {
+		mySavedTime = theSavedTime;
+	}
+
+	public void setDescription(String theDescription) {
+		myDescription = theDescription;
+	}
+
+	public String getDescription() {
+		return myDescription;
+	}
 }

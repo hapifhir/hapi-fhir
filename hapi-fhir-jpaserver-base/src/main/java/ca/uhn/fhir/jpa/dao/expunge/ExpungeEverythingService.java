@@ -41,6 +41,8 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
+import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
@@ -114,6 +116,8 @@ public class ExpungeEverythingService {
 			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 			return null;
 		});
+		counter.addAndGet(expungeEverythingByType(NpmPackageVersionEntity.class));
+		counter.addAndGet(expungeEverythingByType(NpmPackageEntity.class));
 		counter.addAndGet(expungeEverythingByType(SearchParamPresent.class));
 		counter.addAndGet(expungeEverythingByType(ForcedId.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamDate.class));
