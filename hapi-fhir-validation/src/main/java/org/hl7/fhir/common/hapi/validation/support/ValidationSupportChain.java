@@ -236,9 +236,11 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		for (IValidationSupport next : myChain) {
-			CodeValidationResult retVal = next.validateCodeInValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
-			if (retVal != null) {
-				return retVal;
+			if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
+				CodeValidationResult retVal = next.validateCodeInValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
+				if (retVal != null) {
+					return retVal;
+				}
 			}
 		}
 		return null;
