@@ -30,6 +30,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -227,14 +229,23 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@Override
 	public int hashCode() {
+		assert getHashValue() != null;
+
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getHashValue());
 		b.append(getHashSystem());
 		b.append(getHashSystemAndValue());
-		return b.toHashCode();
-	}
 
+		// FIXME: remove
+		int retVal = b.toHashCode();
+		if ("identifier".equals(getParamName())) {
+			ourLog.info("** Hashcode for {} = {} - {} - {} - {}", getParamName(), retVal, getHashValue(), getHashSystemAndValue(), getSystem());
+		}
+
+		return retVal;
+	}
+private static final Logger ourLog = LoggerFactory.getLogger(ResourceIndexedSearchParamToken.class);
 	@Override
 	public IQueryParameterType toQueryParameterType() {
 		return new TokenParam(getSystem(), getValue());
