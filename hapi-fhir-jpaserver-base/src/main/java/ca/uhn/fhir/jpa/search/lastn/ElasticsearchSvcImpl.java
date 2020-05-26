@@ -32,6 +32,7 @@ import org.shadehapi.elasticsearch.search.SearchHits;
 import org.shadehapi.elasticsearch.search.aggregations.AggregationBuilder;
 import org.shadehapi.elasticsearch.search.aggregations.AggregationBuilders;
 import org.shadehapi.elasticsearch.search.aggregations.Aggregations;
+import org.shadehapi.elasticsearch.search.aggregations.BucketOrder;
 import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.*;
 import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.Terms;
@@ -44,7 +45,6 @@ import org.shadehapi.elasticsearch.search.sort.SortOrder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -149,9 +149,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			"          \"type\" : \"keyword\",\n" +
 			"          \"store\" : true\n" +
 			"        },\n" +
-			"        \"codeable_concept_text\" : {\n" +
-			"          \"type\" : \"text\"\n" +
-			"        },\n" +
 			"        \"codingcode\" : {\n" +
 			"          \"type\" : \"keyword\"\n" +
 			"        },\n" +
@@ -163,6 +160,9 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			"        },\n" +
 			"        \"codingsystem\" : {\n" +
 			"          \"type\" : \"keyword\"\n" +
+			"        },\n" +
+			"        \"text\" : {\n" +
+			"          \"type\" : \"text\"\n" +
 			"        }\n" +
 			"      }\n" +
 			"    }\n" +
@@ -247,8 +247,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return subjectReferenceCriteria;
 	}
 
-	private TreeSet<String> getReferenceValues(List<? extends IQueryParameterType> referenceParams) {
-		TreeSet<String> referenceList = new TreeSet<>();
+	private List<String> getReferenceValues(List<? extends IQueryParameterType> referenceParams) {
+		List<String> referenceList = new ArrayList<>();
 
 		for (IQueryParameterType nextOr : referenceParams) {
 
@@ -277,12 +277,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private TermsAggregationBuilder createObservationCodeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
 		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field("codeconceptcodingcode");
+		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
 		// Top Hits Aggregation
 		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits("most_recent_effective")
 			.sort("effectivedtm", SortOrder.DESC)
 			.fetchSource(theTopHitsInclude, null).size(theMaxNumberObservationsPerCode));
 		observationCodeCodeAggregationBuilder.size(10000);
 		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field("codeconceptcodingsystem");
+		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
 		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
 		return observationCodeSystemAggregationBuilder;
 	}

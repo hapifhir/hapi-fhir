@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class TestElasticsearchConfig {
 
-	private final String elasticsearchHost = "127.0.0.1";
+	private final String elasticsearchHost = "localhost";
 	private final String elasticsearchUserId = "";
 	private final String elasticsearchPassword = "";
 

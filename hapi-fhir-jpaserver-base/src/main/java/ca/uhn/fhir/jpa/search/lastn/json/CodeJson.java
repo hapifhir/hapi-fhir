@@ -27,7 +27,7 @@ public class CodeJson {
     @JsonProperty(value = "codeable_concept_id", required = false)
     private String myCodeableConceptId;
 
-    @JsonProperty(value = "codeable_concept_text", required = false)
+    @JsonProperty(value = "text", required = false)
     private String myCodeableConceptText;
 
     @JsonProperty(value = "codingcode", required = false)

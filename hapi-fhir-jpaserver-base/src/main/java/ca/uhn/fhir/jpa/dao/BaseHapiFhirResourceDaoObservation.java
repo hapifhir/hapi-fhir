@@ -20,13 +20,26 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoObservation<T> {
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	protected void updateSearchParamsForLastn(SearchParameterMap theSearchParameterMap, RequestDetails theRequestDetails) {
 		if (!isPagingProviderDatabaseBacked(theRequestDetails)) {
@@ -37,10 +50,49 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		SortSpec effectiveDtm = new SortSpec(getEffectiveParamName()).setOrder(SortOrderEnum.DESC);
 		SortSpec observationCode = new SortSpec(getCodeParamName()).setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
 		if(theSearchParameterMap.containsKey(getSubjectParamName()) || theSearchParameterMap.containsKey(getPatientParamName())) {
+			fixSubjectParamsOrderForLastn(theSearchParameterMap, theRequestDetails);
 			theSearchParameterMap.setSort(new SortSpec(getSubjectParamName()).setOrder(SortOrderEnum.ASC).setChain(observationCode));
 		} else {
 			theSearchParameterMap.setSort(observationCode);
 		}
+	}
+
+	private void fixSubjectParamsOrderForLastn(SearchParameterMap theSearchParameterMap, RequestDetails theRequestDetails) {
+		// Need to ensure that the patient/subject parameters are sorted in the SearchParameterMap to ensure correct ordering of
+		// the output. The reason for this is that observations are indexed by patient/subject forced ID, but then ordered in the
+		// final result set by subject/patient resource PID.
+		TreeMap<Long, IQueryParameterType> orderedSubjectReferenceMap = new TreeMap<>();
+		if(theSearchParameterMap.containsKey(getSubjectParamName())) {
+
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, getResourceName());
+
+			List<List<IQueryParameterType>> patientParams = new ArrayList<>();
+			if (theSearchParameterMap.get(getPatientParamName()) != null) {
+				patientParams.addAll(theSearchParameterMap.get(getPatientParamName()));
+			}
+			if (theSearchParameterMap.get(getSubjectParamName()) != null) {
+				patientParams.addAll(theSearchParameterMap.get(getSubjectParamName()));
+			}
+
+			for (List<? extends IQueryParameterType> nextPatientList : patientParams) {
+				for (IQueryParameterType nextOr : nextPatientList) {
+					if (nextOr instanceof ReferenceParam) {
+						ReferenceParam ref = (ReferenceParam) nextOr;
+						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
+						orderedSubjectReferenceMap.put(pid.getIdAsLong(), nextOr);
+					} else {
+						throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
+					}
+				}
+			}
+
+			theSearchParameterMap.remove(getSubjectParamName());
+			theSearchParameterMap.remove(getPatientParamName());
+			for (Long subjectPid : orderedSubjectReferenceMap.keySet()) {
+				theSearchParameterMap.add(getSubjectParamName(), orderedSubjectReferenceMap.get(subjectPid));
+			}
+		}
+
 	}
 
 	abstract protected String getEffectiveParamName();
