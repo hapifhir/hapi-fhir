@@ -17,13 +17,13 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework.batch</groupId>
-			<artifactId>spring-batch-core</artifactId>
-			<version>4.2.2.RELEASE</version>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server-empi</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
-			<artifactId>spring-batch-test</artifactId>
+			<artifactId>spring-batch-core</artifactId>
 			<version>4.2.2.RELEASE</version>
 		</dependency>
 		<dependency>
@@ -31,11 +31,17 @@
 			<artifactId>spring-batch-infrastructure</artifactId>
 			<version>4.2.2.RELEASE</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
 			<version>${spring_data_version}</version>
+		</dependency>
+		<!--test dependencies -->
+		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-test</artifactId>
+			<version>4.2.2.RELEASE</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>

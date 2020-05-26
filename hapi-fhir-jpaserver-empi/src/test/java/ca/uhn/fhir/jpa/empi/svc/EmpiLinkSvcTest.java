@@ -29,6 +29,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		myExpungeEverythingService.expungeEverythingByType(EmpiLink.class);
 		super.after();
 	}
+
 	@Test
 	public void compareEmptyPatients() {
 		Patient patient = new Patient();

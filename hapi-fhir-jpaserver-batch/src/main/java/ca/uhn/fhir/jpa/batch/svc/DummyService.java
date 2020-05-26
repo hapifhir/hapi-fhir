@@ -10,6 +10,6 @@ public class DummyService {
 	 private static final Logger ourLog = getLogger(DummyService.class);
 
 	public void test() {
-		ourLog.warn("test");
+		ourLog.warn("test testing again");
 	}
 }
