@@ -36,8 +36,6 @@ import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(name = "TRM_CONCEPT_PROPERTY", uniqueConstraints = {
-}, indexes = {
-	@Index(name = "IDX_CONCEPTPROP_CONCEPTPID", columnList = "CONCEPT_PID")
 })
 public class TermConceptProperty implements Serializable {
 	private static final long serialVersionUID = 1L;
