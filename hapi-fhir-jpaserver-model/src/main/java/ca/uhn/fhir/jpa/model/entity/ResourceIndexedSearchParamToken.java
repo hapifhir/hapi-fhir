@@ -30,8 +30,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -61,7 +59,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 	@Index(name = "IDX_SP_TOKEN_HASH_S", columnList = "HASH_SYS"),
 	@Index(name = "IDX_SP_TOKEN_HASH_SV", columnList = "HASH_SYS_AND_VALUE"),
 	// TODO PERF change this to:
-   //	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE,RES_ID"),
+	//	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE,RES_ID"),
 	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE"),
 
 	@Index(name = "IDX_SP_TOKEN_UPDATED", columnList = "SP_UPDATED"),
@@ -237,15 +235,9 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getHashSystem());
 		b.append(getHashSystemAndValue());
 
-		// FIXME: remove
-		int retVal = b.toHashCode();
-		if ("identifier".equals(getParamName())) {
-			ourLog.info("** Hashcode for {} = {} - {} - {} - {}", getParamName(), retVal, getHashValue(), getHashSystemAndValue(), getSystem());
-		}
-
-		return retVal;
+		return b.toHashCode();
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(ResourceIndexedSearchParamToken.class);
+
 	@Override
 	public IQueryParameterType toQueryParameterType() {
 		return new TokenParam(getSystem(), getValue());
