@@ -3372,7 +3372,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: This server does not support _sort specifications of type COMPOSITE - Can't serve _sort=code-value-quantity", e.getMessage());
 		}
 	}
 

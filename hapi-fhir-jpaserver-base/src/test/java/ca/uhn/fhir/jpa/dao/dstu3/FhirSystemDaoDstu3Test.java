@@ -1760,7 +1760,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDusplicateIds", e.getMessage());
 		}
 	}
 

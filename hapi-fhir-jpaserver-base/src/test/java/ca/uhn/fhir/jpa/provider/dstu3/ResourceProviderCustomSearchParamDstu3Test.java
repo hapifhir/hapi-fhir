@@ -64,11 +64,6 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	}
 
 	@Override
-	public void before() throws Exception {
-		super.before();
-	}
-
-	@Override
 	@BeforeEach
 	public void beforeResetConfig() {
 		super.beforeResetConfig();

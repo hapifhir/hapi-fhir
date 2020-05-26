@@ -3370,15 +3370,15 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		published = (ArrayList<Coding>) retrieved.getMeta().getTag();
 		sort(published);
 		assertEquals(3, published.size());
-		assertEquals(published.toString(), "Dog", published.get(0).getCode());
-		assertEquals(published.toString(), "Puppies", published.get(0).getDisplay());
-		assertEquals(published.toString(), null, published.get(0).getSystem());
-		assertEquals(published.toString(), "Cat", published.get(1).getCode());
-		assertEquals(published.toString(), "Kittens", published.get(1).getDisplay());
-		assertEquals(published.toString(), "http://foo", published.get(1).getSystem());
-		assertEquals(published.toString(), "Cow", published.get(2).getCode());
-		assertEquals(published.toString(), "Calves", published.get(2).getDisplay());
-		assertEquals(published.toString(), "http://foo", published.get(2).getSystem());
+		assertEquals("Dog", published.get(0).getCode());
+		assertEquals("Puppies", published.get(0).getDisplay());
+		assertEquals(null, published.get(0).getSystem());
+		assertEquals("Cat", published.get(1).getCode());
+		assertEquals("Kittens", published.get(1).getDisplay());
+		assertEquals("http://foo", published.get(1).getSystem());
+		assertEquals("Cow", published.get(2).getCode());
+		assertEquals("Calves", published.get(2).getDisplay());
+		assertEquals("http://foo", published.get(2).getSystem());
 
 		secLabels = retrieved.getMeta().getSecurity();
 		sortCodings(secLabels);
