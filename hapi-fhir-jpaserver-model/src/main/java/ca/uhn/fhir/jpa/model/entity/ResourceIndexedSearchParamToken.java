@@ -227,11 +227,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@Override
 	public int hashCode() {
-		if (getParamName() == null) {
-			return 0;
-		}
-		assert getHashValue() != null;
-
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getHashValue());
