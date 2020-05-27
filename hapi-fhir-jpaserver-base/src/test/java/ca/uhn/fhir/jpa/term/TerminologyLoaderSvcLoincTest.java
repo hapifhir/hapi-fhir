@@ -379,7 +379,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRTIMARY_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
@@ -410,6 +411,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Normal LOINC code
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
+		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
+		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
+		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
 		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
 		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
