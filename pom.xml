@@ -2041,20 +2041,6 @@
 							</rules>
 						</configuration>
 					</execution>
-					<execution>
-						<id>enforce-property</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requireJavaVersion>
-									<version>11</version>
-								</requireJavaVersion>
-							</rules>
-							<fail>true</fail>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 			<plugin>
