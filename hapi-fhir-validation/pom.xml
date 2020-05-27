@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.3.0-SNAPSHOT</version>
+		<version>5.1.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -30,6 +30,41 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.validation</artifactId>
 			<version>${fhir_core_version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>info.cqframework</groupId>
+					<artifactId>elm</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>info.cqframework</groupId>
+					<artifactId>cql-to-elm</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>info.cqframework</groupId>
+					<artifactId>quick</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>info.cqframework</groupId>
+					<artifactId>qdm</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>info.cqframework</groupId>
+					<artifactId>cql</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>info.cqframework</groupId>
+					<artifactId>model</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.javalin</groupId>
+					<artifactId>javalin</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>org.hl7.fhir.utilities</artifactId>
+			<version>${fhir_core_version}</version>
 		</dependency>
 
 		<dependency>
@@ -39,6 +74,15 @@
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
+		</dependency>
+
+		<!--
+		Note: As of HAPI FHIR 5.0.0 we now use Jackson for JSON parsing, but the
+		validator still uses GSON so it is a dependency here
+		-->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
 		</dependency>
 
 		<!-- 

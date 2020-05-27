@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 

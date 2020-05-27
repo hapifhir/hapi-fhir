@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -582,15 +582,15 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myOrganizationDao.update(p2, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			// good
+			assertEquals("Existing resource ID[Patient/" + p1id.getIdPartAsLong() + "] is of type[Patient] - Cannot update with [Organization]", e.getMessage());
 		}
 
 		try {
 			p2.setId(new IdType("Patient/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
 			fail();
-		} catch (UnprocessableEntityException e) {
-			ourLog.error("Good", e);
+		} catch (InvalidRequestException e) {
+			assertEquals("Incorrect resource type (Patient) for this DAO, wanted: Organization", e.getMessage());
 		}
 
 	}

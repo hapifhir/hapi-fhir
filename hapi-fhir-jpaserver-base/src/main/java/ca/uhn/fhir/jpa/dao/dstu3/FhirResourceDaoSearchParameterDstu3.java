@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import org.hl7.fhir.dstu3.model.*;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -70,8 +72,9 @@ public class FhirResourceDaoSearchParameterDstu3 extends BaseHapiFhirResourceDao
 		String expression = theResource.getExpression();
 		FhirContext context = getContext();
 		Enumerations.SearchParamType type = theResource.getType();
+		String code = theResource.getCode();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamExtractor, type, status, base, expression, context, getConfig());
+		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamRegistry, mySearchParamExtractor, code, type, status, base, expression, context, getConfig());
 	}
 
 }

@@ -21,22 +21,39 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static org.apache.commons.lang3.StringUtils.compare;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceIndexedSearchParams.class);
-
 	final public Collection<ResourceIndexedSearchParamString> myStringParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamToken> myTokenParams = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamNumber> myNumberParams = new ArrayList<>();
@@ -84,7 +101,6 @@ public final class ResourceIndexedSearchParams {
 	}
 
 
-
 	public Collection<ResourceLink> getResourceLinks() {
 		return myLinks;
 	}
@@ -109,7 +125,7 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
 	}
 
-	public void setUpdatedTime(Date theUpdateTime) {
+	void setUpdatedTime(Date theUpdateTime) {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
 		setUpdatedTime(myQuantityParams, theUpdateTime);
@@ -125,6 +141,181 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
+	public Set<String> getPopulatedResourceLinkParameters() {
+		return myPopulatedResourceLinkParameters;
+	}
+
+	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
+		if (theParamDef == null) {
+			return false;
+		}
+		Collection<? extends BaseResourceIndexedSearchParam> resourceParams;
+		switch (theParamDef.getParamType()) {
+			case TOKEN:
+				resourceParams = myTokenParams;
+				break;
+			case QUANTITY:
+				resourceParams = myQuantityParams;
+				break;
+			case STRING:
+				resourceParams = myStringParams;
+				break;
+			case NUMBER:
+				resourceParams = myNumberParams;
+				break;
+			case URI:
+				resourceParams = myUriParams;
+				break;
+			case DATE:
+				resourceParams = myDateParams;
+				break;
+			case REFERENCE:
+				return matchResourceLinks(theModelConfig, theResourceName, theParamName, theParam, theParamDef.getPath());
+			case COMPOSITE:
+			case HAS:
+			case SPECIAL:
+			default:
+				resourceParams = null;
+		}
+		if (resourceParams == null) {
+			return false;
+		}
+		Predicate<BaseResourceIndexedSearchParam> namedParamPredicate = param ->
+			param.getParamName().equalsIgnoreCase(theParamName) &&
+				param.matches(theParam, theUseOrdinalDatesForDayComparison);
+
+		return resourceParams.stream().anyMatch(namedParamPredicate);
+	}
+
+	/**
+	 * @deprecated Replace with the method below
+	 */
+	// KHS This needs to be public as libraries outside of hapi call it directly
+	@Deprecated
+	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
+		return matchResourceLinks(new ModelConfig(), theResourceName, theParamName, theParam, theParamPath);
+	}
+
+	// KHS This needs to be public as libraries outside of hapi call it directly
+	public boolean matchResourceLinks(ModelConfig theModelConfig, String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
+		ReferenceParam reference = (ReferenceParam) theParam;
+
+		Predicate<ResourceLink> namedParamPredicate = resourceLink ->
+			searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
+				&& resourceIdMatches(theModelConfig, resourceLink, reference);
+
+		return myLinks.stream().anyMatch(namedParamPredicate);
+	}
+
+	private boolean resourceIdMatches(ModelConfig theModelConfig, ResourceLink theResourceLink, ReferenceParam theReference) {
+		String baseUrl = theReference.getBaseUrl();
+		if (isNotBlank(baseUrl)) {
+			if (!theModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
+				return false;
+			}
+		}
+
+		String targetType = theResourceLink.getTargetResourceType();
+		String targetId = theResourceLink.getTargetResourceId();
+
+		assert isNotBlank(targetType);
+		assert isNotBlank(targetId);
+
+		if (theReference.hasResourceType()) {
+			if (!theReference.getResourceType().equals(targetType)) {
+				return false;
+			}
+		}
+
+		if (!targetId.equals(theReference.getIdPart())) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean searchParameterPathMatches(String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
+		String sourcePath = theResourceLink.getSourcePath();
+		return sourcePath.equalsIgnoreCase(theParamPath);
+	}
+
+	@Override
+	public String toString() {
+		return "ResourceIndexedSearchParams{" +
+			"stringParams=" + myStringParams +
+			", tokenParams=" + myTokenParams +
+			", numberParams=" + myNumberParams +
+			", quantityParams=" + myQuantityParams +
+			", dateParams=" + myDateParams +
+			", uriParams=" + myUriParams +
+			", coordsParams=" + myCoordsParams +
+			", compositeStringUniques=" + myCompositeStringUniques +
+			", links=" + myLinks +
+			'}';
+	}
+
+	public void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> theActiveSearchParams) {
+		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, myStringParams);
+		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, myNumberParams);
+		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
+		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, myDateParams);
+		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, myUriParams);
+		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, myTokenParams);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
+                                                                                     Collection<RT> paramCollection) {
+		for (Map.Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
+			String nextParamName = nextEntry.getKey();
+			if (nextEntry.getValue().getParamType() == type) {
+				boolean haveParam = false;
+				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
+					if (nextParam.getParamName().equals(nextParamName)) {
+						haveParam = true;
+						break;
+					}
+				}
+
+				if (!haveParam) {
+					BaseResourceIndexedSearchParam param;
+					switch (type) {
+						case DATE:
+							param = new ResourceIndexedSearchParamDate();
+							break;
+						case NUMBER:
+							param = new ResourceIndexedSearchParamNumber();
+							break;
+						case QUANTITY:
+							param = new ResourceIndexedSearchParamQuantity();
+							break;
+						case STRING:
+							param = new ResourceIndexedSearchParamString()
+								.setModelConfig(theModelConfig);
+							break;
+						case TOKEN:
+							param = new ResourceIndexedSearchParamToken();
+							break;
+						case URI:
+							param = new ResourceIndexedSearchParamUri();
+							break;
+						case COMPOSITE:
+						case HAS:
+						case REFERENCE:
+						case SPECIAL:
+						default:
+							continue;
+					}
+					param.setPartitionSettings(thePartitionSettings);
+					param.setResource(theEntity);
+					param.setMissing(true);
+					param.setParamName(nextParamName);
+					param.calculateHashes();
+					paramCollection.add((RT) param);
+				}
+			}
+		}
+	}
 
 	/**
 	 * This method is used to create a set of all possible combinations of
@@ -201,171 +392,6 @@ public final class ResourceIndexedSearchParams {
 				}
 
 				theQueryStringsToPopulate.add(uniqueString.toString());
-			}
-		}
-	}
-
-
-
-	public void calculateHashes(Collection<? extends BaseResourceIndex> theStringParams) {
-		for (BaseResourceIndex next : theStringParams) {
-			next.calculateHashes();
-		}
-	}
-
-	public Set<String> getPopulatedResourceLinkParameters() {
-		return myPopulatedResourceLinkParameters;
-	}
-
-	public boolean matchParam(String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
-		if (theParamDef == null) {
-			return false;
-		}
-		Collection<? extends BaseResourceIndexedSearchParam> resourceParams;
-		switch (theParamDef.getParamType()) {
-			case TOKEN:
-				resourceParams = myTokenParams;
-				break;
-			case QUANTITY:
-				resourceParams = myQuantityParams;
-				break;
-			case STRING:
-				resourceParams = myStringParams;
-				break;
-			case NUMBER:
-				resourceParams = myNumberParams;
-				break;
-			case URI:
-				resourceParams = myUriParams;
-				break;
-			case DATE:
-				resourceParams = myDateParams;
-				break;
-			case REFERENCE:
-				return matchResourceLinks(theResourceName, theParamName, theParam, theParamDef.getPath());
-			case COMPOSITE:
-			case HAS:
-			case SPECIAL:
-			default:
-				resourceParams = null;
-		}
-		if (resourceParams == null) {
-			return false;
-		}
-		Predicate<BaseResourceIndexedSearchParam> namedParamPredicate = param ->
-			param.getParamName().equalsIgnoreCase(theParamName) &&
-				param.matches(theParam);
-
-		return resourceParams.stream().anyMatch(namedParamPredicate);
-	}
-
-	// KHS This needs to be public as libraries outside of hapi call it directly
-	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
-		ReferenceParam reference = (ReferenceParam)theParam;
-
-		Predicate<ResourceLink> namedParamPredicate = resourceLink ->
-			resourceLinkMatches(theResourceName, resourceLink, theParamName, theParamPath)
-			 && resourceIdMatches(resourceLink, reference);
-
-		return myLinks.stream().anyMatch(namedParamPredicate);
-	}
-
-	private boolean resourceIdMatches(ResourceLink theResourceLink, ReferenceParam theReference) {
-		ResourceTable target = theResourceLink.getTargetResource();
-		IdDt idDt = target.getIdDt();
-		if (idDt.isIdPartValidLong()) {
-			if (theReference.isIdPartValidLong()) {
-				return theReference.getIdPartAsLong().equals(idDt.getIdPartAsLong());
-			} else {
-				return false;
-			}
-		} else {
-			ForcedId forcedId = target.getForcedId();
-			if (forcedId != null) {
-				return forcedId.getForcedId().equals(theReference.getValue());
-			} else {
-				return false;
-			}
-		}
-	}
-
-	private boolean resourceLinkMatches(String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
-		return theResourceLink.getTargetResource().getResourceType().equalsIgnoreCase(theParamName) ||
-			theResourceLink.getSourcePath().equalsIgnoreCase(theParamPath);
-	}
-
-	@Override
-	public String toString() {
-		return "ResourceIndexedSearchParams{" +
-			"stringParams=" + myStringParams +
-			", tokenParams=" + myTokenParams +
-			", numberParams=" + myNumberParams +
-			", quantityParams=" + myQuantityParams +
-			", dateParams=" + myDateParams +
-			", uriParams=" + myUriParams +
-			", coordsParams=" + myCoordsParams +
-			", compositeStringUniques=" + myCompositeStringUniques +
-			", links=" + myLinks +
-			'}';
-	}
-
-	public void findMissingSearchParams(ModelConfig theModelConfig, ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> theActiveSearchParams) {
-		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, myStringParams);
-		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, myNumberParams);
-		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
-		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, myDateParams);
-		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, myUriParams);
-		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, myTokenParams);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(ModelConfig theModelConfig, ResourceTable theEntity, Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
-																												Collection<RT> paramCollection) {
-		for (Map.Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
-			String nextParamName = nextEntry.getKey();
-			if (nextEntry.getValue().getParamType() == type) {
-				boolean haveParam = false;
-				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
-					if (nextParam.getParamName().equals(nextParamName)) {
-						haveParam = true;
-						break;
-					}
-				}
-
-				if (!haveParam) {
-					BaseResourceIndexedSearchParam param;
-					switch (type) {
-						case DATE:
-							param = new ResourceIndexedSearchParamDate();
-							break;
-						case NUMBER:
-							param = new ResourceIndexedSearchParamNumber();
-							break;
-						case QUANTITY:
-							param = new ResourceIndexedSearchParamQuantity();
-							break;
-						case STRING:
-							param = new ResourceIndexedSearchParamString()
-								.setModelConfig(theModelConfig);
-							break;
-						case TOKEN:
-							param = new ResourceIndexedSearchParamToken();
-							break;
-						case URI:
-							param = new ResourceIndexedSearchParamUri();
-							break;
-						case COMPOSITE:
-						case HAS:
-						case REFERENCE:
-						case SPECIAL:
-						default:
-							continue;
-					}
-					param.setResource(theEntity);
-					param.setMissing(true);
-					param.setParamName(nextParamName);
-					paramCollection.add((RT) param);
-				}
 			}
 		}
 	}

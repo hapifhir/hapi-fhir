@@ -3,24 +3,43 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.model.util.StringNormalizer;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.util.StringNormalizer;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Duration;
+import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.Normalizer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -39,7 +58,7 @@ public class SearchParamExtractorDstu3Test {
 
 		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
 		assertEquals(1, tokens.size());
@@ -55,14 +74,14 @@ public class SearchParamExtractorDstu3Test {
 		String value = IntStream.range(1, 200).mapToObj(v -> "a").collect(Collectors.joining()) + "ئ";
 		assertEquals(value.length(), 200);
 		assertEquals(Normalizer.normalize(value, Normalizer.Form.NFD).length(), 201);
-		assertEquals(StringNormalizer.normalizeString(value).length(), 201);
+		assertEquals(StringNormalizer.normalizeStringForSearchIndexing(value).length(), 201);
 
 		Questionnaire questionnaire = new Questionnaire();
 		questionnaire.setDescription(value);
 
 		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(questionnaire);
 		assertEquals(1, params.size());
@@ -80,7 +99,7 @@ public class SearchParamExtractorDstu3Test {
 
 		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
 		assertEquals(1, params.size());
@@ -98,7 +117,7 @@ public class SearchParamExtractorDstu3Test {
 
 		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
 		assertEquals(1, params.size());
@@ -110,12 +129,12 @@ public class SearchParamExtractorDstu3Test {
 	public void testEmptyPath() {
 
 		MySearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
-			Patient resource = new Patient();
-			extractor.extractSearchParamStrings(resource);
+		searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+		Patient resource = new Patient();
+		extractor.extractSearchParamStrings(resource);
 
 		searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", null, RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
 		extractor.extractSearchParamStrings(resource);
@@ -126,7 +145,7 @@ public class SearchParamExtractorDstu3Test {
 	public void testStringMissingResourceType() {
 
 		MySearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 
 		searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "communication.language.coding.system | communication.language.coding.code", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
@@ -143,7 +162,7 @@ public class SearchParamExtractorDstu3Test {
 	public void testInvalidType() {
 
 		MySearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 
 		{
@@ -194,7 +213,7 @@ public class SearchParamExtractorDstu3Test {
 
 		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> coords = extractor.extractSearchParamTokens(loc);
 		assertEquals(1, coords.size());
@@ -281,7 +300,7 @@ public class SearchParamExtractorDstu3Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourValidationSupport = new DefaultProfileValidationSupport();
+		ourValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	}
 
 }

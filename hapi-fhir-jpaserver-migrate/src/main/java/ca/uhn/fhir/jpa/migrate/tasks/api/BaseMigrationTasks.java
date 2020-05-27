@@ -65,7 +65,12 @@ public class BaseMigrationTasks<T extends Enum> {
 			theTask.validate();
 			myTasks.put(theRelease, theTask);
 		};
-		return new Builder(theRelease.name(), sink);
+		return new Builder(toReleaseName(theRelease), sink);
+	}
+
+	@Nonnull
+	protected String toReleaseName(T theRelease) {
+		return theRelease.name();
 	}
 
 	public List<BaseTask> getAllTasks(T[] theVersionEnumValues) {
@@ -79,6 +84,13 @@ public class BaseMigrationTasks<T extends Enum> {
 		}
 
 		return retval;
+	}
+
+	protected BaseTask getTaskWithVersion(String theFlywayVersion) {
+		return myTasks.values().stream()
+			.filter(task -> theFlywayVersion.equals(task.getFlywayVersion()))
+			.findFirst()
+			.get();
 	}
 
 	void validate(Collection<BaseTask> theTasks) {

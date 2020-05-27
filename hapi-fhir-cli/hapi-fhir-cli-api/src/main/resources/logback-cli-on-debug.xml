@@ -1,0 +1,59 @@
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<useJansi>false</useJansi>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd} %d{HH:mm:ss.SS} [%thread] [%file:%line] %-5level %logger{20} %msg%n</pattern>
+		</encoder>
+	</appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>output.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd} %d{HH:mm:ss.SS} [%thread] [%file:%line] %-5level %logger{20} %msg%n</pattern>
+        </encoder>
+        <Encoding>utf-8</Encoding>
+    </appender>
+
+	<!-- HAPI HL7v2 App Module -->
+	<logger name="ca.uhn.hl7v2.app" additivity="false" level="debug">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</logger>
+
+	<logger name="ca.uhn.fhir" additivity="false" level="debug">
+		<appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+	</logger>
+	<logger name="ca.cdr" additivity="false" level="debug">
+		<appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+	</logger>
+
+	<!-- These two are used by the websocket client -->
+	<logger name="websocket.RECV" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+    </logger>
+	<logger name="websocket.SEND" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+	</logger>
+
+	<!-- These two are used by SynchronizeFhirServersCommand -->
+	<logger name="sync.SOURCE" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+	</logger>
+	<logger name="sync.TARGET" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+	</logger>
+
+	<root level="warn">
+		<appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+	</root>
+
+</configuration>

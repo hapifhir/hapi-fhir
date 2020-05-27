@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -35,16 +36,19 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Scope("prototype")
 public class PredicateBuilderDate extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
+
+	private Map<String, From<?, ResourceIndexedSearchParamDate>> myJoinMap;
 
 	PredicateBuilderDate(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
@@ -54,30 +58,48 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 	public Predicate addPredicate(String theResourceName,
 											String theParamName,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation) {
+											SearchFilterParser.CompareOperation operation,
+											RequestPartitionId theRequestPartitionId) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+		boolean newJoin = false;
+		if (myJoinMap == null) {
+			myJoinMap = new HashMap<>();
+		}
+		String key = theResourceName + " " + theParamName;
+
+		From<?, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
+		if (join == null) {
+			join = myQueryStack.createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+			myJoinMap.put(key, join);
+			newJoin = true;
+		}
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
-			addPredicateParamMissing(theResourceName, theParamName, missing, join);
+			addPredicateParamMissingForNonReference(theResourceName, theParamName, missing, join, theRequestPartitionId);
 			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
+
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType params = nextOr;
-			Predicate p = createPredicateDate(params,
-				theResourceName,
-				theParamName,
-				myBuilder,
+			Predicate p = createPredicateDate(nextOr,
+				myCriteriaBuilder,
 				join,
-				operation);
+				operation
+			);
 			codePredicates.add(p);
 		}
 
-		Predicate orPredicates = myBuilder.or(toArray(codePredicates));
-		myQueryRoot.addPredicate(orPredicates);
+		Predicate orPredicates = myCriteriaBuilder.or(toArray(codePredicates));
+
+		if (newJoin) {
+			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, theRequestPartitionId);
+			myQueryStack.addPredicateWithImplicitTypeSelection(identityAndValuePredicate);
+		} else {
+			myQueryStack.addPredicateWithImplicitTypeSelection(orPredicates);
+		}
+
 		return orPredicates;
 	}
 
@@ -85,21 +107,20 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													 String theResourceName,
 													 String theParamName,
 													 CriteriaBuilder theBuilder,
-													 From<?, ResourceIndexedSearchParamDate> theFrom) {
-		return createPredicateDate(theParam,
-			theResourceName,
-			theParamName,
+													 From<?, ResourceIndexedSearchParamDate> theFrom,
+													 RequestPartitionId theRequestPartitionId) {
+		Predicate predicateDate = createPredicateDate(theParam,
 			theBuilder,
 			theFrom,
-			null);
+			null
+		);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, predicateDate, theRequestPartitionId);
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam,
-													  String theResourceName,
-													  String theParamName,
 													  CriteriaBuilder theBuilder,
 													  From<?, ResourceIndexedSearchParamDate> theFrom,
-													  SearchFilterParser.CompareOperation operation) {
+													  SearchFilterParser.CompareOperation theOperation) {
 
 		Predicate p;
 		if (theParam instanceof DateParam) {
@@ -109,7 +130,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 				p = createPredicateDateFromRange(theBuilder,
 					theFrom,
 					range,
-					operation);
+					theOperation);
 			} else {
 				// TODO: handle missing date param?
 				p = null;
@@ -119,75 +140,103 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			p = createPredicateDateFromRange(theBuilder,
 				theFrom,
 				range,
-				operation);
+				theOperation);
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
 		}
 
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, p);
+		return p;
+	}
+
+	private boolean isNullOrDayPrecision(DateParam theDateParam) {
+		return theDateParam == null || theDateParam.getPrecision().ordinal() == TemporalPrecisionEnum.DAY.ordinal();
 	}
 
 	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder,
 																  From<?, ResourceIndexedSearchParamDate> theFrom,
 																  DateRangeParam theRange,
 																  SearchFilterParser.CompareOperation operation) {
-		Date lowerBound = theRange.getLowerBoundAsInstant();
-		Date upperBound = theRange.getUpperBoundAsInstant();
+		Date lowerBoundInstant = theRange.getLowerBoundAsInstant();
+		Date upperBoundInstant = theRange.getUpperBoundAsInstant();
+
+		DateParam lowerBound = theRange.getLowerBound();
+		DateParam upperBound = theRange.getUpperBound();
+		Integer lowerBoundAsOrdinal = theRange.getLowerBoundAsDateInteger();
+		Integer upperBoundAsOrdinal = theRange.getUpperBoundAsDateInteger();
+		Comparable genericLowerBound;
+		Comparable genericUpperBound;
+		/**
+		 * If all present search parameters are of DAY precision, and {@link DaoConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
+		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
+		 */
+		boolean isOrdinalComparison = isNullOrDayPrecision(lowerBound) && isNullOrDayPrecision(upperBound) && myDaoConfig.getModelConfig().getUseOrdinalDatesForDayPrecisionSearches();
+
 		Predicate lt = null;
 		Predicate gt = null;
 		Predicate lb = null;
 		Predicate ub = null;
+		String lowValueField;
+		String highValueField;
+
+		if (isOrdinalComparison) {
+			lowValueField = "myValueLowDateOrdinal";
+			highValueField = "myValueHighDateOrdinal";
+			genericLowerBound = lowerBoundAsOrdinal;
+			genericUpperBound = upperBoundAsOrdinal;
+		} else {
+			lowValueField = "myValueLow";
+			highValueField = "myValueHigh";
+			genericLowerBound = lowerBoundInstant;
+			genericUpperBound = upperBoundInstant;
+		}
 
 		if (operation == SearchFilterParser.CompareOperation.lt) {
-			if (lowerBound == null) {
+			if (lowerBoundInstant == null) {
 				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
 			}
-			lb = theBuilder.lessThan(theFrom.get("myValueLow"), lowerBound);
+			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
+			lb = theBuilder.lessThan(theFrom.get(lowValueField), genericLowerBound);
 		} else if (operation == SearchFilterParser.CompareOperation.le) {
-			if (upperBound == null) {
+			if (upperBoundInstant == null) {
 				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
 			}
-			lb = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
+			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
+			lb = theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);
 		} else if (operation == SearchFilterParser.CompareOperation.gt) {
-			if (upperBound == null) {
+			if (upperBoundInstant == null) {
 				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
 			}
-			lb = theBuilder.greaterThan(theFrom.get("myValueHigh"), upperBound);
-		} else if (operation == SearchFilterParser.CompareOperation.ge) {
-			if (lowerBound == null) {
-				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
-			}
-			lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
-		} else if (operation == SearchFilterParser.CompareOperation.ne) {
-			if ((lowerBound == null) ||
-				(upperBound == null)) {
+			lb = theBuilder.greaterThan(theFrom.get(highValueField), genericUpperBound);
+			} else if (operation == SearchFilterParser.CompareOperation.ge) {
+				if (lowerBoundInstant == null) {
+					throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
+				}
+				lb = theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
+			} else if (operation == SearchFilterParser.CompareOperation.ne) {
+			if ((lowerBoundInstant == null) ||
+				(upperBoundInstant == null)) {
 				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare operation");
 			}
-			/*Predicate*/
-			lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
-			/*Predicate*/
-			gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
+			lt = theBuilder.lessThan(theFrom.get(lowValueField), genericLowerBound);
+			gt = theBuilder.greaterThan(theFrom.get(highValueField), genericUpperBound);
 			lb = theBuilder.or(lt,
 				gt);
-		} else if ((operation == SearchFilterParser.CompareOperation.eq) ||
-			(operation == null)) {
-			if (lowerBound != null) {
-				/*Predicate*/
-				gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
-				/*Predicate*/
-				lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), lowerBound);
-				if (theRange.getLowerBound().getPrefix() == ParamPrefixEnum.STARTS_AFTER || theRange.getLowerBound().getPrefix() == ParamPrefixEnum.EQUAL) {
+		} else if ((operation == SearchFilterParser.CompareOperation.eq) || (operation == null)) {
+			if (lowerBoundInstant != null) {
+				gt = theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
+				lt = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericLowerBound);
+				if (lowerBound.getPrefix() == ParamPrefixEnum.STARTS_AFTER || lowerBound.getPrefix() == ParamPrefixEnum.EQUAL) {
 					lb = gt;
 				} else {
 					lb = theBuilder.or(gt, lt);
 				}
 			}
 
-			if (upperBound != null) {
-				/*Predicate*/
-				gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), upperBound);
-				/*Predicate*/
-				lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
+			if (upperBoundInstant != null) {
+				gt = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound);
+				lt = theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);
+
+
 				if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE || theRange.getUpperBound().getPrefix() == ParamPrefixEnum.EQUAL) {
 					ub = lt;
 				} else {
@@ -198,8 +247,11 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			throw new InvalidRequestException(String.format("Unsupported operator specified, operator=%s",
 				operation.name()));
 		}
-
-		ourLog.trace("Date range is {} - {}", lowerBound, upperBound);
+		if (isOrdinalComparison) {
+			ourLog.trace("Ordinal date range is {} - {} ", lowerBoundAsOrdinal, upperBoundAsOrdinal);
+		} else {
+			ourLog.trace("Date range is {} - {}", lowerBoundInstant, upperBoundInstant);
+		}
 
 		if (lb != null && ub != null) {
 			return (theBuilder.and(lb, ub));

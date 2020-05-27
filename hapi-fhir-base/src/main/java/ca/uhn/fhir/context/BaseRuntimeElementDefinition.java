@@ -22,8 +22,11 @@ package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -33,11 +36,11 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	private final Class<? extends T> myImplementingClass;
 	private final String myName;
 	private final boolean myStandardType;
-	private Map<Class<?>, Constructor<T>> myConstructors = Collections.synchronizedMap(new HashMap<Class<?>, Constructor<T>>());
-	private List<RuntimeChildDeclaredExtensionDefinition> myExtensions = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
-	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
-	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsNonModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
-	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
+	private Map<Class<?>, Constructor<T>> myConstructors = Collections.synchronizedMap(new HashMap<>());
+	private List<RuntimeChildDeclaredExtensionDefinition> myExtensions = new ArrayList<>();
+	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsModifier = new ArrayList<>();
+	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsNonModifier = new ArrayList<>();
+	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<>();
 	private BaseRuntimeElementDefinition<?> myRootParentDefinition;
 
 	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
@@ -56,19 +59,21 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		myImplementingClass = theImplementingClass;
 	}
 
-	public void addExtension(RuntimeChildDeclaredExtensionDefinition theExtension) {
-		if (theExtension == null) {
-			throw new NullPointerException();
-		}
+	public void addExtension(@Nonnull RuntimeChildDeclaredExtensionDefinition theExtension) {
+		Validate.notNull(theExtension, "theExtension must not be null");
 		myExtensions.add(theExtension);
 	}
 
 	public abstract ChildTypeEnum getChildType();
 
-	@SuppressWarnings("unchecked")
-	private Constructor<T> getConstructor(Object theArgument) {
+	public List<BaseRuntimeChildDefinition> getChildren() {
+		return Collections.emptyList();
+	}
 
-		Class<? extends Object> argumentType;
+	@SuppressWarnings("unchecked")
+	private Constructor<T> getConstructor(@Nullable Object theArgument) {
+
+		Class<?> argumentType;
 		if (theArgument == null) {
 			argumentType = VOID_CLASS;
 		} else {
@@ -222,6 +227,10 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		 * defers the dealing process
 		 */
 
+	}
+
+	public BaseRuntimeChildDefinition getChildByName(String theChildName) {
+		return null;
 	}
 
 	public enum ChildTypeEnum {

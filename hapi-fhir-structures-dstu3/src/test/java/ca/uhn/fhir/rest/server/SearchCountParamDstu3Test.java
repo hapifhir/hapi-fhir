@@ -112,7 +112,6 @@ public class SearchCountParamDstu3Test {
 			assertEquals("searchWithNoCountParam", ourLastMethod);
 			assertEquals(null, ourLastParam);
 
-			//@formatter:off
 			assertThat(responseContent, stringContainsInOrder(
 				"<link>",
 				"<relation value=\"self\"/>",
@@ -122,7 +121,6 @@ public class SearchCountParamDstu3Test {
 				"<relation value=\"next\"/>",
 				"<url value=\"http://localhost:" + ourPort + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
 				"</link>"));
-			//@formatter:on
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

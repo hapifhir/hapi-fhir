@@ -20,18 +20,42 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.model.util.StringNormalizer;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.StringNormalizer;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.search.spatial.impl.Point;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -40,11 +64,21 @@ import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
@@ -59,6 +93,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private ModelConfig myModelConfig;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 	private Set<String> myIgnoredForSearchDatatypes;
 	private BaseRuntimeChildDefinition myQuantityValueValueChild;
 	private BaseRuntimeChildDefinition myQuantitySystemValueChild;
@@ -108,14 +144,25 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	/**
 	 * UNIT TEST constructor
 	 */
-	BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	BaseSearchParamExtractor(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+		Validate.notNull(theModelConfig);
+		Validate.notNull(theCtx);
+		Validate.notNull(theSearchParamRegistry);
+
+		myModelConfig = theModelConfig;
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	@Override
 	public SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource) {
-		IExtractor<PathAndRef> extractor = (params, searchParam, value, path) -> {
+		IExtractor<PathAndRef> extractor = createReferenceExtractor();
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
+	}
+
+	private IExtractor<PathAndRef> createReferenceExtractor() {
+		return (params, searchParam, value, path) -> {
 			if (value instanceof IBaseResource) {
 				return;
 			}
@@ -125,23 +172,29 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "uri":
 				case "canonical":
 					String typeName = toTypeName(value);
+					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) value;
+					IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
+					fakeReference.setReference(valuePrimitive.getValueAsString());
 
 					// Canonical has a root type of "uri"
 					if ("canonical".equals(typeName)) {
-						IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) value;
-						IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
-						fakeReference.setReference(valuePrimitive.getValueAsString());
 
 						/*
 						 * See #1583
 						 * Technically canonical fields should not allow local references (e.g.
 						 * Questionnaire/123) but it seems reasonable for us to interpret a canonical
-						 * containing a local reference for what it is, and allow people to seaerch
+						 * containing a local reference for what it is, and allow people to search
 						 * based on that.
 						 */
 						IIdType parsed = fakeReference.getReferenceElement();
 						if (parsed.hasIdPart() && parsed.hasResourceType() && !parsed.isAbsolute()) {
-							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference);
+							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference, false);
+							params.add(ref);
+							break;
+						}
+
+						if (parsed.isAbsolute()) {
+							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference, true);
 							params.add(ref);
 							break;
 						}
@@ -165,7 +218,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						return;
 					}
 
-					PathAndRef ref = new PathAndRef(searchParam.getName(), path, valueRef);
+					PathAndRef ref = new PathAndRef(searchParam.getName(), path, valueRef, false);
 					params.add(ref);
 					break;
 				default:
@@ -173,14 +226,83 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
 	}
 
+	@Override
+	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
+		IExtractor extractor;
+		switch(theSearchParam.getParamType()) {
+			case DATE:
+				extractor = createDateExtractor(theResource);
+				break;
+			case STRING:
+				extractor = createStringExtractor(theResource);
+				break;
+			case TOKEN:
+				extractor = createTokenExtractor(theResource);
+				break;
+			case NUMBER:
+				extractor = createNumberExtractor(theResource);
+				break;
+			case REFERENCE:
+				extractor = createReferenceExtractor();
+				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
+			case QUANTITY:
+				extractor = createQuantityExtractor(theResource);
+				break;
+			case URI:
+				extractor = createUriExtractor(theResource);
+				break;
+			case SPECIAL:
+				extractor = createSpecialExtractor(theResource.getIdElement().getResourceType());
+				break;
+			case COMPOSITE:
+			default:
+				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
+		}
+		return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
+	}
+
+	private List<String> extractReferenceParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<PathAndRef> theExtractor) {
+		SearchParamSet<PathAndRef> params = new SearchParamSet<>();
+		extractSearchParam(theSearchParam, theResource, theExtractor, params);
+		return refsToStringList(params);
+	}
+
+	private List<String> refsToStringList(SearchParamSet<PathAndRef> theParams) {
+		return theParams.stream()
+			.map(PathAndRef::getRef)
+			.map(ref -> ref.getReferenceElement().toUnqualifiedVersionless().getValue())
+			.collect(Collectors.toList());
+	}
+
+	private <T extends BaseResourceIndexedSearchParam> List<String> extractParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<T> theExtractor) {
+		SearchParamSet<T> params = new SearchParamSet<>();
+		extractSearchParam(theSearchParam, theResource, theExtractor, params);
+		return toStringList(params);
+	}
+
+	private <T extends BaseResourceIndexedSearchParam> List<String> toStringList(SearchParamSet<T> theParams) {
+		return theParams.stream()
+			.map(param -> param.toQueryParameterType().getValueAsQueryToken(myContext))
+			.collect(Collectors.toList());
+	}
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
+		IExtractor<BaseResourceIndexedSearchParam> extractor = createTokenExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
+	}
 
+	@Override
+	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, RuntimeSearchParam theSearchParam) {
+		IExtractor<BaseResourceIndexedSearchParam> extractor = createTokenExtractor(theResource);
+		SearchParamSet<BaseResourceIndexedSearchParam> setToPopulate = new SearchParamSet<>();
+		extractSearchParam(theSearchParam, theResource, extractor, setToPopulate);
+		return setToPopulate;
+	}
+
+	private IExtractor<BaseResourceIndexedSearchParam> createTokenExtractor(IBaseResource theResource) {
 		String resourceTypeName = toRootTypeName(theResource);
 		String useSystem;
 		if (getContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
@@ -198,99 +320,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
-		IExtractor<BaseResourceIndexedSearchParam> extractor = (params, searchParam, value, path) -> {
-
-			// DSTU3+
-			if (value instanceof IBaseEnumeration<?>) {
-				IBaseEnumeration<?> obj = (IBaseEnumeration<?>) value;
-				String system = extractSystem(obj);
-				String code = obj.getValueAsString();
-				createTokenIndexIfNotBlank(resourceTypeName, params, searchParam, system, code);
-				return;
-			}
-
-			// DSTU2 only
-			if (value instanceof BoundCodeDt) {
-				BoundCodeDt boundCode = (BoundCodeDt) value;
-				Enum valueAsEnum = boundCode.getValueAsEnum();
-				String system = null;
-				if (valueAsEnum != null) {
-					//noinspection unchecked
-					system = boundCode.getBinder().toSystemString(valueAsEnum);
-				}
-				String code = boundCode.getValueAsString();
-				createTokenIndexIfNotBlank(resourceTypeName, params, searchParam, system, code);
-				return;
-			}
-
-			if (value instanceof IPrimitiveType) {
-				IPrimitiveType<?> nextValue = (IPrimitiveType<?>) value;
-				String systemAsString = null;
-				String valueAsString = nextValue.getValueAsString();
-				if ("CodeSystem.concept.code".equals(path)) {
-					systemAsString = useSystem;
-				} else if ("ValueSet.codeSystem.concept.code".equals(path)) {
-					systemAsString = useSystem;
-				}
-
-				createTokenIndexIfNotBlank(resourceTypeName, params, searchParam, systemAsString, valueAsString);
-				return;
-			}
-
-			switch (path) {
-				case "Patient.communication":
-					addToken_PatientCommunication(resourceTypeName, params, searchParam, value);
-					return;
-				case "Consent.source":
-					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
-					return;
-				case "Location.position":
-					addCoords_Position(resourceTypeName, params, searchParam, value);
-					return;
-				case "StructureDefinition.context":
-					// TODO: implement this
-					ourLog.warn("StructureDefinition context indexing not currently supported");
-					return;
-				case "CapabilityStatement.rest.security":
-					addToken_CapabilityStatementRestSecurity(resourceTypeName, params, searchParam, value);
-					return;
-			}
-
-			String nextType = toRootTypeName(value);
-			switch (nextType) {
-				case "Identifier":
-					addToken_Identifier(resourceTypeName, params, searchParam, value);
-					break;
-				case "CodeableConcept":
-					addToken_CodeableConcept(resourceTypeName, params, searchParam, value);
-					break;
-				case "Coding":
-					addToken_Coding(resourceTypeName, params, searchParam, value);
-					break;
-				case "ContactPoint":
-					addToken_ContactPoint(resourceTypeName, params, searchParam, value);
-					break;
-				default:
-					addUnexpectedDatatypeWarning(params, searchParam, value);
-					break;
-			}
-		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
+		return new TokenExtractor(resourceTypeName, useSystem);
 	}
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource) {
-
 		String resourceTypeName = toRootTypeName(theResource);
+		IExtractor<BaseResourceIndexedSearchParam> extractor = createSpecialExtractor(resourceTypeName);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL);
+	}
 
-		IExtractor<BaseResourceIndexedSearchParam> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<BaseResourceIndexedSearchParam> createSpecialExtractor(String theResourceTypeName) {
+		return (params, searchParam, value, path) -> {
 			if ("Location.position".equals(path)) {
-				addCoords_Position(resourceTypeName, params, searchParam, value);
+				addCoords_Position(theResourceTypeName, params, searchParam, value);
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL);
 	}
 
 
@@ -300,7 +345,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamUri> extractor = (params, searchParam, value, path) -> {
+		IExtractor<ResourceIndexedSearchParamUri> extractor = createUriExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamUri> createUriExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -316,13 +366,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamDate> extractor = (params, searchParam, value, path) -> {
+		IExtractor<ResourceIndexedSearchParamDate> extractor = createDateExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamDate> createDateExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -345,14 +398,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE);
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
+		IExtractor<ResourceIndexedSearchParamNumber> extractor = createNumberExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER);
+	}
 
-		IExtractor<ResourceIndexedSearchParamNumber> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<ResourceIndexedSearchParamNumber> createNumberExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -375,14 +430,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER);
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
+		IExtractor<ResourceIndexedSearchParamQuantity> extractor = createQuantityExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
+	}
 
-		IExtractor<ResourceIndexedSearchParamQuantity> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				return;
 			}
@@ -404,13 +461,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamString> extractor = (params, searchParam, value, path) -> {
+		IExtractor<ResourceIndexedSearchParamString> extractor = createStringExtractor(theResource);
+
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamString> createStringExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String resourceType = toRootTypeName(theResource);
 
 			if (value instanceof IPrimitiveType) {
@@ -442,8 +503,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING);
 	}
 
 	/**
@@ -515,7 +574,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String system = extractValueAsString(myQuantitySystemValueChild, theValue);
 			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
 
-			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(theResourceType, theSearchParam.getName(), nextValueValue, system, code);
+			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(myPartitionSettings, theResourceType, theSearchParam.getName(), nextValueValue, system, code);
 			theParams.add(nextEntity);
 		}
 
@@ -530,7 +589,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String nextValueString = "urn:iso:std:iso:4217";
 			String nextValueCode = extractValueAsString(myMoneyCurrencyChild, theValue);
 			String searchParamName = theSearchParam.getName();
-			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(theResourceType, searchParamName, nextValueValue, nextValueString, nextValueCode);
+			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(myPartitionSettings, theResourceType, searchParamName, nextValueValue, nextValueString, nextValueCode);
 			theParams.add(nextEntity);
 		}
 
@@ -552,12 +611,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
 		}
 
-		Optional<IBase> type = myIdentifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
-		if (type.isPresent()) {
-			String text = extractValueAsString(myIdentifierTypeTextValueChild, type.get());
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		if (shouldIndexTextComponentOfToken(theSearchParam)) {
+			Optional<IBase> type = myIdentifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
+			if (type.isPresent()) {
+				String text = extractValueAsString(myIdentifierTypeTextValueChild, type.get());
+				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+			}
 		}
 
+	}
+
+	protected boolean shouldIndexTextComponentOfToken(RuntimeSearchParam theSearchParam) {
+		return tokenTextIndexingEnabledForSearchParam(myModelConfig, theSearchParam);
 	}
 
 	private void addToken_CodeableConcept(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -566,9 +631,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			addToken_Coding(theResourceType, theParams, theSearchParam, nextCoding);
 		}
 
-		String text = extractValueAsString(myCodeableConceptTextValueChild, theValue);
-		if (isNotBlank(text)) {
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		if (shouldIndexTextComponentOfToken(theSearchParam)) {
+			String text = extractValueAsString(myCodeableConceptTextValueChild, theValue);
+			if (isNotBlank(text)) {
+				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+			}
 		}
 	}
 
@@ -577,8 +644,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		String code = extractValueAsString(myCodingCodeValueChild, theValue);
 		createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, code);
 
-		String text = extractValueAsString(myCodingDisplayValueChild, theValue);
-		createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		if (shouldIndexTextComponentOfToken(theSearchParam)) {
+			String text = extractValueAsString(myCodingDisplayValueChild, theValue);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		}
 	}
 
 	private void addToken_ContactPoint(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -605,9 +674,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
 		String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
 		Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
+		String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
 
 		if (start != null || end != null) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), start, end, startAsString);
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
 			theParams.add(nextEntity);
 		}
 	}
@@ -616,13 +686,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
 
 		TreeSet<Date> dates = new TreeSet<>();
+		TreeSet<String> dateStrings = new TreeSet<>();
 		String firstValue = null;
+		String finalValue = null;
 		for (IPrimitiveType<Date> nextEvent : values) {
 			if (nextEvent.getValue() != null) {
 				dates.add(nextEvent.getValue());
 				if (firstValue == null) {
 					firstValue = nextEvent.getValueAsString();
 				}
+				finalValue = nextEvent.getValueAsString();
 			}
 		}
 
@@ -634,14 +707,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if ("Period".equals(boundsType)) {
 					Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
 					Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
+					String endString = extractValueAsString(myPeriodEndValueChild, bounds.get());
 					dates.add(start);
 					dates.add(end);
+					//TODO Check if this logic is valid. Does the start of the first period indicate a lower bound??
+					if (firstValue == null) {
+						firstValue = extractValueAsString(myPeriodStartValueChild, bounds.get());
+					}
+					finalValue = endString;
 				}
 			}
 		}
 
 		if (!dates.isEmpty()) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), dates.first(), dates.last(), firstValue);
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), dates.first(), firstValue, dates.last(), finalValue, firstValue);
 			theParams.add(nextEntity);
 		}
 	}
@@ -652,7 +731,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		BigDecimal value = extractValueAsBigDecimal(myDurationValueValueChild, theValue);
 		if (value != null) {
 			value = normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(system, code, value);
-			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), value);
+			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(myPartitionSettings, theResourceType, theSearchParam.getName(), value);
 			theParams.add(nextEntity);
 		}
 	}
@@ -663,7 +742,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String system = extractValueAsString(myQuantitySystemValueChild, theValue);
 			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
 			value = normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(system, code, value);
-			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), value);
+			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(myPartitionSettings, theResourceType, theSearchParam.getName(), value);
 			theParams.add(nextEntity);
 		}
 	}
@@ -673,7 +752,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>) theValue;
 		if (value.getValue() != null) {
 			BigDecimal valueDecimal = new BigDecimal(value.getValue());
-			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), valueDecimal);
+			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(myPartitionSettings, theResourceType, theSearchParam.getName(), valueDecimal);
 			theParams.add(nextEntity);
 		}
 
@@ -684,7 +763,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>) theValue;
 		if (value.getValue() != null) {
 			BigDecimal valueDecimal = value.getValue();
-			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), valueDecimal);
+			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(myPartitionSettings, theResourceType, theSearchParam.getName(), valueDecimal);
 			theParams.add(nextEntity);
 		}
 
@@ -711,7 +790,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if (latitude != null && longitude != null) {
 			double normalizedLatitude = Point.normalizeLatitude(latitude.doubleValue());
 			double normalizedLongitude = Point.normalizeLongitude(longitude.doubleValue());
-			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(theResourceType, theSearchParam.getName(), normalizedLatitude, normalizedLongitude);
+			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(myPartitionSettings, theResourceType, theSearchParam.getName(), normalizedLatitude, normalizedLongitude);
 			theParams.add(nextEntity);
 		}
 	}
@@ -782,7 +861,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	}
 
-
 	private <T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
@@ -792,25 +870,29 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				continue;
 			}
 
-			String nextPathUnsplit = nextSpDef.getPath();
-			if (isBlank(nextPathUnsplit)) {
-				continue;
-			}
+			extractSearchParam(nextSpDef, theResource, theExtractor, retVal);
+		}
+		return retVal;
+	}
 
-			String[] splitPaths = split(nextPathUnsplit);
-			for (String nextPath : splitPaths) {
-				nextPath = trim(nextPath);
-				for (IBase nextObject : extractValues(nextPath, theResource)) {
-					if (nextObject != null) {
-						String typeName = toRootTypeName(nextObject);
-						if (!myIgnoredForSearchDatatypes.contains(typeName)) {
-							theExtractor.extract(retVal, nextSpDef, nextObject, nextPath);
-						}
+	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBaseResource theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate) {
+		String nextPathUnsplit = theSearchParameterDef.getPath();
+		if (isBlank(nextPathUnsplit)) {
+			return;
+		}
+
+		String[] splitPaths = split(nextPathUnsplit);
+		for (String nextPath : splitPaths) {
+			nextPath = trim(nextPath);
+			for (IBase nextObject : extractValues(nextPath, theResource)) {
+				if (nextObject != null) {
+					String typeName = toRootTypeName(nextObject);
+					if (!myIgnoredForSearchDatatypes.contains(typeName)) {
+						theExtractor.extract(theSetToPopulate, theSearchParameterDef, nextObject, nextPath);
 					}
 				}
 			}
 		}
-		return retVal;
 	}
 
 	private String toRootTypeName(IBase nextObject) {
@@ -828,17 +910,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void addDateTimeTypes(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		IPrimitiveType<Date> nextBaseDateTime = (IPrimitiveType<Date>) theValue;
 		if (nextBaseDateTime.getValue() != null) {
-			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString());
+			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValueAsString());
 			theParams.add(param);
 		}
 	}
-
 
 	private void addUri_Uri(String theResourceType, Set<ResourceIndexedSearchParamUri> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		IPrimitiveType<?> value = (IPrimitiveType<?>) theValue;
 		String valueAsString = value.getValueAsString();
 		if (isNotBlank(valueAsString)) {
-			ResourceIndexedSearchParamUri nextEntity = new ResourceIndexedSearchParamUri(theResourceType, theSearchParam.getName(), valueAsString);
+			ResourceIndexedSearchParamUri nextEntity = new ResourceIndexedSearchParamUri(myPartitionSettings, theResourceType, theSearchParam.getName(), valueAsString);
 			theParams.add(nextEntity);
 		}
 	}
@@ -852,12 +933,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			String searchParamName = theSearchParam.getName();
-			String valueNormalized = StringNormalizer.normalizeString(value);
+			String valueNormalized = StringNormalizer.normalizeStringForSearchIndexing(value);
 			if (valueNormalized.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
 				valueNormalized = valueNormalized.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 			}
 
-			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), theResourceType, searchParamName, valueNormalized, value);
+			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getModelConfig(), theResourceType, searchParamName, valueNormalized, value);
 
 			Set params = theParams;
 			params.add(nextEntity);
@@ -876,7 +957,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			ResourceIndexedSearchParamToken nextEntity;
-			nextEntity = new ResourceIndexedSearchParamToken(theResourceType, theSearchParam.getName(), system, value);
+			nextEntity = new ResourceIndexedSearchParamToken(myPartitionSettings, theResourceType, theSearchParam.getName(), system, value);
 			theParams.add(nextEntity);
 		}
 	}
@@ -1026,6 +1107,118 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	}
 
+	private class TokenExtractor implements IExtractor<BaseResourceIndexedSearchParam> {
+		private final String myResourceTypeName;
+		private final String myUseSystem;
+
+		public TokenExtractor(String theResourceTypeName, String theUseSystem) {
+			myResourceTypeName = theResourceTypeName;
+			myUseSystem = theUseSystem;
+		}
+
+		@Override
+		public void extract(SearchParamSet<BaseResourceIndexedSearchParam> params, RuntimeSearchParam searchParam, IBase value, String path) {
+
+			// DSTU3+
+			if (value instanceof IBaseEnumeration<?>) {
+				IBaseEnumeration<?> obj = (IBaseEnumeration<?>) value;
+				String system = extractSystem(obj);
+				String code = obj.getValueAsString();
+				BaseSearchParamExtractor.this.createTokenIndexIfNotBlank(myResourceTypeName, params, searchParam, system, code);
+				return;
+			}
+
+			// DSTU2 only
+			if (value instanceof BoundCodeDt) {
+				BoundCodeDt boundCode = (BoundCodeDt) value;
+				Enum valueAsEnum = boundCode.getValueAsEnum();
+				String system = null;
+				if (valueAsEnum != null) {
+					//noinspection unchecked
+					system = boundCode.getBinder().toSystemString(valueAsEnum);
+				}
+				String code = boundCode.getValueAsString();
+				BaseSearchParamExtractor.this.createTokenIndexIfNotBlank(myResourceTypeName, params, searchParam, system, code);
+				return;
+			}
+
+			if (value instanceof IPrimitiveType) {
+				IPrimitiveType<?> nextValue = (IPrimitiveType<?>) value;
+				String systemAsString = null;
+				String valueAsString = nextValue.getValueAsString();
+				if ("CodeSystem.concept.code".equals(path)) {
+					systemAsString = myUseSystem;
+				} else if ("ValueSet.codeSystem.concept.code".equals(path)) {
+					systemAsString = myUseSystem;
+				}
+
+				if (value instanceof IIdType) {
+					valueAsString = ((IIdType) value).getIdPart();
+				}
+
+				BaseSearchParamExtractor.this.createTokenIndexIfNotBlank(myResourceTypeName, params, searchParam, systemAsString, valueAsString);
+				return;
+			}
+
+			switch (path) {
+				case "Patient.communication":
+					BaseSearchParamExtractor.this.addToken_PatientCommunication(myResourceTypeName, params, searchParam, value);
+					return;
+				case "Consent.source":
+					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
+					return;
+				case "Location.position":
+					BaseSearchParamExtractor.this.addCoords_Position(myResourceTypeName, params, searchParam, value);
+					return;
+				case "StructureDefinition.context":
+					// TODO: implement this
+					ourLog.warn("StructureDefinition context indexing not currently supported");
+					return;
+				case "CapabilityStatement.rest.security":
+					BaseSearchParamExtractor.this.addToken_CapabilityStatementRestSecurity(myResourceTypeName, params, searchParam, value);
+					return;
+			}
+
+			String nextType = BaseSearchParamExtractor.this.toRootTypeName(value);
+			switch (nextType) {
+				case "Identifier":
+					BaseSearchParamExtractor.this.addToken_Identifier(myResourceTypeName, params, searchParam, value);
+					break;
+				case "CodeableConcept":
+					BaseSearchParamExtractor.this.addToken_CodeableConcept(myResourceTypeName, params, searchParam, value);
+					break;
+				case "Coding":
+					BaseSearchParamExtractor.this.addToken_Coding(myResourceTypeName, params, searchParam, value);
+					break;
+				case "ContactPoint":
+					BaseSearchParamExtractor.this.addToken_ContactPoint(myResourceTypeName, params, searchParam, value);
+					break;
+				default:
+					BaseSearchParamExtractor.this.addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
+			}
+		}
+	}
+
+	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
+		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
+			.map(IBaseExtension::getValue)
+			.map(val -> (IPrimitiveType<?>) val)
+			.map(IPrimitiveType::getValueAsString)
+			.map(Boolean::parseBoolean)
+			.findFirst();
+
+		//if the SP doesn't care, use the system default.
+		if (!noSuppressForSearchParam.isPresent()) {
+			return !theModelConfig.isSuppressStringIndexingInTokens();
+			//If the SP does care, use its value.
+		} else {
+			boolean suppressForSearchParam = noSuppressForSearchParam.get();
+			ourLog.trace("Text indexing for SearchParameter {}: {}", theSearchParam.getName(), suppressForSearchParam);
+			return !suppressForSearchParam;
+		}
+	}
+
 	private static void addIgnoredType(FhirContext theCtx, String theType, Set<String> theIgnoredTypes) {
 		BaseRuntimeElementDefinition<?> elementDefinition = theCtx.getElementDefinition(theType);
 		if (elementDefinition != null) {
@@ -1037,7 +1230,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<?>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValueAsString())
+			.map(IPrimitiveType::getValueAsString)
 			.orElse(null);
 	}
 
@@ -1045,7 +1238,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<Date>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValue())
+			.map(IPrimitiveType::getValue)
 			.orElse(null);
 	}
 
@@ -1053,7 +1246,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<BigDecimal>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValue())
+			.map(IPrimitiveType::getValue)
 			.orElse(null);
 	}
 
@@ -1070,8 +1263,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.getValues(theValue)
 			.stream()
 			.map(t -> (IPrimitiveType) t)
-			.map(t -> t.getValueAsString())
-			.filter(t -> isNotBlank(t))
+			.map(IPrimitiveType::getValueAsString)
+			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toList());
 	}
 

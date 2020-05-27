@@ -287,20 +287,21 @@ public class XmlParser extends BaseParser {
 					for (IBaseResource next : getContainedResources().getContainedResources()) {
 						IIdType resourceId = getContainedResources().getResourceId(next);
 						theEventWriter.writeStartElement("contained");
-						encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(resourceId.getValue()), theEncodeContext);
+						String value = resourceId.getValue();
+						encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(value), theEncodeContext);
 						theEventWriter.writeEndElement();
 					}
 					break;
 				}
 				case RESOURCE: {
 					IBaseResource resource = (IBaseResource) theElement;
-					String resourceName = myContext.getResourceDefinition(resource).getName();
+					String resourceName = myContext.getResourceType(resource);
 					if (!super.shouldEncodeResource(resourceName)) {
 						break;
 					}
 					theEventWriter.writeStartElement(theChildName);
 					theEncodeContext.pushPath(resourceName, true);
-					encodeResourceToXmlStreamWriter(resource, theEventWriter, false, theEncodeContext);
+					encodeResourceToXmlStreamWriter(resource, theEventWriter, theIncludedResource, theEncodeContext);
 					theEncodeContext.popPath();
 					theEventWriter.writeEndElement();
 					break;

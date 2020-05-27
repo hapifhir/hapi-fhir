@@ -15,10 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.dstu3.model.Location;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -456,45 +456,33 @@ public class SearchParameterMap implements Serializable {
 		return b.toString();
 	}
 
+
 	public void clean() {
 		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : this.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
-			clean(nextParamName, andOrParams);
+			cleanParameter(nextParamName, andOrParams);
 		}
 	}
 
 	/*
-	 * Filter out
+	 * Given a particular named parameter, e.g. `name`, iterate over AndOrParams and remove any which are empty.
 	 */
-	private void clean(String theParamName, List<List<IQueryParameterType>> theAndOrParams) {
-		for (int andListIdx = 0; andListIdx < theAndOrParams.size(); andListIdx++) {
-			List<? extends IQueryParameterType> nextOrList = theAndOrParams.get(andListIdx);
+	private void cleanParameter(String theParamName, List<List<IQueryParameterType>> theAndOrParams) {
+		theAndOrParams
+			.forEach(
+				orList -> {
+					List<IQueryParameterType> emptyParameters = orList.stream()
+						.filter(nextOr -> nextOr.getMissing() == null)
+						.filter(nextOr -> nextOr instanceof QuantityParam)
+						.filter(nextOr -> isBlank(((QuantityParam) nextOr).getValueAsString()))
+						.collect(Collectors.toList());
 
-			for (int orListIdx = 0; orListIdx < nextOrList.size(); orListIdx++) {
-				IQueryParameterType nextOr = nextOrList.get(orListIdx);
-				boolean hasNoValue = false;
-				if (nextOr.getMissing() != null) {
-					continue;
-				}
-				if (nextOr instanceof QuantityParam) {
-					if (isBlank(((QuantityParam) nextOr).getValueAsString())) {
-						hasNoValue = true;
-					}
-				}
-
-				if (hasNoValue) {
 					ourLog.debug("Ignoring empty parameter: {}", theParamName);
-					nextOrList.remove(orListIdx);
-					orListIdx--;
+					orList.removeAll(emptyParameters);
 				}
-			}
-
-			if (nextOrList.isEmpty()) {
-				theAndOrParams.remove(andListIdx);
-				andListIdx--;
-			}
-		}
+			);
+		theAndOrParams.removeIf(List::isEmpty);
 	}
 
 	public void setNearDistanceParam(QuantityParam theQuantityParam) {
@@ -503,30 +491,6 @@ public class SearchParameterMap implements Serializable {
 
 	public QuantityParam getNearDistanceParam() {
 		return myNearDistanceParam;
-	}
-
-	public void setLocationDistance() {
-		if (containsKey(Location.SP_NEAR_DISTANCE)) {
-			List<List<IQueryParameterType>> paramAndList = get(Location.SP_NEAR_DISTANCE);
-
-			if (paramAndList.isEmpty()) {
-				return;
-			}
-			if (paramAndList.size() > 1) {
-				throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
-			}
-			List<IQueryParameterType> paramOrList =  paramAndList.get(0);
-			if (paramOrList.isEmpty()) {
-				return;
-			}
-			if (paramOrList.size() > 1) {
-				throw new IllegalArgumentException("Only one " + ca.uhn.fhir.model.dstu2.resource.Location.SP_NEAR_DISTANCE + " parameter may be present");
-			}
-			setNearDistanceParam((QuantityParam) paramOrList.get(0));
-
-			// Need to remove near-distance or it we'll get a hashcode predicate for it
-			remove(Location.SP_NEAR_DISTANCE);
-		}
 	}
 
 	public enum EverythingModeEnum {
@@ -675,4 +639,18 @@ public class SearchParameterMap implements Serializable {
 	public int size() {
 		return mySearchParameterMap.size();
 	}
+
+	public static SearchParameterMap newSynchronous() {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		return retVal;
+	}
+
+	public static SearchParameterMap newSynchronous(String theName, IQueryParameterType theParam) {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		retVal.add(theName, theParam);
+		return retVal;
+	}
+
 }

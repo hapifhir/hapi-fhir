@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import com.google.common.annotations.VisibleForTesting;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfoService;
+import org.flywaydb.core.api.callback.Callback;
 import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +65,6 @@ public class FlywayMigrator extends BaseMigrator {
 			if (isDryRun()) {
 				StringBuilder statementBuilder = buildExecutedStatementsString();
 				ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
-			} else {
-				ourLog.info("Schema migrated successfully.");
 			}
 		} catch (Exception e) {
 			throw e;
@@ -78,6 +78,7 @@ public class FlywayMigrator extends BaseMigrator {
 			.baselineOnMigrate(true)
 			.outOfOrder(isOutOfOrderPermitted())
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
+			.callbacks(getCallbacks().toArray(new Callback[0]))
 			.load();
 		for (FlywayMigration task : myTasks) {
 			task.setConnectionProperties(theConnectionProperties);
@@ -87,7 +88,11 @@ public class FlywayMigrator extends BaseMigrator {
 
 	@Override
 	public void addTasks(List<BaseTask> theTasks) {
-		theTasks.forEach(this::addTask);
+		if ("true".equals(System.getProperty("unit_test_mode"))) {
+			theTasks.stream().filter(task -> task instanceof InitializeSchemaTask).forEach(this::addTask);
+		} else {
+			theTasks.forEach(this::addTask);
+		}
 	}
 
 	@Override

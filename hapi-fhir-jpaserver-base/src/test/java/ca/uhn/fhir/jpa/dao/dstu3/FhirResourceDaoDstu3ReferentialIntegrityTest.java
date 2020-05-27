@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
@@ -24,7 +24,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 	}
 
 	@Test
-	public void testCreateUnknownReferenceFail() throws Exception {
+	public void testCreateUnknownReferenceFail() {
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("Organization/AAA"));

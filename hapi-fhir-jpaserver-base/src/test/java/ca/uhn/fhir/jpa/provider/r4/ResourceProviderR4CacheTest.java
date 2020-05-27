@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -9,20 +9,29 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4CacheTest.class);
 	private CapturingInterceptor myCapturingInterceptor;
 	@Autowired
 	private ISearchDao mySearchEntityDao;
@@ -182,6 +191,39 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		assertEquals("HIT from " + ourServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
 		assertEquals(results1.getMeta().getLastUpdated(), results2.getMeta().getLastUpdated());
 		assertEquals(results1.getId(), results2.getId());
+	}
+
+	@Test
+	public void testDeletedSearchResultsNotReturnedFromCache() {
+		Patient p = new Patient();
+		p.addName().setFamily("Foo");
+		String p1Id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		p = new Patient();
+		p.addName().setFamily("Foo");
+		String p2Id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle resp1 = ourClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("foo"))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(2, resp1.getEntry().size());
+
+		ourClient.delete().resourceById(new IdType(p1Id)).execute();
+
+		Bundle resp2 = ourClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("foo"))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(resp1.getId(), resp2.getId());
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
+		assertEquals(1, resp2.getEntry().size());
 	}
 
 	@AfterClass

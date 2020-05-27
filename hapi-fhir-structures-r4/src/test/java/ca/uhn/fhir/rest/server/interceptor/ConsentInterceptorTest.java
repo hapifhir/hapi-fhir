@@ -30,7 +30,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -43,11 +47,16 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-//import static org.hamcrest.Matchers.any;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConsentInterceptorTest {
@@ -201,12 +210,13 @@ public class ConsentInterceptorTest {
 			assertThat(responseContent, containsString("A DIAG"));
 		}
 
-		verify(myConsentSvc, times(1)).startOperation(any(), any());
-		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
-		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verify(myConsentSvc, timeout(10000).times(1)).startOperation(any(), any());
+		verify(myConsentSvc, timeout(10000).times(2)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, timeout(10000).times(3)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc, timeout(10000).times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, timeout(10000).times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
+
 	}
 
 	@Test
@@ -241,6 +251,7 @@ public class ConsentInterceptorTest {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
+		reset(myConsentSvc);
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
@@ -266,10 +277,10 @@ public class ConsentInterceptorTest {
 			assertEquals("PTB", response.getEntry().get(1).getResource().getIdElement().getIdPart());
 		}
 
-		verify(myConsentSvc, times(1)).startOperation(any(), any());
-		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, timeout(1000).times(1)).startOperation(any(), any());
+		verify(myConsentSvc, timeout(1000).times(2)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, timeout(1000).times(3)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc, timeout(1000).times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
 	}

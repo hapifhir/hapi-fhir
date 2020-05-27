@@ -21,7 +21,9 @@ package ca.uhn.fhir.igpacks.parser;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -35,45 +37,27 @@ import java.util.Map;
 
 public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	private final Map<IIdType, IBaseResource> myIgResources;
+	private FhirContext myCtx;
 
-	public IgPackValidationSupportDstu3(Map<IIdType, IBaseResource> theIgResources) {
+	public IgPackValidationSupportDstu3(FhirContext theCtx, Map<IIdType, IBaseResource> theIgResources) {
 		myIgResources = theIgResources;
+		myCtx = theCtx;
 	}
 
-	@Override
-	public ValueSet.ValueSetExpansionComponent expandValueSet(FhirContext theContext, ValueSet.ConceptSetComponent theInclude) {
-		return null;
-	}
 
 	@Override
-	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+	public List<IBaseResource> fetchAllConformanceResources() {
 		return new ArrayList<>(myIgResources.values());
 	}
 
 
 	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		ArrayList<StructureDefinition> retVal = new ArrayList<>();
-		for (Map.Entry<IIdType, IBaseResource> next : myIgResources.entrySet()) {
-			if (next.getKey().getResourceType().equals("StructureDefinition")) {
-				retVal.add((StructureDefinition) next.getValue());
-			}
-		}
-		return retVal;
+	public ValueSet fetchValueSet(String theSystem) {
+		return fetchResource(ValueSet.class, theSystem);
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return fetchResource(theContext, CodeSystem.class, theSystem);
-	}
-
-	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return fetchResource(theContext, ValueSet.class, theSystem);
-	}
-
-	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		for (Map.Entry<IIdType, IBaseResource> next : myIgResources.entrySet()) {
 			if (theClass.equals(CodeSystem.class)) {
 				if (theClass.isAssignableFrom(next.getValue().getClass())) {
@@ -113,27 +97,28 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		return fetchResource(theCtx, StructureDefinition.class, theUrl);
+	public StructureDefinition fetchStructureDefinition(String theUrl) {
+		return fetchResource(StructureDefinition.class, theUrl);
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		return false;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return null;
 	}
 
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
-		return null;
+	public FhirContext getFhirContext() {
+		return myCtx;
 	}
+
 }

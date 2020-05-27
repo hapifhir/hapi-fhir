@@ -22,7 +22,14 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class Constants {
 
@@ -142,6 +149,8 @@ public class Constants {
 	 */
 	public static final String PARAM_BUNDLETYPE = "_bundletype";
 	public static final String PARAM_FILTER = "_filter";
+	public static final String PARAM_CONTAINED = "_contained";
+	public static final String PARAM_CONTAINED_TYPE = "_containedType";
 	public static final String PARAM_CONTENT = "_content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
@@ -252,7 +261,15 @@ public class Constants {
 	 * </p>
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
-	public static final String CODESYSTEM_VALIDATE_NOT_NEEDED = UUID.randomUUID().toString();
+	public static final String PARAM_FHIRPATH = "_fhirpath";
+	public static final String PARAM_TYPE = "_type";
+
+	/**
+	 * {@link org.hl7.fhir.instance.model.api.IBaseResource#getUserData(String) User metadata key} used
+	 * to store the partition ID (if any) associated with the given resource. Value for this
+	 * key will be of type {@link ca.uhn.fhir.interceptor.model.RequestPartitionId}.
+	 */
+	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
@@ -354,16 +371,7 @@ public class Constants {
 		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
 
-	public static boolean codeSystemNotNeeded(String theCodeSystem) {
-		return Constants.CODESYSTEM_VALIDATE_NOT_NEEDED.equals(theCodeSystem);
-	}
-
-
 	public static String codeSystemWithDefaultDescription(String theSystem) {
-		if (codeSystemNotNeeded(theSystem)) {
-			return "(none)";
-		} else {
-			return theSystem;
-		}
+		return defaultIfBlank(theSystem, "(none)");
 	}
 }

@@ -1,13 +1,49 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR5Config;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
+import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -15,26 +51,24 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -42,13 +76,60 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.AllergyIntolerance;
+import org.hl7.fhir.r5.model.Appointment;
+import org.hl7.fhir.r5.model.AuditEvent;
+import org.hl7.fhir.r5.model.Binary;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CarePlan;
+import org.hl7.fhir.r5.model.ChargeItem;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Communication;
+import org.hl7.fhir.r5.model.CommunicationRequest;
+import org.hl7.fhir.r5.model.CompartmentDefinition;
+import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r5.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r5.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.r5.model.Condition;
+import org.hl7.fhir.r5.model.Consent;
+import org.hl7.fhir.r5.model.Coverage;
+import org.hl7.fhir.r5.model.Device;
+import org.hl7.fhir.r5.model.DiagnosticReport;
+import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Group;
+import org.hl7.fhir.r5.model.Immunization;
+import org.hl7.fhir.r5.model.ImmunizationRecommendation;
+import org.hl7.fhir.r5.model.Location;
+import org.hl7.fhir.r5.model.Medication;
+import org.hl7.fhir.r5.model.MedicationAdministration;
+import org.hl7.fhir.r5.model.MedicationRequest;
+import org.hl7.fhir.r5.model.Meta;
+import org.hl7.fhir.r5.model.MolecularSequence;
+import org.hl7.fhir.r5.model.NamingSystem;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.OperationDefinition;
+import org.hl7.fhir.r5.model.Organization;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Practitioner;
+import org.hl7.fhir.r5.model.PractitionerRole;
+import org.hl7.fhir.r5.model.Procedure;
+import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.QuestionnaireResponse;
+import org.hl7.fhir.r5.model.RiskAssessment;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.ServiceRequest;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.Subscription;
+import org.hl7.fhir.r5.model.Substance;
+import org.hl7.fhir.r5.model.Task;
+import org.hl7.fhir.r5.model.UriType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -76,7 +157,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR5Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest {
-	private static JpaValidationSupportChainR5 ourJpaValidationSupportChainR5;
+	private static IValidationSupport ourJpaValidationSupportChainR5;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
@@ -296,7 +377,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChainR5")
+	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
@@ -317,7 +398,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
-	private JpaValidationSupportChainR5 myJpaValidationSupportChainR5;
+	private IValidationSupport myJpaValidationSupportChain;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
 	@Autowired
@@ -359,7 +440,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
-		ourJpaValidationSupportChainR5 = myJpaValidationSupportChainR5;
+		ourJpaValidationSupportChainR5 = myJpaValidationSupportChain;
 	}
 
 	@Before
@@ -440,7 +521,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR5Test() {
 		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR5.flush();
+		ourJpaValidationSupportChainR5.invalidateCaches();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
@@ -495,13 +576,13 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
-		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
 
 		// Add a duplicate
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
-		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
 
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL);
@@ -521,7 +602,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("67890");
 		target.setDisplay("Target Code 67890");
-		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
 
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL_4);
@@ -536,7 +617,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
-		target.setRelationship(Enumerations.ConceptMapRelationship.NARROWER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISNARROWERTHANTARGET);
 
 		return conceptMap;
 	}

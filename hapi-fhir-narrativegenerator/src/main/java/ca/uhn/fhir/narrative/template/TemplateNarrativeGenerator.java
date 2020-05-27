@@ -28,7 +28,7 @@ public class TemplateNarrativeGenerator implements INarrativeGenerator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TemplateNarrativeGenerator.class);
 
 	private FhirContext myFhirContext = FhirContext.forDstu3();
-	private IValidationSupport myValidationSupport = new DefaultProfileValidationSupport();
+	private IContextValidationSupport myValidationSupport = new DefaultProfileValidationSupport();
 	
 	@Override
 	public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {

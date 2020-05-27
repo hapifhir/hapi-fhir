@@ -24,50 +24,63 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class SimplePreResourceShowDetails implements IPreResourceShowDetails, Iterable<IBaseResource> {
+public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 
-	private final List<IBaseResource> myResources;
-	private final boolean[] mySubSets;
+	private static final IBaseResource[] EMPTY_RESOURCE_ARRAY = new IBaseResource[0];
 
+	private final IBaseResource[] myResources;
+	private final boolean[] myResourceMarkedAsSubset;
+
+	/**
+	 * Constructor for a single resource
+	 */
 	public SimplePreResourceShowDetails(IBaseResource theResource) {
 		this(Lists.newArrayList(theResource));
 	}
 
-	public <T extends IBaseResource> SimplePreResourceShowDetails(List<T> theResources) {
-		//noinspection unchecked
-		myResources = (List<IBaseResource>) theResources;
-		mySubSets = new boolean[myResources.size()];
+	/**
+	 * Constructor for a collection of resources
+	 */
+	public <T extends IBaseResource> SimplePreResourceShowDetails(Collection<T> theResources) {
+		myResources = theResources.toArray(EMPTY_RESOURCE_ARRAY);
+		myResourceMarkedAsSubset = new boolean[myResources.length];
 	}
 
 	@Override
 	public int size() {
-		return myResources.size();
+		return myResources.length;
 	}
 
 	@Override
 	public IBaseResource getResource(int theIndex) {
-		return myResources.get(theIndex);
+		return myResources[theIndex];
 	}
 
 	@Override
 	public void setResource(int theIndex, IBaseResource theResource) {
 		Validate.isTrue(theIndex >= 0, "Invalid index %d - theIndex must not be < 0", theIndex);
-		Validate.isTrue(theIndex < myResources.size(), "Invalid index {} - theIndex must be < %d", theIndex, myResources.size());
-		myResources.set(theIndex, theResource);
+		Validate.isTrue(theIndex < myResources.length, "Invalid index {} - theIndex must be < %d", theIndex, myResources.length);
+		myResources[theIndex] = theResource;
 	}
 
 	@Override
 	public void markResourceAtIndexAsSubset(int theIndex) {
 		Validate.isTrue(theIndex >= 0, "Invalid index %d - theIndex must not be < 0", theIndex);
-		Validate.isTrue(theIndex < myResources.size(), "Invalid index {} - theIndex must be < %d", theIndex, myResources.size());
-		mySubSets[theIndex] = true;
+		Validate.isTrue(theIndex < myResources.length, "Invalid index {} - theIndex must be < %d", theIndex, myResources.length);
+		myResourceMarkedAsSubset[theIndex] = true;
 	}
 
 	@Override
 	public Iterator<IBaseResource> iterator() {
-		return myResources.iterator();
+		return Arrays.asList(myResources).iterator();
+	}
+
+	public List<IBaseResource> toList() {
+		return Lists.newArrayList(myResources);
 	}
 }

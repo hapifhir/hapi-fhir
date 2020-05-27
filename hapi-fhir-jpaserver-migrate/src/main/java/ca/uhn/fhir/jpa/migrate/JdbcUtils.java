@@ -31,7 +31,12 @@ import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
 import org.hibernate.engine.jdbc.env.internal.NormalizingIdentifierHelperImpl;
-import org.hibernate.engine.jdbc.env.spi.*;
+import org.hibernate.engine.jdbc.env.spi.ExtractedDatabaseMetaData;
+import org.hibernate.engine.jdbc.env.spi.IdentifierHelper;
+import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
+import org.hibernate.engine.jdbc.env.spi.LobCreatorBuilder;
+import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
+import org.hibernate.engine.jdbc.env.spi.QualifiedObjectNameFormatter;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hibernate.engine.jdbc.spi.TypeInfo;
 import org.hibernate.service.ServiceRegistry;
@@ -44,8 +49,18 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import javax.annotation.Nullable;
 import javax.sql.DataSource;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
 
 import static org.thymeleaf.util.StringUtils.toUpperCase;
 
@@ -223,6 +238,9 @@ public class JdbcUtils {
 						int dataType = indexes.getInt("DATA_TYPE");
 						Long length = indexes.getLong("COLUMN_SIZE");
 						switch (dataType) {
+							case Types.BIT:
+							case Types.BOOLEAN:
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN, length);
 							case Types.VARCHAR:
 								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, length);
 							case Types.NUMERIC:

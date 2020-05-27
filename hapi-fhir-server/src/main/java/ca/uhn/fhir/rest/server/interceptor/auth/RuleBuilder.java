@@ -20,8 +20,10 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.collect.Lists;
@@ -29,7 +31,13 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -67,7 +75,9 @@ public class RuleBuilder implements IAuthRuleBuilder {
 	@Override
 	public IAuthRuleBuilderRuleOpClassifierFinished allowAll(String theRuleName) {
 		RuleImplOp rule = new RuleImplOp(theRuleName);
-		myRules.add(rule.setOp(RuleOpEnum.ALLOW_ALL));
+		rule.setOp(RuleOpEnum.ALL);
+		rule.setMode(PolicyEnum.ALLOW);
+		myRules.add(rule);
 		return new RuleBuilderFinished(rule);
 	}
 
@@ -97,18 +107,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 	@Override
 	public IAuthRuleBuilderRuleOpClassifierFinished denyAll(String theRuleName) {
 		RuleImplOp rule = new RuleImplOp(theRuleName);
-		myRules.add(rule.setOp(RuleOpEnum.DENY_ALL));
+		rule.setOp(RuleOpEnum.ALL);
+		rule.setMode(PolicyEnum.DENY);
+		myRules.add(rule);
 		return new RuleBuilderFinished(rule);
-	}
-
-	public interface ITenantApplicabilityChecker {
-		boolean applies(RequestDetails theRequest);
 	}
 
 	private class RuleBuilderFinished implements IAuthRuleFinished, IAuthRuleBuilderRuleOpClassifierFinished, IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId {
 
 		protected final BaseRule myOpRule;
-		ITenantApplicabilityChecker myTenantApplicabilityChecker;
 		private List<IAuthRuleTester> myTesters;
 
 		RuleBuilderFinished(BaseRule theRule) {
@@ -142,7 +149,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(final Collection<String> theTenantIds) {
-			setTenantApplicabilityChecker(theRequest -> theTenantIds.contains(theRequest.getTenantId()));
+			withTester(new TenantCheckingTester(theTenantIds, true));
 			return this;
 		}
 
@@ -160,24 +167,62 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(final Collection<String> theTenantIds) {
-			setTenantApplicabilityChecker(theRequest -> !theTenantIds.contains(theRequest.getTenantId()));
+			withTester(new TenantCheckingTester(theTenantIds, false));
 			return this;
-		}
-
-		private void setTenantApplicabilityChecker(ITenantApplicabilityChecker theTenantApplicabilityChecker) {
-			myTenantApplicabilityChecker = theTenantApplicabilityChecker;
-			myOpRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
 		}
 
 		@Override
 		public IAuthRuleFinished withTester(IAuthRuleTester theTester) {
-			if (myTesters == null) {
-				myTesters = new ArrayList<>();
+			if (theTester != null) {
+				if (myTesters == null) {
+					myTesters = new ArrayList<>();
+				}
+				myTesters.add(theTester);
+				myOpRule.addTester(theTester);
 			}
-			myTesters.add(theTester);
-			myOpRule.addTester(theTester);
 
 			return this;
+		}
+
+		private class TenantCheckingTester implements IAuthRuleTester {
+			private final Collection<String> myTenantIds;
+			private final boolean myOutcome;
+
+			public TenantCheckingTester(Collection<String> theTenantIds, boolean theOutcome) {
+				myTenantIds = theTenantIds;
+				myOutcome = theOutcome;
+			}
+
+			@Override
+			public boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource) {
+				if (!myTenantIds.contains(theRequestDetails.getTenantId())) {
+					return !myOutcome;
+				}
+
+				return matchesResource(theInputResource);
+			}
+
+			@Override
+			public boolean matchesOutput(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theOutputResource) {
+				if (!myTenantIds.contains(theRequestDetails.getTenantId())) {
+					return !myOutcome;
+				}
+
+				return matchesResource(theOutputResource);
+			}
+
+			private boolean matchesResource(IBaseResource theResource) {
+				if (theResource != null) {
+					RequestPartitionId partitionId = (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+					if (partitionId != null) {
+						if (!myTenantIds.contains(partitionId.getPartitionName())) {
+							return !myOutcome;
+						}
+					}
+				}
+
+				return myOutcome;
+			}
 		}
 	}
 
@@ -310,7 +355,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					rule.setOperationType(myOperationType);
 					rule.setAppliesTo(myAppliesTo);
 					rule.setAppliesToTypes(myAppliesToTypes);
-					rule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
 					rule.addTesters(getTesters());
 					myRules.add(rule);
 

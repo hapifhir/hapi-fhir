@@ -22,17 +22,27 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.CapabilityStatement.*;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
+import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.UriType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -65,14 +75,19 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderR4(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig) {
+	public JpaConformanceProviderR4(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
 		super(theRestfulServer);
+
+		Validate.notNull(theRestfulServer);
+		Validate.notNull(theSystemDao);
+		Validate.notNull(theDaoConfig);
+
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
 		setIncludeResourceCounts(true);
-		setSearchParamRegistry(theSystemDao.getSearchParamRegistry());
+		setSearchParamRegistry(theSearchParamRegistry);
 	}
 
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {

@@ -1,0 +1,18 @@
+{
+	"resourceType" : "ValueSet",
+	"id" : "message-category",
+	"url" : "http://example.com/valueset",
+	"version" : "0.0.1",
+	"name" : "MessageCategory",
+	"status" : "active",
+	"experimental" : true,
+	"date" : "2019-02-08T00:00:00+00:00",
+	"publisher" : "ehealth.sundhed.dk",
+	"compose" : {
+		"include" : [
+			{
+				"system" : "http://example.com/codesystem"
+			}
+		]
+	}
+}

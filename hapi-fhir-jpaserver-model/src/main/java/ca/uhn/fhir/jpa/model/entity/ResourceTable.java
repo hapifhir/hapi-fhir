@@ -21,18 +21,29 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.IndexNonDeletedInterceptor;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
-import org.hibernate.search.annotations.*;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
 
-import javax.persistence.Index;
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -42,14 +53,12 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
 	@Index(name = "IDX_RES_LANG", columnList = "RES_TYPE,RES_LANGUAGE"),
-	@Index(name = "IDX_RES_PROFILE", columnList = "RES_PROFILE"),
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
-public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource {
+public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
-	private static final int MAX_PROFILE_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -156,10 +165,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private boolean myParamsUriPopulated;
 
-	@Column(name = "RES_PROFILE", length = MAX_PROFILE_LENGTH, nullable = true)
-	@OptimisticLock(excluded = true)
-	private String myProfile;
-
 	// Added in 3.0.0 - Should make this a primitive Boolean at some point
 	@OptimisticLock(excluded = true)
 	@Column(name = "SP_CMPSTR_UNIQ_PRESENT")
@@ -180,9 +185,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * {@link #myHasLinks} is true, meaning that there are actually resource links present
 	 * right now. This avoids Hibernate Search triggering a select on the resource link
 	 * table.
-	 *
+	 * <p>
 	 * This field is used by FulltextSearchSvcImpl
-	 *
+	 * <p>
 	 * You can test that any changes don't cause extra queries by running
 	 * FhirResourceDaoR4QueryCountTest
 	 */
@@ -193,25 +198,42 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
+
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
 	@Field
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Collection<SearchParamPresent> mySearchParamPresents;
+
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Set<ResourceTag> myTags;
+
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
+
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
+
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
+
 	@Transient
 	private transient ResourceHistoryTable myCurrentVersionEntity;
+
+	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
+	private ForcedId myForcedId;
+
+	/**
+	 * Constructor
+	 */
+	public ResourceTable() {
+		super();
+	}
 
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
@@ -220,7 +242,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 				return next;
 			}
 		}
-		ResourceTag tag = new ResourceTag(this, theTag);
+		ResourceTag tag = new ResourceTag(this, theTag, getPartitionId());
 		getTags().add(tag);
 		return tag;
 	}
@@ -372,17 +394,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 		getParamsUri().clear();
 		getParamsUri().addAll(theParamsUri);
-	}
-
-	public String getProfile() {
-		return myProfile;
-	}
-
-	public void setProfile(String theProfile) {
-		if (defaultString(theProfile).length() > MAX_PROFILE_LENGTH) {
-			throw new UnprocessableEntityException("Profile name exceeds maximum length of " + MAX_PROFILE_LENGTH + " chars: " + theProfile);
-		}
-		myProfile = theProfile;
 	}
 
 	@Override
@@ -543,7 +554,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setUpdated(getUpdated());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
+		retVal.setResourceTable(this);
 		retVal.setForcedId(getForcedId());
+		retVal.setPartitionId(getPartitionId());
 
 		retVal.getTags().clear();
 
@@ -600,4 +613,28 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public ResourcePersistentId getPersistentId() {
 		return new ResourcePersistentId(getId());
 	}
+
+	@Override
+	public ForcedId getForcedId() {
+		return myForcedId;
+	}
+
+	@Override
+	public void setForcedId(ForcedId theForcedId) {
+		myForcedId = theForcedId;
+	}
+
+	@Override
+	public IdDt getIdDt() {
+		if (getForcedId() == null) {
+			Long id = this.getResourceId();
+			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			// Avoid a join query if possible
+			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
+			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
+	}
+
+
 }

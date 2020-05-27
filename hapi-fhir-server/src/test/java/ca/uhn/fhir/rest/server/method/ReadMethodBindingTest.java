@@ -20,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,12 +57,17 @@ public class ReadMethodBindingTest {
 		// Read
 		ReadMethodBinding binding = createBinding(new MyProvider());
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
-		assertTrue(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// VRead
+		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));
+		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+
+		// Type history
+		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
 		when(myRequestDetails.getResourceName()).thenReturn("Patient");
 		when(myRequestDetails.getOperation()).thenReturn("_history");
-		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 	}
 
@@ -84,27 +90,27 @@ public class ReadMethodBindingTest {
 		ReadMethodBinding binding = createBinding(new MyProvider());
 		when(myRequestDetails.getResourceName()).thenReturn("Observation");
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Observation/123"));
-		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// Read
 		when(myRequestDetails.getResourceName()).thenReturn("Patient");
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
-		assertTrue(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// VRead
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));
 		when(myRequestDetails.getOperation()).thenReturn("_history");
-		assertTrue(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// Some other operation
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));
 		when(myRequestDetails.getOperation()).thenReturn("$foo");
-		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 		// History operation
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
 		when(myRequestDetails.getOperation()).thenReturn("_history");
-		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
 	}
 
@@ -125,7 +131,7 @@ public class ReadMethodBindingTest {
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
 
 		ReadMethodBinding binding = createBinding(new MyProvider());
-		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
 	}
 
 	public ReadMethodBinding createBinding(Object theProvider) throws NoSuchMethodException {

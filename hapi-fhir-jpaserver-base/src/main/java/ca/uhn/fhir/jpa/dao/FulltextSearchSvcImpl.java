@@ -20,10 +20,14 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -39,7 +43,10 @@ import org.apache.commons.lang3.Validate;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.highlight.Formatter;
-import org.apache.lucene.search.highlight.*;
+import org.apache.lucene.search.highlight.Highlighter;
+import org.apache.lucene.search.highlight.QueryScorer;
+import org.apache.lucene.search.highlight.Scorer;
+import org.apache.lucene.search.highlight.TokenGroup;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
@@ -53,7 +60,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -229,7 +241,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				StringParam idParm = (StringParam) idParam;
 				idParamValue = idParm.getValue();
 			}
-			pid = myIdHelperService.translateForcedIdToPid(theResourceName, idParamValue, theRequest);
+//			pid = myIdHelperService.translateForcedIdToPid_(theResourceName, idParamValue, theRequest);
 		}
 
 		ResourcePersistentId referencingPid = pid;
@@ -269,6 +281,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return doSearch(theResourceName, theParams, null);
 	}
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
 	@Transactional()
 	@Override
 	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText, RequestDetails theRequest) {
@@ -282,7 +300,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(contextParts[0], contextParts[1], theRequest);
+
+		// Partitioning is not supported for this operation
+		Validate.isTrue(myPartitionSettings.isPartitioningEnabled() == false, "Suggest keywords not supported for partitioned system");
+		RequestPartitionId requestPartitionId = null;
+
+		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, contextParts[0], contextParts[1]);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
@@ -298,7 +321,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.sentence(theText.toLowerCase()).createQuery();
 
 		Query query = qb.bool()
-//			.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
 			.must(qb.keyword().onField("myResourceLinksField").matching(pid.toString()).createQuery())
 			.must(textQuery)
 			.createQuery();

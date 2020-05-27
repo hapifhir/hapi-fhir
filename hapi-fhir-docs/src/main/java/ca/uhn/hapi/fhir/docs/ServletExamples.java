@@ -20,22 +20,23 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.*;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import java.util.Arrays;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "RedundantThrows", "InnerClassMayBeStatic"})
 public class ServletExamples {
 
    // START SNIPPET: loggingInterceptor
-   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
    public class RestfulServerWithLogging extends RestfulServer {
 
       @Override
@@ -65,15 +66,17 @@ public class ServletExamples {
    public class ValidatingServerWithLogging extends RestfulServer {
 
       @Override
-      protected void initialize() throws ServletException {
-         
+      protected void initialize() {
+			FhirContext ctx = FhirContext.forDstu3();
+			setFhirContext(ctx);
+
          // ... define your resource providers here ...
 
          // Create an interceptor to validate incoming requests
          RequestValidatingInterceptor requestInterceptor = new RequestValidatingInterceptor();
          
          // Register a validator module (you could also use SchemaBaseValidator and/or SchematronBaseValidator)
-         requestInterceptor.addValidatorModule(new FhirInstanceValidator());
+			requestInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
          
          requestInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
          requestInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
@@ -86,7 +89,7 @@ public class ServletExamples {
          // Create an interceptor to validate responses
          // This is configured in the same way as above
          ResponseValidatingInterceptor responseInterceptor = new ResponseValidatingInterceptor();
-         responseInterceptor.addValidatorModule(new FhirInstanceValidator());
+         responseInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
          responseInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
          responseInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
          responseInterceptor.setResponseHeaderValue("Validation on ${line}: ${message} ${severity}");
@@ -117,6 +120,24 @@ public class ServletExamples {
       
    }
    // END SNIPPET: exceptionInterceptor
+
+	// START SNIPPET: fhirPathInterceptor
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	public class RestfulServerWithFhirPath extends RestfulServer {
+
+		@Override
+		protected void initialize() throws ServletException {
+
+			// ... define your resource providers here ...
+
+			// Now register the interceptor
+			FhirPathFilterInterceptor interceptor = new FhirPathFilterInterceptor();
+			registerInterceptor(interceptor);
+
+		}
+
+	}
+	// END SNIPPET: fhirPathInterceptor
 
    // START SNIPPET: responseHighlighterInterceptor
    @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")

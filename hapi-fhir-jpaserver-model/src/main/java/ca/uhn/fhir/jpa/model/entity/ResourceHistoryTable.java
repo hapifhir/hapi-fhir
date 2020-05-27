@@ -20,10 +20,30 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +74,11 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "RES_ID")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
+	private ResourceTable myResourceTable;
+
+	@Column(name = "RES_ID", nullable = false, updatable = false, insertable = false)
 	private Long myResourceId;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
@@ -88,7 +112,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void addTag(ResourceTag theTag) {
-		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag());
+		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag(), getPartitionId());
 		tag.setResourceType(theTag.getResourceType());
 		getTags().add(tag);
 	}
@@ -100,7 +124,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 				return next;
 			}
 		}
-		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theTag);
+		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theTag, getPartitionId());
 		getTags().add(historyTag);
 		return historyTag;
 	}
@@ -165,4 +189,40 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	public ResourcePersistentId getPersistentId() {
 		return new ResourcePersistentId(myResourceId);
 	}
+
+	public ResourceTable getResourceTable() {
+		return myResourceTable;
+	}
+
+	public void setResourceTable(ResourceTable theResourceTable) {
+		myResourceTable = theResourceTable;
+	}
+
+	@Override
+	public IdDt getIdDt() {
+		// Avoid a join query if possible
+		String resourceIdPart;
+		if (getTransientForcedId() != null) {
+			resourceIdPart = getTransientForcedId();
+		} else {
+			if (getResourceTable().getForcedId() == null) {
+				Long id = getResourceId();
+				resourceIdPart = id.toString();
+			} else {
+				resourceIdPart = getResourceTable().getForcedId().getForcedId();
+			}
+		}
+		return new IdDt(getResourceType() + '/' + resourceIdPart + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+	}
+
+	@Override
+	public ForcedId getForcedId() {
+		return getResourceTable().getForcedId();
+	}
+
+	@Override
+	public void setForcedId(ForcedId theForcedId) {
+		getResourceTable().setForcedId(theForcedId);
+	}
+
 }

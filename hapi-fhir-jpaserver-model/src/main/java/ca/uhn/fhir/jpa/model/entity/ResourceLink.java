@@ -55,49 +55,43 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long mySourceResourcePid;
 
-	@Column(name = "SOURCE_RESOURCE_TYPE", nullable = false, length = ResourceTable.RESTYPE_LEN)
+	@Column(name = "SOURCE_RESOURCE_TYPE", updatable = false, nullable = false, length = ResourceTable.RESTYPE_LEN)
 	@Field()
 	private String mySourceResourceType;
 
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true, foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
+	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true, insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
 
-	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = true)
+	@Column(name = "TARGET_RESOURCE_ID", insertable = true, updatable = true, nullable = true)
 	@Field()
 	private Long myTargetResourcePid;
-
 	@Column(name = "TARGET_RESOURCE_TYPE", nullable = false, length = ResourceTable.RESTYPE_LEN)
 	@Field()
 	private String myTargetResourceType;
-
 	@Column(name = "TARGET_RESOURCE_URL", length = 200, nullable = true)
 	@Field()
 	private String myTargetResourceUrl;
-
 	@Field()
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
+	@Transient
+	private transient String myTargetResourceId;
 
 	public ResourceLink() {
 		super();
 	}
 
-	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
-		super();
-		setSourcePath(theSourcePath);
-		setSourceResource(theSourceResource);
-		setTargetResourceUrl(theTargetResourceUrl);
-		setUpdated(theUpdated);
+	public String getTargetResourceId() {
+		if (myTargetResourceId == null && myTargetResource != null) {
+			myTargetResourceId = getTargetResource().getIdDt().getIdPart();
+		}
+		return myTargetResourceId;
 	}
 
-	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource, Date theUpdated) {
-		super();
-		setSourcePath(theSourcePath);
-		setSourceResource(theSourceResource);
-		setTargetResource(theTargetResource);
-		setUpdated(theUpdated);
+	public String getTargetResourceType() {
+		return myTargetResourceType;
 	}
 
 	@Override
@@ -115,9 +109,20 @@ public class ResourceLink extends BaseResourceIndex {
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(mySourcePath, obj.mySourcePath);
 		b.append(mySourceResource, obj.mySourceResource);
-		b.append(myTargetResourcePid, obj.myTargetResourcePid);
 		b.append(myTargetResourceUrl, obj.myTargetResourceUrl);
+		b.append(myTargetResourceType, obj.myTargetResourceType);
+		b.append(getTargetResourceId(), obj.getTargetResourceId());
 		return b.isEquals();
+	}
+
+	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		ResourceLink source = (ResourceLink) theSource;
+		myTargetResource = source.getTargetResource();
+		myTargetResourceId = source.getTargetResourceId();
+		myTargetResourcePid = source.getTargetResourcePid();
+		myTargetResourceType = source.getTargetResourceType();
+		myTargetResourceUrl = source.getTargetResourceUrl();
 	}
 
 	public String getSourcePath() {
@@ -126,6 +131,10 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public void setSourcePath(String theSourcePath) {
 		mySourcePath = theSourcePath;
+	}
+
+	public Long getSourceResourcePid() {
+		return mySourceResourcePid;
 	}
 
 	public ResourceTable getSourceResource() {
@@ -138,27 +147,20 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourceResourceType = theSourceResource.getResourceType();
 	}
 
-	public Long getSourceResourcePid() {
-		return mySourceResourcePid;
-	}
+	public void setTargetResource(String theResourceType, Long theResourcePid, String theTargetResourceId) {
+		Validate.notBlank(theResourceType);
 
-	public ResourceTable getTargetResource() {
-		return myTargetResource;
-	}
-
-	public void setTargetResource(ResourceTable theTargetResource) {
-		Validate.notNull(theTargetResource);
-		myTargetResource = theTargetResource;
-		myTargetResourcePid = theTargetResource.getId();
-		myTargetResourceType = theTargetResource.getResourceType();
-	}
-
-	public Long getTargetResourcePid() {
-		return myTargetResourcePid;
+		myTargetResourceType = theResourceType;
+		myTargetResourcePid = theResourcePid;
+		myTargetResourceId = theTargetResourceId;
 	}
 
 	public String getTargetResourceUrl() {
 		return myTargetResourceUrl;
+	}
+
+	public Long getTargetResourcePid() {
+		return myTargetResourcePid;
 	}
 
 	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {
@@ -166,16 +168,23 @@ public class ResourceLink extends BaseResourceIndex {
 		Validate.isTrue(theTargetResourceUrl.hasResourceType());
 
 //		if (theTargetResourceUrl.hasIdPart()) {
-			// do nothing
+		// do nothing
 //		} else {
-			// Must have set an url like http://example.org/something
-			// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
-			// treated as the id and 'example.org' was treated as the resource type
-			// TODO: log a warning?
+		// Must have set an url like http://example.org/something
+		// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
+		// treated as the id and 'example.org' was treated as the resource type
+		// TODO: log a warning?
 //		}
 
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
+	}
+
+	public void setTargetResourceUrlCanonical(String theTargetResourceUrl) {
+		Validate.notBlank(theTargetResourceUrl);
+
+		myTargetResourceType = "(unknown)";
+		myTargetResourceUrl = theTargetResourceUrl;
 	}
 
 	public Date getUpdated() {
@@ -206,8 +215,9 @@ public class ResourceLink extends BaseResourceIndex {
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(mySourcePath);
 		b.append(mySourceResource);
-		b.append(myTargetResourcePid);
 		b.append(myTargetResourceUrl);
+		b.append(getTargetResourceType());
+		b.append(getTargetResourceId());
 		return b.toHashCode();
 	}
 
@@ -218,10 +228,45 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append("path=").append(mySourcePath);
 		b.append(", src=").append(mySourceResourcePid);
 		b.append(", target=").append(myTargetResourcePid);
+		b.append(", targetType=").append(myTargetResourceType);
 		b.append(", targetUrl=").append(myTargetResourceUrl);
 
 		b.append("]");
 		return b.toString();
+	}
+
+	public ResourceTable getTargetResource() {
+		return myTargetResource;
+	}
+
+	public static ResourceLink forAbsoluteReference(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
+		ResourceLink retVal = new ResourceLink();
+		retVal.setSourcePath(theSourcePath);
+		retVal.setSourceResource(theSourceResource);
+		retVal.setTargetResourceUrl(theTargetResourceUrl);
+		retVal.setUpdated(theUpdated);
+		return retVal;
+	}
+
+	/**
+	 * Factory for canonical URL
+	 */
+	public static ResourceLink forLogicalReference(String theSourcePath, ResourceTable theSourceResource, String theTargetResourceUrl, Date theUpdated) {
+		ResourceLink retVal = new ResourceLink();
+		retVal.setSourcePath(theSourcePath);
+		retVal.setSourceResource(theSourceResource);
+		retVal.setTargetResourceUrlCanonical(theTargetResourceUrl);
+		retVal.setUpdated(theUpdated);
+		return retVal;
+	}
+
+	public static ResourceLink forLocalReference(String theSourcePath, ResourceTable theSourceResource, String theTargetResourceType, Long theTargetResourcePid, String theTargetResourceId, Date theUpdated) {
+		ResourceLink retVal = new ResourceLink();
+		retVal.setSourcePath(theSourcePath);
+		retVal.setSourceResource(theSourceResource);
+		retVal.setTargetResource(theTargetResourceType, theTargetResourcePid, theTargetResourceId);
+		retVal.setUpdated(theUpdated);
+		return retVal;
 	}
 
 }

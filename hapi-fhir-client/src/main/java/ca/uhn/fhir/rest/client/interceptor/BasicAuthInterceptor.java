@@ -35,7 +35,7 @@ import org.apache.commons.lang3.Validate;
  * HTTP interceptor to be used for adding HTTP basic auth username/password tokens
  * to requests
  * <p>
- * See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client_interceptor.html#Security_HTTP_Basic_Authorization">HAPI Documentation</a>
+ * See the <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/built_in_client_interceptors.html">HAPI Documentation</a>
  * for information on how to use this class.
  * </p>
  */

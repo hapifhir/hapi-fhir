@@ -2,79 +2,63 @@
 
 This page contains examples of how to use the client to perform complete tasks. If you have an example you could contribute, we'd love to hear from you!
 
-# Transaction With Placeholder IDs
+# Transaction With Conditional Create
 
-The following example shows how to post a transaction with two resources, where one resource contains a reference to the other. A temporary ID (a UUID) is used as an ID to refer to, and this ID will be replaced by the server by	a permanent ID.
+The following example demonstrates a common scenario: How to create a new piece of data for a Patient (in this case, an Observation) where the identifier of the Patient is known, but the ID is not.
 
-```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ClientTransactionExamples.java|conditional}}
-```
+In this scenario, we want to look up the Patient record and reference it from the newly created Observation. In the event that no Patient record already exists with the given identifier, a new one will be created and the Observation will reference it. This is known in FHIR as a [Conditional Create](http://hl7.org/fhir/http.html#ccreate).
  
-This code creates the following transaction bundle:
-
 **JSON**:
 
 ```json
 {
   "resourceType": "Bundle",
   "type": "transaction",
-  "entry": [
-    {
-      "fullUrl": "urn:uuid:3bc44de3-069d-442d-829b-f3ef68cae371",
-      "resource": {
-        "resourceType": "Patient",
-        "identifier": [
-          {
-            "system": "http://acme.org/mrns",
-            "value": "12345"
-          }
-        ],
-        "name": [
-          {
-            "family": "Jameson",
-            "given": [
-              "J",
-              "Jonah"
-            ]
-          }
-        ],
-        "gender": "male"
+  "entry": [ {
+    "fullUrl": "urn:uuid:3bc44de3-069d-442d-829b-f3ef68cae371",
+    "resource": {
+      "resourceType": "Patient",
+      "identifier": [ {
+        "system": "http://acme.org/mrns",
+        "value": "12345"
+      } ],
+      "name": [ {
+        "family": "Jameson",
+        "given": [ "J", "Jonah" ]
+      } ],
+      "gender": "male"
+    },
+    "request": {
+      "method": "POST",
+      "url": "Patient",
+      "ifNoneExist": "identifier=http://acme.org/mrns|12345"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Observation",
+      "status": "final",
+      "code": {
+        "coding": [ {
+          "system": "http://loinc.org",
+          "code": "789-8",
+          "display": "Erythrocytes [#/volume] in Blood by Automated count"
+        } ]
       },
-      "request": {
-        "method": "POST",
-        "url": "Patient",
-        "ifNoneExist": "identifier=http://acme.org/mrns|12345"
+      "subject": {
+        "reference": "urn:uuid:3bc44de3-069d-442d-829b-f3ef68cae371"
+      },
+      "valueQuantity": {
+        "value": 4.12,
+        "unit": "10 trillion/L",
+        "system": "http://unitsofmeasure.org",
+        "code": "10*12/L"
       }
     },
-    {
-      "resource": {
-        "resourceType": "Observation",
-        "status": "final",
-        "code": {
-          "coding": [
-            {
-              "system": "http://loinc.org",
-              "code": "789-8",
-              "display": "Erythrocytes [#/volume] in Blood by Automated count"
-            }
-          ]
-        },
-        "subject": {
-          "reference": "urn:uuid:3bc44de3-069d-442d-829b-f3ef68cae371"
-        },
-        "valueQuantity": {
-          "value": 4.12,
-          "unit": "10 trillion/L",
-          "system": "http://unitsofmeasure.org",
-          "code": "10*12/L"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "Observation"
-      }
+    "request": {
+      "method": "POST",
+      "url": "Observation"
     }
-  ]
+  } ]
 }
 ```
 
@@ -164,9 +148,15 @@ The server responds with the following response. Note that the ID of the already
 </Bundle>
 ```
 
+To produce this transaction in Java code:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ClientTransactionExamples.java|conditional}}
+```
+
 # Fetch all Pages of a Bundle
 
-This following example shows how to load all pages of a bundle by fetching each page one-after-the-other and then joining the resuts.
+This following example shows how to load all pages of a bundle by fetching each page one-after-the-other and then joining the results.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleFetcher.java|loadAll}}

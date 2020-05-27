@@ -58,6 +58,24 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
+	public void testEncodedResourceWithIncorrectRepresentationOfDecimalTypeToJson() {
+		DecimalType decimalType = new DecimalType();
+		decimalType.setValueAsString(".5");
+		MedicationRequest mr = new MedicationRequest();
+		Dosage dosage = new Dosage();
+		dosage.setDose(new SimpleQuantity()
+			.setValue(decimalType.getValue())
+			.setUnit("{tablet}")
+			.setSystem("http://unitsofmeasure.org")
+			.setCode("{tablet}"));
+		mr.addDosageInstruction(dosage);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(mr);
+		ourLog.info(encoded);
+		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
+		assertEquals(BigDecimal.valueOf(0.5), mr.getDosageInstructionFirstRep().getDoseSimpleQuantity().getValue());
+		assertTrue(encoded.contains("0.5"));
+	}
 
 	/**
 	 * See #563
@@ -72,7 +90,8 @@ public class JsonParserDstu3Test {
 			p.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Found incorrect type for element subject - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Unexpected character ('=' (code 61)): was expecting a colon to separate field name and value\n" +
+				" at [Source: UNKNOWN; line: 4, column: 18]", e.getMessage());
 		}
 	}
 
@@ -488,32 +507,25 @@ public class JsonParserDstu3Test {
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 
-		//@formatter:off
-		assertEquals("{\n" +
-			"  \"resourceType\": \"Patient\",\n" +
-			"  \"meta\": {\n" +
-			"    \"security\": [\n" +
-			"      {\n" +
-			"        \"system\": \"SYSTEM1\",\n" +
-			"        \"version\": \"VERSION1\",\n" +
-			"        \"code\": \"CODE1\",\n" +
-			"        \"display\": \"DISPLAY1\"\n" +
-			"      },\n" +
-			"      {\n" +
-			"        \"system\": \"SYSTEM2\",\n" +
-			"        \"version\": \"VERSION2\",\n" +
-			"        \"code\": \"CODE2\",\n" +
-			"        \"display\": \"DISPLAY2\"\n" +
-			"      }\n" +
-			"    ]\n" +
-			"  },\n" +
-			"  \"name\": [\n" +
-			"    {\n" +
-			"      \"family\": \"FAMILY\"\n" +
-			"    }\n" +
-			"  ]\n" +
-			"}", enc.trim());
-		//@formatter:on
+		assertThat(enc.trim(), stringContainsInOrder("{",
+			"  \"resourceType\": \"Patient\",",
+			"  \"meta\": {",
+			"    \"security\": [ {",
+			"      \"system\": \"SYSTEM1\",",
+			"      \"version\": \"VERSION1\",",
+			"      \"code\": \"CODE1\",",
+			"      \"display\": \"DISPLAY1\"",
+			"    }, {",
+			"      \"system\": \"SYSTEM2\",",
+			"      \"version\": \"VERSION2\",",
+			"      \"code\": \"CODE2\",",
+			"      \"display\": \"DISPLAY2\"",
+			"    } ]",
+			"  },",
+			"  \"name\": [ {",
+			"    \"family\": \"FAMILY\"",
+			"  } ]",
+			"}"));
 
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
 		List<Coding> gotLabels = parsed.getMeta().getSecurity();
@@ -1401,7 +1413,8 @@ public class JsonParserDstu3Test {
 		String input = "{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.0000000000000001}}";
 		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, input);
 
-		assertEquals("0.0000000000000001", ((Quantity) obs.getValue()).getValueElement().getValueAsString());
+		DecimalType valueElement = ((Quantity) obs.getValue()).getValueElement();
+		assertEquals("0.0000000000000001", valueElement.getValueAsString());
 
 		String str = ourCtx.newJsonParser().encodeResourceToString(obs);
 		ourLog.info(str);
@@ -1509,7 +1522,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(any(), eq("foo"), msgCaptor.capture());
 		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1541,8 +1554,8 @@ public class JsonParserDstu3Test {
 		assertEquals(null, parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(), eq(""), msgCaptor.capture());
-		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
+		verify(errorHandler, times(1)).invalidValue(any(), eq(""), msgCaptor.capture());
+		assertEquals("Attribute value must not be empty (\"\")", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		assertEquals("{\"resourceType\":\"Patient\"}", encoded);
@@ -1561,7 +1574,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(any(), eq("foo"), msgCaptor.capture());
 		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1993,13 +2006,13 @@ public class JsonParserDstu3Test {
 			ourCtx.newJsonParser().parseResource("FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
+			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
 		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());
@@ -2221,25 +2234,47 @@ public class JsonParserDstu3Test {
 
 	@Test
 	public void testParseWithPrecision() {
-		String input = "{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.000000000000000100}}";
-		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, input);
 
-		DecimalType valueElement = ((Quantity) obs.getValue()).getValueElement();
-		assertEquals("0.000000000000000100", valueElement.getValueAsString());
+//		BigDecimal d0 = new BigDecimal("0.1");
+//		BigDecimal d1 = new BigDecimal("0.1000");
+//
+//		ourLog.info("Value: {}", d0);
+//		ourLog.info("Value: {}", d1);
 
-		String str = ourCtx.newJsonParser().encodeResourceToString(obs);
-		ourLog.info(str);
-		assertEquals("{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.000000000000000100}}", str);
+		{
+			String input = "{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.0100}}";
+			Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, input);
+			DecimalType valueElement = ((Quantity) obs.getValue()).getValueElement();
+			assertEquals("0.0100", valueElement.getValueAsString());
+			String str = ourCtx.newJsonParser().encodeResourceToString(obs);
+			ourLog.info(str);
+			assertEquals("{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.0100}}", str);
+		}
+		{
+			String input = "{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.000000000000000100}}";
+			Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, input);
+			DecimalType valueElement = ((Quantity) obs.getValue()).getValueElement();
+			assertEquals("0.000000000000000100", valueElement.getValueAsString());
+			String str = ourCtx.newJsonParser().encodeResourceToString(obs);
+			ourLog.info(str);
+			assertEquals("{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.000000000000000100}}", str);
+		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseWithTrailingContent() {
 		String bundle = "{\n" +
-			"  \"resourceType\" : \"Bundle\",\n" +
-			"  \"total\" : 1\n" +
+			"  \"resourceType\": \"Bundle\",\n" +
+			"  \"total\": 1\n" +
 			"}}";
 
-		ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
+		try {
+			ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [Source: UNKNOWN; line: 1, column: 0])\n" +
+				" at [Source: UNKNOWN; line: 4, column: 3]", e.getMessage());
+		}
 	}
 
 	@Test

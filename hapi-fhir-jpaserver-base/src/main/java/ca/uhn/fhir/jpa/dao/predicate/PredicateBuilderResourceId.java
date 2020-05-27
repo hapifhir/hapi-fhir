@@ -20,12 +20,11 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -58,12 +56,12 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
-		Predicate nextPredicate = createPredicate(myQueryRoot.getRoot(), theResourceName, theValues, theOperation, theRequest);
+		Predicate nextPredicate = createPredicate(theResourceName, theValues, theOperation, theRequestPartitionId);
 
 		if (nextPredicate != null) {
-			myQueryRoot.addPredicate(nextPredicate);
+			myQueryStack.addPredicate(nextPredicate);
 			return nextPredicate;
 		}
 
@@ -71,7 +69,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	private Predicate createPredicate(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+	private Predicate createPredicate(String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 		Predicate nextPredicate = null;
 
 		Set<ResourcePersistentId> allOrPids = null;
@@ -89,7 +87,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 				if (isNotBlank(value)) {
 					haveValue = true;
 					try {
-						ResourcePersistentId pid = myIdHelperService.translateForcedIdToPid(theResourceName, valueAsId.getIdPart(), theRequest);
+						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart());
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest
@@ -110,7 +108,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 		if (allOrPids != null && allOrPids.isEmpty()) {
 
 			// This will never match
-			nextPredicate = myBuilder.equal(theRoot.get("myId").as(Long.class), -1);
+			nextPredicate = myCriteriaBuilder.equal(myQueryStack.getResourcePidColumn(), -1);
 
 		} else if (allOrPids != null) {
 
@@ -120,14 +118,12 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 			switch (operation) {
 				default:
 				case eq:
-					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)));
-					codePredicates.add(myBuilder.equal(myQueryRoot.get("myResourceType"), theResourceName));
-					nextPredicate = myBuilder.and(toArray(codePredicates));
+					codePredicates.add(myQueryStack.getResourcePidColumn().in(ResourcePersistentId.toLongList(allOrPids)));
+					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 				case ne:
-					codePredicates.add(theRoot.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(allOrPids)).not());
-					codePredicates.add(myBuilder.equal(myQueryRoot.get("myResourceType"), theResourceName));
-					nextPredicate = myBuilder.and(toArray(codePredicates));
+					codePredicates.add(myQueryStack.getResourcePidColumn().in(ResourcePersistentId.toLongList(allOrPids)).not());
+					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
 					break;
 			}
 

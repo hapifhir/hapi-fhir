@@ -20,26 +20,25 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Interceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 @Interceptor
 public class LoggingInterceptor implements IClientInterceptor {
@@ -62,9 +61,8 @@ public class LoggingInterceptor implements IClientInterceptor {
 
 	/**
 	 * Constructor for client logging interceptor
-	 * 
-	 * @param theVerbose
-	 *            If set to true, all logging is enabled
+	 *
+	 * @param theVerbose If set to true, all logging is enabled
 	 */
 	public LoggingInterceptor(boolean theVerbose) {
 		if (theVerbose) {
@@ -78,7 +76,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	@Hook(Pointcut.CLIENT_REQUEST)
+	@Hook(value = Pointcut.CLIENT_REQUEST, order = InterceptorOrders.LOGGING_INTERCEPTOR_RESPONSE)
 	public void interceptRequest(IHttpRequest theRequest) {
 		if (myLogRequestSummary) {
 			myLog.info("Client request: {}", theRequest);
@@ -102,7 +100,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	@Hook(Pointcut.CLIENT_RESPONSE)
+	@Hook(value = Pointcut.CLIENT_RESPONSE, order = InterceptorOrders.LOGGING_INTERCEPTOR_REQUEST)
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		if (myLogResponseSummary) {
 			String message = "HTTP " + theResponse.getStatus() + " " + theResponse.getStatusInfo();
@@ -167,18 +165,18 @@ public class LoggingInterceptor implements IClientInterceptor {
 		StringBuilder b = new StringBuilder();
 		if (theHeaders != null && !theHeaders.isEmpty()) {
 			Iterator<String> nameEntries = theHeaders.keySet().iterator();
-			while(nameEntries.hasNext()) {
+			while (nameEntries.hasNext()) {
 				String key = nameEntries.next();
 				Iterator<String> values = theHeaders.get(key).iterator();
-				while(values.hasNext()) {
+				while (values.hasNext()) {
 					String value = values.next();
-						b.append(key);
-						b.append(": ");
-						b.append(value);
-						if (nameEntries.hasNext() || values.hasNext()) {
-							b.append('\n');
-						}
+					b.append(key);
+					b.append(": ");
+					b.append(value);
+					if (nameEntries.hasNext() || values.hasNext()) {
+						b.append('\n');
 					}
+				}
 			}
 		}
 		return b;
@@ -187,9 +185,8 @@ public class LoggingInterceptor implements IClientInterceptor {
 	/**
 	 * Sets a logger to use to log messages (default is a logger with this class' name). This can be used to redirect
 	 * logs to a differently named logger instead.
-	 * 
-	 * @param theLogger
-	 *            The logger to use. Must not be null.
+	 *
+	 * @param theLogger The logger to use. Must not be null.
 	 */
 	public void setLogger(Logger theLogger) {
 		Validate.notNull(theLogger, "theLogger can not be null");

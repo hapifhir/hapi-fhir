@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
+public class DropIdGeneratorTask extends BaseTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIdGeneratorTask.class);
 	private final String myGeneratorName;
@@ -69,6 +69,8 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 				}
 				break;
 			case DERBY_EMBEDDED:
+				sql = "drop sequence " + myGeneratorName + " restrict";
+				break;
 			case H2_EMBEDDED:
 				sql = "drop sequence " + myGeneratorName;
 				break;
@@ -103,7 +105,7 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<DropIdGeneratorTask> theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		DropIdGeneratorTask otherObject = (DropIdGeneratorTask) theOtherObject;
 		theBuilder.append(myGeneratorName, otherObject.myGeneratorName);
 	}

@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -29,6 +31,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -42,9 +45,11 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ElementsParameter;
 import ca.uhn.fhir.rest.server.method.SummaryEnumParameter;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -54,6 +59,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Writer;
@@ -73,7 +79,8 @@ public class RestfulServerUtils {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
-	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<FhirVersionEnum, FhirContext>());
+	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<>());
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
 	private enum NarrativeModeEnum {
 		NORMAL, ONLY, SUPPRESS;
@@ -163,7 +170,7 @@ public class RestfulServerUtils {
 		}
 
 		if (summaryModeCount) {
-			parser.setEncodeElements(Collections.singleton("Bundle.total"));
+			parser.setEncodeElements(Sets.newHashSet("Bundle.total", "Bundle.type"));
 		} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
 			parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
 			parser.setEncodeElementsAppliesToChildResourcesOnly(true);
@@ -335,26 +342,21 @@ public class RestfulServerUtils {
 		return b.toString();
 	}
 
-	/**
-	 * @TODO: this method is only called from one place and should be removed anyway
-	 */
-	public static EncodingEnum determineRequestEncoding(RequestDetails theReq) {
-		EncodingEnum retVal = determineRequestEncodingNoDefault(theReq);
-		if (retVal != null) {
-			return retVal;
-		}
-		return EncodingEnum.XML;
+	@Nullable
+	public static EncodingEnum determineRequestEncodingNoDefault(RequestDetails theReq) {
+		return determineRequestEncodingNoDefault(theReq, false);
 	}
 
-	public static EncodingEnum determineRequestEncodingNoDefault(RequestDetails theReq) {
-		ResponseEncoding retVal = determineRequestEncodingNoDefaultReturnRE(theReq);
+	@Nullable
+	public static EncodingEnum determineRequestEncodingNoDefault(RequestDetails theReq, boolean theStrict) {
+		ResponseEncoding retVal = determineRequestEncodingNoDefaultReturnRE(theReq, theStrict);
 		if (retVal == null) {
 			return null;
 		}
 		return retVal.getEncoding();
 	}
 
-	private static ResponseEncoding determineRequestEncodingNoDefaultReturnRE(RequestDetails theReq) {
+	private static ResponseEncoding determineRequestEncodingNoDefaultReturnRE(RequestDetails theReq, boolean theStrict) {
 		ResponseEncoding retVal = null;
 		List<String> headers = theReq.getHeaders(Constants.HEADER_CONTENT_TYPE);
 		if (headers != null) {
@@ -372,7 +374,12 @@ public class RestfulServerUtils {
 								nextPart = nextPart.substring(0, scIdx);
 							}
 							nextPart = nextPart.trim();
-							EncodingEnum encoding = EncodingEnum.forContentType(nextPart);
+							EncodingEnum encoding;
+							if (theStrict) {
+								encoding = EncodingEnum.forContentTypeStrict(nextPart);
+							} else {
+								encoding = EncodingEnum.forContentType(nextPart);
+							}
 							if (encoding != null) {
 								retVal = new ResponseEncoding(theReq.getServer().getFhirContext(), encoding, nextPart);
 								break;
@@ -506,7 +513,7 @@ public class RestfulServerUtils {
 		 * has a Content-Type header but not an Accept header)
 		 */
 		if (retVal == null) {
-			retVal = determineRequestEncodingNoDefaultReturnRE(theReq);
+			retVal = determineRequestEncodingNoDefaultReturnRE(theReq, strict);
 		}
 
 		return retVal;
@@ -583,7 +590,7 @@ public class RestfulServerUtils {
 			if (theResource != null && isBlank(resName)) {
 				FhirContext context = theServer.getFhirContext();
 				context = getContextForVersion(context, theResource.getStructureFhirVersionEnum());
-				resName = context.getResourceDefinition(theResource).getName();
+				resName = context.getResourceType(theResource);
 			}
 			if (isNotBlank(resName)) {
 				retVal = theResourceId.withServerBase(theServerBase, resName);
@@ -692,59 +699,55 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
-	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
-
 	public static boolean respectPreferHeader(RestOperationTypeEnum theRestOperationType) {
 		return ourOperationsWhichAllowPreferHeader.contains(theRestOperationType);
 	}
 
 	@Nonnull
-    public static PreferHeader parsePreferHeader(IRestfulServer<?> theServer, String theValue) {
-        PreferHeader retVal = new PreferHeader();
-        
-        if (isNotBlank(theValue)) {
-            StringTokenizer tok = new StringTokenizer(theValue, ";");
-            while (tok.hasMoreTokens()) {
-                String next = trim(tok.nextToken());
-                int eqIndex = next.indexOf('=');
-                
-                String key;
-                String value;
-                if (eqIndex == -1 || eqIndex >= next.length() - 2) {
-                    key = next;
-                    value = "";
-                } else {
-                    key = next.substring(0, eqIndex).trim();
-                    value = next.substring(eqIndex + 1).trim();
-                }
-                
-                if (key.equals(Constants.HEADER_PREFER_RETURN)) {
-                    
-                    if (value.length() < 2) {
-                        continue;
-                    }
-                    if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
-                        value = value.substring(1, value.length() - 1);
-                    }
-                    
-                    retVal.setReturn(PreferReturnEnum.fromHeaderValue(value));
-                    
-                } else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
-                    
-                    retVal.setRespondAsync(true);
-                    
-                }
-            }
-        }
+	public static PreferHeader parsePreferHeader(IRestfulServer<?> theServer, String theValue) {
+		PreferHeader retVal = new PreferHeader();
+
+		if (isNotBlank(theValue)) {
+			StringTokenizer tok = new StringTokenizer(theValue, ";");
+			while (tok.hasMoreTokens()) {
+				String next = trim(tok.nextToken());
+				int eqIndex = next.indexOf('=');
+
+				String key;
+				String value;
+				if (eqIndex == -1 || eqIndex >= next.length() - 2) {
+					key = next;
+					value = "";
+				} else {
+					key = next.substring(0, eqIndex).trim();
+					value = next.substring(eqIndex + 1).trim();
+				}
+
+				if (key.equals(Constants.HEADER_PREFER_RETURN)) {
+
+					if (value.length() < 2) {
+						continue;
+					}
+					if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
+						value = value.substring(1, value.length() - 1);
+					}
+
+					retVal.setReturn(PreferReturnEnum.fromHeaderValue(value));
+
+				} else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
+
+					retVal.setRespondAsync(true);
+
+				}
+			}
+		}
 
 		if (retVal.getReturn() == null && theServer != null && theServer.getDefaultPreferReturn() != null) {
 			retVal.setReturn(theServer.getDefaultPreferReturn());
 		}
 
 		return retVal;
-    }
-    
-    
+	}
 
 
 	public static boolean prettyPrintResponse(IRestfulServerDefaults theServer, RequestDetails theRequest) {
@@ -768,12 +771,12 @@ public class RestfulServerUtils {
 	}
 
 	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int stausCode, boolean theAddContentLocationHeader,
-																					boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
+																 boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
 		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, null, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
 	}
 
 	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode, String theStatusMessage,
-																					boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
+																 boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
 		throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
 
@@ -859,7 +862,7 @@ public class RestfulServerUtils {
 			 * parts, we're not streaming just the narrative as HTML (since bundles don't even
 			 * have one)
 			 */
-			if ("Bundle".equals(theServer.getFhirContext().getResourceDefinition(theResource).getName())) {
+			if ("Bundle".equals(theServer.getFhirContext().getResourceType(theResource))) {
 				encodingDomainResourceAsText = false;
 			}
 		}
@@ -892,6 +895,19 @@ public class RestfulServerUtils {
 		String charset = Constants.CHARSET_NAME_UTF8;
 
 		Writer writer = response.getResponseWriter(theStatusCode, theStatusMessage, contentType, charset, respondGzip);
+
+		// Interceptor call: SERVER_OUTGOING_WRITER_CREATED
+		if (theServer.getInterceptorService() != null && theServer.getInterceptorService().hasHooks(Pointcut.SERVER_OUTGOING_WRITER_CREATED)) {
+			HookParams params = new HookParams()
+				.add(Writer.class, writer)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			Object newWriter = theServer.getInterceptorService().callHooksAndReturnObject(Pointcut.SERVER_OUTGOING_WRITER_CREATED, params);
+			if (newWriter != null) {
+				writer = (Writer) newWriter;
+			}
+		}
+
 		if (theResource == null) {
 			// No response is being returned
 		} else if (encodingDomainResourceAsText && theResource instanceof IResource) {
@@ -937,5 +953,22 @@ public class RestfulServerUtils {
 	}
 
 
+	/**
+	 * @since 5.0.0
+	 */
+	public static DeleteCascadeModeEnum extractDeleteCascadeParameter(RequestDetails theRequest) {
+		if (theRequest != null) {
+			String[] cascadeParameters = theRequest.getParameters().get(Constants.PARAMETER_CASCADE_DELETE);
+			if (cascadeParameters != null && Arrays.asList(cascadeParameters).contains(Constants.CASCADE_DELETE)) {
+				return DeleteCascadeModeEnum.DELETE;
+			}
 
+			String cascadeHeader = theRequest.getHeader(Constants.HEADER_CASCADE);
+			if (Constants.CASCADE_DELETE.equals(cascadeHeader)) {
+				return DeleteCascadeModeEnum.DELETE;
+			}
+		}
+
+		return DeleteCascadeModeEnum.NONE;
+	}
 }

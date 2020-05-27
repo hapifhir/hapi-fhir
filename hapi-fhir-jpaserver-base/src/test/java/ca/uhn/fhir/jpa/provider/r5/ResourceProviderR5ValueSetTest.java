@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -27,10 +27,20 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.IntegerType;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.UriType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -968,27 +978,51 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testValidateCodeAgainstBuiltInSystem() {
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("validate-code")
-			.withParameter(Parameters.class, "code", new StringType("Y"))
-			.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/yesnodontknow"))
-			.andParameter("system", new StringType("http://terminology.hl7.org/CodeSystem/v2-0136"))
-			.useHttpGet()
-			.execute();
+		// Good code and system, good valueset
+		{
+			Parameters respParam = ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameter(Parameters.class, "code", new StringType("male"))
+				.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/administrative-gender"))
+				.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
+				.useHttpGet()
+				.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
+			String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+			ourLog.info(resp);
 
-		assertEquals("result", respParam.getParameter().get(0).getName());
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
+			assertEquals("result", respParam.getParameter().get(0).getName());
+			assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertEquals("message", respParam.getParameter().get(1).getName());
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
+			assertEquals("message", respParam.getParameter().get(1).getName());
+			assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
 
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Yes", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+			assertEquals("display", respParam.getParameter().get(2).getName());
+			assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		}
+		// Good code and system, but not in specified valueset
+		{
+			Parameters respParam = ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameter(Parameters.class, "code", new StringType("male"))
+				.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/marital-status"))
+				.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
+				.useHttpGet()
+				.execute();
+
+			String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+			ourLog.info(resp);
+
+			assertEquals("result", respParam.getParameter().get(0).getName());
+			assertEquals(false, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
+
+			assertEquals("message", respParam.getParameter().get(1).getName());
+			assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("Code not found"));
+		}
 	}
 
 	@Test

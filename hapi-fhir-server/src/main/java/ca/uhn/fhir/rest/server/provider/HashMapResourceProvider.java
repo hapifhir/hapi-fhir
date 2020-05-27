@@ -29,9 +29,23 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
+import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -48,7 +62,14 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -77,9 +98,9 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = Collections.synchronizedMap(new LinkedHashMap<>());
 	protected Map<String, LinkedList<T>> myIdToHistory = Collections.synchronizedMap(new LinkedHashMap<>());
 	protected LinkedList<T> myTypeHistory = new LinkedList<>();
+	protected AtomicLong mySearchCount = new AtomicLong(0);
 	private long myNextId;
 	private AtomicLong myDeleteCount = new AtomicLong(0);
-	private AtomicLong mySearchCount = new AtomicLong(0);
 	private AtomicLong myUpdateCount = new AtomicLong(0);
 	private AtomicLong myCreateCount = new AtomicLong(0);
 	private AtomicLong myReadCount = new AtomicLong(0);
@@ -93,7 +114,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public HashMapResourceProvider(FhirContext theFhirContext, Class<T> theResourceType) {
 		myFhirContext = theFhirContext;
 		myResourceType = theResourceType;
-		myResourceName = myFhirContext.getResourceDefinition(theResourceType).getName();
+		myResourceName = myFhirContext.getResourceType(theResourceType);
 		clear();
 	}
 
@@ -119,8 +140,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Create
-	public MethodOutcome create(@ResourceParam T theResource) {
-		createInternal(theResource);
+	public MethodOutcome create(@ResourceParam T theResource, RequestDetails theRequestDetails) {
+		TransactionDetails transactionDetails = new TransactionDetails();
+
+		createInternal(theResource, theRequestDetails, transactionDetails);
 
 		myCreateCount.incrementAndGet();
 
@@ -130,17 +153,19 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			.setId(theResource.getIdElement());
 	}
 
-	private void createInternal(@ResourceParam T theResource) {
+	private void createInternal(@ResourceParam T theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		long idPart = myNextId++;
 		String idPartAsString = Long.toString(idPart);
 		Long versionIdPart = 1L;
 
-		IIdType id = store(theResource, idPartAsString, versionIdPart);
+		IIdType id = store(theResource, idPartAsString, versionIdPart, theRequestDetails, theTransactionDetails);
 		theResource.setId(id);
 	}
 
 	@Delete
-	public MethodOutcome delete(@IdParam IIdType theId) {
+	public MethodOutcome delete(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+		TransactionDetails transactionDetails = new TransactionDetails();
+
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
 			throw new ResourceNotFoundException(theId);
@@ -148,7 +173,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 
 		long nextVersion = versions.lastEntry().getKey() + 1L;
-		IIdType id = store(null, theId.getIdPart(), nextVersion);
+		IIdType id = store(null, theId.getIdPart(), nextVersion, theRequestDetails, transactionDetails);
 
 		myDeleteCount.incrementAndGet();
 
@@ -207,7 +232,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@History
-	public List<T> historyInstance(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+	public List<IBaseResource> historyInstance(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		LinkedList<T> retVal = myIdToHistory.get(theId.getIdPart());
 		if (retVal == null) {
 			throw new ResourceNotFoundException(theId);
@@ -255,7 +280,14 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Search
-	public List<T> searchAll(RequestDetails theRequestDetails) {
+	public List<IBaseResource> searchAll(RequestDetails theRequestDetails) {
+		mySearchCount.incrementAndGet();
+		List<T> retVal = getAllResources();
+		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
+	}
+
+	@Nonnull
+	protected List<T> getAllResources() {
 		List<T> retVal = new ArrayList<>();
 
 		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
@@ -267,13 +299,11 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			}
 		}
 
-		mySearchCount.incrementAndGet();
-
-		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
+		return retVal;
 	}
 
 	@Search
-	public List<T> searchById(
+	public List<IBaseResource> searchById(
 		@RequiredParam(name = "_id") TokenAndListParam theIds, RequestDetails theRequestDetails) {
 
 		List<T> retVal = new ArrayList<>();
@@ -310,7 +340,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 	}
 
-	private IIdType store(@ResourceParam T theResource, String theIdPart, Long theVersionIdPart) {
+	private IIdType store(@ResourceParam T theResource, String theIdPart, Long theVersionIdPart, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		IIdType id = myFhirContext.getVersion().newIdType();
 		String versionIdPart = Long.toString(theVersionIdPart);
 		id.setParts(null, myResourceName, theIdPart, versionIdPart);
@@ -348,6 +378,37 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		TreeMap<Long, T> versionToResource = getVersionToResource(theIdPart);
 		versionToResource.put(theVersionIdPart, theResource);
 
+		if (theRequestDetails != null) {
+			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
+
+			if (theResource != null) {
+				if (!myIdToHistory.containsKey(theIdPart)) {
+
+					// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, params);
+
+				} else {
+
+					// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_UPDATED
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+
+				}
+			}
+		}
+
 		// Store to type history map
 		myTypeHistory.addFirst(theResource);
 
@@ -365,11 +426,13 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	@Update
 	public MethodOutcome update(
 		@ResourceParam T theResource,
-		@ConditionalUrlParam String theConditional) {
+		@ConditionalUrlParam String theConditional,
+		RequestDetails theRequestDetails) {
+		TransactionDetails transactionDetails = new TransactionDetails();
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(isBlank(theConditional), "This server doesn't support conditional update");
 
-		boolean created = updateInternal(theResource);
+		boolean created = updateInternal(theResource, theRequestDetails, transactionDetails);
 		myUpdateCount.incrementAndGet();
 
 		return new MethodOutcome()
@@ -378,7 +441,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			.setId(theResource.getIdElement());
 	}
 
-	private boolean updateInternal(@ResourceParam T theResource) {
+	private boolean updateInternal(@ResourceParam T theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		String idPartAsString = theResource.getIdElement().getIdPart();
 		TreeMap<Long, T> versionToResource = getVersionToResource(idPartAsString);
 
@@ -392,7 +455,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			created = false;
 		}
 
-		IIdType id = store(theResource, idPartAsString, versionIdPart);
+		IIdType id = store(theResource, idPartAsString, versionIdPart, theRequestDetails, theTransactionDetails);
 		theResource.setId(id);
 		return created;
 	}
@@ -411,9 +474,9 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 */
 	public IIdType store(T theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
-			updateInternal(theResource);
+			updateInternal(theResource, null, new TransactionDetails());
 		} else {
-			createInternal(theResource);
+			createInternal(theResource, null, new TransactionDetails());
 		}
 		return theResource.getIdElement();
 	}
@@ -432,7 +495,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	private static <T extends IBaseResource> T fireInterceptorsAndFilterAsNeeded(T theResource, RequestDetails theRequestDetails) {
-		List<T> output = fireInterceptorsAndFilterAsNeeded(Lists.newArrayList(theResource), theRequestDetails);
+		List<IBaseResource> output = fireInterceptorsAndFilterAsNeeded(Lists.newArrayList(theResource), theRequestDetails);
 		if (output.size() == 1) {
 			return theResource;
 		} else {
@@ -440,8 +503,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		}
 	}
 
-	private static <T extends IBaseResource> List<T> fireInterceptorsAndFilterAsNeeded(List<T> theResources, RequestDetails theRequestDetails) {
-		ArrayList<T> resourcesToReturn = new ArrayList<>(theResources);
+	protected static <T extends IBaseResource> List<IBaseResource> fireInterceptorsAndFilterAsNeeded(List<T> theResources, RequestDetails theRequestDetails) {
+		List<IBaseResource> resourcesToReturn = new ArrayList<>(theResources);
 
 		if (theRequestDetails != null) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
@@ -462,6 +525,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(IPreResourceShowDetails.class, preResourceShowDetails);
 			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, preShowParams);
+			resourcesToReturn = preResourceShowDetails.toList();
 
 		}
 

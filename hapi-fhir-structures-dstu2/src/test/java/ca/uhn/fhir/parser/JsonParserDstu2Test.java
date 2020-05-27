@@ -498,37 +498,28 @@ public class JsonParserDstu2Test {
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 
-		//@formatter:off
 		String actual = enc.trim();
 		ourLog.info("Actual:\n{}", actual);
 
-		assertEquals("{\n" +
-			"  \"resourceType\": \"Patient\",\n" +
-			"  \"meta\": {\n" +
-			"    \"security\": [\n" +
-			"      {\n" +
-			"        \"system\": \"SYSTEM1\",\n" +
-			"        \"version\": \"VERSION1\",\n" +
-			"        \"code\": \"CODE1\",\n" +
-			"        \"display\": \"DISPLAY1\"\n" +
-			"      },\n" +
-			"      {\n" +
-			"        \"system\": \"SYSTEM2\",\n" +
-			"        \"version\": \"VERSION2\",\n" +
-			"        \"code\": \"CODE2\",\n" +
-			"        \"display\": \"DISPLAY2\"\n" +
-			"      }\n" +
-			"    ]\n" +
-			"  },\n" +
-			"  \"name\": [\n" +
-			"    {\n" +
-			"      \"family\": [\n" +
-			"        \"FAMILY\"\n" +
-			"      ]\n" +
-			"    }\n" +
-			"  ]\n" +
-			"}", actual);
-		//@formatter:on
+		assertThat(actual, stringContainsInOrder("{",
+			"  \"resourceType\": \"Patient\",", 
+			"  \"meta\": {", 
+			"    \"security\": [ {", 
+			"      \"system\": \"SYSTEM1\",", 
+			"      \"version\": \"VERSION1\",", 
+			"      \"code\": \"CODE1\",", 
+			"      \"display\": \"DISPLAY1\"", 
+			"    }, {", 
+			"      \"system\": \"SYSTEM2\",", 
+			"      \"version\": \"VERSION2\",", 
+			"      \"code\": \"CODE2\",", 
+			"      \"display\": \"DISPLAY2\"", 
+			"    } ]", 
+			"  },", 
+			"  \"name\": [ {", 
+			"    \"family\": [ \"FAMILY\" ]", 
+			"  } ]", 
+			"}"));
 
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
 		List<BaseCodingDt> gotLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(parsed);

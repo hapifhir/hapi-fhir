@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -31,7 +32,14 @@ import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -48,6 +56,7 @@ import java.util.Date;
 	"               h.res_updated       as res_updated,    " +
 	"               h.res_text          as res_text,       " +
 	"               h.res_encoding      as res_encoding,   " +
+	"               h.PARTITION_ID      as PARTITION_ID,   " +
 	"               p.SOURCE_URI        as PROV_SOURCE_URI," +
 	"               p.REQUEST_ID        as PROV_REQUEST_ID," +
 	"               f.forced_id         as FORCED_PID      " +
@@ -94,6 +103,8 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	private ResourceEncodingEnum myEncoding;
 	@Column(name = "FORCED_PID", length = ForcedId.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
+	@Column(name = "PARTITION_ID")
+	private Integer myPartitionId;
 
 	public ResourceSearchView() {
 	}
@@ -185,6 +196,11 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Override
 	public boolean isHasTags() {
 		return myHasTags;
+	}
+
+	@Override
+	public RequestPartitionId getPartitionId() {
+		return RequestPartitionId.fromPartitionId(myPartitionId);
 	}
 
 	public byte[] getResource() {

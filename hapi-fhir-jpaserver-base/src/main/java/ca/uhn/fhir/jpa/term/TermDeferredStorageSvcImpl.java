@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -96,6 +96,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	public void addValueSetsToStorageQueue(List<ValueSet> theValueSets) {
 		Validate.notNull(theValueSets);
 		myDeferredValueSets.addAll(theValueSets);
+	}
+
+	@Override
+	public void saveAllDeferred() {
+		while (!isStorageQueueEmpty()) {
+			saveDeferred();
+		}
 	}
 
 	@Override

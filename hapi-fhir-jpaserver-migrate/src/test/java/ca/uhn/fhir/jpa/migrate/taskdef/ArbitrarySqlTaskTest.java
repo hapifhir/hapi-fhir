@@ -1,17 +1,22 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
 public class ArbitrarySqlTaskTest extends BaseTest {
+
+	public ArbitrarySqlTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		super(theTestDatabaseDetails);
+	}
 
 	@Test
 	public void test350MigrateSearchParams() {
@@ -36,7 +41,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			Boolean present = (Boolean) t.get("SP_PRESENT");
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
-			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);
+			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), null, resType, paramName, present);
 			task.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENT = ? where PID = ?", hash, pid);
 		});
 
@@ -106,8 +111,8 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		};
 		migrator
 			.forVersion(VersionEnum.V3_5_0)
-			.executeRawSql("1", DriverTypeEnum.H2_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
-			.executeRawSql("2", DriverTypeEnum.H2_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
+			.executeRawSql("1", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
+			.executeRawSql("2", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
 
 		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();

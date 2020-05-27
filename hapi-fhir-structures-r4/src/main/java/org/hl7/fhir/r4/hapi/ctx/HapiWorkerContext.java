@@ -1,10 +1,10 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -16,24 +16,38 @@ import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.formats.IParser;
 import org.hl7.fhir.r4.formats.ParserType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureMap;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
-import org.hl7.fhir.r4.terminologies.ValueSetExpanderFactory;
-import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.r4.utils.IResourceValidator;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
+public final class HapiWorkerContext extends I18nBase implements IWorkerContext {
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
   private IValidationSupport myValidationSupport;
@@ -52,11 +66,14 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     }
 
     myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS).build();
+
+    // Set a default locale
+    setValidationMessageLanguage(getLocale());
   }
 
   @Override
   public List<StructureDefinition> allStructures() {
-    return myValidationSupport.fetchAllStructureDefinitions(myCtx);
+    return myValidationSupport.fetchAllStructureDefinitions();
   }
 
   @Override
@@ -69,7 +86,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     if (myValidationSupport == null) {
       return null;
     } else {
-      return myValidationSupport.fetchCodeSystem(myCtx, theSystem);
+      return (CodeSystem) myValidationSupport.fetchCodeSystem(theSystem);
     }
   }
 
@@ -81,13 +98,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public String getAbbreviation(String theName) {
     throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ValueSetExpander getExpander() {
-    ValueSetExpanderSimple retVal = new ValueSetExpanderSimple(this);
-    retVal.setMaxExpansionSize(Integer.MAX_VALUE);
-    return retVal;
   }
 
   @Override
@@ -140,7 +150,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     if (myValidationSupport == null) {
       return false;
     } else {
-      return myValidationSupport.isCodeSystemSupported(myCtx, theSystem);
+      return myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), theSystem);
     }
   }
 
@@ -152,7 +162,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
     for (Coding next : theCode.getCoding()) {
       ValidationResult retVal = validateCode(theOptions, next, theVs);
       if (retVal.isOk()) {
@@ -164,7 +174,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, Coding theCode, ValueSet theVs) {
+  public ValidationResult validateCode(ValidationOptions theOptions, Coding theCode, ValueSet theVs) {
     String system = theCode.getSystem();
     String code = theCode.getCode();
     String display = theCode.getDisplay();
@@ -172,48 +182,35 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay) {
-    IContextValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, (String)null);
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
-    return new ValidationResult((IssueSeverity)result.getSeverity(), result.getMessage(), (ConceptDefinitionComponent)result.asConceptDefinition());
+
+    IssueSeverity severity = null;
+    if (result.getSeverity() != null) {
+      severity = IssueSeverity.fromCode(result.getSeverityCode());
+    }
+
+    ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
+    return new ValidationResult(severity, result.getMessage(), definition);
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
     throw new UnsupportedOperationException();
   }
 
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-
-    /*
-     * The following valueset is a special case, since the BCP codesystem is very difficult to expand
-     */
-    if ("http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
-      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-      definition.setCode(theSystem);
-      definition.setDisplay(theCode);
-      return new ValidationResult(definition);
-    }
-
-    /*
-     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
-     */
-    if ("http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
-      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-      definition.setCode(theSystem);
-      definition.setDisplay(theCode);
-      return new ValidationResult(definition);
-    }
+  public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
     IValidationSupport.CodeValidationResult outcome;
     if (isNotBlank(theVs.getUrl())) {
-      outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+      outcome = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
-      outcome = myValidationSupport.validateCodeInValueSet(myCtx, theSystem, theCode, theDisplay, theVs);
+      outcome = myValidationSupport.validateCodeInValueSet(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs);
     }
 
     if (outcome != null && outcome.isOk()) {
@@ -227,8 +224,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, ValueSet vs) {
-    return validateCode(theOptions, Constants.CODESYSTEM_VALIDATE_NOT_NEEDED, code, null, vs);
+  public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet vs) {
+    ValidationOptions options = theOptions.guessSystem();
+    return validateCode(options, null, code, null, vs);
   }
 
   @Override
@@ -259,30 +257,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValueSetExpansionOutcome expand(ValueSet theSource, Parameters theProfile) {
-    ValueSetExpansionOutcome vso;
-    try {
-      vso = getExpander().expand(theSource, theProfile);
-    } catch (InvalidRequestException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new InternalErrorException(e);
-    }
-    if (vso.getError() != null) {
-      throw new InvalidRequestException(vso.getError());
-    } else {
-      return vso;
-    }
-  }
-
-  @Override
-  public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHeiarchical) {
+  public ValueSetExpander.ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHeiarchical) throws TerminologyServiceException {
-    return myValidationSupport.expandValueSet(myCtx, theInc);
+  public ValueSetExpander.ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical) throws TerminologyServiceException {
+    ValueSet input = new ValueSet();
+    input.getCompose().addInclude(theInc);
+    IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
+    return new ValueSetExpander.ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
   }
 
   @Override
@@ -361,9 +345,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return null;
     } else {
       @SuppressWarnings("unchecked")
-      T retVal = (T) myFetchedResourceCache.get(theUri, t -> {
-        return myValidationSupport.fetchResource(myCtx, theClass, theUri);
-      });
+      T retVal = (T) myFetchedResourceCache.get(theUri, t -> myValidationSupport.fetchResource(theClass, theUri));
       return retVal;
     }
   }
@@ -394,12 +376,20 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public Set<String> getResourceNamesAsSet() {
-    return myCtx.getResourceNames();
+    return myCtx.getResourceTypes();
   }
 
   @Override
-  public ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHeiarchical) throws FHIRException {
+  public ValueSetExpander.ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical) throws FHIRException {
     throw new UnsupportedOperationException();
+  }
+
+  public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
+    ConceptValidationOptions retVal = new ConceptValidationOptions();
+    if (theOptions.isGuessSystem()) {
+      retVal = retVal.setInferSystem(true);
+    }
+    return retVal;
   }
 
 }

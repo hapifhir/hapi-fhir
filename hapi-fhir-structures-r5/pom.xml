@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.3.0-SNAPSHOT</version>
+		<version>5.1.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -57,6 +57,11 @@
 		<dependency>
 			<groupId>xpp3</groupId>
 			<artifactId>xpp3</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 			<optional>true</optional>
 		</dependency>
 
@@ -114,6 +119,11 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>ooxml-schemas</artifactId>
 			<version>1.4</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
 			<optional>true</optional>
 		</dependency>
 
@@ -346,6 +356,13 @@
 					<dependencySourceIncludes>
 						<include>ca.uhn.hapi.fhir:org.hl7.fhir.r5</include>
 					</dependencySourceIncludes>
+					<additionalDependencies>
+						<dependency>
+							<groupId>com.google.guava</groupId>
+							<artifactId>guava</artifactId>
+							<version>${guava_version}</version>
+						</dependency>
+					</additionalDependencies>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.model.cross.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -23,9 +23,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -44,7 +51,11 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_VALUE_SET;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3Test {
 
@@ -760,9 +771,9 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
-			.withParameter(Parameters.class, "code", new StringType("BRN"))
-			.andParameter("identifier", new StringType("http://hl7.org/fhir/ValueSet/v2-0487"))
-			.andParameter("system", new StringType("http://hl7.org/fhir/v2/0487"))
+			.withParameter(Parameters.class, "code", new StringType("male"))
+			.andParameter("identifier", new StringType("http://hl7.org/fhir/ValueSet/administrative-gender"))
+			.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
 			.useHttpGet()
 			.execute();
 
@@ -776,7 +787,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), Matchers.containsStringIgnoringCase("succeeded"));
 
 		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Burn", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	/**
@@ -790,9 +801,9 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
-			.withParameter(Parameters.class, "code", new StringType("BRN"))
-			.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/v2-0487"))
-			.andParameter("system", new StringType("http://hl7.org/fhir/v2/0487"))
+			.withParameter(Parameters.class, "code", new StringType("male"))
+			.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/administrative-gender"))
+			.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
 			.useHttpGet()
 			.execute();
 
@@ -806,7 +817,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), Matchers.containsStringIgnoringCase("succeeded"));
 
 		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Burn", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@After

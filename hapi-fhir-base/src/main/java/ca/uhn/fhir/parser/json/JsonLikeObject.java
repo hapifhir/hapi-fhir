@@ -53,20 +53,4 @@ public abstract class JsonLikeObject extends JsonLikeValue {
 	
 	public abstract JsonLikeValue get (String key);
 	
-	public String getString (String key) {
-		JsonLikeValue value = this.get(key);
-		if (null == value) {
-			throw new NullPointerException("Json object missing element named \""+key+"\"");
-		}
-		return value.getAsString();
-	}
-	
-	public String getString (String key, String defaultValue) {
-		String result = defaultValue;
-		JsonLikeValue value = this.get(key);
-		if (value != null) {
-			result = value.getAsString();
-		}
-		return result;
-	}
 }

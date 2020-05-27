@@ -21,17 +21,23 @@ package ca.uhn.fhir.jpa.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.*;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DeleteConflict;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.apache.commons.lang3.Validate;
@@ -41,9 +47,9 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.delete.DeleteConflictService.MAX_RETRY_ATTEMPTS;
@@ -71,30 +77,42 @@ public class CascadingDeleteInterceptor {
 
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final FhirContext myFhirContext;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theDaoRegistry The DAO registry (must not be null)
 	 */
-	public CascadingDeleteInterceptor(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster) {
+	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theInterceptorBroadcaster, "theInterceptorBroadcaster must not be null");
+		Validate.notNull(theFhirContext, "theFhirContext must not be null");
+
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myFhirContext = theFhirContext;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS)
-	public DeleteConflictOutcome handleDeleteConflicts(DeleteConflictList theConflictList, RequestDetails theRequest) {
+	public DeleteConflictOutcome handleDeleteConflicts(DeleteConflictList theConflictList, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ourLog.debug("Have delete conflicts: {}", theConflictList);
 
-		if (!shouldCascade(theRequest)) {
+		if (shouldCascade(theRequest) == DeleteCascadeModeEnum.NONE) {
+
+			// Add a message to the response
+			String message = myFhirContext.getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
+			ourLog.trace(message);
+
+			if (theRequest != null) {
+				theRequest.getUserData().put(CASCADED_DELETES_FAILED_KEY, message);
+			}
+
 			return null;
 		}
 
 		List<String> cascadedDeletes = getCascadedDeletesMap(theRequest, true);
-		for (Iterator<DeleteConflict> iter = theConflictList.iterator(); iter.hasNext(); ) {
-			DeleteConflict next = iter.next();
+		for (DeleteConflict next : theConflictList) {
 			IdDt nextSource = next.getSourceId();
 			String nextSourceId = nextSource.toUnqualifiedVersionless().getValue();
 
@@ -113,7 +131,7 @@ public class CascadingDeleteInterceptor {
 
 				// Actually perform the delete
 				ourLog.info("Have delete conflict {} - Cascading delete", next);
-				dao.delete(nextSource, theConflictList, theRequest);
+				dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
 
 				cascadedDeletes.add(nextSourceId);
 
@@ -176,28 +194,12 @@ public class CascadingDeleteInterceptor {
 	/**
 	 * Subclasses may override
 	 *
-	 * @param theRequest The REST request
+	 * @param theRequest The REST request (may be null)
 	 * @return Returns true if cascading delete should be allowed
 	 */
-	@SuppressWarnings("WeakerAccess")
-	protected boolean shouldCascade(RequestDetails theRequest) {
-		if (theRequest != null) {
-			String[] cascadeParameters = theRequest.getParameters().get(Constants.PARAMETER_CASCADE_DELETE);
-			if (cascadeParameters != null && Arrays.asList(cascadeParameters).contains(Constants.CASCADE_DELETE)) {
-				return true;
-			}
-
-			String cascadeHeader = theRequest.getHeader(Constants.HEADER_CASCADE);
-			if (Constants.CASCADE_DELETE.equals(cascadeHeader)) {
-				return true;
-			}
-
-			// Add a message to the response
-			String message = theRequest.getFhirContext().getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
-			theRequest.getUserData().put(CASCADED_DELETES_FAILED_KEY, message);
-		}
-
-		return false;
+	@Nonnull
+	protected DeleteCascadeModeEnum shouldCascade(@Nullable RequestDetails theRequest) {
+		return RestfulServerUtils.extractDeleteCascadeParameter(theRequest);
 	}
 
 

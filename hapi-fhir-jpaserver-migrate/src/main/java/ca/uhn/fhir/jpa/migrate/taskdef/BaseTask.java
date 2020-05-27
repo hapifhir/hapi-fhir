@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class BaseTask<T extends BaseTask> {
+public abstract class BaseTask {
 
 	public static final String MIGRATION_VERSION_PATTERN = "\\d{8}\\.\\d+";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTask.class);
@@ -84,9 +84,9 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public T setDescription(String theDescription) {
+	public BaseTask setDescription(String theDescription) {
 		myDescription = theDescription;
-		return (T) this;
+		return this;
 	}
 
 	public List<ExecutedStatement> getExecutedStatements() {
@@ -108,7 +108,9 @@ public abstract class BaseTask<T extends BaseTask> {
 				JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 				try {
 					int changesCount = jdbcTemplate.update(theSql, theArguments);
-					logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+					if (!"true".equals(System.getProperty("unit_test_mode"))) {
+						logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+					}
 					return changesCount;
 				} catch (DataAccessException e) {
 					if (myFailureAllowed) {
@@ -165,11 +167,16 @@ public abstract class BaseTask<T extends BaseTask> {
 		doExecute();
 	}
 
-	public abstract void doExecute() throws SQLException;
+	protected abstract void doExecute() throws SQLException;
 
 	public void setFailureAllowed(boolean theFailureAllowed) {
 		myFailureAllowed = theFailureAllowed;
 	}
+
+	protected boolean isFailureAllowed() {
+		return myFailureAllowed;
+	}
+
 
 	public String getFlywayVersion() {
 		String releasePart = myProductVersion;
@@ -194,7 +201,7 @@ public abstract class BaseTask<T extends BaseTask> {
 		return myDoNothing;
 	}
 
-	public BaseTask<T> setDoNothing(boolean theDoNothing) {
+	public BaseTask setDoNothing(boolean theDoNothing) {
 		myDoNothing = theDoNothing;
 		return this;
 	}
@@ -214,14 +221,14 @@ public abstract class BaseTask<T extends BaseTask> {
 			return false;
 		}
 		@SuppressWarnings("unchecked")
-		T otherObject = (T) theObject;
+		BaseTask otherObject = (BaseTask) theObject;
 
 		EqualsBuilder b = new EqualsBuilder();
 		generateEquals(b, otherObject);
 		return b.isEquals();
 	}
 
-	protected abstract void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject);
+	protected abstract void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject);
 
 	public static class ExecutedStatement {
 		private final String mySql;

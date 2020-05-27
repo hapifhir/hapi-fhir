@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -22,7 +22,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -32,10 +31,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
-import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.ProxyUtils;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -48,8 +44,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -393,7 +398,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
 			"IDX_STRING='Patient?identifier=urn%7C111'",
-			"HASH_SYS_AND_VALUE in ('-3122824860083758210')"
+			"HASH_SYS_AND_VALUE='-3122824860083758210'"
 		));
 		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
 		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
@@ -530,7 +535,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
 			"IDX_STRING='ServiceRequest?identifier=sys%7C111&patient=Patient%2F" + ptId.getIdPart() + "&performer=Practitioner%2F" + practId.getIdPart() + "'",
-			"HASH_SYS_AND_VALUE in ('6795110643554413877')"
+			"HASH_SYS_AND_VALUE='6795110643554413877'"
 		));
 		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
 		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
@@ -551,8 +556,8 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(srId));
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
-			"SRC_PATH in ('ServiceRequest.subject.where(resolve() is Patient)')",
-			"SRC_PATH in ('ServiceRequest.performer')"
+			"SRC_PATH='ServiceRequest.subject.where(resolve() is Patient)'",
+			"SRC_PATH='ServiceRequest.performer'"
 		));
 		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
 		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));
@@ -695,7 +700,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
 		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 			assertEquals(uniques.toString(), 1, uniques.size());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
@@ -712,7 +717,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		myResourceReindexingSvc.forceReindexingPass();
 		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 			assertEquals(uniques.toString(), 1, uniques.size());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));

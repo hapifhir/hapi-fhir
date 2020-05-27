@@ -30,7 +30,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+// TODO: move this to ca.uhn.fhir.jpa.model.config
 public class ModelConfig {
+
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
 	 * values:
@@ -55,11 +57,15 @@ public class ModelConfig {
 	private boolean myAllowExternalReferences = false;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
-	private boolean myDefaultSearchParamsCanBeOverridden = false;
+	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
-	private boolean mySubscriptionMatchingEnabled = true;
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
+	/**
+	 * Update setter javadoc if default changes.
+	 */
+	private boolean myUseOrdinalDatesForDayPrecisionSearches = true;
+	private boolean mySuppressStringIndexingInTokens = false;
 
 	/**
 	 * Constructor
@@ -77,7 +83,7 @@ public class ModelConfig {
 	 * the behaviour of the default search parameters.
 	 * </p>
 	 * <p>
-	 * The default value for this setting is {@code false}
+	 * The default value for this setting is {@code true}
 	 * </p>
 	 */
 	public boolean isDefaultSearchParamsCanBeOverridden() {
@@ -93,7 +99,7 @@ public class ModelConfig {
 	 * the behaviour of the default search parameters.
 	 * </p>
 	 * <p>
-	 * The default value for this setting is {@code false}
+	 * The default value for this setting is {@code true}
 	 * </p>
 	 */
 	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
@@ -257,7 +263,6 @@ public class ModelConfig {
 			myTreatReferencesAsLogical = new HashSet<>();
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
-
 	}
 
 	/**
@@ -314,7 +319,6 @@ public class ModelConfig {
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.
-	 *
 	 */
 	public ModelConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
 		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
@@ -324,31 +328,9 @@ public class ModelConfig {
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.
-	 *
 	 */
 	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
 		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
-	}
-
-	/**
-	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
-	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
-	 * @since 3.7.0
-	 */
-
-	public boolean isSubscriptionMatchingEnabled() {
-		return mySubscriptionMatchingEnabled;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
-	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
-	 * @since 3.7.0
-	 */
-
-
-	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
-		mySubscriptionMatchingEnabled = theSubscriptionMatchingEnabled;
 	}
 
 	@VisibleForTesting
@@ -386,6 +368,74 @@ public class ModelConfig {
 
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myWebsocketContextPath = theWebsocketContextPath;
+	}
+
+	/**
+	 * <p>
+	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
+	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
+	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
+	 * <p>
+	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
+	 * integer representing the ordinal date {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
+	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
+	 * </p>
+	 * Default is {@literal true} beginning in HAPI FHIR 5.0.0
+	 * </p>
+	 *
+	 * @since 5.0.0
+	 */
+	public boolean getUseOrdinalDatesForDayPrecisionSearches() {
+		return myUseOrdinalDatesForDayPrecisionSearches;
+	}
+
+	/**
+	 * <p>
+	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
+	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
+	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
+	 * <p>
+	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
+	 * ordinal {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
+	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
+	 * </p>
+	 * Default is {@literal true} beginning in HAPI FHIR 5.0.0
+	 * </p>
+	 *
+	 * @since 5.0.0
+	 */
+	public void setUseOrdinalDatesForDayPrecisionSearches(boolean theUseOrdinalDates) {
+		myUseOrdinalDatesForDayPrecisionSearches = theUseOrdinalDates;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), when indexing SearchParameter values for token SearchParameter,
+	 * the string component to support the <code>:text</code> modifier will be disabled. This means that the following fields
+	 * will not be indexed for tokens:
+	 * <ul>
+	 *    <li>CodeableConcept.text</li>
+	 *    <li>Coding.display</li>
+	 *    <li>Identifier.use.text</li>
+	 * </ul>
+	 * @since 5.0.0
+	 */
+	public boolean isSuppressStringIndexingInTokens() {
+		return mySuppressStringIndexingInTokens;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), when indexing SearchParameter values for token SearchParameter,
+	 * the string component to support the <code>:text</code> modifier will be disabled. This means that the following fields
+	 * will not be indexed for tokens:
+	 * <ul>
+	 *    <li>CodeableConcept.text</li>
+	 *    <li>Coding.display</li>
+	 *    <li>Identifier.use.text</li>
+	 * </ul>
+	 * @since 5.0.0
+	 */
+	public void setSuppressStringIndexingInTokens(boolean theSuppressStringIndexingInTokens) {
+		mySuppressStringIndexingInTokens = theSuppressStringIndexingInTokens;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

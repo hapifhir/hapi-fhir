@@ -1,12 +1,10 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -36,8 +34,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -58,9 +55,6 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchNoFtTest.class);
-
-	@Autowired
-	MatchUrlService myMatchUrlService;
 
 	@Before
 	public void beforeDisableResultReuse() {
@@ -368,16 +362,16 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.setDevice(new Reference(devId));
 			obs.setSubject(new Reference(pid0));
-			myObservationDao.create(obs, mySrd).getId();
+			obs.setCode(new CodeableConcept(new Coding("sys", "val", "disp")));
+			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		SearchParameterMap params;
+		SearchParameterMap params = new SearchParameterMap();
 
-		// Not currently working
-//		params = new SearchParameterMap();
-//		params.setLoadSynchronous(true);
-//		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+		// Target exists and is linked
+		params.setLoadSynchronous(true);
+		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
 
 		// No targets exist
 		params = new SearchParameterMap();
@@ -495,7 +489,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertEquals(2, results.size());
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
-			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam((ParamPrefixEnum) null, 123, "http://foo", "UNIT"))));
+			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, "http://foo", "UNIT"))));
 		assertThat(actual, contains(id));
 	}
 
@@ -1592,7 +1586,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		dr01.setSubject(new Reference(patientId01));
 		IIdType drId01 = myDiagnosticReportDao.create(dr01, mySrd).getId();
 
-		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[]{patientId01, patientId02, obsId01, obsId02, drId01});
+		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", patientId01, patientId02, obsId01, obsId02, drId01);
 
 		List<Observation> result = toList(myObservationDao
 			.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"))));
@@ -1697,7 +1691,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		Date after = new Date();
 		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
-		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", new Object[]{patientId01, locId01, obsId01, obsId02});
+		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", patientId01, locId01, obsId01, obsId02);
 
 		List<IIdType> result;
 		SearchParameterMap params;
@@ -1760,7 +1754,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		dr01.setSubject(new Reference(patientId01));
 		IIdType drId01 = myDiagnosticReportDao.create(dr01, mySrd).getId();
 
-		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[]{patientId01, patientId02, obsId01, obsId02, drId01});
+		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", patientId01, patientId02, obsId01, obsId02, drId01);
 
 		List<Observation> result = toList(
 			myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId01"))));
@@ -2851,7 +2845,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info("Initial size: " + value.size());
 		for (IBaseResource next : value.getResources(0, value.size())) {
 			ourLog.info("Deleting: {}", next.getIdElement());
-			myDeviceDao.delete((IIdType) next.getIdElement(), mySrd);
+			myDeviceDao.delete(next.getIdElement(), mySrd);
 		}
 
 		value = myDeviceDao.search(new SearchParameterMap());
@@ -2870,7 +2864,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	public void testSearchWithRevIncludes() {
 		final String methodName = "testSearchWithRevIncludes";
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		IIdType pid = txTemplate.execute(new TransactionCallback<IIdType>() {
 
 			@Override
@@ -2888,7 +2882,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		});
 
 		SearchParameterMap map = new SearchParameterMap();
-		map.add(Patient.SP_RES_ID, new StringParam(pid.getIdPart()));
+		map.add(IAnyResource.SP_RES_ID, new StringParam(pid.getIdPart()));
 		map.addRevInclude(Condition.INCLUDE_PATIENT);
 		IBundleProvider results = myPatientDao.search(map);
 		List<IBaseResource> foundResources = results.getResources(0, results.size());
@@ -3471,112 +3465,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(ids.toString(), ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
-	}
-
-	@Test
-	public void testNearSearchDistanceNoDistance() {
-		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_CHIN;
-		double longitude = CoordCalculatorTest.LONGITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
-		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-			"Location?" +
-				Location.SP_NEAR + "=" + latitude + ":" + longitude,
-			myFhirCtx.getResourceDefinition("Location"));
-
-		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-		assertThat(ids, contains(locId));
-	}
-
-	@Test
-	public void testNearSearchDistanceZero() {
-		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_CHIN;
-		double longitude = CoordCalculatorTest.LONGITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
-		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-			"Location?" +
-				Location.SP_NEAR + "=" + latitude + ":" + longitude +
-				"&" +
-				Location.SP_NEAR_DISTANCE + "=0||",
-			myFhirCtx.getResourceDefinition("Location"));
-
-		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-		assertThat(ids, contains(locId));
-	}
-
-	@Test
-	public void testNearSearchApproximate() {
-		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_UHN;
-		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
-		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
-
-		{ // In the box
-			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + ":" + CoordCalculatorTest.LONGITUDE_CHIN +
-					"&" +
-					Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
-
-			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids, contains(locId));
-		}
-		{ // Outside the box
-			double tooSmallDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN / 2;
-
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + ":" + CoordCalculatorTest.LONGITUDE_CHIN +
-					"&" +
-					Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
-
-			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids.size(), is(0));
-		}
-
-	}
-
-	@Test
-	public void testBadCoordsFormat() {
-		assertInvalidNearFormat("1:2:3");
-		assertInvalidNearFormat("1:");
-		assertInvalidNearFormat(":");
-		assertInvalidNearFormat("");
-	}
-
-	private void assertInvalidNearFormat(String theCoords) {
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Location.SP_NEAR, new TokenParam(theCoords));
-		map.setLoadSynchronous(true);
-		try {
-			myLocationDao.search(map);
-			fail();
-		} catch (InvalidDataAccessApiUsageException e) {
-			assertEquals("Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'", e.getCause().getMessage());
-		}
-	}
-
-	@Test
-	public void testNearMissingLat() {
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Location.SP_NEAR, new TokenParam(":2"));
-		map.setLoadSynchronous(true);
-		try {
-			myLocationDao.search(map);
-			fail();
-		} catch (InvalidDataAccessApiUsageException e) {
-			assertEquals("Invalid position format ':2'.  Both latitude and longitude must be provided.", e.getCause().getMessage());
-		}
 	}
 
 	private String toStringMultiline(List<?> theResults) {

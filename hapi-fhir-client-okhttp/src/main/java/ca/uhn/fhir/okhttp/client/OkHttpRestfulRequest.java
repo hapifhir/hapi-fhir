@@ -1,5 +1,15 @@
 package ca.uhn.fhir.okhttp.client;
 
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
+import okhttp3.Call;
+import okhttp3.Call.Factory;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -25,21 +35,12 @@ import java.util.Map;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
-import okhttp3.Call;
-import okhttp3.Call.Factory;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-
 /**
  * Adapter for building an OkHttp-specific request.
  *
  * @author Matthew Clarke | matthew.clarke@orionhealth.com | Orion Health
  */
-public class OkHttpRestfulRequest implements IHttpRequest {
+public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpRequest {
 
     private final Request.Builder myRequestBuilder;
     private Factory myClient;
@@ -89,7 +90,12 @@ public class OkHttpRestfulRequest implements IHttpRequest {
         return myUrl;
     }
 
-    @Override
+	@Override
+	public void setUri(String theUrl) {
+		myUrl = theUrl;
+	}
+
+	@Override
     public String getHttpVerbName() {
         return myRequestTypeEnum.name();
     }

@@ -24,8 +24,10 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public abstract class BaseTableTask<T extends BaseTableTask<T>> extends BaseTask<T> {
+public abstract class BaseTableTask extends BaseTask {
 	private String myTableName;
+
+
 
 	public BaseTableTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -35,11 +37,10 @@ public abstract class BaseTableTask<T extends BaseTableTask<T>> extends BaseTask
 		return myTableName;
 	}
 
-	public T setTableName(String theTableName) {
+	public BaseTableTask setTableName(String theTableName) {
 		Validate.notBlank(theTableName);
 		myTableName = theTableName;
-		//noinspection unchecked
-		return (T) this;
+		return this;
 	}
 
 	@Override
@@ -48,8 +49,8 @@ public abstract class BaseTableTask<T extends BaseTableTask<T>> extends BaseTask
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask<T> theOtherObject) {
-		BaseTableTask<T> otherObject = (BaseTableTask<T>) theOtherObject;
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		BaseTableTask otherObject = (BaseTableTask) theOtherObject;
 		theBuilder.append(myTableName, otherObject.myTableName);
 	}
 

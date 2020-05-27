@@ -1,7 +1,20 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import org.hl7.fhir.r4.model.*;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.UnsignedIntType;
 
 /*
  * #%L
@@ -22,15 +35,6 @@ import org.hl7.fhir.r4.model.*;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public class BaseJpaResourceProviderEncounterR4 extends JpaResourceProviderR4<Encounter> {
 

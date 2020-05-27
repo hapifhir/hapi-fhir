@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.GraphQLQuery;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -35,8 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.IGraphQLEngine;
@@ -71,28 +70,28 @@ public class GraphQLProvider {
 	 * @param theValidationSupport The HAPI Validation Support object, or null
 	 * @param theStorageServices   The storage services (this object will be used to retrieve various resources as required by the GraphQL engine)
 	 */
-	public GraphQLProvider(@Nonnull FhirContext theFhirContext, @Nullable IContextValidationSupport theValidationSupport, @Nonnull IGraphQLStorageServices theStorageServices) {
+	public GraphQLProvider(@Nonnull FhirContext theFhirContext, @Nullable IValidationSupport theValidationSupport, @Nonnull IGraphQLStorageServices theStorageServices) {
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notNull(theStorageServices, "theStorageServices must not be null");
 
 		switch (theFhirContext.getVersion().getVersion()) {
 			case DSTU3: {
-				IValidationSupport validationSupport = (IValidationSupport) theValidationSupport;
-				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport());
+				IValidationSupport validationSupport = theValidationSupport;
+				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
 				org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
 				engineFactory = () -> new org.hl7.fhir.dstu3.utils.GraphQLEngine(workerContext);
 				break;
 			}
 			case R4: {
-				org.hl7.fhir.r4.hapi.ctx.IValidationSupport validationSupport = (org.hl7.fhir.r4.hapi.ctx.IValidationSupport) theValidationSupport;
-				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport());
+				IValidationSupport validationSupport = theValidationSupport;
+				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
 				org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
 				engineFactory = () -> new org.hl7.fhir.r4.utils.GraphQLEngine(workerContext);
 				break;
 			}
 			case R5: {
-				org.hl7.fhir.r5.hapi.ctx.IValidationSupport validationSupport = (org.hl7.fhir.r5.hapi.ctx.IValidationSupport) theValidationSupport;
-				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport());
+				IValidationSupport validationSupport = theValidationSupport;
+				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
 				org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
 				engineFactory = () -> new org.hl7.fhir.r5.utils.GraphQLEngine(workerContext);
 				break;

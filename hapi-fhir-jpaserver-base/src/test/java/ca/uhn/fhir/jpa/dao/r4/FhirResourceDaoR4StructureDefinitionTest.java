@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.SnapshotGeneratingValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -11,10 +12,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
@@ -32,12 +30,12 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 
 		// Create a validation chain that includes default validation support and a
 		// snapshot generator
-		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
-		SnapshotGeneratingValidationSupport snapshotGenerator = new SnapshotGeneratingValidationSupport(myFhirCtx, defaultSupport);
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(myFhirCtx);
+		SnapshotGeneratingValidationSupport snapshotGenerator = new SnapshotGeneratingValidationSupport(myFhirCtx);
 		ValidationSupportChain chain = new ValidationSupportChain(defaultSupport, snapshotGenerator);
 
 		// Generate the snapshot
-		StructureDefinition snapshot = chain.generateSnapshot(differential, "http://foo", null, "THE BEST PROFILE");
+		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(new ValidationSupportContext(chain), differential, "http://foo", null, "THE BEST PROFILE");
 
 		String url = "http://foo";
 		String webUrl = null;
@@ -45,7 +43,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(differential, url, webUrl, name);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(51, output.getSnapshot().getElement().size());
+		assertEquals(54, output.getSnapshot().getElement().size());
 	}
 
 

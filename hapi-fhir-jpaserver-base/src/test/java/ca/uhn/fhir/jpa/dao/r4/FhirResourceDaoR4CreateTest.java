@@ -1,28 +1,40 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.SampledData;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.Date;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4CreateTest.class);
@@ -31,6 +43,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void afterResetDao() {
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
+		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Test
@@ -62,8 +75,24 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithUuidResourceStrategy() {
+	public void testCreateWithUuidServerResourceStrategy() {
 		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+
+		Patient p = new Patient();
+		p.addName().setFamily("FAM");
+		IIdType id = myPatientDao.create(p).getId().toUnqualified();
+
+		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+
+		p = myPatientDao.read(id);
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
+
+	}
+
+	@Test
+	public void testCreateWithUuidServerResourceStrategy_ClientIdNotAllowed() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
 
 		Patient p = new Patient();
 		p.addName().setFamily("FAM");
@@ -149,7 +178,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.setActive(false);
 		try {
-			myPatientDao.create(p).getId();
+			myPatientDao.create(p);
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
@@ -277,6 +306,26 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Organization org = (Organization) p.getManagingOrganization().getResource();
 		assertEquals("#1", org.getId());
 		assertEquals(1, org.getMeta().getTag().size());
+
+	}
+
+	@Test
+	public void testOverrideBuiltInSearchParamFailsIfDisabled() {
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-birthdate");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setCode("birthdate");
+		sp.setExpression("Patient.birthDate");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		try {
+			mySearchParameterDao.update(sp);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
+		}
 
 	}
 

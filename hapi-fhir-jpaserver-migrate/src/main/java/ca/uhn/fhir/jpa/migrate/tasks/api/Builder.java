@@ -61,6 +61,7 @@ public class Builder {
 		return this;
 	}
 
+	@SuppressWarnings("unused")
 	public Builder initializeSchema(String theVersion, String theSchemaName, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
 		task.setDescription("Initialize " + theSchemaName + " schema");
@@ -95,7 +96,11 @@ public class Builder {
 		addTask(task);
 	}
 
-	public class BuilderAddTableRawSql {
+    public void addNop(String theVersion) {
+		 addTask(new NopTask(myRelease, theVersion));
+    }
+
+    public class BuilderAddTableRawSql {
 
 		private final AddTableRawSqlTask myTask;
 
@@ -207,17 +212,18 @@ public class Builder {
 			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, this);
 		}
 
-		public void dropColumn(String theVersion, String theColumnName) {
+		public BuilderCompleteTask dropColumn(String theVersion, String theColumnName) {
 			Validate.notBlank(theColumnName);
 			DropColumnTask task = new DropColumnTask(myRelease, theVersion);
 			task.setTableName(myTableName);
 			task.setColumnName(theColumnName);
 			addTask(task);
+			return new BuilderCompleteTask(task);
 		}
 
 		@Override
 		public void addTask(BaseTask theTask) {
-			((BaseTableTask<?>) theTask).setTableName(myTableName);
+			((BaseTableTask) theTask).setTableName(myTableName);
 			mySink.addTask(theTask);
 		}
 
@@ -457,9 +463,9 @@ public class Builder {
 
 	public static class BuilderCompleteTask {
 
-		private final BaseTask<?> myTask;
+		private final BaseTask myTask;
 
-		public BuilderCompleteTask(BaseTask<?> theTask) {
+		public BuilderCompleteTask(BaseTask theTask) {
 			myTask = theTask;
 		}
 

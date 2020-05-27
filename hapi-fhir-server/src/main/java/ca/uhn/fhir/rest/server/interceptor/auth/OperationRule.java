@@ -84,7 +84,10 @@ class OperationRule extends BaseRule implements IAuthRule {
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		if (isOtherTenant(theRequestDetails)) {
+		// Operation rules apply to the execution of the operation itself, not to side effects like
+		// loading resources (that will presumably be reflected in the response). Those loads need
+		// to be explicitly authorized
+		if (isResourceAccess(thePointcut)) {
 			return null;
 		}
 
@@ -109,7 +112,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 				} else if (myAppliesToTypes != null) {
 					// TODO: Convert to a map of strings and keep the result
 					for (Class<? extends IBaseResource> next : myAppliesToTypes) {
-						String resName = ctx.getResourceDefinition(next).getName();
+						String resName = ctx.getResourceType(next);
 						if (resName.equals(theRequestDetails.getResourceName())) {
 							applies = true;
 							break;
@@ -130,7 +133,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 					}
 					if (requestResourceId != null) {
 						if (myAppliesToIds != null) {
-							String instanceId = requestResourceId .toUnqualifiedVersionless().getValue();
+							String instanceId = requestResourceId.toUnqualifiedVersionless().getValue();
 							for (IIdType next : myAppliesToIds) {
 								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
 									applies = true;
@@ -141,7 +144,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 						if (myAppliesToInstancesOfType != null) {
 							// TODO: Convert to a map of strings and keep the result
 							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
-								String resName = ctx.getResourceDefinition(next).getName();
+								String resName = ctx.getResourceType(next);
 								if (resName.equals(requestResourceId .getResourceType())) {
 									applies = true;
 									break;
@@ -197,15 +200,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 			return null;
 		}
 
-		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
-			return null;
-		}
-
-		return newVerdict();
-	}
-
-	public String getOperationName() {
-		return myOperationName;
+		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 	}
 
 	/**
