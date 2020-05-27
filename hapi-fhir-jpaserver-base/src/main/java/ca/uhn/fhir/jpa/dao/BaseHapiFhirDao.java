@@ -1221,9 +1221,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Override
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
-													IBasePersistedResource theEntity2, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
+													IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
 
-		ResourceTable entity = (ResourceTable) theEntity2;
+		ResourceTable entity = (ResourceTable) theEntity;
 
 		// We'll update the resource ID with the correct version later but for
 		// now at least set it to something useful for the interceptors

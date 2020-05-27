@@ -35,6 +35,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -67,13 +68,20 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParams, Collection<T> theExistingParams) {
-		for (T next : theNewParams) {
+		Collection<T> newParams = theNewParams;
+		for (T next : newParams) {
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
 		}
 
-		List<T> paramsToRemove = subtract(theExistingParams, theNewParams);
-		List<T> paramsToAdd = subtract(theNewParams, theExistingParams);
+		/*
+		 * HashCodes may have changed as a result of setting the partition ID, so
+		 * create a new set that will reflect the new hashcodes
+		 */
+		newParams = new HashSet<>(newParams);
+
+		List<T> paramsToRemove = subtract(theExistingParams, newParams);
+		List<T> paramsToAdd = subtract(newParams, theExistingParams);
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
 
 		for (T next : paramsToRemove) {
@@ -127,8 +135,12 @@ public class DaoSearchParamSynchronizer {
 			return new ArrayList<>();
 		}
 
-		ArrayList<T> retVal = new ArrayList<>(theSubtractFrom);
-		retVal.removeAll(theToSubtract);
+		ArrayList<T> retVal = new ArrayList<>();
+		for (T next : theSubtractFrom) {
+			if (!theToSubtract.contains(next)) {
+				retVal.add(next);
+			}
+		}
 		return retVal;
 	}
 }
