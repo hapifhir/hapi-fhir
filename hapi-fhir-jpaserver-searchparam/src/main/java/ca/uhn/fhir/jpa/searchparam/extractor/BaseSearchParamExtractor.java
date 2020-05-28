@@ -677,6 +677,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
 
 		if (start != null || end != null) {
+
+			if (start == null) {
+				start = myModelConfig.getPeriodIndexStartOfTime().getValue();
+				startAsString = myModelConfig.getPeriodIndexStartOfTime().getValueAsString();
+			}
+			if (end == null) {
+				end = myModelConfig.getPeriodIndexEndOfTime().getValue();
+				endAsString = myModelConfig.getPeriodIndexEndOfTime().getValueAsString();
+			}
+
 			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
 			theParams.add(nextEntity);
 		}
