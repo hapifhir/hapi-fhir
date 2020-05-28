@@ -54,8 +54,21 @@ public class ModelConfig {
 		"http://hl7.org/fhir/StructureDefinition/*")));
 
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
-	protected static final String DEFAULT_PERIOD_INDEX_START_OF_TIME = "1700-01-01";
-	protected static final String DEFAULT_PERIOD_INDEX_END_OF_TIME = "2600-01-01";
+
+	/*
+	 * <p>
+	 * Note the following database documented limitations:
+	 *    <ul>
+	 *       <li>JDBC Timestamp Datatype Low Value -4713 and High Value 9999</li>
+	 *       <li>MySQL 8: the range for DATETIME values is '1000-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999`</li>
+	 *       <li>Postgresql 12: Timestamp [without time zone] Low Value 4713 BC and High Value 294276 AD</li>
+	 *       <li>Oracle: Timestamp Low Value 4712 BC and High Value 9999 CE</li>
+	 *       <li>H2: datetime2 Low Value -4713 and High Value 9999</li>
+	 *     </ul>
+	 * </p>
+	 */
+	protected static final String DEFAULT_PERIOD_INDEX_START_OF_TIME = "1001-01-01";
+	protected static final String DEFAULT_PERIOD_INDEX_END_OF_TIME = "9000-01-01";
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -459,6 +472,16 @@ public class ModelConfig {
 	 * is probably good enough for almost any application, but this can be changed if
 	 * needed.
 	 * </p>
+	 * <p>
+	 * Note the following database documented limitations:
+	 *    <ul>
+	 *       <li>JDBC Timestamp Datatype Low Value -4713 and High Value 9999</li>
+	 *       <li>MySQL 8: the range for DATETIME values is '1000-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999`</li>
+	 *       <li>Postgresql 12: Timestamp [without time zone] Low Value 4713 BC and High Value 294276 AD</li>
+	 *       <li>Oracle: Timestamp Low Value 4712 BC and High Value 9999 CE</li>
+	 *       <li>H2: datetime2 Low Value -4713 and High Value 9999</li>
+	 *     </ul>
+	 * </p>
 	 *
 	 * @see #getPeriodIndexEndOfTime()
 	 * @since 5.1.0
@@ -475,6 +498,16 @@ public class ModelConfig {
 	 * The default value for this is {@link #DEFAULT_PERIOD_INDEX_START_OF_TIME} which
 	 * is probably good enough for almost any application, but this can be changed if
 	 * needed.
+	 * </p>
+	 * <p>
+	 * Note the following database documented limitations:
+	 *    <ul>
+	 *       <li>JDBC Timestamp Datatype Low Value -4713 and High Value 9999</li>
+	 *       <li>MySQL 8: the range for DATETIME values is '1000-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999`</li>
+	 *       <li>Postgresql 12: Timestamp [without time zone] Low Value 4713 BC and High Value 294276 AD</li>
+	 *       <li>Oracle: Timestamp Low Value 4712 BC and High Value 9999 CE</li>
+	 *       <li>H2: datetime2 Low Value -4713 and High Value 9999</li>
+	 *     </ul>
 	 * </p>
 	 *
 	 * @see #getPeriodIndexEndOfTime()
@@ -494,6 +527,16 @@ public class ModelConfig {
 	 * is probably good enough for almost any application, but this can be changed if
 	 * needed.
 	 * </p>
+	 * <p>
+	 * Note the following database documented limitations:
+	 *    <ul>
+	 *       <li>JDBC Timestamp Datatype Low Value -4713 and High Value 9999</li>
+	 *       <li>MySQL 8: the range for DATETIME values is '1000-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999`</li>
+	 *       <li>Postgresql 12: Timestamp [without time zone] Low Value 4713 BC and High Value 294276 AD</li>
+	 *       <li>Oracle: Timestamp Low Value 4712 BC and High Value 9999 CE</li>
+	 *       <li>H2: datetime2 Low Value -4713 and High Value 9999</li>
+	 *     </ul>
+	 * </p>
 	 *
 	 * @see #getPeriodIndexStartOfTime()
 	 * @since 5.1.0
@@ -510,6 +553,16 @@ public class ModelConfig {
 	 * The default value for this is {@link #DEFAULT_PERIOD_INDEX_START_OF_TIME} which
 	 * is probably good enough for almost any application, but this can be changed if
 	 * needed.
+	 * </p>
+	 * <p>
+	 * Note the following database documented limitations:
+	 *    <ul>
+	 *       <li>JDBC Timestamp Datatype Low Value -4713 and High Value 9999</li>
+	 *       <li>MySQL 8: the range for DATETIME values is '1000-01-01 00:00:00.000000' to '9999-12-31 23:59:59.999999`</li>
+	 *       <li>Postgresql 12: Timestamp [without time zone] Low Value 4713 BC and High Value 294276 AD</li>
+	 *       <li>Oracle: Timestamp Low Value 4712 BC and High Value 9999 CE</li>
+	 *       <li>H2: datetime2 Low Value -4713 and High Value 9999</li>
+	 *     </ul>
 	 * </p>
 	 *
 	 * @see #getPeriodIndexStartOfTime()

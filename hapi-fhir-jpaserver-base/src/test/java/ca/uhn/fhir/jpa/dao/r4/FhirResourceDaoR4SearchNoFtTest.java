@@ -5,7 +5,6 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -531,7 +530,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam( "CareTeam").setChain(PARAM_TYPE));
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("CareTeam").setChain(PARAM_TYPE));
 		results = myDiagnosticReportDao.search(map);
 		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids.toString(), ids, contains(drId1.getValue()));
@@ -1698,8 +1697,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		enc.getPeriod().getStartElement().setValueAsString("2020-05-26T12:00:00Z");
 		String id1 = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
 
-		runInTransaction(()->{
-			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		// ge -> above the lower bound
@@ -1746,8 +1745,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		enc.getPeriod().getStartElement().setValueAsString("2020-05-26T12:00:00Z");
 		String id1 = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
 
-		runInTransaction(()->{
-			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		// ge -> above the lower bound
@@ -1794,8 +1793,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		enc.getPeriod().getEndElement().setValueAsString("2020-05-26T12:00:00Z");
 		String id1 = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
 
-		runInTransaction(()->{
-			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		// le -> above the upper bound
@@ -1842,8 +1841,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		enc.getPeriod().getEndElement().setValueAsString("2020-05-26T12:00:00Z");
 		String id1 = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
 
-		runInTransaction(()->{
-			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		// le -> above the upper bound
@@ -1904,8 +1903,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params = new SearchParameterMap();
 		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", "2001-01-03"));
 		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "02"));
-		// encs = toList(ourEncounterDao.search(params));
-		// assertEquals(1, encs.size());
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
 
 		params = new SearchParameterMap();
 		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", null));
