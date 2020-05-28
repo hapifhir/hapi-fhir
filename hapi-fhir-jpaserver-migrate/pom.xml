@@ -42,6 +42,12 @@
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<!-- Need this for the schema files from spring batch -->
+		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-core</artifactId>
+			<version>4.2.2.RELEASE</version>
+		</dependency>
 
 		<!-- Test Database -->
 		<dependency>
