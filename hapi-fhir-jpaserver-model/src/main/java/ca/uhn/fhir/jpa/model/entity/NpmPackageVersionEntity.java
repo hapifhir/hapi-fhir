@@ -18,6 +18,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 import java.util.Date;
 
 @Entity()
@@ -55,10 +56,14 @@ public class NpmPackageVersionEntity {
 	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private String myFhirVersionId;
 	@Enumerated(EnumType.STRING)
-	@Column(name = "FHIR_VERSION_NAME", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
-	private FhirVersionEnum myFhirVersionName;
+	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
+	private FhirVersionEnum myFhirVersion;
 	@Column(name = "PACKAGE_SIZE_BYTES", nullable = false)
 	private long myPackageSizeBytes;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Version
+	@Column(name = "UPDATED_TIME", nullable = false)
+	private Date myVersion;
 
 	public long getPackageSizeBytes() {
 		return myPackageSizeBytes;
@@ -100,12 +105,12 @@ public class NpmPackageVersionEntity {
 		myFhirVersionId = theFhirVersionId;
 	}
 
-	public FhirVersionEnum getFhirVersionName() {
-		return myFhirVersionName;
+	public FhirVersionEnum getFhirVersion() {
+		return myFhirVersion;
 	}
 
-	public void setFhirVersionName(FhirVersionEnum theFhirVersionName) {
-		myFhirVersionName = theFhirVersionName;
+	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
+		myFhirVersion = theFhirVersion;
 	}
 
 	public NpmPackageEntity getPackage() {

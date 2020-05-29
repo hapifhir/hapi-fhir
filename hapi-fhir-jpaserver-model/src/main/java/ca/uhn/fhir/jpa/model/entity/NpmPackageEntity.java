@@ -11,7 +11,11 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+import java.util.Date;
 
 @Entity()
 @Table(name = "NPM_PACKAGE", uniqueConstraints = {
@@ -30,6 +34,10 @@ public class NpmPackageEntity {
 	private String myPackageId;
 	@Column(name = "CUR_VERSION_ID", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = true)
 	private String myCurrentVersionId;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Version
+	@Column(name = "UPDATED_TIME", nullable = false)
+	private Date myVersion;
 
 	public String getPackageId() {
 		return myPackageId;

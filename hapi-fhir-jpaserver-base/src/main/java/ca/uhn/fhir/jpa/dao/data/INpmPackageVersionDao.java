@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /*
@@ -29,7 +30,9 @@ import java.util.Optional;
 
 public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEntity, Long> {
 
+	@Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id")
+	Collection<NpmPackageVersionEntity> findByPackageId(@Param("id") String thePackageId);
+
 	@Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId = :version")
 	Optional<NpmPackageVersionEntity> findByPackageIdAndVersion(@Param("id") String thePackageId, @Param("version") String thePackageVersion);
-
 }
