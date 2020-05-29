@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
-import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntityPk;
-import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionValidationResourceEntity;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /*
  * #%L
@@ -25,6 +28,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * #L%
  */
 
-public interface INpmPackageVersionResourceDao extends JpaRepository<NpmPackageVersionValidationResourceEntity, Long> {
+public interface INpmPackageVersionResourceDao extends JpaRepository<NpmPackageVersionResourceEntity, Long> {
 
+	@Query("SELECT e FROM NpmPackageVersionResourceEntity e WHERE e.myCanonicalUrl = :url AND e.myFhirVersionName = :fhirVersion AND e.myPackageVersion.myCurrentVersion = true")
+	Slice<NpmPackageVersionResourceEntity> findCurrentVersionByCanonicalUrl(Pageable thePage, @Param("fhirVersion") FhirVersionEnum theFhirVersion, @Param("url") String theCanonicalUrl);
+
+	@Query("SELECT e FROM NpmPackageVersionResourceEntity e WHERE e.myCanonicalUrl = :url AND e.myCanonicalVersion = :version AND e.myFhirVersionName = :fhirVersion AND e.myPackageVersion.myCurrentVersion = true")
+	Slice<NpmPackageVersionResourceEntity> findCurrentVersionByCanonicalUrlAndVersion(Pageable theOf, @Param("fhirVersion") FhirVersionEnum theFhirVersion, @Param("url") String theCanonicalUrl, @Param("version") String theCanonicalVersion);
 }

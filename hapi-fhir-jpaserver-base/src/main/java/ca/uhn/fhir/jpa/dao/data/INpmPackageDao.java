@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import java.util.Optional;
 
 /*
  * #%L
@@ -27,6 +27,9 @@ import java.util.List;
  * #L%
  */
 
-public interface INpmPackageDao extends JpaRepository<NpmPackageEntity, String> {
+public interface INpmPackageDao extends JpaRepository<NpmPackageEntity, Long> {
+
+	@Query("SELECT p FROM NpmPackageEntity p WHERE p.myPackageId = :id")
+	Optional<NpmPackageEntity> findByPackageId(@Param("id") String thePackageId);
 
 }

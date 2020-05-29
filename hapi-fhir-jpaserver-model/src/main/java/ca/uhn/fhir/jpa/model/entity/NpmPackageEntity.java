@@ -5,21 +5,35 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity()
 @Table(name = "NPM_PACKAGE", uniqueConstraints = {
-}, indexes = {
+	@UniqueConstraint(name = "IDX_PACK_ID", columnNames = "PACKAGE_ID")
 })
 public class NpmPackageEntity {
 
 	protected static final int PACKAGE_ID_LENGTH = 200;
+
+	@SequenceGenerator(name = "SEQ_NPM_PACK", sequenceName = "SEQ_NPM_PACK")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_NPM_PACK")
 	@Id
+	@Column(name = "PID")
+	private Long myId;
 	@Column(name = "PACKAGE_ID", length = PACKAGE_ID_LENGTH, nullable = false)
 	private String myPackageId;
 	@Column(name = "CUR_VERSION_ID", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = true)
 	private String myCurrentVersionId;
+
+	public String getPackageId() {
+		return myPackageId;
+	}
 
 	public void setPackageId(String thePackageId) {
 		myPackageId = thePackageId;

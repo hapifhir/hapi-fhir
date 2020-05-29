@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.JpaPackageCache;
 import ca.uhn.fhir.jpa.packages.NpmInstallerSvc;
+import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
@@ -192,6 +193,11 @@ public abstract class BaseConfig {
 	@Bean
 	public IHapiPackageCacheManager packageCacheManager() {
 		return new JpaPackageCache();
+	}
+
+	@Bean
+	public NpmJpaValidationSupport npmJpaValidationSupport() {
+		return new NpmJpaValidationSupport();
 	}
 
 	@Bean

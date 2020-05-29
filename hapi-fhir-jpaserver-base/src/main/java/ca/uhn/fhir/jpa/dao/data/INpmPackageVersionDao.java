@@ -1,14 +1,11 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
-import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntityPk;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import java.util.Optional;
 
 /*
  * #%L
@@ -30,6 +27,9 @@ import java.util.List;
  * #L%
  */
 
-public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEntity, NpmPackageVersionEntityPk> {
+public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEntity, Long> {
+
+	@Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId = :version")
+	Optional<NpmPackageVersionEntity> findByPackageIdAndVersion(@Param("id") String thePackageId, @Param("version") String thePackageVersion);
 
 }
