@@ -82,8 +82,8 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jcl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
