@@ -179,10 +179,10 @@
 					</overlays>
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 					<attachClasses>true</attachClasses>
-					<excludes>
+					<packagingExcludes>
 						WEB-INF/lib/Saxon-HE-*,
 						WEB-INF/lib/hapi-*
-					</excludes>
+					</packagingExcludes>
 				</configuration>
 			</plugin>
 

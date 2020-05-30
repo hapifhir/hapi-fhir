@@ -22,6 +22,10 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR4ConfigWithElasticSearch.class);
 	private static final String ELASTIC_VERSION = "6.5.4";
+	protected final String elasticsearchHost = "localhost";
+	protected final String elasticsearchUserId = "";
+	protected final String elasticsearchPassword = "";
+
 
 	@Override
 	@Bean
@@ -38,9 +42,9 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 			.setIndexSchemaManagementStrategy(IndexSchemaManagementStrategy.CREATE)
 			.setIndexManagementWaitTimeoutMillis(10000)
 			.setRequiredIndexStatus(ElasticsearchIndexStatus.YELLOW)
-			.setRestUrl("http://localhost:" + httpPort)
-			.setUsername("")
-			.setPassword("")
+			.setRestUrl("http://"+ elasticsearchHost + ":" + httpPort)
+			.setUsername(elasticsearchUserId)
+			.setPassword(elasticsearchPassword)
 			.apply(retVal);
 
 		return retVal;
@@ -64,7 +68,6 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 		return embeddedElastic;
 	}
-
 
 	@PreDestroy
 	public void stop() {
