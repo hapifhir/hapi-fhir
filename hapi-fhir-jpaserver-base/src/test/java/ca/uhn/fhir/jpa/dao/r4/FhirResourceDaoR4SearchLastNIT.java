@@ -23,7 +23,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
 	@After
 	public void resetMaximumPageSize() {
-		SearchBuilder.setIsTest(false);
+		SearchBuilder.setMaxPageSize50ForTest(false);
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
 		// Set chunk size to 50
-		SearchBuilder.setIsTest(true);
+		SearchBuilder.setMaxPageSize50ForTest(true);
 
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(),null));

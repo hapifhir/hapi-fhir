@@ -14,13 +14,13 @@ public interface IObservationIndexedCodeCodingSearchParamDao extends JpaReposito
             "WHERE t.myCode = :code " +
             "AND t.mySystem = :system " +
             "")
-    String findForCodeAndSystem(@Param("code") String theCode, @Param("system") String theSystem);
+    String findByCodeAndSystem(@Param("code") String theCode, @Param("system") String theSystem);
 
 
     @Query("" +
             "SELECT t.myCodeableConceptId FROM ObservationIndexedCodeCodingEntity t " +
             "WHERE t.myDisplay = :display" +
             "")
-    String findForDisplay(@Param("display") String theDisplay);
+    String findByDisplay(@Param("display") String theDisplay);
 
 }

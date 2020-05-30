@@ -131,7 +131,7 @@ public class SearchBuilder implements ISearchBuilder {
 	// NB: keep public
 	public static final int MAXIMUM_PAGE_SIZE = 800;
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
-	public static boolean myIsTest = false;
+	public static boolean myUseMaxPageSize50ForTest = false;
 
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
@@ -184,15 +184,15 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	public static int getMaximumPageSize() {
-		if (myIsTest) {
+		if (myUseMaxPageSize50ForTest) {
 			return MAXIMUM_PAGE_SIZE_FOR_TESTING;
 		} else {
 			return MAXIMUM_PAGE_SIZE;
 		}
 	}
 
-	public static void setIsTest(boolean theIsTest) {
-		myIsTest = theIsTest;
+	public static void setMaxPageSize50ForTest(boolean theIsTest) {
+		myUseMaxPageSize50ForTest = theIsTest;
 	}
 
 	@Override

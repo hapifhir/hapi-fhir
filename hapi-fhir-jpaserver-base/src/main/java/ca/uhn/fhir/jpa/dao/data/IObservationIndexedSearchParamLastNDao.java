@@ -12,6 +12,6 @@ public interface IObservationIndexedSearchParamLastNDao extends JpaRepository<Ob
 		"SELECT t FROM ObservationIndexedSearchParamLastNEntity t " +
 		"WHERE t.myIdentifier = :identifier" +
 		"")
-	ObservationIndexedSearchParamLastNEntity findForIdentifier(@Param("identifier") String theIdentifier);
+	ObservationIndexedSearchParamLastNEntity findByIdentifier(@Param("identifier") String theIdentifier);
 
 }

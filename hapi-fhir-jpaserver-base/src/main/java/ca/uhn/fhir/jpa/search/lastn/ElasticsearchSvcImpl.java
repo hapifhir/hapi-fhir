@@ -1,22 +1,22 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
+import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
+import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
-import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
-import ca.uhn.fhir.jpa.search.lastn.util.CodeSystemHash;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import org.shadehapi.elasticsearch.action.DocWriteResponse;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.shadehapi.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.shadehapi.elasticsearch.action.DocWriteResponse;
 import org.shadehapi.elasticsearch.action.index.IndexRequest;
 import org.shadehapi.elasticsearch.action.index.IndexResponse;
 import org.shadehapi.elasticsearch.action.search.SearchRequest;
@@ -33,7 +33,10 @@ import org.shadehapi.elasticsearch.search.aggregations.AggregationBuilder;
 import org.shadehapi.elasticsearch.search.aggregations.AggregationBuilders;
 import org.shadehapi.elasticsearch.search.aggregations.Aggregations;
 import org.shadehapi.elasticsearch.search.aggregations.BucketOrder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.*;
+import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.CompositeAggregationBuilder;
+import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder;
+import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.ParsedComposite;
+import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceBuilder;
 import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -42,7 +45,9 @@ import org.shadehapi.elasticsearch.search.aggregations.support.ValueType;
 import org.shadehapi.elasticsearch.search.builder.SearchSourceBuilder;
 import org.shadehapi.elasticsearch.search.sort.SortOrder;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -52,9 +57,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	public static final String OBSERVATION_INDEX = "observation_index";
-	public static final String CODE_INDEX = "code_index";
+	public static final String OBSERVATION_CODE_INDEX = "code_index";
 	public static final String OBSERVATION_DOCUMENT_TYPE = "ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity";
 	public static final String CODE_DOCUMENT_TYPE = "ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity";
+	public static final String OBSERVATION_INDEX_SCHEMA_FILE = "ObservationIndexSchema.json";
+	public static final String OBSERVATION_CODE_INDEX_SCHEMA_FILE = "ObservationCodeIndexSchema.json";
 
 	private final RestHighLevelClient myRestHighLevelClient;
 
@@ -63,6 +70,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private final String GROUP_BY_SUBJECT = "group_by_subject";
 	private final String GROUP_BY_SYSTEM = "group_by_system";
 	private final String GROUP_BY_CODE = "group_by_code";
+	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
 
 
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
@@ -70,106 +78,41 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 		try {
 			createObservationIndexIfMissing();
-			createCodeIndexIfMissing();
+			createObservationCodeIndexIfMissing();
 		} catch (IOException theE) {
 			throw new RuntimeException("Failed to create document index", theE);
 		}
+	}
+
+	private String getIndexSchema(String theSchemaFileName) throws IOException {
+		InputStreamReader input = new InputStreamReader(ElasticsearchSvcImpl.class.getResourceAsStream(theSchemaFileName));
+		BufferedReader reader = new BufferedReader(input);
+		StringBuilder sb = new StringBuilder();
+		String str;
+		while((str = reader.readLine())!= null){
+			sb.append(str);
+		}
+
+		return sb.toString();
 	}
 
 	private void createObservationIndexIfMissing() throws IOException {
 		if (indexExists(OBSERVATION_INDEX)) {
 			return;
 		}
-		String observationMapping = "{\n" +
-			"  \"mappings\" : {\n" +
-			"    \"ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity\" : {\n" +
-			"      \"properties\" : {\n" +
-			"        \"codeconceptid\" : {\n" +
-			"          \"type\" : \"keyword\",\n" +
-			"          \"norms\" : true\n" +
-			"        },\n" +
-			"        \"codeconcepttext\" : {\n" +
-			"          \"type\" : \"text\"\n" +
-			"        },\n" +
-			"        \"codeconceptcodingcode\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"codeconceptcodingsystem\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"codeconceptcodingcode_system_hash\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"codeconceptcodingdisplay\" : {\n" +
-			"          \"type\" : \"text\"\n" +
-			"        },\n" +
-			"        \"categoryconcepttext\" : {\n" +
-			"          \"type\" : \"text\"\n" +
-			"        },\n" +
-			"        \"categoryconceptcodingcode\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"categoryconceptcodingsystem\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"categoryconceptcodingcode_system_hash\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"categoryconceptcodingdisplay\" : {\n" +
-			"          \"type\" : \"text\"\n" +
-			"        },\n" +
-			"        \"effectivedtm\" : {\n" +
-			"          \"type\" : \"date\"\n" +
-			"        },\n" +
-			"        \"identifier\" : {\n" +
-			"          \"type\" : \"keyword\",\n" +
-			"          \"store\" : true\n" +
-			"        },\n" +
-			"        \"subject\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        }\n" +
-			"      }\n" +
-			"    }\n" +
-			"  }\n" +
-			"}\n";
+		String observationMapping = getIndexSchema(OBSERVATION_INDEX_SCHEMA_FILE);
 		if (!createIndex(OBSERVATION_INDEX, observationMapping)) {
 			throw new RuntimeException("Failed to create observation index");
 		}
 	}
 
-	private void createCodeIndexIfMissing() throws IOException {
-		if (indexExists(CODE_INDEX)) {
+	private void createObservationCodeIndexIfMissing() throws IOException {
+		if (indexExists(OBSERVATION_CODE_INDEX)) {
 			return;
 		}
-		String codeMapping = "{\n" +
-			"  \"mappings\" : {\n" +
-			"    \"ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity\" : {\n" +
-			"      \"properties\" : {\n" +
-			"        \"codeable_concept_id\" : {\n" +
-			"          \"type\" : \"keyword\",\n" +
-			"          \"store\" : true\n" +
-			"        },\n" +
-			"        \"codingcode\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"codingcode_system_hash\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"codingdisplay\" : {\n" +
-			"          \"type\" : \"text\"\n" +
-			"        },\n" +
-			"        \"codingsystem\" : {\n" +
-			"          \"type\" : \"keyword\"\n" +
-			"        },\n" +
-			"        \"text\" : {\n" +
-			"          \"type\" : \"text\"\n" +
-			"        }\n" +
-			"      }\n" +
-			"    }\n" +
-			"  }\n" +
-			"}\n";
-		if (!createIndex(CODE_INDEX, codeMapping)) {
-			throw new RuntimeException("Failed to create code index");
+		String observationCodeMapping = getIndexSchema(OBSERVATION_CODE_INDEX_SCHEMA_FILE);
+		if (!createIndex(OBSERVATION_CODE_INDEX, observationCodeMapping)) {
+			throw new RuntimeException("Failed to create observation code index");
 		}
 
 	}
@@ -190,7 +133,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@Override
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch) {
-		String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
 		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
 		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, topHitsInclude,
 			ObservationJson::getIdentifier, theMaxResultsToFetch);
@@ -557,7 +499,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@VisibleForTesting
 	List<CodeJson> queryAllIndexedObservationCodes() throws IOException {
-		SearchRequest codeSearchRequest = new SearchRequest(CODE_INDEX);
+		SearchRequest codeSearchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
 		searchSourceBuilder.query(QueryBuilders.matchAllQuery());

@@ -22,24 +22,49 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.*;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 
 public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoObservation<T> {
 
 	@Autowired
+	ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
+
+	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
+	protected ResourceTable updateObservationEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity,
+																	Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+																	TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion,
+			theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			if (retVal.getDeleted() == null) {
+				// Update indexes here for LastN operation.
+				myObservationLastNIndexPersistSvc.indexObservation(theResource);
+			} else {
+				myObservationLastNIndexPersistSvc.deleteObservationIndex(theEntity);
+			}
+		}
+
+		return retVal;
+	}
 
 	protected void updateSearchParamsForLastn(SearchParameterMap theSearchParameterMap, RequestDetails theRequestDetails) {
 		if (!isPagingProviderDatabaseBacked(theRequestDetails)) {

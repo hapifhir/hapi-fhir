@@ -24,12 +24,9 @@ public class ObservationIndexedCodeCodeableConceptEntity {
     @Column(name = "CODEABLE_CONCEPT_TEXT", nullable = true, length = MAX_LENGTH)
     private String myCodeableConceptText;
 
-    // TODO: Make coding a Collection. Need to first figure out how to maintain this over time.
     @IndexedEmbedded(depth=2, prefix = "coding")
-//    @OneToMany(mappedBy = "myCodeableConceptId", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	 @JoinColumn(name = "CODEABLE_CONCEPT_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CONCEPT_CODE"))
 	 @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-//    private Set<ObservationIndexedCodeCodingEntity> myObservationIndexedCodeCodingEntitySet;
 	 private ObservationIndexedCodeCodingEntity myObservationIndexedCodeCodingEntity;
 
     public ObservationIndexedCodeCodeableConceptEntity() {
@@ -42,10 +39,6 @@ public class ObservationIndexedCodeCodeableConceptEntity {
     }
 
     public void addCoding(ObservationIndexedCodeCodingEntity theObservationIndexedCodeCodingEntity) {
-//        if (myObservationIndexedCodeCodingEntitySet == null) {
-//            myObservationIndexedCodeCodingEntitySet = new HashSet<>();
-//        }
-//        myObservationIndexedCodeCodingEntitySet.add(theObservationIndexedCodeCodingEntity);
 		 myObservationIndexedCodeCodingEntity = theObservationIndexedCodeCodingEntity;
     }
 
@@ -64,7 +57,5 @@ public class ObservationIndexedCodeCodeableConceptEntity {
     public void setCodeableConceptText(String theCodeableConceptText) {
         myCodeableConceptText = theCodeableConceptText;
     }
-
-
 
 }

@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.search.lastn.json;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.search.lastn.util.CodeSystemHash;
+import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

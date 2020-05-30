@@ -52,14 +52,14 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		mySmallerPreFetchThresholds.add(-1);
 		myDaoConfig.setSearchPreFetchThresholds(mySmallerPreFetchThresholds);
 
-		SearchBuilder.setIsTest(true);
+		SearchBuilder.setMaxPageSize50ForTest(true);
 
 	}
 
 	@After
 	public void after() {
 		myDaoConfig.setSearchPreFetchThresholds(originalPreFetchThresholds);
-		SearchBuilder.setIsTest(false);
+		SearchBuilder.setMaxPageSize50ForTest(false);
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
 		// Set chunk size to 50
-		SearchBuilder.setIsTest(true);
+		SearchBuilder.setMaxPageSize50ForTest(true);
 
 		// Expand default fetch sizes to ensure all observations are returned in first page:
 		List<Integer> myBiggerPreFetchThresholds = new ArrayList<>();

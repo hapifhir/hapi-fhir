@@ -1,27 +1,37 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
-import ca.uhn.fhir.jpa.search.lastn.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.*;
+import org.junit.After;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -68,12 +78,6 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	final String CODEFIRSTCODINGCODE = "test-code";
 	final String CODEFIRSTCODINGDISPLAY = "test-code display";
-//	final String CODESECONDCODINGSYSTEM = "http://myalternatecodes.org/fhir/observation-code";
-//	final String CODESECONDCODINGCODE = "test-alt-code";
-//	final String CODESECONDCODINGDISPLAY = "test-alt-code display";
-//	final String CODETHIRDCODINGSYSTEM = "http://mysecondaltcodes.org/fhir/observation-code";
-//	final String CODETHIRDCODINGCODE = "test-second-alt-code";
-//	final String CODETHIRDCODINGDISPLAY = "test-second-alt-code display";
 
 	final FhirContext myFhirContext = FhirContext.forR4();
 
@@ -89,7 +93,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	@After
 	public void after() throws IOException {
 		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.CODE_INDEX);
+		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 	}
 
 	@Test
@@ -209,32 +213,6 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		String code_concept_text_values = observation.getCode_concept_text();
 		assertEquals(OBSERVATIONCODETEXT, code_concept_text_values);
 
-		// TODO: Temporary changes until find a solution for addressing Observation Code with multiple codings.
- /*
-        List<String> code_coding_systems = observation.getCode_coding_system();
-        assertEquals(3,code_coding_systems.size());
-        assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems.get(0));
-        assertEquals(CODESECONDCODINGSYSTEM, code_coding_systems.get(1));
-        assertEquals(CODETHIRDCODINGSYSTEM, code_coding_systems.get(2));
-
-        List<String> code_coding_codes = observation.getCode_coding_code();
-        assertEquals(3, code_coding_codes.size());
-        assertEquals(CODEFIRSTCODINGCODE, code_coding_codes.get(0));
-        assertEquals(CODESECONDCODINGCODE, code_coding_codes.get(1));
-        assertEquals(CODETHIRDCODINGCODE, code_coding_codes.get(2));
-
-        List<String> code_coding_display = observation.getCode_coding_display();
-        assertEquals(3, code_coding_display.size());
-        assertEquals(CODEFIRSTCODINGDISPLAY, code_coding_display.get(0));
-        assertEquals(CODESECONDCODINGDISPLAY, code_coding_display.get(1));
-        assertEquals(CODETHIRDCODINGDISPLAY, code_coding_display.get(2));
-
-        List<String> code_coding_code_system_hash = observation.getCode_coding_code_system_hash();
-        assertEquals(3, code_coding_code_system_hash.size());
-        assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash.get(0));
-        assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODESECONDCODINGSYSTEM, CODESECONDCODINGCODE)), code_coding_code_system_hash.get(1));
-        assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODETHIRDCODINGSYSTEM, CODETHIRDCODINGCODE)), code_coding_code_system_hash.get(2));
-*/
 		String code_coding_systems = observation.getCode_coding_system();
 		assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems);
 
@@ -258,36 +236,20 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(OBSERVATIONCODETEXT, persistedCodeConceptText);
 
 		List<String> persistedCodeCodingSystems = persistedObservationCode.getCoding_system();
-		// TODO: Temporary changes until find a solution for addressing Observation Code with multiple codings.
-//        assertEquals(3,persistedCodeCodingSystems.size());
 		assertEquals(1, persistedCodeCodingSystems.size());
 		assertEquals(CODEFIRSTCODINGSYSTEM, persistedCodeCodingSystems.get(0));
-//        assertEquals(CODESECONDCODINGSYSTEM, persistedCodeCodingSystems.get(1));
-//        assertEquals(CODETHIRDCODINGSYSTEM, persistedCodeCodingSystems.get(2));
 
 		List<String> persistedCodeCodingCodes = persistedObservationCode.getCoding_code();
-		// TODO: Temporary changes until find a solution for addressing Observation Code with multiple codings.
-//        assertEquals(3, persistedCodeCodingCodes.size());
 		assertEquals(1, persistedCodeCodingCodes.size());
 		assertEquals(CODEFIRSTCODINGCODE, persistedCodeCodingCodes.get(0));
-//        assertEquals(CODESECONDCODINGCODE, persistedCodeCodingCodes.get(1));
-//        assertEquals(CODETHIRDCODINGCODE, persistedCodeCodingCodes.get(2));
 
 		List<String> persistedCodeCodingDisplays = persistedObservationCode.getCoding_display();
-		// TODO: Temporary changes until find a solution for addressing Observation Code with multiple codings.
-//        assertEquals(3, persistedCodeCodingDisplays.size());
 		assertEquals(1, persistedCodeCodingDisplays.size());
 		assertEquals(CODEFIRSTCODINGDISPLAY, persistedCodeCodingDisplays.get(0));
-//        assertEquals(CODESECONDCODINGDISPLAY, persistedCodeCodingDisplays.get(1));
-//        assertEquals(CODETHIRDCODINGDISPLAY, persistedCodeCodingDisplays.get(2));
 
 		List<String> persistedCodeCodingCodeSystemHashes = persistedObservationCode.getCoding_code_system_hash();
-		// TODO: Temporary changes until find a solution for addressing Observation Code with multiple codings.
-//        assertEquals(3, persistedCodeCodingCodeSystemHashes.size());
 		assertEquals(1, persistedCodeCodingCodeSystemHashes.size());
 		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), persistedCodeCodingCodeSystemHashes.get(0));
-//        assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODESECONDCODINGSYSTEM, CODESECONDCODINGCODE)), persistedCodeCodingCodeSystemHashes.get(1));
-//        assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODETHIRDCODINGSYSTEM, CODETHIRDCODINGCODE)), persistedCodeCodingCodeSystemHashes.get(2));
 
 
 	}
@@ -330,9 +292,6 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		indexedObservation.setCode_concept_id(OBSERVATIONSINGLECODEID);
 		CodeableConcept codeableConceptField = new CodeableConcept().setText(OBSERVATIONCODETEXT);
 		codeableConceptField.addCoding(new Coding(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE, CODEFIRSTCODINGDISPLAY));
-		// TODO: Temporary changes until find a solution for addressing Observation Code with multiple codings.
-//        codeableConceptField.addCoding(new Coding(CODESECONDCODINGSYSTEM, CODESECONDCODINGCODE, CODESECONDCODINGDISPLAY));
-//        codeableConceptField.addCoding(new Coding(CODETHIRDCODINGSYSTEM, CODETHIRDCODINGCODE, CODETHIRDCODINGDISPLAY));
 		indexedObservation.setCode(codeableConceptField);
 
 		String observationDocument = ourMapperNonPrettyPrint.writeValueAsString(indexedObservation);
@@ -340,7 +299,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 		CodeJson observationCode = new CodeJson(codeableConceptField, OBSERVATIONSINGLECODEID);
 		String codeDocument = ourMapperNonPrettyPrint.writeValueAsString(observationCode);
-		assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.CODE_INDEX, OBSERVATIONSINGLECODEID, codeDocument, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
+		assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX, OBSERVATIONSINGLECODEID, codeDocument, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
 
 		try {
 			Thread.sleep(1000L);

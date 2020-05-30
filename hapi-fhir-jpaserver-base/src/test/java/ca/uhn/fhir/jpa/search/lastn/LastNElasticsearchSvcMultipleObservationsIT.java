@@ -54,7 +54,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	@After
 	public void after() throws IOException {
 		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.CODE_INDEX);
+		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 	}
 
 	@Test
@@ -307,18 +307,12 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		String codeableConceptId1 = UUID.randomUUID().toString();
 		CodeableConcept codeableConceptField1 = new CodeableConcept().setText("Test Codeable Concept Field for First Code");
 		codeableConceptField1.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-1 display"));
-		// TODO: uncomment the following once there is a solution to supporting multiple codings for Observation Code
-//        codeableConceptField1.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-1", "test-alt-code-1 display"));
-//        codeableConceptField1.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-1", "test-second-alt-code-1 display"));
 		CodeJson codeJson1 = new CodeJson(codeableConceptField1, codeableConceptId1);
 		String codeJson1Document = ourMapperNonPrettyPrint.writeValueAsString(codeJson1);
 
 		String codeableConceptId2 = UUID.randomUUID().toString();
 		CodeableConcept codeableConceptField2 = new CodeableConcept().setText("Test Codeable Concept Field for Second Code");
 		codeableConceptField2.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-2 display"));
-		// TODO: uncomment the following once there is a solution to supporting multiple codings for Observation Code
-//        codeableConceptField2.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-2", "test-alt-code-2 display"));
-//        codeableConceptField2.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-2", "test-second-alt-code-2 display"));
 		CodeJson codeJson2 = new CodeJson(codeableConceptField2, codeableConceptId2);
 		String codeJson2Document = ourMapperNonPrettyPrint.writeValueAsString(codeJson2);
 
@@ -357,12 +351,12 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 					observationJson.setCategories(categoryConcepts1);
 					observationJson.setCode(codeableConceptField1);
 					observationJson.setCode_concept_id(codeableConceptId1);
-					assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.CODE_INDEX, codeableConceptId1, codeJson1Document, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
+					assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX, codeableConceptId1, codeJson1Document, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
 				} else {
 					observationJson.setCategories(categoryConcepts2);
 					observationJson.setCode(codeableConceptField2);
 					observationJson.setCode_concept_id(codeableConceptId2);
-					assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.CODE_INDEX, codeableConceptId2, codeJson2Document, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
+					assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX, codeableConceptId2, codeJson2Document, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
 				}
 
 				Calendar observationDate = new GregorianCalendar();
