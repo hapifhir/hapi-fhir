@@ -734,6 +734,14 @@ public class QuestionnaireResponseValidatorR4Test {
 	@Test
 	public void testValidateQuestionnaireResponseWithValueSetChoiceAnswer() {
 		/*
+		 * Create CodeSystem
+		 */
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setUrl(SYSTEMURI_ICC_SCHOOLTYPE);
+		codeSystem.addConcept().setCode(CODE_ICC_SCHOOLTYPE_PT);
+
+		/*
 		 * Create valueset
 		 */
 		ValueSet iccSchoolTypeVs = new ValueSet();
@@ -785,6 +793,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire()))).thenReturn(questionnaire);
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE))).thenReturn(iccSchoolTypeVs);
 		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any(ValueSet.class))).thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
+		when(myValSupport.fetchCodeSystem(eq(SYSTEMURI_ICC_SCHOOLTYPE))).thenReturn(codeSystem);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());

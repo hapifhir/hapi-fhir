@@ -522,3 +522,72 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
     </tbody>
 </table>
 
+# HFJ_SPIDX_DATE: Date Search Parameters
+
+For any FHIR Search Parameter of type *date* that generates a database index, a row in the *HFJ_SPIDX_DATE* table will be created.
+
+## Columns
+
+The following columns are common to **all HFJ_SPIDX_xxx tables**.
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>SP_VALUE_LOW</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td>Nullable</td>
+            <td>
+                This is the lower bound of the date in question. 
+                <ul>
+                    <li>For a point in time date to millisecond precision (such as an Instant with a value of <code>2020-05-26T15:00:00.000</code>) this represents the exact value.</li>
+                    <li>For an instant value with lower precision, this represents the start of the possible range denoted by the value. For example, for a value of <code>2020-05-26</code> this represents <code>2020-05-26T00:00:00.000</code>.</li>
+                    <li>For a Period with a lower (start) value present, this column contains that value.</li>
+                    <li>For a Period with no lower (start) value present, this column contains a timestamp representing the "start of time".</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>SP_VALUE_HIGH</td>
+            <td></td>
+            <td>Timestamp</td>
+            <td>Nullable</td>
+            <td>
+                This is the upper bound of the date in question. 
+                <ul>
+                    <li>For a point in time date to millisecond precision (such as an Instant with a value of <code>2020-05-26T15:00:00.000</code>) this represents the exact value.</li>
+                    <li>For an instant value with lower precision, this represents the start of the possible range denoted by the value. For example, for a value of <code>2020-05-26</code> this represents <code>2020-05-26T23:59:59.999</code>.</li>
+                    <li>For a Period with an upper (end) value present, this column contains that value.</li>
+                    <li>For a Period with no upper (end) value present, this column contains a timestamp representing the "end of time".</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>SP_VALUE_LOW_DATE_ORDINAL</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>
+                This column contains the same Timestamp as <code>SP_VALUE_LOW</code>, but truncated to Date precision and formatted as an integer in the format "YYYYMMDD".
+            </td>
+        </tr>
+        <tr>
+            <td>SP_VALUE_HIGH_DATE_ORDINAL</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>
+                This column contains the same Timestamp as <code>SP_VALUE_HIGH</code>, but truncated to Date precision and formatted as an integer in the format "YYYYMMDD".
+            </td>
+        </tr>
+    </tbody>
+</table>

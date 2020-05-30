@@ -67,7 +67,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
 	@Override
-	public IValidationSupport.ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand)  {
+	public IValidationSupport.ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		ValueSet expanded = super.expandValueSet(theExpansionOptions, (ValueSet) theValueSetToExpand);
 		return new IValidationSupport.ValueSetExpansionOutcome(expanded);
 	}
@@ -110,21 +110,21 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 		}
 
 		if (!haveValidated) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c->c.toVersionIndependentConcept()));
+			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+			codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> c.toVersionIndependentConcept()));
 		}
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
-				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
-					.setCode(code.getCode()); // AAAAAAAAAAA format
-				return retVal;
-			}
+			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
+				.setCode(code.getCode());
+			return retVal;
+		}
 
-			return new IValidationSupport.CodeValidationResult()
-		.setSeverity(IssueSeverity.ERROR)
-		.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
+		return new IValidationSupport.CodeValidationResult()
+			.setSeverity(IssueSeverity.ERROR)
+			.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override

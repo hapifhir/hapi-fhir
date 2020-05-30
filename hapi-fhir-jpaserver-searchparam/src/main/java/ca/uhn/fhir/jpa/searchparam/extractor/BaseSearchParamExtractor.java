@@ -444,6 +444,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
 
 			if (start != null || end != null) {
+
+				if (start == null) {
+					start = myModelConfig.getPeriodIndexStartOfTime().getValue();
+					startAsString = myModelConfig.getPeriodIndexStartOfTime().getValueAsString();
+				}
+				if (end == null) {
+					end = myModelConfig.getPeriodIndexEndOfTime().getValue();
+					endAsString = myModelConfig.getPeriodIndexEndOfTime().getValueAsString();
+				}
+
 				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
 				theParams.add(myIndexedSearchParamDate);
 			}
@@ -819,6 +829,71 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		List<IBase> values = myCapabilityStatementRestSecurityServiceValueChild.getAccessor().getValues(theValue);
 		for (IBase nextValue : values) {
 			addToken_CodeableConcept(theResourceType, theParams, theSearchParam, nextValue);
+		}
+	}
+
+	private void addDate_Period(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+		Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
+		String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
+		Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
+		String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
+
+		if (start != null || end != null) {
+
+			if (start == null) {
+				start = myModelConfig.getPeriodIndexStartOfTime().getValue();
+				startAsString = myModelConfig.getPeriodIndexStartOfTime().getValueAsString();
+			}
+			if (end == null) {
+				end = myModelConfig.getPeriodIndexEndOfTime().getValue();
+				endAsString = myModelConfig.getPeriodIndexEndOfTime().getValueAsString();
+			}
+
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
+			theParams.add(nextEntity);
+		}
+	}
+
+	private void addDate_Timing(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+		List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
+
+		TreeSet<Date> dates = new TreeSet<>();
+		TreeSet<String> dateStrings = new TreeSet<>();
+		String firstValue = null;
+		String finalValue = null;
+		for (IPrimitiveType<Date> nextEvent : values) {
+			if (nextEvent.getValue() != null) {
+				dates.add(nextEvent.getValue());
+				if (firstValue == null) {
+					firstValue = nextEvent.getValueAsString();
+				}
+				finalValue = nextEvent.getValueAsString();
+			}
+		}
+
+		Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
+		if (repeat.isPresent()) {
+			Optional<IBase> bounds = myTimingRepeatBoundsValueChild.getAccessor().getFirstValueOrNull(repeat.get());
+			if (bounds.isPresent()) {
+				String boundsType = toRootTypeName(bounds.get());
+				if ("Period".equals(boundsType)) {
+					Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
+					Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
+					String endString = extractValueAsString(myPeriodEndValueChild, bounds.get());
+					dates.add(start);
+					dates.add(end);
+					//TODO Check if this logic is valid. Does the start of the first period indicate a lower bound??
+					if (firstValue == null) {
+						firstValue = extractValueAsString(myPeriodStartValueChild, bounds.get());
+					}
+					finalValue = endString;
+				}
+			}
+		}
+
+		if (!dates.isEmpty()) {
+			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), dates.first(), firstValue, dates.last(), finalValue, firstValue);
+			theParams.add(nextEntity);
 		}
 	}
 

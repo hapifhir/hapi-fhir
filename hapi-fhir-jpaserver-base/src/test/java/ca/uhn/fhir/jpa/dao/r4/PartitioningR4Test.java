@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
@@ -696,6 +697,60 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(10, strings.size());
 			assertEquals(myPartitionId, strings.get(0).getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, strings.get(0).getPartitionId().getPartitionDate());
+
+		});
+
+	}
+
+	@Test
+	public void testUpdateConditionalInPartition() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		createRequestId();
+
+		// Create a resource
+		addCreatePartition(myPartitionId, myPartitionDate);
+		addReadPartition(myPartitionId);
+		Patient p = new Patient();
+		p.setActive(false);
+		p.addIdentifier().setValue("12345");
+		Long patientId = myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong();
+		runInTransaction(() -> {
+			// HFJ_RESOURCE
+			assertEquals(1, myResourceTableDao.count());
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
+			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
+
+			// HFJ_SPIDX_TOKEN
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			assertEquals(3, myResourceIndexedSearchParamTokenDao.countForResourceId(patientId));
+		});
+
+		// Update that resource
+		addReadPartition(myPartitionId);
+		p = new Patient();
+		p.setActive(true);
+		p.addIdentifier().setValue("12345");
+		Long patientId2 = myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong();
+
+		assertEquals(patientId, patientId2);
+
+		runInTransaction(() -> {
+			// HFJ_RESOURCE
+			assertEquals(1, myResourceTableDao.count());
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
+			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
+
+			// HFJ_SPIDX_TOKEN
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			assertEquals(3, myResourceIndexedSearchParamTokenDao.countForResourceId(patientId));
+
+			// HFJ_RES_VER
+			int version = 2;
+			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, version);
+			assertEquals(myPartitionId, resVer.getPartitionId().getPartitionId().intValue());
+			assertEquals(myPartitionDate, resVer.getPartitionId().getPartitionDate());
 
 		});
 

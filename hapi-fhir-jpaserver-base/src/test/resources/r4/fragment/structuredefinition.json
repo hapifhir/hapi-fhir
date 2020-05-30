@@ -1,0 +1,57 @@
+{
+	"resourceType": "StructureDefinition",
+	"id": "vitalsigns",
+	"url": "http://example.com/structuredefinition",
+	"version": "4.0.0",
+	"name": "observation-vitalsigns",
+	"title": "Vital Signs Profile",
+	"status": "draft",
+	"experimental": false,
+	"date": "2016-03-25",
+	"publisher": "Health Level Seven International (Orders and Observations Workgroup)",
+	"description": "FHIR Vital Signs Profile",
+	"fhirVersion": "4.0.0",
+	"kind": "resource",
+	"abstract": false,
+	"type": "Observation",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+	"derivation": "constraint",
+	"differential": {
+		"element": [
+			{
+				"id": "Observation",
+				"path": "Observation",
+				"short": "FHIR Vital Signs Profile",
+				"definition": "The FHIR Vitals Signs profile sets minimum expectations for the Observation Resource to record, search and fetch the vital signs associated with a patient.",
+				"alias": [
+					"Vital Signs",
+					"Measurement",
+					"Results",
+					"Tests"
+				],
+				"min": 0,
+				"max": "*"
+			},
+			{
+				"id": "Observation.code",
+				"path": "Observation.code",
+				"short": "Coded Responses from C-CDA Vital Sign Results",
+				"definition": "Coded Responses from C-CDA Vital Sign Results.",
+				"requirements": "5. SHALL contain exactly one [1..1] code, where the @code SHOULD be selected from ValueSet HITSP Vital Sign Result Type 2.16.840.1.113883.3.88.12.80.62 DYNAMIC (CONF:7301).",
+				"min": 1,
+				"max": "1",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				],
+				"mustSupport": true,
+				"binding": {
+					"strength": "required",
+					"description": "This identifies the vital sign result type.",
+					"valueSet": "http://example.com/valueset"
+				}
+			}
+		]
+	}
+}
