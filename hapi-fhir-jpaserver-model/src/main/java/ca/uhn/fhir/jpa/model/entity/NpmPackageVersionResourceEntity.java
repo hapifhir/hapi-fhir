@@ -36,6 +36,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Version;
+import java.util.Date;
 
 @Entity()
 @Table(name = "NPM_PACKAGE_VER_RES", uniqueConstraints = {
@@ -67,13 +71,17 @@ public class NpmPackageVersionResourceEntity {
 	private String myCanonicalUrl;
 	@Column(name = "CANONICAL_VERSION", length = 200)
 	private String myCanonicalVersion;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
+	private FhirVersionEnum myFhirVersion;
 	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private String myFhirVersionId;
-	@Enumerated(EnumType.STRING)
-	@Column(name = "FHIR_VERSION_NAME", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
-	private FhirVersionEnum myFhirVersionName;
 	@Column(name = "res_SIZE_BYTES", nullable = false)
 	private long myResSizeBytes;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Version
+	@Column(name = "UPDATED_TIME", nullable = false)
+	private Date myVersion;
 
 	public long getResSizeBytes() {
 		return myResSizeBytes;
@@ -107,12 +115,12 @@ public class NpmPackageVersionResourceEntity {
 		myFhirVersionId = theFhirVersionId;
 	}
 
-	public FhirVersionEnum getFhirVersionName() {
-		return myFhirVersionName;
+	public FhirVersionEnum getFhirVersion() {
+		return myFhirVersion;
 	}
 
-	public void setFhirVersionName(FhirVersionEnum theFhirVersionName) {
-		myFhirVersionName = theFhirVersionName;
+	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
+		myFhirVersion = theFhirVersion;
 	}
 
 	public void setPackageVersion(NpmPackageVersionEntity thePackageVersion) {

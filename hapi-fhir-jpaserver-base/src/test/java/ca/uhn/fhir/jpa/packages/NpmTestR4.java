@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
@@ -14,13 +13,15 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.junit.After;
@@ -37,8 +38,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -47,15 +48,20 @@ import static org.junit.Assert.assertThat;
 public class NpmTestR4 extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);
+	private final Map<String, byte[]> myResponses = new HashMap<>();
 	@Autowired
 	public NpmInstallerSvc igInstaller;
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
-
 	private Server myServer;
-	private final Map<String, byte[]> myResponses = new HashMap<>();
+	@Autowired
+	private INpmPackageDao myPackageDao;
+	@Autowired
+	private INpmPackageVersionDao myPackageVersionDao;
+	@Autowired
+	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
 
 	@Before
 	public void before() throws Exception {
@@ -103,13 +109,13 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 		// Fetch resource by URL
 		FhirContext fhirContext = FhirContext.forDstu3();
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ACVPU-Observation-1");
 			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ACVPU-Observation-1\",\"version\":\"1.0.0\""));
 		});
 
 		// Fetch resource by URL with version
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ACVPU-Observation-1|1.0.0");
 			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ACVPU-Observation-1\",\"version\":\"1.0.0\""));
 		});
@@ -117,13 +123,6 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		// This was saved but is the wrong version of FHIR for this server
 		assertNull(myNpmJpaValidationSupport.fetchStructureDefinition("http://fhir.de/StructureDefinition/condition-de-basis/0.2"));
 	}
-
-	@Autowired
-	private INpmPackageDao myPackageDao;
-	@Autowired
-	private INpmPackageVersionDao myPackageVersionDao;
-	@Autowired
-	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
 
 	@Test
 	public void testInstallR4Package() throws Exception {
@@ -148,46 +147,188 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
 
 		// Make sure DB rows were saved
-		runInTransaction(()->{
-			NpmPackageEntity pkgEntity = myPackageDao.findByPackageId("hl7.fhir.uv.shorthand").orElseThrow(()->new IllegalArgumentException());
+		runInTransaction(() -> {
+			NpmPackageEntity pkgEntity = myPackageDao.findByPackageId("hl7.fhir.uv.shorthand").orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("hl7.fhir.uv.shorthand", pkgEntity.getPackageId());
 
-			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(()->new IllegalArgumentException());
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("hl7.fhir.uv.shorthand", versionEntity.getPackageId());
 			assertEquals("0.12.0", versionEntity.getVersionId());
-			assertEquals(1, versionEntity.getPackageSizeBytes());
+			assertEquals(3001, versionEntity.getPackageSizeBytes());
 			assertEquals(true, versionEntity.isCurrentVersion());
-			assertEquals(true, versionEntity.getFhirVersionId());
-			assertEquals(FhirVersionEnum.R4, versionEntity.getFhirVersionName());
+			assertEquals("hl7.fhir.uv.shorthand", versionEntity.getName());
+			assertEquals("4.0.1", versionEntity.getFhirVersionId());
+			assertEquals(FhirVersionEnum.R4, versionEntity.getFhirVersion());
 
 			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand").getContent().get(0);
-			assertEquals("", resource.getCanonicalUrl());
-			assertEquals("", resource.getCanonicalVersion());
-			assertEquals("", resource.getFilename());
-			assertEquals("", resource.getFhirVersionId());
-			assertEquals("", resource.getFhirVersionName());
-			assertEquals(1, resource.getResSizeBytes());
+			assertEquals("http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand", resource.getCanonicalUrl());
+			assertEquals("0.12.0", resource.getCanonicalVersion());
+			assertEquals("ImplementationGuide-hl7.fhir.uv.shorthand.json", resource.getFilename());
+			assertEquals("4.0.1", resource.getFhirVersionId());
+			assertEquals(FhirVersionEnum.R4, resource.getFhirVersion());
+			assertEquals(6155, resource.getResSizeBytes());
 		});
 
 		// Fetch resource by URL
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
 			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
 		});
 
 		// Fetch resource by URL with version
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand|0.12.0");
 			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
 		});
 
 		// Search for the installed resource
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(StructureDefinition.SP_URL, new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system"));
 			IBundleProvider outcome = myCodeSystemDao.search(map);
 			assertEquals(1, outcome.sizeOrThrowNpe());
 		});
+	}
+
+
+	@Test
+	public void testLoadPackageMetadata() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+		runInTransaction(() -> {
+			NpmPackageMetadataJson metadata = myPackageCacheManager.loadPackageMetadata("hl7.fhir.uv.shorthand");
+			try {
+				ourLog.info(JsonUtil.serialize(metadata));
+
+				assertEquals("0.12.0", metadata.getDistTags().getLatest());
+
+				assertThat(metadata.getVersions().getVersions().keySet(), contains("0.12.0", "0.11.1"));
+
+			} catch (IOException e) {
+				throw new InternalErrorException(e);
+			}
+		});
+
+	}
+
+
+	@Test
+	public void testInstallNewerPackageUpdatesLatestVersionFlag() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+
+		// Install older version
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+		// Older version is current
+		runInTransaction(() -> {
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.11.1").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(true, versionEntity.isCurrentVersion());
+		});
+
+		// Fetching a resource should return the older version
+		runInTransaction(() -> {
+			ImplementationGuide ig = (ImplementationGuide) myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
+			assertEquals("0.11.1", ig.getVersion());
+		});
+
+		// Now install newer version
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+		// Newer version is current
+		runInTransaction(() -> {
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.11.1").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(false, versionEntity.isCurrentVersion());
+
+			versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(true, versionEntity.isCurrentVersion());
+		});
+
+		// Fetching a resource should return the newer version
+		runInTransaction(() -> {
+			ImplementationGuide ig = (ImplementationGuide) myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
+			assertEquals("0.12.0", ig.getVersion());
+		});
+	}
+
+	@Test
+	public void testInstallOlderPackageDoesntUpdatLatestVersionFlag() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+
+		// Install newer version
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+		runInTransaction(() -> {
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(true, versionEntity.isCurrentVersion());
+		});
+
+		// Fetching a resource should return the older version
+		runInTransaction(() -> {
+			ImplementationGuide ig = (ImplementationGuide) myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
+			assertEquals("0.12.0", ig.getVersion());
+		});
+
+		// Install older version
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+		// Newer version is still current
+		runInTransaction(() -> {
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.11.1").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(false, versionEntity.isCurrentVersion());
+
+			versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(true, versionEntity.isCurrentVersion());
+		});
+
+		// Fetching a resource should return the newer version
+		runInTransaction(() -> {
+			ImplementationGuide ig = (ImplementationGuide) myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
+			assertEquals("0.12.0", ig.getVersion());
+		});
+	}
+
+	@Test
+	public void testInstallAlreadyExistingIsIgnored() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+
+		// Install
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+		runInTransaction(() -> {
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(true, versionEntity.isCurrentVersion());
+		});
+
+		// Install same again
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+		runInTransaction(() -> {
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(true, versionEntity.isCurrentVersion());
+		});
+
 	}
 
 	private class FakeNpmServlet extends HttpServlet {

@@ -75,7 +75,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	private void init510() {
 		Builder version = forVersion(VersionEnum.V5_1_0);
 
-		version.addTableByColumns("20200524.1", "")
+//		version.addTableByColumns("20200524.1", "")
 
 	}
 

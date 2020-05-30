@@ -39,7 +39,9 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
+import ca.uhn.fhir.util.ResourceUtil;
 import com.google.common.base.Charsets;
+import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -55,6 +57,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.comparator.Comparators;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,6 +66,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -155,6 +160,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				return;
 			}
 
+			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, thePackageVersion);
+
 			packageVersion = new NpmPackageVersionEntity();
 			packageVersion.setPackageId(thePackageId);
 			packageVersion.setVersionId(thePackageVersion);
@@ -163,9 +170,10 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			packageVersion.setSavedTime(new Date());
 			packageVersion.setDescription(npmPackage.description());
 			packageVersion.setFhirVersionId(npmPackage.fhirVersion());
-			packageVersion.setFhirVersionName(fhirVersion);
-			packageVersion.setCurrentVersion(true);
+			packageVersion.setFhirVersion(fhirVersion);
+			packageVersion.setCurrentVersion(currentVersion);
 			packageVersion.setPackageSizeBytes(bytes.length);
+			packageVersion.setName(npmPackage.name());
 			packageVersion = myPackageVersionDao.save(packageVersion);
 
 			String dirName = "package";
@@ -183,19 +191,25 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 						throw new InternalErrorException(e);
 					}
 
-					String contentType;
 					IBaseResource resource;
 					if (nextFile.toLowerCase().endsWith(".xml")) {
-						contentType = Constants.CT_FHIR_XML_NEW;
 						resource = packageContext.newXmlParser().parseResource(contentsString);
 					} else if (nextFile.toLowerCase().endsWith(".json")) {
-						contentType = Constants.CT_FHIR_JSON_NEW;
 						resource = packageContext.newJsonParser().parseResource(contentsString);
 					} else {
 						return;
 					}
 
-					IBaseBinary resourceBinary = createPackageResourceBinary(nextFile, contents, contentType);
+					/*
+					 * Re-encode the resource as JSON with the narrative removed in order to reduce the footprint.
+					 * This is useful since we'll be loading these resources back and hopefully keeping lots of
+					 * them in memory in order to speed up validation activities.
+					 */
+					String contentType = Constants.CT_FHIR_JSON_NEW;
+					ResourceUtil.removeNarrative(packageContext, resource);
+					byte[] minimizedContents = packageContext.newJsonParser().encodeResourceToString(resource).getBytes(StandardCharsets.UTF_8);
+
+					IBaseBinary resourceBinary = createPackageResourceBinary(nextFile, minimizedContents, contentType);
 					ResourceTable persistedResource = (ResourceTable) getBinaryDao().create(resourceBinary).getEntity();
 
 					NpmPackageVersionResourceEntity resourceEntity = new NpmPackageVersionResourceEntity();
@@ -203,7 +217,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					resourceEntity.setResourceBinary(persistedResource);
 					resourceEntity.setDirectory(dirName);
 					resourceEntity.setFhirVersionId(npmPackage.fhirVersion());
-					resourceEntity.setFhirVersionName(fhirVersion);
+					resourceEntity.setFhirVersion(fhirVersion);
 					resourceEntity.setFilename(nextFile);
 					resourceEntity.setResourceType(nextType);
 					resourceEntity.setResSizeBytes(contents.length);
@@ -226,6 +240,26 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		});
 
 		return npmPackage;
+	}
+
+	private boolean updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(String thePackageId, String thePackageVersion) {
+		Collection<NpmPackageVersionEntity> existingVersions = myPackageVersionDao.findByPackageId(thePackageId);
+		boolean retVal = true;
+
+		for (NpmPackageVersionEntity next : existingVersions) {
+			int cmp = PackageVersionComparator.INSTANCE.compare(next.getVersionId(), thePackageVersion);
+			assert cmp != 0;
+			if (cmp < 0) {
+				if (next.isCurrentVersion()) {
+					next.setCurrentVersion(false);
+					myPackageVersionDao.save(next);
+				}
+			} else {
+				retVal = false;
+			}
+		}
+
+		return retVal;
 	}
 
 	@Nonnull
@@ -295,7 +329,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		int versionSeparator = canonicalUrl.lastIndexOf('|');
 		Slice<NpmPackageVersionResourceEntity> slice;
 		if (versionSeparator != -1) {
-			String canonicalVersion = canonicalUrl.substring(versionSeparator+1);
+			String canonicalVersion = canonicalUrl.substring(versionSeparator + 1);
 			canonicalUrl = canonicalUrl.substring(0, versionSeparator);
 			slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersion(PageRequest.of(0, 1), theFhirVersion, canonicalUrl, canonicalVersion);
 		} else {
@@ -311,8 +345,38 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
 			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
 
-			FhirContext packageContext = getFhirContext(contents.getFhirVersionName());
+			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
 			return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
 		}
+	}
+
+	@Override
+	@Transactional
+	public NpmPackageMetadataJson loadPackageMetadata(String thePackageId) {
+		NpmPackageMetadataJson retVal = new NpmPackageMetadataJson();
+
+		Optional<NpmPackageEntity> pkg = myPackageDao.findByPackageId(thePackageId);
+		if (!pkg.isPresent()) {
+			throw new ResourceNotFoundException("Unknown package ID: " + thePackageId);
+		}
+
+		List<NpmPackageVersionEntity> packageVersions = new ArrayList<>(myPackageVersionDao.findByPackageId(thePackageId));
+		packageVersions.sort(new ReverseComparator<>((o1, o2) -> PackageVersionComparator.INSTANCE.compare(o1.getVersionId(), o2.getVersionId())));
+
+		for (NpmPackageVersionEntity next : packageVersions) {
+			if (next.isCurrentVersion()) {
+				retVal.setDistTags(new NpmPackageMetadataJson.DistTags().setLatest(next.getVersionId()));
+			}
+
+			NpmPackageMetadataJson.Version version = new NpmPackageMetadataJson.Version();
+			version.setFhirVersion(next.getFhirVersionId());
+			version.setDescription(next.getDescription());
+			version.setName(next.getName());
+			version.setVersion(next.getVersionId());
+			retVal.getVersions().addVersion(version);
+
+		}
+
+		return retVal;
 	}
 }
