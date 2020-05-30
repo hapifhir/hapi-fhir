@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -13,7 +12,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.junit.After;
@@ -37,7 +35,7 @@ public class NpmTestDstu3 extends BaseJpaDstu3Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);
 	@Autowired
-	public NpmInstallerSvc igInstaller;
+	public NpmInstallerSvcImpl igInstaller;
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired

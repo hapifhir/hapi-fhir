@@ -41,16 +41,17 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class NpmTestR4 extends BaseJpaR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(NpmTestR4.class);
 	private final Map<String, byte[]> myResponses = new HashMap<>();
 	@Autowired
-	public NpmInstallerSvc igInstaller;
+	public INpmInstallerSvc igInstaller;
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
@@ -210,7 +211,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 				assertEquals("0.12.0", metadata.getDistTags().getLatest());
 
-				assertThat(metadata.getVersions().getVersions().keySet(), contains("0.12.0", "0.11.1"));
+				assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
 
 			} catch (IOException e) {
 				throw new InternalErrorException(e);
@@ -224,8 +225,10 @@ public class NpmTestR4 extends BaseJpaR4Test {
 	public void testInstallNewerPackageUpdatesLatestVersionFlag() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
 
-		myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
-		myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+		byte[] contents0111 = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
+		byte[] contents0120 = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", contents0111);
+		myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", contents0120);
 
 		// Install older version
 		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
@@ -329,6 +332,24 @@ public class NpmTestR4 extends BaseJpaR4Test {
 			assertEquals(true, versionEntity.isCurrentVersion());
 		});
 
+	}
+
+	@Test
+	public void testLoadContents() throws IOException {
+		byte[] contents0111 = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
+		byte[] contents0120 = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY).setContents(contents0111);
+		igInstaller.install(spec);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY).setContents(contents0120);
+		igInstaller.install(spec);
+
+
+		assertArrayEquals(contents0111, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1"));
+		assertArrayEquals(contents0120, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0"));
+		assertArrayEquals(contents0120, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest"));
+		assertEquals(null, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3"));
+		assertEquals(null, myPackageCacheManager.loadPackageContents("foo", "1.2.3"));
 	}
 
 	private class FakeNpmServlet extends HttpServlet {

@@ -54,9 +54,9 @@ import java.util.Map;
 /**
  * @since 5.1.0
  */
-public class NpmInstallerSvc {
+public class NpmInstallerSvcImpl implements INpmInstallerSvc {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(NpmInstallerSvc.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(NpmInstallerSvcImpl.class);
 	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
 		"NamingSystem",
 		"CodeSystem",
@@ -76,6 +76,13 @@ public class NpmInstallerSvc {
 	private IValidationSupport validationSupport;
 	@Autowired
 	private IHapiPackageCacheManager packageCacheManager;
+
+	/**
+	 * Constructor
+	 */
+	public NpmInstallerSvcImpl() {
+		super();
+	}
 
 	@PostConstruct
 	public void initialize() {
@@ -109,6 +116,7 @@ public class NpmInstallerSvc {
 	 * @param theInstallationSpec The details about what should be installed
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
+	@Override
 	public void install(NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		if (enabled) {
 			try {

@@ -58,6 +58,9 @@ public class NpmInstallationSpec {
 	@ApiModelProperty("Should contents be made available to the FHIR validation infrastructure")
 	@JsonProperty("validationMode")
 	private ValidationModeEnum myValidationMode;
+	@ApiModelProperty("If provided, supplies the actual bytes of the package .tar.gz file")
+	@JsonProperty("packageContents")
+	private byte[] myContents;
 
 	public String getPackageUrl() {
 		return myPackageUrl;
@@ -108,6 +111,15 @@ public class NpmInstallationSpec {
 
 	public NpmInstallationSpec setPackageVersion(String thePackageVersion) {
 		myPackageVersion = thePackageVersion;
+		return this;
+	}
+
+	public byte[] getContents() {
+		return myContents;
+	}
+
+	public NpmInstallationSpec setContents(byte[] theContents) {
+		myContents = theContents;
 		return this;
 	}
 

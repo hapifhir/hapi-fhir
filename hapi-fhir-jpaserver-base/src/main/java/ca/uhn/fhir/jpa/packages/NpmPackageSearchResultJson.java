@@ -20,84 +20,64 @@ package ca.uhn.fhir.jpa.packages;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 
-import javax.annotation.Nonnull;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-@ApiModel("Represents an NPM package metadata response")
+@ApiModel("Represents an NPM package search response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class NpmPackageMetadataJson {
+public class NpmPackageSearchResultJson {
 
-	@JsonProperty("dist-tags")
-	private DistTags myDistTags;
-	@JsonProperty("modified")
-	@JsonSerialize(using = JsonDateSerializer.class)
-	@JsonDeserialize(using = JsonDateDeserializer.class)
-	private Date myModified;
-	@JsonProperty("name")
-	private String myName;
-	@JsonProperty("versions")
-	private Map<String, Version> myVersionIdToVersion;
+	@JsonProperty("objects")
+	private List<ObjectElement> myObjects;
+	@JsonProperty("total")
+	private int myTotal;
 
-	public void addVersion(Version theVersion) {
-		getVersions().put(theVersion.getVersion(), theVersion);
-	}
-
-	@Nonnull
-	public Map<String, Version> getVersions() {
-		if (myVersionIdToVersion == null) {
-			myVersionIdToVersion = new LinkedHashMap<>();
+	public List<ObjectElement> getObjects() {
+		if (myObjects == null) {
+			myObjects = new ArrayList<>();
 		}
-		return myVersionIdToVersion;
+		return myObjects;
 	}
 
-	public DistTags getDistTags() {
-		return myDistTags;
+	public ObjectElement addObject() {
+		ObjectElement object = new ObjectElement();
+		getObjects().add(object);
+		return object;
 	}
 
-	public void setDistTags(DistTags theDistTags) {
-		myDistTags = theDistTags;
+	public int getTotal() {
+		return myTotal;
 	}
 
-	public void setModified(Date theModified) {
-		myModified = theModified;
+	public void setTotal(int theTotal) {
+		myTotal = theTotal;
 	}
-
-	public void setName(String theName) {
-		myName = theName;
-	}
-
-
-	public static class DistTags {
-
-		@JsonProperty("latest")
-		private String myLatest;
-
-		public String getLatest() {
-			return myLatest;
-		}
-
-		public DistTags setLatest(String theLatest) {
-			myLatest = theLatest;
-			return this;
-		}
-	}
-
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-	public static class Version {
+	public static class ObjectElement {
+
+		@JsonProperty("package")
+		private Package myPackage;
+
+		public Package getPackage() {
+			if (myPackage == null) {
+				myPackage = new Package();
+			}
+			return myPackage;
+		}
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+	public static class Package {
 
 		@JsonProperty("name")
 		private String myName;
@@ -106,38 +86,46 @@ public class NpmPackageMetadataJson {
 		@JsonProperty("description")
 		private String myDescription;
 		@JsonProperty("fhirVersion")
-		private String myFhirVersion;
+		private List<String> myFhirVersion;
 
 		public String getName() {
 			return myName;
 		}
 
-		public void setName(String theName) {
+		public Package setName(String theName) {
 			myName = theName;
+			return this;
 		}
 
 		public String getDescription() {
 			return myDescription;
 		}
 
-		public void setDescription(String theDescription) {
+		public Package setDescription(String theDescription) {
 			myDescription = theDescription;
+			return this;
 		}
 
-		public String getFhirVersion() {
+		public List<String> getFhirVersion() {
+			if (myFhirVersion == null) {
+				myFhirVersion = new ArrayList<>();
+			}
 			return myFhirVersion;
 		}
 
-		public void setFhirVersion(String theFhirVersion) {
-			myFhirVersion = theFhirVersion;
+		public void setFhirVersion(Collection<String> theFhirVersion) {
+			getFhirVersion().clear();
+			getFhirVersion().addAll(theFhirVersion);
+			getFhirVersion().sort(PackageVersionComparator.INSTANCE);
 		}
 
 		public String getVersion() {
 			return myVersion;
 		}
 
-		public void setVersion(String theVersion) {
+		public Package setVersion(String theVersion) {
 			myVersion = theVersion;
+			return this;
 		}
 	}
 }

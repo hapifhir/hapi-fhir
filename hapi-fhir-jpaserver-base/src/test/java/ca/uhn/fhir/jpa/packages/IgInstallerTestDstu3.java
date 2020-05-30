@@ -18,7 +18,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 	@Autowired
 	private DaoConfig daoConfig;
 	@Autowired
-	private NpmInstallerSvc igInstaller;
+	private NpmInstallerSvcImpl igInstaller;
 	@Autowired
 	private IPackageCacheManager myPackageCacheManager;
 

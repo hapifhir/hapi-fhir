@@ -270,6 +270,7 @@ public class Constants {
 	 * key will be of type {@link ca.uhn.fhir.interceptor.model.RequestPartitionId}.
 	 */
 	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
+	public static final String CT_APPLICATION_GZIP = "application/gzip";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

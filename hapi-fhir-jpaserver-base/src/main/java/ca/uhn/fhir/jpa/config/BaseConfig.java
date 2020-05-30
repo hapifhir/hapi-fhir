@@ -22,8 +22,9 @@ import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.INpmInstallerSvc;
 import ca.uhn.fhir.jpa.packages.JpaPackageCache;
-import ca.uhn.fhir.jpa.packages.NpmInstallerSvc;
+import ca.uhn.fhir.jpa.packages.NpmInstallerSvcImpl;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -264,8 +265,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public NpmInstallerSvc igInstallerSvc() {
-		return new NpmInstallerSvc();
+	public INpmInstallerSvc npmInstallerSvc() {
+		return new NpmInstallerSvcImpl();
 	}
 
 	@Bean

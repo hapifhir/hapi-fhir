@@ -36,4 +36,7 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
 	NpmPackageMetadataJson loadPackageMetadata(String thePackageId) throws ResourceNotFoundException;
 
+	byte[] loadPackageContents(String thePackageId, String theVersion);
+
+	NpmPackageSearchResultJson search(PackageSearchSpec thePackageSearchSpec);
 }
