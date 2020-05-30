@@ -13,8 +13,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -37,6 +39,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -153,6 +156,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 			assertEquals("0.12.0", versionEntity.getVersionId());
 			assertEquals(3001, versionEntity.getPackageSizeBytes());
 			assertEquals(true, versionEntity.isCurrentVersion());
+			assertEquals("hl7.fhir.uv.shorthand", versionEntity.getName());
 			assertEquals("4.0.1", versionEntity.getFhirVersionId());
 			assertEquals(FhirVersionEnum.R4, versionEntity.getFhirVersion());
 
@@ -184,6 +188,35 @@ public class NpmTestR4 extends BaseJpaR4Test {
 			IBundleProvider outcome = myCodeSystemDao.search(map);
 			assertEquals(1, outcome.sizeOrThrowNpe());
 		});
+	}
+
+
+	@Test
+	public void testLoadPackageMetadata() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+		runInTransaction(() -> {
+			NpmPackageMetadataJson metadata = myPackageCacheManager.loadPackageMetadata("hl7.fhir.uv.shorthand");
+			try {
+				ourLog.info(JsonUtil.serialize(metadata));
+
+				assertEquals("0.12.0", metadata.getDistTags().getLatest());
+
+				assertThat(metadata.getVersions().getVersions().keySet(), contains("0.12.0", "0.11.1"));
+
+			} catch (IOException e) {
+				throw new InternalErrorException(e);
+			}
+		});
+
 	}
 
 

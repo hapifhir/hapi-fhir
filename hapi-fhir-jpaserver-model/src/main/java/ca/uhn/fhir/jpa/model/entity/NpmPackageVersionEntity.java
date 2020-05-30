@@ -64,6 +64,8 @@ public class NpmPackageVersionEntity {
 	@Version
 	@Column(name = "UPDATED_TIME", nullable = false)
 	private Date myVersion;
+	@Column(name = "PACKAGE_NAME", nullable = true, length = 200)
+	private String myName;
 
 	public long getPackageSizeBytes() {
 		return myPackageSizeBytes;
@@ -139,5 +141,13 @@ public class NpmPackageVersionEntity {
 
 	public void setDescription(String theDescription) {
 		myDescription = theDescription;
+	}
+
+	public String getName() {
+		return myName;
+	}
+
+	public void setName(String theName) {
+		myName = theName;
 	}
 }

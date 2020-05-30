@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.packages;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -21,6 +41,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.ResourceUtil;
 import com.google.common.base.Charsets;
+import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -36,7 +57,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.yaml.snakeyaml.extensions.compactnotation.PackageCompactConstructor;
+import org.springframework.util.comparator.Comparators;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,6 +66,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -151,6 +173,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			packageVersion.setFhirVersion(fhirVersion);
 			packageVersion.setCurrentVersion(currentVersion);
 			packageVersion.setPackageSizeBytes(bytes.length);
+			packageVersion.setName(npmPackage.name());
 			packageVersion = myPackageVersionDao.save(packageVersion);
 
 			String dirName = "package";
@@ -325,5 +348,35 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
 			return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
 		}
+	}
+
+	@Override
+	@Transactional
+	public NpmPackageMetadataJson loadPackageMetadata(String thePackageId) {
+		NpmPackageMetadataJson retVal = new NpmPackageMetadataJson();
+
+		Optional<NpmPackageEntity> pkg = myPackageDao.findByPackageId(thePackageId);
+		if (!pkg.isPresent()) {
+			throw new ResourceNotFoundException("Unknown package ID: " + thePackageId);
+		}
+
+		List<NpmPackageVersionEntity> packageVersions = new ArrayList<>(myPackageVersionDao.findByPackageId(thePackageId));
+		packageVersions.sort(new ReverseComparator<>((o1, o2) -> PackageVersionComparator.INSTANCE.compare(o1.getVersionId(), o2.getVersionId())));
+
+		for (NpmPackageVersionEntity next : packageVersions) {
+			if (next.isCurrentVersion()) {
+				retVal.setDistTags(new NpmPackageMetadataJson.DistTags().setLatest(next.getVersionId()));
+			}
+
+			NpmPackageMetadataJson.Version version = new NpmPackageMetadataJson.Version();
+			version.setFhirVersion(next.getFhirVersionId());
+			version.setDescription(next.getDescription());
+			version.setName(next.getName());
+			version.setVersion(next.getVersionId());
+			retVal.getVersions().addVersion(version);
+
+		}
+
+		return retVal;
 	}
 }
