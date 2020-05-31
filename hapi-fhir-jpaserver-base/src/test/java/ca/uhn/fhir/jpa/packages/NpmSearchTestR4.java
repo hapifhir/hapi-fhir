@@ -66,6 +66,7 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
 		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
 		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
+		assertEquals(3115, search.getObjects().get(0).getPackage().getBytes());
 		assertThat(search.getObjects().get(0).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
 
 		assertEquals("nictiz.fhir.nl.stu3.questionnaires", search.getObjects().get(1).getPackage().getName());
@@ -117,6 +118,64 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		assertEquals(0, search.getObjects().size());
 
 	}
+
+
+	@Test
+	public void testSearchByFhirVersion() throws IOException {
+		NpmInstallationSpec spec;
+		byte[] bytes;
+		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY).setContents(bytes);
+		igInstaller.install(spec);
+
+		PackageSearchSpec searchSpec;
+		NpmPackageSearchResultJson search;
+
+		// Matching by name
+		myCaptureQueriesListener.clear();
+		searchSpec = new PackageSearchSpec();
+		searchSpec.setFhirVersion("R4");
+		search = myPackageCacheManager.search(searchSpec);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
+		assertEquals(1, search.getTotal());
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertEquals("4.0.1", search.getObjects().get(0).getPackage().getFhirVersion().get(0));
+
+		// Matching FHIR version
+		myCaptureQueriesListener.clear();
+		searchSpec = new PackageSearchSpec();
+		searchSpec.setFhirVersion("4.0.1");
+		search = myPackageCacheManager.search(searchSpec);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
+		assertEquals(1, search.getTotal());
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+
+		// Partial Matching FHIR version
+		myCaptureQueriesListener.clear();
+		searchSpec = new PackageSearchSpec();
+		searchSpec.setFhirVersion("4.0");
+		search = myPackageCacheManager.search(searchSpec);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
+		assertEquals(1, search.getTotal());
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+
+		// Non Matching URL
+		searchSpec = new PackageSearchSpec();
+		searchSpec.setResourceUrl("http://foo");
+		search = myPackageCacheManager.search(searchSpec);
+
+		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
+		assertEquals(0, search.getTotal());
+		assertEquals(0, search.getObjects().size());
+
+	}
+
 
 	@Test
 	public void testSearchByDescription() throws IOException {

@@ -74,7 +74,7 @@ public class NpmPackageVersionEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SAVED_TIME", nullable = false)
 	private Date mySavedTime;
-	@Column(name = "DESC", nullable = false, length = 500)
+	@Column(name = "PKG_DESC", nullable = false, length = 500)
 	private String myDescription;
 	@Column(name = "DESC_UPPER", nullable = false, length = 500)
 	private String myDescriptionUpper;

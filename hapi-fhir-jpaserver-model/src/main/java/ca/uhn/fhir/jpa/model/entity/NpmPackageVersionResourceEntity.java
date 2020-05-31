@@ -76,7 +76,7 @@ public class NpmPackageVersionResourceEntity {
 	private FhirVersionEnum myFhirVersion;
 	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private String myFhirVersionId;
-	@Column(name = "res_SIZE_BYTES", nullable = false)
+	@Column(name = "RES_SIZE_BYTES", nullable = false)
 	private long myResSizeBytes;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Version

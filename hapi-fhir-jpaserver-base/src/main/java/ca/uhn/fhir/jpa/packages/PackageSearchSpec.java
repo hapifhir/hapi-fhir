@@ -7,6 +7,15 @@ public class PackageSearchSpec {
 	private int mySize = 50;
 	private String myResourceUrl;
 	private CharSequence myDescription;
+	private String myFhirVersion;
+
+	public String getFhirVersion() {
+		return myFhirVersion;
+	}
+
+	public void setFhirVersion(String theFhirVersion) {
+		myFhirVersion = theFhirVersion;
+	}
 
 	public int getSize() {
 		return mySize;

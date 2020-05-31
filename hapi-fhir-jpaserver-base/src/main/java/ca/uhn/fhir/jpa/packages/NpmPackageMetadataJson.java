@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
@@ -107,6 +108,9 @@ public class NpmPackageMetadataJson {
 		private String myDescription;
 		@JsonProperty("fhirVersion")
 		private String myFhirVersion;
+		@ApiModelProperty("The size of this package in bytes")
+		@JsonProperty("_bytes")
+		private long myBytes;
 
 		public String getName() {
 			return myName;
@@ -138,6 +142,14 @@ public class NpmPackageMetadataJson {
 
 		public void setVersion(String theVersion) {
 			myVersion = theVersion;
+		}
+
+		public long getBytes() {
+			return myBytes;
+		}
+
+		public void setBytes(long theBytes) {
+			myBytes = theBytes;
 		}
 	}
 }

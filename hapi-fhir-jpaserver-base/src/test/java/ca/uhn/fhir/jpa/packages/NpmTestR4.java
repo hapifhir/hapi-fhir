@@ -215,6 +215,9 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 				assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
 
+				NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
+				assertEquals(3001, version0120.getBytes());
+
 			} catch (IOException e) {
 				throw new InternalErrorException(e);
 			}

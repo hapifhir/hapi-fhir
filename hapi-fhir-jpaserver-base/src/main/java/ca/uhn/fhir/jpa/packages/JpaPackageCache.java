@@ -417,6 +417,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			version.setDescription(next.getDescription());
 			version.setName(next.getName());
 			version.setVersion(next.getVersionId());
+			version.setBytes(next.getPackageSizeBytes());
 			retVal.addVersion(version);
 
 		}
@@ -508,6 +509,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			String searchTerm = "%" + thePackageSearchSpec.getDescription() + "%";
 			searchTerm = StringNormalizer.normalizeStringForSearchIndexing(searchTerm);
 			predicates.add(theCb.like(theRoot.get("myDescriptionUpper").as(String.class), searchTerm));
+		}
+
+		if (isNotBlank(thePackageSearchSpec.getFhirVersion())) {
+			if (!thePackageSearchSpec.getFhirVersion().matches("([0-9]+\\.)+[0-9]+")) {
+				FhirVersionEnum versionEnum = FhirVersionEnum.forVersionString(thePackageSearchSpec.getFhirVersion());
+				if (versionEnum != null) {
+					predicates.add(theCb.equal(theRoot.get("myFhirVersion").as(FhirVersionEnum.class), versionEnum));
+				}
+			} else {
+				predicates.add(theCb.like(theRoot.get("myFhirVersionId").as(String.class), thePackageSearchSpec.getFhirVersion() + "%"));
+			}
 		}
 
 		return predicates;
