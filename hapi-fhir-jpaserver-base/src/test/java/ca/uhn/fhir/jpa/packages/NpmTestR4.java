@@ -108,19 +108,19 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		// Make sure we can fetch the package by ID
 		pkg = myPackageCacheManager.loadPackage("nictiz.fhir.nl.stu3.questionnaires", null);
 		assertEquals("1.0.2", pkg.version());
-		assertEquals("STU3 Assets from our Github account and Care Connect Profiles have been added from Github https://github.com/nhsconnect/CareConnect-profiles/tree/develop", pkg.description());
+		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", pkg.description());
 
 		// Fetch resource by URL
 		FhirContext fhirContext = FhirContext.forDstu3();
 		runInTransaction(() -> {
-			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ACVPU-Observation-1");
-			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ACVPU-Observation-1\",\"version\":\"1.0.0\""));
+			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse");
+			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\""));
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
-			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ACVPU-Observation-1|1.0.0");
-			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ACVPU-Observation-1\",\"version\":\"1.0.0\""));
+			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse|1.0.1");
+			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\""));
 		});
 
 		// This was saved but is the wrong version of FHIR for this server
@@ -222,6 +222,33 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 	}
 
+
+	@Test
+	public void testLoadPackageUsingImpreciseId() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.0.tgz"));
+
+		NpmInstallationSpec spec;
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		igInstaller.install(spec);
+
+
+		NpmPackage pkg;
+
+		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.11.x");
+		assertEquals("0.11.1", pkg.version());
+
+		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.x");
+		assertEquals("0.12.0", pkg.version());
+
+	}
 
 	@Test
 	public void testInstallNewerPackageUpdatesLatestVersionFlag() throws Exception {

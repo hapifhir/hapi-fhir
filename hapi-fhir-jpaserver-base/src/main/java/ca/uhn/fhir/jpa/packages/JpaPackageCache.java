@@ -110,6 +110,20 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	public NpmPackage loadPackageFromCacheOnly(String theId, @Nullable String theVersion) {
 		Optional<NpmPackageVersionEntity> packageVersion = loadPackageVersionEntity(theId, theVersion);
+		if (!packageVersion.isPresent() && theVersion.endsWith(".x")) {
+			String lookupVersion = theVersion;
+			do {
+				lookupVersion = lookupVersion.substring(0, lookupVersion.length() - 2);
+			} while (lookupVersion.endsWith(".x"));
+
+			List<String> candidateVersionIds = myPackageVersionDao.findVersionIdsByPackageIdAndLikeVersion(theId, lookupVersion + ".%");
+			if (candidateVersionIds.size() > 0) {
+				candidateVersionIds.sort(PackageVersionComparator.INSTANCE);
+				packageVersion = loadPackageVersionEntity(theId, candidateVersionIds.get(candidateVersionIds.size() - 1));
+			}
+
+		}
+
 		return packageVersion.map(t -> loadPackage(t)).orElse(null);
 	}
 
@@ -460,7 +474,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 						.setName(next.getPackageId())
 						.setDescription(next.getPackage().getDescription())
 						.setVersion(next.getVersionId())
-						.addFhirVersion(next.getFhirVersionId());
+						.addFhirVersion(next.getFhirVersionId())
+						.setBytes(next.getPackageSizeBytes());
 				} else {
 					NpmPackageSearchResultJson.Package retPackage = retVal.getPackageWithId(next.getPackageId());
 					retPackage.addFhirVersion(next.getFhirVersionId());

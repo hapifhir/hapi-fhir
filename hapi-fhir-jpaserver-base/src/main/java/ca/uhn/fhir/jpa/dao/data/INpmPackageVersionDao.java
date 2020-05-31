@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /*
@@ -35,4 +36,10 @@ public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEn
 
 	@Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId = :version")
 	Optional<NpmPackageVersionEntity> findByPackageIdAndVersion(@Param("id") String thePackageId, @Param("version") String thePackageVersion);
+
+	/**
+	 * Uses a "like" expression on the version ID
+	 */
+	@Query("SELECT p.myVersionId FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId like :version")
+	List<String> findVersionIdsByPackageIdAndLikeVersion(@Param("id") String theId, @Param("version") String thePartialVersionString);
 }

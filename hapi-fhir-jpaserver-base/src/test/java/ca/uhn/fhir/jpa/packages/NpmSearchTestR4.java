@@ -69,9 +69,9 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		assertThat(search.getObjects().get(0).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
 
 		assertEquals("nictiz.fhir.nl.stu3.questionnaires", search.getObjects().get(1).getPackage().getName());
-		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", search.getObjects().get(1).getPackage().getDescription());
+		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", search.getObjects().get(1).getPackage().getDescription());
 		assertEquals("1.0.2", search.getObjects().get(1).getPackage().getVersion());
-		assertThat(search.getObjects().get(1).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("3.0.2"));
+		assertThat(search.getObjects().get(1).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
 
 	}
 

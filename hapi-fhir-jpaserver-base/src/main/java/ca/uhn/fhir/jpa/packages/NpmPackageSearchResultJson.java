@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +95,18 @@ public class NpmPackageSearchResultJson {
 		private String myDescription;
 		@JsonProperty("fhirVersion")
 		private List<String> myFhirVersion;
+		@ApiModelProperty("The size of this package in bytes")
+		@JsonProperty("_bytes")
+		private long myBytes;
+
+		public long getBytes() {
+			return myBytes;
+		}
+
+		public Package setBytes(long theBytes) {
+			myBytes = theBytes;
+			return this;
+		}
 
 		public String getName() {
 			return myName;
@@ -129,11 +142,12 @@ public class NpmPackageSearchResultJson {
 			return this;
 		}
 
-		public void addFhirVersion(String theFhirVersionId) {
+		public Package addFhirVersion(String theFhirVersionId) {
 			if (!getFhirVersion().contains(theFhirVersionId)) {
 				getFhirVersion().add(theFhirVersionId);
 				getFhirVersion().sort(PackageVersionComparator.INSTANCE);
 			}
+			return this;
 		}
 	}
 }
