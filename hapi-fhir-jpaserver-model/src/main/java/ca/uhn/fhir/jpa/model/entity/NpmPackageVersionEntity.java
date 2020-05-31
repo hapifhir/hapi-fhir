@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.util.StringNormalizer;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -73,6 +74,8 @@ public class NpmPackageVersionEntity {
 	private Date mySavedTime;
 	@Column(name = "DESC", nullable = false, length = 500)
 	private String myDescription;
+	@Column(name = "DESC_UPPER", nullable = false, length = 500)
+	private String myDescriptionUpper;
 	@Column(name = "CURRENT_VERSION", nullable = false)
 	private boolean myCurrentVersion;
 	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
@@ -165,6 +168,7 @@ public class NpmPackageVersionEntity {
 
 	public void setDescription(String theDescription) {
 		myDescription = theDescription;
+		myDescriptionUpper = StringNormalizer.normalizeStringForSearchIndexing(theDescription);
 	}
 
 	public String getName() {

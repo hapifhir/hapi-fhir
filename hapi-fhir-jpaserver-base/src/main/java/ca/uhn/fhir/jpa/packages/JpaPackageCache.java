@@ -79,11 +79,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static ca.uhn.fhir.jpa.dao.SearchBuilder.toPredicateArray;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -424,69 +422,74 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 
-//		// Query for total
-//		{
-//			List<Predicate> predicates = new ArrayList<>();
-//			CriteriaQuery<Long> countCriteriaQuery = cb.createQuery(Long.class);
-//			Root<NpmPackageEntity> countCriteriaRoot = countCriteriaQuery.from(NpmPackageEntity.class);
-//			countCriteriaQuery.select(cb.count(countCriteriaRoot.get("myId")));
-//
-//			if (isNotBlank(thePackageSearchSpec.getResourceUrl())) {
-//				Subquery<String> resourceSubquery = countCriteriaQuery.subquery(String.class);
-//				Root<NpmPackageVersionResourceEntity> resourceSubqueryRoot = resourceSubquery.from(NpmPackageVersionResourceEntity.class);
-//				resourceSubquery.where(cb.equal(resourceSubqueryRoot.get("myCanonicalUrl").as(String.class), thePackageSearchSpec.getResourceUrl()));
-//				resourceSubquery.distinct(true);
-//				predicates.add(countCriteriaRoot.get("myPackageId").as(String.class).in(resourceSubquery));
-//			}
-//
-//			countCriteriaQuery.where(toPredicateArray(predicates));
-//			Long total = myEntityManager.createQuery(countCriteriaQuery).getSingleResult();
-//			retVal.setTotal(Math.toIntExact(total));
-//		}
+		// Query for total
+		{
+			CriteriaQuery<Long> countCriteriaQuery = cb.createQuery(Long.class);
+			Root<NpmPackageVersionEntity> countCriteriaRoot = countCriteriaQuery.from(NpmPackageVersionEntity.class);
+			countCriteriaQuery.multiselect(cb.countDistinct(countCriteriaRoot.get("myPackageId")));
+
+			List<Predicate> predicates = createSearchPredicates(thePackageSearchSpec, cb, countCriteriaRoot);
+
+			countCriteriaQuery.where(toPredicateArray(predicates));
+			Long total = myEntityManager.createQuery(countCriteriaQuery).getSingleResult();
+			retVal.setTotal(Math.toIntExact(total));
+		}
 
 		// Query for results
 		{
-			List<Predicate> predicates = new ArrayList<>();
-			CriteriaQuery<NpmPackageEntity> criteriaQuery = cb.createQuery();
-			Root<NpmPackageEntity> root = criteriaQuery.from(NpmPackageEntity.class);
-			criteriaQuery.orderBy(cb.asc(root.get("myPackageId")));
+			CriteriaQuery<NpmPackageVersionEntity> criteriaQuery = cb.createQuery(NpmPackageVersionEntity.class);
+			Root<NpmPackageVersionEntity> root = criteriaQuery.from(NpmPackageVersionEntity.class);
 
-			Join<NpmPackageEntity, NpmPackageVersionEntity> versions = root.join("myVersions");
-
-			if (isNotBlank(thePackageSearchSpec.getResourceUrl())) {
-				Join<NpmPackageVersionEntity, NpmPackageVersionResourceEntity> resources = versions.join("myResources", JoinType.LEFT);
-
-				predicates.add(cb.equal(resources.get("myCanonicalUrl").as(String.class), thePackageSearchSpec.getResourceUrl()));
-			}
+			List<Predicate> predicates = createSearchPredicates(thePackageSearchSpec, cb, root);
 
 			criteriaQuery.where(toPredicateArray(predicates));
-			TypedQuery<NpmPackageEntity> query = myEntityManager.createQuery(criteriaQuery);
+			criteriaQuery.orderBy(cb.asc(root.get("myPackageId")));
+			TypedQuery<NpmPackageVersionEntity> query = myEntityManager.createQuery(criteriaQuery);
 			query.setFirstResult(thePackageSearchSpec.getStart());
 			query.setMaxResults(thePackageSearchSpec.getSize());
 
+			List<NpmPackageVersionEntity> resultList = query.getResultList();
+			for (NpmPackageVersionEntity next : resultList) {
 
-			List<NpmPackageEntity> resultList = query.getResultList();
-			for (NpmPackageEntity next : resultList) {
+				if (!retVal.hasPackageWithId(next.getPackageId())) {
+					retVal
+						.addObject()
+						.getPackage()
+						.setName(next.getPackageId())
+						.setDescription(next.getPackage().getDescription())
+						.setVersion(next.getVersionId());
+				} else {
+					NpmPackageSearchResultJson.Package retPackage = retVal.getPackageWithId(next.getPackageId());
+					retPackage.addFhirVersion(next.getFhirVersionId());
 
-				Set<String> fhirVersions = new HashSet<>();
-				Collection<NpmPackageVersionEntity> versionEntities = myPackageVersionDao.findByPackageId(next.getPackageId());
-				for (NpmPackageVersionEntity nextVersionEntity : versionEntities) {
-					fhirVersions.add(nextVersionEntity.getFhirVersionId());
+					int cmp = PackageVersionComparator.INSTANCE.compare(next.getVersionId(), retPackage.getVersion());
+					if (cmp > 0) {
+						retPackage.setVersion(next.getVersionId());
+					}
+
 				}
-
-				retVal
-					.addObject()
-					.getPackage()
-					.setName(next.getPackageId())
-					.setDescription(next.getDescription())
-					.setVersion(next.getCurrentVersionId())
-					.setFhirVersion(fhirVersions);
-
 			}
-			retVal.setTotal(resultList.size());
 
 		}
 
+
 		return retVal;
+	}
+
+	@Nonnull
+	public List<Predicate> createSearchPredicates(PackageSearchSpec thePackageSearchSpec, CriteriaBuilder theCb, Root<NpmPackageVersionEntity> theRoot) {
+		List<Predicate> predicates = new ArrayList<>();
+
+		if (isNotBlank(thePackageSearchSpec.getResourceUrl())) {
+			Join<NpmPackageVersionEntity, NpmPackageVersionResourceEntity> resources = theRoot.join("myResources", JoinType.LEFT);
+
+			predicates.add(theCb.equal(resources.get("myCanonicalUrl").as(String.class), thePackageSearchSpec.getResourceUrl()));
+		}
+
+		if (isNotBlank(thePackageSearchSpec.getDescription())) {
+			predicates.add(theCb.like(theRoot.get("myDescription").as(String.class), "%" + thePackageSearchSpec.getDescription() + "%"));
+		}
+
+		return predicates;
 	}
 }

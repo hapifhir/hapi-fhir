@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @ApiModel("Represents an NPM package search response")
@@ -58,6 +57,14 @@ public class NpmPackageSearchResultJson {
 
 	public void setTotal(int theTotal) {
 		myTotal = theTotal;
+	}
+
+	public boolean hasPackageWithId(String thePackageId) {
+		return getObjects().stream().anyMatch(t -> t.getPackage().getName().equals(thePackageId));
+	}
+
+	public Package getPackageWithId(String thePackageId) {
+		return getObjects().stream().map(t -> t.getPackage()).filter(t -> t.getName().equals(thePackageId)).findFirst().orElseThrow(() -> new IllegalArgumentException());
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -113,12 +120,6 @@ public class NpmPackageSearchResultJson {
 			return myFhirVersion;
 		}
 
-		public void setFhirVersion(Collection<String> theFhirVersion) {
-			getFhirVersion().clear();
-			getFhirVersion().addAll(theFhirVersion);
-			getFhirVersion().sort(PackageVersionComparator.INSTANCE);
-		}
-
 		public String getVersion() {
 			return myVersion;
 		}
@@ -126,6 +127,13 @@ public class NpmPackageSearchResultJson {
 		public Package setVersion(String theVersion) {
 			myVersion = theVersion;
 			return this;
+		}
+
+		public void addFhirVersion(String theFhirVersionId) {
+			if (!getFhirVersion().contains(theFhirVersionId)) {
+				getFhirVersion().add(theFhirVersionId);
+				getFhirVersion().sort(PackageVersionComparator.INSTANCE);
+			}
 		}
 	}
 }

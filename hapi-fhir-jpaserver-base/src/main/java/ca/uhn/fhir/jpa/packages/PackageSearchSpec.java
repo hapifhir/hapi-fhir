@@ -6,6 +6,7 @@ public class PackageSearchSpec {
 	private int myStart;
 	private int mySize = 50;
 	private String myResourceUrl;
+	private CharSequence myDescription;
 
 	public int getSize() {
 		return mySize;
@@ -31,5 +32,13 @@ public class PackageSearchSpec {
 
 	public void setResourceUrl(String theResourceUrl) {
 		myResourceUrl = theResourceUrl;
+	}
+
+	public CharSequence getDescription() {
+		return myDescription;
+	}
+
+	public void setDescription(CharSequence theDescription) {
+		myDescription = theDescription;
 	}
 }
