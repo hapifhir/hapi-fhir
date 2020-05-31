@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.ResourceUtil;
+import ca.uhn.fhir.util.StringNormalizer;
 import com.google.common.base.Charsets;
 import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.io.IOUtils;
@@ -149,9 +150,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	public NpmPackage addPackageToCache(String thePackageId, String thePackageVersion, InputStream thePackageTgzInputStream, String theSourceDesc) throws IOException {
+	public NpmPackage addPackageToCache(String thePackageId, String thePackageVersionId, InputStream thePackageTgzInputStream, String theSourceDesc) throws IOException {
 		Validate.notBlank(thePackageId, "thePackageId must not be null");
-		Validate.notBlank(thePackageVersion, "thePackageVersion must not be null");
+		Validate.notBlank(thePackageVersionId, "thePackageVersionId must not be null");
 		Validate.notNull(thePackageTgzInputStream, "thePackageTgzInputStream must not be null");
 
 		byte[] bytes = IOUtils.toByteArray(thePackageTgzInputStream);
@@ -160,10 +161,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		if (!npmPackage.id().equals(thePackageId)) {
 			throw new InvalidRequestException("Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
 		}
-		if (!npmPackage.version().equals(thePackageVersion)) {
-			throw new InvalidRequestException("Package ID " + npmPackage.version() + " doesn't match expected: " + thePackageVersion);
+		if (!PackageVersionComparator.isEquivalent(thePackageVersionId, npmPackage.version())) {
+			throw new InvalidRequestException("Package ID " + npmPackage.version() + " doesn't match expected: " + thePackageVersionId);
 		}
 
+		String packageVersionId = npmPackage.version();
 		FhirVersionEnum fhirVersion = FhirVersionEnum.forVersionString(npmPackage.fhirVersion());
 		if (fhirVersion == null) {
 			throw new InvalidRequestException("Unknown FHIR version: " + npmPackage.fhirVersion());
@@ -175,22 +177,22 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		newTxTemplate().executeWithoutResult(tx -> {
 			ResourceTable persistedPackage = (ResourceTable) getBinaryDao().create(binary).getEntity();
 			NpmPackageEntity pkg = myPackageDao.findByPackageId(thePackageId).orElseGet(() -> createPackage(npmPackage));
-			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findByPackageIdAndVersion(thePackageId, thePackageVersion).orElse(null);
+			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findByPackageIdAndVersion(thePackageId, packageVersionId).orElse(null);
 			if (packageVersion != null) {
-				ourLog.info("Package version already exists, no action taken: {}#{}", thePackageId, thePackageVersion);
+				ourLog.info("Package version already exists, no action taken: {}#{}", thePackageId, packageVersionId);
 				return;
 			}
 
-			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, thePackageVersion);
+			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, packageVersionId);
 			if (currentVersion) {
-				pkg.setCurrentVersionId(thePackageVersion);
+				pkg.setCurrentVersionId(packageVersionId);
 				pkg.setDescription(npmPackage.description());
 				myPackageDao.save(pkg);
 			}
 
 			packageVersion = new NpmPackageVersionEntity();
 			packageVersion.setPackageId(thePackageId);
-			packageVersion.setVersionId(thePackageVersion);
+			packageVersion.setVersionId(packageVersionId);
 			packageVersion.setPackage(pkg);
 			packageVersion.setPackageBinary(persistedPackage);
 			packageVersion.setSavedTime(new Date());
@@ -259,7 +261,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					}
 					myPackageVersionResourceDao.save(resourceEntity);
 
-					ourLog.info("Package[{}#{}] Installing Resource[{}] with URL: {}|{}", thePackageId, thePackageVersion, dirName + '/' + nextFile, defaultString(url), defaultString(version));
+					ourLog.info("Package[{}#{}] Installing Resource[{}] with URL: {}|{}", thePackageId, packageVersionId, dirName + '/' + nextFile, defaultString(url), defaultString(version));
 				}
 			}
 
@@ -457,7 +459,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 						.getPackage()
 						.setName(next.getPackageId())
 						.setDescription(next.getPackage().getDescription())
-						.setVersion(next.getVersionId());
+						.setVersion(next.getVersionId())
+						.addFhirVersion(next.getFhirVersionId());
 				} else {
 					NpmPackageSearchResultJson.Package retPackage = retVal.getPackageWithId(next.getPackageId());
 					retPackage.addFhirVersion(next.getFhirVersionId());
@@ -487,7 +490,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 
 		if (isNotBlank(thePackageSearchSpec.getDescription())) {
-			predicates.add(theCb.like(theRoot.get("myDescription").as(String.class), "%" + thePackageSearchSpec.getDescription() + "%"));
+			String searchTerm = "%" + thePackageSearchSpec.getDescription() + "%";
+			searchTerm = StringNormalizer.normalizeStringForSearchIndexing(searchTerm);
+			predicates.add(theCb.like(theRoot.get("myDescriptionUpper").as(String.class), searchTerm));
 		}
 
 		return predicates;

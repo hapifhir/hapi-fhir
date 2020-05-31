@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.packages;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -150,7 +152,9 @@ public class NpmInstallerSvcImpl implements INpmInstallerSvc {
 
 		assertFhirVersionsAreCompatible(fhirVersion, currentFhirVersion);
 
-		fetchAndInstallDependencies(npmPackage, theInstallationSpec);
+		if (theInstallationSpec.isFetchDependencies()) {
+			fetchAndInstallDependencies(npmPackage, theInstallationSpec);
+		}
 
 		List<String> installTypes;
 		if (!theInstallationSpec.getInstallResourceTypes().isEmpty()) {
@@ -216,8 +220,11 @@ public class NpmInstallerSvcImpl implements INpmInstallerSvc {
 	private void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
 		throws ImplementationGuideInstallationException {
 
-		boolean compatible = fhirVersion.charAt(0) == currentFhirVersion.charAt(0) &&
-			currentFhirVersion.compareTo(fhirVersion) >= 0;
+		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(fhirVersion);
+		FhirVersionEnum currentFhirVersionEnum = FhirVersionEnum.forVersionString(currentFhirVersion);
+		Validate.notNull(fhirVersionEnum, "Invalid FHIR version string: %s", fhirVersion);
+		Validate.notNull(currentFhirVersionEnum, "Invalid FHIR version string: %s", currentFhirVersion);
+		boolean compatible = fhirVersionEnum.equals(currentFhirVersionEnum);
 		if (!compatible) {
 			throw new ImplementationGuideInstallationException(String.format(
 				"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",

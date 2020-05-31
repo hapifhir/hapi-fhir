@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -53,8 +54,8 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
-		bytes = loadClasspathBytes("/packages/NHSD.Assets.STU3.tar.gz");
-		spec = new NpmInstallationSpec().setPackageId("NHSD.Assets.STU3").setPackageVersion("1.2.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY).setContents(bytes);
+		bytes = loadClasspathBytes("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
+		spec = new NpmInstallationSpec().setPackageId("nictiz.fhir.nl.stu3.questionnaires").setPackageVersion("1.0.2").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		NpmPackageSearchResultJson search = myPackageCacheManager.search(new PackageSearchSpec());
@@ -62,15 +63,16 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		assertEquals(2, search.getTotal());
 
 		assertEquals(2, search.getObjects().size());
-		assertEquals("NHSD.Assets.STU3", search.getObjects().get(0).getPackage().getName());
-		assertEquals("STU3 Assets from our Github account and Care Connect Profiles have been added from Github https://github.com/nhsconnect/CareConnect-profiles/tree/develop", search.getObjects().get(0).getPackage().getDescription());
-		assertEquals("1.2.0", search.getObjects().get(0).getPackage().getVersion());
-		assertThat(search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("3.0.2"));
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
+		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
+		assertThat(search.getObjects().get(0).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
 
-		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(1).getPackage().getName());
-		assertEquals("0.12.0", search.getObjects().get(1).getPackage().getDescription());
-		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(1).getPackage().getVersion());
-		assertThat(search.getObjects().get(1).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
+		assertEquals("nictiz.fhir.nl.stu3.questionnaires", search.getObjects().get(1).getPackage().getName());
+		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", search.getObjects().get(1).getPackage().getDescription());
+		assertEquals("1.0.2", search.getObjects().get(1).getPackage().getVersion());
+		assertThat(search.getObjects().get(1).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("3.0.2"));
+
 	}
 
 
@@ -138,6 +140,11 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		searchSpec.setDescription("shorthand");
 		search = myPackageCacheManager.search(searchSpec);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+
+		runInTransaction(()->{
+			ourLog.info("Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(1, search.getTotal());

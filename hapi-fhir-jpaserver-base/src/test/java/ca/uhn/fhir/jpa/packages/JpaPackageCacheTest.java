@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.utilities.cache.IPackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.junit.Test;
@@ -18,7 +19,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSavePackage() throws IOException {
-		try (InputStream stream = IgInstallerTestDstu3.class.getResourceAsStream("/ca/uhn/fhir/jpa/packages/basisprofil.de.tar.gz")) {
+		try (InputStream stream = IgInstallerTestDstu3.class.getResourceAsStream("/packages/basisprofil.de.tar.gz")) {
 			myPackageCacheManager.addPackageToCache("basisprofil.de", "0.2.40", stream, "basisprofil.de");
 		}
 
@@ -30,8 +31,12 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		pkg = myPackageCacheManager.loadPackage("basisprofil.de", "0.2.40");
 		assertEquals("0.2.40", pkg.version());
 
-		pkg = myPackageCacheManager.loadPackage("basisprofil.de", "99");
-		assertEquals(null, pkg);
+		try {
+			myPackageCacheManager.loadPackage("basisprofil.de", "99");
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Unable to locate package basisprofil.de#99", e.getMessage());
+		}
 	}
 
 

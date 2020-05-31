@@ -42,7 +42,6 @@ public class NpmInstallationSpec {
 	@ApiModelProperty("The direct package URL")
 	@JsonProperty("packageUrl")
 	private String myPackageUrl;
-
 	@ApiModelProperty("The NPM package ID")
 	@JsonProperty("packageId")
 	private String myPackageId;
@@ -58,9 +57,21 @@ public class NpmInstallationSpec {
 	@ApiModelProperty("Should contents be made available to the FHIR validation infrastructure")
 	@JsonProperty("validationMode")
 	private ValidationModeEnum myValidationMode;
+	@ApiModelProperty("Should dependencies be automatically resolved, fetched and installed with the same settings")
+	@JsonProperty("fetchDependencies")
+	private boolean myFetchDependencies;
 	@ApiModelProperty("If provided, supplies the actual bytes of the package .tar.gz file")
 	@JsonProperty("packageContents")
 	private byte[] myContents;
+
+	public boolean isFetchDependencies() {
+		return myFetchDependencies;
+	}
+
+	public NpmInstallationSpec setFetchDependencies(boolean theFetchDependencies) {
+		myFetchDependencies = theFetchDependencies;
+		return this;
+	}
 
 	public String getPackageUrl() {
 		return myPackageUrl;
