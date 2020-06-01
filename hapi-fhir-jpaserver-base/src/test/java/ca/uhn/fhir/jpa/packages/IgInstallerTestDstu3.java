@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResourceAsByteArray;
@@ -30,7 +29,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 	@Autowired
 	private DaoConfig daoConfig;
 	@Autowired
-	private NpmInstallerSvcImpl igInstaller;
+	private PackageInstallerSvcImpl igInstaller;
 	@Autowired
 	private IPackageCacheManager myPackageCacheManager;
 	private Server myServer;

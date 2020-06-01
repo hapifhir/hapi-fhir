@@ -90,11 +90,15 @@ public class NpmPackageVersionEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Version
 	@Column(name = "UPDATED_TIME", nullable = false)
-	private Date myVersion;
+	private Date myUpdatedTime;
 	@Column(name = "PACKAGE_NAME", nullable = true, length = 200)
 	private String myName;
 	@OneToMany(mappedBy = "myPackageVersion")
 	private List<NpmPackageVersionResourceEntity> myResources;
+
+	public Date getUpdatedTime() {
+		return myUpdatedTime;
+	}
 
 	public long getPackageSizeBytes() {
 		return myPackageSizeBytes;

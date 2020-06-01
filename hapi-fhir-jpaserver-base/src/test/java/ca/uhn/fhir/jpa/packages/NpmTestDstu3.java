@@ -35,7 +35,7 @@ public class NpmTestDstu3 extends BaseJpaDstu3Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);
 	@Autowired
-	public NpmInstallerSvcImpl igInstaller;
+	public PackageInstallerSvcImpl igInstaller;
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired

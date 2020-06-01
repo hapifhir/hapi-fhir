@@ -56,9 +56,9 @@ import java.util.Map;
 /**
  * @since 5.1.0
  */
-public class NpmInstallerSvcImpl implements INpmInstallerSvc {
+public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(NpmInstallerSvcImpl.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
 	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
 		"NamingSystem",
 		"CodeSystem",
@@ -82,7 +82,7 @@ public class NpmInstallerSvcImpl implements INpmInstallerSvc {
 	/**
 	 * Constructor
 	 */
-	public NpmInstallerSvcImpl() {
+	public PackageInstallerSvcImpl() {
 		super();
 	}
 
@@ -116,15 +116,22 @@ public class NpmInstallerSvcImpl implements INpmInstallerSvc {
 	 * Creates the resources if non-existent, updates them otherwise.
 	 *
 	 * @param theInstallationSpec The details about what should be installed
-	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
 	@Override
-	public void install(NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
+	public PackageInstallOutcomeJson install(NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		if (enabled) {
 			try {
 				NpmPackage npmPackage = packageCacheManager.loadPackage(theInstallationSpec);
 				if (npmPackage == null) {
 					throw new IOException("Package not found");
+				}
+
+				String fhirVersion = npmPackage.fhirVersion();
+				String currentFhirVersion = fhirContext.getVersion().getVersion().getFhirVersionString();
+				assertFhirVersionsAreCompatible(fhirVersion, currentFhirVersion);
+
+				if (theInstallationSpec.isFetchDependencies()) {
+					fetchAndInstallDependencies(npmPackage, theInstallationSpec);
 				}
 
 				if (theInstallationSpec.getInstallMode() == NpmInstallationSpec.InstallModeEnum.CACHE_AND_INSTALL) {
@@ -135,6 +142,8 @@ public class NpmInstallerSvcImpl implements INpmInstallerSvc {
 				throw new ImplementationGuideInstallationException("Could not load NPM package " + theInstallationSpec.getPackageId() + "#" + theInstallationSpec.getPackageVersion(), e);
 			}
 		}
+
+		return new PackageInstallOutcomeJson().setMessage("Success");
 	}
 
 	/**
@@ -147,14 +156,6 @@ public class NpmInstallerSvcImpl implements INpmInstallerSvc {
 	private void install(NpmPackage npmPackage, NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		String name = npmPackage.getNpm().get("name").getAsString();
 		String version = npmPackage.getNpm().get("version").getAsString();
-		String fhirVersion = npmPackage.fhirVersion();
-		String currentFhirVersion = fhirContext.getVersion().getVersion().getFhirVersionString();
-
-		assertFhirVersionsAreCompatible(fhirVersion, currentFhirVersion);
-
-		if (theInstallationSpec.isFetchDependencies()) {
-			fetchAndInstallDependencies(npmPackage, theInstallationSpec);
-		}
 
 		List<String> installTypes;
 		if (!theInstallationSpec.getInstallResourceTypes().isEmpty()) {

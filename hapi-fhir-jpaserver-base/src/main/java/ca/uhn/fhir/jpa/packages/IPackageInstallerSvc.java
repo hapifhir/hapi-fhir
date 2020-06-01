@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.packages;
  * #L%
  */
 
-public interface INpmInstallerSvc {
+public interface IPackageInstallerSvc {
 
-	void install(NpmInstallationSpec theSpec);
+	PackageInstallOutcomeJson install(NpmInstallationSpec theSpec);
 
 }

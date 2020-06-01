@@ -27,6 +27,7 @@ import org.hl7.fhir.utilities.cache.IPackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 
 import java.io.IOException;
+import java.util.Date;
 
 public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
@@ -36,7 +37,60 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
 	NpmPackageMetadataJson loadPackageMetadata(String thePackageId) throws ResourceNotFoundException;
 
-	byte[] loadPackageContents(String thePackageId, String theVersion);
+	PackageContents loadPackageContents(String thePackageId, String theVersion);
 
 	NpmPackageSearchResultJson search(PackageSearchSpec thePackageSearchSpec);
+
+
+	class PackageContents {
+
+		private byte[] myBytes;
+		private String myPackageId;
+		private String myVersion;
+		private Date myLastModified;
+
+		/**
+		 * Constructor
+		 */
+		public PackageContents() {
+			super();
+		}
+
+		public byte[] getBytes() {
+			return myBytes;
+		}
+
+		public PackageContents setBytes(byte[] theBytes) {
+			myBytes = theBytes;
+			return this;
+		}
+
+		public String getPackageId() {
+			return myPackageId;
+		}
+
+		public PackageContents setPackageId(String thePackageId) {
+			myPackageId = thePackageId;
+			return this;
+		}
+
+		public String getVersion() {
+			return myVersion;
+		}
+
+		public PackageContents setVersion(String theVersion) {
+			myVersion = theVersion;
+			return this;
+		}
+
+		public Date getLastModified() {
+			return myLastModified;
+		}
+
+		public PackageContents setLastModified(Date theLastModified) {
+			myLastModified = theLastModified;
+			return this;
+		}
+	}
+
 }
