@@ -143,8 +143,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	private NpmPackage loadPackage(NpmPackageVersionEntity thePackageVersion) {
-		byte[] content = loadPackageContents(thePackageVersion);
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
+		PackageContents content = loadPackageContents(thePackageVersion);
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(content.getBytes());
 		try {
 			return NpmPackage.fromPackage(inputStream);
 		} catch (IOException e) {
@@ -152,10 +152,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 	}
 
-	private byte[] loadPackageContents(NpmPackageVersionEntity thePackageVersion) {
+	private IHapiPackageCacheManager.PackageContents loadPackageContents(NpmPackageVersionEntity thePackageVersion) {
 		IFhirResourceDao<? extends IBaseBinary> binaryDao = getBinaryDao();
 		IBaseBinary binary = binaryDao.readByPid(new ResourcePersistentId(thePackageVersion.getPackageBinary().getId()));
-		return binary.getContent();
+
+		PackageContents retVal = new PackageContents()
+			.setBytes(binary.getContent())
+			.setPackageId(thePackageVersion.getPackageId())
+			.setVersion(thePackageVersion.getVersionId())
+			.setLastModified(thePackageVersion.getUpdatedTime());
+		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -427,7 +433,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	@Transactional
-	public byte[] loadPackageContents(String thePackageId, String theVersion) {
+	public PackageContents loadPackageContents(String thePackageId, String theVersion) {
 		Optional<NpmPackageVersionEntity> entity = loadPackageVersionEntity(thePackageId, theVersion);
 		return entity.map(t -> loadPackageContents(t)).orElse(null);
 	}

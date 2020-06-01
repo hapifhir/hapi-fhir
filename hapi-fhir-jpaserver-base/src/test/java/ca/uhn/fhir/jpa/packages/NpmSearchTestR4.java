@@ -23,7 +23,7 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmSearchTestR4.class);
 	@Autowired
-	public INpmInstallerSvc igInstaller;
+	public IPackageInstallerSvc igInstaller;
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
