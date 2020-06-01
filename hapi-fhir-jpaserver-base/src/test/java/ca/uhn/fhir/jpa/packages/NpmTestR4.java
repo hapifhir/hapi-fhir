@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,9 +40,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -95,7 +99,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		byte[] bytes = loadClasspathBytes("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
 		myFakeNpmServlet.myResponses.put("/nictiz.fhir.nl.stu3.questionnaires/1.0.2", bytes);
 
-		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("nictiz.fhir.nl.stu3.questionnaires").setPackageVersion("1.0.2").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("nictiz.fhir.nl.stu3.questionnaires").setPackageVersion("1.0.2").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		// Be sure no further communication with the server
@@ -134,7 +138,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		byte[] bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
 
-		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_AND_INSTALL);
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		igInstaller.install(spec);
 
 		// Be sure no further communication with the server
@@ -201,9 +205,9 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
 
-		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		runInTransaction(() -> {
@@ -235,11 +239,18 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.0.tgz"));
 
 		NpmInstallationSpec spec;
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
-		igInstaller.install(spec);
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
-		igInstaller.install(spec);
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
+		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
+		assertThat(outcome.getMessage(), hasItem("Marking package hl7.fhir.uv.shorthand#0.12.0 as current version"));
+		assertThat(outcome.getMessage(), hasItem("Indexing Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0"));
+
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
+		outcome = igInstaller.install(spec);
+		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
+		assertThat(outcome.getMessage(), not(hasItem("Marking package hl7.fhir.uv.shorthand#0.11.1 as current version")));
+
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 
@@ -263,7 +274,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", contents0120);
 
 		// Install older version
-		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		// Older version is current
@@ -279,7 +290,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		});
 
 		// Now install newer version
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		// Newer version is current
@@ -299,14 +310,14 @@ public class NpmTestR4 extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testInstallOlderPackageDoesntUpdatLatestVersionFlag() throws Exception {
+	public void testInstallOlderPackageDoesntUpdateLatestVersionFlag() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
 
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
 
 		// Install newer version
-		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		runInTransaction(() -> {
@@ -321,7 +332,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		});
 
 		// Install older version
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		// Newer version is still current
@@ -347,7 +358,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 
 		// Install
-		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		runInTransaction(() -> {
@@ -356,7 +367,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		});
 
 		// Install same again
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		runInTransaction(() -> {
@@ -371,9 +382,9 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		byte[] contents0111 = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
 		byte[] contents0120 = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 
-		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY).setContents(contents0111);
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(contents0111);
 		igInstaller.install(spec);
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.CACHE_ONLY).setContents(contents0120);
+		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(contents0120);
 		igInstaller.install(spec);
 
 
@@ -386,6 +397,53 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		assertEquals(null, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3"));
 		assertEquals(null, myPackageCacheManager.loadPackageContents("foo", "1.2.3"));
 	}
+
+
+	@Test
+	public void testDeletePackage() throws IOException {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.0.tgz"));
+
+		igInstaller.install(new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY));
+		igInstaller.install(new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY));
+		igInstaller.install(new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY));
+
+		runInTransaction(() -> {
+			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");
+			assertEquals(1, versions.getNumberOfElements());
+			NpmPackageVersionResourceEntity resource = versions.getContent().get(0);
+			assertEquals("0.12.0", resource.getCanonicalVersion());
+		});
+
+		myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
+
+		runInTransaction(() -> {
+			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");
+			assertEquals(1, versions.getNumberOfElements());
+			NpmPackageVersionResourceEntity resource = versions.getContent().get(0);
+			assertEquals("0.11.1", resource.getCanonicalVersion());
+		});
+
+		myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.11.0");
+
+		runInTransaction(() -> {
+			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");
+			assertEquals(1, versions.getNumberOfElements());
+			NpmPackageVersionResourceEntity resource = versions.getContent().get(0);
+			assertEquals("0.11.1", resource.getCanonicalVersion());
+		});
+
+		myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.11.1");
+
+		runInTransaction(() -> {
+			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");
+			assertEquals(0, versions.getNumberOfElements());
+		});
+	}
+
 
 	static class FakeNpmServlet extends HttpServlet {
 

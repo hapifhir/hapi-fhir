@@ -32,7 +32,7 @@ import java.util.List;
 @ApiModel(
 	value = "NpmInstallationSpec",
 	description =
-		"Defines a "
+		"Defines a set of instructions for package installation"
 )
 @JsonPropertyOrder({
 	"packageId", "packageVersion", "packageUrl", "installMode", "installResourceTypes", "validationMode"
@@ -54,15 +54,24 @@ public class NpmInstallationSpec {
 	@ApiModelProperty("If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
 	@JsonProperty("installResourceTypes")
 	private List<String> myInstallResourceTypes;
-	@ApiModelProperty("Should contents be made available to the FHIR validation infrastructure")
+	@ApiModelProperty("Should contents be made available to the FHIR validation infrastructure. The default if not specified is \"AVAILABLE\".")
 	@JsonProperty("validationMode")
 	private ValidationModeEnum myValidationMode;
 	@ApiModelProperty("Should dependencies be automatically resolved, fetched and installed with the same settings")
 	@JsonProperty("fetchDependencies")
 	private boolean myFetchDependencies;
+	@ApiModelProperty("Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
+	private List<String> myDependencyExcludes;
 	@ApiModelProperty("If provided, supplies the actual bytes of the package .tar.gz file")
 	@JsonProperty("packageContents")
 	private byte[] myContents;
+
+	public List<String> getDependencyExcludes() {
+		if (myDependencyExcludes == null) {
+			myDependencyExcludes = new ArrayList<>();
+		}
+		return myDependencyExcludes;
+	}
 
 	public boolean isFetchDependencies() {
 		return myFetchDependencies;
@@ -134,10 +143,15 @@ public class NpmInstallationSpec {
 		return this;
 	}
 
+	public NpmInstallationSpec addDependencyExclude(String theExclude) {
+		getDependencyExcludes().add(theExclude);
+		return this;
+	}
+
 
 	public enum InstallModeEnum {
-		CACHE_ONLY,
-		CACHE_AND_INSTALL
+		STORE_ONLY,
+		STORE_AND_INSTALL
 	}
 
 	public enum ValidationModeEnum {

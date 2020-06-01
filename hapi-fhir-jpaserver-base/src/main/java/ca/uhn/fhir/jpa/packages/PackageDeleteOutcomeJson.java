@@ -28,10 +28,10 @@ import io.swagger.annotations.ApiModel;
 import java.util.ArrayList;
 import java.util.List;
 
-@ApiModel("Represents an NPM package installation response")
+@ApiModel("Represents an NPM package deletion response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class PackageInstallOutcomeJson {
+public class PackageDeleteOutcomeJson {
 
 	@JsonProperty("messages")
 	private List<String> myMessage;

@@ -195,4 +195,8 @@ public class NpmPackageVersionEntity {
 	public void setName(String theName) {
 		myName = theName;
 	}
+
+	public List<NpmPackageVersionResourceEntity> getResources() {
+		return myResources;
+	}
 }

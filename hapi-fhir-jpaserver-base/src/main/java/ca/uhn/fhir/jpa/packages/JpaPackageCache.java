@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
@@ -83,6 +84,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.SearchBuilder.toPredicateArray;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -194,20 +196,27 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		IBaseBinary binary = createPackageBinary(bytes);
 
-		newTxTemplate().executeWithoutResult(tx -> {
+		return newTxTemplate().execute(tx -> {
+
 			ResourceTable persistedPackage = (ResourceTable) getBinaryDao().create(binary).getEntity();
 			NpmPackageEntity pkg = myPackageDao.findByPackageId(thePackageId).orElseGet(() -> createPackage(npmPackage));
 			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findByPackageIdAndVersion(thePackageId, packageVersionId).orElse(null);
 			if (packageVersion != null) {
-				ourLog.info("Package version already exists, no action taken: {}#{}", thePackageId, packageVersionId);
-				return;
+				NpmPackage existingPackage = loadPackageFromCacheOnly(packageVersion.getPackageId(), packageVersion.getVersionId());
+				String msg = "Package version already exists in local storage, no action taken: " + thePackageId + "#" + packageVersionId;
+				getProcessingMessages(existingPackage).add(msg);
+				ourLog.info(msg);
+				return existingPackage;
 			}
 
 			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, packageVersionId);
 			if (currentVersion) {
+				getProcessingMessages(npmPackage).add("Marking package " + thePackageId + "#" + thePackageVersionId + " as current version");
 				pkg.setCurrentVersionId(packageVersionId);
 				pkg.setDescription(npmPackage.description());
 				myPackageDao.save(pkg);
+			} else {
+				getProcessingMessages(npmPackage).add("Package " + thePackageId + "#" + thePackageVersionId + " is not the newest version");
 			}
 
 			packageVersion = new NpmPackageVersionEntity();
@@ -245,7 +254,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					} else if (nextFile.toLowerCase().endsWith(".json")) {
 						resource = packageContext.newJsonParser().parseResource(contentsString);
 					} else {
-						return;
+						getProcessingMessages(npmPackage).add("Not indexing file: " + nextFile);
+						continue;
 					}
 
 					/*
@@ -281,13 +291,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					}
 					myPackageVersionResourceDao.save(resourceEntity);
 
-					ourLog.info("Package[{}#{}] Installing Resource[{}] with URL: {}|{}", thePackageId, packageVersionId, dirName + '/' + nextFile, defaultString(url), defaultString(version));
+					String msg = "Indexing Resource[" + dirName + '/' + nextFile + "] with URL: " + defaultString(url) + "|" + defaultString(version);
+					getProcessingMessages(npmPackage).add(msg);
+					ourLog.info("Package[{}#{}] " + msg, thePackageId, packageVersionId);
 				}
 			}
 
+			getProcessingMessages(npmPackage).add("Successfully added package " + npmPackage.id() + "#" + npmPackage.version() + " to registry");
+
+			return npmPackage;
 		});
 
-		return npmPackage;
 	}
 
 	private boolean updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(String thePackageId, String thePackageVersion) {
@@ -347,7 +361,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 
 		try {
-			return addPackageToCache(thePackageId, thePackageVersion == null ? pkg.version : thePackageVersion, pkg.stream, pkg.url);
+			NpmPackage retVal = addPackageToCache(thePackageId, thePackageVersion == null ? pkg.version : thePackageVersion, pkg.stream, pkg.url);
+			getProcessingMessages(retVal).add(0, "Package fetched from server at: " + pkg.url);
+			return retVal;
 		} finally {
 			pkg.stream.close();
 		}
@@ -359,7 +375,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	public NpmPackage loadPackage(NpmInstallationSpec theInstallationSpec) throws IOException {
+	public NpmPackage installPackage(NpmInstallationSpec theInstallationSpec) throws IOException {
 		Validate.notBlank(theInstallationSpec.getPackageId(), "thePackageId must not be blank");
 		Validate.notBlank(theInstallationSpec.getPackageVersion(), "thePackageVersion must not be blank");
 
@@ -501,6 +517,71 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		return retVal;
 	}
 
+	@Override
+	@Transactional
+	public PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion) {
+		PackageDeleteOutcomeJson retVal = new PackageDeleteOutcomeJson();
+
+		Optional<NpmPackageVersionEntity> packageVersion = myPackageVersionDao.findByPackageIdAndVersion(thePackageId, theVersion);
+		if (packageVersion.isPresent()) {
+
+			String msg = "Deleting package " + thePackageId + "#" + theVersion;
+			ourLog.info(msg);
+			retVal.getMessage().add(msg);
+
+			for (NpmPackageVersionResourceEntity next : packageVersion.get().getResources()) {
+				msg = "Deleting package +" + thePackageId + "#" + theVersion + "resource: " + next.getCanonicalUrl();
+				ourLog.info(msg);
+				retVal.getMessage().add(msg);
+
+				myPackageVersionResourceDao.delete(next);
+
+				ExpungeOptions options = new ExpungeOptions();
+				options.setExpungeDeletedResources(true).setExpungeOldVersions(true);
+				getBinaryDao().delete(next.getResourceBinary().getIdDt().toVersionless());
+				getBinaryDao().forceExpungeInExistingTransaction(next.getResourceBinary().getIdDt().toVersionless(), options, null);
+			}
+
+			myPackageVersionDao.delete(packageVersion.get());
+
+			ExpungeOptions options = new ExpungeOptions();
+			options.setExpungeDeletedResources(true).setExpungeOldVersions(true);
+			getBinaryDao().delete(packageVersion.get().getPackageBinary().getIdDt().toVersionless());
+			getBinaryDao().forceExpungeInExistingTransaction(packageVersion.get().getPackageBinary().getIdDt().toVersionless(), options, null);
+
+			Collection<NpmPackageVersionEntity> remainingVersions = myPackageVersionDao.findByPackageId(thePackageId);
+			if (remainingVersions.size() == 0) {
+				msg = "No versions of package " + thePackageId + " remain";
+				ourLog.info(msg);
+				retVal.getMessage().add(msg);
+				Optional<NpmPackageEntity> pkgEntity = myPackageDao.findByPackageId(thePackageId);
+				myPackageDao.delete(pkgEntity.get());
+			} else {
+
+				List<NpmPackageVersionEntity> versions = remainingVersions
+					.stream()
+					.sorted((o1, o2) -> PackageVersionComparator.INSTANCE.compare(o1.getVersionId(), o2.getVersionId()))
+					.collect(Collectors.toList());
+				for (int i = 0; i < versions.size(); i++) {
+					boolean isCurrent = i == versions.size() - 1;
+					if (isCurrent != versions.get(i).isCurrentVersion()) {
+						versions.get(i).setCurrentVersion(isCurrent);
+						myPackageVersionDao.save(versions.get(i));
+					}
+				}
+
+			}
+
+		} else {
+
+			String msg = "No package found with the given ID";
+			retVal.getMessage().add(msg);
+
+		}
+
+		return retVal;
+	}
+
 	@Nonnull
 	public List<Predicate> createSearchPredicates(PackageSearchSpec thePackageSearchSpec, CriteriaBuilder theCb, Root<NpmPackageVersionEntity> theRoot) {
 		List<Predicate> predicates = new ArrayList<>();
@@ -530,4 +611,12 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		return predicates;
 	}
+
+
+	@SuppressWarnings("unchecked")
+	public static List<String> getProcessingMessages(NpmPackage thePackage) {
+		return (List<String>) thePackage.getUserData().computeIfAbsent("JpPackageCache_ProcessingMessages", t -> new ArrayList<>());
+	}
+
+
 }

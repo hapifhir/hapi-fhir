@@ -27,7 +27,7 @@ public class PartitionSettings {
 
 	private boolean myPartitioningEnabled = false;
 	private CrossPartitionReferenceMode myAllowReferencesAcrossPartitions = CrossPartitionReferenceMode.NOT_ALLOWED;
-	private boolean myIncludePartitionInSearchHashes = true;
+	private boolean myIncludePartitionInSearchHashes = false;
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>) the <code>PARTITION_ID</code> value will be factored into the

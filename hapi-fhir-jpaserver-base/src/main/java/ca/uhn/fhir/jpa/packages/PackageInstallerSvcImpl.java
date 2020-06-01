@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -119,22 +120,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	@Override
 	public PackageInstallOutcomeJson install(NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
+		PackageInstallOutcomeJson retVal = new PackageInstallOutcomeJson();
 		if (enabled) {
 			try {
-				NpmPackage npmPackage = packageCacheManager.loadPackage(theInstallationSpec);
+				NpmPackage npmPackage = packageCacheManager.installPackage(theInstallationSpec);
 				if (npmPackage == null) {
 					throw new IOException("Package not found");
 				}
 
-				String fhirVersion = npmPackage.fhirVersion();
-				String currentFhirVersion = fhirContext.getVersion().getVersion().getFhirVersionString();
-				assertFhirVersionsAreCompatible(fhirVersion, currentFhirVersion);
+				retVal.getMessage().addAll(JpaPackageCache.getProcessingMessages(npmPackage));
 
 				if (theInstallationSpec.isFetchDependencies()) {
-					fetchAndInstallDependencies(npmPackage, theInstallationSpec);
+					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
 				}
 
-				if (theInstallationSpec.getInstallMode() == NpmInstallationSpec.InstallModeEnum.CACHE_AND_INSTALL) {
+				if (theInstallationSpec.getInstallMode() == NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
 					install(npmPackage, theInstallationSpec);
 				}
 
@@ -143,7 +143,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			}
 		}
 
-		return new PackageInstallOutcomeJson().setMessage("Success");
+		return retVal;
 	}
 
 	/**
@@ -156,6 +156,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private void install(NpmPackage npmPackage, NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		String name = npmPackage.getNpm().get("name").getAsString();
 		String version = npmPackage.getNpm().get("version").getAsString();
+
+		String fhirVersion = npmPackage.fhirVersion();
+		String currentFhirVersion = fhirContext.getVersion().getVersion().getFhirVersionString();
+		assertFhirVersionsAreCompatible(fhirVersion, currentFhirVersion);
 
 		List<String> installTypes;
 		if (!theInstallationSpec.getInstallResourceTypes().isEmpty()) {
@@ -186,26 +190,38 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private void fetchAndInstallDependencies(NpmPackage npmPackage, NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
+	private void fetchAndInstallDependencies(NpmPackage npmPackage, NpmInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
 		if (npmPackage.getNpm().has("dependencies")) {
-			Map<String, String> dependencies = new Gson().fromJson(npmPackage.getNpm().get("dependencies"), HashMap.class);
+			JsonElement dependenciesElement = npmPackage.getNpm().get("dependencies");
+			Map<String, String> dependencies = new Gson().fromJson(dependenciesElement, HashMap.class);
 			for (Map.Entry<String, String> d : dependencies.entrySet()) {
 				String id = d.getKey();
 				String ver = d.getValue();
-				if (id.startsWith("hl7.fhir")) {
-					continue; // todo : which packages to ignore?
-				}
-				if (packageCacheManager == null) {
-					throw new ImplementationGuideInstallationException(String.format(
-						"Cannot install dependency %s#%s due to PacketCacheManager initialization error", id, ver));
-				}
 				try {
+					theOutcome.getMessage().add("Package " + npmPackage.id() + "#" + npmPackage.version() + " depends on package " + id + "#" + ver);
+
+					boolean skip = false;
+					for (String next : theInstallationSpec.getDependencyExcludes()) {
+						if (id.matches(next)) {
+							theOutcome.getMessage().add("Not installing dependency " + id + " because it matches exclude criteria: " + next);
+							skip = true;
+							break;
+						}
+					}
+					if (skip) {
+						continue;
+					}
+
 					// resolve in local cache or on packages.fhir.org
 					NpmPackage dependency = packageCacheManager.loadPackage(id, ver);
 					// recursive call to install dependencies of a package before
 					// installing the package
-					fetchAndInstallDependencies(dependency, theInstallationSpec);
-					install(dependency, theInstallationSpec);
+					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
+
+					if (theInstallationSpec.getInstallMode() == NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+						install(dependency, theInstallationSpec);
+					}
+
 				} catch (IOException e) {
 					throw new ImplementationGuideInstallationException(String.format(
 						"Cannot resolve dependency %s#%s", id, ver), e);
