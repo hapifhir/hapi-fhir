@@ -10,6 +10,8 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 
 public class BatchJobSubmitterImpl implements IBatchJobSubmitter {
 
@@ -19,7 +21,6 @@ public class BatchJobSubmitterImpl implements IBatchJobSubmitter {
 	@Override
 	public JobExecution runJob(Job theJob, JobParameters theJobParameters) {
 		try {
-			System.out.println("WTF");
 			return myJobLauncher.run(theJob, theJobParameters);
 		} catch (JobExecutionAlreadyRunningException theE) {
 			//FIXME properly handle these

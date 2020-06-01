@@ -14,6 +14,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.containsString;
@@ -32,6 +34,9 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private DaoConfig myDaoConfig;
+
+	@Autowired
+	private Job testJob;
 
 	PointcutLatch myEverythingLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING);
 	PointcutLatch myExpungeResourceLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE);
@@ -92,6 +97,6 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testSubmitJob() {
-		//myBatchJobSubmitter.runJob(null, null);
+		myBatchJobSubmitter.runJob(testJob, new JobParameters());
 	}
 }

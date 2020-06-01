@@ -134,8 +134,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private static IValidationSupport ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
-	//@Autowired
-	//protected IBatchJobSubmitter myBatchJobSubmitter;
+	@Autowired
+	protected IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired

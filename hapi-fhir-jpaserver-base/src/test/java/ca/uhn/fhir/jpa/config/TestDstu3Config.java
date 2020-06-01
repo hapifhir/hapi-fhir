@@ -12,6 +12,12 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -31,6 +37,35 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
 	private Exception myLastStackTrace;
+
+	@Autowired
+	private StepBuilderFactory myStepBuilderFactory;
+
+	@Autowired
+	private JobBuilderFactory myJobBuilderFactory;
+
+	@Bean
+	public Job testJob() {
+		return myJobBuilderFactory.get("testJob")
+			.start(taskletStep())
+			.build();
+	}
+	@Bean
+	public Step taskletStep() {
+		return myStepBuilderFactory.get("testSte")
+			.tasklet((stepContribution, chunkContext) -> {
+				System.out.println("It works!");
+				return RepeatStatus.FINISHED;
+			})
+			.build();
+	}
+
+	@Bean
+	public Job expungeJob() {
+		return myJobBuilderFactory.get("expungeJob")
+			.start(taskletStep())
+
+	}
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
