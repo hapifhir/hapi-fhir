@@ -300,7 +300,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
-		await().until(()-> runInTransaction(()->{
+		await().until(() -> runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			return search.getNumFound() >= 200;
 		}));
@@ -360,8 +360,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
-		await().until(()->{
-			return runInTransaction(()->{
+		await().until(() -> {
+			return runInTransaction(() -> {
 				return mySearchEntityDao
 					.findByUuidAndFetchIncludes(uuid)
 					.orElseThrow(() -> new InternalErrorException(""))
@@ -496,8 +496,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
-		await().until(()->{
-			return runInTransaction(()->{
+		await().until(() -> {
+			return runInTransaction(() -> {
 				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 				return search.getNumFound() >= 50;
 			});
@@ -536,8 +536,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		/*
 		 * 20 should be prefetched since that's the initial page size
 		 */
-		await().until(()->{
-			return runInTransaction(()->{
+		await().until(() -> {
+			return runInTransaction(() -> {
 				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 				return search.getNumFound() == 20;
 			});
@@ -600,7 +600,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
-		waitForSize(20, () -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException("")).getNumFound()));
+		waitForSize(
+			20,
+			10000,
+			() -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException("")).getNumFound()),
+			() -> "Wanted 20: " + runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException("")).toString()));
+
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(20, search.getNumFound());
@@ -662,7 +667,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals(1, ids.size());
 
-		await().until(()-> runInTransaction(()-> mySearchEntityDao
+		await().until(() -> runInTransaction(() -> mySearchEntityDao
 			.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""))
 			.getStatus() == SearchStatusEnum.FINISHED));
 
@@ -810,7 +815,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		search.getResources(0, 20);
 		ourLog.info("** Done retrieving resources");
 
-		await().until(()->myCaptureQueriesListener.countSelectQueries() == 4);
+		await().until(() -> myCaptureQueriesListener.countSelectQueries() == 4);
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countSelectQueries());

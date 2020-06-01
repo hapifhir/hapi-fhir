@@ -531,7 +531,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam( "CareTeam").setChain(PARAM_TYPE));
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("CareTeam").setChain(PARAM_TYPE));
 		results = myDiagnosticReportDao.search(map);
 		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids.toString(), ids, contains(drId1.getValue()));
@@ -1690,6 +1690,338 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 
 	}
+
+
+	@Test
+	public void testDateRangeOnPeriod_SearchByDateTime_NoUpperBound() {
+		Encounter enc = new Encounter();
+		enc.getPeriod().getStartElement().setValueAsString("2020-05-26T12:00:00Z");
+		String id1 = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
+
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		// ge -> above the lower bound
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("ge2020-05-26T13:00:00Z"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myEncounterDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// ge -> Below the lower bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("ge2020-05-26T11:00:00Z"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// le -> above the lower bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("le2020-05-26T13:00:00Z"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// le -> Below the lower bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("le2020-05-26T11:00:00Z"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, empty());
+	}
+
+
+	@Test
+	public void testDateRangeOnPeriod_SearchByDate_NoUpperBound() {
+		Encounter enc = new Encounter();
+		enc.getPeriod().getStartElement().setValueAsString("2020-05-26T12:00:00Z");
+		String id1 = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
+
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		// ge -> above the lower bound
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("ge2020-05-27"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myEncounterDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// ge -> Below the lower bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("ge2020-05-25"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// le -> above the lower bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("le2020-05-27"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// le -> Below the lower bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("le2020-05-25"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, empty());
+	}
+
+
+	@Test
+	public void testDateRangeOnPeriod_SearchByDateTime_NoLowerBound() {
+		Encounter enc = new Encounter();
+		enc.getPeriod().getEndElement().setValueAsString("2020-05-26T12:00:00Z");
+		String id1 = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
+
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		// le -> above the upper bound
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("le2020-05-26T13:00:00Z"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myEncounterDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// le -> Below the upper bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("le2020-05-26T11:00:00Z"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// ge -> above the upper bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("ge2020-05-26T13:00:00Z"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, empty());
+
+		// ge -> Below the upper bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("ge2020-05-26T11:00:00Z"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+	}
+
+
+	@Test
+	public void testDateRangeOnPeriod_SearchByDate_NoLowerBound() {
+		Encounter enc = new Encounter();
+		enc.getPeriod().getEndElement().setValueAsString("2020-05-26T12:00:00Z");
+		String id1 = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
+
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		// le -> above the upper bound
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("le2020-05-27"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myEncounterDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// le -> Below the upper bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("le2020-05-25"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+
+		// ge -> above the upper bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("ge2020-05-27"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, empty());
+
+		// ge -> Below the upper bound
+		map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_DATE, new DateParam("ge2020-05-25"));
+		myCaptureQueriesListener.clear();
+		results = myEncounterDao.search(map);
+		ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(id1));
+	}
+
+
+	@Test
+	public void testDatePeriodParamEndOnly() {
+		{
+			Encounter enc = new Encounter();
+			enc.addIdentifier().setSystem("testDatePeriodParam").setValue("02");
+			enc.getPeriod().getEndElement().setValueAsString("2001-01-02");
+			myEncounterDao.create(enc, mySrd);
+		}
+		SearchParameterMap params;
+		List<Encounter> encs;
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "02"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "02"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", null));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "02"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-01"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "02"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-03", null));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "02"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(0, encs.size());
+
+	}
+
+	@Test
+	public void testDatePeriodParamStartAndEnd() {
+		{
+			Encounter enc = new Encounter();
+			enc.addIdentifier().setSystem("testDatePeriodParam").setValue("03");
+			enc.getPeriod().getStartElement().setValueAsString("2001-01-02");
+			enc.getPeriod().getEndElement().setValueAsString("2001-01-03");
+			myEncounterDao.create(enc, mySrd);
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "03"));
+		List<Encounter> encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-02", "2001-01-06"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "03"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", null));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "03"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "03"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-05"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "03"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-01"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "03"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(0, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-05", null));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "03"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(0, encs.size());
+
+	}
+
+	@Test
+	public void testDatePeriodParamStartOnly() {
+		{
+			Encounter enc = new Encounter();
+			enc.addIdentifier().setSystem("testDatePeriodParam").setValue("01");
+			enc.getPeriod().getStartElement().setValueAsString("2001-01-02");
+			myEncounterDao.create(enc, mySrd);
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "01"));
+		List<Encounter> encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-01", null));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "01"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-03"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "01"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam(null, "2001-01-01"));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "01"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(0, encs.size());
+
+		params = new SearchParameterMap();
+		params.add(Encounter.SP_DATE, new DateRangeParam("2001-01-03", null));
+		params.add(Encounter.SP_IDENTIFIER, new TokenParam("testDatePeriodParam", "01"));
+		encs = toList(myEncounterDao.search(params));
+		assertEquals(1, encs.size());
+
+	}
+
 
 	/**
 	 * See #1174

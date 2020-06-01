@@ -134,9 +134,70 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals( "Unknown code {http://terminology.hl7.org/CodeSystem/observation-category}FOO", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals(encode(oo), "Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics());
 
 	}
+
+	/**
+	 * Per: https://chat.fhir.org/#narrow/stream/179166-implementers/topic/Handling.20incomplete.20CodeSystems
+	 *
+	 * We should generate a warning if a code can't be found but the codesystem is a fragment
+	 */
+	@Test
+	public void testValidateWithFragmentCodeSystem() throws IOException {
+		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/fragment/structuredefinition.json"));
+		myCodeSystemDao.create(loadResourceFromClasspath(CodeSystem.class, "/r4/fragment/codesystem.json"));
+		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/fragment/valueset.json"));
+
+		createPatient(withId("A"), withActiveTrue());
+
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getSubject().setReference("Patient/A");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getText().getDiv().setValue("<div>hello</div>");
+		obs.setValue(new StringType("hello"));
+		obs.getPerformerFirstRep().setReference("Patient/A");
+		obs.setEffective(new DateTimeType("2020-01-01"));
+
+		OperationOutcome outcome;
+
+		// Correct codesystem, but code not in codesystem
+		obs.getCode().getCodingFirstRep().setSystem("http://example.com/codesystem");
+		obs.getCode().getCodingFirstRep().setCode("foo-foo");
+		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
+		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
+		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo'", outcome.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, outcome.getIssueFirstRep().getSeverity());
+
+		// Correct codesystem, Code in codesystem
+		obs.getCode().getCodingFirstRep().setSystem("http://example.com/codesystem");
+		obs.getCode().getCodingFirstRep().setCode("some-code");
+		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
+		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
+		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("No issues detected during validation", outcome.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, outcome.getIssueFirstRep().getSeverity());
+
+		// Code in wrong codesystem
+		obs.getCode().getCodingFirstRep().setSystem("http://example.com/foo-foo");
+		obs.getCode().getCodingFirstRep().setCode("some-code");
+		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
+		try {
+			outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
+			ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+			assertEquals("", outcome.getIssueFirstRep().getDiagnostics());
+			assertEquals(OperationOutcome.IssueSeverity.INFORMATION, outcome.getIssueFirstRep().getSeverity());
+			fail();
+		} catch (PreconditionFailedException e) {
+			outcome = (OperationOutcome) e.getOperationOutcome();
+			ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+			assertEquals("None of the codes provided are in the value set http://example.com/valueset (http://example.com/valueset), and a code from this value set is required) (codes = http://example.com/foo-foo#some-code)", outcome.getIssueFirstRep().getDiagnostics());
+			assertEquals(OperationOutcome.IssueSeverity.ERROR, outcome.getIssueFirstRep().getSeverity());
+		}
+	}
+
 
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
@@ -217,7 +278,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals( "Unknown code {http://terminology.hl7.org/CodeSystem/observation-category}FOO", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals(encode(oo), "Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 

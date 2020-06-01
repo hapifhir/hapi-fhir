@@ -369,14 +369,7 @@ public class FhirPatch {
 		// Find newly inserted items
 		while (targetIndex < targetValues.size()) {
 			String path = theTargetPath + "." + elementName;
-
-
-			IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
-			ParametersUtil.addPartCode(myContext, operation, "type", "insert");
-			ParametersUtil.addPartString(myContext, operation, "path", path);
-			ParametersUtil.addPartInteger(myContext, operation, "index", targetIndex);
-			ParametersUtil.addPart(myContext, operation, "value", targetValues.get(targetIndex));
-
+			addInsertItems(theDiff, targetValues, targetIndex, path, theChildDef);
 			targetIndex++;
 		}
 
@@ -391,6 +384,36 @@ public class FhirPatch {
 		}
 
 		theSourceEncodePath.popPath();
+	}
+
+	private void addInsertItems(IBaseParameters theDiff, List<? extends IBase> theTargetValues, int theTargetIndex, String thePath, BaseRuntimeChildDefinition theChildDefinition) {
+		IBase operation = ParametersUtil.addParameterToParameters(myContext, theDiff, "operation");
+		ParametersUtil.addPartCode(myContext, operation, "type", "insert");
+		ParametersUtil.addPartString(myContext, operation, "path", thePath);
+		ParametersUtil.addPartInteger(myContext, operation, "index", theTargetIndex);
+
+		IBase value = theTargetValues.get(theTargetIndex);
+		BaseRuntimeElementDefinition<?> valueDef = myContext.getElementDefinition(value.getClass());
+
+		/*
+		 * If the value is a Resource or a datatype, we can put it into the part.value and that will cover
+		 * all of its children. If it's an infrastructure element though, such as Patient.contact we can't
+		 * just put it into part.value because it isn't an actual type. So we have to put all of its
+		 * childen in instead.
+		 */
+		if (valueDef.isStandardType()) {
+			ParametersUtil.addPart(myContext, operation, "value", value);
+		} else {
+			for (BaseRuntimeChildDefinition nextChild : valueDef.getChildren()) {
+				List<IBase> childValues = nextChild.getAccessor().getValues(value);
+				for (int index = 0; index < childValues.size(); index++) {
+					boolean childRepeatable = theChildDefinition.getMax() != 1;
+					String elementName = nextChild.getChildNameByDatatype(childValues.get(index).getClass());
+					String targetPath = thePath + (childRepeatable ? "[" + index + "]" : "") + "." + elementName;
+					addInsertItems(theDiff, childValues, index, targetPath, nextChild);
+				}
+			}
+		}
 	}
 
 	private void addValueToDiff(IBase theOperationPart, IBase theOldValue, IBase theNewValue) {
