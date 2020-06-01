@@ -89,4 +89,9 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		IIdType hookId = hookParams.get(IIdType.class);
 		assertEquals(expungeId.getValue(), hookId.getValue());
 	}
+
+	@Test
+	public void testSubmitJob() {
+		//myBatchJobSubmitter.runJob(null, null);
+	}
 }

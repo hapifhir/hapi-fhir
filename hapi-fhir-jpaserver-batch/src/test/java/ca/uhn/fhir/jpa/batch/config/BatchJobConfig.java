@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.batch.config;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.batch.svc.DummyService;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.springframework.batch.core.Job;
@@ -26,10 +25,6 @@ public class BatchJobConfig implements IPointcutLatch {
 
 	private final PointcutLatch myPointcutLatch = new PointcutLatch("batchJobLatch");
 
-	@Bean
-	public DummyService myDummyService() {
-		return new DummyService();
-	}
 
 	@Bean
 	public Job datJob() {

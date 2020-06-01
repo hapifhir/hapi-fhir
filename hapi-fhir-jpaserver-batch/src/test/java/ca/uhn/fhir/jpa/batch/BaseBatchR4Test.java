@@ -1,9 +1,7 @@
 package ca.uhn.fhir.jpa.batch;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.config.BatchJobConfig;
 import ca.uhn.fhir.jpa.batch.config.InMemoryJobRepositoryBatchConfig;
-import ca.uhn.fhir.jpa.batch.svc.DummyService;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.batch.core.Job;
@@ -23,8 +21,6 @@ abstract public class BaseBatchR4Test {
  	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
 
-	@Autowired
-	protected DummyService myDummyService;
 	@Autowired
 	protected JobLauncher myJobLauncher;
 	@Autowired

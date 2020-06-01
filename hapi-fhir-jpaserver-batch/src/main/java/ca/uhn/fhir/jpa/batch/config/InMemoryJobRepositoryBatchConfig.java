@@ -11,7 +11,6 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -25,13 +24,6 @@ public class InMemoryJobRepositoryBatchConfig implements BatchConfigurer {
 	private JobLauncher myJobLauncher;
 	private JobRepository myJobRepository;
 	private JobExplorer myJobExplorer;
-
-	@Autowired
-	private JobBuilderFactory myJobBuilderFactory;
-
-	@Autowired
-	private StepBuilderFactory myStepBuilderFactory;
-
 
 	@Override
 	public PlatformTransactionManager getTransactionManager() {

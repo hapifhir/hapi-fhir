@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.JavaMailEmailSender;
@@ -33,6 +35,11 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
+	}
+
+	@Bean
+	public IBatchJobSubmitter batchJobSubmitter() {
+		return new BatchJobSubmitterImpl();
 	}
 
 	@Bean
