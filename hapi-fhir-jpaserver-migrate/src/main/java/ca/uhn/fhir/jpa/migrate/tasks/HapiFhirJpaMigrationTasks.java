@@ -111,6 +111,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 
 		empiLink.addIndex("20200517.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
+
 	}
 
 	protected void init500() { // 20200218 - 20200519
@@ -189,8 +190,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
 		);
 
-		// TRM_CONCEPT_PROPERTY
-		version.onTable("TRM_CONCEPT_PROPERTY").addIndex("20200523.1", "IDX_CONCEPTPROP_CONCEPTPID").unique(false).withColumns("CONCEPT_PID");
 	}
 
 	/**

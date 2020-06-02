@@ -30,7 +30,7 @@ public class PartitionSettings {
 	private boolean myIncludePartitionInSearchHashes = false;
 
 	/**
-	 * If set to <code>true</code> (default is <code>true</code>) the <code>PARTITION_ID</code> value will be factored into the
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>PARTITION_ID</code> value will be factored into the
 	 * hash values used in the <code>HFJ_SPIDX_xxx</code> tables, removing the need to explicitly add a selector
 	 * on this column in queries. If set to <code>false</code>, an additional selector is used instead, which may perform
 	 * better when using native database partitioning features.
@@ -43,7 +43,7 @@ public class PartitionSettings {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>true</code>) the <code>PARTITION_ID</code> value will be factored into the
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>PARTITION_ID</code> value will be factored into the
 	 * hash values used in the <code>HFJ_SPIDX_xxx</code> tables, removing the need to explicitly add a selector
 	 * on this column in queries. If set to <code>false</code>, an additional selector is used instead, which may perform
 	 * better when using native database partitioning features.

@@ -204,6 +204,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 
+	/**
+	 * Search for IDs for processing a match URLs, etc.
+	 */
 	Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
 
 	/**

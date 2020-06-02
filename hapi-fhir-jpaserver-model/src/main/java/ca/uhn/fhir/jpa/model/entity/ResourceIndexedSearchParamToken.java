@@ -59,7 +59,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 	@Index(name = "IDX_SP_TOKEN_HASH_S", columnList = "HASH_SYS"),
 	@Index(name = "IDX_SP_TOKEN_HASH_SV", columnList = "HASH_SYS_AND_VALUE"),
 	// TODO PERF change this to:
-   //	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE,RES_ID"),
+	//	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE,RES_ID"),
 	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE"),
 
 	@Index(name = "IDX_SP_TOKEN_UPDATED", columnList = "SP_UPDATED"),
@@ -232,6 +232,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getHashValue());
 		b.append(getHashSystem());
 		b.append(getHashSystemAndValue());
+
 		return b.toHashCode();
 	}
 
