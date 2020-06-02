@@ -34,7 +34,10 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
@@ -45,8 +48,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -476,15 +482,11 @@ public class PersonHelper {
 	private void mergeR4PersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
 		Person fromPerson = (Person) thePersonToDelete;
 		Person toPerson = (Person) thePersonToKeep;
-		if (!toPerson.hasName()) {
-			toPerson.setName(fromPerson.getName());
-		}
-		if (!toPerson.hasAddress()) {
-			toPerson.setAddress(fromPerson.getAddress());
-		}
-		if (!toPerson.hasTelecom()) {
-			toPerson.setTelecom(fromPerson.getTelecom());
-		}
+
+		mergeElementList(fromPerson, toPerson, HumanName.class, Person::getName, HumanName::equalsDeep);
+		mergeElementList(fromPerson, toPerson, Identifier.class, Person::getIdentifier, Identifier::equalsDeep);
+		mergeElementList(fromPerson, toPerson, Address.class, Person::getAddress, Address::equalsDeep);
+		mergeElementList(fromPerson, toPerson, ContactPoint.class, Person::getTelecom, ContactPoint::equalsDeep);
 		if (!toPerson.hasBirthDate()) {
 			toPerson.setBirthDate(fromPerson.getBirthDate());
 		}
@@ -496,19 +498,28 @@ public class PersonHelper {
 		}
 	}
 
+	private <P,T> void mergeElementList(P fromPerson, P toPerson, Class<T> theBase, Function<P, List<T>> theGetList, BiPredicate<T, T> theEquals) {
+		List<T> fromList = theGetList.apply(fromPerson);
+		List<T> toList = theGetList.apply(toPerson);
+		List<T> itemsToAdd = new ArrayList<>();
+
+		for (T fromItem : fromList) {
+			if (toList.stream().noneMatch(t -> theEquals.test(fromItem, t))) {
+				itemsToAdd.add(fromItem);
+			}
+		}
+		toList.addAll(itemsToAdd);
+	}
 
 	private void mergeDstu3PersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
 		org.hl7.fhir.dstu3.model.Person fromPerson = (org.hl7.fhir.dstu3.model.Person) thePersonToDelete;
 		org.hl7.fhir.dstu3.model.Person toPerson = (org.hl7.fhir.dstu3.model.Person) thePersonToKeep;
-		if (!toPerson.hasName()) {
-			toPerson.setName(fromPerson.getName());
-		}
-		if (!toPerson.hasAddress()) {
-			toPerson.setAddress(fromPerson.getAddress());
-		}
-		if (!toPerson.hasTelecom()) {
-			toPerson.setTelecom(fromPerson.getTelecom());
-		}
+
+		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.HumanName.class, org.hl7.fhir.dstu3.model.Person::getName, org.hl7.fhir.dstu3.model.HumanName::equalsDeep);
+		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.Identifier.class, org.hl7.fhir.dstu3.model.Person::getIdentifier, org.hl7.fhir.dstu3.model.Identifier::equalsDeep);
+		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.Address.class, org.hl7.fhir.dstu3.model.Person::getAddress, org.hl7.fhir.dstu3.model.Address::equalsDeep);
+		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.ContactPoint.class, org.hl7.fhir.dstu3.model.Person::getTelecom, org.hl7.fhir.dstu3.model.ContactPoint::equalsDeep);
+
 		if (!toPerson.hasBirthDate()) {
 			toPerson.setBirthDate(fromPerson.getBirthDate());
 		}
