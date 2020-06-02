@@ -57,4 +57,10 @@ public final class EmpiUtil {
 	public static boolean isEmpiManaged(IBaseResource theBaseResource) {
 		return theBaseResource.getMeta().getTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED) != null;
 	}
+
+	public static boolean isEmpiManagedPerson(FhirContext theFhirContext, IBaseResource theResource) {
+		String resourceType = theFhirContext.getResourceType(theResource);
+
+		return "Person".equals(resourceType) && isEmpiManaged(theResource);
+	}
 }

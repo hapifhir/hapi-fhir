@@ -26,6 +26,7 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.EmpiUtil;
+import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
@@ -56,6 +57,8 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private IEmpiSettings myEmpiSettings;
+	@Autowired
+	private PersonHelper myPersonHelper;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
@@ -78,6 +81,12 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 		//If running in single EID mode, forbid multiple eids.
 		if (myEmpiSettings.isPreventMultipleEids()) {
 			forbidIfHasMultipleEids(theNewResource);
+		}
+
+		if (EmpiUtil.isEmpiManagedPerson(myFhirContext, theNewResource) &&
+			myPersonHelper.isDeactivated(theNewResource)) {
+			ourLog.info("Deleting empi links to deactivated Person {}", theNewResource.getIdElement().toUnqualifiedVersionless());
+			myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theNewResource);
 		}
 
 		if (isInternalRequest(theRequestDetails)) {

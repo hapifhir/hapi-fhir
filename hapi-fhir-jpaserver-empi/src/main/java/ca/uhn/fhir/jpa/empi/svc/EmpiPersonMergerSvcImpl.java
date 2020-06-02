@@ -61,8 +61,10 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		mergeLinks(theFromPerson, theToPerson, theEmpiTransactionContext);
 		myEmpiResourceDaoSvc.updatePerson(theToPerson);
 		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
-		myEmpiResourceDaoSvc.deletePerson(theFromPerson);
-		log(theEmpiTransactionContext, "Deleted " + theFromPerson.getIdElement().toVersionless());
+
+		myPersonHelper.deactivatePerson(theFromPerson);
+		myEmpiResourceDaoSvc.updatePerson(theFromPerson);
+		log(theEmpiTransactionContext, "Deactivated " + theFromPerson.getIdElement().toVersionless());
 		return theToPerson;
 	}
 

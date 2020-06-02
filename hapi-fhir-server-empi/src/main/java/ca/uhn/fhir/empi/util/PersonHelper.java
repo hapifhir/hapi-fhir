@@ -629,4 +629,32 @@ public class PersonHelper {
 			updatePersonExternalEidFromEmpiTarget(thePerson, theResource, theEmpiTransactionContext);
 		}
 	}
+
+	public void deactivatePerson(IAnyResource thePerson) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person personR4 = (Person) thePerson;
+				personR4.setActive(false);
+				break;
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
+				personStu3.setActive(false);
+				break;
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
+	}
+
+	public boolean isDeactivated(IBaseResource thePerson) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person personR4 = (Person) thePerson;
+				return !personR4.getActive();
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
+				return !personStu3.getActive();
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
+	}
 }

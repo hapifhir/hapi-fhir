@@ -86,11 +86,13 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	
 	@Test
 	public void emptyMerge() {
+		assertEquals(2, getAllPersons().size());
 		assertEquals(2, getAllActivePersons().size());
 
 		Person mergedPerson = mergePersons();
 		assertEquals(myToPerson.getIdElement(), mergedPerson.getIdElement());
 		assertThat(mergedPerson, is(samePersonAs(mergedPerson)));
+		assertEquals(2, getAllPersons().size());
 		assertEquals(1, getAllActivePersons().size());
 	}
 

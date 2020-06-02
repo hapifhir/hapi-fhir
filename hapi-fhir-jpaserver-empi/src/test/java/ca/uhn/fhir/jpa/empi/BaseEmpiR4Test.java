@@ -42,7 +42,6 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -319,17 +318,29 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return IsMatchedToAPerson.matchedToAPerson(myIdHelperService, myEmpiLinkDaoSvc);
 	}
 
-	protected Person getOnlyPerson() {
+	protected Person getOnlyActivePerson() {
 		List<IBaseResource> resources = getAllActivePersons();
 		assertEquals(1, resources.size());
 		return (Person) resources.get(0);
 	}
 
-	@NotNull
+	@Nonnull
 	protected List<IBaseResource> getAllActivePersons() {
+		return getAllPersons(true);
+	}
+
+	@Nonnull
+	protected List<IBaseResource> getAllPersons() {
+		return getAllPersons(false);
+	}
+
+	@Nonnull
+	private List<IBaseResource> getAllPersons(boolean theOnlyActive) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add("active", new TokenParam().setValue("true"));
+		if (theOnlyActive) {
+			map.add("active", new TokenParam().setValue("true"));
+		}
 		IBundleProvider bundle = myPersonDao.search(map);
 		return bundle.getResources(0, 999);
 	}

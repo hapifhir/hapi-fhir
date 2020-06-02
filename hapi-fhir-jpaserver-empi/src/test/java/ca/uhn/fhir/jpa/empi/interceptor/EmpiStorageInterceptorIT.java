@@ -82,7 +82,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testDeletePersonDeletesLinks() throws InterruptedException {
 		myEmpiHelper.createWithLatch(new Patient());
 		assertLinkCount(1);
-		Person person = getOnlyPerson();
+		Person person = getOnlyActivePerson();
 		myPersonDao.delete(person.getIdElement());
 		assertLinkCount(0);
 	}
