@@ -351,6 +351,20 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		assertThat(myKeepPerson.getName().get(0).getGiven(), hasSize(2));
 	}
 
+	@Test
+	public void testMergeIdentities() {
+		myDeletePerson.addIdentifier().setValue("aaa");
+		myDeletePerson.addIdentifier().setValue("bbb");
+		assertThat(myDeletePerson.getIdentifier(), hasSize(2));
+
+		myKeepPerson.addIdentifier().setValue("aaa");
+		myKeepPerson.addIdentifier().setValue("ccc");
+		assertThat(myKeepPerson.getIdentifier(), hasSize(2));
+
+		mergePersons();
+		assertThat(myKeepPerson.getIdentifier(), hasSize(3));
+	}
+
 	private EmpiLink createEmpiLink(Person thePerson, Patient theTargetPatient) {
 		thePerson.addLink().setTarget(new Reference(theTargetPatient));
 		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
