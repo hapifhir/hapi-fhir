@@ -35,9 +35,6 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	@Autowired
-	private Job testJob;
-
 	PointcutLatch myEverythingLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING);
 	PointcutLatch myExpungeResourceLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE);
 
@@ -93,10 +90,5 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 
 		IIdType hookId = hookParams.get(IIdType.class);
 		assertEquals(expungeId.getValue(), hookId.getValue());
-	}
-
-	@Test
-	public void testSubmitJob() {
-		myBatchJobSubmitter.runJob(testJob, new JobParameters());
 	}
 }

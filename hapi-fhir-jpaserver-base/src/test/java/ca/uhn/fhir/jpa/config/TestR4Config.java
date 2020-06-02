@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.bulk.batch.BulkItemReader;
@@ -68,6 +70,11 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	private Exception myLastStackTrace;
 
 	@Bean
+	public IBatchJobSubmitter batchJobSubmitter() {
+		return new BatchJobSubmitterImpl();
+	}
+
+	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
 	}
@@ -82,7 +89,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	@Bean
 	public Step readPidsStep() {
 		return myStepBuilderFactory.get("readPidsToBeExportedStep")
-			.<ResourcePersistentId, ResourcePersistentId > chunk(100)
+			.<ResourcePersistentId, ResourcePersistentId > chunk(2)
 			.reader(myBulkItemReader(null))
 			.writer(mySimplePrinter())
 			.build();
@@ -103,6 +110,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	public BulkItemReader myBulkItemReader(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
 		BulkItemReader bulkItemReader = new BulkItemReader();
 		bulkItemReader.setJobUUID(theJobUUID);
+		bulkItemReader.setName("bulkItemReader");
 		return bulkItemReader;
 	}
 

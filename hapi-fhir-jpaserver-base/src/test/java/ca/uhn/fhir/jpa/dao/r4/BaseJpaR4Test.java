@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
@@ -180,7 +181,6 @@ import static org.mockito.Mockito.mock;
 public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
-
 
 	@Autowired
 	protected IPartitionLookupSvc myPartitionConfigSvc;
@@ -460,6 +460,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private IdHelperService myIdHelperService;
+	@Autowired
+	protected IBatchJobSubmitter myBatchJobSubmitter;
 
 	@After()
 	public void afterCleanupDao() {

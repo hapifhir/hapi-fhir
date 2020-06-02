@@ -123,8 +123,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private IdHelperService myIdHelperService;
-	@Autowired
-	protected IBatchJobSubmitter myBatchJobSubmitter;
 
 	@After
 	public void afterPerformCleanup() {

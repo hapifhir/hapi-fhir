@@ -50,10 +50,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		return new CircularQueueCaptureQueriesListener();
 	}
 
-	@Bean
-	public IBatchJobSubmitter batchJobSubmitter() {
-		return new BatchJobSubmitterImpl();
-	}
 
 	@Bean
 	public BasicDataSource basicDataSource() {
