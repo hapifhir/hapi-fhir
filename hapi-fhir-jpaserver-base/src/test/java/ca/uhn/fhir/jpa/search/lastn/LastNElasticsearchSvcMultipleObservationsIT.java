@@ -37,9 +37,9 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
 
-	private FhirContext myFhirContext = FhirContext.forR4();
+	private final FhirContext myFhirContext = FhirContext.forR4();
 
-	static private Calendar baseObservationDate = new GregorianCalendar();
+	static private final Calendar baseObservationDate = new GregorianCalendar();
 
 	@BeforeClass
 	public static void beforeClass() {
