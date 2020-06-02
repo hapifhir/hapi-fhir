@@ -38,17 +38,20 @@ public class LastNParameterHelper {
 
 	private static boolean isLastNParameterDstu3(String theParamName) {
 		return (theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_SUBJECT) || theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_PATIENT)
-			|| theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CODE));
+			|| theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CODE))
+			|| theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_DATE);
 	}
 
 	private static boolean isLastNParameterR4(String theParamName) {
 		return (theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_SUBJECT) || theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_PATIENT)
-			|| theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_CODE));
+			|| theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_CODE))
+			|| theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_DATE);
 	}
 
 	private static boolean isLastNParameterR5(String theParamName) {
 		return (theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_SUBJECT) || theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_PATIENT)
-			|| theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CODE));
+			|| theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CODE))
+			|| theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_DATE);
 	}
 
 	public static String getSubjectParamName(FhirContext theContext) {

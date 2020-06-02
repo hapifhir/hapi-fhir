@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -25,7 +27,9 @@ import org.shadehapi.elasticsearch.client.RequestOptions;
 import org.shadehapi.elasticsearch.client.RestHighLevelClient;
 import org.shadehapi.elasticsearch.common.xcontent.XContentType;
 import org.shadehapi.elasticsearch.index.query.BoolQueryBuilder;
+import org.shadehapi.elasticsearch.index.query.MatchQueryBuilder;
 import org.shadehapi.elasticsearch.index.query.QueryBuilders;
+import org.shadehapi.elasticsearch.index.query.RangeQueryBuilder;
 import org.shadehapi.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.shadehapi.elasticsearch.search.SearchHit;
 import org.shadehapi.elasticsearch.search.SearchHits;
@@ -321,6 +325,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 			addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 			addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
+			addDateCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 			searchSourceBuilder.query(boolQueryBuilder);
 		}
 		searchSourceBuilder.size(0);
@@ -341,6 +346,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		boolQueryBuilder.must(QueryBuilders.termQuery("subject", theSubjectParam));
 		addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 		addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
+		addDateCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 		searchSourceBuilder.query(boolQueryBuilder);
 		searchSourceBuilder.size(0);
 
@@ -490,6 +496,41 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 		}
 
+	}
+
+	private void addDateCriteria(BoolQueryBuilder theBoolQueryBuilder, SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
+		String dateParamName = LastNParameterHelper.getEffectiveParamName(theFhirContext);
+		if (theSearchParameterMap.containsKey(dateParamName)) {
+			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(dateParamName);
+			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
+				BoolQueryBuilder myDateBoolQueryBuilder = new BoolQueryBuilder();
+				for (IQueryParameterType nextOr : nextAnd) {
+					if (nextOr instanceof DateParam) {
+						DateParam myDate = (DateParam) nextOr;
+						createDateCriteria(myDate, myDateBoolQueryBuilder);
+					}
+				}
+				theBoolQueryBuilder.must(myDateBoolQueryBuilder);
+			}
+		}
+	}
+
+	private void createDateCriteria(DateParam theDate, BoolQueryBuilder theBoolQueryBuilder) {
+		Long dateInstant = theDate.getValue().getTime();
+		RangeQueryBuilder myRangeQueryBuilder = new RangeQueryBuilder("effectivedtm");
+
+		ParamPrefixEnum prefix = theDate.getPrefix();
+		if (prefix == ParamPrefixEnum.GREATERTHAN || prefix == ParamPrefixEnum.STARTS_AFTER) {
+			theBoolQueryBuilder.should(myRangeQueryBuilder.gt(dateInstant));
+		} else if (prefix == ParamPrefixEnum.LESSTHAN || prefix == ParamPrefixEnum.ENDS_BEFORE) {
+			theBoolQueryBuilder.should(myRangeQueryBuilder.lt(dateInstant));
+		} else if (prefix == ParamPrefixEnum.LESSTHAN_OR_EQUALS) {
+			theBoolQueryBuilder.should(myRangeQueryBuilder.lte(dateInstant));
+		} else if (prefix == ParamPrefixEnum.GREATERTHAN_OR_EQUALS) {
+			theBoolQueryBuilder.should(myRangeQueryBuilder.gte(dateInstant));
+		} else {
+			theBoolQueryBuilder.should(new MatchQueryBuilder("effectivedtm", dateInstant));
+		}
 	}
 
 	@VisibleForTesting

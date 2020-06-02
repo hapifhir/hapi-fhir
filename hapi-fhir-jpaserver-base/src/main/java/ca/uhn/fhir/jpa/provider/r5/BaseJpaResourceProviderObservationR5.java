@@ -60,6 +60,10 @@ public class BaseJpaResourceProviderObservationR5 extends JpaResourceProviderR5<
 		@OperationParam(name="code")
 			TokenAndListParam theCode,
 
+		@Description(shortDefinition="The effective date of the observation")
+		@OperationParam(name="date")
+			DateAndListParam theDate,
+
 		@Description(shortDefinition="The subject that the observation is about (if patient)")
 		@OperationParam(name="patient")
 			ReferenceAndListParam thePatient,
@@ -78,6 +82,7 @@ public class BaseJpaResourceProviderObservationR5 extends JpaResourceProviderR5<
 			SearchParameterMap paramMap = new SearchParameterMap();
 			paramMap.add(Observation.SP_CATEGORY, theCategory);
 			paramMap.add(Observation.SP_CODE, theCode);
+			paramMap.add(Observation.SP_DATE, theDate);
 			if (thePatient != null) {
 				paramMap.add(Observation.SP_PATIENT, thePatient);
 			}
