@@ -106,21 +106,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return bulkItemReader;
 	}
 
-	@Bean
-	public Job testJob() {
-		return myJobBuilderFactory.get("testJob")
-			.start(taskletStep())
-			.build();
-	}
-	@Bean
-	public Step taskletStep() {
-		return myStepBuilderFactory.get("testSte")
-			.tasklet((stepContribution, chunkContext) -> {
-				System.out.println("It works!");
-				return RepeatStatus.FINISHED;
-			})
-			.build();
-	}
 
 	@Bean
 	public DataSource dataSource() {

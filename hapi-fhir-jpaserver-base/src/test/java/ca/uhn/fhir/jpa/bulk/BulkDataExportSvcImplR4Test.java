@@ -48,7 +48,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
-	@Autowired()
+	@Autowired
 	private Job myBulkJob;
 
 
