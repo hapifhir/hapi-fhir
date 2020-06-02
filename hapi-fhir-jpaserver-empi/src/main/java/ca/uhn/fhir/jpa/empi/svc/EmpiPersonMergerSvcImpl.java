@@ -55,28 +55,28 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 	@Override
 	@Transactional
-	public IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep, EmpiTransactionContext theEmpiTransactionContext) {
+	public IAnyResource mergePersons(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
 		// TODO EMPI replace this with a post containing the manually merged fields
-		myPersonHelper.mergePersonFields(thePersonToDelete, thePersonToKeep);
-		mergeLinks(thePersonToDelete, thePersonToKeep, theEmpiTransactionContext);
-		myEmpiResourceDaoSvc.updatePerson(thePersonToKeep);
-		log(theEmpiTransactionContext, "Merged " + thePersonToDelete.getIdElement().toVersionless() + " into " + thePersonToKeep.getIdElement().toVersionless());
-		myEmpiResourceDaoSvc.deletePerson(thePersonToDelete);
-		log(theEmpiTransactionContext, "Deleted " + thePersonToDelete.getIdElement().toVersionless());
-		return thePersonToKeep;
+		myPersonHelper.mergePersonFields(theFromPerson, theToPerson);
+		mergeLinks(theFromPerson, theToPerson, theEmpiTransactionContext);
+		myEmpiResourceDaoSvc.updatePerson(theToPerson);
+		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
+		myEmpiResourceDaoSvc.deletePerson(theFromPerson);
+		log(theEmpiTransactionContext, "Deleted " + theFromPerson.getIdElement().toVersionless());
+		return theToPerson;
 	}
 
-	private void mergeLinks(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep, EmpiTransactionContext theEmpiTransactionContext) {
-		long personToKeepPid = myIdHelperService.getPidOrThrowException(thePersonToKeep);
-		List<EmpiLink> incomingLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToDelete);
-		List<EmpiLink> origLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(thePersonToKeep);
+	private void mergeLinks(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
+		long toPersonPid = myIdHelperService.getPidOrThrowException(theToPerson);
+		List<EmpiLink> incomingLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(theFromPerson);
+		List<EmpiLink> origLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(theToPerson);
 
 		// For each incomingLink, either ignore it, move it, or replace the original one
 
 		for (EmpiLink incomingLink : incomingLinks) {
 			Optional<EmpiLink> optionalOrigLink = findLinkWithMatchingTarget(origLinks, incomingLink);
 			if (optionalOrigLink.isPresent()) {
-				// The original links already contain this target, so move it over to the personToKeep
+				// The original links already contain this target, so move it over to the toPerson
 				EmpiLink origLink = optionalOrigLink.get();
 				if (incomingLink.isManual()) {
 					switch (origLink.getLinkSource()) {
@@ -94,14 +94,14 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 					continue;
 				}
 			}
-			// The original links didn't contain this target, so move it over to the personToKeep
-			incomingLink.setPersonPid(personToKeepPid);
+			// The original links didn't contain this target, so move it over to the toPerson
+			incomingLink.setPersonPid(toPersonPid);
 			ourLog.trace("Saving link {}", incomingLink);
 			myEmpiLinkDaoSvc.save(incomingLink);
 		}
 
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToDelete, theEmpiTransactionContext);
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePersonToKeep, theEmpiTransactionContext);
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theFromPerson, theEmpiTransactionContext);
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
 	}
 
 	private Optional<EmpiLink> findLinkWithMatchingTarget(List<EmpiLink> theEmpiLinks, EmpiLink theLinkWithTargetToMatch) {

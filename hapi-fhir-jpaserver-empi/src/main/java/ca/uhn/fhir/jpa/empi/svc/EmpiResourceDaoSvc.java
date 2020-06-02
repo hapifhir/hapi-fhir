@@ -86,7 +86,7 @@ public class EmpiResourceDaoSvc {
 		}
 	}
 
-	public void deletePerson(IAnyResource thePersonToDelete) {
-		myPersonDao.delete(thePersonToDelete.getIdElement());
+	public void deletePerson(IAnyResource theFromPerson) {
+		myPersonDao.delete(theFromPerson.getIdElement());
 	}
 }

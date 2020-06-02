@@ -16,19 +16,20 @@ import static org.junit.Assert.fail;
 
 public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
-	private Person myDeletePerson;
-	private StringType myDeletePersonId;
-	private Person myKeepPerson;
-	private StringType myKeepPersonId;
+	private Person myFromPerson;
+	private StringType myFromPersonId;
+	private Person myToPerson;
+	private StringType myToPersonId;
 
 	@Before
 	public void before() {
 		super.before();
+		super.loadEmpiSearchParameters();
 
-		myDeletePerson = createPerson();
-		myDeletePersonId = new StringType(myDeletePerson.getIdElement().toUnqualifiedVersionless().getValue());
-		myKeepPerson = createPerson();
-		myKeepPersonId = new StringType(myKeepPerson.getIdElement().toUnqualifiedVersionless().getValue());
+		myFromPerson = createPerson();
+		myFromPersonId = new StringType(myFromPerson.getIdElement().toUnqualifiedVersionless().getValue());
+		myToPerson = createPerson();
+		myToPersonId = new StringType(myToPerson.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -45,18 +46,18 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testMerge() {
-		Person mergedPerson = myEmpiProviderR4.mergePersons(myDeletePersonId, myKeepPersonId, myRequestDetails);
-		assertEquals(myKeepPerson.getIdElement(), mergedPerson.getIdElement());
+		Person mergedPerson = myEmpiProviderR4.mergePersons(myFromPersonId, myToPersonId, myRequestDetails);
+		assertEquals(myToPerson.getIdElement(), mergedPerson.getIdElement());
 		assertThat(mergedPerson, is(samePersonAs(mergedPerson)));
-		assertEquals(1, getAllPersons().size());
+		assertEquals(1, getAllActivePersons().size());
 	}
 
 	@Test
 	public void testUnmanagedMerge() {
-		StringType deletePersonId = new StringType(createUnmanagedPerson().getIdElement().toVersionless().getValue());
-		StringType keepPersonId = new StringType(createUnmanagedPerson().getIdElement().toVersionless().getValue());
+		StringType fromPersonId = new StringType(createUnmanagedPerson().getIdElement().toVersionless().getValue());
+		StringType toPersonId = new StringType(createUnmanagedPerson().getIdElement().toVersionless().getValue());
 		try {
-			myEmpiProviderR4.mergePersons(deletePersonId, keepPersonId, myRequestDetails);
+			myEmpiProviderR4.mergePersons(fromPersonId, toPersonId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Only EMPI managed resources can be merged.  Empi managed resource have the HAPI-EMPI tag.", e.getMessage());
@@ -71,7 +72,7 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 			myEmpiProviderR4.mergePersons(patientId, otherPatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToDelete must have form Person/<id> where <id> is the id of the person", e.getMessage());
+			assertEquals("fromPersonId must have form Person/<id> where <id> is the id of the person", e.getMessage());
 		}
 
 	}
@@ -82,50 +83,50 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 			myEmpiProviderR4.mergePersons(null, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToDelete cannot be null", e.getMessage());
+			assertEquals("fromPersonId cannot be null", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(null, myKeepPersonId, myRequestDetails);
+			myEmpiProviderR4.mergePersons(null, myToPersonId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToDelete cannot be null", e.getMessage());
+			assertEquals("fromPersonId cannot be null", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myDeletePersonId, null, myRequestDetails);
+			myEmpiProviderR4.mergePersons(myFromPersonId, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToKeep cannot be null", e.getMessage());
+			assertEquals("toPersonId cannot be null", e.getMessage());
 		}
 	}
 
 	@Test
 	public void testBadParams() {
 		try {
-		myEmpiProviderR4.mergePersons(new StringType("Patient/1"), new StringType("Patient/2"), myRequestDetails);
+			myEmpiProviderR4.mergePersons(new StringType("Patient/1"), new StringType("Patient/2"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToDelete must have form Person/<id> where <id> is the id of the person", e.getMessage());
+			assertEquals("fromPersonId must have form Person/<id> where <id> is the id of the person", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myDeletePersonId, new StringType("Patient/2"), myRequestDetails);
+			myEmpiProviderR4.mergePersons(myFromPersonId, new StringType("Patient/2"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToKeep must have form Person/<id> where <id> is the id of the person", e.getMessage());
+			assertEquals("toPersonId must have form Person/<id> where <id> is the id of the person", e.getMessage());
 		}
 		try {
 			myEmpiProviderR4.mergePersons(new StringType("Person/1"), new StringType("Person/1"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personIdToDelete must be different from personToKeep", e.getMessage());
+			assertEquals("fromPersonId must be different from toPersonId", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(new StringType("Person/abc"), myKeepPersonId, myRequestDetails);
+			myEmpiProviderR4.mergePersons(new StringType("Person/abc"), myToPersonId, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Resource Person/abc is not known", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myDeletePersonId, new StringType("Person/abc"), myRequestDetails);
+			myEmpiProviderR4.mergePersons(myFromPersonId, new StringType("Person/abc"), myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Resource Person/abc is not known", e.getMessage());

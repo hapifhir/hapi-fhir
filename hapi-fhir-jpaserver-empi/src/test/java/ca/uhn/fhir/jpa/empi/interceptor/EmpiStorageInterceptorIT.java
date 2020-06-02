@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -53,6 +54,11 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public EmpiHelperR4 myEmpiHelper;
 	@Autowired
 	private IdHelperService myIdHelperService;
+
+	@Before
+	public void before() {
+		super.loadEmpiSearchParameters();
+	}
 
 	@Test
 	public void testCreatePatient() throws InterruptedException {
