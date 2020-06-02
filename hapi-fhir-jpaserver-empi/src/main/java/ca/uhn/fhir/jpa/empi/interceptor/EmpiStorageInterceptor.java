@@ -85,7 +85,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 
 		if (EmpiUtil.isEmpiManagedPerson(myFhirContext, theNewResource) &&
 			myPersonHelper.isDeactivated(theNewResource)) {
-			ourLog.info("Deleting empi links to deactivated Person {}", theNewResource.getIdElement().toUnqualifiedVersionless());
+			ourLog.debug("Deleting empi links to deactivated Person {}", theNewResource.getIdElement().toUnqualifiedVersionless());
 			myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theNewResource);
 		}
 
