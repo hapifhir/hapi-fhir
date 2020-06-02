@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
@@ -21,7 +22,11 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Date;
 import java.util.UUID;
@@ -41,6 +46,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private IBatchJobSubmitter myBatchJobSubmitter;
+	@Autowired()
+	private Job myBulkJob;
 
 
 	@Test
@@ -234,7 +243,19 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 
-		@Test
+	@Test
+	public void testBatchJob() {
+		createResources();
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
+		//Add the UUID to the job
+		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", jobDetails.getJobId());
+
+		myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+
+	}
+	@Test
 	public void testSubmit_WithSince() throws InterruptedException {
 
 		// Create some resources to load

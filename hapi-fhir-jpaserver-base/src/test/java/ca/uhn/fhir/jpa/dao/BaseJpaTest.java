@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -122,6 +123,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private IdHelperService myIdHelperService;
+	@Autowired
+	protected IBatchJobSubmitter myBatchJobSubmitter;
 
 	@After
 	public void afterPerformCleanup() {

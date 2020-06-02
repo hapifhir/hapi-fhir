@@ -2,8 +2,10 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.bulk.batch.BulkItemReader;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -11,7 +13,15 @@ import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -47,6 +57,12 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Autowired
+	private StepBuilderFactory myStepBuilderFactory;
+
+	@Autowired
+	private JobBuilderFactory myJobBuilderFactory;
+
+	@Autowired
 	private Environment myEnvironment;
 
 	private Exception myLastStackTrace;
@@ -54,6 +70,56 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
+	}
+	@Bean
+	public Job bulkExportJob() {
+		return myJobBuilderFactory.get("bulkExportJob")
+			.start(readPidsStep())
+			.build();
+
+	}
+
+	@Bean
+	public Step readPidsStep() {
+		return myStepBuilderFactory.get("readPidsToBeExportedStep")
+			.<ResourcePersistentId, ResourcePersistentId > chunk(100)
+			.reader(myBulkItemReader(null))
+			.writer(mySimplePrinter())
+			.build();
+	}
+
+	@Bean
+	public ItemWriter<ResourcePersistentId> mySimplePrinter() {
+		return (theResourcePersistentIds) -> {
+			System.out.println("PRINTING CHUNK");
+			theResourcePersistentIds.stream().forEach(pid -> {
+				System.out.println("zoop -> " + pid.toString());
+			});
+		};
+	}
+
+	@Bean
+	@StepScope
+	public BulkItemReader myBulkItemReader(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
+		BulkItemReader bulkItemReader = new BulkItemReader();
+		bulkItemReader.setJobUUID(theJobUUID);
+		return bulkItemReader;
+	}
+
+	@Bean
+	public Job testJob() {
+		return myJobBuilderFactory.get("testJob")
+			.start(taskletStep())
+			.build();
+	}
+	@Bean
+	public Step taskletStep() {
+		return myStepBuilderFactory.get("testSte")
+			.tasklet((stepContribution, chunkContext) -> {
+				System.out.println("It works!");
+				return RepeatStatus.FINISHED;
+			})
+			.build();
 	}
 
 	@Bean

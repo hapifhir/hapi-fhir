@@ -2,11 +2,13 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
+import ca.uhn.fhir.jpa.bulk.batch.BulkItemReader;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -16,8 +18,12 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemStreamWriter;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -38,34 +44,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
 	private Exception myLastStackTrace;
 
-	@Autowired
-	private StepBuilderFactory myStepBuilderFactory;
-
-	@Autowired
-	private JobBuilderFactory myJobBuilderFactory;
-
-	@Bean
-	public Job testJob() {
-		return myJobBuilderFactory.get("testJob")
-			.start(taskletStep())
-			.build();
-	}
-	@Bean
-	public Step taskletStep() {
-		return myStepBuilderFactory.get("testSte")
-			.tasklet((stepContribution, chunkContext) -> {
-				System.out.println("It works!");
-				return RepeatStatus.FINISHED;
-			})
-			.build();
-	}
-
-	@Bean
-	public Job expungeJob() {
-		return myJobBuilderFactory.get("expungeJob")
-			.start(taskletStep())
-
-	}
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {

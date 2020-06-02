@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInter
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -304,6 +305,7 @@ public abstract class BaseConfig {
 	public IBulkDataExportSvc bulkDataExportSvc() {
 		return new BulkDataExportSvcImpl();
 	}
+
 
 	@Bean
 	@Lazy
