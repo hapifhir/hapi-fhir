@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -313,6 +314,55 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		assertThat(myKeepPerson, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
 		assertEquals(3, myKeepPerson.getLink().size());
+	}
+
+	@Test
+	public void testMergeNames() {
+		myDeletePerson.addName().addGiven("Jim");
+		myDeletePerson.getNameFirstRep().addGiven("George");
+		assertThat(myDeletePerson.getName(), hasSize(1));
+		assertThat(myDeletePerson.getName().get(0).getGiven(), hasSize(2));
+
+		myKeepPerson.addName().addGiven("Jeff");
+		myKeepPerson.getNameFirstRep().addGiven("George");
+		assertThat(myKeepPerson.getName(), hasSize(1));
+		assertThat(myKeepPerson.getName().get(0).getGiven(), hasSize(2));
+
+		mergePersons();
+		assertThat(myKeepPerson.getName(), hasSize(2));
+		assertThat(myKeepPerson.getName().get(0).getGiven(), hasSize(2));
+		assertThat(myKeepPerson.getName().get(1).getGiven(), hasSize(2));
+	}
+
+	@Test
+	public void testMergeNamesAllSame() {
+		myDeletePerson.addName().addGiven("Jim");
+		myDeletePerson.getNameFirstRep().addGiven("George");
+		assertThat(myDeletePerson.getName(), hasSize(1));
+		assertThat(myDeletePerson.getName().get(0).getGiven(), hasSize(2));
+
+		myKeepPerson.addName().addGiven("Jim");
+		myKeepPerson.getNameFirstRep().addGiven("George");
+		assertThat(myKeepPerson.getName(), hasSize(1));
+		assertThat(myKeepPerson.getName().get(0).getGiven(), hasSize(2));
+
+		mergePersons();
+		assertThat(myKeepPerson.getName(), hasSize(1));
+		assertThat(myKeepPerson.getName().get(0).getGiven(), hasSize(2));
+	}
+
+	@Test
+	public void testMergeIdentities() {
+		myDeletePerson.addIdentifier().setValue("aaa");
+		myDeletePerson.addIdentifier().setValue("bbb");
+		assertThat(myDeletePerson.getIdentifier(), hasSize(2));
+
+		myKeepPerson.addIdentifier().setValue("aaa");
+		myKeepPerson.addIdentifier().setValue("ccc");
+		assertThat(myKeepPerson.getIdentifier(), hasSize(2));
+
+		mergePersons();
+		assertThat(myKeepPerson.getIdentifier(), hasSize(3));
 	}
 
 	private EmpiLink createEmpiLink(Person thePerson, Patient theTargetPatient) {
