@@ -109,6 +109,7 @@ public class BaseDstu2Config extends BaseConfig {
 	@Primary
 	@Bean
 	public IValidationSupport jpaValidationSupportDstu2() {
+		// FIXME
 		JpaPersistedResourceValidationSupport retVal = new JpaPersistedResourceValidationSupport(fhirContextDstu2());
 		return retVal;
 	}

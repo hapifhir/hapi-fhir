@@ -37,9 +37,10 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	private final FhirContext myFhirContext;
 
-	@Autowired
-	@Qualifier("myJpaValidationSupport")
-	public IValidationSupport myJpaValidationSupport;
+	// FIXME: remove
+//	@Autowired
+//	@Qualifier("myJpaValidationSupport")
+//	public IValidationSupport myJpaValidationSupport;
 
 	@Qualifier("myDefaultProfileValidationSupport")
 	@Autowired
@@ -63,12 +64,12 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PostConstruct
 	public void postConstruct() {
-		addValidationSupport((IValidationSupport) new CommonCodeSystemsTerminologyService(myFhirContext));
+		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myDefaultProfileValidationSupport);
-		addValidationSupport(myJpaValidationSupport);
-		addValidationSupport((IValidationSupport) myTerminologyService);
-		addValidationSupport((IValidationSupport) new SnapshotGeneratingValidationSupport(myFhirContext));
-		addValidationSupport((IValidationSupport) new InMemoryTerminologyServerValidationSupport(myFhirContext));
+//		addValidationSupport(myJpaValidationSupport);
+		addValidationSupport(myTerminologyService);
+		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
+		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
 	}
 
 }
