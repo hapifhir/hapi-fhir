@@ -146,7 +146,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		myObservationDao.validate(obs, null, null, null, null, null, null);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();

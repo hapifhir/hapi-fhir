@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -29,6 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingRule;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -53,6 +56,8 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -122,8 +127,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private IdHelperService myIdHelperService;
+	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
+	@Autowired
+	private IValidationSupport myJpaPersistedValidationSupport;
 
-	@After
+
+		@After
 	public void afterPerformCleanup() {
 		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(false);
 		if (myCaptureQueriesListener != null) {
@@ -135,6 +144,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myIdHelperService != null) {
 			myIdHelperService.clearCache();
 		}
+		if (myJpaPersistedValidationSupport != null) {
+			ProxyUtil.getSingletonTarget(myJpaPersistedValidationSupport, JpaPersistedResourceValidationSupport.class).clearCaches();
+		}
+
 
 	}
 

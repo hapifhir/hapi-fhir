@@ -113,6 +113,7 @@ import java.util.Date;
 public abstract class BaseConfig {
 
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
+	public static final String JPA_VALIDATION_SUPPORT = "myJpaValidationSupport";
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";

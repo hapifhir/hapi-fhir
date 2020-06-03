@@ -107,11 +107,9 @@ public class BaseDstu2Config extends BaseConfig {
 	}
 
 	@Primary
-	@Bean
+	@Bean(name = JPA_VALIDATION_SUPPORT)
 	public IValidationSupport jpaValidationSupportDstu2() {
-		// FIXME
-		JpaPersistedResourceValidationSupport retVal = new JpaPersistedResourceValidationSupport(fhirContextDstu2());
-		return retVal;
+		return new JpaPersistedResourceValidationSupport(fhirContextDstu2());
 	}
 
 	@Bean(name = "myResourceCountsCache")

@@ -74,11 +74,10 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 		return new JpaValidationSupportChain(fhirContext());
 	}
 
-	// FIXME: remove
-//	@Bean(name = "myJpaValidationSupport")
-//	public IValidationSupport jpaValidationSupport() {
-//		return new JpaPersistedResourceValidationSupport(fhirContext());
-//	}
+	@Bean(name = JPA_VALIDATION_SUPPORT)
+	public IValidationSupport jpaValidationSupport() {
+		return new JpaPersistedResourceValidationSupport(fhirContext());
+	}
 
 	@Primary
 	@Bean()
