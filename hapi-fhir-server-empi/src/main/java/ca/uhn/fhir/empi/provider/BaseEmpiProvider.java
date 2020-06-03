@@ -30,6 +30,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -47,33 +48,33 @@ public abstract class BaseEmpiProvider {
 		myResourceLoader = theResourceLoader;
 	}
 
-	protected IAnyResource getPersonFromIdOrThrowException(String theParamName, String theId) {
-		IdDt personId = getPersonIdDtOrThrowException(theParamName, theId);
-		return loadResource(personId);
+	protected IAnyResource getLatestPersonFromIdOrThrowException(String theParamName, String theId) {
+		IdDt latestPersonId = getLatestPersonIdDtOrThrowException(theParamName, theId);
+		return loadResource(latestPersonId);
 	}
 
-	private IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
+	private IdDt getLatestPersonIdDtOrThrowException(String theParamName, String theId) {
 		IdDt personId = new IdDt(theId);
 		if (!"Person".equals(personId.getResourceType()) ||
 			personId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " must have form Person/<id> where <id> is the id of the person");
 		}
-		return personId;
+		return personId.toUnqualifiedVersionless();
 	}
 
-	protected IAnyResource getTargetFromIdOrThrowException(String theParamName, String theId) {
-		IIdType targetId = getTargetIdDtOrThrowException(theParamName, theId);
+	protected IAnyResource getLatestTargetFromIdOrThrowException(String theParamName, String theId) {
+		IIdType targetId = getLatestTargetIdDtOrThrowException(theParamName, theId);
 		return loadResource(targetId);
 	}
 
-	protected IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
+	protected IIdType getLatestTargetIdDtOrThrowException(String theParamName, String theId) {
 		IdDt targetId = new IdDt(theId);
 		String resourceType = targetId.getResourceType();
 		if (!EmpiUtil.supportedTargetType(resourceType) ||
 			targetId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource");
 		}
-		return targetId;
+		return targetId.toUnqualifiedVersionless();
 	}
 
 	protected IAnyResource loadResource(IIdType theResourceId) {
@@ -157,7 +158,7 @@ public abstract class BaseEmpiProvider {
 		if (personId == null) {
 			return null;
 		}
-		return getPersonIdDtOrThrowException(theName, personId);
+		return getLatestPersonIdDtOrThrowException(theName, personId);
 	}
 
 	protected IIdType extractTargetIdDtOrNull(String theName, IPrimitiveType<String> theTargetId) {
@@ -165,7 +166,18 @@ public abstract class BaseEmpiProvider {
 		if (targetId == null) {
 			return null;
 		}
-		return getTargetIdDtOrThrowException(theName, targetId);
+		return getLatestTargetIdDtOrThrowException(theName, targetId);
 	}
 
+	protected void validateSameVersion(IAnyResource theResource, IPrimitiveType<String> theResourceId) {
+		String storedId = theResource.getIdElement().getValue();
+		String requestedId = theResourceId.getValue();
+		if (hasVersionIdPart(requestedId) && !storedId.equals(requestedId)) {
+			throw new ResourceVersionConflictException("Requested resource " + requestedId + " is not the latest version.  Latest version is " + storedId);
+		}
+	}
+
+	private boolean hasVersionIdPart(String theId) {
+		return new IdDt(theId).hasVersionIdPart();
+	}
 }
