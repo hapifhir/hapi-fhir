@@ -701,7 +701,7 @@
 		<jaxb_runtime_version>2.3.1</jaxb_runtime_version>
 		<jersey_version>2.25.1</jersey_version>
 		<!-- 9.4.17 seems to have issues -->
-		<jetty_version>9.4.24.v20191120</jetty_version>
+		<jetty_version>9.4.29.v20200521</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<flyway_version>6.4.1</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
