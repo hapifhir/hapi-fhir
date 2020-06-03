@@ -27,9 +27,9 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 		super.loadEmpiSearchParameters();
 
 		myFromPerson = createPerson();
-		myFromPersonId = new StringType(myFromPerson.getIdElement().toUnqualifiedVersionless().getValue());
+		myFromPersonId = new StringType(myFromPerson.getIdElement().getValue());
 		myToPerson = createPerson();
-		myToPersonId = new StringType(myToPerson.getIdElement().toUnqualifiedVersionless().getValue());
+		myToPersonId = new StringType(myToPerson.getIdElement().getValue());
 	}
 
 	@Test
@@ -55,8 +55,8 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testUnmanagedMerge() {
-		StringType fromPersonId = new StringType(createUnmanagedPerson().getIdElement().toVersionless().getValue());
-		StringType toPersonId = new StringType(createUnmanagedPerson().getIdElement().toVersionless().getValue());
+		StringType fromPersonId = new StringType(createUnmanagedPerson().getIdElement().getValue());
+		StringType toPersonId = new StringType(createUnmanagedPerson().getIdElement().getValue());
 		try {
 			myEmpiProviderR4.mergePersons(fromPersonId, toPersonId, myRequestDetails);
 			fail();
@@ -68,8 +68,8 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	@Test
 	public void testMergePatients() {
 		try {
-			StringType patientId = new StringType(createPatient().getIdElement().toVersionless().getValue());
-			StringType otherPatientId = new StringType(createPatient().getIdElement().toVersionless().getValue());
+			StringType patientId = new StringType(createPatient().getIdElement().getValue());
+			StringType otherPatientId = new StringType(createPatient().getIdElement().getValue());
 			myEmpiProviderR4.mergePersons(patientId, otherPatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {

@@ -13,31 +13,35 @@ import javax.annotation.Nonnull;
 import static org.junit.Assert.assertEquals;
 
 public abstract class BaseLinkR4Test extends BaseProviderR4Test {
+	protected static final StringType NO_MATCH_RESULT = new StringType(EmpiMatchResultEnum.NO_MATCH.name());
+	protected static final StringType MATCH_RESULT = new StringType(EmpiMatchResultEnum.MATCH.name());
+	protected static final StringType POSSIBLE_MATCH_RESULT = new StringType(EmpiMatchResultEnum.POSSIBLE_MATCH.name());
+	protected static final StringType POSSIBLE_DUPLICATE_RESULT = new StringType(EmpiMatchResultEnum.POSSIBLE_DUPLICATE.name());
+
 	protected Patient myPatient;
 	protected Person myPerson;
 	protected EmpiLink myLink;
 	protected StringType myPatientId;
 	protected StringType myPersonId;
-	protected StringType myNoMatch;
-	protected StringType myPossibleMatch;
-	protected StringType myPossibleDuplicate;
+	protected StringType myVersionlessPersonId;
+
 
 	@Before
 	public void before() {
 		super.before();
 
 		myPatient = createPatientAndUpdateLinks(new Patient());
-		myPatientId = new StringType(myPatient.getIdElement().toUnqualifiedVersionless().getValue());
+		myPatientId = new StringType(myPatient.getIdElement().getValue());
 
 		myPerson = getPersonFromTarget(myPatient);
-		myPersonId = new StringType(myPerson.getIdElement().toUnqualifiedVersionless().getValue());
-		myLink = getLink();
-		assertEquals(EmpiLinkSourceEnum.AUTO, myLink.getLinkSource());
-		assertEquals(EmpiMatchResultEnum.MATCH, myLink.getMatchResult());
+		myPersonId = new StringType(myPerson.getIdElement().getValue());
+		myVersionlessPersonId = new StringType(myPerson.getIdElement().toVersionless().getValue());
 
-		myNoMatch = new StringType(EmpiMatchResultEnum.NO_MATCH.name());
-		myPossibleMatch = new StringType(EmpiMatchResultEnum.POSSIBLE_MATCH.name());
-		myPossibleDuplicate = new StringType(EmpiMatchResultEnum.POSSIBLE_DUPLICATE.name());
+		myLink = getLink();
+		// Tests require our initial link to be a POSSIBLE_MATCH
+		myLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_MATCH);
+		myEmpiLinkDao.save(myLink);
+		assertEquals(EmpiLinkSourceEnum.AUTO, myLink.getLinkSource());
 	}
 
 	@Nonnull

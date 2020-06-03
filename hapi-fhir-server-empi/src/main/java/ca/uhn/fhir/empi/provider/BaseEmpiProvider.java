@@ -30,6 +30,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -47,9 +48,9 @@ public abstract class BaseEmpiProvider {
 		myResourceLoader = theResourceLoader;
 	}
 
-	protected IAnyResource getPersonFromIdOrThrowException(String theParamName, String theId) {
+	protected IAnyResource getLatestPersonFromIdOrThrowException(String theParamName, String theId) {
 		IdDt personId = getPersonIdDtOrThrowException(theParamName, theId);
-		return loadResource(personId);
+		return loadResource(personId.toUnqualifiedVersionless());
 	}
 
 	private IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
@@ -61,9 +62,9 @@ public abstract class BaseEmpiProvider {
 		return personId;
 	}
 
-	protected IAnyResource getTargetFromIdOrThrowException(String theParamName, String theId) {
+	protected IAnyResource getLatestTargetFromIdOrThrowException(String theParamName, String theId) {
 		IIdType targetId = getTargetIdDtOrThrowException(theParamName, theId);
-		return loadResource(targetId);
+		return loadResource(targetId.toUnqualifiedVersionless());
 	}
 
 	protected IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
@@ -168,4 +169,15 @@ public abstract class BaseEmpiProvider {
 		return getTargetIdDtOrThrowException(theName, targetId);
 	}
 
+	protected void validateSameVersion(IAnyResource theResource, IPrimitiveType<String> theResourceId) {
+		String storedId = theResource.getIdElement().getValue();
+		String requestedId = theResourceId.getValue();
+		if (hasVersionIdPart(requestedId) && !storedId.equals(requestedId)) {
+			throw new ResourceVersionConflictException("Requested resource " + requestedId + " is not the latest version.  Latest version is " + storedId);
+		}
+	}
+
+	private boolean hasVersionIdPart(String theId) {
+		return new IdDt(theId).hasVersionIdPart();
+	}
 }

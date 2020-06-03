@@ -91,9 +91,11 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 									  @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, min = 1, max = 1) StringType theToPersonId,
 									  RequestDetails theRequestDetails) {
 		validateMergeParameters(theFromPersonId, theToPersonId);
-		IAnyResource fromPerson = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPersonId.getValue());
-		IAnyResource toPerson = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPersonId.getValue());
+		IAnyResource fromPerson = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPersonId.getValue());
+		IAnyResource toPerson = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPersonId.getValue());
 		validateMergeResources(fromPerson, toPerson);
+		validateSameVersion(fromPerson, theFromPersonId);
+		validateSameVersion(toPerson, theToPersonId);
 
 		return (Person) myPersonMergerSvc.mergePersons(fromPerson, toPerson, createEmpiContext(theRequestDetails));
 	}
@@ -106,8 +108,10 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 
 		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
 		EmpiMatchResultEnum matchResult = extractMatchResultOrNull(theMatchResult);
-		IAnyResource person = getPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
-		IAnyResource target = getTargetFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
+		IAnyResource person = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
+		IAnyResource target = getLatestTargetFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
+		validateSameVersion(person, thePersonId);
+		validateSameVersion(target, theTargetId);
 
 		return (Person) myEmpiLinkUpdaterSvc.updateLink(person, target, matchResult, createEmpiContext(theRequestDetails));
 	}
