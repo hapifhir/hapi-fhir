@@ -55,8 +55,13 @@ public enum TokenParamModifier {
 	/** 
 	 * :text
 	 */
-	TEXT(":text");
-	
+	TEXT(":text"),
+
+	/**
+	 * :of-type
+	 */
+	OF_TYPE(":of-type");
+
 	private static final Map<String, TokenParamModifier> VALUE_TO_ENUM;
 
 	static {
