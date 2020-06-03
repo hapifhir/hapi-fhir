@@ -552,7 +552,6 @@ public enum Pointcut {
 		void.class,
 		new ExceptionHandlingSpec()
 			.addLogAndSwallow(Throwable.class),
-		false,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
@@ -592,7 +591,6 @@ public enum Pointcut {
 		void.class,
 		new ExceptionHandlingSpec()
 			.addLogAndSwallow(Throwable.class),
-		false,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
@@ -2013,7 +2011,6 @@ public enum Pointcut {
 	TEST_RB(
 		boolean.class,
 		new ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.class),
-		false,
 		String.class.getName(),
 		String.class.getName()),
 
@@ -2026,25 +2023,19 @@ public enum Pointcut {
 	private final List<String> myParameterTypes;
 	private final Class<?> myReturnType;
 	private final ExceptionHandlingSpec myExceptionHandlingSpec;
-	private final boolean myAlwaysSynchronous;
 
 	Pointcut(@Nonnull String theReturnType, String... theParameterTypes) {
-		this(toReturnTypeClass(theReturnType), new ExceptionHandlingSpec(), false, theParameterTypes);
+		this(toReturnTypeClass(theReturnType), new ExceptionHandlingSpec(), theParameterTypes);
 	}
 
-	Pointcut(@Nonnull Class<?> theReturnType, @Nonnull ExceptionHandlingSpec theExceptionHandlingSpec, boolean theAlwaysSynchronous, String... theParameterTypes) {
+	Pointcut(@Nonnull Class<?> theReturnType, @Nonnull ExceptionHandlingSpec theExceptionHandlingSpec, String... theParameterTypes) {
 		myReturnType = theReturnType;
 		myExceptionHandlingSpec = theExceptionHandlingSpec;
 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
-		myAlwaysSynchronous = theAlwaysSynchronous;
 	}
 
 	Pointcut(@Nonnull Class<?> theReturnType, String... theParameterTypes) {
-		this(theReturnType, new ExceptionHandlingSpec(), false, theParameterTypes);
-	}
-
-	public boolean isAlwaysSynchronous() {
-		return myAlwaysSynchronous;
+		this(theReturnType, new ExceptionHandlingSpec(), theParameterTypes);
 	}
 
 	public boolean isShouldLogAndSwallowException(@Nonnull Throwable theException) {
@@ -2066,7 +2057,7 @@ public enum Pointcut {
 		return myParameterTypes;
 	}
 
-	private class UnknownType {
+	private static class UnknownType {
 	}
 
 	private static class ExceptionHandlingSpec {
