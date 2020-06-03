@@ -70,7 +70,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	}
 
 	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
-	public ValidationSupportChain jpaValidationSupportChain() {
+	public JpaValidationSupportChain jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(fhirContext());
 	}
 

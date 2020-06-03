@@ -20,6 +20,9 @@ package ca.uhn.fhir.context.support;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public class ConceptValidationOptions {
 
 	public boolean isInferSystem() {
@@ -33,4 +36,10 @@ public class ConceptValidationOptions {
 
 	private boolean myInferSystem;
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("inferSystem", myInferSystem)
+			.toString();
+	}
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -227,12 +228,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ITermCodeSystemStorageSvc myConceptStorageSvc;
 	@Autowired
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 	private volatile IValidationSupport myJpaValidationSupport;
 	private volatile IValidationSupport myValidationSupport;
+	private final Cache<String, Boolean> myCodeSystemSupportedCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		return supportsSystem(theSystem);
+		return myCodeSystemSupportedCache.get(theSystem, url->{
+			// This terminology service shouldn't try to handle built-in terminology
+			if (myDefaultProfileValidationSupport.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
+				return false;
+			}
+			TermCodeSystem cs = getCodeSystem(theSystem);
+			return cs != null;
+		});
 	}
 
 	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
@@ -1713,12 +1724,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return theOutput;
 		}
 		return null;
-	}
-
-	@Override
-	public boolean supportsSystem(String theSystem) {
-		TermCodeSystem cs = getCodeSystem(theSystem);
-		return cs != null;
 	}
 
 	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
