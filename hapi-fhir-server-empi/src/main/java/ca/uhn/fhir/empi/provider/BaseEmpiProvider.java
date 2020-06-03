@@ -49,8 +49,8 @@ public abstract class BaseEmpiProvider {
 	}
 
 	protected IAnyResource getLatestPersonFromIdOrThrowException(String theParamName, String theId) {
-		IdDt latestPersonId = getPersonIdDtOrThrowException(theParamName, theId);
-		return loadResource(latestPersonId.toUnqualifiedVersionless());
+		IdDt personId = getPersonIdDtOrThrowException(theParamName, theId);
+		return loadResource(personId.toUnqualifiedVersionless());
 	}
 
 	private IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
