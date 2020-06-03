@@ -833,7 +833,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	public static class GraphQLProvider {
 		@GraphQL
-		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
+		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQuery) {
 			return "{\"foo\":\"bar\"}";
 		}
 	}

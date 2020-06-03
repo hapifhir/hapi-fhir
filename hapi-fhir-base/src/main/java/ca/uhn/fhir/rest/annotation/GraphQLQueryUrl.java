@@ -16,7 +16,7 @@ package ca.uhn.fhir.rest.annotation;
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the LBoicense.
  * #L%
  */
 
@@ -37,6 +37,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface GraphQLQuery {
+public @interface GraphQLQueryUrl {
 	// ignore
 }

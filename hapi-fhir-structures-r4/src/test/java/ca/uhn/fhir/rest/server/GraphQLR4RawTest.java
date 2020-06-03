@@ -156,7 +156,7 @@ public class GraphQLR4RawTest {
 
 
 		@GraphQL
-		public String process(@IdParam IdType theId, @GraphQLQuery String theQuery) {
+		public String process(@IdParam IdType theId, @GraphQLQueryUrl String theQuery) {
 			ourMethodCount++;
 			ourLastId = theId;
 			ourLastQuery = theQuery;

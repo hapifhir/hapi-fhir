@@ -21,33 +21,51 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.json.JsonLikeObject;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.JsonLikeValue;
+import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-public class GraphQLQueryParameter implements IParameter {
+import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
+import static ca.uhn.fhir.rest.server.method.ResourceParameter.createRequestReader;
+
+public class GraphQLQueryBodyParameter implements IParameter {
 
 	private Class<?> myType;
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		String[] queryParams = theRequest.getParameters().get(Constants.PARAM_GRAPHQL_QUERY);
-		String retVal = null;
-		if (queryParams != null) {
-			if (queryParams.length > 0) {
-				retVal = queryParams[0];
+		String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+
+		if (CT_JSON.equals(ctValue)) {
+			Reader reader = createRequestReader(theRequest);
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode jsonNode = mapper.readTree(reader);
+				if (jsonNode != null && jsonNode.get("query") != null) {
+					return jsonNode.get("query").asText();
+				}
+			} catch (IOException e) {
+				throw new InternalErrorException(e);
 			}
 		}
-		return retVal;
+
+		return null;
 	}
 
 	@Override

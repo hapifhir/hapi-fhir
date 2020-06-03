@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
@@ -43,11 +45,15 @@ import java.lang.reflect.Method;
 public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 
 	private final Integer myIdParamIndex;
+	private final Integer queryUrlParamIndex;
+	private final Integer queryBodyParamIndex;
 
 	public GraphQLMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, theProvider);
 
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
+		queryUrlParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
+		queryBodyParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryBody.class);
 	}
 
 	@Override
@@ -75,6 +81,16 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 		return MethodMatchEnum.NONE;
 	}
 
+	private String getQueryValue(Object[] methodParams) {
+		if (methodParams[queryBodyParamIndex] != null) {
+			return (String) methodParams[queryBodyParamIndex];
+		}
+		if (methodParams[queryUrlParamIndex] != null) {
+			return (String) methodParams[queryUrlParamIndex];
+		}
+		return null;
+	}
+
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		Object[] methodParams = createMethodParams(theRequest);
@@ -82,7 +98,7 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 			methodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-		Object response = invokeServerMethod(theServer, theRequest, methodParams);
+		String responseString = (String) invokeServerMethod(theServer, theRequest, methodParams);
 
 		int statusCode = Constants.STATUS_HTTP_200_OK;
 		String statusMessage = Constants.HTTP_STATUS_NAMES.get(statusCode);
@@ -90,20 +106,19 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 		String charset = Constants.CHARSET_NAME_UTF8;
 		boolean respondGzip = theRequest.isRespondGzip();
 
-		String responseString = (String) response;
-
-		HttpServletRequest servletRequest=null;
-		HttpServletResponse servletResponse=null;
+		HttpServletRequest servletRequest = null;
+		HttpServletResponse servletResponse = null;
 		if (theRequest instanceof ServletRequestDetails) {
 			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
 			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
 		}
 
+		String graphQLQuery = getQueryValue(methodParams);
 		// Interceptor call: SERVER_OUTGOING_GRAPHQL_RESPONSE
 		HookParams params = new HookParams()
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
-			.add(String.class, theRequest.getParameters().get(Constants.PARAM_GRAPHQL_QUERY)[0])
+			.add(String.class, graphQLQuery)
 			.add(String.class, responseString)
 			.add(HttpServletRequest.class, servletRequest)
 			.add(HttpServletResponse.class, servletResponse);
@@ -127,7 +142,6 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
 		writer.write(responseString);
 		writer.close();
-
 
 		return null;
 	}
