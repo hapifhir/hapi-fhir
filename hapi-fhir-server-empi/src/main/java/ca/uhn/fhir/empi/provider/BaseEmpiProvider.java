@@ -49,32 +49,32 @@ public abstract class BaseEmpiProvider {
 	}
 
 	protected IAnyResource getLatestPersonFromIdOrThrowException(String theParamName, String theId) {
-		IdDt latestPersonId = getLatestPersonIdDtOrThrowException(theParamName, theId);
-		return loadResource(latestPersonId);
+		IdDt latestPersonId = getPersonIdDtOrThrowException(theParamName, theId);
+		return loadResource(latestPersonId.toUnqualifiedVersionless());
 	}
 
-	private IdDt getLatestPersonIdDtOrThrowException(String theParamName, String theId) {
+	private IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
 		IdDt personId = new IdDt(theId);
 		if (!"Person".equals(personId.getResourceType()) ||
 			personId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " must have form Person/<id> where <id> is the id of the person");
 		}
-		return personId.toUnqualifiedVersionless();
+		return personId;
 	}
 
 	protected IAnyResource getLatestTargetFromIdOrThrowException(String theParamName, String theId) {
-		IIdType targetId = getLatestTargetIdDtOrThrowException(theParamName, theId);
-		return loadResource(targetId);
+		IIdType targetId = getTargetIdDtOrThrowException(theParamName, theId);
+		return loadResource(targetId.toUnqualifiedVersionless());
 	}
 
-	protected IIdType getLatestTargetIdDtOrThrowException(String theParamName, String theId) {
+	protected IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
 		IdDt targetId = new IdDt(theId);
 		String resourceType = targetId.getResourceType();
 		if (!EmpiUtil.supportedTargetType(resourceType) ||
 			targetId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource");
 		}
-		return targetId.toUnqualifiedVersionless();
+		return targetId;
 	}
 
 	protected IAnyResource loadResource(IIdType theResourceId) {
@@ -158,7 +158,7 @@ public abstract class BaseEmpiProvider {
 		if (personId == null) {
 			return null;
 		}
-		return getLatestPersonIdDtOrThrowException(theName, personId);
+		return getPersonIdDtOrThrowException(theName, personId);
 	}
 
 	protected IIdType extractTargetIdDtOrNull(String theName, IPrimitiveType<String> theTargetId) {
@@ -166,7 +166,7 @@ public abstract class BaseEmpiProvider {
 		if (targetId == null) {
 			return null;
 		}
-		return getLatestTargetIdDtOrThrowException(theName, targetId);
+		return getTargetIdDtOrThrowException(theName, targetId);
 	}
 
 	protected void validateSameVersion(IAnyResource theResource, IPrimitiveType<String> theResourceId) {
