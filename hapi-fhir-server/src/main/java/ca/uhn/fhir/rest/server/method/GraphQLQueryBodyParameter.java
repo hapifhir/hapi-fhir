@@ -41,6 +41,7 @@ import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import static ca.uhn.fhir.rest.api.Constants.CT_GRAPHQL;
 import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
 import static ca.uhn.fhir.rest.server.method.ResourceParameter.createRequestReader;
 
@@ -51,15 +52,23 @@ public class GraphQLQueryBodyParameter implements IParameter {
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+		Reader requestReader = createRequestReader(theRequest);
 
 		if (CT_JSON.equals(ctValue)) {
-			Reader reader = createRequestReader(theRequest);
 			try {
 				ObjectMapper mapper = new ObjectMapper();
-				JsonNode jsonNode = mapper.readTree(reader);
+				JsonNode jsonNode = mapper.readTree(requestReader);
 				if (jsonNode != null && jsonNode.get("query") != null) {
 					return jsonNode.get("query").asText();
 				}
+			} catch (IOException e) {
+				throw new InternalErrorException(e);
+			}
+		}
+
+		if (CT_GRAPHQL.equals(ctValue)) {
+			try {
+				return IOUtils.toString(requestReader);
 			} catch (IOException e) {
 				throw new InternalErrorException(e);
 			}
