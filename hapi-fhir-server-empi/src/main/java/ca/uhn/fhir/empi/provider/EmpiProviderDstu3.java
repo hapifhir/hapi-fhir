@@ -87,15 +87,15 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS, type = Person.class)
-	public Person mergePerson(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, min = 1, max = 1) StringType thePersonIdToDelete,
-									  @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep,
+	public Person mergePerson(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, min = 1, max = 1) StringType theFromPersonId,
+									  @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, min = 1, max = 1) StringType theToPersonId,
 									  RequestDetails theRequestDetails) {
-		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
-		IAnyResource personToDelete = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonIdToDelete.getValue());
-		IAnyResource personToKeep = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonIdToKeep.getValue());
-		validateMergeResources(personToDelete, personToKeep);
+		validateMergeParameters(theFromPersonId, theToPersonId);
+		IAnyResource fromPerson = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPersonId.getValue());
+		IAnyResource toPerson = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPersonId.getValue());
+		validateMergeResources(fromPerson, toPerson);
 
-		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(theRequestDetails));
+		return (Person) myPersonMergerSvc.mergePersons(fromPerson, toPerson, createEmpiContext(theRequestDetails));
 	}
 
 	@Operation(name = ProviderConstants.EMPI_UPDATE_LINK, type = Person.class)

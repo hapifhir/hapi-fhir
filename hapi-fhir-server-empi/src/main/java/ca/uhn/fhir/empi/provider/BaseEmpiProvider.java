@@ -81,17 +81,17 @@ public abstract class BaseEmpiProvider {
 		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
 	}
 
-	protected void validateMergeParameters(IPrimitiveType<String> thePersonIdToDelete, IPrimitiveType<String> thePersonIdToKeep) {
-		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonIdToDelete);
-		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonIdToKeep);
-		if (thePersonIdToDelete.getValue().equals(thePersonIdToKeep.getValue())) {
-			throw new InvalidRequestException("personIdToDelete must be different from personToKeep");
+	protected void validateMergeParameters(IPrimitiveType<String> theFromPersonId, IPrimitiveType<String> theToPersonId) {
+		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPersonId);
+		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPersonId);
+		if (theFromPersonId.getValue().equals(theToPersonId.getValue())) {
+			throw new InvalidRequestException("fromPersonId must be different from toPersonId");
 		}
  	}
 
- 	protected void validateMergeResources(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep) {
-		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonToDelete);
-		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonToKeep);
+ 	protected void validateMergeResources(IAnyResource theFromPerson, IAnyResource theToPerson) {
+		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPerson);
+		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPerson);
 	}
 
 	private void validateIsEmpiManaged(String theName, IAnyResource thePerson) {

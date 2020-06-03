@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmpiSearchParameterLoader {
 	public static final String EMPI_PERSON_ASSURANCE_SEARCH_PARAMETER_ID = "person-assurance";
+	public static final String EMPI_PERSON_ACTIVE_SEARCH_PARAMETER_ID = "person-active";
 	@Autowired
 	public FhirContext myFhirContext;
 	@Autowired
@@ -41,12 +42,15 @@ public class EmpiSearchParameterLoader {
 
 	synchronized public void daoUpdateEmpiSearchParameters() {
 		IBaseResource personAssurance;
+		IBaseResource personActive;
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				personAssurance = buildEmpiSearchParameterDstu3();
+				personAssurance = buildAssuranceEmpiSearchParameterDstu3();
+				personActive = buildActiveEmpiSearchParameterDstu3();
 				break;
 			case R4:
-				personAssurance = buildEmpiSearchParameterR4();
+				personAssurance = buildAssuranceEmpiSearchParameterR4();
+				personActive = buildActiveEmpiSearchParameterR4();
 				break;
 			default:
 				throw new ConfigurationException("EMPI not supported for FHIR version " + myFhirContext.getVersion().getVersion());
@@ -54,9 +58,10 @@ public class EmpiSearchParameterLoader {
 
 		IFhirResourceDao<IBaseResource> searchParameterDao = myDaoRegistry.getResourceDao("SearchParameter");
 		searchParameterDao.update(personAssurance);
+		searchParameterDao.update(personActive);
 	}
 
-	private org.hl7.fhir.dstu3.model.SearchParameter buildEmpiSearchParameterDstu3() {
+	private org.hl7.fhir.dstu3.model.SearchParameter buildAssuranceEmpiSearchParameterDstu3() {
 		org.hl7.fhir.dstu3.model.SearchParameter retval = new org.hl7.fhir.dstu3.model.SearchParameter();
 		retval.setId(EMPI_PERSON_ASSURANCE_SEARCH_PARAMETER_ID);
 		retval.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
@@ -69,7 +74,7 @@ public class EmpiSearchParameterLoader {
 		return retval;
 	}
 
-	private SearchParameter buildEmpiSearchParameterR4() {
+	private SearchParameter buildAssuranceEmpiSearchParameterR4() {
 		SearchParameter retval = new SearchParameter();
 		retval.setId(EMPI_PERSON_ASSURANCE_SEARCH_PARAMETER_ID);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -79,6 +84,32 @@ public class EmpiSearchParameterLoader {
 		retval.setType(Enumerations.SearchParamType.TOKEN);
 		retval.setDescription("The assurance level of the link on a Person");
 		retval.setExpression("Person.link.assurance");
+		return retval;
+	}
+
+	private org.hl7.fhir.dstu3.model.SearchParameter buildActiveEmpiSearchParameterDstu3() {
+		org.hl7.fhir.dstu3.model.SearchParameter retval = new org.hl7.fhir.dstu3.model.SearchParameter();
+		retval.setId(EMPI_PERSON_ACTIVE_SEARCH_PARAMETER_ID);
+		retval.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		retval.setCode("active");
+		retval.addBase("Person");
+		retval.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		retval.setDescription("The active status of a Person");
+		retval.setExpression("Person.active");
+		return retval;
+	}
+
+	private SearchParameter buildActiveEmpiSearchParameterR4() {
+		SearchParameter retval = new SearchParameter();
+		retval.setId(EMPI_PERSON_ACTIVE_SEARCH_PARAMETER_ID);
+		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		retval.setCode("active");
+		retval.addBase("Person");
+		retval.setType(Enumerations.SearchParamType.TOKEN);
+		retval.setDescription("The active status of a Person");
+		retval.setExpression("Person.active");
 		return retval;
 	}
 }
