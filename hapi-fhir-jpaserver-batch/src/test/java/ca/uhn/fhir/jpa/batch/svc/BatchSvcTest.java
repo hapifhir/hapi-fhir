@@ -20,4 +20,5 @@ public class BatchSvcTest extends BaseBatchR4Test {
 		myJobLauncher.run(myJob, new JobParameters());
 		myBatchJobConfig.awaitExpected();
 	}
+
 }

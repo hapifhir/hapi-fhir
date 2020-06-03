@@ -36,4 +36,6 @@ public interface IBulkExportCollectionDao extends JpaRepository<BulkExportCollec
 	@Query("DELETE FROM BulkExportCollectionEntity t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
 
+//	@Query("SELECT BulkExportCollectionEntity ")
+//	void findByJobId(Long theId);
 }

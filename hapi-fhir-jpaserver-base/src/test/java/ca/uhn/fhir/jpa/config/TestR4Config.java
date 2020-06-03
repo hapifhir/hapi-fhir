@@ -4,7 +4,10 @@ import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.bulk.batch.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.bulk.batch.BulkItemReader;
+import ca.uhn.fhir.jpa.bulk.batch.BulkItemResourceLoaderProcessor;
+import ca.uhn.fhir.jpa.bulk.batch.ResourceTypePartitioner;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -15,11 +18,15 @@ import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +49,7 @@ import static org.junit.Assert.fail;
 @Configuration
 @Import(TestJPAConfig.class)
 @EnableTransactionManagement()
+@EnableBatchProcessing
 public class TestR4Config extends BaseJavaConfigR4 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
@@ -64,9 +72,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
 
-	@Autowired
-	private Environment myEnvironment;
-
 	private Exception myLastStackTrace;
 
 	@Bean
@@ -78,29 +83,56 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
 	}
+
 	@Bean
 	public Job bulkExportJob() {
 		return myJobBuilderFactory.get("bulkExportJob")
-			.start(readPidsStep())
+			.start(partitionStep())
 			.build();
-
 	}
 
 	@Bean
-	public Step readPidsStep() {
-		return myStepBuilderFactory.get("readPidsToBeExportedStep")
-			.<ResourcePersistentId, ResourcePersistentId > chunk(2)
+	public Step slaveResourceStep() {
+		return myStepBuilderFactory.get("slaveResourceStep")
+			.<ResourcePersistentId, IBaseResource> chunk(2)
 			.reader(myBulkItemReader(null))
+			.processor(pidToResourceProcessor(null))
 			.writer(mySimplePrinter())
+			.listener(myBulkItemReader(null))
+			.build();
+	}
+	@Bean
+	public Step partitionStep() {
+		return myStepBuilderFactory.get("partitionStep")
+			.partitioner("slaveResourceStep", partitioner(null)).step(slaveResourceStep())
 			.build();
 	}
 
+
 	@Bean
-	public ItemWriter<ResourcePersistentId> mySimplePrinter() {
+	public BulkExportDaoSvc bulkExportDaoSvc() {
+		return new BulkExportDaoSvc();
+	}
+
+	@Bean
+	@JobScope
+	public ResourceTypePartitioner partitioner(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
+		return new ResourceTypePartitioner(theJobUUID);
+	}
+
+
+	@Bean
+	@StepScope
+	public ItemProcessor<ResourcePersistentId, IBaseResource> pidToResourceProcessor(@Value("#{jobParameters['jobUUID']}") String theUUID) {
+		return new BulkItemResourceLoaderProcessor();
+	}
+
+	@Bean
+	public ItemWriter<IBaseResource> mySimplePrinter() {
 		return (theResourcePersistentIds) -> {
 			System.out.println("PRINTING CHUNK");
-			theResourcePersistentIds.stream().forEach(pid -> {
-				System.out.println("zoop -> " + pid.toString());
+			theResourcePersistentIds.stream().forEach(theIBaseResource-> {
+				System.out.println("zoop -> " + theIBaseResource);
 			});
 		};
 	}

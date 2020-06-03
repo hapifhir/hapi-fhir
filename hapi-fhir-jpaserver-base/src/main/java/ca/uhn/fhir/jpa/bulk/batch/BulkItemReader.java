@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
-import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -17,9 +16,16 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 public class BulkItemReader extends AbstractItemCountingItemStreamItemReader<ResourcePersistentId> {
@@ -42,53 +48,23 @@ public class BulkItemReader extends AbstractItemCountingItemStreamItemReader<Res
 
 	private String myJobUUID;
 
-	private IResultIterator myResultIterator;
+	@Value("#{stepExecutionContext['resourceType']}")
+	private String myResourceType;
 
 
-	@Override
+	Iterator<ResourcePersistentId> myPidIterator;
+
+
 	protected ResourcePersistentId doRead() throws Exception {
-		if (myJobEntity == null) {
-			loadData();
+		if (myPidIterator == null) {
+			loadResourcePids();
 		}
-		if (myResultIterator.hasNext()) {
-			return myResultIterator.next();
+		if (myPidIterator.hasNext()) {
+			return myPidIterator.next();
 		} else {
 			return null;
 		}
 	}
-
-
-	private void loadData() {
-		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(myJobUUID);
-		if (!jobOpt.isPresent()) {
-			ourLog.info("Job appears to be deleted");
-			return;
-		}
-		myJobEntity = jobOpt.get();
-		ourLog.info("Bulk export starting generation for batch export job: {}", myJobEntity);
-
-		for (BulkExportCollectionEntity nextCollection : myJobEntity.getCollections()) {
-			String nextType = nextCollection.getResourceType();
-			IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextType);
-
-			ourLog.info("Bulk export assembling export of type {} for job {}", nextType, myJobUUID);
-
-			Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(nextType).getImplementingClass();
-			ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, nextType, nextTypeClass);
-
-			SearchParameterMap map = new SearchParameterMap();
-			map.setLoadSynchronous(true);
-			if (myJobEntity.getSince() != null) {
-				map.setLastUpdated(new DateRangeParam(myJobEntity.getSince(), null));
-			}
-
-			myResultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
-		}
-
-
-		ourLog.info("Bulk export completed job in");
-	}
-
 
 	@Override
 	protected void doOpen() throws Exception {
@@ -100,7 +76,39 @@ public class BulkItemReader extends AbstractItemCountingItemStreamItemReader<Res
 
 	}
 
+
+	private void loadResourcePids() {
+		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(myJobUUID);
+		if (!jobOpt.isPresent()) {
+			ourLog.info("Job appears to be deleted");
+			return;
+		}
+		myJobEntity = jobOpt.get();
+		ourLog.info("Bulk export starting generation for batch export job: {}", myJobEntity);
+
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(myResourceType);
+
+		ourLog.info("Bulk export assembling export of type {} for job {}", myResourceType, myJobUUID);
+
+		Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
+		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, nextTypeClass);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		if (myJobEntity.getSince() != null) {
+			map.setLastUpdated(new DateRangeParam(myJobEntity.getSince(), null));
+		}
+
+		IResultIterator myResultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
+		List<ResourcePersistentId> myReadPids = new ArrayList<>();
+		while (myResultIterator.hasNext()) {
+			myReadPids.add(myResultIterator.next());
+		}
+		myPidIterator = myReadPids.iterator();
+	}
+
 	public void setJobUUID(String theUUID) {
 		this.myJobUUID = theUUID;
 	}
+
 }

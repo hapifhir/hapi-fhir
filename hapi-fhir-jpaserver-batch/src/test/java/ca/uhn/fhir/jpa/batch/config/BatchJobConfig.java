@@ -7,6 +7,10 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -35,13 +39,35 @@ public class BatchJobConfig implements IPointcutLatch {
 
 	@Bean
 	public Step testStep() {
-		return myStepBuilderFactory.get("testStep").tasklet((theStepContribution, theChunkContext) -> {
-			System.out.println("woo!");
-			myPointcutLatch.call(theChunkContext);
-			return RepeatStatus.FINISHED;
-		}).build();
+		//return myStepBuilderFactory.get("testStep").tasklet(sampleTasklet()).build();
+		return myStepBuilderFactory.get("testStep")
+			.<String, String>chunk(100)
+			.reader(reader())
+			.writer(simpleWriter())
+			.build();
 	}
 
+	@Bean
+	@StepScope
+	public Tasklet sampleTasklet() {
+		return new SampleTasklet();
+	}
+
+	@Bean
+	@StepScope
+	public ItemReader<String> reader() {
+		return new SampleItemReader();
+	}
+
+	@Bean
+	public ItemWriter<String> simpleWriter() {
+		return new ItemWriter<String>() {
+			@Override
+			public void write(List<? extends String> theList) throws Exception {
+				theList.forEach(System.out::println);
+			}
+		};
+	}
 	@Override
 	public void clear() {
 		myPointcutLatch.clear();
