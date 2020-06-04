@@ -14,7 +14,7 @@ import java.util.function.Function;
 /**
  * This class acts as a central spot for all of the many Caffeine caches we use in HAPI FHIR.
  * <p>
- * The API is super simplistic, and caches are all 1-minute, max 10000 entries for starters. We could definitelY add nuance to this,
+ * The API is super simplistic, and caches are all 1-minute, max 10000 entries for starters. We could definitely add nuance to this,
  * which will be much easier now that this is being centralized.. Some logging/monitoring would be good too.
  */
 public class MemoryCacheService {
