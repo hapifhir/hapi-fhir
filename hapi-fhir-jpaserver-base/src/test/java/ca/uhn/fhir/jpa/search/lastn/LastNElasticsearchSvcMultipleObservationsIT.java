@@ -55,14 +55,6 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		}
 	}
 
-	@After
-	public void after() throws IOException {
-		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
-	}
-
 	@Test
 	public void testLastNAllPatientsQuery() {
 
