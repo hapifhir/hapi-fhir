@@ -482,8 +482,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 	@After
 	public void afterClearTerminologyCaches() {
 		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
-		baseHapiTerminologySvc.clearTranslationCache();
-		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		baseHapiTerminologySvc.clearCaches();
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationCache();
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);

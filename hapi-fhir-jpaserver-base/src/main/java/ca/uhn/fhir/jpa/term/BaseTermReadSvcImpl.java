@@ -289,16 +289,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
-	public void clearTranslationCache() {
+	public void clearCaches() {
 		myTranslationCache.invalidateAll();
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting()
-	public void clearTranslationWithReverseCache() {
 		myTranslationWithReverseCache.invalidateAll();
+		myCodeSystemCurrentVersionCache.invalidateAll();
 	}
 
 	public void deleteConceptMap(ResourceTable theResourceTable) {
