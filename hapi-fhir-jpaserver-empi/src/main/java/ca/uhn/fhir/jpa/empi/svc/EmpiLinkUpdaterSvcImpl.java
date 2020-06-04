@@ -83,7 +83,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePerson, theEmpiContext);
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
 		if (theMatchResult == EmpiMatchResultEnum.NO_MATCH) {
-			// Need to find a new Person for this target to link to
+			// Need to find a new Person to link this target to
 			myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theTarget, theEmpiContext);
 		}
 		return thePerson;
