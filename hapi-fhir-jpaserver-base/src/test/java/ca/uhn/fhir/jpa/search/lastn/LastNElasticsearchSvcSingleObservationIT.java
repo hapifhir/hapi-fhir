@@ -294,8 +294,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		codeableConceptField.addCoding(new Coding(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE, CODEFIRSTCODINGDISPLAY));
 		indexedObservation.setCode(codeableConceptField);
 
-		String observationDocument = ourMapperNonPrettyPrint.writeValueAsString(indexedObservation);
-		assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX, RESOURCEPID, observationDocument, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE));
+		assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(RESOURCEPID, indexedObservation));
 
 		CodeJson observationCode = new CodeJson(codeableConceptField, OBSERVATIONSINGLECODEID);
 		String codeDocument = ourMapperNonPrettyPrint.writeValueAsString(observationCode);

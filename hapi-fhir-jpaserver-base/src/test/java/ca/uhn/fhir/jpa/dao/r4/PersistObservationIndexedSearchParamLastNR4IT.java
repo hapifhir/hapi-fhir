@@ -87,22 +87,29 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Test
 	public void testIndexObservationSingle() {
 		indexSingleObservation();
-		List<ObservationIndexedSearchParamLastNEntity> persistedObservationEntities = myResourceIndexedObservationLastNDao.findAll();
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setLastNMax(10);
+		List<ObservationJson> persistedObservationEntities = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
 		assertEquals(1, persistedObservationEntities.size());
-		ObservationIndexedSearchParamLastNEntity persistedObservationEntity = persistedObservationEntities.get(0);
+		ObservationJson persistedObservationEntity = persistedObservationEntities.get(0);
 		assertEquals(SINGLE_SUBJECT_ID, persistedObservationEntity.getSubject());
 		assertEquals(SINGLE_OBSERVATION_PID, persistedObservationEntity.getIdentifier());
 		assertEquals(SINGLE_EFFECTIVEDTM, persistedObservationEntity.getEffectiveDtm());
 
-		String observationCodeNormalizedId = persistedObservationEntity.getCodeNormalizedId();
+		String observationCodeNormalizedId = persistedObservationEntity.getCode_concept_id();
 
-		List<ObservationIndexedCodeCodeableConceptEntity> persistedObservationCodes = myCodeableConceptIndexedSearchParamNormalizedDao.findAll();
-		assertEquals(1, persistedObservationCodes.size());
-		ObservationIndexedCodeCodeableConceptEntity persistedObservationCode = persistedObservationCodes.get(0);
+		// Check that we can retrieve code by hash value.
+		String codeSystemHash = persistedObservationEntity.getCode_coding_code_system_hash();
+		CodeJson persistedObservationCode = elasticsearchSvc.getObservationCodeDocument(codeSystemHash, null);
+		assertNotNull(persistedObservationCode);
 		assertEquals(observationCodeNormalizedId, persistedObservationCode.getCodeableConceptId());
 		assertEquals(SINGLE_OBSERVATION_CODE_TEXT, persistedObservationCode.getCodeableConceptText());
 
-		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		// Also confirm that we can retrieve code by text value.
+		persistedObservationCode = elasticsearchSvc.getObservationCodeDocument(null, SINGLE_OBSERVATION_CODE_TEXT);
+		assertNotNull(persistedObservationCode);
+
+		searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SINGLE_SUBJECT_ID);
 		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
 		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
@@ -174,11 +181,13 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Test
 	public void testIndexObservationMultiple() {
 		indexMultipleObservations();
-		assertEquals(100, myResourceIndexedObservationLastNDao.count());
-		assertEquals(2, myCodeableConceptIndexedSearchParamNormalizedDao.count());
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setLastNMax(100);
+		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		assertEquals(100, observationDocuments.size());
 
 		// Check that all observations were indexed.
-		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);
 
 		searchParameterMap.setLastNMax(10);
@@ -271,12 +280,15 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Test
 	public void testDeleteObservation() {
 		indexMultipleObservations();
-		assertEquals(100, myResourceIndexedObservationLastNDao.count());
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setLastNMax(100);
+		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		assertEquals(100, observationDocuments.size());
 		// Check that fifth observation for fifth patient has been indexed.
-		ObservationIndexedSearchParamLastNEntity observation = myResourceIndexedObservationLastNDao.findByIdentifier("55");
+		ObservationJson observation = elasticsearchSvc.getObservationDocument("55");
 		assertNotNull(observation);
 
-		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);
 		searchParameterMap.setLastNMax(10);
 		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
@@ -292,8 +304,11 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		testObservationPersist.deleteObservationIndex(entity);
 
 		// Confirm that observation was deleted.
-		assertEquals(99, myResourceIndexedObservationLastNDao.count());
-		observation = myResourceIndexedObservationLastNDao.findByIdentifier("55");
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setLastNMax(100);
+		observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		assertEquals(99, observationDocuments.size());
+		observation = elasticsearchSvc.getObservationDocument("55");
 		assertNull(observation);
 
 		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
@@ -412,6 +427,5 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		assertEquals(38, observationIdsOnly.size());
 
 	}
-
 
 }
