@@ -53,31 +53,15 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 	IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
 	EmpiResourceDaoSvc myEmpiResourceDaoSvc;
+	@Autowired
+	EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 
 	@Transactional
 	@Override
 	public IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiTransactionContext theEmpiContext) {
-		if (theMatchResult != EmpiMatchResultEnum.NO_MATCH &&
-		theMatchResult != EmpiMatchResultEnum.MATCH) {
-			throw new InvalidRequestException("Match Result may only be set to " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
-		}
-
-		String personType = myFhirContext.getResourceType(thePerson);
-		if (!"Person".equals(personType)) {
-			throw new InvalidRequestException("First argument to updateLink must be a Person.  Was " + personType);
-		}
 		String targetType = myFhirContext.getResourceType(theTarget);
-		if (!EmpiUtil.supportedTargetType(targetType)) {
-			throw new InvalidRequestException("Second argument to updateLink must be a Patient or Practitioner.  Was " + targetType);
-		}
 
-		if (!EmpiUtil.isEmpiManaged(thePerson)) {
-			throw new InvalidRequestException("Only EMPI Managed Person resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi");
-		}
-
-		if (!EmpiUtil.isEmpiAccessible(theTarget)) {
-			throw new InvalidRequestException("The target is marked with the " + EmpiConstants.CODE_NO_EMPI_MANAGED + " tag which means it may not be EMPI linked.");
-		}
+		validateUpdateLinkRequest(thePerson, theTarget, theMatchResult, targetType);
 
 		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
@@ -98,6 +82,33 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		myEmpiLinkDaoSvc.save(empiLink);
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePerson, theEmpiContext);
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
+		if (theMatchResult == EmpiMatchResultEnum.NO_MATCH) {
+			// Need to find a new Person to link this target to
+			myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theTarget, theEmpiContext);
+		}
 		return thePerson;
+	}
+
+	private void validateUpdateLinkRequest(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, String theTargetType) {
+		String personType = myFhirContext.getResourceType(thePerson);
+		if (theMatchResult != EmpiMatchResultEnum.NO_MATCH &&
+		theMatchResult != EmpiMatchResultEnum.MATCH) {
+			throw new InvalidRequestException("Match Result may only be set to " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
+		}
+
+		if (!"Person".equals(personType)) {
+			throw new InvalidRequestException("First argument to updateLink must be a Person.  Was " + personType);
+		}
+		if (!EmpiUtil.supportedTargetType(theTargetType)) {
+			throw new InvalidRequestException("Second argument to updateLink must be a Patient or Practitioner.  Was " + theTargetType);
+		}
+
+		if (!EmpiUtil.isEmpiManaged(thePerson)) {
+			throw new InvalidRequestException("Only EMPI Managed Person resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi");
+		}
+
+		if (!EmpiUtil.isEmpiAccessible(theTarget)) {
+			throw new InvalidRequestException("The target is marked with the " + EmpiConstants.CODE_NO_EMPI_MANAGED + " tag which means it may not be EMPI linked.");
+		}
 	}
 }
