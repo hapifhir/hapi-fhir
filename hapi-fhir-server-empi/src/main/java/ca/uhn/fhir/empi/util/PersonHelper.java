@@ -222,16 +222,18 @@ public class PersonHelper {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person personR4 = new Person();
+				personR4.setActive(true);
 				eidsToApply.forEach(eid -> personR4.addIdentifier(eid.toR4()));
 				personR4.getMeta().addTag((Coding) buildEmpiManagedTag());
 				copyEmpiTargetDataIntoPerson(theSourceResource, personR4, true);
 				return personR4;
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personDSTU3 = new org.hl7.fhir.dstu3.model.Person();
-				eidsToApply.forEach(eid -> personDSTU3.addIdentifier(eid.toDSTU3()));
-				personDSTU3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding) buildEmpiManagedTag());
-				copyEmpiTargetDataIntoPerson(theSourceResource, personDSTU3, true);
-				return personDSTU3;
+				org.hl7.fhir.dstu3.model.Person personDstu3 = new org.hl7.fhir.dstu3.model.Person();
+				personDstu3.setActive(true);
+				eidsToApply.forEach(eid -> personDstu3.addIdentifier(eid.toDSTU3()));
+				personDstu3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding) buildEmpiManagedTag());
+				copyEmpiTargetDataIntoPerson(theSourceResource, personDstu3, true);
+				return personDstu3;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
@@ -466,22 +468,22 @@ public class PersonHelper {
 		}
 	}
 
-	public void mergePersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
+	public void mergePersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				mergeR4PersonFields(thePersonToDelete, thePersonToKeep);
+				mergeR4PersonFields(theFromPerson, theToPerson);
 				break;
 			case DSTU3:
-				mergeDstu3PersonFields(thePersonToDelete, thePersonToKeep);
+				mergeDstu3PersonFields(theFromPerson, theToPerson);
 				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 
-	private void mergeR4PersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
-		Person fromPerson = (Person) thePersonToDelete;
-		Person toPerson = (Person) thePersonToKeep;
+	private void mergeR4PersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
+		Person fromPerson = (Person) theFromPerson;
+		Person toPerson = (Person) theToPerson;
 
 		mergeElementList(fromPerson, toPerson, HumanName.class, Person::getName, HumanName::equalsDeep);
 		mergeElementList(fromPerson, toPerson, Identifier.class, Person::getIdentifier, Identifier::equalsDeep);
@@ -511,9 +513,9 @@ public class PersonHelper {
 		toList.addAll(itemsToAdd);
 	}
 
-	private void mergeDstu3PersonFields(IBaseResource thePersonToDelete, IBaseResource thePersonToKeep) {
-		org.hl7.fhir.dstu3.model.Person fromPerson = (org.hl7.fhir.dstu3.model.Person) thePersonToDelete;
-		org.hl7.fhir.dstu3.model.Person toPerson = (org.hl7.fhir.dstu3.model.Person) thePersonToKeep;
+	private void mergeDstu3PersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
+		org.hl7.fhir.dstu3.model.Person fromPerson = (org.hl7.fhir.dstu3.model.Person) theFromPerson;
+		org.hl7.fhir.dstu3.model.Person toPerson = (org.hl7.fhir.dstu3.model.Person) theToPerson;
 
 		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.HumanName.class, org.hl7.fhir.dstu3.model.Person::getName, org.hl7.fhir.dstu3.model.HumanName::equalsDeep);
 		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.Identifier.class, org.hl7.fhir.dstu3.model.Person::getIdentifier, org.hl7.fhir.dstu3.model.Identifier::equalsDeep);
@@ -625,6 +627,34 @@ public class PersonHelper {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
 		if (!eidFromResource.isEmpty()) {
 			updatePersonExternalEidFromEmpiTarget(thePerson, theResource, theEmpiTransactionContext);
+		}
+	}
+
+	public void deactivatePerson(IAnyResource thePerson) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person personR4 = (Person) thePerson;
+				personR4.setActive(false);
+				break;
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
+				personStu3.setActive(false);
+				break;
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		}
+	}
+
+	public boolean isDeactivated(IBaseResource thePerson) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				Person personR4 = (Person) thePerson;
+				return !personR4.getActive();
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
+				return !personStu3.getActive();
+			default:
+				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 }

@@ -51,6 +51,8 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
+	@Autowired
+	EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 
 	@Transactional
 	@Override
@@ -95,6 +97,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.save(empiLink);
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePerson, theEmpiContext);
+		myEmpiResourceDaoSvc.updatePerson(thePerson);
 		return thePerson;
 	}
 }
