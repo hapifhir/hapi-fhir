@@ -54,7 +54,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 	public void testQueryLinkOneMatch() {
 
 		Parameters result = myEmpiProviderR4.queryLinks(myPersonId, myPatientId, null, null, myRequestDetails);
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
@@ -91,6 +91,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 	public void testNotDuplicate() {
 		{
 			Parameters result = myEmpiProviderR4.notDuplicate(myPerson1Id, myPerson2Id, myRequestDetails);
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 			assertEquals("success", result.getParameterFirstRep().getName());
 			assertTrue(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
 		}
