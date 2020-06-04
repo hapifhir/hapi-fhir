@@ -39,6 +39,7 @@ import org.shadehapi.elasticsearch.action.DocWriteResponse;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.shadehapi.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.shadehapi.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.shadehapi.elasticsearch.action.index.IndexRequest;
 import org.shadehapi.elasticsearch.action.index.IndexResponse;
 import org.shadehapi.elasticsearch.action.search.SearchRequest;
@@ -232,7 +233,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
 		CompositeValuesSourceBuilder<?> subjectValuesBuilder = new TermsValuesSourceBuilder("subject").field("subject");
-		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList();
+		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList<>();
 		compositeAggSubjectSources.add(subjectValuesBuilder);
 		CompositeAggregationBuilder compositeAggregationSubjectBuilder = new CompositeAggregationBuilder(GROUP_BY_SUBJECT, compositeAggSubjectSources);
 		compositeAggregationSubjectBuilder.subAggregation(createObservationCodeAggregationBuilder(theMaxNumberObservationsPerCode, theTopHitsInclude));
@@ -554,12 +555,12 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@VisibleForTesting
-	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
+	public List<ObservationJson> executeLastNWithAllFieldsForTest(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
 		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, null, t -> t, 100);
 	}
 
 	@VisibleForTesting
-	List<CodeJson> queryAllIndexedObservationCodes() throws IOException {
+	List<CodeJson> queryAllIndexedObservationCodesForTest() throws IOException {
 		SearchRequest codeSearchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
@@ -580,8 +581,104 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return codes;
 	}
 
-	@VisibleForTesting
-	boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
+	@Override
+	public ObservationJson getObservationDocument(String theDocumentID) {
+		if (theDocumentID == null) {
+			throw new InvalidRequestException("Require non-null document ID for observation document query");
+		}
+		SearchRequest theSearchRequest = buildSingleObservationSearchRequest(theDocumentID);
+		ObservationJson observationDocumentJson = null;
+		try {
+			SearchResponse observationDocumentResponse = executeSearchRequest(theSearchRequest);
+			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
+			if (observationDocumentHits.length > 0) {
+				// There should be no more than one hit for the identifier
+				String observationDocument = observationDocumentHits[0].getSourceAsString();
+				observationDocumentJson = objectMapper.readValue(observationDocument, ObservationJson.class);
+			}
+
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to execute observation document query for ID " + theDocumentID, theE);
+		}
+
+		return observationDocumentJson;
+	}
+
+	private SearchRequest buildSingleObservationSearchRequest(String theObservationIdentifier) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		boolQueryBuilder.must(QueryBuilders.termQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theObservationIdentifier));
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(1);
+
+		searchRequest.source(searchSourceBuilder);
+
+		return searchRequest;
+	}
+
+	@Override
+	public CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText) {
+		if(theCodeSystemHash == null && theText == null) {
+			throw new InvalidRequestException("Require a non-null code system hash value or display value for observation code document query");
+		}
+		SearchRequest theSearchRequest = buildSingleObservationCodeSearchRequest(theCodeSystemHash, theText);
+		CodeJson observationCodeDocumentJson = null;
+		try {
+			SearchResponse observationCodeDocumentResponse = executeSearchRequest(theSearchRequest);
+			SearchHit[] observationCodeDocumentHits = observationCodeDocumentResponse.getHits().getHits();
+			if (observationCodeDocumentHits.length > 0) {
+				// There should be no more than one hit for the code lookup.
+				String observationCodeDocument = observationCodeDocumentHits[0].getSourceAsString();
+				observationCodeDocumentJson = objectMapper.readValue(observationCodeDocument, CodeJson.class);
+			}
+
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to execute observation code document query hash code or display", theE);
+		}
+
+		return observationCodeDocumentJson;
+	}
+
+	private SearchRequest buildSingleObservationCodeSearchRequest(String theCodeSystemHash, String theText) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		if (theCodeSystemHash != null) {
+			boolQueryBuilder.must(QueryBuilders.termQuery("codingcode_system_hash", theCodeSystemHash));
+		} else {
+			boolQueryBuilder.must(QueryBuilders.matchPhraseQuery("text", theText));
+		}
+
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(1);
+
+		searchRequest.source(searchSourceBuilder);
+
+		return searchRequest;
+	}
+
+	@Override
+	public Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument){
+		try {
+			String documentToIndex = objectMapper.writeValueAsString(theObservationDocument);
+			return performIndex(OBSERVATION_INDEX, theDocumentId, documentToIndex, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to persist Observation document " + theDocumentId);
+		}
+	}
+
+	@Override
+	public Boolean createOrUpdateObservationCodeIndex(String theCodeableConceptID, CodeJson theObservationCodeDocument) {
+		try {
+			String documentToIndex = objectMapper.writeValueAsString(theObservationCodeDocument);
+			return performIndex(OBSERVATION_CODE_INDEX, theCodeableConceptID, documentToIndex, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to persist Observation Code document " + theCodeableConceptID);
+		}
+	}
+
+	private boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
 		IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
 			RequestOptions.DEFAULT);
 
@@ -597,11 +694,27 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return request;
 	}
 
+	@Override
+	public void deleteObservationDocument(String theDocumentId) {
+		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(OBSERVATION_INDEX);
+		deleteByQueryRequest.setQuery(QueryBuilders.termQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theDocumentId));
+		try {
+			myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to delete Observation " + theDocumentId);
+		}
+	}
+
 	@VisibleForTesting
-	void deleteAllDocuments(String theIndexName) throws IOException {
+	public void deleteAllDocumentsForTest(String theIndexName) throws IOException {
 		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(theIndexName);
 		deleteByQueryRequest.setQuery(QueryBuilders.matchAllQuery());
 		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+	}
+
+	@VisibleForTesting
+	public void refreshIndex(String theIndexName) throws IOException {
+		myRestHighLevelClient.indices().refresh(new RefreshRequest(theIndexName), RequestOptions.DEFAULT);
 	}
 
 }

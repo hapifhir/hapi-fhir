@@ -24,8 +24,6 @@ import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -88,18 +86,24 @@ public class ObservationJson {
 		mySubject = theSubject;
 	}
 
-	public void setCategories(List<CodeableConcept> theCategories) {
-		for (CodeableConcept theConcept : theCategories) {
-			myCategory_concept_text.add(theConcept.getText());
+	public void setCategories(List<CodeJson> theCategories) {
+		for (CodeJson theConcept : theCategories) {
+			myCategory_concept_text.add(theConcept.getCodeableConceptText());
 			List<String> coding_code_system_hashes = new ArrayList<>();
 			List<String> coding_codes = new ArrayList<>();
 			List<String> coding_displays = new ArrayList<>();
 			List<String> coding_systems = new ArrayList<>();
-			for (Coding theCategoryCoding : theConcept.getCoding()) {
-				coding_code_system_hashes.add(String.valueOf(CodeSystemHash.hashCodeSystem(theCategoryCoding.getSystem(), theCategoryCoding.getCode())));
-				coding_codes.add(theCategoryCoding.getCode());
-				coding_displays.add(theCategoryCoding.getDisplay());
-				coding_systems.add(theCategoryCoding.getSystem());
+			for (String theCategoryCoding_code : theConcept.getCoding_code()) {
+				coding_codes.add(theCategoryCoding_code);
+			}
+			for (String theCategoryCoding_system : theConcept.getCoding_system()) {
+				coding_systems.add(theCategoryCoding_system);
+			}
+			for (String theCategoryCoding_code_system_hash : theConcept.getCoding_code_system_hash()) {
+				coding_code_system_hashes.add(theCategoryCoding_code_system_hash);
+			}
+			for (String theCategoryCoding_display : theConcept.getCoding_display()) {
+				coding_displays.add(theCategoryCoding_display);
 			}
 			myCategory_coding_code_system_hash.add(coding_code_system_hashes);
 			myCategory_coding_code.add(coding_codes);
@@ -128,14 +132,13 @@ public class ObservationJson {
 		return myCategory_coding_system;
 	}
 
-	public void setCode(CodeableConcept theCode) {
-		myCode_concept_text = theCode.getText();
-		for (Coding theCodeCoding : theCode.getCoding()) {
-			myCode_coding_code_system_hash = String.valueOf(CodeSystemHash.hashCodeSystem(theCodeCoding.getSystem(), theCodeCoding.getCode()));
-			myCode_coding_code = theCodeCoding.getCode();
-			myCode_coding_display = theCodeCoding.getDisplay();
-			myCode_coding_system = theCodeCoding.getSystem();
-		}
+	public void setCode(CodeJson theCode) {
+		myCode_concept_text = theCode.getCodeableConceptText();
+		// Currently can only support one Coding for Observation Code
+		myCode_coding_code_system_hash = theCode.getCoding_code_system_hash().get(0);
+		myCode_coding_code = theCode.getCoding_code().get(0);
+		myCode_coding_display = theCode.getCoding_display().get(0);
+		myCode_coding_system = theCode.getCoding_system().get(0);
 
 	}
 
