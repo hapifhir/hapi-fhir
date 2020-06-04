@@ -26,7 +26,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class HapiFlywayMigrateDatabaseCommandTest {
 
@@ -37,7 +39,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		System.setProperty("test", "true");
 	}
 
-	// TODO INTERMITTENT This just failed for me on CI with a BadSqlGrammarException
 	@Test
 	public void testMigrateFrom340() throws IOException, SQLException {
 

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1850
+title: When serializing a resource, the JSON Parser will now ignore any extensions that are present on an
+   element if they do not have a URL or any children populated.

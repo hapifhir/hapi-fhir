@@ -39,7 +39,7 @@ public class AbstractJaxRsConformanceProviderR4Test {
 		headers = new ResteasyHttpHeaders(queryParameters);
 
 
-		providers = new ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider>();
+		providers = new ConcurrentHashMap<>();
 		provider = createConformanceProvider(providers);
 	}
 

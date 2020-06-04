@@ -15,9 +15,13 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleTester;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -33,18 +37,22 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -181,8 +189,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 								return patient
 									.getIdentifier()
 									.stream()
-									.filter(t-> "http://uhn.ca/mrns".equals(t.getSystem()))
-									.anyMatch(t-> "100".equals(t.getValue()));
+									.filter(t -> "http://uhn.ca/mrns".equals(t.getSystem()))
+									.anyMatch(t -> "100".equals(t.getValue()));
 							}
 							return false;
 						}
@@ -729,6 +737,123 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}
 
 	}
+
+
+	@Test
+	public void testDiffOperation_AllowedByType_Instance() {
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("A"), withActiveFalse());
+		createObservation(withId("B"), withStatus("final"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onAnyInstance().andAllowAllResponses().andThen()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onServer().andAllowAllResponses().andThen()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Parameters diff;
+
+		diff = ourClient.operation().onInstance("Patient/A").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+		assertEquals(1, diff.getParameter().size());
+
+		diff = ourClient.operation().onInstanceVersion(new IdType("Patient/A/_history/2")).named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+		assertEquals(1, diff.getParameter().size());
+
+		try {
+			ourClient.operation().onInstance("Observation/B").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+
+	}
+
+	@Test
+	public void testDiffOperation_AllowedByType_Server() {
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveFalse());
+		createObservation(withId("C"), withStatus("final"));
+		createObservation(withId("D"), withStatus("amended"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onAnyInstance().andAllowAllResponses().andThen()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onServer().andAllowAllResponses().andThen()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Parameters diff;
+
+		diff = ourClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.DIFF_OPERATION_NAME)
+			.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Patient/A"))
+			.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Patient/B"))
+			.execute();
+		assertEquals(2, diff.getParameter().size());
+
+		try {
+			ourClient
+				.operation()
+				.onServer()
+				.named(ProviderConstants.DIFF_OPERATION_NAME)
+				.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Observation/C"))
+				.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Observation/D"))
+				.execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+
+	}
+
+
+	@Test
+	public void testGraphQL_AllowedByType_Instance() throws IOException {
+		createPatient(withId("A"), withFamily("MY_FAMILY"));
+		createPatient(withId("B"), withFamily("MY_FAMILY"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().graphQL().any().andThen()
+					.allow().read().instance("Patient/A").andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		String query = "{name{family,given}}";
+
+		httpGet = new HttpGet(ourServerBase + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, containsString("MY_FAMILY"));
+		}
+
+		httpGet = new HttpGet(ourServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(403, response.getStatusLine().getStatusCode());
+		}
+
+	}
+
 
 	/**
 	 * See #762

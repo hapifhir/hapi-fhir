@@ -41,7 +41,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class QuestionnaireResponseValidatorR4Test {
-	public static final String ID_ICC_QUESTIONNAIRE_SETUP = "Questionnaire/profile";
+	public static final String ID_ICC_QUESTIONNAIRE_SETUP = "http://example.com/Questionnaire/profile";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorR4Test.class);
 	private static final String CODE_ICC_SCHOOLTYPE_PT = "PT";
 	private static final String ID_VS_SCHOOLTYPE = "ValueSet/schooltype";
@@ -318,7 +318,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response found for required item with id = 'link0'"));
+		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
 	}
 
 	@Test
@@ -640,7 +640,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay(""));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response found for required item with id = 'link0'"));
+		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
 
 	}
 
@@ -734,6 +734,14 @@ public class QuestionnaireResponseValidatorR4Test {
 	@Test
 	public void testValidateQuestionnaireResponseWithValueSetChoiceAnswer() {
 		/*
+		 * Create CodeSystem
+		 */
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setUrl(SYSTEMURI_ICC_SCHOOLTYPE);
+		codeSystem.addConcept().setCode(CODE_ICC_SCHOOLTYPE_PT);
+
+		/*
 		 * Create valueset
 		 */
 		ValueSet iccSchoolTypeVs = new ValueSet();
@@ -785,6 +793,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire()))).thenReturn(questionnaire);
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE))).thenReturn(iccSchoolTypeVs);
 		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any(ValueSet.class))).thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
+		when(myValSupport.fetchCodeSystem(eq(SYSTEMURI_ICC_SCHOOLTYPE))).thenReturn(codeSystem);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());

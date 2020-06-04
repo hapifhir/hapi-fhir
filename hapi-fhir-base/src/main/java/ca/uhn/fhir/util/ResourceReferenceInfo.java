@@ -45,7 +45,7 @@ public class ResourceReferenceInfo {
 
 	public ResourceReferenceInfo(FhirContext theContext, IBaseResource theOwningResource, List<String> thePathToElement, IBaseReference theElement) {
 		myContext = theContext;
-		myOwningResource = theContext.getResourceDefinition(theOwningResource).getName();
+		myOwningResource = theContext.getResourceType(theOwningResource);
 
 		myResource = theElement;
 		if (thePathToElement != null && !thePathToElement.isEmpty()) {

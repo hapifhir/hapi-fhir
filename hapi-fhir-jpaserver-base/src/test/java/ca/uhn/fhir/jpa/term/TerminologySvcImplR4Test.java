@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
@@ -1776,10 +1777,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	public void testValidateCode() {
 		createCodeSystem();
 
-		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myValidationSupport, new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
+		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
 		assertEquals(true, validation.isOk());
 
-		validation = myTermSvc.validateCode(myValidationSupport, new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);
+		validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);
 		assertEquals(false, validation.isOk());
 	}
 

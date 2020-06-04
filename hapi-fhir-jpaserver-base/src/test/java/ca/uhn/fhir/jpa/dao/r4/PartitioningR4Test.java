@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateAndListParam;
@@ -47,6 +48,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -67,10 +69,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -85,11 +89,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestDataBuilder {
+public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningR4Test.class);
 
-	private MyInterceptor myPartitionInterceptor;
+	private MyReadWriteInterceptor myPartitionInterceptor;
 	private LocalDate myPartitionDate;
 	private LocalDate myPartitionDate2;
 	private int myPartitionId;
@@ -106,7 +110,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
 
-		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyInterceptor);
+		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
 		myInterceptor = null;
 
 		if (myHaveDroppedForcedIdUniqueConstraint) {
@@ -136,7 +140,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		myPartitionId = 1;
 		myPartitionId2 = 2;
 
-		myPartitionInterceptor = new MyInterceptor();
+		myPartitionInterceptor = new MyReadWriteInterceptor();
 		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
 
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"));
@@ -166,6 +170,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 	@Test
 	public void testCreate_CrossPartitionReference_ByPid_Allowed() {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 
 		// Create patient in partition 1
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -177,7 +182,17 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		addCreatePartition(myPartitionId2, myPartitionDate2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
+
+		myCaptureQueriesListener.clear();
 		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		assertEquals(2, selectQueries.size());
+		// Look up the partition
+		assertThat(selectQueries.get(0).getSql(true,false).toLowerCase(), containsString(" from hfj_partition "));
+		// Look up the referenced subject/patient
+		assertThat(selectQueries.get(1).getSql(true,false).toLowerCase(), containsString(" from hfj_resource "));
+		assertEquals(0, StringUtils.countMatches(selectQueries.get(1).getSql(true,false).toLowerCase(), "partition"));
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
@@ -627,6 +642,49 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 	}
 
 
+
+	@Test
+	public void testCreateInTransaction_ServerId_WithPartition() {
+		createUniqueCompositeSp();
+		createRequestId();
+
+		addCreatePartition(myPartitionId, myPartitionDate);
+		addCreatePartition(myPartitionId, myPartitionDate);
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+
+		Organization org = new Organization();
+		org.setId(IdType.newRandomUuid());
+		org.setName("org");
+		input.addEntry()
+			.setFullUrl(org.getId())
+			.setResource(org)
+			.getRequest().setUrl("Organization").setMethod(Bundle.HTTPVerb.POST);
+
+		Patient p = new Patient();
+		p.getMeta().addTag("http://system", "code", "diisplay");
+		p.addName().setFamily("FAM");
+		p.addIdentifier().setSystem("system").setValue("value");
+		p.setBirthDate(new Date());
+		p.getManagingOrganization().setReference(org.getId());
+		input.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest().setUrl("Patient").setMethod(Bundle.HTTPVerb.POST);
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Long patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPartAsLong();
+
+		runInTransaction(() -> {
+			// HFJ_RESOURCE
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
+			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
+		});
+
+	}
+
 	@Test
 	public void testUpdateResourceWithPartition() {
 		createRequestId();
@@ -689,9 +747,63 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 	}
 
 	@Test
+	public void testUpdateConditionalInPartition() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		createRequestId();
+
+		// Create a resource
+		addCreatePartition(myPartitionId, myPartitionDate);
+		addReadPartition(myPartitionId);
+		Patient p = new Patient();
+		p.setActive(false);
+		p.addIdentifier().setValue("12345");
+		Long patientId = myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong();
+		runInTransaction(() -> {
+			// HFJ_RESOURCE
+			assertEquals(1, myResourceTableDao.count());
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
+			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
+
+			// HFJ_SPIDX_TOKEN
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			assertEquals(3, myResourceIndexedSearchParamTokenDao.countForResourceId(patientId));
+		});
+
+		// Update that resource
+		addReadPartition(myPartitionId);
+		p = new Patient();
+		p.setActive(true);
+		p.addIdentifier().setValue("12345");
+		Long patientId2 = myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong();
+
+		assertEquals(patientId, patientId2);
+
+		runInTransaction(() -> {
+			// HFJ_RESOURCE
+			assertEquals(1, myResourceTableDao.count());
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
+			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
+
+			// HFJ_SPIDX_TOKEN
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			assertEquals(3, myResourceIndexedSearchParamTokenDao.countForResourceId(patientId));
+
+			// HFJ_RES_VER
+			int version = 2;
+			ResourceHistoryTable resVer = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, version);
+			assertEquals(myPartitionId, resVer.getPartitionId().getPartitionId().intValue());
+			assertEquals(myPartitionDate, resVer.getPartitionId().getPartitionDate());
+
+		});
+
+	}
+
+	@Test
 	public void testRead_PidId_AllPartitions() {
 		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2) , withActiveTrue());
+		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
 
 		{
 			addReadAllPartitions();
@@ -763,6 +875,44 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 			}
 		}
 	}
+
+	@Test
+	public void testRead_PidId_AllPartitionsBecauseNoReadInterceptor() {
+		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+
+		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
+		MyWriteInterceptor writeInterceptor = new MyWriteInterceptor();
+		myInterceptorRegistry.registerInterceptor(writeInterceptor);
+		try {
+			{
+				myCaptureQueriesListener.clear();
+				IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
+				assertEquals(patientId1, gotId1);
+
+				String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+				ourLog.info("Search SQL:\n{}", searchSql);
+
+				// Only the read columns should be used, no criteria use partition
+				assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
+				assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			}
+			{
+				IdType gotId2 = myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
+				assertEquals(patientId2, gotId2);
+
+				String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+				ourLog.info("Search SQL:\n{}", searchSql);
+
+				// Only the read columns should be used, no criteria use partition
+				assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
+				assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			}
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(writeInterceptor);
+		}
+	}
+
 
 	@Test
 	public void testRead_PidId_DefaultPartition() {
@@ -1261,7 +1411,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 
 		// Date param
 
-		ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2206,7 +2356,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		// Resolve forced IDs
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
 		assertEquals(sql, 1, countMatches(sql, "forcedid0_.RESOURCE_PID in"));
-		assertEquals(sql,0, countMatches(sql, "PARTITION_ID is null"));
+		assertEquals(sql, 0, countMatches(sql, "PARTITION_ID is null"));
 	}
 
 	@Test
@@ -2304,36 +2454,39 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 		};
 	}
 
-	@Override
-	public IIdType doCreateResource(IBaseResource theResource) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
-	}
-
-	@Override
-	public IIdType doUpdateResource(IBaseResource theResource) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirCtx;
-	}
-
 	@Interceptor
-	public static class MyInterceptor {
+	public static class MyReadWriteInterceptor extends MyWriteInterceptor {
 
 
-		private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
 		private final List<RequestPartitionId> myReadRequestPartitionIds = new ArrayList<>();
-
-		public void addCreatePartition(RequestPartitionId theRequestPartitionId) {
-			myCreateRequestPartitionIds.add(theRequestPartitionId);
-		}
 
 		public void addReadPartition(RequestPartitionId theRequestPartitionId) {
 			myReadRequestPartitionIds.add(theRequestPartitionId);
+		}
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+		public RequestPartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
+			ourLog.info("Returning partition for read: {}", retVal);
+			return retVal;
+		}
+
+		@Override
+		public void assertNoRemainingIds() {
+			super.assertNoRemainingIds();
+			assertEquals(0, myReadRequestPartitionIds.size());
+		}
+
+	}
+
+	@Interceptor
+	public static class MyWriteInterceptor {
+
+
+		private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
+
+		public void addCreatePartition(RequestPartitionId theRequestPartitionId) {
+			myCreateRequestPartitionIds.add(theRequestPartitionId);
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
@@ -2344,16 +2497,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest implements ITestData
 			return retVal;
 		}
 
-		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public RequestPartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
-			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
-			ourLog.info("Returning partition for read: {}", retVal);
-			return retVal;
-		}
-
 		public void assertNoRemainingIds() {
 			assertEquals(0, myCreateRequestPartitionIds.size());
-			assertEquals(0, myReadRequestPartitionIds.size());
 		}
 
 	}

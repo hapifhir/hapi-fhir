@@ -18,7 +18,9 @@ import java.util.function.Supplier;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class SchemaMigratorTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaMigratorTest.class);
@@ -95,7 +97,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 		ImmutableList<BaseTask> taskList = ImmutableList.of(taskA, taskB, taskC, taskD);
 		MigrationTaskSkipper.setDoNothingOnSkippedTasks(taskList, "4_1_0.20191214.2, 4_1_0.20191214.4");
-		SchemaMigrator schemaMigrator = new SchemaMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList);
 		schemaMigrator.setDriverType(getDriverType());
 
 		schemaMigrator.migrate();
@@ -134,7 +136,7 @@ public class SchemaMigratorTest extends BaseTest {
 		AddTableRawSqlTask task = new AddTableRawSqlTask("1", theSchemaVersion);
 		task.setTableName(theTableName);
 		task.addSql(getDriverType(), theSql);
-		SchemaMigrator retval = new SchemaMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), ImmutableList.of(task));
+		SchemaMigrator retval = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), ImmutableList.of(task));
 		retval.setDriverType(getDriverType());
 		return retval;
 	}

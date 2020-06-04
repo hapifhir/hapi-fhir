@@ -1,0 +1,185 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-location",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-location",
+  "version": "2.0.1",
+  "name": "nl-core-location",
+  "title": "nl-core-location",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "A Location resource as defined for the Dutch realm",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-patient-v2.0.1-2015EN",
+      "uri": "https://zibs.nl/wiki/Patient-v2.0.1(2015EN)",
+      "name": "HCIM Patient-v2.0.1(2015EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-patient-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.0(2016EN)",
+      "name": "HCIM Patient-v3.0(2016EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-contactinformation-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/ContactInformation-v1.0(2017EN)",
+      "name": "HCIM ContactInformation-v1.0(2017EN)"
+    },
+    {
+      "identity": "hcim-addressinformation-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/AddressInformation-v1.0(2017EN)",
+      "name": "HCIM AddressInformation-v1.0(2017EN)"
+    },
+    {
+      "identity": "hcim-dispense-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/Dispense-v1.0(2017EN)",
+      "name": "HCIM Dispense-v1.0(2017EN)"
+    },
+    {
+      "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+      "uri": "https://zibs.nl/wiki/HealthcareProvider-v3.1.1(2017EN)",
+      "name": "HCIM HealthcareProvider-v3.1.1(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Location",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Location",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Location.name",
+        "path": "Location.name",
+        "short": "LocationName",
+        "alias": [
+          "OrganizationLocation",
+          "OrganisatieLocatie",
+          "DispenseLocation",
+          "Afleverlocatie"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-dispense-v1.0-2017EN",
+            "map": "NL-CM:9.9.20925",
+            "comment": "DispenseLocation"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.8",
+            "comment": "OrganizationLocation"
+          }
+        ]
+      },
+      {
+        "id": "Location.telecom",
+        "path": "Location.telecom",
+        "short": "ContactInformation",
+        "alias": [
+          "Contactgegevens"
+        ],
+        "type": [
+          {
+            "code": "ContactPoint",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-contactpoint"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.1",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "art-decor-eafspraak",
+            "map": "eafspraak-dataelement-40",
+            "comment": "Contactgegevens"
+          }
+        ]
+      },
+      {
+        "id": "Location.address",
+        "path": "Location.address",
+        "short": "AddressInformation",
+        "alias": [
+          "Adresgegevens"
+        ],
+        "type": [
+          {
+            "code": "Address",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-address"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.4",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.4",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-addressinformation-v3.1-2017EN",
+            "map": "NL-CM:20.5.1",
+            "comment": "AddressInformation"
+          }
+        ]
+      },
+      {
+        "id": "Location.managingOrganization",
+        "path": "Location.managingOrganization",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.1",
+            "comment": "HealthcareProvider"
+          }
+        ]
+      },
+      {
+        "id": "Location.partOf",
+        "path": "Location.partOf",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-location"
+          }
+        ]
+      }
+    ]
+  }
+}

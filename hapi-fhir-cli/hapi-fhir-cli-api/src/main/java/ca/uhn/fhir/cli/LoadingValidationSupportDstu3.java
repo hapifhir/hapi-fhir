@@ -36,7 +36,7 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
-		String resName = myCtx.getResourceDefinition(theClass).getName();
+		String resName = myCtx.getResourceType(theClass);
 		ourLog.info("Attempting to fetch {} at URL: {}", resName, theUri);
 		
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);

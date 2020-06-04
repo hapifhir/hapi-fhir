@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,9 +50,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
-			boolean retVal = next.isValueSetSupported(theRootValidationSupport, theValueSetUrl);
+			boolean retVal = next.isValueSetSupported(theValidationSupportContext, theValueSetUrl);
 			if (retVal) {
 				return true;
 			}
@@ -60,9 +61,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public IBaseResource generateSnapshot(IValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+	public IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 		for (IValidationSupport next : myChain) {
-			IBaseResource retVal = next.generateSnapshot(theRootValidationSupport, theInput, theUrl, theWebUrl, theProfileName);
+			IBaseResource retVal = next.generateSnapshot(theValidationSupportContext, theInput, theUrl, theWebUrl, theProfileName);
 			if (retVal != null) {
 				return retVal;
 			}
@@ -122,10 +123,10 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		for (IValidationSupport next : myChain) {
 			// TODO: test if code system is supported?
-			ValueSetExpansionOutcome expanded = next.expandValueSet(theRootValidationSupport, null, theValueSetToExpand);
+			ValueSetExpansionOutcome expanded = next.expandValueSet(theValidationSupportContext, null, theValueSetToExpand);
 			if (expanded != null) {
 				return expanded;
 			}
@@ -210,9 +211,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theRootValidationSupport, theSystem)) {
+			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
 				return true;
 			}
 		}
@@ -220,10 +221,10 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
-			if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theRootValidationSupport, theCodeSystem))) {
-				CodeValidationResult retVal = next.validateCode(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+			if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
+				CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (retVal != null) {
 					return retVal;
 				}
@@ -233,21 +234,23 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		for (IValidationSupport next : myChain) {
-			CodeValidationResult retVal = next.validateCodeInValueSet(theRootValidationSupport, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
-			if (retVal != null) {
-				return retVal;
+			if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
+				CodeValidationResult retVal = next.validateCodeInValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
+				if (retVal != null) {
+					return retVal;
+				}
 			}
 		}
 		return null;
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theRootValidationSupport, theSystem)) {
-				return next.lookupCode(theRootValidationSupport, theSystem, theCode);
+			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
+				return next.lookupCode(theValidationSupportContext, theSystem, theCode);
 			}
 		}
 		return null;

@@ -61,6 +61,8 @@ public class SearchParameterMap implements Serializable {
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
 	private QuantityParam myNearDistanceParam;
+	private boolean myLastN;
+	private Integer myLastNMax;
 
 	/**
 	 * Constructor
@@ -302,6 +304,42 @@ public class SearchParameterMap implements Serializable {
 		myLoadSynchronous = theLoadSynchronous;
 		return this;
 	}
+
+	/**
+	 * If set, tells the server to use an Elasticsearch query to generate a list of
+	 * Resource IDs for the LastN operation
+	 */
+	public boolean isLastN() {
+		return myLastN;
+	}
+
+	/**
+	 * If set, tells the server to use an Elasticsearch query to generate a list of
+	 * Resource IDs for the LastN operation
+	 */
+	public SearchParameterMap setLastN(boolean theLastN) {
+		myLastN = theLastN;
+		return this;
+	}
+
+
+	/**
+	 * If set, tells the server the maximum number of observations to return for each
+	 * observation code in the result set of a lastn operation
+	 */
+	public Integer getLastNMax() {
+		return myLastNMax;
+	}
+
+	/**
+	 * If set, tells the server the maximum number of observations to return for each
+	 * observation code in the result set of a lastn operation
+	 */
+	public SearchParameterMap setLastNMax(Integer theLastNMax) {
+		myLastNMax = theLastNMax;
+		return this;
+	}
+
 
 	/**
 	 * This method creates a URL query string representation of the parameters in this
@@ -639,4 +677,18 @@ public class SearchParameterMap implements Serializable {
 	public int size() {
 		return mySearchParameterMap.size();
 	}
+
+	public static SearchParameterMap newSynchronous() {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		return retVal;
+	}
+
+	public static SearchParameterMap newSynchronous(String theName, IQueryParameterType theParam) {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		retVal.add(theName, theParam);
+		return retVal;
+	}
+
 }

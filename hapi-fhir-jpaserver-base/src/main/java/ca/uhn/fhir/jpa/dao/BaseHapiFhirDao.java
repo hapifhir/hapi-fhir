@@ -964,11 +964,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
-		return myContext.getResourceDefinition(theResourceType).getName();
+		return myContext.getResourceType(theResourceType);
 	}
 
 	String toResourceName(IBaseResource theResource) {
-		return myContext.getResourceDefinition(theResource).getName();
+		return myContext.getResourceType(theResource);
 	}
 
 	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
@@ -997,7 +997,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					validateResourceForStorage((T) theResource, entity);
 				}
 			}
-			String resourceType = myContext.getResourceDefinition(theResource).getName();
+			String resourceType = myContext.getResourceType(theResource);
 			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
 				throw new UnprocessableEntityException(
 					"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
@@ -1221,9 +1221,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Override
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
-													IBasePersistedResource theEntity2, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
+													IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
 
-		ResourceTable entity = (ResourceTable) theEntity2;
+		ResourceTable entity = (ResourceTable) theEntity;
 
 		// We'll update the resource ID with the correct version later but for
 		// now at least set it to something useful for the interceptors
@@ -1346,7 +1346,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						allowAny = true;
 						break;
 					}
-					validTypes.add(getContext().getResourceDefinition(nextValidType).getName());
+					validTypes.add(getContext().getResourceType(nextValidType));
 				}
 
 				if (allowAny) {
@@ -1417,7 +1417,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
 
-		String resName = getContext().getResourceDefinition(theResource).getName();
+		String resName = getContext().getResourceType(theResource);
 		validateChildReferences(theResource, resName);
 
 		validateMetaCount(totalMetaCount);

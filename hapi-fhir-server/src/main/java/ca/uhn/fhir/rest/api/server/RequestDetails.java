@@ -23,7 +23,11 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -73,6 +77,7 @@ public abstract class RequestDetails {
 	private Map<Object, Object> myUserData;
 	private IBaseResource myResource;
 	private String myRequestId;
+	private String myTransactionGuid;
 	private String myFixedConditionalUrl;
 
 	/**
@@ -515,6 +520,14 @@ public abstract class RequestDetails {
 		myDeferredInterceptorBroadcaster = null;
 	}
 
+	public String getTransactionGuid() {
+		return myTransactionGuid;
+	}
+
+	public void setTransactionGuid(String theTransactionGuid) {
+		myTransactionGuid = theTransactionGuid;
+	}
+
 
 	private class DeferredOperationCallback implements IInterceptorBroadcaster {
 
@@ -543,6 +556,10 @@ public abstract class RequestDetails {
 
 		@Override
 		public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
+			if (!thePointcut.getReturnType().equals(void.class)) {
+				return myWrap.callHooksAndReturnObject(thePointcut, theParams);
+			}
+
 			myDeferredTasks.add(() -> myWrap.callHooksAndReturnObject(thePointcut, theParams));
 			return null;
 		}

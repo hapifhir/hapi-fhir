@@ -104,11 +104,15 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private boolean addToHeldExtensions(int valueIdx, List<? extends IBaseExtension<?, ?>> ext, ArrayList<ArrayList<HeldExtension>> list, boolean theIsModifier, CompositeChildElement theChildElem,
-													CompositeChildElement theParent, EncodeContext theEncodeContext, boolean theContainedResource, IBase theContainingElement) {
+                                        CompositeChildElement theParent, EncodeContext theEncodeContext, boolean theContainedResource, IBase theContainingElement) {
 		boolean retVal = false;
 		if (ext.size() > 0) {
 			Boolean encodeExtension = null;
 			for (IBaseExtension<?, ?> next : ext) {
+
+				if (next.isEmpty()) {
+					continue;
+				}
 
 				// Make sure we respect _summary and _elements
 				if (encodeExtension == null) {
@@ -621,7 +625,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		EncodeContext encodeContext = new EncodeContext();
-		String resourceName = myContext.getResourceDefinition(theResource).getName();
+		String resourceName = myContext.getResourceType(theResource);
 		encodeContext.pushPath(resourceName, true);
 		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, encodeContext);
 	}

@@ -32,10 +32,8 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -47,6 +45,8 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -74,6 +74,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -350,7 +351,7 @@ public abstract class BaseTransactionProcessor {
 		// Do all entries have a verb?
 		for (int i = 0; i < myVersionAdapter.getEntries(theRequest).size(); i++) {
 			IBase nextReqEntry = requestEntries.get(i);
-			String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
+			String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 			if (verb == null || !isValidVerb(verb)) {
 				throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", verb, i));
 			}
@@ -372,7 +373,7 @@ public abstract class BaseTransactionProcessor {
 		for (int i = 0; i < requestEntries.size(); i++) {
 			originalRequestOrder.put(requestEntries.get(i), i);
 			myVersionAdapter.addEntry(response);
-			if (myVersionAdapter.getEntryRequestVerb(requestEntries.get(i)).equals("GET")) {
+			if (myVersionAdapter.getEntryRequestVerb(myContext, requestEntries.get(i)).equals("GET")) {
 				getEntries.add(requestEntries.get(i));
 			}
 		}
@@ -544,7 +545,7 @@ public abstract class BaseTransactionProcessor {
 				IBase nextReqEntry = theEntries.get(index);
 				IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
 				if (resource != null) {
-					String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
+					String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 					String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
 					String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
@@ -647,8 +648,8 @@ public abstract class BaseTransactionProcessor {
 
 				}
 
-				String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
-				String resourceType = res != null ? myContext.getResourceDefinition(res).getName() : null;
+				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
+				String resourceType = res != null ? myContext.getResourceType(res) : null;
 				Integer order = theOriginalRequestOrder.get(nextReqEntry);
 				IBase nextRespEntry = (IBase) myVersionAdapter.getEntries(theResponse).get(order);
 
@@ -768,6 +769,8 @@ public abstract class BaseTransactionProcessor {
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						String patchBody = null;
 						String contentType = null;
+						IBaseParameters patchBodyParameters = null;
+						PatchTypeEnum patchType = null;
 
 						if (res instanceof IBaseBinary) {
 							IBaseBinary binary = (IBaseBinary) res;
@@ -775,21 +778,26 @@ public abstract class BaseTransactionProcessor {
 								patchBody = new String(binary.getContent(), Charsets.UTF_8);
 							}
 							contentType = binary.getContentType();
+							patchType = PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(myContext, contentType);
+							if (patchType == PatchTypeEnum.FHIR_PATCH_JSON || patchType == PatchTypeEnum.FHIR_PATCH_XML) {
+								String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "fhirPatchShouldNotUseBinaryResource");
+								throw new InvalidRequestException(msg);
+							}
+						} else if (res instanceof IBaseParameters) {
+							patchBodyParameters = (IBaseParameters) res;
+							patchType = PatchTypeEnum.FHIR_PATCH_JSON;
 						}
 
-						if (isBlank(patchBody)) {
-							String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingPatchBody");
-							throw new InvalidRequestException(msg);
-						}
-						if (isBlank(contentType)) {
-							String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingPatchContentType");
-							throw new InvalidRequestException(msg);
+						if (patchBodyParameters == null) {
+							if (isBlank(patchBody)) {
+								String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingPatchBody");
+								throw new InvalidRequestException(msg);
+							}
 						}
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
-						PatchTypeEnum patchType = PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentType);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
-						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, theRequest);
+						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, patchBodyParameters, theRequest);
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {
 							updatedResources.add(outcome.getResource());
@@ -989,7 +997,7 @@ public abstract class BaseTransactionProcessor {
 
 
 	private String toResourceName(Class<? extends IBaseResource> theResourceType) {
-		return myContext.getResourceDefinition(theResourceType).getName();
+		return myContext.getResourceType(theResourceType);
 	}
 
 	public void setContext(FhirContext theContext) {
@@ -1030,7 +1038,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private String toMatchUrl(IBase theEntry) {
-		String verb = myVersionAdapter.getEntryRequestVerb(theEntry);
+		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		if (verb.equals("POST")) {
 			return myVersionAdapter.getEntryIfNoneExist(theEntry);
 		}
@@ -1069,7 +1077,7 @@ public abstract class BaseTransactionProcessor {
 
 		BUNDLEENTRY addEntry(BUNDLE theBundle);
 
-		String getEntryRequestVerb(BUNDLEENTRY theEntry);
+		String getEntryRequestVerb(FhirContext theContext, BUNDLEENTRY theEntry);
 
 		String getFullUrl(BUNDLEENTRY theEntry);
 
@@ -1106,7 +1114,7 @@ public abstract class BaseTransactionProcessor {
 	//@formatter:off
 	public class TransactionSorter implements Comparator<IBase> {
 
-		private Set<String> myPlaceholderIds;
+		private final Set<String> myPlaceholderIds;
 
 		public TransactionSorter(Set<String> thePlaceholderIds) {
 			myPlaceholderIds = thePlaceholderIds;
@@ -1159,8 +1167,8 @@ public abstract class BaseTransactionProcessor {
 
 		private int toOrder(IBase theO1) {
 			int o1 = 0;
-			if (myVersionAdapter.getEntryRequestVerb(theO1) != null) {
-				switch (myVersionAdapter.getEntryRequestVerb(theO1)) {
+			if (myVersionAdapter.getEntryRequestVerb(myContext, theO1) != null) {
+				switch (myVersionAdapter.getEntryRequestVerb(myContext, theO1)) {
 					case "DELETE":
 						o1 = 1;
 						break;
@@ -1206,7 +1214,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private static String toStatusString(int theStatusCode) {
-		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
+		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
 

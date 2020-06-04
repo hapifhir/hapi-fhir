@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.0.0-SNAPSHOT</version>
+		<version>5.1.0-SNAPSHOT</version>
 		<relativePath>../../hapi-deployable-pom</relativePath>
 	</parent>
 
@@ -179,10 +179,10 @@
 					</overlays>
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 					<attachClasses>true</attachClasses>
-					<excludes>
+					<packagingExcludes>
 						WEB-INF/lib/Saxon-HE-*,
 						WEB-INF/lib/hapi-*
-					</excludes>
+					</packagingExcludes>
 				</configuration>
 			</plugin>
 

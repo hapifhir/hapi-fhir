@@ -1,0 +1,23 @@
+{
+	"resourceType": "Observation",
+	"effectiveDateTime": "2019-11-01T12:41:50+00:00",
+	"meta": {
+		"profile": [
+			"http://example.org/fhir/StructureDefinition/MyObservation"
+		]
+	},
+	"status": "final",
+	"code": {
+		"coding": [
+			{
+				"code": "aabbcc",
+				"system": "http://example.org"
+			}
+		]
+	},
+	"valueQuantity": {
+		"code": "whatever",
+		"system": "http://unitsofmeasure.org",
+		"value": 18
+	}
+}

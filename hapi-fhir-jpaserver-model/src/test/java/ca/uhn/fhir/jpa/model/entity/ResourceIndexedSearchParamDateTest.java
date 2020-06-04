@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 

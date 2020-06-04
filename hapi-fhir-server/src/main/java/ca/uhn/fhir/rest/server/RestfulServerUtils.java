@@ -59,6 +59,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Writer;
@@ -341,26 +342,21 @@ public class RestfulServerUtils {
 		return b.toString();
 	}
 
-	/**
-	 * @TODO: this method is only called from one place and should be removed anyway
-	 */
-	public static EncodingEnum determineRequestEncoding(RequestDetails theReq) {
-		EncodingEnum retVal = determineRequestEncodingNoDefault(theReq);
-		if (retVal != null) {
-			return retVal;
-		}
-		return EncodingEnum.XML;
+	@Nullable
+	public static EncodingEnum determineRequestEncodingNoDefault(RequestDetails theReq) {
+		return determineRequestEncodingNoDefault(theReq, false);
 	}
 
-	public static EncodingEnum determineRequestEncodingNoDefault(RequestDetails theReq) {
-		ResponseEncoding retVal = determineRequestEncodingNoDefaultReturnRE(theReq);
+	@Nullable
+	public static EncodingEnum determineRequestEncodingNoDefault(RequestDetails theReq, boolean theStrict) {
+		ResponseEncoding retVal = determineRequestEncodingNoDefaultReturnRE(theReq, theStrict);
 		if (retVal == null) {
 			return null;
 		}
 		return retVal.getEncoding();
 	}
 
-	private static ResponseEncoding determineRequestEncodingNoDefaultReturnRE(RequestDetails theReq) {
+	private static ResponseEncoding determineRequestEncodingNoDefaultReturnRE(RequestDetails theReq, boolean theStrict) {
 		ResponseEncoding retVal = null;
 		List<String> headers = theReq.getHeaders(Constants.HEADER_CONTENT_TYPE);
 		if (headers != null) {
@@ -378,7 +374,12 @@ public class RestfulServerUtils {
 								nextPart = nextPart.substring(0, scIdx);
 							}
 							nextPart = nextPart.trim();
-							EncodingEnum encoding = EncodingEnum.forContentType(nextPart);
+							EncodingEnum encoding;
+							if (theStrict) {
+								encoding = EncodingEnum.forContentTypeStrict(nextPart);
+							} else {
+								encoding = EncodingEnum.forContentType(nextPart);
+							}
 							if (encoding != null) {
 								retVal = new ResponseEncoding(theReq.getServer().getFhirContext(), encoding, nextPart);
 								break;
@@ -512,7 +513,7 @@ public class RestfulServerUtils {
 		 * has a Content-Type header but not an Accept header)
 		 */
 		if (retVal == null) {
-			retVal = determineRequestEncodingNoDefaultReturnRE(theReq);
+			retVal = determineRequestEncodingNoDefaultReturnRE(theReq, strict);
 		}
 
 		return retVal;
@@ -589,7 +590,7 @@ public class RestfulServerUtils {
 			if (theResource != null && isBlank(resName)) {
 				FhirContext context = theServer.getFhirContext();
 				context = getContextForVersion(context, theResource.getStructureFhirVersionEnum());
-				resName = context.getResourceDefinition(theResource).getName();
+				resName = context.getResourceType(theResource);
 			}
 			if (isNotBlank(resName)) {
 				retVal = theResourceId.withServerBase(theServerBase, resName);
@@ -861,7 +862,7 @@ public class RestfulServerUtils {
 			 * parts, we're not streaming just the narrative as HTML (since bundles don't even
 			 * have one)
 			 */
-			if ("Bundle".equals(theServer.getFhirContext().getResourceDefinition(theResource).getName())) {
+			if ("Bundle".equals(theServer.getFhirContext().getResourceType(theResource))) {
 				encodingDomainResourceAsText = false;
 			}
 		}
