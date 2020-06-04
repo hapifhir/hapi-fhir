@@ -57,7 +57,7 @@ public interface IElasticsearchSvc {
 	 * Creates or updates index for an Observation Resource.
 	 * @param theDocumentId Identifier for Observation resource.
 	 * @param theObservationDocument Indexing document for Observation.
-	 * @return
+	 * @return True if Observation indexed successfully.
 	 */
 	Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument);
 
@@ -65,7 +65,7 @@ public interface IElasticsearchSvc {
 	 * Creates or updates index for an Observation Code.
 	 * @param theCodeableConceptID Identifier for Observation resource.
 	 * @param theObservationCodeDocument Indexing document for Observation.
-	 * @return
+	 * @return True if Observation Code indexed successfully.
 	 */
 	Boolean createOrUpdateObservationCodeIndex(String theCodeableConceptID, CodeJson theObservationCodeDocument);
 

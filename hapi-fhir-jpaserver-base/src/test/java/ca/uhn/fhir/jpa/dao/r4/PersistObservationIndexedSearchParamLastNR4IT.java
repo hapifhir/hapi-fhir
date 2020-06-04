@@ -61,6 +61,8 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 	}
 
 	private final String SINGLE_SUBJECT_ID = "4567";
@@ -89,6 +91,9 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		assertEquals(SINGLE_EFFECTIVEDTM, persistedObservationEntity.getEffectiveDtm());
 
 		String observationCodeNormalizedId = persistedObservationEntity.getCode_concept_id();
+
+		// List<CodeJson> persistedObservationCodes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
+		// assertEquals(1, persistedObservationCodes.size());
 
 		// Check that we can retrieve code by hash value.
 		String codeSystemHash = persistedObservationEntity.getCode_coding_code_system_hash();
@@ -180,6 +185,9 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		searchParameterMap.setLastNMax(100);
 		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
 		assertEquals(100, observationDocuments.size());
+
+		//List<CodeJson> codeDocuments = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
+		//assertEquals(2, codeDocuments.size());
 
 		// Check that all observations were indexed.
 		searchParameterMap = new SearchParameterMap();
