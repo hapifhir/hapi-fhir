@@ -21,43 +21,33 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodingSearchParamDao;
-import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCategoryCodeableConceptEntity;
-import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCategoryCodingEntity;
-import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity;
-import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodingEntity;
-import ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
+import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
+import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
+import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import java.util.*;
 
-@Transactional(propagation = Propagation.REQUIRED)
 public class ObservationLastNIndexPersistSvc {
 
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
-
 	@Autowired
-	IObservationIndexedSearchParamLastNDao myResourceIndexedObservationLastNDao;
+	private ISearchParamExtractor mySearchParameterExtractor;
 
-	@Autowired
-	IObservationIndexedCodeCodingSearchParamDao myObservationIndexedCodeCodingSearchParamDao;
-
-	@Autowired
-	public ISearchParamExtractor mySearchParameterExtractor;
+	@Autowired(required = false)
+	private IElasticsearchSvc myElasticsearchSvc;
 
 	public void indexObservation(IBaseResource theResource) {
+
+		if (myElasticsearchSvc == null) {
+			// Elasticsearch is not enabled and therefore no index needs to be updated.
+			return;
+		}
 
 		List<IBase> subjectReferenceElement = mySearchParameterExtractor.extractValues("Observation.subject", theResource);
 		String subjectId = subjectReferenceElement.stream()
@@ -95,15 +85,12 @@ public class ObservationLastNIndexPersistSvc {
 																 List<IBase> theObservationCategoryCodeableConcepts) {
 
 		// Determine if an index already exists for Observation:
-		boolean observationIndexUpdate = false;
-		ObservationIndexedSearchParamLastNEntity indexedObservation = null;
+		ObservationJson indexedObservation = null;
 		if (resourcePID != null) {
-			indexedObservation = myResourceIndexedObservationLastNDao.findByIdentifier(resourcePID);
+			indexedObservation = myElasticsearchSvc.getObservationDocument(resourcePID);
 		}
 		if (indexedObservation == null) {
-			indexedObservation = new ObservationIndexedSearchParamLastNEntity();
-		} else {
-			observationIndexUpdate = true;
+			indexedObservation = new ObservationJson();
 		}
 
 		indexedObservation.setEffectiveDtm(theEffectiveDtm);
@@ -114,77 +101,65 @@ public class ObservationLastNIndexPersistSvc {
 
 		addCategoriesToObservationIndex(theObservationCategoryCodeableConcepts, indexedObservation);
 
-		if (observationIndexUpdate) {
-			myEntityManager.merge(indexedObservation);
-		} else {
-			myEntityManager.persist(indexedObservation);
-		}
+		myElasticsearchSvc.createOrUpdateObservationIndex(resourcePID, indexedObservation);
 
 	}
 
 	private void addCodeToObservationIndex(List<IBase> theObservationCodeCodeableConcepts,
-														ObservationIndexedSearchParamLastNEntity theIndexedObservation) {
+														ObservationJson theIndexedObservation) {
 		// Determine if a Normalized ID was created previously for Observation Code
-		Optional<String> existingObservationCodeNormalizedId = getCodeCodeableConceptIdIfExists(theObservationCodeCodeableConcepts.get(0));
+		String existingObservationCodeNormalizedId = getCodeCodeableConceptId(theObservationCodeCodeableConcepts.get(0));
 
 		// Create/update normalized Observation Code index record
-		ObservationIndexedCodeCodeableConceptEntity codeableConceptField =
+		CodeJson codeableConceptField =
 			getCodeCodeableConcept(theObservationCodeCodeableConcepts.get(0),
-				existingObservationCodeNormalizedId.orElse(UUID.randomUUID().toString()));
+				existingObservationCodeNormalizedId);
 
-		if (existingObservationCodeNormalizedId.isPresent()) {
-			myEntityManager.merge(codeableConceptField);
-		} else {
-			myEntityManager.persist(codeableConceptField);
-		}
+		myElasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptField.getCodeableConceptId(), codeableConceptField);
 
-		theIndexedObservation.setObservationCode(codeableConceptField);
-		theIndexedObservation.setCodeNormalizedId(codeableConceptField.getCodeableConceptId());
-
+		theIndexedObservation.setCode(codeableConceptField);
+		theIndexedObservation.setCode_concept_id(codeableConceptField.getCodeableConceptId());
 	}
 
 	private void addCategoriesToObservationIndex(List<IBase> observationCategoryCodeableConcepts,
-																ObservationIndexedSearchParamLastNEntity indexedObservation) {
+																ObservationJson indexedObservation) {
 		// Build CodeableConcept entities for Observation.Category
-		Set<ObservationIndexedCategoryCodeableConceptEntity> categoryCodeableConceptEntities = new HashSet<>();
+		List<CodeJson> categoryCodeableConceptEntities = new ArrayList<>();
 		for (IBase categoryCodeableConcept : observationCategoryCodeableConcepts) {
 			// Build CodeableConcept entities for each category CodeableConcept
 			categoryCodeableConceptEntities.add(getCategoryCodeableConceptEntities(categoryCodeableConcept));
 		}
-		indexedObservation.setCategoryCodeableConcepts(categoryCodeableConceptEntities);
-
+		indexedObservation.setCategories(categoryCodeableConceptEntities);
 	}
 
-	private ObservationIndexedCategoryCodeableConceptEntity getCategoryCodeableConceptEntities(IBase theValue) {
+	private CodeJson getCategoryCodeableConceptEntities(IBase theValue) {
 		String text = mySearchParameterExtractor.getDisplayTextFromCodeableConcept(theValue);
-		ObservationIndexedCategoryCodeableConceptEntity categoryCodeableConcept = new ObservationIndexedCategoryCodeableConceptEntity(text);
+		CodeJson categoryCodeableConcept = new CodeJson();
+		categoryCodeableConcept.setCodeableConceptText(text);
 
 		List<IBase> codings = mySearchParameterExtractor.getCodingsFromCodeableConcept(theValue);
-		Set<ObservationIndexedCategoryCodingEntity> categoryCodingEntities = new HashSet<>();
 		for (IBase nextCoding : codings) {
-			categoryCodingEntities.add(getCategoryCoding(nextCoding));
+			addCategoryCoding(nextCoding, categoryCodeableConcept);
 		}
-
-		categoryCodeableConcept.setObservationIndexedCategoryCodingEntitySet(categoryCodingEntities);
-
 		return categoryCodeableConcept;
 	}
 
-	private ObservationIndexedCodeCodeableConceptEntity getCodeCodeableConcept(IBase theValue, String observationCodeNormalizedId) {
+	private CodeJson getCodeCodeableConcept(IBase theValue, String observationCodeNormalizedId) {
 		String text = mySearchParameterExtractor.getDisplayTextFromCodeableConcept(theValue);
-		ObservationIndexedCodeCodeableConceptEntity codeCodeableConcept = new ObservationIndexedCodeCodeableConceptEntity(text, observationCodeNormalizedId);
+		CodeJson codeCodeableConcept = new CodeJson();
+		codeCodeableConcept.setCodeableConceptText(text);
+		codeCodeableConcept.setCodeableConceptId(observationCodeNormalizedId);
 
 		List<IBase> codings = mySearchParameterExtractor.getCodingsFromCodeableConcept(theValue);
 		for (IBase nextCoding : codings) {
-			codeCodeableConcept.addCoding(getCodeCoding(nextCoding, observationCodeNormalizedId));
+			addCodeCoding(nextCoding, codeCodeableConcept);
 		}
 
 		return codeCodeableConcept;
 	}
 
-	private Optional<String> getCodeCodeableConceptIdIfExists(IBase theValue) {
+	private String getCodeCodeableConceptId(IBase theValue) {
 		List<IBase> codings = mySearchParameterExtractor.getCodingsFromCodeableConcept(theValue);
-		String codeCodeableConceptId = null;
 		Optional<String> codeCodeableConceptIdOptional = Optional.empty();
 
 		for (IBase nextCoding : codings) {
@@ -196,52 +171,52 @@ public class ObservationLastNIndexPersistSvc {
 				String system = param.getSystem();
 				String code = param.getValue();
 				String text = mySearchParameterExtractor.getDisplayTextForCoding(nextCoding);
-				if (code != null && system != null) {
-					codeCodeableConceptIdOptional = Optional.ofNullable(myObservationIndexedCodeCodingSearchParamDao.findByCodeAndSystem(code, system));
-				} else {
-					codeCodeableConceptIdOptional = Optional.ofNullable(myObservationIndexedCodeCodingSearchParamDao.findByDisplay(text));
-				}
-				if (codeCodeableConceptIdOptional.isPresent()) {
+
+					String codeSystemHash = String.valueOf(CodeSystemHash.hashCodeSystem(system, code));
+				CodeJson codeCodeableConceptDocument = myElasticsearchSvc.getObservationCodeDocument(codeSystemHash, text);
+				if (codeCodeableConceptDocument != null) {
+					codeCodeableConceptIdOptional = Optional.of(codeCodeableConceptDocument.getCodeableConceptId());
 					break;
 				}
 			}
 		}
 
-		return codeCodeableConceptIdOptional;
+		return codeCodeableConceptIdOptional.orElse(UUID.randomUUID().toString());
 	}
 
-	private ObservationIndexedCategoryCodingEntity getCategoryCoding(IBase theValue) {
+	private void addCategoryCoding(IBase theValue, CodeJson theCategoryCodeableConcept) {
 		ResourceIndexedSearchParamToken param = mySearchParameterExtractor.createSearchParamForCoding("Observation",
 			new RuntimeSearchParam(null, null, "category", null, null, null, null, null, null, null),
 			theValue);
-		ObservationIndexedCategoryCodingEntity observationIndexedCategoryCodingEntity = null;
 		if (param != null) {
 			String system = param.getSystem();
 			String code = param.getValue();
 			String text = mySearchParameterExtractor.getDisplayTextForCoding(theValue);
-			observationIndexedCategoryCodingEntity = new ObservationIndexedCategoryCodingEntity(system, code, text);
+			theCategoryCodeableConcept.addCoding(system, code, text);
 		}
-		return observationIndexedCategoryCodingEntity;
 	}
 
-	private ObservationIndexedCodeCodingEntity getCodeCoding(IBase theValue, String observationCodeNormalizedId) {
+	private void addCodeCoding(IBase theValue, CodeJson theObservationCode) {
 		ResourceIndexedSearchParamToken param = mySearchParameterExtractor.createSearchParamForCoding("Observation",
 			new RuntimeSearchParam(null, null, "code", null, null, null, null, null, null, null),
 			theValue);
-		ObservationIndexedCodeCodingEntity observationIndexedCodeCodingEntity = null;
 		if (param != null) {
 			String system = param.getSystem();
 			String code = param.getValue();
 			String text = mySearchParameterExtractor.getDisplayTextForCoding(theValue);
-			observationIndexedCodeCodingEntity = new ObservationIndexedCodeCodingEntity(system, code, text, observationCodeNormalizedId);
+			theObservationCode.addCoding(system, code, text);
 		}
-		return observationIndexedCodeCodingEntity;
 	}
 
 	public void deleteObservationIndex(IBasePersistedResource theEntity) {
-		ObservationIndexedSearchParamLastNEntity deletedObservationLastNEntity = myResourceIndexedObservationLastNDao.findByIdentifier(theEntity.getIdDt().getIdPart());
+		if (myElasticsearchSvc == null) {
+			// Elasticsearch is not enabled and therefore no index needs to be updated.
+			return;
+		}
+
+		ObservationJson deletedObservationLastNEntity = myElasticsearchSvc.getObservationDocument(theEntity.getIdDt().getIdPart());
 		if (deletedObservationLastNEntity != null) {
-			myEntityManager.remove(deletedObservationLastNEntity);
+			myElasticsearchSvc.deleteObservationDocument(deletedObservationLastNEntity.getIdentifier());
 		}
 	}
 
