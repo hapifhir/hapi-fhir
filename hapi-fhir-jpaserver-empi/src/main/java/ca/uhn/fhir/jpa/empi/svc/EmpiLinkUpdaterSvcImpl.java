@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,5 +100,10 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePerson, theEmpiContext);
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
 		return thePerson;
+	}
+
+	@Override
+	public IBaseParameters notDuplicateperson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext) {
+		return null;
 	}
 }

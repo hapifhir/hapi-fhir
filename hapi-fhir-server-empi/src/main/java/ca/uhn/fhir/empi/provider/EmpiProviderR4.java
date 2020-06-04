@@ -33,12 +33,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -139,10 +137,17 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	// FIXME KHS Dstu3
-	public Parameters notDuplicate(IdType thePerson1Id, IdType thePerson2Id, ServletRequestDetails theRequestDetails) {
-		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
-		retval.addParameter("success", true);
-		// FIXME KHS implement
-		return retval;
+	@Operation(name = ProviderConstants.EMPI_NOT_DUPLICATE, idempotent = true)
+	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, min = 0, max = 1) StringType thePersonId,
+											 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, min = 0, max = 1) StringType theTargetId,
+											 ServletRequestDetails theRequestDetails) {
+
+		validateNotLinkParameters(thePersonId, theTargetId);
+		IAnyResource person = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
+		IAnyResource target = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
+		validateSameVersion(person, thePersonId);
+		validateSameVersion(target, theTargetId);
+
+		return (Parameters) myEmpiLinkUpdaterSvc.notDuplicateperson(person, target, createEmpiContext(theRequestDetails));
 	}
 }

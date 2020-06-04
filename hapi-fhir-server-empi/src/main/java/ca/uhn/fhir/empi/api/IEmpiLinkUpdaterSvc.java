@@ -22,7 +22,10 @@ package ca.uhn.fhir.empi.api;
 
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 public interface IEmpiLinkUpdaterSvc {
 	IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiTransactionContext theEmpiContext);
+
+	IBaseParameters notDuplicateperson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext);
 }
