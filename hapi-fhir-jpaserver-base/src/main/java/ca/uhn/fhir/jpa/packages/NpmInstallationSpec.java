@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.packages;
  */
 
 
+import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.annotations.ApiModel;
@@ -28,6 +31,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 @ApiModel(
 	value = "NpmInstallationSpec",
@@ -35,18 +39,21 @@ import java.util.List;
 		"Defines a set of instructions for package installation"
 )
 @JsonPropertyOrder({
-	"packageId", "packageVersion", "packageUrl", "installMode", "installResourceTypes", "validationMode"
+	"name", "version", "packageUrl", "installMode", "installResourceTypes", "validationMode"
 })
+@ExampleSupplier({NpmInstallationSpec.ExampleSupplier.class, NpmInstallationSpec.ExampleSupplier2.class})
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmInstallationSpec {
 
 	@ApiModelProperty("The direct package URL")
 	@JsonProperty("packageUrl")
 	private String myPackageUrl;
-	@ApiModelProperty("The NPM package ID")
-	@JsonProperty("packageId")
-	private String myPackageId;
+	@ApiModelProperty("The NPM package Name")
+	@JsonProperty("name")
+	private String myPackageName;
 	@ApiModelProperty("The direct package version")
-	@JsonProperty("packageVersion")
+	@JsonProperty("version")
 	private String myPackageVersion;
 	@ApiModelProperty("Should resources from this package be extracted from the package and installed into the repository individually")
 	@JsonProperty("installMode")
@@ -54,9 +61,6 @@ public class NpmInstallationSpec {
 	@ApiModelProperty("If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
 	@JsonProperty("installResourceTypes")
 	private List<String> myInstallResourceTypes;
-	@ApiModelProperty("Should contents be made available to the FHIR validation infrastructure. The default if not specified is \"AVAILABLE\".")
-	@JsonProperty("validationMode")
-	private ValidationModeEnum myValidationMode;
 	@ApiModelProperty("Should dependencies be automatically resolved, fetched and installed with the same settings")
 	@JsonProperty("fetchDependencies")
 	private boolean myFetchDependencies;
@@ -107,21 +111,12 @@ public class NpmInstallationSpec {
 		return myInstallResourceTypes;
 	}
 
-	public ValidationModeEnum getValidationMode() {
-		return myValidationMode;
+	public String getPackageName() {
+		return myPackageName;
 	}
 
-	public NpmInstallationSpec setValidationMode(ValidationModeEnum theValidationMode) {
-		myValidationMode = theValidationMode;
-		return this;
-	}
-
-	public String getPackageId() {
-		return myPackageId;
-	}
-
-	public NpmInstallationSpec setPackageId(String thePackageId) {
-		myPackageId = thePackageId;
+	public NpmInstallationSpec setPackageName(String thePackageName) {
+		myPackageName = thePackageName;
 		return this;
 	}
 
@@ -148,6 +143,12 @@ public class NpmInstallationSpec {
 		return this;
 	}
 
+	public NpmInstallationSpec addInstallResourceTypes(String... theResourceTypes) {
+		for (String next : theResourceTypes) {
+			getInstallResourceTypes().add(next);
+		}
+		return this;
+	}
 
 	public enum InstallModeEnum {
 		STORE_ONLY,
@@ -157,6 +158,31 @@ public class NpmInstallationSpec {
 	public enum ValidationModeEnum {
 		NOT_AVAILABLE,
 		AVAILABLE
+	}
+
+	public static class ExampleSupplier implements Supplier<NpmInstallationSpec> {
+
+		@Override
+		public NpmInstallationSpec get() {
+			return new NpmInstallationSpec()
+				.setPackageName("hl7.fhir.us.core")
+				.setPackageVersion("3.1.0")
+				.setInstallMode(InstallModeEnum.STORE_ONLY)
+				.setFetchDependencies(true);
+		}
+	}
+
+	public static class ExampleSupplier2 implements Supplier<NpmInstallationSpec> {
+
+		@Override
+		public NpmInstallationSpec get() {
+			return new NpmInstallationSpec()
+				.setPackageName("com.example.my-resources")
+				.setPackageVersion("1.0")
+				.setPackageUrl("classpath:/my-resources.tgz")
+				.setInstallMode(InstallModeEnum.STORE_AND_INSTALL)
+				.addInstallResourceTypes("Organization", "Medication", "PlanDefinition", "SearchParameter");
+		}
 	}
 
 }

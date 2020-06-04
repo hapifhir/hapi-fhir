@@ -40,11 +40,17 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -377,14 +383,39 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	public NpmPackage installPackage(NpmInstallationSpec theInstallationSpec) throws IOException {
-		Validate.notBlank(theInstallationSpec.getPackageId(), "thePackageId must not be blank");
+		Validate.notBlank(theInstallationSpec.getPackageName(), "thePackageId must not be blank");
 		Validate.notBlank(theInstallationSpec.getPackageVersion(), "thePackageVersion must not be blank");
 
-		if (theInstallationSpec.getContents() != null) {
-			return addPackageToCache(theInstallationSpec.getPackageId(), theInstallationSpec.getPackageVersion(), new ByteArrayInputStream(theInstallationSpec.getContents()), "Manually added");
+		if (isNotBlank(theInstallationSpec.getPackageUrl())) {
+			byte[] contents = loadPackageUrlContents(theInstallationSpec.getPackageUrl());
+			theInstallationSpec.setContents(contents);
 		}
 
-		return loadPackage(theInstallationSpec.getPackageId(), theInstallationSpec.getPackageVersion());
+		if (theInstallationSpec.getContents() != null) {
+			return addPackageToCache(theInstallationSpec.getPackageName(), theInstallationSpec.getPackageVersion(), new ByteArrayInputStream(theInstallationSpec.getContents()), "Manually added");
+		}
+
+		return loadPackage(theInstallationSpec.getPackageName(), theInstallationSpec.getPackageVersion());
+	}
+
+	protected byte[] loadPackageUrlContents(String thePackageUrl) {
+		if (thePackageUrl.startsWith("classpath:")) {
+			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
+		} else {
+			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+			try (CloseableHttpResponse request = HttpClientBuilder
+				.create()
+				.setConnectionManager(connManager)
+				.build()
+				.execute(new HttpGet(thePackageUrl))) {
+				if (request.getStatusLine().getStatusCode() != 200) {
+					throw new IOException("Received HTTP " + request.getStatusLine().getStatusCode());
+				}
+				return IOUtils.toByteArray(request.getEntity().getContent());
+			} catch (IOException e) {
+				throw new InternalErrorException("Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+			}
+		}
 	}
 
 	@Override

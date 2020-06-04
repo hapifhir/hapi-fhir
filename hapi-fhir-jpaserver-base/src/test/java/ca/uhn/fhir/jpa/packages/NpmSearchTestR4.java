@@ -47,15 +47,15 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		byte[] bytes;
 
 		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
+		spec = new NpmInstallationSpec().setPackageName("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
+		spec = new NpmInstallationSpec().setPackageName("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		bytes = loadClasspathBytes("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
-		spec = new NpmInstallationSpec().setPackageId("nictiz.fhir.nl.stu3.questionnaires").setPackageVersion("1.0.2").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
+		spec = new NpmInstallationSpec().setPackageName("nictiz.fhir.nl.stu3.questionnaires").setPackageVersion("1.0.2").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		NpmPackageSearchResultJson search = myPackageCacheManager.search(new PackageSearchSpec());
@@ -83,11 +83,11 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		byte[] bytes;
 
 		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
+		spec = new NpmInstallationSpec().setPackageName("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
+		spec = new NpmInstallationSpec().setPackageName("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		PackageSearchSpec searchSpec;
@@ -125,7 +125,7 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		NpmInstallationSpec spec;
 		byte[] bytes;
 		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
+		spec = new NpmInstallationSpec().setPackageName("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		PackageSearchSpec searchSpec;
@@ -183,11 +183,11 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		byte[] bytes;
 
 		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
+		spec = new NpmInstallationSpec().setPackageName("hl7.fhir.uv.shorthand").setPackageVersion("0.11.1").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		spec = new NpmInstallationSpec().setPackageId("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
+		spec = new NpmInstallationSpec().setPackageName("hl7.fhir.uv.shorthand").setPackageVersion("0.12.0").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY).setContents(bytes);
 		igInstaller.install(spec);
 
 		PackageSearchSpec searchSpec;

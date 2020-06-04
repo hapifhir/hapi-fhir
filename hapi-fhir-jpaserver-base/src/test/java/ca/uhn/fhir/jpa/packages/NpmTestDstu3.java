@@ -73,7 +73,7 @@ public class NpmTestDstu3 extends BaseJpaDstu3Test {
 		byte[] bytes = loadClasspathBytes("/packages/basisprofil.de.tar.gz");
 		myResponses.put("/basisprofil.de/0.2.40", bytes);
 
-		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageId("basisprofil.de").setPackageVersion("0.2.40").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
+		NpmInstallationSpec spec = new NpmInstallationSpec().setPackageName("basisprofil.de").setPackageVersion("0.2.40").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
 		// Be sure no further communication with the server
