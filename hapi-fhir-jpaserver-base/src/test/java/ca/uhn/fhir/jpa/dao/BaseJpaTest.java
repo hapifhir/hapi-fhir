@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
@@ -122,6 +123,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private IdHelperService myIdHelperService;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	@After
 	public void afterPerformCleanup() {
@@ -135,7 +138,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myIdHelperService != null) {
 			myIdHelperService.clearCache();
 		}
-
+		if (myMemoryCacheService != null) {
+			myMemoryCacheService.invalidateAllCaches();
+		}
 	}
 
 	@After
