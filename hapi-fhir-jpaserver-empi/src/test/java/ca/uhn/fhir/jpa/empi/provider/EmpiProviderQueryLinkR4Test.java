@@ -4,6 +4,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -21,14 +22,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLinkR4Test.class);
 	private StringType myLinkSource;
-	private IdType myPerson1Id;
-	private IdType myPerson2Id;
+	private StringType myPerson1Id;
+	private StringType myPerson2Id;
 
 	@Before
 	public void before() {
@@ -40,10 +41,10 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		// Add a possible duplicate
 		myLinkSource = new StringType(EmpiLinkSourceEnum.AUTO.name());
 		Person person1 = createPerson();
-		myPerson1Id = person1.getIdElement().toVersionless();
+		myPerson1Id = new StringType(person1.getIdElement().toVersionless().getValue());
 		Long person1Pid = myIdHelperService.getPidOrNull(person1);
 		Person person2 = createPerson();
-		myPerson2Id = person2.getIdElement().toVersionless();
+		myPerson2Id = new StringType(person2.getIdElement().toVersionless().getValue());
 		Long person2Pid = myIdHelperService.getPidOrNull(person2);
 		EmpiLink empiLink = new EmpiLink().setPersonPid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
 		myEmpiLinkDaoSvc.save(empiLink);
@@ -98,11 +99,16 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		assertThat(list, hasSize(0));
 	}
 
+	// FIXME KHS test that no_link is never marked as duplicate again
+
 	@Test
 	public void testNotDuplicateBadId() {
-		Parameters result = myEmpiProviderR4.notDuplicate(myPerson1Id, new IdType("Person/notAnId123"), myRequestDetails);
-		assertEquals("success", result.getParameterFirstRep().getName());
-		assertFalse(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
+		try {
+			myEmpiProviderR4.notDuplicate(myPerson1Id, new StringType("Person/notAnId123"), myRequestDetails);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Resource Person/notAnId123 is not known", e.getMessage());
+		}
 	}
 
 	private void assertEmpiLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, EmpiMatchResultEnum theMatchResult) {
