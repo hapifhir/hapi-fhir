@@ -4,6 +4,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -19,9 +20,12 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
-private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLinkR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLinkR4Test.class);
 	private StringType myLinkSource;
 	private IdType myPerson1Id;
 	private IdType myPerson2Id;
@@ -80,6 +84,25 @@ private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderQueryLi
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
 		assertEmpiLink(2, part, myPerson1Id.getValue(), myPerson2Id.getValue(), EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
+	}
+
+	@Test
+	public void testNotDuplicate() {
+		{
+			Parameters result = myEmpiProviderR4.notDuplicate(myPerson1Id, myPerson2Id, myRequestDetails);
+			assertEquals("success", result.getParameterFirstRep().getName());
+			assertTrue(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
+		}
+		Parameters result = myEmpiProviderR4.getDuplicatePersons(myRequestDetails);
+		List<Parameters.ParametersParameterComponent> list = result.getParameter();
+		assertThat(list, hasSize(0));
+	}
+
+	@Test
+	public void testNotDuplicateBadId() {
+		Parameters result = myEmpiProviderR4.notDuplicate(myPerson1Id, new IdType("Person/notAnId123"), myRequestDetails);
+		assertEquals("success", result.getParameterFirstRep().getName());
+		assertFalse(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
 	}
 
 	private void assertEmpiLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, EmpiMatchResultEnum theMatchResult) {

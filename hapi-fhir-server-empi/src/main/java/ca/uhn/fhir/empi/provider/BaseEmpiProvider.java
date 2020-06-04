@@ -40,7 +40,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public abstract class BaseEmpiProvider {
 
-	private final FhirContext myFhirContext;
+	protected final FhirContext myFhirContext;
 	private final IResourceLoader myResourceLoader;
 
 	public BaseEmpiProvider(FhirContext theFhirContext, IResourceLoader theResourceLoader) {

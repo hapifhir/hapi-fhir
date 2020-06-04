@@ -33,10 +33,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -134,5 +136,13 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	@Operation(name = ProviderConstants.EMPI_DUPLICATE_PERSONS, idempotent = true)
 	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
 		return (Parameters) myEmpiLinkQuerySvc.getPossibleDuplicates(createEmpiContext(theRequestDetails));
+	}
+
+	// FIXME KHS Dstu3
+	public Parameters notDuplicate(IdType thePerson1Id, IdType thePerson2Id, ServletRequestDetails theRequestDetails) {
+		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
+		retval.addParameter("success", true);
+		// FIXME KHS implement
+		return retval;
 	}
 }
