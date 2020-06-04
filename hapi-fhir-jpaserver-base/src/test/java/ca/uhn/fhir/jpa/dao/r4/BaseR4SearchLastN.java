@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -31,6 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,6 +61,9 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 
 	@Autowired
 	protected FhirContext myFhirCtx;
+
+	@Autowired
+	private ElasticsearchSvcImpl myElasticsearchSvc;
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
@@ -101,7 +105,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	private static final Map<String, Date> observationEffectiveMap = new HashMap<>();
 
 	@Before
-	public void beforeCreateTestPatientsAndObservations() {
+	public void beforeCreateTestPatientsAndObservations() throws IOException {
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
 		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
@@ -119,6 +123,9 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 			patient2Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
 			createObservationsForPatient(patient2Id);
 			dataLoaded = true;
+
+			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 
 		}
 

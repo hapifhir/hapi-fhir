@@ -12,8 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.*;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -84,7 +82,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
 		searchParameterMap.setLastNMax(3);
 
-		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, myFhirContext);
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
 
 		assertEquals(60, observations.size());
 
@@ -305,16 +303,16 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	private void createMultiplePatientsAndObservations() throws IOException {
 		// Create CodeableConcepts for two Codes, each with three codings.
 		String codeableConceptId1 = UUID.randomUUID().toString();
-		CodeableConcept codeableConceptField1 = new CodeableConcept().setText("Test Codeable Concept Field for First Code");
-		codeableConceptField1.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-1 display"));
-		CodeJson codeJson1 = new CodeJson(codeableConceptField1, codeableConceptId1);
-		String codeJson1Document = ourMapperNonPrettyPrint.writeValueAsString(codeJson1);
+		CodeJson codeJson1 = new CodeJson();
+		codeJson1.setCodeableConceptText("Test Codeable Concept Field for First Code");
+		codeJson1.setCodeableConceptId(codeableConceptId1);
+		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-1 display");
 
 		String codeableConceptId2 = UUID.randomUUID().toString();
-		CodeableConcept codeableConceptField2 = new CodeableConcept().setText("Test Codeable Concept Field for Second Code");
-		codeableConceptField2.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-2 display"));
-		CodeJson codeJson2 = new CodeJson(codeableConceptField2, codeableConceptId2);
-		String codeJson2Document = ourMapperNonPrettyPrint.writeValueAsString(codeJson2);
+		CodeJson codeJson2 = new CodeJson();
+		codeJson2.setCodeableConceptText("Test Codeable Concept Field for Second Code");
+		codeJson2.setCodeableConceptId(codeableConceptId1);
+		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-2 display");
 
 		// Create CodeableConcepts for two categories, each with three codings.
 		// Create three codings and first category CodeableConcept

@@ -3,13 +3,12 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
-import ca.uhn.fhir.jpa.dao.data.IObservationIndexedCodeCodeableConceptSearchParamDao;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
-import ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity;
-import ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity;
-import ca.uhn.fhir.jpa.dao.data.IObservationIndexedSearchParamLastNDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
+import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
+import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.*;
@@ -43,12 +42,6 @@ import static org.junit.Assert.assertTrue;
 public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	@Autowired
-	IObservationIndexedSearchParamLastNDao myResourceIndexedObservationLastNDao;
-
-	@Autowired
-	IObservationIndexedCodeCodeableConceptSearchParamDao myCodeableConceptIndexedSearchParamNormalizedDao;
-
-	@Autowired
 	private ElasticsearchSvcImpl elasticsearchSvc;
 
 	@Autowired
@@ -64,11 +57,10 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	protected FhirContext myFhirCtx;
 
 	@Before
-	public void before() {
+	public void before() throws IOException {
 
-		myResourceIndexedObservationLastNDao.deleteAll();
-		myCodeableConceptIndexedSearchParamNormalizedDao.deleteAll();
-
+		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 	}
 
 	private final String SINGLE_SUBJECT_ID = "4567";
@@ -85,7 +77,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	private ReferenceAndListParam multiSubjectParams = null;
 
 	@Test
-	public void testIndexObservationSingle() {
+	public void testIndexObservationSingle() throws IOException {
 		indexSingleObservation();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLastNMax(10);
@@ -124,7 +116,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		assertEquals(SINGLE_OBSERVATION_PID, observationIdsOnly.get(0));
 	}
 
-	private void indexSingleObservation() {
+	private void indexSingleObservation() throws IOException {
 
 		Observation myObservation = new Observation();
 		IdType observationID = new IdType("Observation", SINGLE_OBSERVATION_PID, "1");
@@ -138,6 +130,9 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		myObservation.setCode(getObservationCode());
 
 		testObservationPersist.indexObservation(myObservation);
+
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 
 	}
 
@@ -179,7 +174,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	}
 
 	@Test
-	public void testIndexObservationMultiple() {
+	public void testIndexObservationMultiple() throws IOException {
 		indexMultipleObservations();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLastNMax(100);
@@ -206,7 +201,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
-	private void indexMultipleObservations() {
+	private void indexMultipleObservations() throws IOException {
 
 		// Create two CodeableConcept values each for a Code with three codings.
 		CodeableConcept codeableConceptField1 = new CodeableConcept().setText("Test Codeable Concept Field for First Code");
@@ -275,10 +270,13 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		multiSubjectParams = new ReferenceAndListParam().addAnd(subjectParams);
 
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+
 	}
 
 	@Test
-	public void testDeleteObservation() {
+	public void testDeleteObservation() throws IOException {
 		indexMultipleObservations();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLastNMax(100);
@@ -302,6 +300,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		entity.setVersion(0L);
 
 		testObservationPersist.deleteObservationIndex(entity);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 
 		// Confirm that observation was deleted.
 		searchParameterMap = new SearchParameterMap();
@@ -318,14 +317,16 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	}
 
 	@Test
-	public void testUpdateObservation() {
+	public void testUpdateObservation() throws IOException {
 		indexSingleObservation();
-		ObservationIndexedSearchParamLastNEntity observationIndexEntity = myResourceIndexedObservationLastNDao.findAll().get(0);
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setLastNMax(10);
+		ObservationJson observationIndexEntity = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx).get(0);
 		assertEquals(SINGLE_OBSERVATION_PID, observationIndexEntity.getIdentifier());
 		assertEquals(SINGLE_SUBJECT_ID, observationIndexEntity.getSubject());
 		assertEquals(SINGLE_EFFECTIVEDTM, observationIndexEntity.getEffectiveDtm());
 
-		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SINGLE_SUBJECT_ID);
 		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
 		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
@@ -350,8 +351,9 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		updatedObservation.setCode(getObservationCode());
 
 		testObservationPersist.indexObservation(updatedObservation);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 
-		ObservationIndexedSearchParamLastNEntity updatedObservationEntity = myResourceIndexedObservationLastNDao.findByIdentifier(SINGLE_OBSERVATION_PID);
+		ObservationJson updatedObservationEntity = elasticsearchSvc.getObservationDocument(SINGLE_OBSERVATION_PID);
 		assertEquals("1234", updatedObservationEntity.getSubject());
 		assertEquals(newEffectiveDtm.getValue(), updatedObservationEntity.getEffectiveDtm());
 
@@ -412,6 +414,8 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 			}
 		);
+
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 

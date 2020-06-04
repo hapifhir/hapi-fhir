@@ -229,7 +229,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
 		CompositeValuesSourceBuilder<?> subjectValuesBuilder = new TermsValuesSourceBuilder("subject").field("subject");
-		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList();
+		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList<>();
 		compositeAggSubjectSources.add(subjectValuesBuilder);
 		CompositeAggregationBuilder compositeAggregationSubjectBuilder = new CompositeAggregationBuilder(GROUP_BY_SUBJECT, compositeAggSubjectSources);
 		compositeAggregationSubjectBuilder.subAggregation(createObservationCodeAggregationBuilder(theMaxNumberObservationsPerCode, theTopHitsInclude));
@@ -514,12 +514,12 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@VisibleForTesting
-	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
+	public List<ObservationJson> executeLastNWithAllFieldsForTest(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
 		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, null, t -> t, 100);
 	}
 
 	@VisibleForTesting
-	List<CodeJson> queryAllIndexedObservationCodes() throws IOException {
+	List<CodeJson> queryAllIndexedObservationCodesForTest() throws IOException {
 		SearchRequest codeSearchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
