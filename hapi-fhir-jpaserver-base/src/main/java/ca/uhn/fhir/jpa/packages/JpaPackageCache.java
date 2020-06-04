@@ -41,8 +41,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.ResourceUtil;
-import ca.uhn.fhir.util.StringNormalizer;
-import com.google.common.base.Charsets;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -87,11 +86,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.SearchBuilder.toPredicateArray;
+import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaPackageCache extends BasePackageCacheManager implements IHapiPackageCacheManager {
 
+	public static final String UTF8_BOM = "\uFEFF";
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPackageCache.class);
 	private final Map<FhirVersionEnum, FhirContext> myVersionToContext = Collections.synchronizedMap(new HashMap<>());
 	@PersistenceContext
@@ -243,7 +244,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					String contentsString;
 					try {
 						contents = packageFolder.fetchFile(nextFile);
-						contentsString = new String(contents, Charsets.UTF_8);
+						contentsString = toUtf8String(contents);
 					} catch (IOException e) {
 						throw new InternalErrorException(e);
 					}
@@ -594,7 +595,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		if (isNotBlank(thePackageSearchSpec.getDescription())) {
 			String searchTerm = "%" + thePackageSearchSpec.getDescription() + "%";
-			searchTerm = StringNormalizer.normalizeStringForSearchIndexing(searchTerm);
+			searchTerm = StringUtil.normalizeStringForSearchIndexing(searchTerm);
 			predicates.add(theCb.like(theRoot.get("myDescriptionUpper").as(String.class), searchTerm));
 		}
 
@@ -611,7 +612,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		return predicates;
 	}
-
 
 	@SuppressWarnings("unchecked")
 	public static List<String> getProcessingMessages(NpmPackage thePackage) {

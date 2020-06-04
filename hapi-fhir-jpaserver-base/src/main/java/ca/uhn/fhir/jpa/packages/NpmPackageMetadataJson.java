@@ -108,7 +108,7 @@ public class NpmPackageMetadataJson {
 		private String myDescription;
 		@JsonProperty("fhirVersion")
 		private String myFhirVersion;
-		@ApiModelProperty("The size of this package in bytes")
+		@ApiModelProperty(value = "The size of this package in bytes", example = "1000")
 		@JsonProperty("_bytes")
 		private long myBytes;
 

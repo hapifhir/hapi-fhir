@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.util.StringNormalizer;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -174,7 +174,7 @@ public class NpmPackageVersionEntity {
 
 	public void setDescription(String theDescription) {
 		myDescription = theDescription;
-		myDescriptionUpper = StringNormalizer.normalizeStringForSearchIndexing(theDescription);
+		myDescriptionUpper = StringUtil.normalizeStringForSearchIndexing(theDescription);
 	}
 
 	@Override

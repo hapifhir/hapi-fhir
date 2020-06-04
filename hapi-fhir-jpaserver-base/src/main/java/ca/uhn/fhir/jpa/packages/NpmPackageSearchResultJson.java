@@ -95,7 +95,7 @@ public class NpmPackageSearchResultJson {
 		private String myDescription;
 		@JsonProperty("fhirVersion")
 		private List<String> myFhirVersion;
-		@ApiModelProperty("The size of this package in bytes")
+		@ApiModelProperty(value = "The size of this package in bytes", example = "1000")
 		@JsonProperty("_bytes")
 		private long myBytes;
 

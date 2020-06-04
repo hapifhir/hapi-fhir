@@ -21,9 +21,12 @@ package ca.uhn.fhir.util;
  */
 
 import java.io.CharArrayWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
+import java.util.Arrays;
 
-public class StringNormalizer {
+public class StringUtil {
+
 	public static String normalizeStringForSearchIndexing(String theString) {
 		CharArrayWriter outBuffer = new CharArrayWriter(theString.length());
 
@@ -50,5 +53,15 @@ public class StringNormalizer {
 		return new String(outBuffer.toCharArray()).toUpperCase();
 	}
 
+
+	public static String toUtf8String(byte[] theBytes) {
+		byte[] bytes = theBytes;
+		if (theBytes.length >= 3) {
+			if (theBytes[0] == -17 && theBytes[1] == -69 && theBytes[2] == -65) {
+				bytes = Arrays.copyOfRange(theBytes, 3, theBytes.length);
+			}
+		}
+		return new String(bytes, StandardCharsets.UTF_8);
+	}
 
 }

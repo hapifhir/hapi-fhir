@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.cache.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -193,7 +194,11 @@ public abstract class BaseConfig {
 
 	@Bean
 	public IHapiPackageCacheManager packageCacheManager() {
-		return new JpaPackageCache();
+		JpaPackageCache retVal = new JpaPackageCache();
+		retVal.getPackageServers().clear();
+		retVal.getPackageServers().add(FilesystemPackageCacheManager.PRIMARY_SERVER);
+		retVal.getPackageServers().add(FilesystemPackageCacheManager.SECONDARY_SERVER);
+		return retVal;
 	}
 
 	@Bean

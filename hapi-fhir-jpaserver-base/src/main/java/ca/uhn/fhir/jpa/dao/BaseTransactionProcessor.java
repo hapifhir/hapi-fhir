@@ -99,6 +99,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -768,14 +769,14 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = toMatchUrl(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						String patchBody = null;
-						String contentType = null;
+						String contentType;
 						IBaseParameters patchBodyParameters = null;
 						PatchTypeEnum patchType = null;
 
 						if (res instanceof IBaseBinary) {
 							IBaseBinary binary = (IBaseBinary) res;
 							if (binary.getContent() != null && binary.getContent().length > 0) {
-								patchBody = new String(binary.getContent(), Charsets.UTF_8);
+								patchBody = toUtf8String(binary.getContent());
 							}
 							contentType = binary.getContentType();
 							patchType = PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(myContext, contentType);
