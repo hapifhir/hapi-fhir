@@ -125,12 +125,10 @@ public abstract class BaseEmpiProvider {
 		}
 	}
 
-
-	protected void validateNotLinkParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId) {
+	protected void validateNotDuplicateParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId) {
 		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
 		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
 	}
-
 
 	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());

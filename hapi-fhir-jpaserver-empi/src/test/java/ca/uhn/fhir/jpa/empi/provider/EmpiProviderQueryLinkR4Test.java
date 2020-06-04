@@ -90,6 +90,11 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testNotDuplicate() {
 		{
+			Parameters result = myEmpiProviderR4.getDuplicatePersons(myRequestDetails);
+			List<Parameters.ParametersParameterComponent> list = result.getParameter();
+			assertThat(list, hasSize(1));
+		}
+		{
 			Parameters result = myEmpiProviderR4.notDuplicate(myPerson1Id, myPerson2Id, myRequestDetails);
 			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 			assertEquals("success", result.getParameterFirstRep().getName());

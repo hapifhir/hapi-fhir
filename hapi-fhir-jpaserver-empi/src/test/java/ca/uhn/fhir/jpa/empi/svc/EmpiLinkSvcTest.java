@@ -88,6 +88,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 		myEmpiLinkSvc.updateLink(person, target, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPid, targetPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		assertLinkCount(1);
 	}
 
 	@Test
@@ -105,6 +106,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 		myEmpiLinkSvc.updateLink(person, target, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPid, targetPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		assertLinkCount(1);
 	}
 
 	private void saveNoMatchLink(Long thePersonPid, Long theTargetPid) {

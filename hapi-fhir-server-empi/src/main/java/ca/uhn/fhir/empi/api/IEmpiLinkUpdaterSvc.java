@@ -27,5 +27,5 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 public interface IEmpiLinkUpdaterSvc {
 	IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiTransactionContext theEmpiContext);
 
-	IBaseParameters notDuplicateperson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext);
+	IBaseParameters notDuplicatePerson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext);
 }

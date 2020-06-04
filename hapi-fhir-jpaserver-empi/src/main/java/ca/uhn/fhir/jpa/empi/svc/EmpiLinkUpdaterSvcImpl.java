@@ -118,7 +118,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public IBaseParameters notDuplicateperson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext) {
+	public IBaseParameters notDuplicatePerson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext) {
 		validateNotDuplicatePersonRequest(thePerson, theTarget);
 
 		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
