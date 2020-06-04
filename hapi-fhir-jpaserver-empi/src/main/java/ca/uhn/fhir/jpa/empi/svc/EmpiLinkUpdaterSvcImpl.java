@@ -33,8 +33,11 @@ import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,15 +96,15 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 	private void validateUpdateLinkRequest(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, String theTargetType) {
 		String personType = myFhirContext.getResourceType(thePerson);
 		if (theMatchResult != EmpiMatchResultEnum.NO_MATCH &&
-		theMatchResult != EmpiMatchResultEnum.MATCH) {
+			theMatchResult != EmpiMatchResultEnum.MATCH) {
 			throw new InvalidRequestException("Match Result may only be set to " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
 		}
 
 		if (!"Person".equals(personType)) {
-			throw new InvalidRequestException("First argument to updateLink must be a Person.  Was " + personType);
+			throw new InvalidRequestException("First argument to " + ProviderConstants.EMPI_UPDATE_LINK + " must be a Person.  Was " + personType);
 		}
 		if (!EmpiUtil.supportedTargetType(theTargetType)) {
-			throw new InvalidRequestException("Second argument to updateLink must be a Patient or Practitioner.  Was " + theTargetType);
+			throw new InvalidRequestException("Second argument to " + ProviderConstants.EMPI_UPDATE_LINK + " must be a Patient or Practitioner.  Was " + theTargetType);
 		}
 
 		if (!EmpiUtil.isEmpiManaged(thePerson)) {
@@ -113,8 +116,45 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		}
 	}
 
+	@Transactional
 	@Override
 	public IBaseParameters notDuplicateperson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext) {
-		return null;
+		validateNotDuplicatePersonRequest(thePerson, theTarget);
+
+		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
+		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
+
+		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personId, targetId);
+		if (!oEmpiLink.isPresent()) {
+			throw new InvalidRequestException("No link exists between " + thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless());
+		}
+
+		EmpiLink empiLink = oEmpiLink.get();
+		if (empiLink.isPossibleDuplicate()) {
+			throw new InvalidRequestException(thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless() + " are not possible duplicates.");
+		}
+		empiLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
+		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		myEmpiLinkDaoSvc.save(empiLink);
+
+		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
+		retval.addParameter("success", true);
+		return retval;
+	}
+
+	private void validateNotDuplicatePersonRequest(IAnyResource thePerson, IAnyResource theTarget) {
+		String personType = myFhirContext.getResourceType(thePerson);
+		String targetType = myFhirContext.getResourceType(theTarget);
+		if (!"Person".equals(personType)) {
+			throw new InvalidRequestException("First argument to " + ProviderConstants.EMPI_UPDATE_LINK + " must be a Person.  Was " + personType);
+		}
+		if (!"Person".equals(targetType)) {
+			throw new InvalidRequestException("Second argument to " + ProviderConstants.EMPI_UPDATE_LINK + " must be a Person .  Was " + targetType);
+		}
+
+		if (!EmpiUtil.isEmpiManaged(thePerson) || !EmpiUtil.isEmpiManaged(theTarget)) {
+			throw new InvalidRequestException("Only EMPI Managed Person resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi");
+		}
+
 	}
 }

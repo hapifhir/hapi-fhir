@@ -136,7 +136,6 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return (Parameters) myEmpiLinkQuerySvc.getPossibleDuplicates(createEmpiContext(theRequestDetails));
 	}
 
-	// FIXME KHS Dstu3
 	@Operation(name = ProviderConstants.EMPI_NOT_DUPLICATE, idempotent = true)
 	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, min = 0, max = 1) StringType thePersonId,
 											 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, min = 0, max = 1) StringType theTargetId,

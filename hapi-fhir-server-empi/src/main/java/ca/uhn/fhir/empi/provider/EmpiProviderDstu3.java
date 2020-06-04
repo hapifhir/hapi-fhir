@@ -134,4 +134,18 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
 		return (Parameters) myEmpiLinkQuerySvc.getPossibleDuplicates(createEmpiContext(theRequestDetails));
 	}
+
+	@Operation(name = ProviderConstants.EMPI_NOT_DUPLICATE, idempotent = true)
+	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, min = 0, max = 1) StringType thePersonId,
+																		  @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, min = 0, max = 1) StringType theTargetId,
+																		  ServletRequestDetails theRequestDetails) {
+
+		validateNotLinkParameters(thePersonId, theTargetId);
+		IAnyResource person = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
+		IAnyResource target = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
+		validateSameVersion(person, thePersonId);
+		validateSameVersion(target, theTargetId);
+
+		return (Parameters) myEmpiLinkUpdaterSvc.notDuplicateperson(person, target, createEmpiContext(theRequestDetails));
+	}
 }
