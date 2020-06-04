@@ -135,9 +135,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myPartitionConfigSvc != null) {
 			myPartitionConfigSvc.clearCaches();
 		}
-		if (myIdHelperService != null) {
-			myIdHelperService.clearCache();
-		}
 		if (myMemoryCacheService != null) {
 			myMemoryCacheService.invalidateAllCaches();
 		}

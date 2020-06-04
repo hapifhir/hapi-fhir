@@ -1847,7 +1847,12 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
 	}
 
+	/**
+	 * There is nothing here that isn't tested elsewhere, but it's useful for testing a large transaction followed
+	 * by a large cascading delete
+	 */
 	@Test
+	@Ignore
 	public void testTransactionFromBundle_Slow() throws Exception {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 		myDaoConfig.setMaximumDeleteConflictQueryCount(10000);
