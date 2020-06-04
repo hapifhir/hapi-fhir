@@ -173,7 +173,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public List<EmpiLink> findEmpiLinksByPersonId(IBaseResource thePersonResource) {
-		@Nullable Long pid = myIdHelperService.getPidOrNull(thePersonResource);
+		Long pid = myIdHelperService.getPidOrNull(thePersonResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
@@ -195,7 +195,7 @@ public class EmpiLinkDaoSvc {
    }
 
 	public List<EmpiLink> findEmpiLinksByTarget(Patient theTargetResource) {
-		@Nullable Long pid = myIdHelperService.getPidOrNull(theTargetResource);
+		Long pid = myIdHelperService.getPidOrNull(theTargetResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
