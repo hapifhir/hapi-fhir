@@ -46,8 +46,8 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		Person person2 = createPerson();
 		myPerson2Id = new StringType(person2.getIdElement().toVersionless().getValue());
 		Long person2Pid = myIdHelperService.getPidOrNull(person2);
-		EmpiLink empiLink = new EmpiLink().setPersonPid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
-		myEmpiLinkDaoSvc.save(empiLink);
+		EmpiLink possibleDuplicateEmpiLink = new EmpiLink().setPersonPid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
+		myEmpiLinkDaoSvc.save(possibleDuplicateEmpiLink);
 	}
 
 	@Test
@@ -98,8 +98,6 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(0));
 	}
-
-	// FIXME KHS test that no_link is never marked as duplicate again
 
 	@Test
 	public void testNotDuplicateBadId() {

@@ -130,8 +130,8 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		}
 
 		EmpiLink empiLink = oEmpiLink.get();
-		if (empiLink.isPossibleDuplicate()) {
-			throw new InvalidRequestException(thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless() + " are not possible duplicates.");
+		if (!empiLink.isPossibleDuplicate()) {
+			throw new InvalidRequestException(thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless() + " are not linked as POSSIBLE_DUPLICATE.");
 		}
 		empiLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
