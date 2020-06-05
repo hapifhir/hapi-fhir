@@ -80,7 +80,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 
 		// Unknown base of StructureDefinitions
 		try {
-			igInstaller.install(new NpmInstallationSpec().setPackageName("erroneous-ig").setPackageVersion("1.0.2").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setContents(bytes));
+			igInstaller.install(new PackageInstallationSpec().setPackageName("erroneous-ig").setPackageVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setContents(bytes));
 			fail();
 		} catch (ImplementationGuideInstallationException e) {
 			Assert.assertThat(e.getMessage(), containsString("Failure when generating snapshot of StructureDefinition"));
@@ -98,10 +98,10 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.zib2017/1.3.x", bytes);
 
 		daoConfig.setAllowExternalReferences(true);
-		NpmInstallationSpec spec = new NpmInstallationSpec()
+		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setPackageName("nictiz.fhir.nl.stu3.questionnaires")
 			.setPackageVersion("1.0.2")
-			.setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setFetchDependencies(true)
 			.addDependencyExclude("hl7\\.fhir\\.[a-zA-Z0-9]+\\.core");
 		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
@@ -126,7 +126,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.zib2017/1.3.x", bytes);
 
 		daoConfig.setAllowExternalReferences(true);
-		igInstaller.install(new NpmInstallationSpec().setPackageName("nictiz.fhir.nl.stu3.questionnaires").setPackageVersion("1.0.2").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(false));
+		igInstaller.install(new PackageInstallationSpec().setPackageName("nictiz.fhir.nl.stu3.questionnaires").setPackageVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(false));
 
 		runInTransaction(() -> {
 			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
@@ -142,7 +142,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 		bytes = loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
 		myFakeNpmServlet.getResponses().put("/foo.tgz", bytes);
 
-		igInstaller.install(new NpmInstallationSpec()
+		igInstaller.install(new PackageInstallationSpec()
 			.setPackageName("nictiz.fhir.nl.stu3.questionnaires")
 			.setPackageVersion("1.0.2")
 			.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
@@ -158,7 +158,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 	public void testInstallPackageByUrl_Classpath() {
 		byte[] bytes;
 
-		igInstaller.install(new NpmInstallationSpec()
+		igInstaller.install(new PackageInstallationSpec()
 			.setPackageName("nictiz.fhir.nl.stu3.questionnaires")
 			.setPackageVersion("1.0.2")
 			.setPackageUrl("classpath:/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz")
@@ -178,7 +178,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 		myFakeNpmServlet.getResponses().put("/foo.tgz", bytes);
 
 		try {
-			igInstaller.install(new NpmInstallationSpec()
+			igInstaller.install(new PackageInstallationSpec()
 				.setPackageName("blah")
 				.setPackageVersion("1.0.2")
 				.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
@@ -193,7 +193,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 	@Test
 	public void testInstallPackageByUrl_FailingUrl() {
 		try {
-			igInstaller.install(new NpmInstallationSpec()
+			igInstaller.install(new PackageInstallationSpec()
 				.setPackageName("blah")
 				.setPackageVersion("1.0.2")
 				.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
@@ -210,6 +210,6 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 		byte[] bytes = loadResourceAsByteArray("/packages/basisprofil.de.tar.gz");
 		myFakeNpmServlet.getResponses().put("/basisprofil.de/0.2.40", bytes);
 
-		igInstaller.install(new NpmInstallationSpec().setPackageName("basisprofil.de").setPackageVersion("0.2.40").setInstallMode(NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL));
+		igInstaller.install(new PackageInstallationSpec().setPackageName("basisprofil.de").setPackageVersion("0.2.40").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL));
 	}
 }

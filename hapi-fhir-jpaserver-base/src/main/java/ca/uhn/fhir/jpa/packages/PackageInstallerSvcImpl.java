@@ -119,7 +119,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @param theInstallationSpec The details about what should be installed
 	 */
 	@Override
-	public PackageInstallOutcomeJson install(NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
+	public PackageInstallOutcomeJson install(PackageInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		PackageInstallOutcomeJson retVal = new PackageInstallOutcomeJson();
 		if (enabled) {
 			try {
@@ -134,7 +134,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
 				}
 
-				if (theInstallationSpec.getInstallMode() == NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
 					install(npmPackage, theInstallationSpec);
 				}
 
@@ -153,7 +153,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 *
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
-	private void install(NpmPackage npmPackage, NpmInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
+	private void install(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec) throws ImplementationGuideInstallationException {
 		String name = npmPackage.getNpm().get("name").getAsString();
 		String version = npmPackage.getNpm().get("version").getAsString();
 
@@ -190,7 +190,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private void fetchAndInstallDependencies(NpmPackage npmPackage, NpmInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
+	private void fetchAndInstallDependencies(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
 		if (npmPackage.getNpm().has("dependencies")) {
 			JsonElement dependenciesElement = npmPackage.getNpm().get("dependencies");
 			Map<String, String> dependencies = new Gson().fromJson(dependenciesElement, HashMap.class);
@@ -218,7 +218,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					// installing the package
 					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
 
-					if (theInstallationSpec.getInstallMode() == NpmInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
 						install(dependency, theInstallationSpec);
 					}
 

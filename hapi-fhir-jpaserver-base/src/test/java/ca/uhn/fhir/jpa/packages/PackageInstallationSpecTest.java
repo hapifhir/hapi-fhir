@@ -8,15 +8,15 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
-public class NpmInstallationSpecTest {
+public class PackageInstallationSpecTest {
 
 	@Test
 	public void testExampleSupplier() throws IOException {
-		NpmInstallationSpec output = new NpmInstallationSpec.ExampleSupplier().get();
+		PackageInstallationSpec output = new PackageInstallationSpec.ExampleSupplier().get();
 		String json = JsonUtil.serialize(output);
 		assertThat(json, containsString("\"name\" : \"hl7.fhir.us.core\""));
 
-		output = new NpmInstallationSpec.ExampleSupplier2().get();
+		output = new PackageInstallationSpec.ExampleSupplier2().get();
 		json = JsonUtil.serialize(output);
 		assertThat(json, containsString("\"packageUrl\" : \"classpath:my-resources.tgz\""));
 	}

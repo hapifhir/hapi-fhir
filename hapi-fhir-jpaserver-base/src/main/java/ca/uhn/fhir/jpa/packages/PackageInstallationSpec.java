@@ -34,17 +34,17 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @ApiModel(
-	value = "NpmInstallationSpec",
+	value = "PackageInstallationSpec",
 	description =
 		"Defines a set of instructions for package installation"
 )
 @JsonPropertyOrder({
 	"name", "version", "packageUrl", "installMode", "installResourceTypes", "validationMode"
 })
-@ExampleSupplier({NpmInstallationSpec.ExampleSupplier.class, NpmInstallationSpec.ExampleSupplier2.class})
+@ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class NpmInstallationSpec {
+public class PackageInstallationSpec {
 
 	@ApiModelProperty("The direct package URL")
 	@JsonProperty("packageUrl")
@@ -81,7 +81,7 @@ public class NpmInstallationSpec {
 		return myFetchDependencies;
 	}
 
-	public NpmInstallationSpec setFetchDependencies(boolean theFetchDependencies) {
+	public PackageInstallationSpec setFetchDependencies(boolean theFetchDependencies) {
 		myFetchDependencies = theFetchDependencies;
 		return this;
 	}
@@ -90,7 +90,7 @@ public class NpmInstallationSpec {
 		return myPackageUrl;
 	}
 
-	public NpmInstallationSpec setPackageUrl(String thePackageUrl) {
+	public PackageInstallationSpec setPackageUrl(String thePackageUrl) {
 		myPackageUrl = thePackageUrl;
 		return this;
 	}
@@ -99,7 +99,7 @@ public class NpmInstallationSpec {
 		return myInstallMode;
 	}
 
-	public NpmInstallationSpec setInstallMode(InstallModeEnum theInstallMode) {
+	public PackageInstallationSpec setInstallMode(InstallModeEnum theInstallMode) {
 		myInstallMode = theInstallMode;
 		return this;
 	}
@@ -115,7 +115,7 @@ public class NpmInstallationSpec {
 		return myPackageName;
 	}
 
-	public NpmInstallationSpec setPackageName(String thePackageName) {
+	public PackageInstallationSpec setPackageName(String thePackageName) {
 		myPackageName = thePackageName;
 		return this;
 	}
@@ -124,7 +124,7 @@ public class NpmInstallationSpec {
 		return myPackageVersion;
 	}
 
-	public NpmInstallationSpec setPackageVersion(String thePackageVersion) {
+	public PackageInstallationSpec setPackageVersion(String thePackageVersion) {
 		myPackageVersion = thePackageVersion;
 		return this;
 	}
@@ -133,17 +133,17 @@ public class NpmInstallationSpec {
 		return myContents;
 	}
 
-	public NpmInstallationSpec setContents(byte[] theContents) {
+	public PackageInstallationSpec setContents(byte[] theContents) {
 		myContents = theContents;
 		return this;
 	}
 
-	public NpmInstallationSpec addDependencyExclude(String theExclude) {
+	public PackageInstallationSpec addDependencyExclude(String theExclude) {
 		getDependencyExcludes().add(theExclude);
 		return this;
 	}
 
-	public NpmInstallationSpec addInstallResourceTypes(String... theResourceTypes) {
+	public PackageInstallationSpec addInstallResourceTypes(String... theResourceTypes) {
 		for (String next : theResourceTypes) {
 			getInstallResourceTypes().add(next);
 		}
@@ -160,11 +160,11 @@ public class NpmInstallationSpec {
 		AVAILABLE
 	}
 
-	public static class ExampleSupplier implements Supplier<NpmInstallationSpec> {
+	public static class ExampleSupplier implements Supplier<PackageInstallationSpec> {
 
 		@Override
-		public NpmInstallationSpec get() {
-			return new NpmInstallationSpec()
+		public PackageInstallationSpec get() {
+			return new PackageInstallationSpec()
 				.setPackageName("hl7.fhir.us.core")
 				.setPackageVersion("3.1.0")
 				.setInstallMode(InstallModeEnum.STORE_ONLY)
@@ -172,11 +172,11 @@ public class NpmInstallationSpec {
 		}
 	}
 
-	public static class ExampleSupplier2 implements Supplier<NpmInstallationSpec> {
+	public static class ExampleSupplier2 implements Supplier<PackageInstallationSpec> {
 
 		@Override
-		public NpmInstallationSpec get() {
-			return new NpmInstallationSpec()
+		public PackageInstallationSpec get() {
+			return new PackageInstallationSpec()
 				.setPackageName("com.example.my-resources")
 				.setPackageVersion("1.0")
 				.setPackageUrl("classpath:/my-resources.tgz")

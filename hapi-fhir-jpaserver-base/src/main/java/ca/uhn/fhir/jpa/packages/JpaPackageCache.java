@@ -382,7 +382,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	public NpmPackage installPackage(NpmInstallationSpec theInstallationSpec) throws IOException {
+	public NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException {
 		Validate.notBlank(theInstallationSpec.getPackageName(), "thePackageId must not be blank");
 		Validate.notBlank(theInstallationSpec.getPackageVersion(), "thePackageVersion must not be blank");
 

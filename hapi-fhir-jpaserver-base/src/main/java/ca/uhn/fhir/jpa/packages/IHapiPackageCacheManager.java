@@ -27,14 +27,11 @@ import org.hl7.fhir.utilities.cache.IPackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
-	NpmPackage installPackage(NpmInstallationSpec theInstallationSpec) throws IOException;
+	NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException;
 
 	IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
