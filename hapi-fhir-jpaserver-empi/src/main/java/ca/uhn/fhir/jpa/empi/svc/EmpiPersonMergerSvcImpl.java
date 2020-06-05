@@ -68,6 +68,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		Long fromPersonPid = myIdHelperService.getPidOrThrowException(theFromPerson);
 		addMergeLink(fromPersonPid, toPersonPid);
 		myPersonHelper.deactivatePerson(theFromPerson);
+
 		refreshLinksAndUpdatePerson(theFromPerson, theEmpiTransactionContext);
 
 		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
