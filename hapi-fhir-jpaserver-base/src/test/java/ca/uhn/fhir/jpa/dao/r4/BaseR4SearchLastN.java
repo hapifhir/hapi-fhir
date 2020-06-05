@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,6 +77,16 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myPlatformTransactionManager;
+	}
+
+	@Before
+	public void beforeEnableLastN() {
+		myDaoConfig.setLastNEnabled(true);
+	}
+
+	@After
+	public void afterDisableLastN() {
+		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 	}
 
 	protected final String observationCd0 = "code0";
