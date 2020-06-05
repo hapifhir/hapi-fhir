@@ -82,10 +82,10 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	}
 
 	private String getQueryValue(Object[] methodParams) {
-		if (methodParams[queryBodyParamIndex] != null) {
+		if (queryBodyParamIndex != null && methodParams[queryBodyParamIndex] != null) {
 			return (String) methodParams[queryBodyParamIndex];
 		}
-		if (methodParams[queryUrlParamIndex] != null) {
+		if (queryUrlParamIndex != null && methodParams[queryUrlParamIndex] != null) {
 			return (String) methodParams[queryUrlParamIndex];
 		}
 		return null;
