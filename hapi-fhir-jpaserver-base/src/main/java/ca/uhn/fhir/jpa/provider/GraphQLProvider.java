@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -109,15 +110,20 @@ public class GraphQLProvider {
 		myStorageServices = theStorageServices;
 	}
 
-	@GraphQL
-	public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String queryUrl, @GraphQLQueryBody String queryBody) {
+	@GraphQL(type=RequestTypeEnum.GET)
+	public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String queryUrl) {
 		if (queryUrl != null) {
 			return processGraphQLRequest(theRequestDetails, theId, queryUrl);
 		}
+		throw new InvalidRequestException("Unable to parse empty GraphQL expression");
+	}
+
+	@GraphQL(type=RequestTypeEnum.POST)
+	public String processGraphQlPostRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String queryBody) {
 		if (queryBody != null) {
 			return processGraphQLRequest(theRequestDetails, theId, queryBody);
 		}
-		throw new InvalidRequestException("Unable to parse GraphQL Expression: ");
+		throw new InvalidRequestException("Unable to parse empty GraphQL expression");
 	}
 
 	public String processGraphQLRequest(ServletRequestDetails theRequestDetails, IIdType theId, String theQuery) {

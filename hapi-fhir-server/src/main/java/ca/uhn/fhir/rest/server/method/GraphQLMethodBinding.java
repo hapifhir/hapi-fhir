@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -45,15 +46,17 @@ import java.lang.reflect.Method;
 public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 
 	private final Integer myIdParamIndex;
-	private final Integer queryUrlParamIndex;
-	private final Integer queryBodyParamIndex;
+	private final Integer myQueryUrlParamIndex;
+	private final Integer myQueryBodyParamIndex;
+	private final RequestTypeEnum myMethodRequestType;
 
-	public GraphQLMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+	public GraphQLMethodBinding(Method theMethod, RequestTypeEnum theMethodRequestType, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, theProvider);
 
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
-		queryUrlParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
-		queryBodyParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryBody.class);
+		myQueryUrlParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
+		myQueryBodyParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryBody.class);
+		myMethodRequestType = theMethodRequestType;
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 
 	@Override
 	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation())) {
+		if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation()) && myMethodRequestType.equals(theRequest.getRequestType())) {
 			return MethodMatchEnum.EXACT;
 		}
 
@@ -82,11 +85,11 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	}
 
 	private String getQueryValue(Object[] methodParams) {
-		if (queryBodyParamIndex != null && methodParams[queryBodyParamIndex] != null) {
-			return (String) methodParams[queryBodyParamIndex];
-		}
-		if (queryUrlParamIndex != null && methodParams[queryUrlParamIndex] != null) {
-			return (String) methodParams[queryUrlParamIndex];
+		switch (myMethodRequestType) {
+			case POST:
+				return (String) methodParams[myQueryBodyParamIndex];
+			case GET:
+				return (String) methodParams[myQueryUrlParamIndex];
 		}
 		return null;
 	}
