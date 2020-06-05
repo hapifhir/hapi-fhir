@@ -29,6 +29,12 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	}
 
 	@Test
+	public void testUcum_LookupCode_Good2() {
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(new ValidationSupportContext(myCtx.getValidationSupport()), "http://unitsofmeasure.org", "kg/m2");
+		assertEquals(true, outcome.isFound());
+	}
+
+	@Test
 	public void testUcum_LookupCode_Bad() {
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(new ValidationSupportContext(myCtx.getValidationSupport()), "http://unitsofmeasure.org", "AAAAA");
 		assertNull( outcome);

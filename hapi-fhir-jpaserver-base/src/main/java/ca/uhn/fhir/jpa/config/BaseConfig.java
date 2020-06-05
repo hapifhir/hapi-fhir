@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
@@ -184,6 +185,11 @@ public abstract class BaseConfig {
 	@Lazy
 	public BinaryStorageInterceptor binaryStorageInterceptor() {
 		return new BinaryStorageInterceptor();
+	}
+
+	@Bean
+	public MemoryCacheService memoryCacheService() {
+		return new MemoryCacheService();
 	}
 
 	@Bean

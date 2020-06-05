@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -54,6 +55,11 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	@Autowired
 	private IdHelperService myIdHelperService;
 
+	@Before
+	public void before() {
+		super.loadEmpiSearchParameters();
+	}
+
 	@Test
 	public void testCreatePatient() throws InterruptedException {
 		myEmpiHelper.createWithLatch(new Patient());
@@ -76,7 +82,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testDeletePersonDeletesLinks() throws InterruptedException {
 		myEmpiHelper.createWithLatch(new Patient());
 		assertLinkCount(1);
-		Person person = getOnlyPerson();
+		Person person = getOnlyActivePerson();
 		myPersonDao.delete(person.getIdElement());
 		assertLinkCount(0);
 	}

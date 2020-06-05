@@ -243,7 +243,7 @@ The operation returns the updated `Person` resource.  Note that this is the only
 
 ## Merge Persons
 
-The `$empi-merge-persons` operation can be used to merge one Person resource with another.  When doing this, you will need to decide which resource to delete and which one to keep.  Data from the personToKeep will be given precedence over data in the personToDelete. This operation takes the following parameters:
+The `$empi-merge-persons` operation can be used to merge one Person resource with another.  When doing this, you will need to decide which resource to merge from and which one to merge to.  In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).  However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson. This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -256,15 +256,15 @@ The `$empi-merge-persons` operation can be used to merge one Person resource wit
     </thead>
     <tbody>
         <tr>
-            <td>personIdToDelete</td>
+            <td>fromPersonId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Person resource to merge data from.  This resource will be deleted after the merge.
+                The id of the Person resource to merge data from.  "active" will be set to "false" on this resource after the merge.
             </td>
         </tr>
         <tr>
-            <td>personIdToKeep</td>
+            <td>toPersonId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
@@ -288,10 +288,10 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "personIdToDelete",
+    "name": "fromPersonId",
     "valueString": "Person/123"
   }, {
-    "name": "personIdToKeep",
+    "name": "toPersonId",
     "valueString": "Patient/128"
   } ]
 }

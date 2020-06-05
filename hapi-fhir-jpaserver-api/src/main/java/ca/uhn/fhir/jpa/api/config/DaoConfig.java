@@ -193,6 +193,34 @@ public class DaoConfig {
 	 */
 	private boolean myDeleteEnabled = true;
 
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
+	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
+	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
+	 *
+	 * @since 5.1.0
+	 */
+	public boolean isLastNEnabled() {
+		return myLastNEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
+	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
+	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
+	 *
+	 * @since 5.1.0
+	 */
+	public void setLastNEnabled(boolean theLastNEnabled) {
+		myLastNEnabled = theLastNEnabled;
+	}
+
+	/**
+	 * @since 5.1.0
+	 */
+	private boolean myLastNEnabled = false;
 
 	/**
 	 * Constructor

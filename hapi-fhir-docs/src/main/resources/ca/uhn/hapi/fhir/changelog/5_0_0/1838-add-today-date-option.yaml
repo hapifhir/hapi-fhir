@@ -1,0 +1,7 @@
+---
+type: add
+issue: 1838
+title: "Date searches can be performed relative to 'now' using the `%now` parameter value.  For example, to search for Procedures with a date later than now, you can search for `/Procedure?date=ge%now`.
+   Note the '%' will need to be URL escaped so the actual URL will be `/Procedure?date=ge%25now`.
+   The way this works is the server substitutes `%now` with the current date and time in the standard FHIR format `yyyy-MM-ddTHH:mm:ss` before submitting it to the FHIR Storage module.
+   Similarly date searches can be performed relative to 'today' using the '%today' parameter value.  '%today' works the same as '%now' except that it searches as a 'date' type as opposed to a 'dateTime' type."
