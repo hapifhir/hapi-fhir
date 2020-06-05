@@ -535,7 +535,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		 * stack and run a subquery
 		 */
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theSubResourceName, theChain);
-		if (nextParamDef != null && !theChain.startsWith("_")) {
+		if (nextParamDef != null && !theChain.startsWith("_") && !JpaSystemProperties.isOptmizeSingleElementInExpression()) {
 			myQueryStack.pushIndexTableSubQuery();
 		} else {
 			myQueryStack.pushResourceTableSubQuery(theSubResourceName);
