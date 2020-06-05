@@ -99,7 +99,6 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			.map(this::personLinkFromEmpiLink)
 			.collect(Collectors.toList());
 		myPersonHelper.setLinks(thePersonResource, newLinks);
-		myEmpiResourceDaoSvc.updatePerson(thePersonResource);
 		if (newLinks.size() > origLinkCount) {
 			log(theEmpiTransactionContext, thePersonResource.getIdElement().toVersionless() + " links increased from " + origLinkCount + " to " + newLinks.size());
 		} else if (newLinks.size() < origLinkCount) {

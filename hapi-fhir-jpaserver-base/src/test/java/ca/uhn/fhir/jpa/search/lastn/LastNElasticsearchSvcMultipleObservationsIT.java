@@ -12,8 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.*;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,7 +33,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
 
-	private FhirContext myFhirContext = FhirContext.forR4();
+	private final FhirContext myFhirContext = FhirContext.forR4();
 
 
 	@BeforeClass
@@ -53,8 +51,10 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	@After
 	public void after() throws IOException {
-		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
 		searchParameterMap.setLastNMax(3);
 
-		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, myFhirContext);
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
 
 		assertEquals(60, observations.size());
 
@@ -305,35 +305,33 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	private void createMultiplePatientsAndObservations() throws IOException {
 		// Create CodeableConcepts for two Codes, each with three codings.
 		String codeableConceptId1 = UUID.randomUUID().toString();
-		CodeableConcept codeableConceptField1 = new CodeableConcept().setText("Test Codeable Concept Field for First Code");
-		codeableConceptField1.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-1 display"));
-		CodeJson codeJson1 = new CodeJson(codeableConceptField1, codeableConceptId1);
-		String codeJson1Document = ourMapperNonPrettyPrint.writeValueAsString(codeJson1);
+		CodeJson codeJson1 = new CodeJson();
+		codeJson1.setCodeableConceptText("Test Codeable Concept Field for First Code");
+		codeJson1.setCodeableConceptId(codeableConceptId1);
+		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-1 display");
 
 		String codeableConceptId2 = UUID.randomUUID().toString();
-		CodeableConcept codeableConceptField2 = new CodeableConcept().setText("Test Codeable Concept Field for Second Code");
-		codeableConceptField2.addCoding(new Coding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-2 display"));
-		CodeJson codeJson2 = new CodeJson(codeableConceptField2, codeableConceptId2);
-		String codeJson2Document = ourMapperNonPrettyPrint.writeValueAsString(codeJson2);
+		CodeJson codeJson2 = new CodeJson();
+		codeJson2.setCodeableConceptText("Test Codeable Concept Field for Second Code");
+		codeJson2.setCodeableConceptId(codeableConceptId1);
+		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-2 display");
 
 		// Create CodeableConcepts for two categories, each with three codings.
-		List<Coding> category1 = new ArrayList<>();
 		// Create three codings and first category CodeableConcept
-		category1.add(new Coding("http://mycodes.org/fhir/observation-category", "test-heart-rate", "test-heart-rate display"));
-		category1.add(new Coding("http://myalternatecodes.org/fhir/observation-category", "test-alt-heart-rate", "test-alt-heart-rate display"));
-		category1.add(new Coding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-heart-rate", "test-2nd-alt-heart-rate display"));
-		List<CodeableConcept> categoryConcepts1 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().setText("Test Codeable Concept Field for first category");
-		categoryCodeableConcept1.setCoding(category1);
+		List<CodeJson> categoryConcepts1 = new ArrayList<>();
+		CodeJson categoryCodeableConcept1 = new CodeJson();
+		categoryCodeableConcept1.setCodeableConceptText("Test Codeable Concept Field for first category");
+		categoryCodeableConcept1.addCoding("http://mycodes.org/fhir/observation-category", "test-heart-rate", "test-heart-rate display");
+		categoryCodeableConcept1.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-heart-rate", "test-alt-heart-rate display");
+		categoryCodeableConcept1.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-heart-rate", "test-2nd-alt-heart-rate display");
 		categoryConcepts1.add(categoryCodeableConcept1);
 		// Create three codings and second category CodeableConcept
-		List<Coding> category2 = new ArrayList<>();
-		category2.add(new Coding("http://mycodes.org/fhir/observation-category", "test-vital-signs", "test-vital-signs display"));
-		category2.add(new Coding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "test-alt-vitals display"));
-		category2.add(new Coding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals", "test-2nd-alt-vitals display"));
-		List<CodeableConcept> categoryConcepts2 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept2 = new CodeableConcept().setText("Test Codeable Concept Field for second category");
-		categoryCodeableConcept2.setCoding(category2);
+		List<CodeJson> categoryConcepts2 = new ArrayList<>();
+		CodeJson categoryCodeableConcept2 = new CodeJson();
+		categoryCodeableConcept2.setCodeableConceptText("Test Codeable Concept Field for second category");
+		categoryCodeableConcept2.addCoding("http://mycodes.org/fhir/observation-category", "test-vital-signs", "test-vital-signs display");
+		categoryCodeableConcept2.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "test-alt-vitals display");
+		categoryCodeableConcept2.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals", "test-2nd-alt-vitals display");
 		categoryConcepts2.add(categoryCodeableConcept2);
 
 		for (int patientCount = 0; patientCount < 10; patientCount++) {
@@ -349,14 +347,14 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 				if (entryCount % 2 == 1) {
 					observationJson.setCategories(categoryConcepts1);
-					observationJson.setCode(codeableConceptField1);
+					observationJson.setCode(codeJson1);
 					observationJson.setCode_concept_id(codeableConceptId1);
-					assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX, codeableConceptId1, codeJson1Document, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
+					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId1, codeJson1));
 				} else {
 					observationJson.setCategories(categoryConcepts2);
-					observationJson.setCode(codeableConceptField2);
+					observationJson.setCode(codeJson2);
 					observationJson.setCode_concept_id(codeableConceptId2);
-					assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX, codeableConceptId2, codeJson2Document, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
+					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId2, codeJson2));
 				}
 
 				Calendar observationDate = new GregorianCalendar();
@@ -364,8 +362,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 				Date effectiveDtm = observationDate.getTime();
 				observationJson.setEffectiveDtm(effectiveDtm);
 
-				String observationDocument = ourMapperNonPrettyPrint.writeValueAsString(observationJson);
-				assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX, identifier, observationDocument, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE));
+				assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(identifier, observationJson));
 
 				if (createdPatientObservationMap.containsKey(subject)) {
 					Map<String, List<Date>> observationCodeMap = createdPatientObservationMap.get(subject);
@@ -392,11 +389,8 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 			}
 		}
 
-		try {
-			Thread.sleep(2000L);
-		} catch (InterruptedException theE) {
-			theE.printStackTrace();
-		}
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 
 	}
 
@@ -404,7 +398,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	public void testLastNNoParamsQuery() {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLastNMax(1);
-		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, myFhirContext);
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
 
 		assertEquals(2, observations.size());
 

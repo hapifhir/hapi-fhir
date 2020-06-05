@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.config.EmpiConsumerConfig;
+import ca.uhn.fhir.jpa.empi.config.EmpiSearchParameterLoader;
 import ca.uhn.fhir.jpa.empi.config.EmpiSubmitterConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
 import ca.uhn.fhir.jpa.empi.matcher.IsLinkedTo;
@@ -25,11 +26,13 @@ import ca.uhn.fhir.jpa.empi.matcher.IsSamePersonAs;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -39,7 +42,6 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -93,6 +95,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected EmpiMatchLinkSvc myEmpiMatchLinkSvc;
 	@Autowired
 	protected EIDHelper myEIDHelper;
+	@Autowired
+	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
+	@Autowired
+	SearchParamRegistryImpl mySearchParamRegistry;
 
 	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
@@ -126,6 +132,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected Person createPerson(Person thePerson, boolean theEmpiManaged) {
 		if (theEmpiManaged) {
 			thePerson.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+			thePerson.setActive(true);
 		}
 		DaoMethodOutcome outcome = myPersonDao.create(thePerson);
 		Person person = (Person) outcome.getResource();
@@ -311,16 +318,29 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return IsMatchedToAPerson.matchedToAPerson(myIdHelperService, myEmpiLinkDaoSvc);
 	}
 
-	protected Person getOnlyPerson() {
-		List<IBaseResource> resources = getAllPersons();
+	protected Person getOnlyActivePerson() {
+		List<IBaseResource> resources = getAllActivePersons();
 		assertEquals(1, resources.size());
 		return (Person) resources.get(0);
 	}
 
-	@NotNull
+	@Nonnull
+	protected List<IBaseResource> getAllActivePersons() {
+		return getAllPersons(true);
+	}
+
+	@Nonnull
 	protected List<IBaseResource> getAllPersons() {
+		return getAllPersons(false);
+	}
+
+	@Nonnull
+	private List<IBaseResource> getAllPersons(boolean theOnlyActive) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
+		if (theOnlyActive) {
+			map.add("active", new TokenParam().setValue("true"));
+		}
 		IBundleProvider bundle = myPersonDao.search(map);
 		return bundle.getResources(0, 999);
 	}
@@ -336,5 +356,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		empiLink.setPersonPid(myIdHelperService.getPidOrNull(person));
 		empiLink.setTargetPid(myIdHelperService.getPidOrNull(patient));
 		return empiLink;
+	}
+
+	protected void loadEmpiSearchParameters() {
+		myEmpiSearchParameterLoader.daoUpdateEmpiSearchParameters();
+		mySearchParamRegistry.forceRefresh();
 	}
 }

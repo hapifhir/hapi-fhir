@@ -17,8 +17,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -92,8 +90,10 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 	@After
 	public void after() throws IOException {
-		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.deleteAllDocuments(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(RESOURCEPID, observationIdsOnly.get(0));
 
 		// execute Observation search for all search fields
-		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFields(searchParameterMap, myFhirContext);
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
 
 		validateFullObservationSearch(observations);
 	}
@@ -226,7 +226,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash);
 
 		// Retrieve all Observation codes
-		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodes();
+		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
 		assertEquals(1, codes.size());
 		CodeJson persistedObservationCode = codes.get(0);
 
@@ -261,52 +261,45 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		indexedObservation.setEffectiveDtm(EFFECTIVEDTM);
 
 		// Add three CodeableConcepts for category
-		List<CodeableConcept> categoryConcepts = new ArrayList<>();
+		List<CodeJson> categoryConcepts = new ArrayList<>();
 		// Create three codings and first category CodeableConcept
-		List<Coding> category1 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().setText(FIRSTCATEGORYTEXT);
-		category1.add(new Coding(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE, FIRSTCATEGORYFIRSTCODINGDISPLAY));
-		category1.add(new Coding(CATEGORYSECONDCODINGSYSTEM, FIRSTCATEGORYSECONDCODINGCODE, FIRSTCATEGORYSECONDCODINGDISPLAY));
-		category1.add(new Coding(CATEGORYTHIRDCODINGSYSTEM, FIRSTCATEGORYTHIRDCODINGCODE, FIRSTCATEGORYTHIRDCODINGDISPLAY));
-		categoryCodeableConcept1.setCoding(category1);
+		CodeJson categoryCodeableConcept1 = new CodeJson();
+		categoryCodeableConcept1.setCodeableConceptText(FIRSTCATEGORYTEXT);
+		categoryCodeableConcept1.addCoding(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE, FIRSTCATEGORYFIRSTCODINGDISPLAY);
+		categoryCodeableConcept1.addCoding(CATEGORYSECONDCODINGSYSTEM, FIRSTCATEGORYSECONDCODINGCODE, FIRSTCATEGORYSECONDCODINGDISPLAY);
+		categoryCodeableConcept1.addCoding(CATEGORYTHIRDCODINGSYSTEM, FIRSTCATEGORYTHIRDCODINGCODE, FIRSTCATEGORYTHIRDCODINGDISPLAY);
 		categoryConcepts.add(categoryCodeableConcept1);
 		// Create three codings and second category CodeableConcept
-		List<Coding> category2 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept2 = new CodeableConcept().setText(SECONDCATEGORYTEXT);
-		category2.add(new Coding(CATEGORYFIRSTCODINGSYSTEM, SECONDCATEGORYFIRSTCODINGCODE, SECONDCATEGORYFIRSTCODINGDISPLAY));
-		category2.add(new Coding(CATEGORYSECONDCODINGSYSTEM, SECONDCATEGORYSECONDCODINGCODE, SECONDCATEGORYSECONDCODINGDISPLAY));
-		category2.add(new Coding(CATEGORYTHIRDCODINGSYSTEM, SECONDCATEGORYTHIRDCODINGCODE, SECONDCATEGORYTHIRDCODINGDISPLAY));
-		categoryCodeableConcept2.setCoding(category2);
+		CodeJson categoryCodeableConcept2 = new CodeJson();
+		categoryCodeableConcept2.setCodeableConceptText(SECONDCATEGORYTEXT);
+		categoryCodeableConcept2.addCoding(CATEGORYFIRSTCODINGSYSTEM, SECONDCATEGORYFIRSTCODINGCODE, SECONDCATEGORYFIRSTCODINGDISPLAY);
+		categoryCodeableConcept2.addCoding(CATEGORYSECONDCODINGSYSTEM, SECONDCATEGORYSECONDCODINGCODE, SECONDCATEGORYSECONDCODINGDISPLAY);
+		categoryCodeableConcept2.addCoding(CATEGORYTHIRDCODINGSYSTEM, SECONDCATEGORYTHIRDCODINGCODE, SECONDCATEGORYTHIRDCODINGDISPLAY);
+
 		categoryConcepts.add(categoryCodeableConcept2);
 		// Create three codings and third category CodeableConcept
-		List<Coding> category3 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept3 = new CodeableConcept().setText(THIRDCATEGORYTEXT);
-		category3.add(new Coding(CATEGORYFIRSTCODINGSYSTEM, THIRDCATEGORYFIRSTCODINGCODE, THIRDCATEGORYFIRSTCODINGDISPLAY));
-		category3.add(new Coding(CATEGORYSECONDCODINGSYSTEM, THIRDCATEGORYSECONDCODINGCODE, THIRDCATEGORYSECONDCODINGDISPLAY));
-		category3.add(new Coding(CATEGORYTHIRDCODINGSYSTEM, THIRDCATEGORYTHIRDCODINGCODE, THIRDCATEGORYTHIRDCODINGDISPLAY));
-		categoryCodeableConcept3.setCoding(category3);
+		CodeJson categoryCodeableConcept3 = new CodeJson();
+		categoryCodeableConcept3.setCodeableConceptText(THIRDCATEGORYTEXT);
+		categoryCodeableConcept3.addCoding(CATEGORYFIRSTCODINGSYSTEM, THIRDCATEGORYFIRSTCODINGCODE, THIRDCATEGORYFIRSTCODINGDISPLAY);
+		categoryCodeableConcept3.addCoding(CATEGORYSECONDCODINGSYSTEM, THIRDCATEGORYSECONDCODINGCODE, THIRDCATEGORYSECONDCODINGDISPLAY);
+		categoryCodeableConcept3.addCoding(CATEGORYTHIRDCODINGSYSTEM, THIRDCATEGORYTHIRDCODINGCODE, THIRDCATEGORYTHIRDCODINGDISPLAY);
 		categoryConcepts.add(categoryCodeableConcept3);
 		indexedObservation.setCategories(categoryConcepts);
 
 		// Create CodeableConcept for Code with three codings.
 		indexedObservation.setCode_concept_id(OBSERVATIONSINGLECODEID);
-		CodeableConcept codeableConceptField = new CodeableConcept().setText(OBSERVATIONCODETEXT);
-		codeableConceptField.addCoding(new Coding(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE, CODEFIRSTCODINGDISPLAY));
+		CodeJson codeableConceptField = new CodeJson();
+		codeableConceptField.setCodeableConceptText(OBSERVATIONCODETEXT);
+		codeableConceptField.addCoding(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE, CODEFIRSTCODINGDISPLAY);
 		indexedObservation.setCode(codeableConceptField);
 
-		String observationDocument = ourMapperNonPrettyPrint.writeValueAsString(indexedObservation);
-		assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX, RESOURCEPID, observationDocument, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE));
+		assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(RESOURCEPID, indexedObservation));
 
-		CodeJson observationCode = new CodeJson(codeableConceptField, OBSERVATIONSINGLECODEID);
-		String codeDocument = ourMapperNonPrettyPrint.writeValueAsString(observationCode);
-		assertTrue(elasticsearchSvc.performIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX, OBSERVATIONSINGLECODEID, codeDocument, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE));
+		codeableConceptField.setCodeableConceptId(OBSERVATIONSINGLECODEID);
+		assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(OBSERVATIONSINGLECODEID, codeableConceptField));
 
-		try {
-			Thread.sleep(1000L);
-		} catch (InterruptedException theE) {
-			theE.printStackTrace();
-		}
-
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 	}
 
 }

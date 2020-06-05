@@ -25,11 +25,11 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IEmpiPersonMergerSvc {
 	/**
-	 * Move all links from the thePersonToDelete to thePersonToKeep and then delete thePersonToDelete.  Merge all Person
-	 * fields, with fields in thePersonToKeep overriding fields in thePersonToDelete
-	 * @param thePersonToDelete the person we are merging from
-	 * @param thePersonToKeep the person we are merging to
-	 * @return updated thePersonToKeep with the merged fields and links.
+	 * Move all links from the theFromPerson to theToPerson and then set active=false on theFromPerson.  Merge all Person
+	 * fields.
+	 * @param theFromPerson the person we are merging from
+	 * @param theToPerson the person we are merging to
+	 * @return updated theToPerson with the merged fields and links.
 	 */
-	IAnyResource mergePersons(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep, EmpiTransactionContext theEmpiTransactionContext);
+	IAnyResource mergePersons(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext);
 }
