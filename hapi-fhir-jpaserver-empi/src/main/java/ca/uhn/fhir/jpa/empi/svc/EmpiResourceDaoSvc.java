@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -38,9 +40,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmpiResourceDaoSvc {
+	private static final int MAX_MATCHING_PERSONS = 1000;
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
@@ -81,13 +85,27 @@ public class EmpiResourceDaoSvc {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add("identifier", new TokenParam(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theEid));
+		map.add("active", new TokenParam("true"));
 		IBundleProvider search = myPersonDao.search(map);
 
-		List<IBaseResource> list = search.getResources(0, 2);
+		// Could add the meta tag to the query, but it's probably more efficient to filter on it afterwards since in practice
+		// it will always be present.
+		List<IBaseResource> list = search.getResources(0, MAX_MATCHING_PERSONS).stream()
+			.filter(EmpiUtil::isEmpiManaged)
+			.collect(Collectors.toList());
+
 		if (list.isEmpty()) {
 			return Optional.empty();
 		} else if (list.size() > 1) {
-			throw new InternalErrorException("Found more than one active Person with EID " + theEid);
+			throw new InternalErrorException("Found more than one active " +
+				EmpiConstants.CODE_HAPI_EMPI_MANAGED +
+				" Person with EID " +
+				theEid +
+				": " +
+				list.get(0).getIdElement().getValue() +
+				", " +
+				list.get(1).getIdElement().getValue()
+				);
 		} else {
 			return Optional.of((IAnyResource) search.getResources(0, 1).get(0));
 		}

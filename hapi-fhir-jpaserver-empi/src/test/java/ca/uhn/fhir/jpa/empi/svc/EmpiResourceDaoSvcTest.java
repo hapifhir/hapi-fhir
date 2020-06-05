@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Person;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,6 +17,11 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 	private static final String TEST_EID = "TEST_EID";
 	@Autowired
 	EmpiResourceDaoSvc myResourceDaoSvc;
+
+	@Before
+	public void before() {
+		super.loadEmpiSearchParameters();
+	}
 
 	@Test
 	public void testSearchPersonByEidExcludesInactive() {
@@ -31,6 +37,16 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodPerson.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
 
+	@Test
+	public void testSearchPersonByEidExcludesNonEmpiManaged() {
+		Person goodPerson = addExternalEID(createPerson(), TEST_EID);
+		myPersonDao.update(goodPerson);
 
-	// FIXME only search empi-managed persons
+		Person badPerson = addExternalEID(createPerson(new Person(), false), TEST_EID);
+		myPersonDao.update(badPerson);
+
+		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchPersonByEid(TEST_EID);
+		assertTrue(foundPerson.isPresent());
+		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodPerson.getIdElement().toUnqualifiedVersionless().getValue()));
+	}
 }

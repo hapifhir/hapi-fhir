@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,10 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 	@Autowired
 	private PersonHelper myPersonHelper;
 
+	@Before
+	public void before() {
+		super.loadEmpiSearchParameters();
+	}
 
 	@Test
 	public void testIncomingPatientWithEIDThatMatchesPersonWithHapiEidAddsExternalEidsToPerson() {
