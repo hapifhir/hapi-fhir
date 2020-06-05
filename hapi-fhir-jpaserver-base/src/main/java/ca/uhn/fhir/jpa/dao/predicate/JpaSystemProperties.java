@@ -21,7 +21,7 @@ public class JpaSystemProperties {
 
 	public static void updateSettingsBasedOnCurrentSystemProperties() {
 		ourOptmizeSingleElementInExpression = !("true".equals(System.getProperty(HFJ_FORCE_IN_CLAUSES_HF_50)));
-		if (ourOptmizeSingleElementInExpression) {
+		if (!ourOptmizeSingleElementInExpression) {
 			ourLog.warn("Forcing IN(..) clauses for single element SQL predicates");
 		}
 	}
