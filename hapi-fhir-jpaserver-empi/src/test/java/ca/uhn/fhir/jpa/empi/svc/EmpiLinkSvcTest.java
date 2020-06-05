@@ -24,6 +24,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
 
+	@Override
 	@After
 	public void after() {
 		myExpungeEverythingService.expungeEverythingByType(EmpiLink.class);
