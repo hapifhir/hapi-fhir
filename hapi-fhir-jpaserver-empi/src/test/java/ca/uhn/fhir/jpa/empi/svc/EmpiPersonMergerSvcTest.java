@@ -78,6 +78,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myInterceptorService.registerInterceptor(myEmpiStorageInterceptor);
 	}
 
+	@Override
 	@After
 	public void after() {
 		myInterceptorService.unregisterInterceptor(myEmpiStorageInterceptor);
