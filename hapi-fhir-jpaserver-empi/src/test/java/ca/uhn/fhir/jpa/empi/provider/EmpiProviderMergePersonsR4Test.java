@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Bundle;
@@ -9,6 +12,9 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -48,9 +54,16 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	public void testMerge() {
 		Person mergedPerson = myEmpiProviderR4.mergePersons(myFromPersonId, myToPersonId, myRequestDetails);
 		assertEquals(myToPerson.getIdElement(), mergedPerson.getIdElement());
-		assertThat(mergedPerson, is(samePersonAs(mergedPerson)));
+		assertThat(mergedPerson, is(samePersonAs(myToPerson)));
 		assertEquals(2, getAllPersons().size());
 		assertEquals(1, getAllActivePersons().size());
+
+		Person fromPerson = myPersonDao.read(myFromPerson.getIdElement().toUnqualifiedVersionless());
+		assertThat(fromPerson.getActive(), is(false));
+		List<Person.PersonLinkComponent> links = fromPerson.getLink();
+		assertThat(links, hasSize(1));
+		assertThat(links.get(0).getTarget().getReference(), is (myToPerson.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(links.get(0).getAssurance(), is (AssuranceLevelUtil.getAssuranceLevel(EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL).toR4()));
 	}
 
 	@Test
