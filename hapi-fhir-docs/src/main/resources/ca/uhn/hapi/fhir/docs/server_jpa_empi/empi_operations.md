@@ -317,7 +317,11 @@ The operation returns the updated `Person` resource.  Note that this is the only
 
 ## Merge Persons
 
-The `$empi-merge-persons` operation can be used to merge one Person resource with another.  When doing this, you will need to decide which resource to merge from and which one to merge to.  In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).  However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson. This operation takes the following parameters:
+The `$empi-merge-persons` operation can be used to merge one Person resource with another.  When doing this, you will need to decide which resource to merge from and which one to merge to.  In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).  However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson
+
+After the merge is complete, `fromPerson.active` will be set to `false`.  Also, a new link with assurance level 4 (MANUAL MATCH) will be added pointing from the fromPerson to the toPerson.
+
+This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -334,7 +338,7 @@ The `$empi-merge-persons` operation can be used to merge one Person resource wit
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Person resource to merge data from.  "active" will be set to "false" on this resource after the merge.
+                The id of the Person resource to merge data from.
             </td>
         </tr>
         <tr>
