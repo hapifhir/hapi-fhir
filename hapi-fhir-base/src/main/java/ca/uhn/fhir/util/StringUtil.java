@@ -28,6 +28,10 @@ import java.util.Arrays;
 public class StringUtil {
 
 	public static String normalizeStringForSearchIndexing(String theString) {
+		if (theString == null) {
+			return null;
+		}
+
 		CharArrayWriter outBuffer = new CharArrayWriter(theString.length());
 
 		/*

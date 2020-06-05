@@ -18,6 +18,7 @@ public class StringUtilTest {
 		assertEquals("TEST TEST", StringUtil.normalizeStringForSearchIndexing("TEST teSt"));
 		assertEquals("AEIØU", StringUtil.normalizeStringForSearchIndexing("åéîøü"));
 		assertEquals("杨浩", StringUtil.normalizeStringForSearchIndexing("杨浩"));
+		assertEquals(null, StringUtil.normalizeStringForSearchIndexing(null));
 	}
 
 	@Test
