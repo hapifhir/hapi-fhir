@@ -1,21 +1,11 @@
 package ca.uhn.fhir.jpa.bulk.batch;
 
-import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
-import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
-import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import org.slf4j.Logger;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.annotation.Resource;
-import javax.transaction.TransactionSynchronizationRegistry;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -36,13 +26,24 @@ public class ResourceTypePartitioner implements Partitioner {
 	public Map<String, ExecutionContext> partition(int gridSize) {
 		Map<String, ExecutionContext> partitionContextMap = new HashMap<>();
 
-		List<String> resourceTypes = myBulkExportDaoSvc.getBulkJobResourceTypes(myJobUUID);
+		Map<Long, String> idToResourceType = myBulkExportDaoSvc.getBulkJobCollectionIdToResourceTypeMap(	myJobUUID);
 
-		resourceTypes.stream()
-			.forEach(resourceType -> {
+		idToResourceType.entrySet().stream()
+			.forEach(entry -> {
 				ExecutionContext context = new ExecutionContext();
+				String resourceType = entry.getValue();
+				Long collectionEntityId = entry.getKey();
+				ourLog.debug("Creating a partition step for CollectionEntity: [{}] processing resource type [{}]", collectionEntityId, resourceType);
+
+				//The slave step needs to know what resource type it is looking for.
 				context.putString("resourceType", resourceType);
+
+				// The slave step needs to know which parent job it is processing for, and which collection entity it will be
+				// attaching its results to.
 				context.putString("jobUUID", myJobUUID);
+				context.putLong("bulkExportCollectionEntityId", collectionEntityId);
+
+				// Name the partition based on the resource type
 				partitionContextMap.put(resourceType, context);
 				});
 

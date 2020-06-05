@@ -1,14 +1,18 @@
 package ca.uhn.fhir.jpa.bulk.batch;
 
+import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
+import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
+import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,13 +25,29 @@ public class BulkExportDaoSvc {
 	@Autowired
 	IBulkExportJobDao myBulkExportJobDao;
 
+	@Autowired
+	IBulkExportCollectionDao myBulkExportCollectionDao;
+
+	@Autowired
+	IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
+
 	@Transactional
-	public List<String> getBulkJobResourceTypes(String theJobUUID) {
+	public void addFileToCollection(BulkExportCollectionEntity theCollectionEntity, BulkExportCollectionFileEntity theFile) {
+		theCollectionEntity.getFiles().add(theFile);
+		myBulkExportCollectionDao.saveAndFlush(theCollectionEntity);
+		myBulkExportCollectionFileDao.saveAndFlush(theFile);
+
+	}
+
+	@Transactional
+	public Map<Long, String> getBulkJobCollectionIdToResourceTypeMap(String theJobUUID) {
 		BulkExportJobEntity bulkExportJobEntity = loadJob(theJobUUID);
-		return bulkExportJobEntity.getCollections()
-			.stream()
-			.map(BulkExportCollectionEntity::getResourceType)
-			.collect(Collectors.toList());
+		Collection<BulkExportCollectionEntity> collections = bulkExportJobEntity.getCollections();
+		return collections.stream()
+			.collect(Collectors.toMap(
+				BulkExportCollectionEntity::getId,
+				BulkExportCollectionEntity::getResourceType
+			));
 	}
 
 	private BulkExportJobEntity loadJob(String theJobUUID) {

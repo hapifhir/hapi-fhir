@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.bulk.batch.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.bulk.batch.BulkItemReader;
 import ca.uhn.fhir.jpa.bulk.batch.BulkItemResourceLoaderProcessor;
+import ca.uhn.fhir.jpa.bulk.batch.OutputFileSizeCompletionPolicy;
+import ca.uhn.fhir.jpa.bulk.batch.ResourceToFileWriter;
 import ca.uhn.fhir.jpa.bulk.batch.ResourceTypePartitioner;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -28,14 +30,12 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -74,6 +74,13 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	private Exception myLastStackTrace;
 
+
+	@Bean
+	@StepScope
+	public OutputFileSizeCompletionPolicy filesizeCompletionPolicy() {
+		return new OutputFileSizeCompletionPolicy();
+	}
+
 	@Bean
 	public IBatchJobSubmitter batchJobSubmitter() {
 		return new BatchJobSubmitterImpl();
@@ -94,13 +101,21 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	@Bean
 	public Step slaveResourceStep() {
 		return myStepBuilderFactory.get("slaveResourceStep")
-			.<ResourcePersistentId, IBaseResource> chunk(2)
+			.<ResourcePersistentId, IBaseResource> chunk(filesizeCompletionPolicy())
 			.reader(myBulkItemReader(null))
-			.processor(pidToResourceProcessor(null))
-			.writer(mySimplePrinter())
-			.listener(myBulkItemReader(null))
+			.processor(pidToResourceProcessor())
+			.writer(resourceToFileWriter())
+			.listener(filesizeCompletionPolicy())
 			.build();
 	}
+
+	@Bean
+	@StepScope
+	public ItemWriter<IBaseResource> resourceToFileWriter() {
+		return new ResourceToFileWriter();
+
+	}
+
 	@Bean
 	public Step partitionStep() {
 		return myStepBuilderFactory.get("partitionStep")
@@ -123,18 +138,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	@Bean
 	@StepScope
-	public ItemProcessor<ResourcePersistentId, IBaseResource> pidToResourceProcessor(@Value("#{jobParameters['jobUUID']}") String theUUID) {
+	public ItemProcessor<ResourcePersistentId, IBaseResource> pidToResourceProcessor() {
 		return new BulkItemResourceLoaderProcessor();
-	}
-
-	@Bean
-	public ItemWriter<IBaseResource> mySimplePrinter() {
-		return (theResourcePersistentIds) -> {
-			System.out.println("PRINTING CHUNK");
-			theResourcePersistentIds.stream().forEach(theIBaseResource-> {
-				System.out.println("zoop -> " + theIBaseResource);
-			});
-		};
 	}
 
 	@Bean

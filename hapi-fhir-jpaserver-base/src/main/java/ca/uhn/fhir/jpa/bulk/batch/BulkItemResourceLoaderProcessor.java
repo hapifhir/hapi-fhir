@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +16,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class BulkItemResourceLoaderProcessor implements ItemProcessor<ResourcePersistentId, IBaseResource> {
+	private static final Logger ourLog = getLogger(BulkItemResourceLoaderProcessor.class);
+
 
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
@@ -29,6 +34,8 @@ public class BulkItemResourceLoaderProcessor implements ItemProcessor<ResourcePe
 	@Autowired
 	private FhirContext myContext;
 
+
+
 	@Override
 	public IBaseResource process(ResourcePersistentId theResourcePersistentId) throws Exception {
 
@@ -37,6 +44,9 @@ public class BulkItemResourceLoaderProcessor implements ItemProcessor<ResourcePe
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, resourceTypeClass);
 		List<IBaseResource> outgoing = new ArrayList<>();
 		sb.loadResourcesByPid(Collections.singletonList(theResourcePersistentId), Collections.emptyList(), outgoing, false, null);
+		//Update bytes taken so far.
 		return outgoing.get(0);
+
 	}
+
 }
