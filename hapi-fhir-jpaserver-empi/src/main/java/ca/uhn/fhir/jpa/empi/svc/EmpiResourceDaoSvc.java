@@ -107,7 +107,7 @@ public class EmpiResourceDaoSvc {
 				list.get(1).getIdElement().getValue()
 				);
 		} else {
-			return Optional.of((IAnyResource) search.getResources(0, 1).get(0));
+			return Optional.of((IAnyResource) list.get(0));
 		}
 	}
 }
