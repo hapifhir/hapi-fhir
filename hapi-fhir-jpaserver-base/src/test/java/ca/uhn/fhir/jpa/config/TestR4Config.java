@@ -5,9 +5,9 @@ import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.bulk.batch.BulkExportDaoSvc;
+import ca.uhn.fhir.jpa.bulk.batch.BulkExportJobCompletionListener;
 import ca.uhn.fhir.jpa.bulk.batch.BulkItemReader;
 import ca.uhn.fhir.jpa.bulk.batch.BulkItemResourceLoaderProcessor;
-import ca.uhn.fhir.jpa.bulk.batch.OutputFileSizeCompletionPolicy;
 import ca.uhn.fhir.jpa.bulk.batch.ResourceToFileWriter;
 import ca.uhn.fhir.jpa.bulk.batch.ResourceTypePartitioner;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
@@ -52,6 +52,11 @@ import static org.junit.Assert.fail;
 @EnableBatchProcessing
 public class TestR4Config extends BaseJavaConfigR4 {
 
+	/**
+	 * NANI
+	 */
+	public static final String WILL_LATE_BIND = null;
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
 	public static Integer ourMaxThreads;
 
@@ -76,12 +81,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 
 	@Bean
-	@StepScope
-	public OutputFileSizeCompletionPolicy filesizeCompletionPolicy() {
-		return new OutputFileSizeCompletionPolicy();
-	}
-
-	@Bean
 	public IBatchJobSubmitter batchJobSubmitter() {
 		return new BatchJobSubmitterImpl();
 	}
@@ -95,31 +94,37 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	public Job bulkExportJob() {
 		return myJobBuilderFactory.get("bulkExportJob")
 			.start(partitionStep())
+			.listener(bulkExportJobCompletionListener())
 			.build();
 	}
 
 	@Bean
-	public Step slaveResourceStep() {
-		return myStepBuilderFactory.get("slaveResourceStep")
-			.<ResourcePersistentId, IBaseResource> chunk(filesizeCompletionPolicy())
-			.reader(myBulkItemReader(null))
+	public Step workerResourceStep() {
+		return myStepBuilderFactory.get("workerResourceStep")
+			.<ResourcePersistentId, IBaseResource> chunk(2)
+			.reader(myBulkItemReader(WILL_LATE_BIND))
 			.processor(pidToResourceProcessor())
 			.writer(resourceToFileWriter())
-			.listener(filesizeCompletionPolicy())
 			.build();
+	}
+
+	@Bean
+	@JobScope
+	public BulkExportJobCompletionListener bulkExportJobCompletionListener() {
+		return new BulkExportJobCompletionListener();
 	}
 
 	@Bean
 	@StepScope
 	public ItemWriter<IBaseResource> resourceToFileWriter() {
 		return new ResourceToFileWriter();
-
 	}
 
 	@Bean
 	public Step partitionStep() {
 		return myStepBuilderFactory.get("partitionStep")
-			.partitioner("slaveResourceStep", partitioner(null)).step(slaveResourceStep())
+			.partitioner("workerResourceStep", partitioner(null))
+			.step(workerResourceStep())
 			.build();
 	}
 

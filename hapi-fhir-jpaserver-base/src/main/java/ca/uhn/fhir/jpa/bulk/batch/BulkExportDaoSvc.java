@@ -32,10 +32,14 @@ public class BulkExportDaoSvc {
 	IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
 
 	@Transactional
-	public void addFileToCollection(BulkExportCollectionEntity theCollectionEntity, BulkExportCollectionFileEntity theFile) {
-		theCollectionEntity.getFiles().add(theFile);
-		myBulkExportCollectionDao.saveAndFlush(theCollectionEntity);
-		myBulkExportCollectionFileDao.saveAndFlush(theFile);
+	public void addFileToCollectionWithId(Long theCollectionEntityId, BulkExportCollectionFileEntity theFile) {
+		Optional<BulkExportCollectionEntity> byId = myBulkExportCollectionDao.findById(theCollectionEntityId);
+		if (byId.isPresent()) {
+			BulkExportCollectionEntity exportCollectionEntity = byId.get();
+			theFile.setCollection(exportCollectionEntity);;
+			myBulkExportCollectionFileDao.saveAndFlush(theFile);
+			myBulkExportCollectionDao.saveAndFlush(exportCollectionEntity);
+		}
 
 	}
 

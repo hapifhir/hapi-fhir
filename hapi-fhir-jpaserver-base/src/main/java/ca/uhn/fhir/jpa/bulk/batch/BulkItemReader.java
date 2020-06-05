@@ -16,9 +16,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +27,6 @@ import java.util.Optional;
 
 public class BulkItemReader extends AbstractItemCountingItemStreamItemReader<ResourcePersistentId> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkItemReader.class);
-
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;

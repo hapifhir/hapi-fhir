@@ -41,10 +41,10 @@ public class BulkItemResourceLoaderProcessor implements ItemProcessor<ResourcePe
 
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(myResourceType);
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
+
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, resourceTypeClass);
 		List<IBaseResource> outgoing = new ArrayList<>();
 		sb.loadResourcesByPid(Collections.singletonList(theResourcePersistentId), Collections.emptyList(), outgoing, false, null);
-		//Update bytes taken so far.
 		return outgoing.get(0);
 
 	}

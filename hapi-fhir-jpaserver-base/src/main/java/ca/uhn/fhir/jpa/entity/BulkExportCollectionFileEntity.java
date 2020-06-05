@@ -34,9 +34,11 @@ public class BulkExportCollectionFileEntity implements Serializable {
 	@SequenceGenerator(name = "SEQ_BLKEXCOLFILE_PID", sequenceName = "SEQ_BLKEXCOLFILE_PID")
 	@Column(name = "PID")
 	private Long myId;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "COLLECTION_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name="FK_BLKEXCOLFILE_COLLECT"))
 	private BulkExportCollectionEntity myCollection;
+
 	@Column(name = "RES_ID", length = ForcedId.MAX_FORCED_ID_LENGTH, nullable = false)
 	private String myResourceId;
 

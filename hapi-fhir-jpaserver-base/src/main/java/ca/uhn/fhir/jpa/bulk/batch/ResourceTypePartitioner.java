@@ -27,18 +27,22 @@ public class ResourceTypePartitioner implements Partitioner {
 		Map<String, ExecutionContext> partitionContextMap = new HashMap<>();
 
 		Map<Long, String> idToResourceType = myBulkExportDaoSvc.getBulkJobCollectionIdToResourceTypeMap(	myJobUUID);
+		//observation -> obs1.json, obs2.json, obs3.json BulkJobCollectionEntity
+		//bulk Collection Entity ID -> patient
 
+		// 123123-> Patient
+		// 91876389126-> Observation
 		idToResourceType.entrySet().stream()
 			.forEach(entry -> {
-				ExecutionContext context = new ExecutionContext();
 				String resourceType = entry.getValue();
 				Long collectionEntityId = entry.getKey();
 				ourLog.debug("Creating a partition step for CollectionEntity: [{}] processing resource type [{}]", collectionEntityId, resourceType);
 
-				//The slave step needs to know what resource type it is looking for.
+				ExecutionContext context = new ExecutionContext();
+				//The worker step needs to know what resource type it is looking for.
 				context.putString("resourceType", resourceType);
 
-				// The slave step needs to know which parent job it is processing for, and which collection entity it will be
+				// The worker step needs to know which parent job it is processing for, and which collection entity it will be
 				// attaching its results to.
 				context.putString("jobUUID", myJobUUID);
 				context.putLong("bulkExportCollectionEntityId", collectionEntityId);
@@ -46,6 +50,7 @@ public class ResourceTypePartitioner implements Partitioner {
 				// Name the partition based on the resource type
 				partitionContextMap.put(resourceType, context);
 				});
+
 
 		return partitionContextMap;
 	}

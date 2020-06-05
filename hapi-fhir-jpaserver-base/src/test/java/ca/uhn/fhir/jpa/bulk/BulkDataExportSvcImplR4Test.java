@@ -320,10 +320,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
 			IIdType patId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
 
-		//	Observation obs = new Observation();
-		//	obs.setId("OBS" + i);
-		//	obs.setStatus(Observation.ObservationStatus.FINAL);
-		//	obs.getSubject().setReference(patId.getValue());
+			//Observation obs = new Observation();
+			//obs.setId("OBS" + i);
+			//obs.setStatus(Observation.ObservationStatus.FINAL);
+			//obs.getSubject().setReference(patId.getValue());
 		//	myObservationDao.update(obs);
 		}
 	}

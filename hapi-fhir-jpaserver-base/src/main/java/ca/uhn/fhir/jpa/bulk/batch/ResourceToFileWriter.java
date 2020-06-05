@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.parser.IParser;
@@ -37,16 +36,12 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 	@Autowired
 	private FhirContext myContext;
 
-	@Autowired
-	private IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
 
 	@Autowired
 	private IBulkExportCollectionDao myBulkExportCollectionDao;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private BulkExportCollectionFileDaoSvc myBulkExportCollectionFileDaoSvc;
 
 	private BulkExportCollectionEntity  myBulkExportCollectionEntity;
 
@@ -62,7 +57,6 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 	@Autowired
 	private BulkExportDaoSvc myBulkExportDaoSvc;
 
-
 	public ResourceToFileWriter() {
 		myOutputStream = new ByteArrayOutputStream();
 		myWriter = new OutputStreamWriter(myOutputStream, Constants.CHARSET_UTF8);
@@ -74,19 +68,13 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 		myBinaryDao = getBinaryDao();
 	}
 
-	private Optional<IIdType> flushToFiles(BulkExportCollectionEntity theExportCollectionEntity) {
+	private Optional<IIdType> flushToFiles() {
 		if (myOutputStream.size() > 0) {
-			IBaseBinary binary = BinaryUtil.newBinary(myContext);
-			binary.setContentType(Constants.CT_FHIR_NDJSON);
-			binary.setContent(myOutputStream.toByteArray());
-
-			IIdType createdId = myBinaryDao.create(binary).getResource().getIdElement();
-
+			IIdType createdId = createBinaryFromOutputStream();
 			BulkExportCollectionFileEntity file = new BulkExportCollectionFileEntity();
-			file.setCollection(theExportCollectionEntity);
 			file.setResource(createdId.getIdPart());
 
-			myBulkExportDaoSvc.addFileToCollection(theExportCollectionEntity, file);
+			myBulkExportDaoSvc.addFileToCollectionWithId(myBulkExportCollectionEntityId, file);
 
 			myOutputStream.reset();
 
@@ -94,6 +82,14 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 		}
 
 		return Optional.empty();
+	}
+
+	private IIdType createBinaryFromOutputStream() {
+		IBaseBinary binary = BinaryUtil.newBinary(myContext);
+		binary.setContentType(Constants.CT_FHIR_NDJSON);
+		binary.setContent(myOutputStream.toByteArray());
+
+		return myBinaryDao.create(binary).getResource().getIdElement();
 	}
 
 	private BulkExportCollectionEntity getOrLoadBulkExportCollectionEntity() {
@@ -117,8 +113,7 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 			myWriter.append("\n");
 		}
 
-		BulkExportCollectionEntity exportCollectionEntity = getOrLoadBulkExportCollectionEntity();
-		Optional<IIdType> createdId = flushToFiles(exportCollectionEntity);
+		Optional<IIdType> createdId = flushToFiles();
 		createdId.ifPresent(theIIdType -> ourLog.warn("Created resources for bulk export file containing {}:{} resources of type ", theIIdType.toUnqualifiedVersionless().getValue(), myBulkExportCollectionEntity.getResourceType()));
 	}
 
