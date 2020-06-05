@@ -1,0 +1,36 @@
+package ca.uhn.fhir.jpa.empi.svc;
+
+import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.r4.model.Person;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Optional;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
+	private static final String TEST_EID = "TEST_EID";
+	@Autowired
+	EmpiResourceDaoSvc myResourceDaoSvc;
+
+	@Test
+	public void testSearchPersonByEidExcludesInactive() {
+		Person goodPerson = addExternalEID(createPerson(), TEST_EID);
+		myPersonDao.update(goodPerson);
+
+		Person badPerson = addExternalEID(createPerson(), TEST_EID);
+		badPerson.setActive(false);
+		myPersonDao.update(badPerson);
+
+		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchPersonByEid(TEST_EID);
+		assertTrue(foundPerson.isPresent());
+		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodPerson.getIdElement().toUnqualifiedVersionless().getValue()));
+	}
+
+
+	// FIXME only search empi-managed persons
+}

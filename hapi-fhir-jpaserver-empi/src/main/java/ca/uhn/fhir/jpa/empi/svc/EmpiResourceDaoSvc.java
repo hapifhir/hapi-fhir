@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -35,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmpiResourceDaoSvc {
@@ -74,16 +77,19 @@ public class EmpiResourceDaoSvc {
 		return (IAnyResource) myPersonDao.readByPid(thePersonPid);
 	}
 
-	public IAnyResource searchPersonByEid(String theEidFromResource) {
+	public Optional<IAnyResource> searchPersonByEid(String theEid) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add("identifier", new TokenParam(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theEidFromResource));
+		map.add("identifier", new TokenParam(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theEid));
 		IBundleProvider search = myPersonDao.search(map);
-		if (search.isEmpty()) {
-			return null;
+
+		List<IBaseResource> list = search.getResources(0, 2);
+		if (list.isEmpty()) {
+			return Optional.empty();
+		} else if (list.size() > 1) {
+			throw new InternalErrorException("Found more than one active Person with EID " + theEid);
 		} else {
-			return (IAnyResource) search.getResources(0, 1).get(0);
+			return Optional.of((IAnyResource) search.getResources(0, 1).get(0));
 		}
 	}
-
 }
