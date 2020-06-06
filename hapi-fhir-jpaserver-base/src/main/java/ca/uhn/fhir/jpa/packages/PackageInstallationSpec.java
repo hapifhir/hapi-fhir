@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -51,10 +52,10 @@ public class PackageInstallationSpec {
 	private String myPackageUrl;
 	@ApiModelProperty("The NPM package Name")
 	@JsonProperty("name")
-	private String myPackageName;
+	private String myName;
 	@ApiModelProperty("The direct package version")
 	@JsonProperty("version")
-	private String myPackageVersion;
+	private String myVersion;
 	@ApiModelProperty("Should resources from this package be extracted from the package and installed into the repository individually")
 	@JsonProperty("installMode")
 	private InstallModeEnum myInstallMode;
@@ -66,15 +67,18 @@ public class PackageInstallationSpec {
 	private boolean myFetchDependencies;
 	@ApiModelProperty("Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
 	private List<String> myDependencyExcludes;
-	@ApiModelProperty("If provided, supplies the actual bytes of the package .tar.gz file")
-	@JsonProperty("packageContents")
-	private byte[] myContents;
+	@JsonIgnore
+	private byte[] myPackageContents;
 
 	public List<String> getDependencyExcludes() {
 		if (myDependencyExcludes == null) {
 			myDependencyExcludes = new ArrayList<>();
 		}
 		return myDependencyExcludes;
+	}
+
+	public void setDependencyExcludes(List<String> theDependencyExcludes) {
+		myDependencyExcludes = theDependencyExcludes;
 	}
 
 	public boolean isFetchDependencies() {
@@ -111,30 +115,34 @@ public class PackageInstallationSpec {
 		return myInstallResourceTypes;
 	}
 
-	public String getPackageName() {
-		return myPackageName;
+	public void setInstallResourceTypes(List<String> theInstallResourceTypes) {
+		myInstallResourceTypes = theInstallResourceTypes;
 	}
 
-	public PackageInstallationSpec setPackageName(String thePackageName) {
-		myPackageName = thePackageName;
+	public String getName() {
+		return myName;
+	}
+
+	public PackageInstallationSpec setName(String theName) {
+		myName = theName;
 		return this;
 	}
 
-	public String getPackageVersion() {
-		return myPackageVersion;
+	public String getVersion() {
+		return myVersion;
 	}
 
-	public PackageInstallationSpec setPackageVersion(String thePackageVersion) {
-		myPackageVersion = thePackageVersion;
+	public PackageInstallationSpec setVersion(String theVersion) {
+		myVersion = theVersion;
 		return this;
 	}
 
-	public byte[] getContents() {
-		return myContents;
+	public byte[] getPackageContents() {
+		return myPackageContents;
 	}
 
-	public PackageInstallationSpec setContents(byte[] theContents) {
-		myContents = theContents;
+	public PackageInstallationSpec setPackageContents(byte[] thePackageContents) {
+		myPackageContents = thePackageContents;
 		return this;
 	}
 
@@ -165,8 +173,8 @@ public class PackageInstallationSpec {
 		@Override
 		public PackageInstallationSpec get() {
 			return new PackageInstallationSpec()
-				.setPackageName("hl7.fhir.us.core")
-				.setPackageVersion("3.1.0")
+				.setName("hl7.fhir.us.core")
+				.setVersion("3.1.0")
 				.setInstallMode(InstallModeEnum.STORE_ONLY)
 				.setFetchDependencies(true);
 		}
@@ -177,8 +185,8 @@ public class PackageInstallationSpec {
 		@Override
 		public PackageInstallationSpec get() {
 			return new PackageInstallationSpec()
-				.setPackageName("com.example.my-resources")
-				.setPackageVersion("1.0")
+				.setName("com.example.my-resources")
+				.setVersion("1.0")
 				.setPackageUrl("classpath:/my-resources.tgz")
 				.setInstallMode(InstallModeEnum.STORE_AND_INSTALL)
 				.addInstallResourceTypes("Organization", "Medication", "PlanDefinition", "SearchParameter");

@@ -383,19 +383,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	public NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException {
-		Validate.notBlank(theInstallationSpec.getPackageName(), "thePackageId must not be blank");
-		Validate.notBlank(theInstallationSpec.getPackageVersion(), "thePackageVersion must not be blank");
+		Validate.notBlank(theInstallationSpec.getName(), "thePackageId must not be blank");
+		Validate.notBlank(theInstallationSpec.getVersion(), "thePackageVersion must not be blank");
 
 		if (isNotBlank(theInstallationSpec.getPackageUrl())) {
 			byte[] contents = loadPackageUrlContents(theInstallationSpec.getPackageUrl());
-			theInstallationSpec.setContents(contents);
+			theInstallationSpec.setPackageContents(contents);
 		}
 
-		if (theInstallationSpec.getContents() != null) {
-			return addPackageToCache(theInstallationSpec.getPackageName(), theInstallationSpec.getPackageVersion(), new ByteArrayInputStream(theInstallationSpec.getContents()), "Manually added");
+		if (theInstallationSpec.getPackageContents() != null) {
+			return addPackageToCache(theInstallationSpec.getName(), theInstallationSpec.getVersion(), new ByteArrayInputStream(theInstallationSpec.getPackageContents()), "Manually added");
 		}
 
-		return loadPackage(theInstallationSpec.getPackageName(), theInstallationSpec.getPackageVersion());
+		return loadPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
 	}
 
 	protected byte[] loadPackageUrlContents(String thePackageUrl) {

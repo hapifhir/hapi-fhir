@@ -139,7 +139,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				}
 
 			} catch (IOException e) {
-				throw new ImplementationGuideInstallationException("Could not load NPM package " + theInstallationSpec.getPackageName() + "#" + theInstallationSpec.getPackageVersion(), e);
+				throw new ImplementationGuideInstallationException("Could not load NPM package " + theInstallationSpec.getName() + "#" + theInstallationSpec.getVersion(), e);
 			}
 		}
 
