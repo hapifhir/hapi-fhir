@@ -62,6 +62,62 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		}
 	}
 
+
+	@Test
+	public void testPossibleDuplicate() {
+		assertLinkCount(0);
+		Person person = createPerson();
+		Person target = createPerson();
+
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		assertLinkCount(1);
+	}
+
+	@Test
+	public void testNoMatchBlocksPossibleDuplicate() {
+		assertLinkCount(0);
+		Person person = createPerson();
+		Person target = createPerson();
+
+		Long personPid = myIdHelperService.getPidOrNull(person);
+		Long targetPid = myIdHelperService.getPidOrNull(target);
+		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personPid, targetPid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(targetPid, personPid).isPresent());
+
+		saveNoMatchLink(personPid, targetPid);
+
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPid, targetPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		assertLinkCount(1);
+	}
+
+	@Test
+	public void testNoMatchBlocksPossibleDuplicateReversed() {
+		assertLinkCount(0);
+		Person person = createPerson();
+		Person target = createPerson();
+
+		Long personPid = myIdHelperService.getPidOrNull(person);
+		Long targetPid = myIdHelperService.getPidOrNull(target);
+		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personPid, targetPid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(targetPid, personPid).isPresent());
+
+		saveNoMatchLink(targetPid, personPid);
+
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPid, targetPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		assertLinkCount(1);
+	}
+
+	private void saveNoMatchLink(Long thePersonPid, Long theTargetPid) {
+		EmpiLink noMatchLink = new EmpiLink()
+			.setPersonPid(thePersonPid)
+			.setTargetPid(theTargetPid)
+			.setLinkSource(EmpiLinkSourceEnum.MANUAL)
+			.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
+		myEmpiLinkDaoSvc.save(noMatchLink);
+	}
+
 	@Test
 	public void testManualEmpiLinksCannotBeModifiedBySystem() {
 		Person person = createPerson(buildJanePerson());

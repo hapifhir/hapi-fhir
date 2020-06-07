@@ -44,6 +44,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -635,6 +636,49 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+
+
+	@Test
+	public void testCreateInTransaction_ServerId_WithPartition() {
+		createUniqueCompositeSp();
+		createRequestId();
+
+		addCreatePartition(myPartitionId, myPartitionDate);
+		addCreatePartition(myPartitionId, myPartitionDate);
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+
+		Organization org = new Organization();
+		org.setId(IdType.newRandomUuid());
+		org.setName("org");
+		input.addEntry()
+			.setFullUrl(org.getId())
+			.setResource(org)
+			.getRequest().setUrl("Organization").setMethod(Bundle.HTTPVerb.POST);
+
+		Patient p = new Patient();
+		p.getMeta().addTag("http://system", "code", "diisplay");
+		p.addName().setFamily("FAM");
+		p.addIdentifier().setSystem("system").setValue("value");
+		p.setBirthDate(new Date());
+		p.getManagingOrganization().setReference(org.getId());
+		input.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest().setUrl("Patient").setMethod(Bundle.HTTPVerb.POST);
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Long patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPartAsLong();
+
+		runInTransaction(() -> {
+			// HFJ_RESOURCE
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
+			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
+		});
+
+	}
 
 	@Test
 	public void testUpdateResourceWithPartition() {

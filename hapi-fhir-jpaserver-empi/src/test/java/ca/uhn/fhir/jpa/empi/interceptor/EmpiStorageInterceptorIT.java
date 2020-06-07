@@ -54,6 +54,11 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	@Autowired
 	private IdHelperService myIdHelperService;
 
+	@BeforeEach
+	public void before() {
+		super.loadEmpiSearchParameters();
+	}
+
 	@Test
 	public void testCreatePatient() throws InterruptedException {
 		myEmpiHelper.createWithLatch(new Patient());
@@ -76,7 +81,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testDeletePersonDeletesLinks() throws InterruptedException {
 		myEmpiHelper.createWithLatch(new Patient());
 		assertLinkCount(1);
-		Person person = getOnlyPerson();
+		Person person = getOnlyActivePerson();
 		myPersonDao.delete(person.getIdElement());
 		assertLinkCount(0);
 	}
@@ -129,7 +134,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
-		for (IBaseResource person : resources) {
+		for (IBaseResource person: resources) {
 			assertThat(person.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED), is(notNullValue()));
 		}
 	}
@@ -147,7 +152,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 			myEmpiHelper.doUpdateResource(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("The HAPI-EMPI tag on a resource may not be changed once created.", e.getMessage());
+			assertEquals("The HAPI-EMPI tag on a resource may not be changed once created.", e.getMessage() );
 		}
 	}
 
@@ -162,7 +167,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		//Updating a Person who was created via EMPI should fail.
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(patient)).get();
 		Long personPid = empiLink.getPersonPid();
-		Person empiPerson = (Person) myPersonDao.readByPid(new ResourcePersistentId(personPid));
+		Person empiPerson= (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
 		empiPerson.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myEmpiHelper.doUpdateResource(empiPerson, true);
@@ -171,7 +176,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());
 		}
 	}
-
+	
 	@Test
 	public void testEmpiPointcutReceivesTransactionLogMessages() throws InterruptedException {
 		EmpiHelperR4.OutcomeAndLogMessageWrapper wrapper = myEmpiHelper.createWithLatch(buildJanePatient());
@@ -235,11 +240,11 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	}
 
 	private void setPreventEidUpdates(boolean thePrevent) {
-		((EmpiSettings) myEmpiConfig).setPreventEidUpdates(thePrevent);
+		((EmpiSettings)myEmpiConfig).setPreventEidUpdates(thePrevent);
 	}
 
 	private void setPreventMultipleEids(boolean thePrevent) {
-		((EmpiSettings) myEmpiConfig).setPreventMultipleEids(thePrevent);
+		((EmpiSettings)myEmpiConfig).setPreventMultipleEids(thePrevent);
 	}
 
 }

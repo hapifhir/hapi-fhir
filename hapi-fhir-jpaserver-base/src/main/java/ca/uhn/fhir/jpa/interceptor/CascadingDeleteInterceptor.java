@@ -117,6 +117,7 @@ public class CascadingDeleteInterceptor {
 			String nextSourceId = nextSource.toUnqualifiedVersionless().getValue();
 
 			if (!cascadedDeletes.contains(nextSourceId)) {
+				cascadedDeletes.add(nextSourceId);
 
 				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
@@ -132,9 +133,6 @@ public class CascadingDeleteInterceptor {
 				// Actually perform the delete
 				ourLog.info("Have delete conflict {} - Cascading delete", next);
 				dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
-
-				cascadedDeletes.add(nextSourceId);
-
 			}
 		}
 

@@ -1,0 +1,11 @@
+---
+- item:
+    type: "add"
+    title: "This release corrects a snapshot dependency on org.hl7.fhir.core that was accidentally
+    left in HAPI FHIR 5.0.1."
+- item:
+     type: "change"
+     title: "The default setting for the partition mode's Include Hashes in Search Indexes setting was
+   incorrectly set to true in HAPI FHIR 5.0.0 and has now been changed to false, as this is a more sensible
+   default. Note that this wil affect existing systems that are trying this feature out. A manual reindex of
+   data may be required."

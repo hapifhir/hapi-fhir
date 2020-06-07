@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -105,6 +106,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private IResourceProvenanceDao myResourceHistoryProvenanceTableDao;
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	@Override
 	@Transactional
@@ -238,19 +241,42 @@ class ResourceExpungeService implements IResourceExpungeService {
 	@Override
 	@Transactional
 	public void deleteAllSearchParams(Long theResourceId) {
-		myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceId);
-		myResourceIndexedSearchParamCoordsDao.deleteByResourceId(theResourceId);
-		myResourceIndexedSearchParamDateDao.deleteByResourceId(theResourceId);
-		myResourceIndexedSearchParamNumberDao.deleteByResourceId(theResourceId);
-		myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
-		myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
-		myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
-		myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId);
-		mySearchParamPresentDao.deleteByResourceId(theResourceId);
-		myResourceLinkDao.deleteByResourceId(theResourceId);
+		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElse(null);
 
+		if (resource == null || resource.isParamsUriPopulated()) {
+			myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsCoordsPopulated()) {
+			myResourceIndexedSearchParamCoordsDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsDatePopulated()) {
+			myResourceIndexedSearchParamDateDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsNumberPopulated()) {
+			myResourceIndexedSearchParamNumberDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsQuantityPopulated()) {
+			myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsStringPopulated()) {
+			myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsTokenPopulated()) {
+			myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsCompositeStringUniquePresent()) {
+			myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId);
+		}
+		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
+			mySearchParamPresentDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isHasLinks()) {
+			myResourceLinkDao.deleteByResourceId(theResourceId);
+		}
 
-		myResourceTagDao.deleteByResourceId(theResourceId);
+		if (resource == null || resource.isHasTags()) {
+			myResourceTagDao.deleteByResourceId(theResourceId);
+		}
 	}
 
 	private void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
