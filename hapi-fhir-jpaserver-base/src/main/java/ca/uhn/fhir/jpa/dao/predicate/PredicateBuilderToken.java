@@ -373,7 +373,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		}
 
 		Predicate predicate;
-		if (values.size() == 1) {
+		if (values.size() == 1 && JpaSystemProperties.isOptmizeSingleElementInExpression()) {
 			predicate = myCriteriaBuilder.equal(hashField, values.get(0));
 		} else {
 			predicate = hashField.in(values);

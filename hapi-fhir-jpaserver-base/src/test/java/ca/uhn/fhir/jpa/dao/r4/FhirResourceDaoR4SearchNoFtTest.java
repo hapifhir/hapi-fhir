@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.predicate.JpaSystemProperties;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -143,6 +144,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.predicate.JpaSystemProperties.HFJ_FORCE_IN_CLAUSES_HF_50;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -530,7 +532,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam( "CareTeam").setChain(PARAM_TYPE));
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("CareTeam").setChain(PARAM_TYPE));
 		results = myDiagnosticReportDao.search(map);
 		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids.toString(), ids, contains(drId1.getValue()));
@@ -4728,6 +4730,48 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> values = toUnqualifiedVersionlessIdValues(results);
 		assertThat(values.toString(), values, containsInAnyOrder(patientId.getValue(), encId.getValue(), conditionId.getValue(), epId.getValue()));
 
+	}
+
+	@Test
+	public void testSearchReference_DontOptmizeSingleValueInPredicate() {
+		Patient p = new Patient();
+		p.setActive(true);
+		String patientId = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		AuditEvent audit = new AuditEvent();
+		audit.addEntity().getWhat().setReference(patientId);
+		String auditId = myAuditEventDao.create(audit).getId().toUnqualifiedVersionless().getValue();
+
+
+		// Default
+		{
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(AuditEvent.SP_ENTITY, new ReferenceParam(patientId));
+			IBundleProvider outcome = myAuditEventDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(auditId));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true), containsString("myresource1_.TARGET_RESOURCE_ID="));
+		}
+
+		// Disable optmization
+		try {
+			System.setProperty(HFJ_FORCE_IN_CLAUSES_HF_50, "true");
+			JpaSystemProperties.updateSettingsBasedOnCurrentSystemProperties();
+
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(AuditEvent.SP_ENTITY, new ReferenceParam(patientId));
+			IBundleProvider outcome = myAuditEventDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(auditId));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true), containsString("myresource1_.TARGET_RESOURCE_ID in "));
+		} finally {
+			System.clearProperty(HFJ_FORCE_IN_CLAUSES_HF_50);
+			JpaSystemProperties.updateSettingsBasedOnCurrentSystemProperties();
+		}
 	}
 
 

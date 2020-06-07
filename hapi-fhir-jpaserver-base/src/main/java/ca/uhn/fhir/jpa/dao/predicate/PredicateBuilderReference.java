@@ -221,7 +221,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 			Predicate pidPredicate;
 			if ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) {
-				if (targetPids.size() == 1) {
+				if (targetPids.size() == 1 && JpaSystemProperties.isOptmizeSingleElementInExpression()) {
 					pidPredicate = myCriteriaBuilder.equal(join.get("myTargetResourcePid").as(Long.class), targetPids.get(0).getIdAsLong());
 				} else {
 					pidPredicate = join.get("myTargetResourcePid").in(ResourcePersistentId.toLongList(targetPids));
@@ -497,7 +497,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		// one value
-		if (path.size() == 1) {
+		if (path.size() == 1 && JpaSystemProperties.isOptmizeSingleElementInExpression()) {
 			return myCriteriaBuilder.equal(from.get("mySourcePath").as(String.class), path.get(0));
 		}
 
@@ -535,7 +535,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		 * stack and run a subquery
 		 */
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theSubResourceName, theChain);
-		if (nextParamDef != null && !theChain.startsWith("_")) {
+		if (nextParamDef != null && !theChain.startsWith("_") && !JpaSystemProperties.isOptmizeSingleElementInExpression()) {
 			myQueryStack.pushIndexTableSubQuery();
 		} else {
 			myQueryStack.pushResourceTableSubQuery(theSubResourceName);
