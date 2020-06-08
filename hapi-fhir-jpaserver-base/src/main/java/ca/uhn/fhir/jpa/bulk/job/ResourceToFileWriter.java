@@ -1,10 +1,9 @@
-package ca.uhn.fhir.jpa.bulk.batch;
+package ca.uhn.fhir.jpa.bulk.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
-import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
+import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -31,19 +30,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ResourceToFileWriter implements ItemWriter<IBaseResource>, CompletionPolicy {
 	private static final Logger ourLog = getLogger(ResourceToFileWriter.class);
 
-
-
 	@Autowired
 	private FhirContext myContext;
-
-
-	@Autowired
-	private IBulkExportCollectionDao myBulkExportCollectionDao;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	private BulkExportCollectionEntity  myBulkExportCollectionEntity;
+	@Autowired
+	private BulkExportDaoSvc myBulkExportDaoSvc;
 
 	private ByteArrayOutputStream myOutputStream;
 	private OutputStreamWriter myWriter;
@@ -54,8 +48,6 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 
 	private IFhirResourceDao<IBaseBinary> myBinaryDao;
 
-	@Autowired
-	private BulkExportDaoSvc myBulkExportDaoSvc;
 
 	public ResourceToFileWriter() {
 		myOutputStream = new ByteArrayOutputStream();
@@ -92,19 +84,6 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 		return myBinaryDao.create(binary).getResource().getIdElement();
 	}
 
-	private BulkExportCollectionEntity getOrLoadBulkExportCollectionEntity() {
-		if (myBulkExportCollectionEntity == null) {
-			Optional<BulkExportCollectionEntity> oBulkExportCollectionEntity = myBulkExportCollectionDao.findById(myBulkExportCollectionEntityId);
-			if (!oBulkExportCollectionEntity.isPresent()) {
-				throw new IllegalArgumentException("This BulkExportCollectionEntity doesn't exist!");
-			} else {
-				myBulkExportCollectionEntity = oBulkExportCollectionEntity.get();
-			}
-		}
-		return myBulkExportCollectionEntity;
-
-	}
-
 	@Override
 	public void write(List<? extends IBaseResource> resources) throws Exception {
 
@@ -114,7 +93,7 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 		}
 
 		Optional<IIdType> createdId = flushToFiles();
-		createdId.ifPresent(theIIdType -> ourLog.warn("Created resources for bulk export file containing {}:{} resources of type ", theIIdType.toUnqualifiedVersionless().getValue(), myBulkExportCollectionEntity.getResourceType()));
+		createdId.ifPresent(theIIdType -> ourLog.warn("Created resources for bulk export file containing {} resources of type ", theIIdType.toUnqualifiedVersionless().getValue()));
 	}
 
 	@SuppressWarnings("unchecked")

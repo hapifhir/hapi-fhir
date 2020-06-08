@@ -1,5 +1,6 @@
-package ca.uhn.fhir.jpa.bulk.batch;
+package ca.uhn.fhir.jpa.bulk.svc;
 
+import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
@@ -61,6 +62,20 @@ public class BulkExportDaoSvc {
 			return null;
 		}
 		return jobOpt.get();
+	}
+
+	@Transactional
+	public void setJobToStatus(String theJobUUID, BulkJobStatusEnum theStatus) {
+		Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(theJobUUID);
+		if (!oJob.isPresent()) {
+			ourLog.error("Job doesn't exist!");
+		} else {
+			ourLog.info("Setting job with UUID {} to {}", theJobUUID, theStatus);
+			BulkExportJobEntity bulkExportJobEntity = oJob.get();
+			bulkExportJobEntity.setStatus(theStatus);
+			myBulkExportJobDao.save(bulkExportJobEntity);
+		}
+
 	}
 
 }

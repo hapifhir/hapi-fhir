@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
@@ -17,17 +19,15 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Date;
 import java.util.UUID;
@@ -53,7 +53,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
+
 	@Autowired
+	@Qualifier("bulkExportJob")
 	private Job myBulkJob;
 
 
@@ -151,7 +153,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter="+TEST_FILTER, status.getRequest());
 
@@ -159,7 +161,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myBulkDataExportSvc.buildExportFiles();
 
 		// Fetch the job again
-		status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(2, status.getFiles().size());
 
@@ -201,7 +203,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson", status.getRequest());
 
@@ -209,7 +211,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myBulkDataExportSvc.buildExportFiles();
 
 		// Fetch the job again
-		status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(2, status.getFiles().size());
 
@@ -249,7 +251,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testBatchJob() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+	public void testBatchJob() throws InterruptedException {
 		createResources();
 
 		// Create a bulk job
@@ -258,10 +260,19 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", jobDetails.getJobId());
 		myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 
-		IBulkDataExportSvc.JobInfo jobStatusOrThrowResourceNotFound = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
-		assertThat(jobStatusOrThrowResourceNotFound.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
-
+		IBulkDataExportSvc.JobInfo jobInfo;
+		while(true) {
+			jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+			if (jobInfo.getStatus() != BulkJobStatusEnum.COMPLETE) {
+				Thread.sleep(1000L);
+				ourLog.warn("waiting..");
+			} else {
+				break;
+			}
+		}
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
 	}
+
 	@Test
 	public void testSubmit_WithSince() throws InterruptedException {
 
@@ -284,7 +295,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_since=" + cutoff.setTimeZoneZulu(true).getValueAsString(), status.getRequest());
 
@@ -292,7 +303,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myBulkDataExportSvc.buildExportFiles();
 
 		// Fetch the job again
-		status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(1, status.getFiles().size());
 
@@ -320,11 +331,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
 			IIdType patId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
 
-			//Observation obs = new Observation();
-			//obs.setId("OBS" + i);
-			//obs.setStatus(Observation.ObservationStatus.FINAL);
-			//obs.getSubject().setReference(patId.getValue());
-		//	myObservationDao.update(obs);
+			Observation obs = new Observation();
+			obs.setId("OBS" + i);
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			obs.getSubject().setReference(patId.getValue());
+			myObservationDao.update(obs);
 		}
 	}
 }

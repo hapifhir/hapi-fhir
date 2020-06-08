@@ -1,18 +1,13 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.bulk.batch.BulkExportDaoSvc;
-import ca.uhn.fhir.jpa.bulk.batch.BulkExportJobCompletionListener;
-import ca.uhn.fhir.jpa.bulk.batch.BulkItemReader;
-import ca.uhn.fhir.jpa.bulk.batch.BulkItemResourceLoaderProcessor;
-import ca.uhn.fhir.jpa.bulk.batch.ResourceToFileWriter;
-import ca.uhn.fhir.jpa.bulk.batch.ResourceTypePartitioner;
+import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -20,18 +15,6 @@ import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.JobScope;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -42,20 +25,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
 
 @Configuration
-@Import(TestJPAConfig.class)
+@Import({TestJPAConfig.class, BatchJobsConfig.class})
 @EnableTransactionManagement()
-@EnableBatchProcessing
 public class TestR4Config extends BaseJavaConfigR4 {
 
-	/**
-	 * NANI
-	 */
-	public static final String WILL_LATE_BIND = null;
+	CountDownLatch jobLatch = new CountDownLatch(1);
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
 	public static Integer ourMaxThreads;
@@ -67,15 +47,10 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * starvation
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 		}
 	}
 
-	@Autowired
-	private StepBuilderFactory myStepBuilderFactory;
-
-	@Autowired
-	private JobBuilderFactory myJobBuilderFactory;
 
 	private Exception myLastStackTrace;
 
@@ -91,71 +66,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Bean
-	public Job bulkExportJob() {
-		return myJobBuilderFactory.get("bulkExportJob")
-			.start(partitionStep())
-			.listener(bulkExportJobCompletionListener())
-			.build();
-	}
-
-	@Bean
-	public Step workerResourceStep() {
-		return myStepBuilderFactory.get("workerResourceStep")
-			.<ResourcePersistentId, IBaseResource> chunk(2)
-			.reader(myBulkItemReader(WILL_LATE_BIND))
-			.processor(pidToResourceProcessor())
-			.writer(resourceToFileWriter())
-			.build();
-	}
-
-	@Bean
-	@JobScope
-	public BulkExportJobCompletionListener bulkExportJobCompletionListener() {
-		return new BulkExportJobCompletionListener();
-	}
-
-	@Bean
-	@StepScope
-	public ItemWriter<IBaseResource> resourceToFileWriter() {
-		return new ResourceToFileWriter();
-	}
-
-	@Bean
-	public Step partitionStep() {
-		return myStepBuilderFactory.get("partitionStep")
-			.partitioner("workerResourceStep", partitioner(null))
-			.step(workerResourceStep())
-			.build();
-	}
-
-
-	@Bean
 	public BulkExportDaoSvc bulkExportDaoSvc() {
 		return new BulkExportDaoSvc();
 	}
-
-	@Bean
-	@JobScope
-	public ResourceTypePartitioner partitioner(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
-		return new ResourceTypePartitioner(theJobUUID);
-	}
-
-
-	@Bean
-	@StepScope
-	public ItemProcessor<ResourcePersistentId, IBaseResource> pidToResourceProcessor() {
-		return new BulkItemResourceLoaderProcessor();
-	}
-
-	@Bean
-	@StepScope
-	public BulkItemReader myBulkItemReader(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
-		BulkItemReader bulkItemReader = new BulkItemReader();
-		bulkItemReader.setJobUUID(theJobUUID);
-		bulkItemReader.setName("bulkItemReader");
-		return bulkItemReader;
-	}
-
 
 	@Bean
 	public DataSource dataSource() {

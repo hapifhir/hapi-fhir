@@ -1,5 +1,6 @@
-package ca.uhn.fhir.jpa.bulk.batch;
+package ca.uhn.fhir.jpa.bulk.job;
 
+import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import org.slf4j.Logger;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;

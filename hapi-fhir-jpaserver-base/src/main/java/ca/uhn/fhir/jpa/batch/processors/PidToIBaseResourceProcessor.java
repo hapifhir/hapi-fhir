@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.batch;
+package ca.uhn.fhir.jpa.batch.processors;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,11 +15,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-public class BulkItemResourceLoaderProcessor implements ItemProcessor<ResourcePersistentId, IBaseResource> {
-	private static final Logger ourLog = getLogger(BulkItemResourceLoaderProcessor.class);
-
+/**
+ * Reusable Item Processor which converts a ResourcePersistentId to its IBaseResource
+ */
+public class PidToIBaseResourceProcessor implements ItemProcessor<ResourcePersistentId, IBaseResource> {
 
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
@@ -33,8 +31,6 @@ public class BulkItemResourceLoaderProcessor implements ItemProcessor<ResourcePe
 
 	@Autowired
 	private FhirContext myContext;
-
-
 
 	@Override
 	public IBaseResource process(ResourcePersistentId theResourcePersistentId) throws Exception {

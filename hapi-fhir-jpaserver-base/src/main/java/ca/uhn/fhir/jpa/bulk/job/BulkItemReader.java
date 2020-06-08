@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.batch;
+package ca.uhn.fhir.jpa.bulk.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -16,7 +16,10 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.support.AbstractItemCountingItemStreamItemReader;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.NonTransientResourceException;
+import org.springframework.batch.item.ParseException;
+import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -25,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class BulkItemReader extends AbstractItemCountingItemStreamItemReader<ResourcePersistentId> {
+public class BulkItemReader implements ItemReader<ResourcePersistentId> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkItemReader.class);
 
 	@Autowired
@@ -47,31 +50,7 @@ public class BulkItemReader extends AbstractItemCountingItemStreamItemReader<Res
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
 
-
 	Iterator<ResourcePersistentId> myPidIterator;
-
-
-	protected ResourcePersistentId doRead() throws Exception {
-		if (myPidIterator == null) {
-			loadResourcePids();
-		}
-		if (myPidIterator.hasNext()) {
-			return myPidIterator.next();
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	protected void doOpen() throws Exception {
-
-	}
-
-	@Override
-	protected void doClose() throws Exception {
-
-	}
-
 
 	private void loadResourcePids() {
 		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(myJobUUID);
@@ -107,4 +86,15 @@ public class BulkItemReader extends AbstractItemCountingItemStreamItemReader<Res
 		this.myJobUUID = theUUID;
 	}
 
+	@Override
+	public ResourcePersistentId read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+		if (myPidIterator == null) {
+			loadResourcePids();
+		}
+		if (myPidIterator.hasNext()) {
+			return myPidIterator.next();
+		} else {
+			return null;
+		}
+	}
 }
