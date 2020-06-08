@@ -40,7 +40,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public abstract class BaseEmpiProvider {
 
-	private final FhirContext myFhirContext;
+	protected final FhirContext myFhirContext;
 	private final IResourceLoader myResourceLoader;
 
 	public BaseEmpiProvider(FhirContext theFhirContext, IResourceLoader theResourceLoader) {
@@ -123,6 +123,11 @@ public abstract class BaseEmpiProvider {
 				throw new InvalidRequestException(ProviderConstants.EMPI_UPDATE_LINK + " illegal " + ProviderConstants.EMPI_UPDATE_LINK_MATCH_RESULT +
 					" value '" + matchResult + "'.  Must be " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
 		}
+	}
+
+	protected void validateNotDuplicateParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId) {
+		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
+		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
 	}
 
 	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails) {

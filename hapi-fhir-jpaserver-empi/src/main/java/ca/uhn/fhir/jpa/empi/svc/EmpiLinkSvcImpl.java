@@ -63,13 +63,19 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource thePerson, IAnyResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
-		IIdType resourceId = theResource.getIdElement().toUnqualifiedVersionless();
+	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+		IIdType resourceId = theTarget.getIdElement().toUnqualifiedVersionless();
 
-		validateRequestIsLegal(thePerson, theResource, theMatchResult, theLinkSource);
+		if (theMatchResult == EmpiMatchResultEnum.POSSIBLE_DUPLICATE && personsLinkedAsNoMatch(thePerson, theTarget)) {
+			log(theEmpiTransactionContext, thePerson.getIdElement().toUnqualifiedVersionless() +
+				" is linked as NO_MATCH with " +
+				theTarget.getIdElement().toUnqualifiedVersionless() +
+				" not linking as POSSIBLE_DUPLICATE.");
+			return;
+		}
+		validateRequestIsLegal(thePerson, theTarget, theMatchResult, theLinkSource);
 		switch (theMatchResult) {
 			case MATCH:
-				//deleteCurrentMatch(theResource);
 				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelUtil.getAssuranceLevel(theMatchResult, theLinkSource), theEmpiTransactionContext);
 				myEmpiResourceDaoSvc.updatePerson(thePerson);
 				break;
@@ -83,8 +89,15 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 				break;
 		}
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
-		createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiTransactionContext);
+		createOrUpdateLinkEntity(thePerson, theTarget, theMatchResult, theLinkSource, theEmpiTransactionContext);
+	}
 
+	private boolean personsLinkedAsNoMatch(IAnyResource thePerson, IAnyResource theTarget) {
+		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
+		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
+		// TODO perf collapse into one query
+		return myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personId, targetId, EmpiMatchResultEnum.NO_MATCH).isPresent() ||
+			myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(targetId, personId, EmpiMatchResultEnum.NO_MATCH).isPresent();
 	}
 
 	@Override

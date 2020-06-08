@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.param.*;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,6 +58,9 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Autowired
 	protected FhirContext myFhirCtx;
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	@Before
 	public void before() throws IOException {
 
@@ -63,7 +68,19 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+
 	}
+
+	@Before
+	public void beforeEnableLastN() {
+		myDaoConfig.setLastNEnabled(true);
+	}
+
+	@After
+	public void afterDisableLastN() {
+		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
+	}
+
 
 	private final String SINGLE_SUBJECT_ID = "4567";
 	private final String SINGLE_OBSERVATION_PID = "123";
