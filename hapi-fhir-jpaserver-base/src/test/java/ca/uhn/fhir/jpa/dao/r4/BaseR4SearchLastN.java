@@ -208,7 +208,6 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	public void testLastNNoPatients() {
 
 		SearchParameterMap params = new SearchParameterMap();
-		params.setLastNMax(1);
 
 		params.setLastN(true);
 		Map<String, String[]> requestParameters = new HashMap<>();

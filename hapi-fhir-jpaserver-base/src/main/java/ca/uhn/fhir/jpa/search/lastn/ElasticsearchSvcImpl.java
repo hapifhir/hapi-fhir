@@ -97,7 +97,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private final String GROUP_BY_CODE = "group_by_code";
 	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
 
-
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
 		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername, thePassword);
 
@@ -175,7 +174,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					break;
 				}
 				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, theFhirContext,
-					createObservationSubjectAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
+					createObservationSubjectAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
 				try {
 					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 					searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
@@ -186,7 +185,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 		} else {
 			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, theFhirContext,
-				createObservationCodeAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
+				createObservationCodeAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
 			try {
 				SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 				searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
@@ -196,6 +195,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 		}
 		return searchResults;
+	}
+
+	private int getMaxParameter(SearchParameterMap theSearchParameterMap) {
+		if (theSearchParameterMap.getLastNMax() == null) {
+			return 1;
+		} else {
+			return theSearchParameterMap.getLastNMax();
+		}
 	}
 
 	private List<String> getSubjectReferenceCriteria(String thePatientParamName, String theSubjectParamName, SearchParameterMap theSearchParameterMap) {
@@ -231,7 +238,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return referenceList;
 	}
 
-	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
+	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(Integer theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
 		CompositeValuesSourceBuilder<?> subjectValuesBuilder = new TermsValuesSourceBuilder("subject").field("subject");
 		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList<>();
 		compositeAggSubjectSources.add(subjectValuesBuilder);

@@ -12,13 +12,13 @@
           "type" : "keyword"
         },
         "codingdisplay" : {
-          "type" : "text"
+          "type" : "keyword"
         },
         "codingsystem" : {
           "type" : "keyword"
         },
         "text" : {
-          "type" : "text"
+          "type" : "keyword"
         }
       }
     }

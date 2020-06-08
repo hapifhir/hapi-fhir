@@ -88,7 +88,9 @@ public class BaseJpaResourceProviderObservationR4 extends JpaResourceProviderR4<
 			if (theSubject != null) {
 				paramMap.add(Observation.SP_SUBJECT, theSubject);
 			}
-			paramMap.setLastNMax(theMax.getValue());
+			if(theMax != null) {
+				paramMap.setLastNMax(theMax.getValue());
+			}
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());
 			}
