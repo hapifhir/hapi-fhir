@@ -196,9 +196,9 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "3");
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		TokenParam categoryParam = new TokenParam("test-heart-rate");
+		TokenParam categoryParam = new TokenParam(null, "test-heart-rate");
 		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		TokenParam codeParam = new TokenParam("test-code-1");
+		TokenParam codeParam = new TokenParam(null,"test-code-1");
 		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
 		searchParameterMap.setLastNMax(100);
 
@@ -230,10 +230,12 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "3");
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		TokenParam categoryParam = new TokenParam("test-heart-rate display");
+		// Check partial text
+		TokenParam categoryParam = new TokenParam("est-heart-ra");
 		categoryParam.setModifier(TokenParamModifier.TEXT);
 		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		TokenParam codeParam = new TokenParam("test-code-1 display");
+		// Check partial text
+		TokenParam codeParam = new TokenParam("est-code-on");
 		codeParam.setModifier(TokenParamModifier.TEXT);
 		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
 		searchParameterMap.setLastNMax(100);
@@ -414,13 +416,13 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		CodeJson codeJson1 = new CodeJson();
 		codeJson1.setCodeableConceptText("Test Codeable Concept Field for First Code");
 		codeJson1.setCodeableConceptId(codeableConceptId1);
-		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-1 display");
+		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-one display");
 
 		String codeableConceptId2 = UUID.randomUUID().toString();
 		CodeJson codeJson2 = new CodeJson();
 		codeJson2.setCodeableConceptText("Test Codeable Concept Field for Second Code");
 		codeJson2.setCodeableConceptId(codeableConceptId1);
-		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-2 display");
+		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-two display");
 
 		// Create CodeableConcepts for two categories, each with three codings.
 		// Create three codings and first category CodeableConcept

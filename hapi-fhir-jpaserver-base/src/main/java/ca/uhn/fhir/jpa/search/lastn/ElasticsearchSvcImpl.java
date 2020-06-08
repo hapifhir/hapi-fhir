@@ -412,8 +412,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			if (textOnlyList.size() > 0) {
 				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
 				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhraseQuery("categoryconceptcodingdisplay", textOnlyParam));
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhraseQuery("categoryconcepttext", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchQuery("categoryconceptcodingdisplay", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchQuery("categoryconcepttext", textOnlyParam));
 				}
 				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
 			}
@@ -510,8 +510,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			if (textOnlyList.size() > 0) {
 				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
 				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhraseQuery("codeconceptcodingdisplay", textOnlyParam));
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhraseQuery("codeconcepttext", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchQuery("codeconceptcodingdisplay", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchQuery("codeconcepttext", textOnlyParam));
 				}
 				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
 			}
