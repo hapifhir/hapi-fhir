@@ -229,18 +229,63 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	public void testLastNCodeCodeTextCategoryTextOnly() {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "3");
+
+		// Check case match
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		// Check partial text
-		TokenParam categoryParam = new TokenParam("est-heart-ra");
+		TokenParam categoryParam = new TokenParam("Heart");
 		categoryParam.setModifier(TokenParamModifier.TEXT);
 		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		// Check partial text
-		TokenParam codeParam = new TokenParam("est-code-on");
+		TokenParam codeParam = new TokenParam("Code1");
 		codeParam.setModifier(TokenParamModifier.TEXT);
 		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
 		searchParameterMap.setLastNMax(100);
 
 		List<String> observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+
+		assertEquals(5, observations.size());
+
+		// Check case not match
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		categoryParam = new TokenParam("heart");
+		categoryParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
+		codeParam = new TokenParam("code1");
+		codeParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.setLastNMax(100);
+
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+
+		assertEquals(5, observations.size());
+
+		// Check hyphenated strings
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		categoryParam = new TokenParam("heart-rate");
+		categoryParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
+		codeParam = new TokenParam("code1");
+		codeParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.setLastNMax(100);
+
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+
+		assertEquals(5, observations.size());
+
+		// Check partial strings
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		categoryParam = new TokenParam("hear");
+		categoryParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
+		codeParam = new TokenParam("1-obs");
+		codeParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.setLastNMax(100);
+
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
 
 		assertEquals(5, observations.size());
 
@@ -416,30 +461,30 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		CodeJson codeJson1 = new CodeJson();
 		codeJson1.setCodeableConceptText("Test Codeable Concept Field for First Code");
 		codeJson1.setCodeableConceptId(codeableConceptId1);
-		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-one display");
+		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "1-Observation Code1");
 
 		String codeableConceptId2 = UUID.randomUUID().toString();
 		CodeJson codeJson2 = new CodeJson();
 		codeJson2.setCodeableConceptText("Test Codeable Concept Field for Second Code");
 		codeJson2.setCodeableConceptId(codeableConceptId1);
-		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-two display");
+		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "2-Observation Code2");
 
 		// Create CodeableConcepts for two categories, each with three codings.
 		// Create three codings and first category CodeableConcept
 		List<CodeJson> categoryConcepts1 = new ArrayList<>();
 		CodeJson categoryCodeableConcept1 = new CodeJson();
 		categoryCodeableConcept1.setCodeableConceptText("Test Codeable Concept Field for first category");
-		categoryCodeableConcept1.addCoding("http://mycodes.org/fhir/observation-category", "test-heart-rate", "test-heart-rate display");
-		categoryCodeableConcept1.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-heart-rate", "test-alt-heart-rate display");
-		categoryCodeableConcept1.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-heart-rate", "test-2nd-alt-heart-rate display");
+		categoryCodeableConcept1.addCoding("http://mycodes.org/fhir/observation-category", "test-heart-rate", "Test Heart Rate");
+		categoryCodeableConcept1.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-heart-rate", "Test Heartrate");
+		categoryCodeableConcept1.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-heart-rate", "Test Heart-Rate");
 		categoryConcepts1.add(categoryCodeableConcept1);
 		// Create three codings and second category CodeableConcept
 		List<CodeJson> categoryConcepts2 = new ArrayList<>();
 		CodeJson categoryCodeableConcept2 = new CodeJson();
 		categoryCodeableConcept2.setCodeableConceptText("Test Codeable Concept Field for second category");
-		categoryCodeableConcept2.addCoding("http://mycodes.org/fhir/observation-category", "test-vital-signs", "test-vital-signs display");
-		categoryCodeableConcept2.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "test-alt-vitals display");
-		categoryCodeableConcept2.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals", "test-2nd-alt-vitals display");
+		categoryCodeableConcept2.addCoding("http://mycodes.org/fhir/observation-category", "test-vital-signs", "Test Vital Signs");
+		categoryCodeableConcept2.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "Test Vital-Signs");
+		categoryCodeableConcept2.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals", "Test Vitals");
 		categoryConcepts2.add(categoryCodeableConcept2);
 
 		for (int patientCount = 0; patientCount < 10; patientCount++) {

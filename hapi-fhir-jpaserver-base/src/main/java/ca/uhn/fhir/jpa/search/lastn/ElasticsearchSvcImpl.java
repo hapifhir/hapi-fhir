@@ -412,8 +412,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			if (textOnlyList.size() > 0) {
 				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
 				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchQuery("categoryconceptcodingdisplay", textOnlyParam));
-					myTextBoolQueryBuilder.should(QueryBuilders.matchQuery("categoryconcepttext", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("categoryconceptcodingdisplay", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("categoryconcepttext", textOnlyParam));
 				}
 				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
 			}
@@ -510,8 +510,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			if (textOnlyList.size() > 0) {
 				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
 				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchQuery("codeconceptcodingdisplay", textOnlyParam));
-					myTextBoolQueryBuilder.should(QueryBuilders.matchQuery("codeconcepttext", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("codeconceptcodingdisplay", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("codeconcepttext", textOnlyParam));
 				}
 				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
 			}
@@ -683,6 +683,11 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			RequestOptions.DEFAULT);
 
 		return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
+	}
+
+	@Override
+	public void close() throws IOException {
+		myRestHighLevelClient.close();
 	}
 
 	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
