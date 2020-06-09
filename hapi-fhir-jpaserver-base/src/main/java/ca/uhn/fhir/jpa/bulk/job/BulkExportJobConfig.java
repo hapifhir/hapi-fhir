@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.JobScope;
@@ -40,10 +41,17 @@ public class BulkExportJobConfig {
 	@Bean
 	public Job bulkExportJob() {
 		return myJobBuilderFactory.get("bulkExportJob")
+			.validator(jobExistsValidator())
 			.start(partitionStep())
 			.listener(bulkExportJobCompletionListener())
 			.build();
 	}
+
+	@Bean
+	public JobParametersValidator jobExistsValidator() {
+		return new JobExistsParameterValidator();
+	}
+
 
 	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {

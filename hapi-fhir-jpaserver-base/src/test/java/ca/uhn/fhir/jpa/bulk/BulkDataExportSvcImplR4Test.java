@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -251,7 +252,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testBatchJobSubmitsAndRuns() throws InterruptedException {
+	public void testBatchJobSubmitsAndRuns() throws Exception {
 		createResources();
 
 		// Create a bulk job
@@ -263,6 +264,18 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		IBulkDataExportSvc.JobInfo jobInfo = awaitJobCompletion(jobDetails.getJobId());
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+	}
+
+	@Test
+	public void testJobParametersValidatorRejectsInvalidParameters() {
+		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", "I'm not real!");
+		try {
+			myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+			fail("Should have had invalid parameter execption!");
+		} catch (JobParametersInvalidException e) {
+
+		}
+
 	}
 
 	public IBulkDataExportSvc.JobInfo awaitJobCompletion(String theJobId) throws InterruptedException {

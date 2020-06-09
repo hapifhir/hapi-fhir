@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
@@ -192,7 +193,11 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			.addString("jobUUID", theJobUuid)
 			.toJobParameters();
 
-		myJobSubmitter.runJob(myBulkExportJob, parameters);
+		try {
+			myJobSubmitter.runJob(myBulkExportJob, parameters);
+		} catch (JobParametersInvalidException theE) {
+			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
+		}
 	}
 
 
