@@ -81,6 +81,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
+	// Index Constants
 	public static final String OBSERVATION_INDEX = "observation_index";
 	public static final String OBSERVATION_CODE_INDEX = "code_index";
 	public static final String OBSERVATION_DOCUMENT_TYPE = "ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity";
@@ -88,14 +89,34 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public static final String OBSERVATION_INDEX_SCHEMA_FILE = "ObservationIndexSchema.json";
 	public static final String OBSERVATION_CODE_INDEX_SCHEMA_FILE = "ObservationCodeIndexSchema.json";
 
-	private final RestHighLevelClient myRestHighLevelClient;
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
+	// Aggregation Constants
 	private final String GROUP_BY_SUBJECT = "group_by_subject";
 	private final String GROUP_BY_SYSTEM = "group_by_system";
 	private final String GROUP_BY_CODE = "group_by_code";
+	private final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
+
+	// Observation index document element names
 	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
+	private final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
+	private final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
+	private final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
+	private final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
+	private final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
+	private final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
+	private final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
+	private final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
+	private final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
+	private final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
+	private final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
+	private final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
+
+	// Code index document element names
+	private final String CODE_HASH = "codingcode_system_hash";
+	private final String CODE_TEXT = "text";
+
+	private final RestHighLevelClient myRestHighLevelClient;
+
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
 		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername, thePassword);
@@ -239,7 +260,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(Integer theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		CompositeValuesSourceBuilder<?> subjectValuesBuilder = new TermsValuesSourceBuilder("subject").field("subject");
+		CompositeValuesSourceBuilder<?> subjectValuesBuilder = new TermsValuesSourceBuilder(OBSERVATION_SUBJECT_FIELD_NAME).field(OBSERVATION_SUBJECT_FIELD_NAME);
 		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList<>();
 		compositeAggSubjectSources.add(subjectValuesBuilder);
 		CompositeAggregationBuilder compositeAggregationSubjectBuilder = new CompositeAggregationBuilder(GROUP_BY_SUBJECT, compositeAggSubjectSources);
@@ -250,14 +271,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private TermsAggregationBuilder createObservationCodeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field("codeconceptcodingcode");
+		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field(OBSERVATION_CODEVALUE_FIELD_NAME);
 		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
 		// Top Hits Aggregation
-		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits("most_recent_effective")
-			.sort("effectivedtm", SortOrder.DESC)
+		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
+			.sort(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, SortOrder.DESC)
 			.fetchSource(theTopHitsInclude, null).size(theMaxNumberObservationsPerCode));
 		observationCodeCodeAggregationBuilder.size(10000);
-		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field("codeconceptcodingsystem");
+		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
 		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
 		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
 		return observationCodeSystemAggregationBuilder;
@@ -339,7 +360,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private SearchHit[] getLastNMatches(Terms.Bucket theObservationCodeBucket) {
 		Aggregations topHitObservationCodes = theObservationCodeBucket.getAggregations();
-		ParsedTopHits parsedTopHits = topHitObservationCodes.get("most_recent_effective");
+		ParsedTopHits parsedTopHits = topHitObservationCodes.get(MOST_RECENT_EFFECTIVE);
 		return parsedTopHits.getHits().getHits();
 	}
 
@@ -371,7 +392,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
 		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-		boolQueryBuilder.must(QueryBuilders.termQuery("subject", theSubjectParam));
+		boolQueryBuilder.must(QueryBuilders.termQuery(OBSERVATION_SUBJECT_FIELD_NAME, theSubjectParam));
 		addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 		addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 		addDateCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
@@ -408,19 +429,19 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				textOnlyList.addAll(getCodingTextOnlyValues(nextAnd));
 			}
 			if (codeSystemHashList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("categoryconceptcodingcode_system_hash", codeSystemHashList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CATEGORYHASH_FIELD_NAME, codeSystemHashList));
 			}
 			if (codeOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("categoryconceptcodingcode", codeOnlyList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CATEGORYVALUE_FIELD_NAME, codeOnlyList));
 			}
 			if (systemOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("categoryconceptcodingsystem", systemOnlyList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CATEGORYSYSTEM_FIELD_NAME, systemOnlyList));
 			}
 			if (textOnlyList.size() > 0) {
 				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
 				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("categoryconceptcodingdisplay", textOnlyParam));
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("categoryconcepttext", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CATEGORYDISPLAY_FIELD_NAME, textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CATEGORYTEXT_FIELD_NAME, textOnlyParam));
 				}
 				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
 			}
@@ -506,19 +527,19 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				textOnlyList.addAll(getCodingTextOnlyValues(nextAnd));
 			}
 			if (codeSystemHashList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("codeconceptcodingcode_system_hash", codeSystemHashList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODEHASH_FIELD_NAME, codeSystemHashList));
 			}
 			if (codeOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("codeconceptcodingcode", codeOnlyList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODEVALUE_FIELD_NAME, codeOnlyList));
 			}
 			if (systemOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("codeconceptcodingsystem", systemOnlyList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODESYSTEM_FIELD_NAME, systemOnlyList));
 			}
 			if (textOnlyList.size() > 0) {
 				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
 				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("codeconceptcodingdisplay", textOnlyParam));
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("codeconcepttext", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CODEDISPLAY_FIELD_NAME, textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CODE_TEXT_FIELD_NAME, textOnlyParam));
 				}
 				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
 			}
@@ -545,7 +566,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private void createDateCriteria(DateParam theDate, BoolQueryBuilder theBoolQueryBuilder) {
 		Long dateInstant = theDate.getValue().getTime();
-		RangeQueryBuilder myRangeQueryBuilder = new RangeQueryBuilder("effectivedtm");
+		RangeQueryBuilder myRangeQueryBuilder = new RangeQueryBuilder(OBSERVATION_EFFECTIVEDTM_FIELD_NAME);
 
 		ParamPrefixEnum prefix = theDate.getPrefix();
 		if (prefix == ParamPrefixEnum.GREATERTHAN || prefix == ParamPrefixEnum.STARTS_AFTER) {
@@ -557,7 +578,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		} else if (prefix == ParamPrefixEnum.GREATERTHAN_OR_EQUALS) {
 			theBoolQueryBuilder.should(myRangeQueryBuilder.gte(dateInstant));
 		} else {
-			theBoolQueryBuilder.should(new MatchQueryBuilder("effectivedtm", dateInstant));
+			theBoolQueryBuilder.should(new MatchQueryBuilder(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, dateInstant));
 		}
 	}
 
@@ -652,9 +673,9 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 		if (theCodeSystemHash != null) {
-			boolQueryBuilder.must(QueryBuilders.termQuery("codingcode_system_hash", theCodeSystemHash));
+			boolQueryBuilder.must(QueryBuilders.termQuery(CODE_HASH, theCodeSystemHash));
 		} else {
-			boolQueryBuilder.must(QueryBuilders.matchPhraseQuery("text", theText));
+			boolQueryBuilder.must(QueryBuilders.matchPhraseQuery(CODE_TEXT, theText));
 		}
 
 		searchSourceBuilder.query(boolQueryBuilder);

@@ -166,7 +166,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 			obs.getSubject().setReferenceElement(thePatientId);
 			obs.getCode().addCoding().setCode(theObservationCode).setSystem(codeSystem);
 			obs.setValue(new StringType(theObservationCode + "_0"));
-			Date effectiveDtm = new Date(observationDate.getTimeInMillis() - (3600*1000*(theTimeOffset+idx)));
+			Date effectiveDtm = calculateObservationDateFromOffset(theTimeOffset, idx);
 			obs.setEffective(new DateTimeType(effectiveDtm));
 			obs.getCategoryFirstRep().addCoding().setCode(theCategoryCode).setSystem(categorySystem);
 			String observationId = myObservationDao.create(obs, mockSrd()).getId().toUnqualifiedVersionless().getValue();
@@ -175,6 +175,12 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 			observationCodeMap.put(observationId, theObservationCode);
 			observationEffectiveMap.put(observationId, effectiveDtm);
 		}
+	}
+
+	private Date calculateObservationDateFromOffset(Integer theTimeOffset, Integer theObservationIndex) {
+		int milliSecondsPerHour = 3600*1000;
+		// Generate a Date by subtracting a calculated number of hours from the static observationDate property.
+		return new Date(observationDate.getTimeInMillis() - (milliSecondsPerHour*(theTimeOffset+theObservationIndex)));
 	}
 
 	protected ServletRequestDetails mockSrd() {

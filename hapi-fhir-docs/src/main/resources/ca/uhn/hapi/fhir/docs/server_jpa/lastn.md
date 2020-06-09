@@ -16,6 +16,8 @@ As described in the [FHIR specification](http://hl7.org/fhir/observation-operati
 
 # Limitations
 
+Currently only Elasticsearch versions up to 6.5.4 are supported.
+
 Search parameters other than those listed above are currently not supported.
 
 The grouping of Observation resources by `Observation.code` means that the `$lastn` operation will not work in cases where `Observation.code` has more than one coding.
@@ -37,5 +39,7 @@ In addition, the Elasticsearch client service, `ElasticsearchSvcImpl` will need 
      return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUserId, elasticsearchPassword);
   }
 ```
+
+The Elasticsearch client service requires that security be enabled in the Elasticsearch clusters, and that an Elasticsearch user be available with permissions to create an index and to index, update and delete documents as needed.
 
 See the [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/search/lastn/IElasticsearchSvc.html) for more information regarding the Elasticsearch client service.
