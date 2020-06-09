@@ -23,10 +23,12 @@ package ca.uhn.fhir.empi.rules.metric;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.metric.matcher.DoubleMetaphoneStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.EmpiPersonNameMatchModeEnum;
+import ca.uhn.fhir.empi.rules.metric.matcher.HapiDateMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.HapiStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.IEmpiFieldMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.MetaphoneStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.NameMatcher;
+import ca.uhn.fhir.empi.rules.metric.matcher.NormalizeCaseStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.empi.rules.metric.similarity.IEmpiFieldSimilarity;
 import info.debatty.java.stringsimilarity.Cosine;
@@ -43,32 +45,29 @@ import javax.annotation.Nullable;
  * calculating differences between strings (https://en.wikipedia.org/wiki/String_metric)
  */
 public enum EmpiMetricEnum {
-	METAPHONE("Metaphone", new HapiStringMatcher(new MetaphoneStringMatcher())),
-	DOUBLE_METAPHONE("Double Metaphone", new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
-	JARO_WINKLER("Jaro Winkler", new HapiStringSimilarity(new JaroWinkler())),
-	COSINE("Cosine", new HapiStringSimilarity(new Cosine())),
-	JACCARD("Jaccard", new HapiStringSimilarity(new Jaccard())),
-	NORMALIZED_LEVENSCHTEIN("Normalized Levenschtein", new HapiStringSimilarity(new NormalizedLevenshtein())),
-	SORENSEN_DICE("Sorensen Dice", new HapiStringSimilarity(new SorensenDice())),
-	STANDARD_NAME_ANY_ORDER("Standard name Any Order", new NameMatcher(EmpiPersonNameMatchModeEnum.STANDARD_ANY_ORDER)),
-	EXACT_NAME_ANY_ORDER("Exact name Any Order", new NameMatcher(EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER)),
-	STANDARD_NAME_FIRST_AND_LAST("Standard name First and Last", new NameMatcher(EmpiPersonNameMatchModeEnum.STANDARD_FIRST_AND_LAST)),
-	EXACT_NAME_FIRST_AND_LAST("Exact name First and Last", new NameMatcher(EmpiPersonNameMatchModeEnum.EXACT_FIRST_AND_LAST));
+	METAPHONE(new HapiStringMatcher(new MetaphoneStringMatcher())),
+	DOUBLE_METAPHONE(new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
+	NORMALIZE_CASE(new HapiStringMatcher(new NormalizeCaseStringMatcher())),
+	EXACT(new HapiStringMatcher()),
+	DATE(new HapiDateMatcher()),
+	JARO_WINKLER(new HapiStringSimilarity(new JaroWinkler())),
+	COSINE(new HapiStringSimilarity(new Cosine())),
+	JACCARD(new HapiStringSimilarity(new Jaccard())),
+	NORMALIZED_LEVENSCHTEIN(new HapiStringSimilarity(new NormalizedLevenshtein())),
+	SORENSEN_DICE(new HapiStringSimilarity(new SorensenDice())),
+	STANDARD_NAME_ANY_ORDER(new NameMatcher(EmpiPersonNameMatchModeEnum.STANDARD_ANY_ORDER)),
+	EXACT_NAME_ANY_ORDER(new NameMatcher(EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER)),
+	STANDARD_NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.STANDARD_FIRST_AND_LAST)),
+	EXACT_NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.EXACT_FIRST_AND_LAST));
 
-	private final String myCode;
 	private final IEmpiFieldMetric myEmpiFieldMetric;
 
-	EmpiMetricEnum(String theCode, IEmpiFieldMetric theEmpiFieldMetric) {
-		myCode = theCode;
+	EmpiMetricEnum(IEmpiFieldMetric theEmpiFieldMetric) {
 		myEmpiFieldMetric = theEmpiFieldMetric;
 	}
 
-	public String getCode() {
-		return myCode;
-	}
-
-	public IEmpiFieldMetric getEmpiFieldMetric() {
-		return myEmpiFieldMetric;
+	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
+		return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase);
 	}
 
 	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, @Nullable Double theThreshold) {

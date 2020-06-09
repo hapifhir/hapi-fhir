@@ -34,6 +34,10 @@ public class HapiStringMatcher implements IEmpiFieldMatcher {
 		myStringMatcher = theStringMatcher;
 	}
 
+	public HapiStringMatcher() {
+		myStringMatcher = String::equals;
+	}
+
 	@Override
 	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
