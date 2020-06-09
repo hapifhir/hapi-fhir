@@ -13,9 +13,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.repeat.CompletionPolicy;
-import org.springframework.batch.repeat.RepeatContext;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -27,7 +24,7 @@ import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class ResourceToFileWriter implements ItemWriter<IBaseResource>, CompletionPolicy {
+public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	private static final Logger ourLog = getLogger(ResourceToFileWriter.class);
 
 	@Autowired
@@ -84,17 +81,6 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 		return myBinaryDao.create(binary).getResource().getIdElement();
 	}
 
-	@Override
-	public void write(List<? extends IBaseResource> resources) throws Exception {
-
-		for (IBaseResource nextFileResource : resources) {
-			myParser.encodeResourceToWriter(nextFileResource, myWriter);
-			myWriter.append("\n");
-		}
-
-		Optional<IIdType> createdId = flushToFiles();
-		createdId.ifPresent(theIIdType -> ourLog.warn("Created resources for bulk export file containing {} resources of type ", theIIdType.toUnqualifiedVersionless().getValue()));
-	}
 
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
@@ -102,22 +88,16 @@ public class ResourceToFileWriter implements ItemWriter<IBaseResource>, Completi
 	}
 
 	@Override
-	public boolean isComplete(RepeatContext theRepeatContext, RepeatStatus theRepeatStatus) {
-		return false;
-	}
+	public void write(List<? extends List<IBaseResource>> theList) throws Exception {
 
-	@Override
-	public boolean isComplete(RepeatContext theRepeatContext) {
-		return false;
-	}
+		for (List<IBaseResource> resourceList : theList) {
+			for (IBaseResource nextFileResource : resourceList) {
+				myParser.encodeResourceToWriter(nextFileResource, myWriter);
+				myWriter.append("\n");
+			}
+		}
 
-	@Override
-	public RepeatContext start(RepeatContext theRepeatContext) {
-		return null;
-	}
-
-	@Override
-	public void update(RepeatContext theRepeatContext) {
-
+		Optional<IIdType> createdId = flushToFiles();
+		createdId.ifPresent(theIIdType -> ourLog.warn("Created resources for bulk export file containing {} resources of type ", theIIdType.toUnqualifiedVersionless().getValue()));
 	}
 }

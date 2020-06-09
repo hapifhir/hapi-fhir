@@ -16,9 +16,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Reusable Item Processor which converts a ResourcePersistentId to its IBaseResource
+ * Reusable Item Processor which converts ResourcePersistentIds to their IBaseResources
  */
-public class PidToIBaseResourceProcessor implements ItemProcessor<ResourcePersistentId, IBaseResource> {
+public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourcePersistentId>, List<IBaseResource>> {
 
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
@@ -33,15 +33,15 @@ public class PidToIBaseResourceProcessor implements ItemProcessor<ResourcePersis
 	private FhirContext myContext;
 
 	@Override
-	public IBaseResource process(ResourcePersistentId theResourcePersistentId) throws Exception {
+	public List<IBaseResource> process(List<ResourcePersistentId> theResourcePersistentId) throws Exception {
 
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(myResourceType);
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
 
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, resourceTypeClass);
 		List<IBaseResource> outgoing = new ArrayList<>();
-		sb.loadResourcesByPid(Collections.singletonList(theResourcePersistentId), Collections.emptyList(), outgoing, false, null);
-		return outgoing.get(0);
+		sb.loadResourcesByPid(theResourcePersistentId, Collections.emptyList(), outgoing, false, null);
+		return outgoing;
 
 	}
 

@@ -28,8 +28,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class BulkItemReader implements ItemReader<ResourcePersistentId> {
+public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkItemReader.class);
+
+	private static final int READ_CHUNK_SIZE = 10;
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
@@ -87,14 +89,18 @@ public class BulkItemReader implements ItemReader<ResourcePersistentId> {
 	}
 
 	@Override
-	public ResourcePersistentId read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+	public List<ResourcePersistentId> read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
 		if (myPidIterator == null) {
 			loadResourcePids();
 		}
-		if (myPidIterator.hasNext()) {
-			return myPidIterator.next();
-		} else {
-			return null;
+		int count = 0;
+		List<ResourcePersistentId> outgoing = new ArrayList<>();
+		while (myPidIterator.hasNext() && count < READ_CHUNK_SIZE) {
+			outgoing.add(myPidIterator.next());
+			count += 1;
 		}
+
+		return outgoing.size() == 0 ? null : outgoing;
+
 	}
 }

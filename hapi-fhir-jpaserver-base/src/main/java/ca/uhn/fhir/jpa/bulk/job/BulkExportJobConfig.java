@@ -16,12 +16,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 
+import java.util.List;
+
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
  * Bulk Export job.
  */
 @Configuration
 public class BulkExportJobConfig {
+
+	public static final String JOB_UUID_KEY = "jobUUID";
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -46,7 +50,7 @@ public class BulkExportJobConfig {
 	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {
 		return myStepBuilderFactory.get("bulkExportGenerateResourceFilesStep")
-			.<ResourcePersistentId, IBaseResource> chunk(1000) //1000 resources per generated file
+			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(100) //1000 resources per generated file, as the reader returns 10 resources at a time.
 			//TODO should we potentially make this configurable?
 			.reader(bulkItemReader(null))
 			.processor(myPidToIBaseResourceProcessor)
@@ -85,7 +89,7 @@ public class BulkExportJobConfig {
 
 	@Bean
 	@StepScope
-	public ItemWriter<IBaseResource> resourceToFileWriter() {
+	public ItemWriter<List<IBaseResource>> resourceToFileWriter() {
 		return new ResourceToFileWriter();
 	}
 
