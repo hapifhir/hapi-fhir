@@ -31,10 +31,13 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	private static ObjectMapper ourMapperNonPrettyPrint;
 
+	private static boolean indexLoaded = false;
+
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
 
 	private final FhirContext myFhirContext = FhirContext.forR4();
 
+	static private final Calendar baseObservationDate = new GregorianCalendar();
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -46,15 +49,10 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	@Before
 	public void before() throws IOException {
-		createMultiplePatientsAndObservations();
-	}
-
-	@After
-	public void after() throws IOException {
-		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+		if (!indexLoaded) {
+			createMultiplePatientsAndObservations();
+			indexLoaded = true;
+		}
 	}
 
 	@Test
@@ -198,9 +196,9 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "3");
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		TokenParam categoryParam = new TokenParam("test-heart-rate");
+		TokenParam categoryParam = new TokenParam(null, "test-heart-rate");
 		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		TokenParam codeParam = new TokenParam("test-code-1");
+		TokenParam codeParam = new TokenParam(null,"test-code-1");
 		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
 		searchParameterMap.setLastNMax(100);
 
@@ -231,11 +229,13 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	public void testLastNCodeCodeTextCategoryTextOnly() {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "3");
+
+		// Check case match
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		TokenParam categoryParam = new TokenParam("test-heart-rate display");
+		TokenParam categoryParam = new TokenParam("Heart");
 		categoryParam.setModifier(TokenParamModifier.TEXT);
 		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		TokenParam codeParam = new TokenParam("test-code-1 display");
+		TokenParam codeParam = new TokenParam("Code1");
 		codeParam.setModifier(TokenParamModifier.TEXT);
 		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
 		searchParameterMap.setLastNMax(100);
@@ -244,31 +244,90 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		assertEquals(5, observations.size());
 
+		// Check case not match
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		categoryParam = new TokenParam("heart");
+		categoryParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
+		codeParam = new TokenParam("code1");
+		codeParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.setLastNMax(100);
+
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+
+		assertEquals(5, observations.size());
+
+		// Check hyphenated strings
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		categoryParam = new TokenParam("heart-rate");
+		categoryParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
+		codeParam = new TokenParam("code1");
+		codeParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.setLastNMax(100);
+
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+
+		assertEquals(5, observations.size());
+
+		// Check partial strings
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		categoryParam = new TokenParam("hear");
+		categoryParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
+		codeParam = new TokenParam("1-obs");
+		codeParam.setModifier(TokenParamModifier.TEXT);
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.setLastNMax(100);
+
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+
+		assertEquals(5, observations.size());
+
 	}
 
 	@Test
 	public void testLastNNoMatchQueries() {
-		// Invalid Patient
+
+		ReferenceParam validPatientParam = new ReferenceParam("Patient", "", "9");
+		TokenParam validCategoryCodeParam = new TokenParam("http://mycodes.org/fhir/observation-category","test-heart-rate");
+		TokenParam validObservationCodeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-1");
+		DateParam validDateParam = new DateParam(ParamPrefixEnum.EQUAL, new Date(baseObservationDate.getTimeInMillis() - (9*3600*1000)));
+
+		// Ensure that valid parameters are indeed valid
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		ReferenceParam patientParam = new ReferenceParam("Patient", "", "10");
-		searchParameterMap.add(Observation.SP_PATIENT, buildReferenceAndListParam(patientParam));
-		TokenParam categoryParam = new TokenParam("http://mycodes.org/fhir/observation-category", "test-heart-rate");
-		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		TokenParam codeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-1");
-		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.add(Observation.SP_PATIENT, buildReferenceAndListParam(validPatientParam));
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(validCategoryCodeParam));
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(validObservationCodeParam));
+		searchParameterMap.add(Observation.SP_DATE, validDateParam);
 		searchParameterMap.setLastNMax(100);
 
 		List<String> observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(1, observations.size());
+
+		// Invalid Patient
+		searchParameterMap = new SearchParameterMap();
+		ReferenceParam patientParam = new ReferenceParam("Patient", "", "10");
+		searchParameterMap.add(Observation.SP_PATIENT, buildReferenceAndListParam(patientParam));
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(validCategoryCodeParam));
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(validObservationCodeParam));
+		searchParameterMap.add(Observation.SP_DATE, validDateParam);
+		searchParameterMap.setLastNMax(100);
+
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
 		assertEquals(0, observations.size());
 
 		// Invalid subject
 		searchParameterMap = new SearchParameterMap();
-		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "10");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		categoryParam = new TokenParam("http://mycodes.org/fhir/observation-category", "test-heart-rate");
-		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		codeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-1");
-		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(patientParam));
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(validCategoryCodeParam));
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(validObservationCodeParam));
+		searchParameterMap.add(Observation.SP_DATE, validDateParam);
 		searchParameterMap.setLastNMax(100);
 
 		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
@@ -276,12 +335,11 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		// Invalid observation code
 		searchParameterMap = new SearchParameterMap();
-		subjectParam = new ReferenceParam("Patient", "", "9");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		categoryParam = new TokenParam("http://mycodes.org/fhir/observation-category", "test-heart-rate");
-		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		codeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-999");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(validPatientParam));
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(validCategoryCodeParam));
+		TokenParam codeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-999");
 		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.add(Observation.SP_DATE, validDateParam);
 		searchParameterMap.setLastNMax(100);
 
 		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
@@ -289,14 +347,109 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		// Invalid category code
 		searchParameterMap = new SearchParameterMap();
-		subjectParam = new ReferenceParam("Patient", "", "9");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		categoryParam = new TokenParam("http://mycodes.org/fhir/observation-category", "test-not-a-category");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(validPatientParam));
+		TokenParam categoryParam = new TokenParam("http://mycodes.org/fhir/observation-category", "test-not-a-category");
 		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		codeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-1");
-		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(validObservationCodeParam));
+		searchParameterMap.add(Observation.SP_DATE, validDateParam);
 		searchParameterMap.setLastNMax(100);
 
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(0, observations.size());
+
+		// Invalid date
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(validPatientParam));
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(validCategoryCodeParam));
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(validObservationCodeParam));
+		searchParameterMap.add(Observation.SP_DATE, new DateParam(ParamPrefixEnum.GREATERTHAN, baseObservationDate.getTime()));
+		searchParameterMap.setLastNMax(100);
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(0, observations.size());
+
+	}
+
+	@Test
+	public void testLastNEffectiveDates() {
+		Date highDate = new Date(baseObservationDate.getTimeInMillis() - (3600*1000));
+		Date lowDate = new Date(baseObservationDate.getTimeInMillis() - (10*3600*1000));
+
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "3");
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		DateParam dateParam = new DateParam(ParamPrefixEnum.EQUAL, lowDate);
+		searchParameterMap.add(Observation.SP_DATE, dateParam);
+		searchParameterMap.setLastNMax(100);
+		List<String> observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(1, observations.size());
+
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lowDate);
+		searchParameterMap.add(Observation.SP_DATE, dateParam);
+		searchParameterMap.setLastNMax(100);
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(10, observations.size());
+
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, lowDate);
+		searchParameterMap.add(Observation.SP_DATE, dateParam);
+		searchParameterMap.setLastNMax(100);
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(9, observations.size());
+
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		dateParam = new DateParam(ParamPrefixEnum.STARTS_AFTER, lowDate);
+		searchParameterMap.add(Observation.SP_DATE, dateParam);
+		searchParameterMap.setLastNMax(100);
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(9, observations.size());
+
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, highDate);
+		searchParameterMap.add(Observation.SP_DATE, dateParam);
+		searchParameterMap.setLastNMax(100);
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(10, observations.size());
+
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		dateParam = new DateParam(ParamPrefixEnum.LESSTHAN, highDate);
+		searchParameterMap.add(Observation.SP_DATE, dateParam);
+		searchParameterMap.setLastNMax(100);
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(9, observations.size());
+
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		dateParam = new DateParam(ParamPrefixEnum.ENDS_BEFORE, highDate);
+		searchParameterMap.add(Observation.SP_DATE, dateParam);
+		searchParameterMap.setLastNMax(100);
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(9, observations.size());
+
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		DateParam startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4*3600*1000)));
+		DateAndListParam dateAndListParam = new DateAndListParam();
+		dateAndListParam.addAnd(new DateOrListParam().addOr(startDateParam));
+		dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, highDate);
+		dateAndListParam.addAnd(new DateOrListParam().addOr(dateParam));
+		searchParameterMap.add(Observation.SP_DATE, dateAndListParam);
+		searchParameterMap.setLastNMax(100);
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(3, observations.size());
+
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4*3600*1000)));
+		searchParameterMap.add(Observation.SP_DATE, startDateParam);
+		dateParam = new DateParam(ParamPrefixEnum.LESSTHAN, lowDate);
+		searchParameterMap.add(Observation.SP_DATE, dateParam);
+		searchParameterMap.setLastNMax(100);
 		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
 		assertEquals(0, observations.size());
 
@@ -308,30 +461,30 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		CodeJson codeJson1 = new CodeJson();
 		codeJson1.setCodeableConceptText("Test Codeable Concept Field for First Code");
 		codeJson1.setCodeableConceptId(codeableConceptId1);
-		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "test-code-1 display");
+		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "1-Observation Code1");
 
 		String codeableConceptId2 = UUID.randomUUID().toString();
 		CodeJson codeJson2 = new CodeJson();
 		codeJson2.setCodeableConceptText("Test Codeable Concept Field for Second Code");
 		codeJson2.setCodeableConceptId(codeableConceptId1);
-		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "test-code-2 display");
+		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "2-Observation Code2");
 
 		// Create CodeableConcepts for two categories, each with three codings.
 		// Create three codings and first category CodeableConcept
 		List<CodeJson> categoryConcepts1 = new ArrayList<>();
 		CodeJson categoryCodeableConcept1 = new CodeJson();
 		categoryCodeableConcept1.setCodeableConceptText("Test Codeable Concept Field for first category");
-		categoryCodeableConcept1.addCoding("http://mycodes.org/fhir/observation-category", "test-heart-rate", "test-heart-rate display");
-		categoryCodeableConcept1.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-heart-rate", "test-alt-heart-rate display");
-		categoryCodeableConcept1.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-heart-rate", "test-2nd-alt-heart-rate display");
+		categoryCodeableConcept1.addCoding("http://mycodes.org/fhir/observation-category", "test-heart-rate", "Test Heart Rate");
+		categoryCodeableConcept1.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-heart-rate", "Test Heartrate");
+		categoryCodeableConcept1.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-heart-rate", "Test Heart-Rate");
 		categoryConcepts1.add(categoryCodeableConcept1);
 		// Create three codings and second category CodeableConcept
 		List<CodeJson> categoryConcepts2 = new ArrayList<>();
 		CodeJson categoryCodeableConcept2 = new CodeJson();
 		categoryCodeableConcept2.setCodeableConceptText("Test Codeable Concept Field for second category");
-		categoryCodeableConcept2.addCoding("http://mycodes.org/fhir/observation-category", "test-vital-signs", "test-vital-signs display");
-		categoryCodeableConcept2.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "test-alt-vitals display");
-		categoryCodeableConcept2.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals", "test-2nd-alt-vitals display");
+		categoryCodeableConcept2.addCoding("http://mycodes.org/fhir/observation-category", "test-vital-signs", "Test Vital Signs");
+		categoryCodeableConcept2.addCoding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "Test Vital-Signs");
+		categoryCodeableConcept2.addCoding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals", "Test Vitals");
 		categoryConcepts2.add(categoryCodeableConcept2);
 
 		for (int patientCount = 0; patientCount < 10; patientCount++) {
@@ -357,9 +510,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId2, codeJson2));
 				}
 
-				Calendar observationDate = new GregorianCalendar();
-				observationDate.add(Calendar.HOUR, -10 + entryCount);
-				Date effectiveDtm = observationDate.getTime();
+				Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10-entryCount)*3600*1000));
 				observationJson.setEffectiveDtm(effectiveDtm);
 
 				assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(identifier, observationJson));

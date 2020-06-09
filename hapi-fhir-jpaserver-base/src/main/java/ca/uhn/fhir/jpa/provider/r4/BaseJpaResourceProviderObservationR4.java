@@ -59,6 +59,10 @@ public class BaseJpaResourceProviderObservationR4 extends JpaResourceProviderR4<
 		@OperationParam(name="code")
 			TokenAndListParam theCode,
 
+		@Description(shortDefinition="The effective date of the observation")
+		@OperationParam(name="date")
+			DateAndListParam theDate,
+
 		@Description(shortDefinition="The subject that the observation is about (if patient)")
 		@OperationParam(name="patient")
 			ReferenceAndListParam thePatient,
@@ -77,13 +81,16 @@ public class BaseJpaResourceProviderObservationR4 extends JpaResourceProviderR4<
 			SearchParameterMap paramMap = new SearchParameterMap();
 			paramMap.add(Observation.SP_CATEGORY, theCategory);
 			paramMap.add(Observation.SP_CODE, theCode);
+			paramMap.add(Observation.SP_DATE, theDate);
 			if (thePatient != null) {
 				paramMap.add(Observation.SP_PATIENT, thePatient);
 			}
 			if (theSubject != null) {
 				paramMap.add(Observation.SP_SUBJECT, theSubject);
 			}
-			paramMap.setLastNMax(theMax.getValue());
+			if(theMax != null) {
+				paramMap.setLastNMax(theMax.getValue());
+			}
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());
 			}
