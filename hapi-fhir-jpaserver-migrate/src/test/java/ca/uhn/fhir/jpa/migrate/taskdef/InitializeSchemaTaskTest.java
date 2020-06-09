@@ -36,20 +36,6 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		getMigrator().migrate();
 	}
 
-	@Test
-	public void testInitializeBatch() throws SQLException {
-		InitializeSchemaTask task = new InitializeSchemaTask("1", "2", new SpringBatchSchemaMigrationProvider());
-		getMigrator().addTask(task);
-		getMigrator().migrate();
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), hasItems(
-			"BATCH_JOB_INSTANCE",
-			"BATCH_JOB_EXECUTION",
-			"BATCH_JOB_EXECUTION_PARAMS",
-			"BATCH_JOB_EXECUTION_CONTEXT",
-			"BATCH_STEP_EXECUTION",
-			"BATCH_STEP_EXECUTION_CONTEXT"
-			));
-	}
 
 	private class TestProvider implements ISchemaInitializationProvider {
 		@Override
