@@ -159,6 +159,8 @@
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
 						<ignoredResource>changelog.xml</ignoredResource>
+						<ignoredResource>.*/favicon.ico$</ignoredResource>
+						<ignoredResource>Log4j-charsets.properties</ignoredResource>
 					</ignoredResourcePatterns>
 				</configuration>
 			</plugin>

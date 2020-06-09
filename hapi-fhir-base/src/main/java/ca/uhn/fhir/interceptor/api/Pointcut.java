@@ -1776,7 +1776,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
-	 * This hook is invoked when a search has failed for any reason. When this pointcut
+	 * This hook is invoked when a search has completed. When this pointcut
 	 * is invoked, a pass in the Search Coordinator has completed successfully, but
 	 * not all possible resources have been loaded yet so a future paging request
 	 * may trigger a new task that will load further resources.
@@ -1809,6 +1809,44 @@ public enum Pointcut {
 	 * </p>
 	 */
 	JPA_PERFTRACE_SEARCH_PASS_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
+
+	/**
+	 * <b>Performance Tracing Hook:</b>
+	 * This hook is invoked when a query involving an external index (e.g. Elasticsearch) has completed. When this pointcut
+	 * is invoked, an initial list of resource IDs has been generated which will be used as part of a subsequent database query.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
@@ -2019,7 +2057,7 @@ public enum Pointcut {
 		return myParameterTypes;
 	}
 
-	private class UnknownType {
+	private static class UnknownType {
 	}
 
 	private static class ExceptionHandlingSpec {

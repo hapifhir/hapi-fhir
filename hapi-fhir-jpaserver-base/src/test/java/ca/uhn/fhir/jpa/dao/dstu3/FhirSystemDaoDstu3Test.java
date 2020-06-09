@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
@@ -21,8 +25,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -60,6 +66,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.internal.stubbing.answers.CallsRealMethods;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -68,8 +76,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,15 +101,25 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu3Test.class);
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IInterceptorService myInterceptorBroadcaster;
 
 	@After
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setMaximumDeleteConflictQueryCount(new DaoConfig().getMaximumDeleteConflictQueryCount());
+
 	}
 
 	@Before
@@ -1824,6 +1845,42 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
+	}
+
+	/**
+	 * There is nothing here that isn't tested elsewhere, but it's useful for testing a large transaction followed
+	 * by a large cascading delete
+	 */
+	@Test
+	@Ignore
+	public void testTransactionFromBundle_Slow() throws Exception {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myDaoConfig.setMaximumDeleteConflictQueryCount(10000);
+
+		StopWatch sw = new StopWatch();
+		sw.startTask("Parse Bundle");
+		Bundle bundle = loadBundle("/dstu3/slow_bundle.xml");
+
+		sw.startTask("Process transaction");
+		Bundle resp = mySystemDao.transaction(mySrd, bundle);
+		ourLog.info("Tasks: {}", sw.formatTaskDurations());
+
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+
+
+		doAnswer(new CallsRealMethods()).when(mySrd).setParameters(any());
+		when(mySrd.getParameters()).thenCallRealMethod();
+		when(mySrd.getUserData()).thenReturn(new HashMap<>());
+		Map<String, String[]> params = Maps.newHashMap();
+		params.put(Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE});
+		mySrd.setParameters(params);
+
+		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorBroadcaster);
+		myInterceptorBroadcaster.registerInterceptor(deleteInterceptor);
+
+
+		myPatientDao.deleteByUrl("Patient?identifier=http://fhir.nl/fhir/NamingSystem/bsn|900197341", mySrd);
+
 	}
 
 	@Test

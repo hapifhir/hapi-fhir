@@ -156,7 +156,7 @@ public class ParametersUtil {
 	}
 
 	/**
-	 * Add a paratemer value to a Parameters resource
+	 * Add a parameter value to a Parameters resource
 	 *
 	 * @param theContext    The FhirContext
 	 * @param theParameters The Parameters resource
@@ -172,7 +172,7 @@ public class ParametersUtil {
 	}
 
 	/**
-	 * Add a paratemer value to a Parameters resource
+	 * Add a parameter value to a Parameters resource
 	 *
 	 * @param theContext           The FhirContext
 	 * @param theParameters        The Parameters resource

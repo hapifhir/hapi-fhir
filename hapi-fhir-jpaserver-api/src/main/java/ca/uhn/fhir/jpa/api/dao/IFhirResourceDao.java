@@ -93,8 +93,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
-	 *
-	 * @param theRequestDetails TODO
 	 */
 	DaoMethodOutcome delete(IIdType theResource, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
@@ -204,6 +202,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 
+	/**
+	 * Search for IDs for processing a match URLs, etc.
+	 */
 	Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
 
 	/**

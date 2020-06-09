@@ -88,15 +88,17 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS, type = Person.class)
-	public Person mergePersons(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, min = 1, max = 1) StringType thePersonIdToDelete,
-										@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, min = 1, max = 1) StringType thePersonIdToKeep,
+	public Person mergePersons(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, min = 1, max = 1) StringType theFromPersonId,
+										@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, min = 1, max = 1) StringType theToPersonId,
 										RequestDetails theRequestDetails) {
-		validateMergeParameters(thePersonIdToDelete, thePersonIdToKeep);
-		IAnyResource personToDelete = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonIdToDelete.getValue());
-		IAnyResource personToKeep = getPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonIdToKeep.getValue());
-		validateMergeResources(personToDelete, personToKeep);
+		validateMergeParameters(theFromPersonId, theToPersonId);
+		IAnyResource fromPerson = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPersonId.getValue());
+		IAnyResource toPerson = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPersonId.getValue());
+		validateMergeResources(fromPerson, toPerson);
+		validateSameVersion(fromPerson, theFromPersonId);
+		validateSameVersion(toPerson, theToPersonId);
 
-		return (Person) myPersonMergerSvc.mergePersons(personToDelete, personToKeep, createEmpiContext(theRequestDetails));
+		return (Person) myPersonMergerSvc.mergePersons(fromPerson, toPerson, createEmpiContext(theRequestDetails));
 	}
 
 	@Operation(name = ProviderConstants.EMPI_UPDATE_LINK, type = Person.class)
@@ -107,8 +109,10 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
 		EmpiMatchResultEnum matchResult = extractMatchResultOrNull(theMatchResult);
-		IAnyResource person = getPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
-		IAnyResource target = getTargetFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
+		IAnyResource person = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
+		IAnyResource target = getLatestTargetFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
+		validateSameVersion(person, thePersonId);
+		validateSameVersion(target, theTargetId);
 
 		return (Person) myEmpiLinkUpdaterSvc.updateLink(person, target, matchResult, createEmpiContext(theRequestDetails));
 	}
@@ -130,5 +134,19 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	@Operation(name = ProviderConstants.EMPI_DUPLICATE_PERSONS, idempotent = true)
 	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
 		return (Parameters) myEmpiLinkQuerySvc.getPossibleDuplicates(createEmpiContext(theRequestDetails));
+	}
+
+	@Operation(name = ProviderConstants.EMPI_NOT_DUPLICATE)
+	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, min = 1, max = 1) StringType thePersonId,
+											 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, min = 1, max = 1) StringType theTargetId,
+											 ServletRequestDetails theRequestDetails) {
+
+		validateNotDuplicateParameters(thePersonId, theTargetId);
+		IAnyResource person = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId.getValue());
+		IAnyResource target = getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId.getValue());
+		validateSameVersion(person, thePersonId);
+		validateSameVersion(target, theTargetId);
+
+		return (Parameters) myEmpiLinkUpdaterSvc.notDuplicatePerson(person, target, createEmpiContext(theRequestDetails));
 	}
 }

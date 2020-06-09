@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -172,7 +173,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public List<EmpiLink> findEmpiLinksByPersonId(IBaseResource thePersonResource) {
-		@Nullable Long pid = myIdHelperService.getPidOrNull(thePersonResource);
+		Long pid = myIdHelperService.getPidOrNull(thePersonResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
@@ -192,4 +193,14 @@ public class EmpiLinkDaoSvc {
    public List<EmpiLink> findEmpiLinkByExample(Example<EmpiLink> theExampleLink) {
 		return myEmpiLinkDao.findAll(theExampleLink);
    }
+
+	public List<EmpiLink> findEmpiLinksByTarget(Patient theTargetResource) {
+		Long pid = myIdHelperService.getPidOrNull(theTargetResource);
+		if (pid == null) {
+			return Collections.emptyList();
+		}
+		EmpiLink empiLink = new EmpiLink().setTargetPid(pid);
+		Example<EmpiLink> example = Example.of(empiLink);
+		return myEmpiLinkDao.findAll(example);
+	}
 }
