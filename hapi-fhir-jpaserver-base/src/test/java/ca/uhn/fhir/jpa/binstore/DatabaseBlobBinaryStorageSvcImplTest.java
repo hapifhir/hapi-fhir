@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,10 +38,17 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	@After
-	public void resetDaoConfig() {
-		myDaoConfig.setPreloadBlobFromInputStream(false);
+	@Before
+	public void backupDaoConfig() {
+		defaultPreloadBlobFromInputStream = myDaoConfig.isPreloadBlobFromInputStream();
 	}
+
+	@After
+	public void restoreDaoConfig() {
+		myDaoConfig.setPreloadBlobFromInputStream(defaultPreloadBlobFromInputStream);
+	}
+
+	boolean defaultPreloadBlobFromInputStream;
 
 	@Test
 	public void testStoreAndRetrieve() throws IOException {
