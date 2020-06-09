@@ -2,6 +2,7 @@ package ca.uhn.fhir.empi;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
@@ -79,7 +80,7 @@ public abstract class BaseR4Test {
 	}
 
 	protected EmpiResourceMatcherSvc buildMatcher(EmpiRulesJson theEmpiRulesJson) {
-		EmpiResourceMatcherSvc retval = new EmpiResourceMatcherSvc(ourFhirContext, new EmpiSettings().setEmpiRules(theEmpiRulesJson));
+		EmpiResourceMatcherSvc retval = new EmpiResourceMatcherSvc(ourFhirContext, new EmpiSettings(new EmpiRuleValidator()).setEmpiRules(theEmpiRulesJson));
 		retval.init();
 		return retval;
 	}

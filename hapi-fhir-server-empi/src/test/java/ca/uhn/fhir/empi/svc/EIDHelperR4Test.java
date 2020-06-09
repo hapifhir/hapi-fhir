@@ -2,6 +2,7 @@ package ca.uhn.fhir.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.model.CanonicalEID;
+import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.util.EIDHelper;
@@ -23,15 +24,15 @@ public class EIDHelperR4Test {
 	private static final FhirContext myFhirContext = FhirContext.forR4();
 	private static final String EXTERNAL_ID_SYSTEM_FOR_TEST = "http://testsystem.io/naming-system/empi";
 
-	private static final EmpiRulesJson myRules = new EmpiRulesJson() {{
+	private static final EmpiRulesJson ourRules = new EmpiRulesJson() {{
 		setEnterpriseEIDSystem(EXTERNAL_ID_SYSTEM_FOR_TEST);
 	}};
 
-	private static final EmpiSettings mySettings = new EmpiSettings() {{
-		setEmpiRules(myRules);
+	private static final EmpiSettings ourSettings = new EmpiSettings(new EmpiRuleValidator()) {{
+		setEmpiRules(ourRules);
 	}};
 
-	private static final EIDHelper EID_HELPER = new EIDHelper(myFhirContext, mySettings);
+	private static final EIDHelper EID_HELPER = new EIDHelper(myFhirContext, ourSettings);
 
 
 	@Test

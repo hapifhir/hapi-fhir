@@ -35,6 +35,10 @@ public class EmpiRuleValidator {
 	}
 
 	private void validateSystemIsUri(EmpiRulesJson theEmpiRulesJson) {
+		if (theEmpiRulesJson.getEnterpriseEIDSystem() == null) {
+			return;
+		}
+
 		try {
 			new URI(theEmpiRulesJson.getEnterpriseEIDSystem());
 		} catch (URISyntaxException e) {

@@ -64,8 +64,6 @@ public class EmpiConsumerConfig {
 	@Autowired
 	IEmpiSettings myEmpiProperties;
 	@Autowired
-	EmpiRuleValidator myEmpiRuleValidator;
-	@Autowired
 	EmpiProviderLoader myEmpiProviderLoader;
 	@Autowired
 	EmpiSubscriptionLoader myEmpiSubscriptionLoader;
@@ -178,8 +176,6 @@ public class EmpiConsumerConfig {
 		if (!myEmpiProperties.isEnabled()) {
 			return;
 		}
-
-		myEmpiRuleValidator.validate(myEmpiProperties.getEmpiRules());
 	}
 
 	@EventListener(classes = {ContextRefreshedEvent.class})

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.empi.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -18,13 +17,13 @@ public class EmpiRuleValidatorTest {
 	private EmpiRuleValidator myEmpiRuleValidator = new EmpiRuleValidator();
 
    @Test
-   public void testValidate() {
-   	String invalidUri = "invalid uri";
-		EmpiRulesJson sampleEmpiRulesJson = new EmpiRulesJson();
-		sampleEmpiRulesJson.setEnterpriseEIDSystem(invalidUri);
-
+   public void testValidate() throws IOException {
+		EmpiSettings empiSettings = new EmpiSettings(myEmpiRuleValidator);
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+		Resource resource = resourceLoader.getResource("bad-rules-bad-url.json");
+		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		try {
-			myEmpiRuleValidator.validate(sampleEmpiRulesJson);
+			empiSettings.setScriptText(json);
 			fail();
 		} catch (ConfigurationException e){
 			assertThat(e.getMessage(), is("Enterprise Identifier System (eidSystem) must be a valid URI"));
@@ -33,9 +32,9 @@ public class EmpiRuleValidatorTest {
    
    @Test
 	public void testNonExistentMatchField() throws IOException {
-		EmpiSettings empiSettings = new EmpiSettings();
+		EmpiSettings empiSettings = new EmpiSettings(myEmpiRuleValidator);
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource("bad-rules.json");
+		Resource resource = resourceLoader.getResource("bad-rules-missing-name.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		try {
 			empiSettings.setScriptText(json);
@@ -43,5 +42,20 @@ public class EmpiRuleValidatorTest {
 		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage(), is("There is no matchField with name foo"));
 		}
+	}
+
+	@Test
+	public void testSimilarityHasThreshold() throws IOException {
+		EmpiSettings empiSettings = new EmpiSettings(myEmpiRuleValidator);
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+		Resource resource = resourceLoader.getResource("bad-rules-missing-name.json");
+		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
+		try {
+			empiSettings.setScriptText(json);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertThat(e.getMessage(), is("There is no matchField with name foo"));
+		}
+
 	}
 }

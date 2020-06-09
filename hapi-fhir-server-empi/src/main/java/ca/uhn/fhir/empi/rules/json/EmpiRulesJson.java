@@ -35,13 +35,13 @@ import java.util.Map;
 
 @JsonDeserialize(converter = EmpiRulesJson.EmpiRulesJsonConverter.class)
 public class EmpiRulesJson implements IModelJson {
-	@JsonProperty("candidateSearchParams")
+	@JsonProperty(value = "candidateSearchParams", required = true)
 	List<EmpiResourceSearchParamJson> myResourceSearchParams = new ArrayList<>();
-	@JsonProperty("candidateFilterSearchParams")
+	@JsonProperty(value = "candidateFilterSearchParams", required = true)
 	List<EmpiFilterSearchParamJson> myFilterSearchParams = new ArrayList<>();
-	@JsonProperty("matchFields")
+	@JsonProperty(value = "matchFields", required = true)
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
-	@JsonProperty("matchResultMap")
+	@JsonProperty(value = "matchResultMap", required = true)
 	Map<String, EmpiMatchResultEnum> myMatchResultMap = new HashMap<>();
 	@JsonProperty(value = "eidSystem")
 	String myEnterpriseEIDSystem;
