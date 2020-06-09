@@ -251,26 +251,29 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testBatchJob() throws InterruptedException {
+	public void testBatchJobSubmitsAndRuns() throws InterruptedException {
 		createResources();
 
 		// Create a bulk job
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
+
 		//Add the UUID to the job
 		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", jobDetails.getJobId());
 		myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 
-		IBulkDataExportSvc.JobInfo jobInfo;
+		IBulkDataExportSvc.JobInfo jobInfo = awaitJobCompletion(jobDetails.getJobId());
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+	}
+
+	public IBulkDataExportSvc.JobInfo awaitJobCompletion(String theJobId) throws InterruptedException {
 		while(true) {
-			jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId);
 			if (jobInfo.getStatus() != BulkJobStatusEnum.COMPLETE) {
 				Thread.sleep(1000L);
-				ourLog.warn("waiting..");
 			} else {
-				break;
+				return jobInfo;
 			}
 		}
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
 	}
 
 	@Test

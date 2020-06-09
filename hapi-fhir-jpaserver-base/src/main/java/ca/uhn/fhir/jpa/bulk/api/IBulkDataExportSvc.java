@@ -80,6 +80,7 @@ public interface IBulkDataExportSvc {
 				myFiles = new ArrayList<>();
 			}
 			return myFiles;
+
 		}
 
 		public BulkJobStatusEnum getStatus() {
@@ -130,6 +131,7 @@ public interface IBulkDataExportSvc {
 			return this;
 		}
 	}
+
 
 
 }
