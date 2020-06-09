@@ -51,7 +51,6 @@ public class BulkExportJobConfig {
 	public Step bulkExportGenerateResourceFilesStep() {
 		return myStepBuilderFactory.get("bulkExportGenerateResourceFilesStep")
 			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(100) //1000 resources per generated file, as the reader returns 10 resources at a time.
-			//TODO should we potentially make this configurable?
 			.reader(bulkItemReader(null))
 			.processor(myPidToIBaseResourceProcessor)
 			.writer(resourceToFileWriter())
