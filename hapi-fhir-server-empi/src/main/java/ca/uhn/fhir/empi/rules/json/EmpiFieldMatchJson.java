@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Contains all business data for determining if a match exists on a particular field, given:
@@ -34,16 +35,16 @@ import javax.annotation.Nonnull;
  * 3. A given FHIRPath expression for finding the particular primitive to be used for comparison. (e.g. name.given)
  */
 public class EmpiFieldMatchJson implements IModelJson {
-	@JsonProperty("name")
+	@JsonProperty(value = "name", required = true)
 	String myName;
-	@JsonProperty("resourceType")
+	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
-	@JsonProperty("resourcePath")
+	@JsonProperty(value = "resourcePath", required = true)
 	String myResourcePath;
-	@JsonProperty("metric")
+	@JsonProperty(value = "metric", required = true)
 	EmpiMetricEnum myMetric;
 	@JsonProperty("matchThreshold")
-	double myMatchThreshold;
+	Double myMatchThreshold;
 
 	public EmpiMetricEnum getMetric() {
 		return myMetric;
@@ -72,7 +73,8 @@ public class EmpiFieldMatchJson implements IModelJson {
 		return this;
 	}
 
-	public double getMatchThreshold() {
+	@Nullable
+	public Double getMatchThreshold() {
 		return myMatchThreshold;
 	}
 

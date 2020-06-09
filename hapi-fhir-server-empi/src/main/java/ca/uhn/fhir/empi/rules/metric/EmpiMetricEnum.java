@@ -36,11 +36,13 @@ import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import info.debatty.java.stringsimilarity.SorensenDice;
 import org.hl7.fhir.instance.model.api.IBase;
 
+import javax.annotation.Nullable;
+
 /**
  * Enum for holding all the known distance metrics that we support in HAPI for
  * calculating differences between strings (https://en.wikipedia.org/wiki/String_metric)
  */
-public enum EmpiMetricEnum implements IEmpiFieldSimilarity {
+public enum EmpiMetricEnum {
 	METAPHONE("Metaphone", new HapiStringMatcher(new MetaphoneStringMatcher())),
 	DOUBLE_METAPHONE("Double Metaphone", new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
 	JARO_WINKLER("Jaro Winkler", new HapiStringSimilarity(new JaroWinkler())),
@@ -69,14 +71,13 @@ public enum EmpiMetricEnum implements IEmpiFieldSimilarity {
 		return myEmpiFieldMetric;
 	}
 
-	@Override
-	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
+	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, @Nullable Double theThreshold) {
 		if (myEmpiFieldMetric instanceof IEmpiFieldSimilarity) {
-			return ((IEmpiFieldSimilarity) myEmpiFieldMetric).similarity(theFhirContext, theLeftBase, theRightBase);
+			return ((IEmpiFieldSimilarity) myEmpiFieldMetric).similarity(theFhirContext, theLeftBase, theRightBase) >= theThreshold;
 		} else if (myEmpiFieldMetric instanceof IEmpiFieldMatcher) {
 			// Convert boolean to double
-			return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase) ? 1.0 : 0.0;
+			return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase);
 		}
-		return 0.0;
+		return false;
 	}
 }

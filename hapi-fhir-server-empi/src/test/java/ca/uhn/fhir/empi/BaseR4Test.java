@@ -8,7 +8,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
-import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
+import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 
@@ -16,12 +16,9 @@ public abstract class BaseR4Test {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	public static final String PATIENT_GIVEN = "patient-given";
 	public static final String PATIENT_LAST = "patient-last";
-	public static final String PATIENT_GENERAL_PRACTITIONER= "patient-practitioner";
-
 
 	public static final double NAME_THRESHOLD = 0.8;
 	protected EmpiFieldMatchJson myGivenNameMatchField;
-	protected EmpiFieldMatchJson myParentMatchField;
 	protected String myBothNameFields;
 
 	@Before
@@ -81,8 +78,8 @@ public abstract class BaseR4Test {
 		return retval;
 	}
 
-	protected EmpiResourceComparatorSvc buildComparator(EmpiRulesJson theEmpiRulesJson) {
-		EmpiResourceComparatorSvc retval = new EmpiResourceComparatorSvc(ourFhirContext, new EmpiSettings().setEmpiRules(theEmpiRulesJson));
+	protected EmpiResourceMatcherSvc buildMatcher(EmpiRulesJson theEmpiRulesJson) {
+		EmpiResourceMatcherSvc retval = new EmpiResourceMatcherSvc(ourFhirContext, new EmpiSettings().setEmpiRules(theEmpiRulesJson));
 		retval.init();
 		return retval;
 	}

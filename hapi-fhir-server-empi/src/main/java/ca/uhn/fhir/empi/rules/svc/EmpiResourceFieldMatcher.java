@@ -34,13 +34,13 @@ import static ca.uhn.fhir.empi.api.EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 /**
  * This class is responsible for performing matching between raw-typed values of a left record and a right record.
  */
-public class EmpiResourceFieldComparator {
+public class EmpiResourceFieldMatcher {
 	private final FhirContext myFhirContext;
 	private final EmpiFieldMatchJson myEmpiFieldMatchJson;
 	private final String myResourceType;
 	private final String myResourcePath;
 
-	public EmpiResourceFieldComparator(FhirContext theFhirContext, EmpiFieldMatchJson theEmpiFieldMatchJson) {
+	public EmpiResourceFieldMatcher(FhirContext theFhirContext, EmpiFieldMatchJson theEmpiFieldMatchJson) {
 		myFhirContext = theFhirContext;
 		myEmpiFieldMatchJson = theEmpiFieldMatchJson;
 		myResourceType = theEmpiFieldMatchJson.getResourceType();
@@ -80,7 +80,7 @@ public class EmpiResourceFieldComparator {
 	}
 
 	private boolean match(IBase theLeftValue, IBase theRightValue) {
-		return myEmpiFieldMatchJson.getMetric().similarity(myFhirContext, theLeftValue, theRightValue) >= myEmpiFieldMatchJson.getMatchThreshold();
+		return myEmpiFieldMatchJson.getMetric().match(myFhirContext, theLeftValue, theRightValue, myEmpiFieldMatchJson.getMatchThreshold());
 	}
 
 	private void validate(IBaseResource theResource) {

@@ -30,7 +30,7 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
-import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
+import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
@@ -159,8 +159,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiResourceComparatorSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
-		return new EmpiResourceComparatorSvc(theFhirContext, theEmpiConfig);
+    EmpiResourceMatcherSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
+		return new EmpiResourceMatcherSvc(theFhirContext, theEmpiConfig);
 	}
 
 	@Bean
