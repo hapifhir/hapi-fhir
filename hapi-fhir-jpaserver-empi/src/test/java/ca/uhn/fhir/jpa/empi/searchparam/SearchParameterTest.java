@@ -1,9 +1,7 @@
 package ca.uhn.fhir.jpa.empi.searchparam;
 
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
-import ca.uhn.fhir.jpa.empi.config.EmpiSearchParameterLoader;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Patient;
@@ -12,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -22,15 +19,10 @@ import static org.junit.Assert.assertThat;
 
 public class SearchParameterTest extends BaseEmpiR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterTest.class);
-	@Autowired
-	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
-	@Autowired
-	SearchParamRegistryImpl mySearchParamRegistry;
 
 	@Before
 	public void before() {
-		myEmpiSearchParameterLoader.daoUpdateEmpiSearchParameters();
-		mySearchParamRegistry.forceRefresh();
+		super.loadEmpiSearchParameters();
 	}
 
 	@Test

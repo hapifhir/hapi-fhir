@@ -1107,6 +1107,49 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	}
 
+
+	@Test
+	public void testTransactionWithMultipleProfiles() {
+		myDaoConfig.setDeleteEnabled(true);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		// Create transaction
+
+		Bundle input = new Bundle();
+		for (int i = 0; i < 5; i++) {
+			Patient patient = new Patient();
+			patient.getMeta().addProfile("http://example.com/profile");
+			patient.getMeta().addTag().setSystem("http://example.com/tags").setCode("tag-1");
+			patient.getMeta().addTag().setSystem("http://example.com/tags").setCode("tag-2");
+			input.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Patient");
+		}
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(8, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Do the same a second time
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
+
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

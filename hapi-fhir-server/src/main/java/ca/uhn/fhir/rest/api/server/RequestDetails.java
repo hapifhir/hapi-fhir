@@ -556,6 +556,10 @@ public abstract class RequestDetails {
 
 		@Override
 		public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
+			if (!thePointcut.getReturnType().equals(void.class)) {
+				return myWrap.callHooksAndReturnObject(thePointcut, theParams);
+			}
+
 			myDeferredTasks.add(() -> myWrap.callHooksAndReturnObject(thePointcut, theParams));
 			return null;
 		}

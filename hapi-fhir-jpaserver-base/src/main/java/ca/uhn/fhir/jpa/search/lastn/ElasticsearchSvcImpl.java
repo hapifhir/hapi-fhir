@@ -27,6 +27,8 @@ import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -37,6 +39,7 @@ import org.shadehapi.elasticsearch.action.DocWriteResponse;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.shadehapi.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.shadehapi.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.shadehapi.elasticsearch.action.index.IndexRequest;
 import org.shadehapi.elasticsearch.action.index.IndexResponse;
 import org.shadehapi.elasticsearch.action.search.SearchRequest;
@@ -45,7 +48,9 @@ import org.shadehapi.elasticsearch.client.RequestOptions;
 import org.shadehapi.elasticsearch.client.RestHighLevelClient;
 import org.shadehapi.elasticsearch.common.xcontent.XContentType;
 import org.shadehapi.elasticsearch.index.query.BoolQueryBuilder;
+import org.shadehapi.elasticsearch.index.query.MatchQueryBuilder;
 import org.shadehapi.elasticsearch.index.query.QueryBuilders;
+import org.shadehapi.elasticsearch.index.query.RangeQueryBuilder;
 import org.shadehapi.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.shadehapi.elasticsearch.search.SearchHit;
 import org.shadehapi.elasticsearch.search.SearchHits;
@@ -76,6 +81,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
+	// Index Constants
 	public static final String OBSERVATION_INDEX = "observation_index";
 	public static final String OBSERVATION_CODE_INDEX = "code_index";
 	public static final String OBSERVATION_DOCUMENT_TYPE = "ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity";
@@ -83,15 +89,34 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public static final String OBSERVATION_INDEX_SCHEMA_FILE = "ObservationIndexSchema.json";
 	public static final String OBSERVATION_CODE_INDEX_SCHEMA_FILE = "ObservationCodeIndexSchema.json";
 
-	private final RestHighLevelClient myRestHighLevelClient;
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
+	// Aggregation Constants
 	private final String GROUP_BY_SUBJECT = "group_by_subject";
 	private final String GROUP_BY_SYSTEM = "group_by_system";
 	private final String GROUP_BY_CODE = "group_by_code";
-	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
+	private final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
 
+	// Observation index document element names
+	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
+	private final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
+	private final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
+	private final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
+	private final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
+	private final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
+	private final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
+	private final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
+	private final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
+	private final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
+	private final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
+	private final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
+	private final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
+
+	// Code index document element names
+	private final String CODE_HASH = "codingcode_system_hash";
+	private final String CODE_TEXT = "text";
+
+	private final RestHighLevelClient myRestHighLevelClient;
+
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
 		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername, thePassword);
@@ -170,7 +195,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					break;
 				}
 				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, theFhirContext,
-					createObservationSubjectAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
+					createObservationSubjectAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
 				try {
 					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 					searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
@@ -181,7 +206,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 		} else {
 			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, theFhirContext,
-				createObservationCodeAggregationBuilder(theSearchParameterMap.getLastNMax(), topHitsInclude));
+				createObservationCodeAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
 			try {
 				SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 				searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
@@ -191,6 +216,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 		}
 		return searchResults;
+	}
+
+	private int getMaxParameter(SearchParameterMap theSearchParameterMap) {
+		if (theSearchParameterMap.getLastNMax() == null) {
+			return 1;
+		} else {
+			return theSearchParameterMap.getLastNMax();
+		}
 	}
 
 	private List<String> getSubjectReferenceCriteria(String thePatientParamName, String theSubjectParamName, SearchParameterMap theSearchParameterMap) {
@@ -226,9 +259,9 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return referenceList;
 	}
 
-	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		CompositeValuesSourceBuilder<?> subjectValuesBuilder = new TermsValuesSourceBuilder("subject").field("subject");
-		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList();
+	private CompositeAggregationBuilder createObservationSubjectAggregationBuilder(Integer theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
+		CompositeValuesSourceBuilder<?> subjectValuesBuilder = new TermsValuesSourceBuilder(OBSERVATION_SUBJECT_FIELD_NAME).field(OBSERVATION_SUBJECT_FIELD_NAME);
+		List<CompositeValuesSourceBuilder<?>> compositeAggSubjectSources = new ArrayList<>();
 		compositeAggSubjectSources.add(subjectValuesBuilder);
 		CompositeAggregationBuilder compositeAggregationSubjectBuilder = new CompositeAggregationBuilder(GROUP_BY_SUBJECT, compositeAggSubjectSources);
 		compositeAggregationSubjectBuilder.subAggregation(createObservationCodeAggregationBuilder(theMaxNumberObservationsPerCode, theTopHitsInclude));
@@ -238,14 +271,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private TermsAggregationBuilder createObservationCodeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field("codeconceptcodingcode");
+		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field(OBSERVATION_CODEVALUE_FIELD_NAME);
 		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
 		// Top Hits Aggregation
-		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits("most_recent_effective")
-			.sort("effectivedtm", SortOrder.DESC)
+		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
+			.sort(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, SortOrder.DESC)
 			.fetchSource(theTopHitsInclude, null).size(theMaxNumberObservationsPerCode));
 		observationCodeCodeAggregationBuilder.size(10000);
-		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field("codeconceptcodingsystem");
+		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
 		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
 		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
 		return observationCodeSystemAggregationBuilder;
@@ -327,7 +360,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private SearchHit[] getLastNMatches(Terms.Bucket theObservationCodeBucket) {
 		Aggregations topHitObservationCodes = theObservationCodeBucket.getAggregations();
-		ParsedTopHits parsedTopHits = topHitObservationCodes.get("most_recent_effective");
+		ParsedTopHits parsedTopHits = topHitObservationCodes.get(MOST_RECENT_EFFECTIVE);
 		return parsedTopHits.getHits().getHits();
 	}
 
@@ -341,6 +374,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 			addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 			addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
+			addDateCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 			searchSourceBuilder.query(boolQueryBuilder);
 		}
 		searchSourceBuilder.size(0);
@@ -358,9 +392,10 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
 		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-		boolQueryBuilder.must(QueryBuilders.termQuery("subject", theSubjectParam));
+		boolQueryBuilder.must(QueryBuilders.termQuery(OBSERVATION_SUBJECT_FIELD_NAME, theSubjectParam));
 		addCategoriesCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 		addObservationCodeCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
+		addDateCriteria(boolQueryBuilder, theSearchParameterMap, theFhirContext);
 		searchSourceBuilder.query(boolQueryBuilder);
 		searchSourceBuilder.size(0);
 
@@ -394,19 +429,19 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				textOnlyList.addAll(getCodingTextOnlyValues(nextAnd));
 			}
 			if (codeSystemHashList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("categoryconceptcodingcode_system_hash", codeSystemHashList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CATEGORYHASH_FIELD_NAME, codeSystemHashList));
 			}
 			if (codeOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("categoryconceptcodingcode", codeOnlyList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CATEGORYVALUE_FIELD_NAME, codeOnlyList));
 			}
 			if (systemOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("categoryconceptcodingsystem", systemOnlyList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CATEGORYSYSTEM_FIELD_NAME, systemOnlyList));
 			}
 			if (textOnlyList.size() > 0) {
 				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
 				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhraseQuery("categoryconceptcodingdisplay", textOnlyParam));
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhraseQuery("categoryconcepttext", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CATEGORYDISPLAY_FIELD_NAME, textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CATEGORYTEXT_FIELD_NAME, textOnlyParam));
 				}
 				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
 			}
@@ -492,19 +527,19 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				textOnlyList.addAll(getCodingTextOnlyValues(nextAnd));
 			}
 			if (codeSystemHashList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("codeconceptcodingcode_system_hash", codeSystemHashList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODEHASH_FIELD_NAME, codeSystemHashList));
 			}
 			if (codeOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("codeconceptcodingcode", codeOnlyList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODEVALUE_FIELD_NAME, codeOnlyList));
 			}
 			if (systemOnlyList.size() > 0) {
-				theBoolQueryBuilder.must(QueryBuilders.termsQuery("codeconceptcodingsystem", systemOnlyList));
+				theBoolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODESYSTEM_FIELD_NAME, systemOnlyList));
 			}
 			if (textOnlyList.size() > 0) {
 				BoolQueryBuilder myTextBoolQueryBuilder = QueryBuilders.boolQuery();
 				for (String textOnlyParam : textOnlyList) {
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhraseQuery("codeconceptcodingdisplay", textOnlyParam));
-					myTextBoolQueryBuilder.should(QueryBuilders.matchPhraseQuery("codeconcepttext", textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CODEDISPLAY_FIELD_NAME, textOnlyParam));
+					myTextBoolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery(OBSERVATION_CODE_TEXT_FIELD_NAME, textOnlyParam));
 				}
 				theBoolQueryBuilder.must(myTextBoolQueryBuilder);
 			}
@@ -512,13 +547,48 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	}
 
+	private void addDateCriteria(BoolQueryBuilder theBoolQueryBuilder, SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
+		String dateParamName = LastNParameterHelper.getEffectiveParamName(theFhirContext);
+		if (theSearchParameterMap.containsKey(dateParamName)) {
+			List<List<IQueryParameterType>> andOrParams = theSearchParameterMap.get(dateParamName);
+			for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
+				BoolQueryBuilder myDateBoolQueryBuilder = new BoolQueryBuilder();
+				for (IQueryParameterType nextOr : nextAnd) {
+					if (nextOr instanceof DateParam) {
+						DateParam myDate = (DateParam) nextOr;
+						createDateCriteria(myDate, myDateBoolQueryBuilder);
+					}
+				}
+				theBoolQueryBuilder.must(myDateBoolQueryBuilder);
+			}
+		}
+	}
+
+	private void createDateCriteria(DateParam theDate, BoolQueryBuilder theBoolQueryBuilder) {
+		Long dateInstant = theDate.getValue().getTime();
+		RangeQueryBuilder myRangeQueryBuilder = new RangeQueryBuilder(OBSERVATION_EFFECTIVEDTM_FIELD_NAME);
+
+		ParamPrefixEnum prefix = theDate.getPrefix();
+		if (prefix == ParamPrefixEnum.GREATERTHAN || prefix == ParamPrefixEnum.STARTS_AFTER) {
+			theBoolQueryBuilder.should(myRangeQueryBuilder.gt(dateInstant));
+		} else if (prefix == ParamPrefixEnum.LESSTHAN || prefix == ParamPrefixEnum.ENDS_BEFORE) {
+			theBoolQueryBuilder.should(myRangeQueryBuilder.lt(dateInstant));
+		} else if (prefix == ParamPrefixEnum.LESSTHAN_OR_EQUALS) {
+			theBoolQueryBuilder.should(myRangeQueryBuilder.lte(dateInstant));
+		} else if (prefix == ParamPrefixEnum.GREATERTHAN_OR_EQUALS) {
+			theBoolQueryBuilder.should(myRangeQueryBuilder.gte(dateInstant));
+		} else {
+			theBoolQueryBuilder.should(new MatchQueryBuilder(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, dateInstant));
+		}
+	}
+
 	@VisibleForTesting
-	List<ObservationJson> executeLastNWithAllFields(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
+	public List<ObservationJson> executeLastNWithAllFieldsForTest(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
 		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, null, t -> t, 100);
 	}
 
 	@VisibleForTesting
-	List<CodeJson> queryAllIndexedObservationCodes() throws IOException {
+	List<CodeJson> queryAllIndexedObservationCodesForTest() throws IOException {
 		SearchRequest codeSearchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
@@ -539,12 +609,113 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return codes;
 	}
 
-	@VisibleForTesting
-	boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
+	@Override
+	public ObservationJson getObservationDocument(String theDocumentID) {
+		if (theDocumentID == null) {
+			throw new InvalidRequestException("Require non-null document ID for observation document query");
+		}
+		SearchRequest theSearchRequest = buildSingleObservationSearchRequest(theDocumentID);
+		ObservationJson observationDocumentJson = null;
+		try {
+			SearchResponse observationDocumentResponse = executeSearchRequest(theSearchRequest);
+			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
+			if (observationDocumentHits.length > 0) {
+				// There should be no more than one hit for the identifier
+				String observationDocument = observationDocumentHits[0].getSourceAsString();
+				observationDocumentJson = objectMapper.readValue(observationDocument, ObservationJson.class);
+			}
+
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to execute observation document query for ID " + theDocumentID, theE);
+		}
+
+		return observationDocumentJson;
+	}
+
+	private SearchRequest buildSingleObservationSearchRequest(String theObservationIdentifier) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		boolQueryBuilder.must(QueryBuilders.termQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theObservationIdentifier));
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(1);
+
+		searchRequest.source(searchSourceBuilder);
+
+		return searchRequest;
+	}
+
+	@Override
+	public CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText) {
+		if(theCodeSystemHash == null && theText == null) {
+			throw new InvalidRequestException("Require a non-null code system hash value or display value for observation code document query");
+		}
+		SearchRequest theSearchRequest = buildSingleObservationCodeSearchRequest(theCodeSystemHash, theText);
+		CodeJson observationCodeDocumentJson = null;
+		try {
+			SearchResponse observationCodeDocumentResponse = executeSearchRequest(theSearchRequest);
+			SearchHit[] observationCodeDocumentHits = observationCodeDocumentResponse.getHits().getHits();
+			if (observationCodeDocumentHits.length > 0) {
+				// There should be no more than one hit for the code lookup.
+				String observationCodeDocument = observationCodeDocumentHits[0].getSourceAsString();
+				observationCodeDocumentJson = objectMapper.readValue(observationCodeDocument, CodeJson.class);
+			}
+
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to execute observation code document query hash code or display", theE);
+		}
+
+		return observationCodeDocumentJson;
+	}
+
+	private SearchRequest buildSingleObservationCodeSearchRequest(String theCodeSystemHash, String theText) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		if (theCodeSystemHash != null) {
+			boolQueryBuilder.must(QueryBuilders.termQuery(CODE_HASH, theCodeSystemHash));
+		} else {
+			boolQueryBuilder.must(QueryBuilders.matchPhraseQuery(CODE_TEXT, theText));
+		}
+
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(1);
+
+		searchRequest.source(searchSourceBuilder);
+
+		return searchRequest;
+	}
+
+	@Override
+	public Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument){
+		try {
+			String documentToIndex = objectMapper.writeValueAsString(theObservationDocument);
+			return performIndex(OBSERVATION_INDEX, theDocumentId, documentToIndex, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to persist Observation document " + theDocumentId);
+		}
+	}
+
+	@Override
+	public Boolean createOrUpdateObservationCodeIndex(String theCodeableConceptID, CodeJson theObservationCodeDocument) {
+		try {
+			String documentToIndex = objectMapper.writeValueAsString(theObservationCodeDocument);
+			return performIndex(OBSERVATION_CODE_INDEX, theCodeableConceptID, documentToIndex, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to persist Observation Code document " + theCodeableConceptID);
+		}
+	}
+
+	private boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
 		IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
 			RequestOptions.DEFAULT);
 
 		return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
+	}
+
+	@Override
+	public void close() throws IOException {
+		myRestHighLevelClient.close();
 	}
 
 	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
@@ -556,11 +727,27 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return request;
 	}
 
+	@Override
+	public void deleteObservationDocument(String theDocumentId) {
+		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(OBSERVATION_INDEX);
+		deleteByQueryRequest.setQuery(QueryBuilders.termQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theDocumentId));
+		try {
+			myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to delete Observation " + theDocumentId);
+		}
+	}
+
 	@VisibleForTesting
-	void deleteAllDocuments(String theIndexName) throws IOException {
+	public void deleteAllDocumentsForTest(String theIndexName) throws IOException {
 		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(theIndexName);
 		deleteByQueryRequest.setQuery(QueryBuilders.matchAllQuery());
 		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+	}
+
+	@VisibleForTesting
+	public void refreshIndex(String theIndexName) throws IOException {
+		myRestHighLevelClient.indices().refresh(new RefreshRequest(theIndexName), RequestOptions.DEFAULT);
 	}
 
 }
