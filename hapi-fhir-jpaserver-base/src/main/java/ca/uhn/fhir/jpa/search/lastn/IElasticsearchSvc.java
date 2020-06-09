@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface IElasticsearchSvc {
@@ -74,5 +75,10 @@ public interface IElasticsearchSvc {
 	 * @param theDocumentId Identifier for Observation resource.
 	 */
 	void deleteObservationDocument(String theDocumentId);
+
+	/**
+	 * Invoked when shutting down.
+	 */
+	void close() throws IOException;
 
 }
