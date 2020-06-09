@@ -21,7 +21,7 @@ public class JobExistsParameterValidator implements JobParametersValidator {
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 		String jobUUID = theJobParameters.getString("jobUUID");
 		if (StringUtils.isBlank(jobUUID)) {
-			throw new JobParametersInvalidException("You did not pass a jobUUID to this job!");
+			throw new JobParametersInvalidException("Missing jobUUID job parameter");
 		}
 
 		Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(jobUUID);
