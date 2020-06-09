@@ -25,8 +25,6 @@ import java.util.List;
 @Configuration
 public class BulkExportJobConfig {
 
-	public static final String JOB_UUID_KEY = "jobUUID";
-
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
 
