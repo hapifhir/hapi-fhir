@@ -20,8 +20,6 @@ package ca.uhn.fhir.jpa.test;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.config.TestJpaR4Config;
-import org.springframework.test.context.ContextConfiguration;
 public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 }
