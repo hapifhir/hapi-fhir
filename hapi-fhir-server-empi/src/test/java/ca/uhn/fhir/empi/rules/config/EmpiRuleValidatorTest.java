@@ -18,44 +18,50 @@ public class EmpiRuleValidatorTest {
 
    @Test
    public void testValidate() throws IOException {
-		EmpiSettings empiSettings = new EmpiSettings(myEmpiRuleValidator);
-		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource("bad-rules-bad-url.json");
-		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		try {
-			empiSettings.setScriptText(json);
+			setScript("bad-rules-bad-url.json");
 			fail();
 		} catch (ConfigurationException e){
 			assertThat(e.getMessage(), is("Enterprise Identifier System (eidSystem) must be a valid URI"));
 		}
    }
-   
-   @Test
+
+	@Test
 	public void testNonExistentMatchField() throws IOException {
-		EmpiSettings empiSettings = new EmpiSettings(myEmpiRuleValidator);
-		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource("bad-rules-missing-name.json");
-		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		try {
-			empiSettings.setScriptText(json);
+			setScript("bad-rules-missing-name.json");
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (ConfigurationException e) {
 			assertThat(e.getMessage(), is("There is no matchField with name foo"));
 		}
 	}
 
 	@Test
 	public void testSimilarityHasThreshold() throws IOException {
+		try {
+			setScript("bad-rules-missing-threshold.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), is("MatchField given-name metric COSINE requires a matchThreshold"));
+		}
+	}
+
+	@Test
+	public void testMatcherUnusedThreshold() throws IOException {
+		try {
+			setScript("bad-rules-unused-threshold.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), is("MatchField given-name metric EXACT should not have a matchThreshold"));
+		}
+	}
+
+	private void setScript(String theTheS) throws IOException {
 		EmpiSettings empiSettings = new EmpiSettings(myEmpiRuleValidator);
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource("bad-rules-missing-name.json");
+		Resource resource = resourceLoader.getResource(theTheS);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		try {
-			empiSettings.setScriptText(json);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), is("There is no matchField with name foo"));
-		}
-
+		empiSettings.setScriptText(json);
 	}
+
 }

@@ -71,12 +71,15 @@ public enum EmpiMetricEnum {
 	}
 
 	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, @Nullable Double theThreshold) {
-		if (myEmpiFieldMetric instanceof IEmpiFieldSimilarity) {
+		if (isSimilarity()) {
 			return ((IEmpiFieldSimilarity) myEmpiFieldMetric).similarity(theFhirContext, theLeftBase, theRightBase) >= theThreshold;
-		} else if (myEmpiFieldMetric instanceof IEmpiFieldMatcher) {
+		} else {
 			// Convert boolean to double
 			return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase);
 		}
-		return false;
 	}
+
+    public boolean isSimilarity() {
+		return myEmpiFieldMetric instanceof IEmpiFieldSimilarity;
+    }
 }

@@ -5,11 +5,10 @@
 		"name" : "given-name",
 		"resourceType" : "*",
 		"resourcePath" : "name.given",
-		"metric" : "COSINE",
+		"metric" : "EXACT",
 		"matchThreshold" : 0.8
 	}],
 	"matchResultMap" : {
-		"given-name" : "POSSIBLE_MATCH",
-		"foo" : "MATCH"
+		"given-name" : "POSSIBLE_MATCH"
 	}
 }

@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.rules.config;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ public class EmpiRuleValidator {
 
 	public void validate(EmpiRulesJson theEmpiRulesJson) {
 		validateSystemIsUri(theEmpiRulesJson);
+		validateMatchFields(theEmpiRulesJson);
 	}
 
 	private void validateSystemIsUri(EmpiRulesJson theEmpiRulesJson) {
@@ -43,6 +45,18 @@ public class EmpiRuleValidator {
 			new URI(theEmpiRulesJson.getEnterpriseEIDSystem());
 		} catch (URISyntaxException e) {
 			throw new ConfigurationException("Enterprise Identifier System (eidSystem) must be a valid URI");
+		}
+	}
+
+	private void validateMatchFields(EmpiRulesJson theEmpiRulesJson) {
+		for (EmpiFieldMatchJson fieldMatch : theEmpiRulesJson.getMatchFields()) {
+			if (fieldMatch.getMetric().isSimilarity()) {
+				if (fieldMatch.getMatchThreshold() == null) {
+					throw new ConfigurationException("MatchField " + fieldMatch.getName() + " metric " + fieldMatch.getMetric() + " requires a matchThreshold");
+				}
+			} else if (fieldMatch.getMatchThreshold() != null) {
+				throw new ConfigurationException("MatchField " + fieldMatch.getName() + " metric " + fieldMatch.getMetric() + " should not have a matchThreshold");
+			}
 		}
 	}
 }

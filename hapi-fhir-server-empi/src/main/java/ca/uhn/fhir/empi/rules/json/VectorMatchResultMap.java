@@ -20,6 +20,7 @@ package ca.uhn.fhir.empi.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 
 import javax.annotation.Nonnull;
@@ -58,7 +59,7 @@ public class VectorMatchResultMap {
 		for (String fieldMatchName : splitFieldMatchNames(theFieldMatchNames)) {
 			int index = getFieldMatchIndex(fieldMatchName);
 			if (index == -1) {
-				throw new IllegalArgumentException("There is no matchField with name " + fieldMatchName);
+				throw new ConfigurationException("There is no matchField with name " + fieldMatchName);
 			}
 			retval |= (1 << index);
 		}
