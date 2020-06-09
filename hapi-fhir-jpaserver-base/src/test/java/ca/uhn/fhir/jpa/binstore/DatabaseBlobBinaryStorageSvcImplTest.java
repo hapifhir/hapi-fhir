@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,6 +33,14 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("databaseBlobBinaryStorageSvc")
 	private IBinaryStorageSvc mySvc;
+
+	@Autowired
+	private DaoConfig myDaoConfig;
+
+	@After
+	public void resetDaoConfig() {
+		myDaoConfig.setPreloadBlobFromInputStream(false);
+	}
 
 	@Test
 	public void testStoreAndRetrieve() throws IOException {
@@ -76,6 +86,12 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		assertArrayEquals(SOME_BYTES, capture.toByteArray());
 		assertArrayEquals(SOME_BYTES, mySvc.fetchBlob(resourceId, outcome.getBlobId()));
+	}
+
+	@Test
+	public void testStoreAndRetrieveWithPreload() throws IOException {
+		myDaoConfig.setPreloadBlobFromInputStream(true);
+		testStoreAndRetrieve();
 	}
 
 
