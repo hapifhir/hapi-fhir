@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.jpa.migrate.providers.SpringBatchSchemaMigrationProvider;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Test;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
 
 public class InitializeSchemaTaskTest extends BaseTest {
@@ -35,7 +33,6 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		getMigrator().addTask(identicalTask);
 		getMigrator().migrate();
 	}
-
 
 	private class TestProvider implements ISchemaInitializationProvider {
 		@Override
