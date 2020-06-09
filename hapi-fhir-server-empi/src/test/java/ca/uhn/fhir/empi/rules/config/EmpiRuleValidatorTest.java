@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -10,11 +11,14 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class EmpiRuleValidatorTest {
-	private EmpiRuleValidator myEmpiRuleValidator = new EmpiRuleValidator();
+	protected static final FhirContext ourFhirContext = FhirContext.forR4();
+
+	private EmpiRuleValidator myEmpiRuleValidator = new EmpiRuleValidator(ourFhirContext);
 
    @Test
    public void testValidate() throws IOException {
@@ -53,6 +57,16 @@ public class EmpiRuleValidatorTest {
 			fail();
 		} catch (ConfigurationException e) {
 			assertThat(e.getMessage(), is("MatchField given-name metric EXACT should not have a matchThreshold"));
+		}
+	}
+
+	@Test
+	public void testMatcherBadPath() throws IOException {
+		try {
+			setScript("bad-rules-bad-path.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), startsWith("MatchField given-name resourceType Patient has invalid path 'name.first'.  Unknown child name 'first' in element Patient"));
 		}
 	}
 

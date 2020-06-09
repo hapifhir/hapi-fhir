@@ -131,8 +131,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiRuleValidator empiRuleValidator() {
-		return new EmpiRuleValidator();
+	EmpiRuleValidator empiRuleValidator(FhirContext theFhirContext) {
+		return new EmpiRuleValidator(theFhirContext);
 	}
 
 	@Bean

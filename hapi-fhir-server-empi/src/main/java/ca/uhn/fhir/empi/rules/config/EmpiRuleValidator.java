@@ -21,8 +21,13 @@ package ca.uhn.fhir.empi.rules.config;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.FhirTerser;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -30,6 +35,18 @@ import java.net.URISyntaxException;
 
 @Service
 public class EmpiRuleValidator {
+	private final FhirContext myFhirContext;
+	private final Class<? extends IBaseResource> myPatientClass;
+	private final Class<? extends IBaseResource> myPractitionerClass;
+	private final FhirTerser myTerser;
+
+	@Autowired
+	public EmpiRuleValidator(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+		myPatientClass = theFhirContext.getResourceDefinition("Patient").getImplementingClass();
+		myPractitionerClass = theFhirContext.getResourceDefinition("Practitioner").getImplementingClass();
+		myTerser = theFhirContext.newTerser();
+	}
 
 	public void validate(EmpiRulesJson theEmpiRulesJson) {
 		validateSystemIsUri(theEmpiRulesJson);
@@ -50,13 +67,62 @@ public class EmpiRuleValidator {
 
 	private void validateMatchFields(EmpiRulesJson theEmpiRulesJson) {
 		for (EmpiFieldMatchJson fieldMatch : theEmpiRulesJson.getMatchFields()) {
-			if (fieldMatch.getMetric().isSimilarity()) {
-				if (fieldMatch.getMatchThreshold() == null) {
-					throw new ConfigurationException("MatchField " + fieldMatch.getName() + " metric " + fieldMatch.getMetric() + " requires a matchThreshold");
-				}
-			} else if (fieldMatch.getMatchThreshold() != null) {
-				throw new ConfigurationException("MatchField " + fieldMatch.getName() + " metric " + fieldMatch.getMetric() + " should not have a matchThreshold");
-			}
+			validateThreshold(fieldMatch);
+			validatePath(fieldMatch);
 		}
 	}
+
+	private void validateThreshold(EmpiFieldMatchJson theFieldMatch) {
+		if (theFieldMatch.getMetric().isSimilarity()) {
+			if (theFieldMatch.getMatchThreshold() == null) {
+				throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " metric " + theFieldMatch.getMetric() + " requires a matchThreshold");
+			}
+		} else if (theFieldMatch.getMatchThreshold() != null) {
+			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " metric " + theFieldMatch.getMetric() + " should not have a matchThreshold");
+		}
+	}
+
+	// FIXME KHS validate the other parts of the rules
+	private void validatePath(EmpiFieldMatchJson theFieldMatch) {
+		String resourceType = theFieldMatch.getResourceType();
+		if ("*".equals(resourceType)) {
+			validatePatientPath(theFieldMatch);
+			// FIXME KHS test where one matches and the other doesnt
+			validatePractitionerPath(theFieldMatch);
+		} else if ("Patient".equals(resourceType)) {
+			validatePatientPath(theFieldMatch);
+		} else if ("Practitioner".equals(resourceType)) {
+			validatePractitionerPath(theFieldMatch);
+		} else {
+			// FIXME KHS test
+			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " has unknown resourceType " + resourceType);
+		}
+	}
+
+	private void validatePatientPath(EmpiFieldMatchJson theFieldMatch) {
+		try {
+			myTerser.getDefinition(myPatientClass, theFieldMatch.getResourcePath());
+		} catch (DataFormatException e) {
+			throw new ConfigurationException("MatchField " +
+				theFieldMatch.getName() +
+				" resourceType " +
+				theFieldMatch.getResourceType() +
+				" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " +
+				e.getMessage());
+		}
+	}
+
+	private void validatePractitionerPath(EmpiFieldMatchJson theFieldMatch) {
+		try {
+			myTerser.getDefinition(myPractitionerClass, theFieldMatch.getResourcePath());
+		} catch (DataFormatException e) {
+			throw new ConfigurationException("MatchField " +
+				theFieldMatch.getName() +
+				" resourceType " +
+				theFieldMatch.getResourceType() +
+				" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " +
+				e.getMessage());
+		}
+	}
+
 }

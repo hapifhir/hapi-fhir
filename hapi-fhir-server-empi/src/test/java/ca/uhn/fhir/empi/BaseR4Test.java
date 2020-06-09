@@ -80,7 +80,7 @@ public abstract class BaseR4Test {
 	}
 
 	protected EmpiResourceMatcherSvc buildMatcher(EmpiRulesJson theEmpiRulesJson) {
-		EmpiResourceMatcherSvc retval = new EmpiResourceMatcherSvc(ourFhirContext, new EmpiSettings(new EmpiRuleValidator()).setEmpiRules(theEmpiRulesJson));
+		EmpiResourceMatcherSvc retval = new EmpiResourceMatcherSvc(ourFhirContext, new EmpiSettings(new EmpiRuleValidator(ourFhirContext)).setEmpiRules(theEmpiRulesJson));
 		retval.init();
 		return retval;
 	}
