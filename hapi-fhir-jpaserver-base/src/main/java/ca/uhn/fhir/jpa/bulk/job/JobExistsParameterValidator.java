@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Optional;
 
 /**
- * This class will prevent job running if the UUID is found to be non-existent, or invalid.
+ * This class will prevent a job from running if the UUID does not exist or is invalid.
  */
 public class JobExistsParameterValidator implements JobParametersValidator {
 	@Autowired
