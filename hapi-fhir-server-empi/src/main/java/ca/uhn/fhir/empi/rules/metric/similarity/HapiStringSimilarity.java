@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.similarity;
+package ca.uhn.fhir.empi.rules.metric.similarity;
 
 /*-
  * #%L
@@ -35,6 +35,7 @@ public class HapiStringSimilarity implements IEmpiFieldSimilarity {
 		myStringSimilarity = theStringSimilarity;
 	}
 
+	@Override
 	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
 			IPrimitiveType<?> leftString = (IPrimitiveType<?>) theLeftBase;

@@ -3,11 +3,11 @@ package ca.uhn.fhir.empi;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.config.EmpiSettings;
-import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
+import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -30,7 +30,7 @@ public abstract class BaseR4Test {
 			.setName(PATIENT_GIVEN)
 			.setResourceType("Patient")
 			.setResourcePath("name.given")
-			.setMetric(DistanceMetricEnum.COSINE)
+			.setMetric(EmpiMetricEnum.COSINE)
 			.setMatchThreshold(NAME_THRESHOLD);
 		myBothNameFields = String.join(",", PATIENT_GIVEN, PATIENT_LAST);
 	}
@@ -67,7 +67,7 @@ public abstract class BaseR4Test {
 			.setName(PATIENT_LAST)
 			.setResourceType("Patient")
 			.setResourcePath("name.family")
-			.setMetric(DistanceMetricEnum.JARO_WINKLER)
+			.setMetric(EmpiMetricEnum.JARO_WINKLER)
 			.setMatchThreshold(NAME_THRESHOLD);
 
 		EmpiRulesJson retval = new EmpiRulesJson();

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseR4Test;
-import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
+import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
@@ -64,7 +64,7 @@ public class EmpiResourceFieldComparatorR4Test extends BaseR4Test {
 				.setName("patient-foo")
 				.setResourceType("Patient")
 				.setResourcePath("foo")
-				.setMetric(DistanceMetricEnum.COSINE)
+				.setMetric(EmpiMetricEnum.COSINE)
 				.setMatchThreshold(NAME_THRESHOLD);
 			EmpiResourceFieldComparator comparator = new EmpiResourceFieldComparator(ourFhirContext, matchField);
 			comparator.match(myJohn, myJohny);

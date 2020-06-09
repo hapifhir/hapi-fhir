@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.similarity;
+package ca.uhn.fhir.empi.rules.metric.matcher;
 
 /*-
  * #%L

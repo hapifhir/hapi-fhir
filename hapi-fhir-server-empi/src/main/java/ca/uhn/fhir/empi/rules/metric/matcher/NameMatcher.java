@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.similarity;
+package ca.uhn.fhir.empi.rules.metric.matcher;
 
 /*-
  * #%L
@@ -32,19 +32,19 @@ import java.util.stream.Collectors;
 /**
  * Similarity measure for two IBase name fields
  */
-public class NameSimilarity implements IEmpiFieldSimilarity {
+public class NameMatcher implements IEmpiFieldMatcher {
 	private final EmpiPersonNameMatchModeEnum myMatchMode;
 
-	public NameSimilarity(EmpiPersonNameMatchModeEnum theMatchMode) {
+	public NameMatcher(EmpiPersonNameMatchModeEnum theMatchMode) {
 		myMatchMode = theMatchMode;
 	}
 
 	@Override
-	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
 		String leftFamilyName = NameUtil.extractFamilyName(theFhirContext, theLeftBase);
 		String rightFamilyName = NameUtil.extractFamilyName(theFhirContext, theRightBase);
 		if (StringUtils.isEmpty(leftFamilyName) || StringUtils.isEmpty(rightFamilyName)) {
-			return 0.0;
+			return false;
 		}
 
 		boolean match = false;
@@ -71,6 +71,6 @@ public class NameSimilarity implements IEmpiFieldSimilarity {
 			}
 		}
 
-		return match ? 1.0 : 0.0;
+		return match;
 	}
 }

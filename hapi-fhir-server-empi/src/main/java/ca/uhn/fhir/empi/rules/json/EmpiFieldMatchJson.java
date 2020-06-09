@@ -20,6 +20,7 @@ package ca.uhn.fhir.empi.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -28,7 +29,7 @@ import javax.annotation.Nonnull;
 /**
  * Contains all business data for determining if a match exists on a particular field, given:
  *
- * 1. A {@link DistanceMetricEnum} which determines the actual similarity values.
+ * 1. A {@link EmpiMetricEnum} which determines the actual similarity values.
  * 2. A given resource type (e.g. Patient)
  * 3. A given FHIRPath expression for finding the particular primitive to be used for comparison. (e.g. name.given)
  */
@@ -40,15 +41,15 @@ public class EmpiFieldMatchJson implements IModelJson {
 	@JsonProperty("resourcePath")
 	String myResourcePath;
 	@JsonProperty("metric")
-	DistanceMetricEnum myMetric;
+	EmpiMetricEnum myMetric;
 	@JsonProperty("matchThreshold")
 	double myMatchThreshold;
 
-	public DistanceMetricEnum getMetric() {
+	public EmpiMetricEnum getMetric() {
 		return myMetric;
 	}
 
-	public EmpiFieldMatchJson setMetric(DistanceMetricEnum theMetric) {
+	public EmpiFieldMatchJson setMetric(EmpiMetricEnum theMetric) {
 		myMetric = theMetric;
 		return this;
 	}

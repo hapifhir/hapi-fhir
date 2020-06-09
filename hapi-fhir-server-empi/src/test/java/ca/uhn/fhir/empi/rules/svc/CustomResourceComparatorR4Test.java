@@ -2,9 +2,9 @@ package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
+import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.BeforeClass;
@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 public class CustomResourceComparatorR4Test extends BaseR4Test {
 
-	public static final String FIELD_EXACT_MATCH_NAME = DistanceMetricEnum.EXACT_NAME_ANY_ORDER.name();
+	public static final String FIELD_EXACT_MATCH_NAME = EmpiMetricEnum.EXACT_NAME_ANY_ORDER.name();
 	private static Patient ourJohnHenry;
 	private static Patient ourJohnHENRY;
 	private static Patient ourJaneHenry;
@@ -38,7 +38,7 @@ public class CustomResourceComparatorR4Test extends BaseR4Test {
 
 	@Test
 	public void testExactNameAnyOrder() {
-		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(DistanceMetricEnum.EXACT_NAME_ANY_ORDER));
+		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(EmpiMetricEnum.EXACT_NAME_ANY_ORDER));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourJohnHenry));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourHenryJohn));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourHenryJOHN));
@@ -51,7 +51,7 @@ public class CustomResourceComparatorR4Test extends BaseR4Test {
 
 	@Test
 	public void testStandardNameAnyOrder() {
-		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(DistanceMetricEnum.STANDARD_NAME_ANY_ORDER));
+		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(EmpiMetricEnum.STANDARD_NAME_ANY_ORDER));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourJohnHenry));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourHenryJohn));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourHenryJOHN));
@@ -65,7 +65,7 @@ public class CustomResourceComparatorR4Test extends BaseR4Test {
 
 	@Test
 	public void testExactNameFirstAndLast() {
-		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(DistanceMetricEnum.EXACT_NAME_FIRST_AND_LAST));
+		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(EmpiMetricEnum.EXACT_NAME_FIRST_AND_LAST));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourJohnHenry));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourHenryJohn));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourHenryJOHN));
@@ -78,7 +78,7 @@ public class CustomResourceComparatorR4Test extends BaseR4Test {
 
 	@Test
 	public void testStandardNameFirstAndLast() {
-		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(DistanceMetricEnum.STANDARD_NAME_FIRST_AND_LAST));
+		EmpiResourceComparatorSvc nameAnyOrderComparator = buildComparator(buildNameAnyOrderRules(EmpiMetricEnum.STANDARD_NAME_FIRST_AND_LAST));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourJohnHenry));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourHenryJohn));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderComparator.compare(ourJohnHenry, ourHenryJOHN));
@@ -100,7 +100,7 @@ public class CustomResourceComparatorR4Test extends BaseR4Test {
 		return patient;
 	}
 
-	private EmpiRulesJson buildNameAnyOrderRules(DistanceMetricEnum theExactNameAnyOrder) {
+	private EmpiRulesJson buildNameAnyOrderRules(EmpiMetricEnum theExactNameAnyOrder) {
 		EmpiFieldMatchJson nameAnyOrderFieldMatch = new EmpiFieldMatchJson()
 			.setName(FIELD_EXACT_MATCH_NAME)
 			.setResourceType("Patient")
