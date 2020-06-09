@@ -6,6 +6,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AopTestUtils;
 
@@ -31,6 +32,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 	}
 
 	@Override
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());

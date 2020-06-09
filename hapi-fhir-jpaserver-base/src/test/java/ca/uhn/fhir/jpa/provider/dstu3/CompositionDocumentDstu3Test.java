@@ -60,6 +60,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	}
 
 	@Override
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());

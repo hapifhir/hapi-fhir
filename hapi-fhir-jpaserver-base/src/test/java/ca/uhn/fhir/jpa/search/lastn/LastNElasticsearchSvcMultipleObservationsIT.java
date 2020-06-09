@@ -1,55 +1,63 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.*;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestElasticsearchConfig.class})
 public class LastNElasticsearchSvcMultipleObservationsIT {
 
+	private static ObjectMapper ourMapperNonPrettyPrint;
+	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
+	private final FhirContext myFhirContext = FhirContext.forR4();
 	@Autowired
 	private ElasticsearchSvcImpl elasticsearchSvc;
 
-	private static ObjectMapper ourMapperNonPrettyPrint;
-
-	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
-
-	private final FhirContext myFhirContext = FhirContext.forR4();
-
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourMapperNonPrettyPrint = new ObjectMapper();
-		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
-		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-	}
-
-	@Before
+	@BeforeEach
 	public void before() throws IOException {
 		createMultiplePatientsAndObservations();
 	}
 
-	@After
+	@AfterEach
 	public void after() throws IOException {
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
@@ -407,6 +415,14 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		assertNotEquals(observationCode1, observationCode2);
 
+	}
+
+	@BeforeAll
+	public static void beforeClass() {
+		ourMapperNonPrettyPrint = new ObjectMapper();
+		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
+		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
 	}
 
 

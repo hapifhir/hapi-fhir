@@ -85,7 +85,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	@BeforeEach
 	public void before() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);

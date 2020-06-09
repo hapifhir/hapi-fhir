@@ -15,15 +15,17 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.*;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.aspectj.lang.annotation.Before;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.persistence.EntityManager;
@@ -34,12 +36,13 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
 public class PersistObservationIndexedSearchParamLastNR4IT {
 
@@ -61,8 +64,9 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	@Before
+	@BeforeEach
 	public void before() throws IOException {
+		myDaoConfig.setLastNEnabled(true);
 
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
@@ -71,12 +75,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
-	@Before
-	public void beforeEnableLastN() {
-		myDaoConfig.setLastNEnabled(true);
-	}
-
-	@After
+	@AfterEach
 	public void afterDisableLastN() {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 	}

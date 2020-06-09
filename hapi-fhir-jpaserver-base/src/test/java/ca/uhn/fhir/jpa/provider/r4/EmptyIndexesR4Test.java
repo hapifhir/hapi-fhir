@@ -47,13 +47,6 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 	}
 	
 	@BeforeEach
-	public void before() {
-		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-	}
-
-	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -103,6 +96,10 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 		
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		myRestServer.setPagingProvider(myPagingProvider);
+
+		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
+		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 	}
 
 

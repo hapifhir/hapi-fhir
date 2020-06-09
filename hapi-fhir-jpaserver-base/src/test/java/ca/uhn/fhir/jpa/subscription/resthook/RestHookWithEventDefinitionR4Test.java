@@ -36,6 +36,10 @@ import java.util.List;
  * 6. Execute the 'sendObservation' test
  * 7. Look in the 'attachWebSocket' terminal execution and wait for your ping with the subscription id
  */
+/**
+ * Ignored because this feature isn't implemented yet
+ */
+@Disabled
 public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookWithEventDefinitionR4Test.class);
@@ -82,11 +86,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 
 	}
 
-	/**
-	 * Ignored because this feature isn't implemented yet
-	 */
 	@Test
-	@Disabled
 	public void testSubscriptionAddedTrigger() {
 		/*
 		 * Create patient

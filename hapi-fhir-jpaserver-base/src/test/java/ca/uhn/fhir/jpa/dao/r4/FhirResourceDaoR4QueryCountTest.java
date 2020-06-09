@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +13,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -490,7 +488,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithMultipleReferences() {
 		Bundle input = new Bundle();
-		
+
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
 		patient.setActive(true);
@@ -1094,10 +1092,5 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	}
 
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

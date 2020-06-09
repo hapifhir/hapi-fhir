@@ -1519,7 +1519,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertEquals("Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}

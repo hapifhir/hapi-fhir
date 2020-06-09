@@ -59,6 +59,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Override
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());

@@ -187,7 +187,7 @@ public class InMemoryResourceMatcherR5Test {
 	@Test
 	public void testTodayPast() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, myObservation, mySearchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -199,7 +199,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -211,7 +211,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -223,7 +223,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertFalse(result.matched());
 	}
 
@@ -241,7 +241,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertFalse(result.matched());
 	}
 

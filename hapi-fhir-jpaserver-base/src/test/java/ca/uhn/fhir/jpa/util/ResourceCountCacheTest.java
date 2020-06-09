@@ -26,18 +26,15 @@ public class ResourceCountCacheTest {
 		ResourceCountCache.setNowForUnitTest(null);
 	}
 
-	@BeforeEach
-	public void before() throws Exception {
+	@Test
+	public void testCache() throws Exception {
 		AtomicLong id = new AtomicLong();
 		when(myFetcher.call()).thenAnswer(t->{
 			Map<String, Long> retVal = new HashMap<>();
 			retVal.put("A", id.incrementAndGet());
 			return retVal;
 		});
-	}
 
-	@Test
-	public void testCache() {
 		long start = System.currentTimeMillis();
 		ResourceCountCache.setNowForUnitTest(start);
 

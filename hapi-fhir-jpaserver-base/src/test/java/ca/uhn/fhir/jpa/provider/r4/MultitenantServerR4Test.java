@@ -10,6 +10,8 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,13 +94,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			.getRequest().setUrl("Patient").setMethod(Bundle.HTTPVerb.POST);
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		Bundle response = ourClient.transaction().withBundle(input).execute();
+		Bundle response = myClient.transaction().withBundle(input).execute();
 
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

@@ -68,12 +68,6 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	}
 
 	@BeforeEach
-	public void before() {
-		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
-	}
-
-	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -126,6 +120,9 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			ourClient.setLogRequestAndResponse(true);
 			myRestServer = restServer;
 		}
+
+		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
+		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		myRestServer.setPagingProvider(myPagingProvider);

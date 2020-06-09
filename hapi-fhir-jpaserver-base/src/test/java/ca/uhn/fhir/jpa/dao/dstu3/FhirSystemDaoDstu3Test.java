@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -26,7 +25,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
@@ -76,7 +74,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -101,6 +98,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
@@ -1776,7 +1776,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
 		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST);
 		try {
-		mySystemDao.transaction(mySrd, request);
+			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDusplicateIds", e.getMessage());

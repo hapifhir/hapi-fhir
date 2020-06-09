@@ -139,21 +139,6 @@ public class SearchCoordinatorSvcImplTest {
 		DaoConfig daoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(daoConfig);
 
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-
-		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
-
-		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchCoordinatorSvcImpl.SearchTask.class), nullable(ISearchBuilder.class))).thenAnswer(t->{
-			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
-			Search search = t.getArgument(1, Search.class);
-			SearchCoordinatorSvcImpl.SearchTask searchTask = t.getArgument(2, SearchCoordinatorSvcImpl.SearchTask.class);
-			ISearchBuilder searchBuilder = t.getArgument(3, ISearchBuilder.class);
-			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
-			retVal.setTxManagerForUnitTest(myTxManager);
-			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
-			return retVal;
-		});
-
 	}
 
 	private List<ResourcePersistentId> createPidSequence(int to) {
@@ -179,6 +164,8 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testAsyncSearchFailDuringSearchSameCoordinator() {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -201,6 +188,8 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
+		initSearches();
+
 		List<ResourcePersistentId> allResults = new ArrayList<>();
 		doAnswer(t -> {
 			List<ResourcePersistentId> oldResults = t.getArgument(1, List.class);
@@ -294,6 +283,8 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testAsyncSearchLargeResultSetSameCoordinator() {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -316,8 +307,27 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
+	private void initSearches() {
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
+		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchCoordinatorSvcImpl.SearchTask.class), nullable(ISearchBuilder.class))).thenAnswer(t->{
+			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
+			Search search = t.getArgument(1, Search.class);
+			SearchCoordinatorSvcImpl.SearchTask searchTask = t.getArgument(2, SearchCoordinatorSvcImpl.SearchTask.class);
+			ISearchBuilder searchBuilder = t.getArgument(3, ISearchBuilder.class);
+			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
+			retVal.setTxManagerForUnitTest(myTxManager);
+			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
+			return retVal;
+		});
+	}
+
 	@Test
 	public void testCancelActiveSearches() throws InterruptedException {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -363,6 +373,8 @@ public class SearchCoordinatorSvcImplTest {
 	 */
 	@Test
 	public void testAsyncSearchLargeResultSetSecondRequestSameCoordinator() {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -411,6 +423,8 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testAsyncSearchSmallResultSetSameCoordinator() {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -441,6 +455,9 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testLoadSearchResultsFromDifferentCoordinator() {
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
 		final String uuid = UUID.randomUUID().toString();
 
 		final Search search = new Search();
@@ -513,6 +530,9 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testSynchronousSearch() {
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add("name", new StringParam("ANAME"));
@@ -534,6 +554,9 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testSynchronousSearchUpTo() {
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(100);
 		params.add("name", new StringParam("ANAME"));

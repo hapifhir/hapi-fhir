@@ -1583,7 +1583,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertEquals(10, response.getEntry().size());
 		if (ourConnectionPoolSize > 1) {
-			assertEquals("Total should be null but was " + response.getTotalElement().getValueAsString() + " in " + sw.toString(), null, response.getTotalElement().getValueAsString());
+			assertEquals(null, response.getTotalElement().getValueAsString(), "Total should be null but was " + response.getTotalElement().getValueAsString() + " in " + sw.toString());
 		}
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
@@ -2133,7 +2133,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: This server does not support _sort specifications of type COMPOSITE - Can't serve _sort=code-value-quantity", e.getMessage());
 		}
 	}
 

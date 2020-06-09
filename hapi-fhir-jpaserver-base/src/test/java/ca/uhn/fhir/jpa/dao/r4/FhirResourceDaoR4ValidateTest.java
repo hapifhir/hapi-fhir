@@ -134,7 +134,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 	}
 
@@ -278,7 +278,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals(encode(oo), "Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 	}
 

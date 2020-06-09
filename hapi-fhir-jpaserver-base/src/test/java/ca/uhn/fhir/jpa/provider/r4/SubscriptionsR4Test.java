@@ -27,6 +27,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsR4Test.class);
 
 	@Override
+	@BeforeEach
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();
 

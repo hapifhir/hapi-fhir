@@ -73,12 +73,6 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@BeforeEach
-	public void before() {
-		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
-	}
-	
-	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -128,6 +122,9 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		myRestServer.setPagingProvider(myPagingProvider);
+
+		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
+		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 	}
 	
 
