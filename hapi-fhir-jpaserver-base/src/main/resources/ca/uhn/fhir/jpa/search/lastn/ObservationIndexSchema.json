@@ -18,10 +18,10 @@
           "type" : "keyword"
         },
         "codeconceptcodingdisplay" : {
-          "type" : "keyword"
+          "type" : "text"
         },
         "categoryconcepttext" : {
-          "type" : "keyword"
+          "type" : "text"
         },
         "categoryconceptcodingcode" : {
           "type" : "keyword"
@@ -33,7 +33,7 @@
           "type" : "keyword"
         },
         "categoryconceptcodingdisplay" : {
-          "type" : "keyword"
+          "type" : "text"
         },
         "effectivedtm" : {
           "type" : "date"

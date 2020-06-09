@@ -93,8 +93,9 @@ public class EmpiPersonFindingSvc {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
 		if (!eidFromResource.isEmpty()) {
 			for (CanonicalEID eid : eidFromResource) {
-				IBaseResource foundPerson = myEmpiResourceDaoSvc.searchPersonByEid(eid.getValue());
-				if (foundPerson != null) {
+				Optional<IAnyResource> oFoundPerson = myEmpiResourceDaoSvc.searchPersonByEid(eid.getValue());
+				if (oFoundPerson.isPresent()) {
+					IAnyResource foundPerson = oFoundPerson.get();
 					Long pidOrNull = myIdHelperService.getPidOrNull(foundPerson);
 					MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), EmpiMatchResultEnum.MATCH);
 					ourLog.debug("Matched {} by EID {}", foundPerson.getIdElement(), eid);

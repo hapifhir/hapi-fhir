@@ -311,9 +311,6 @@ public class SearchBuilder implements ISearchBuilder {
 						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
 					}
 				}
-				if(myParams.getLastNMax() == null) {
-					throw new InvalidRequestException("Max parameter is required for $lastn operation");
-				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
 				for (String lastnResourceId : lastnResourceIds) {
 					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));

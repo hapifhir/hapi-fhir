@@ -22,14 +22,14 @@ public class TestElasticsearchConfig {
 
 
 	@Bean()
-	public ElasticsearchSvcImpl myElasticsearchSvc() throws IOException {
+	public ElasticsearchSvcImpl myElasticsearchSvc() {
 		int elasticsearchPort = embeddedElasticSearch().getHttpPort();
 		return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUserId, elasticsearchPassword);
 	}
 
 	@Bean
 	public EmbeddedElastic embeddedElasticSearch() {
-		EmbeddedElastic embeddedElastic = null;
+		EmbeddedElastic embeddedElastic;
 		try {
 			embeddedElastic = EmbeddedElastic.builder()
 					.withElasticVersion(ELASTIC_VERSION)
@@ -44,6 +44,12 @@ public class TestElasticsearchConfig {
 		}
 
 		return embeddedElastic;
+	}
+
+	@PreDestroy
+	public void stop() throws IOException {
+		myElasticsearchSvc().close();
+		embeddedElasticSearch().stop();
 	}
 
 }
