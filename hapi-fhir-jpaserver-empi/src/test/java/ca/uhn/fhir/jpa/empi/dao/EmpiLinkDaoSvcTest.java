@@ -12,8 +12,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class EmpiLinkDaoSvcTest extends BaseEmpiR4Test {
 	@Autowired
@@ -27,7 +27,7 @@ public class EmpiLinkDaoSvcTest extends BaseEmpiR4Test {
 		myEmpiLinkDaoSvc.save(empiLink);
 		assertThat(empiLink.getCreated(), is(notNullValue()));
 		assertThat(empiLink.getUpdated(), is(notNullValue()));
-		assertEquals(empiLink.getCreated(), empiLink.getUpdated());
+		assertTrue(empiLink.getUpdated().getTime() - empiLink.getCreated().getTime() < 1000);
 	}
 
 	@Test

@@ -5,12 +5,13 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -60,6 +61,10 @@ public class BaseJpaResourceProviderObservationDstu3 extends JpaResourceProvider
 		@OperationParam(name="code")
 			TokenAndListParam theCode,
 
+		@Description(shortDefinition="The effective date of the observation")
+		@OperationParam(name="date")
+			DateAndListParam theDate,
+
 		@Description(shortDefinition="The subject that the observation is about (if patient)")
 		@OperationParam(name="patient")
 			ReferenceAndListParam thePatient,
@@ -78,13 +83,16 @@ public class BaseJpaResourceProviderObservationDstu3 extends JpaResourceProvider
 			SearchParameterMap paramMap = new SearchParameterMap();
 			paramMap.add(Observation.SP_CATEGORY, theCategory);
 			paramMap.add(Observation.SP_CODE, theCode);
+			paramMap.add(Observation.SP_DATE, theDate);
 			if (thePatient != null) {
-				paramMap.add("patient", thePatient);
+				paramMap.add(Observation.SP_PATIENT, thePatient);
 			}
 			if (theSubject != null) {
-				paramMap.add("subject", theSubject);
+				paramMap.add(Observation.SP_SUBJECT, theSubject);
 			}
-			paramMap.setLastNMax(theMax.getValue());
+			if (theMax != null) {
+				paramMap.setLastNMax(theMax.getValue());
+			}
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());
 			}
