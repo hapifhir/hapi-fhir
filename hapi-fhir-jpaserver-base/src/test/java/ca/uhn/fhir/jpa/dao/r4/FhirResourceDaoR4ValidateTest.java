@@ -136,6 +136,27 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		assertEquals(encode(oo), "Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics());
 
+		// Make sure we're caching the validations as opposed to hitting the DB every time
+		myCaptureQueriesListener.clear();
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCoding().clear();
+		obs.getCategory().clear();
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE4").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		myCaptureQueriesListener.clear();
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE4").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+
+
+
 	}
 
 	/**

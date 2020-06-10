@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -133,15 +134,16 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	/**
 	 * Bean which validates incoming requests
+	 * @param theInstanceValidator
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor(IValidatorModule theInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidator());
+		requestValidator.addValidatorModule(theInstanceValidator);
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;

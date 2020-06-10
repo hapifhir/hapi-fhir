@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
@@ -17,7 +18,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;

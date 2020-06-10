@@ -94,8 +94,6 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet);
 
-	boolean supportsSystem(String theCodeSystem);
-
 	List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest);
 
 	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);

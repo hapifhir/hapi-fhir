@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	private EIDHelper myEidHelper;
 	@Autowired
 	private PersonHelper myPersonHelper;
+
+	@Before
+	public void before() {
+		super.loadEmpiSearchParameters();
+	}
 
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {
