@@ -49,7 +49,7 @@ import java.util.List;
 @Entity()
 @Table(name = "NPM_PACKAGE_VER", uniqueConstraints = {
 }, indexes = {
-	@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID")
+	@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true)
 })
 public class NpmPackageVersionEntity {
 
@@ -74,9 +74,9 @@ public class NpmPackageVersionEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SAVED_TIME", nullable = false)
 	private Date mySavedTime;
-	@Column(name = "PKG_DESC", nullable = false, length = 500)
+	@Column(name = "PKG_DESC", nullable = false, length = 200)
 	private String myDescription;
-	@Column(name = "DESC_UPPER", nullable = false, length = 500)
+	@Column(name = "DESC_UPPER", nullable = false, length = 200)
 	private String myDescriptionUpper;
 	@Column(name = "CURRENT_VERSION", nullable = false)
 	private boolean myCurrentVersion;
@@ -91,8 +91,6 @@ public class NpmPackageVersionEntity {
 	@Version
 	@Column(name = "UPDATED_TIME", nullable = false)
 	private Date myUpdatedTime;
-	@Column(name = "PACKAGE_NAME", nullable = true, length = 200)
-	private String myName;
 	@OneToMany(mappedBy = "myPackageVersion")
 	private List<NpmPackageVersionResourceEntity> myResources;
 
@@ -186,14 +184,6 @@ public class NpmPackageVersionEntity {
 			.append("myDescriptionUpper", myDescriptionUpper)
 			.append("myFhirVersionId", myFhirVersionId)
 			.toString();
-	}
-
-	public String getName() {
-		return myName;
-	}
-
-	public void setName(String theName) {
-		myName = theName;
 	}
 
 	public List<NpmPackageVersionResourceEntity> getResources() {

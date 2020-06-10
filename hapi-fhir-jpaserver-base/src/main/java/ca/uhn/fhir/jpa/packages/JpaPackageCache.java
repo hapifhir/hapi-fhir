@@ -237,7 +237,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			packageVersion.setFhirVersion(fhirVersion);
 			packageVersion.setCurrentVersion(currentVersion);
 			packageVersion.setPackageSizeBytes(bytes.length);
-			packageVersion.setName(npmPackage.name());
 			packageVersion = myPackageVersionDao.save(packageVersion);
 
 			String dirName = "package";
@@ -469,7 +468,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			NpmPackageMetadataJson.Version version = new NpmPackageMetadataJson.Version();
 			version.setFhirVersion(next.getFhirVersionId());
 			version.setDescription(next.getDescription());
-			version.setName(next.getName());
+			version.setName(next.getPackageId());
 			version.setVersion(next.getVersionId());
 			version.setBytes(next.getPackageSizeBytes());
 			retVal.addVersion(version);

@@ -48,15 +48,13 @@ import java.util.Date;
 })
 public class NpmPackageVersionResourceEntity {
 
-	public static final int VERSION_ID_LENGTH = 200;
-
 	@Id
 	@SequenceGenerator(name = "SEQ_NPM_PACKVERRES", sequenceName = "SEQ_NPM_PACKVERRES")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_NPM_PACKVERRES")
-	@Column(name = "SP_ID")
+	@Column(name = "PID")
 	private Long myId;
 	@ManyToOne
-	@JoinColumn(name = "PACKVER_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_NPM_PACKVERRES_PACKVER"))
+	@JoinColumn(name = "PACKVER_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_NPM_PACKVERRES_PACKVER"), nullable = false)
 	private NpmPackageVersionEntity myPackageVersion;
 	@OneToOne
 	@JoinColumn(name = "BINARY_RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKVR_RESID"))
@@ -65,7 +63,7 @@ public class NpmPackageVersionResourceEntity {
 	private String myDirectory;
 	@Column(name = "FILE_NAME", length = 200)
 	private String myFilename;
-	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN)
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 	@Column(name = "CANONICAL_URL", length = 200)
 	private String myCanonicalUrl;
