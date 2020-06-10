@@ -2,6 +2,8 @@
 
 Several operations exist that can be used to manage EMPI links. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [EmpiProvider](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/provider/EmpiProviderR4.html).
 
+In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Person/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This could be used to prevent update conflicts in an environment where multiple users are working on the same set of empi links.
+
 ## Query links
 
 Ue the `$empi-query-links` operation to view empi links.  The results returned are based on the parameters provided.  All parameters are optional.  This operation takes the following parameters:
@@ -74,27 +76,25 @@ The following request body could be used to find all POSSIBLE_MATCH links in the
 This operation returns a `Parameters` resource that looks like the following:
 
 ```json
-<Parameters xmlns="http://hl7.org/fhir">
-   <parameter>
-      <name value="link"/>
-      <part>
-         <name value="personId"/>
-         <valueString value="Person/123"/>
-      </part>
-      <part>
-         <name value="targetId"/>
-         <valueString value="Patient/456"/>
-      </part>
-      <part>
-         <name value="matchResult"/>
-         <valueString value="MATCH"/>
-      </part>
-      <part>
-         <name value="linkSource"/>
-         <valueString value="AUTO"/>
-      </part>
-   </parameter>
-</Parameters>
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "link",
+    "part": [ {
+      "name": "personId",
+      "valueString": "Person/123"
+    }, {
+      "name": "targetId",
+      "valueString": "Patient/456"
+    }, {
+      "name": "matchResult",
+      "valueString": "POSSIBLE_MATCH"
+    }, {
+      "name": "linkSource",
+      "valueString": "AUTO"
+    } ]
+  } ]
+}
 ```
 
 ## Querying links via the Person resource
@@ -155,19 +155,93 @@ This operation returns `Parameters` similar to `$empi-query-links`:
 
 
 ```json
-<Parameters xmlns="http://hl7.org/fhir">
-   <parameter>
-      <name value="link"/>
-      <part>
-         <name value="personId"/>
-         <valueString value="Person/123"/>
-      </part>
-      <part>
-         <name value="targetId"/>
-         <valueString value="Person/789"/>
-      </part>
-   </parameter>
-</Parameters>
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "link",
+    "part": [ {
+      "name": "personId",
+      "valueString": "Person/123"
+    }, {
+      "name": "targetId",
+      "valueString": "Person/456"
+    }, {
+      "name": "matchResult",
+      "valueString": "POSSIBLE_DUPLICATE"
+    }, {
+      "name": "linkSource",
+      "valueString": "AUTO"
+    } ]
+  } ]
+}
+```
+
+## Unduplicate Persons
+
+Use the `$empi-not-duplicate` operation to mark duplicate persons as not duplicates.    This operation takes the following parameters:
+                                                                                      
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>personId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the Person resource.
+            </td>
+        </tr>
+        <tr>
+            <td>targetId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the Person that personId has a possible duplicate link to.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+### Example
+
+Use an HTTP POST to the following URL to invoke this operation:
+
+```url
+http://example.com/$empi-not-duplicate
+```
+
+The following request body could be used:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "personId",
+    "valueString": "Person/123"
+  }, {
+    "name": "targetId",
+    "valueString": "Person/456"
+  } ]
+}
+```
+
+When the operation is successful, it returns the following `Parameters`:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "success",
+    "valueBoolean": true
+  } ]
+}
 ```
 
 ## Update Link
@@ -243,7 +317,11 @@ The operation returns the updated `Person` resource.  Note that this is the only
 
 ## Merge Persons
 
-The `$empi-merge-persons` operation can be used to merge one Person resource with another.  When doing this, you will need to decide which resource to delete and which one to keep.  Data from the personToKeep will be given precedence over data in the personToDelete. This operation takes the following parameters:
+The `$empi-merge-persons` operation can be used to merge one Person resource with another.  When doing this, you will need to decide which resource to merge from and which one to merge to.  In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).  However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson
+
+After the merge is complete, `fromPerson.active` is set to `false`.  Also, a new link with assurance level 4 (MANUAL MATCH) will be added pointing from the fromPerson to the toPerson.
+
+This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -256,15 +334,15 @@ The `$empi-merge-persons` operation can be used to merge one Person resource wit
     </thead>
     <tbody>
         <tr>
-            <td>personIdToDelete</td>
+            <td>fromPersonId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Person resource to merge data from.  This resource will be deleted after the merge.
+                The id of the Person resource to merge data from.
             </td>
         </tr>
         <tr>
-            <td>personIdToKeep</td>
+            <td>toPersonId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
@@ -288,10 +366,10 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "personIdToDelete",
+    "name": "fromPersonId",
     "valueString": "Person/123"
   }, {
-    "name": "personIdToKeep",
+    "name": "toPersonId",
     "valueString": "Patient/128"
   } ]
 }

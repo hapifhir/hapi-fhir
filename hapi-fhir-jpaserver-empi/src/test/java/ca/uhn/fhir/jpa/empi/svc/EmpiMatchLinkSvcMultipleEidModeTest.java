@@ -1,15 +1,14 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.EmpiConstants;
-import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
-import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +32,12 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 	private static final Logger ourLog = getLogger(EmpiMatchLinkSvcMultipleEidModeTest.class);
 	@Autowired
-	IEmpiLinkSvc myEmpiLinkSvc;
-	@Autowired
 	private EIDHelper myEidHelper;
-	@Autowired
-	private PersonHelper myPersonHelper;
 
+	@Before
+	public void before() {
+		super.loadEmpiSearchParameters();
+	}
 
 	@Test
 	public void testIncomingPatientWithEIDThatMatchesPersonWithHapiEidAddsExternalEidsToPerson() {

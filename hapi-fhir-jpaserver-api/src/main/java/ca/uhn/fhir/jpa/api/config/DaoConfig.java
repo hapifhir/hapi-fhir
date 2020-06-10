@@ -193,6 +193,39 @@ public class DaoConfig {
 	 */
 	private boolean myDeleteEnabled = true;
 
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
+	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
+	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
+	 *
+	 * @since 5.1.0
+	 */
+	public boolean isLastNEnabled() {
+		return myLastNEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
+	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
+	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
+	 *
+	 * @since 5.1.0
+	 */
+	public void setLastNEnabled(boolean theLastNEnabled) {
+		myLastNEnabled = theLastNEnabled;
+	}
+
+	/**
+	 * @since 5.1.0
+	 */
+	private boolean myLastNEnabled = false;
+
+	/**
+	 * @since 5.1.0
+	 */
+	private boolean myPreloadBlobFromInputStream = false;
 
 	/**
 	 * Constructor
@@ -2053,6 +2086,44 @@ public class DaoConfig {
 	 */
 	public void setMaximumDeleteConflictQueryCount(Integer theMaximumDeleteConflictQueryCount) {
 		myMaximumDeleteConflictQueryCount = theMaximumDeleteConflictQueryCount;
+	}
+
+	/**
+	 * <p>
+	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
+	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
+	 * in advance.
+	 * </p>
+	 * <p>
+	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public boolean isPreloadBlobFromInputStream() {
+		return myPreloadBlobFromInputStream;
+	}
+
+	/**
+	 * <p>
+	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
+	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
+	 * in advance.
+	 * </p>
+	 * <p>
+	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
+		myPreloadBlobFromInputStream = thePreloadBlobFromInputStream;
 	}
 
 }

@@ -2057,7 +2057,7 @@ public enum Pointcut {
 		return myParameterTypes;
 	}
 
-	private class UnknownType {
+	private static class UnknownType {
 	}
 
 	private static class ExceptionHandlingSpec {

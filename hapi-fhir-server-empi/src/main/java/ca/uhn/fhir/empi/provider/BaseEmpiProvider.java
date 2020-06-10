@@ -30,6 +30,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -39,7 +40,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public abstract class BaseEmpiProvider {
 
-	private final FhirContext myFhirContext;
+	protected final FhirContext myFhirContext;
 	private final IResourceLoader myResourceLoader;
 
 	public BaseEmpiProvider(FhirContext theFhirContext, IResourceLoader theResourceLoader) {
@@ -47,9 +48,9 @@ public abstract class BaseEmpiProvider {
 		myResourceLoader = theResourceLoader;
 	}
 
-	protected IAnyResource getPersonFromIdOrThrowException(String theParamName, String theId) {
+	protected IAnyResource getLatestPersonFromIdOrThrowException(String theParamName, String theId) {
 		IdDt personId = getPersonIdDtOrThrowException(theParamName, theId);
-		return loadResource(personId);
+		return loadResource(personId.toUnqualifiedVersionless());
 	}
 
 	private IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
@@ -61,9 +62,9 @@ public abstract class BaseEmpiProvider {
 		return personId;
 	}
 
-	protected IAnyResource getTargetFromIdOrThrowException(String theParamName, String theId) {
+	protected IAnyResource getLatestTargetFromIdOrThrowException(String theParamName, String theId) {
 		IIdType targetId = getTargetIdDtOrThrowException(theParamName, theId);
-		return loadResource(targetId);
+		return loadResource(targetId.toUnqualifiedVersionless());
 	}
 
 	protected IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
@@ -81,17 +82,17 @@ public abstract class BaseEmpiProvider {
 		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
 	}
 
-	protected void validateMergeParameters(IPrimitiveType<String> thePersonIdToDelete, IPrimitiveType<String> thePersonIdToKeep) {
-		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonIdToDelete);
-		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonIdToKeep);
-		if (thePersonIdToDelete.getValue().equals(thePersonIdToKeep.getValue())) {
-			throw new InvalidRequestException("personIdToDelete must be different from personToKeep");
+	protected void validateMergeParameters(IPrimitiveType<String> theFromPersonId, IPrimitiveType<String> theToPersonId) {
+		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPersonId);
+		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPersonId);
+		if (theFromPersonId.getValue().equals(theToPersonId.getValue())) {
+			throw new InvalidRequestException("fromPersonId must be different from toPersonId");
 		}
  	}
 
- 	protected void validateMergeResources(IAnyResource thePersonToDelete, IAnyResource thePersonToKeep) {
-		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE, thePersonToDelete);
-		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP, thePersonToKeep);
+ 	protected void validateMergeResources(IAnyResource theFromPerson, IAnyResource theToPerson) {
+		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPerson);
+		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPerson);
 	}
 
 	private void validateIsEmpiManaged(String theName, IAnyResource thePerson) {
@@ -122,6 +123,11 @@ public abstract class BaseEmpiProvider {
 				throw new InvalidRequestException(ProviderConstants.EMPI_UPDATE_LINK + " illegal " + ProviderConstants.EMPI_UPDATE_LINK_MATCH_RESULT +
 					" value '" + matchResult + "'.  Must be " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
 		}
+	}
+
+	protected void validateNotDuplicateParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId) {
+		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
+		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
 	}
 
 	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails) {
@@ -168,4 +174,15 @@ public abstract class BaseEmpiProvider {
 		return getTargetIdDtOrThrowException(theName, targetId);
 	}
 
+	protected void validateSameVersion(IAnyResource theResource, IPrimitiveType<String> theResourceId) {
+		String storedId = theResource.getIdElement().getValue();
+		String requestedId = theResourceId.getValue();
+		if (hasVersionIdPart(requestedId) && !storedId.equals(requestedId)) {
+			throw new ResourceVersionConflictException("Requested resource " + requestedId + " is not the latest version.  Latest version is " + storedId);
+		}
+	}
+
+	private boolean hasVersionIdPart(String theId) {
+		return new IdDt(theId).hasVersionIdPart();
+	}
 }
