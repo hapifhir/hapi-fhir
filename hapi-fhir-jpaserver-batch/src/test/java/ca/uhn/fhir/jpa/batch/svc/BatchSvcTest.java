@@ -16,9 +16,7 @@ public class BatchSvcTest extends BaseBatchR4Test {
 
 	@Test
 	public void testApplicationContextLoads() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, InterruptedException {
-		myBatchJobConfig.setExpectedCount(1);
 		myJobLauncher.run(myJob, new JobParameters());
-		myBatchJobConfig.awaitExpected();
 	}
 
 }

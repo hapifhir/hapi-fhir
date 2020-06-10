@@ -37,7 +37,7 @@ public class BulkExportDaoSvc {
 		Optional<BulkExportCollectionEntity> byId = myBulkExportCollectionDao.findById(theCollectionEntityId);
 		if (byId.isPresent()) {
 			BulkExportCollectionEntity exportCollectionEntity = byId.get();
-			theFile.setCollection(exportCollectionEntity);;
+			theFile.setCollection(exportCollectionEntity);
 			myBulkExportCollectionFileDao.saveAndFlush(theFile);
 			myBulkExportCollectionDao.saveAndFlush(exportCollectionEntity);
 		}

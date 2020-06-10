@@ -2,8 +2,6 @@ package ca.uhn.fhir.jpa.batch.config;
 
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.MapJobExplorerFactoryBean;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -16,8 +14,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
 @EnableBatchProcessing
+@Configuration
 public class InMemoryJobRepositoryBatchConfig implements BatchConfigurer {
 
 	private PlatformTransactionManager myPlatformTransactionManager;

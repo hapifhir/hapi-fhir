@@ -71,6 +71,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
+	private static final Long READ_CHUNK_SIZE = 10L;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
 	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
@@ -191,6 +192,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private void processJob(String theJobUuid) {
 		JobParameters parameters = new JobParametersBuilder()
 			.addString("jobUUID", theJobUuid)
+			.addLong("readChunkSize", READ_CHUNK_SIZE)
 			.toJobParameters();
 
 		try {

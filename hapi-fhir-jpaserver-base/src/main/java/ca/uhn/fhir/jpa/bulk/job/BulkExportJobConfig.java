@@ -72,7 +72,7 @@ public class BulkExportJobConfig {
 	@Bean
 	public Step partitionStep() {
 		return myStepBuilderFactory.get("partitionStep")
-			.partitioner("bulkExportGenerateResourceFilesStep", partitioner(null))
+			.partitioner("bulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner(null))
 			.step(bulkExportGenerateResourceFilesStep())
 			.taskExecutor(myTaskExecutor)
 			.build();
@@ -88,7 +88,7 @@ public class BulkExportJobConfig {
 
 	@Bean
 	@JobScope
-	public ResourceTypePartitioner partitioner(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
+	public ResourceTypePartitioner bulkExportResourceTypePartitioner(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
 		return new ResourceTypePartitioner(theJobUUID);
 	}
 

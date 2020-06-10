@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -15,7 +16,6 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
@@ -29,9 +29,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkItemReader.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	private static final int READ_CHUNK_SIZE = 10;
+	@Value("#{jobParameters['readChunkSize']}")
+	private Long READ_CHUNK_SIZE;
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;

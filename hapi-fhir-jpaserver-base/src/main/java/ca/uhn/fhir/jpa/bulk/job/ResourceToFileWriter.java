@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.bulk.job;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.parser.IParser;
@@ -22,10 +23,8 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Optional;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
-	private static final Logger ourLog = getLogger(ResourceToFileWriter.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Autowired
 	private FhirContext myContext;

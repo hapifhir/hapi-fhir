@@ -32,8 +32,7 @@ public class BulkExportJobStatusChangeListener implements JobExecutionListener {
 		if (theJobExecution.getStatus() == BatchStatus.COMPLETED) {
 			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.COMPLETE);
 		} else {
-			//If the job didn't complete successfully, just set it back to submitted so that it gets picked up again by the scheduler.
-			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.SUBMITTED);
+			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.ERROR);
 		}
 	}
 }

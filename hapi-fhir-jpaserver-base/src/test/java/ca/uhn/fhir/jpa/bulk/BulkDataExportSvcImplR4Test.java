@@ -259,11 +259,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
 
 		//Add the UUID to the job
-		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", jobDetails.getJobId());
+		JobParametersBuilder paramBuilder = new JobParametersBuilder()
+			.addString("jobUUID", jobDetails.getJobId())
+			.addLong("readChunkSize", 10L);
 		myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 
 		IBulkDataExportSvc.JobInfo jobInfo = awaitJobCompletion(jobDetails.getJobId());
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
 	}
 
 	@Test
@@ -273,7 +276,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 			fail("Should have had invalid parameter execption!");
 		} catch (JobParametersInvalidException e) {
-
 		}
 
 	}

@@ -19,14 +19,26 @@ public class JobExistsParameterValidator implements JobParametersValidator {
 
 	@Override
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
+		if (theJobParameters == null) {
+			throw new JobParametersInvalidException("This job requires Parameters: [readChunkSize] and [jobUUID]");
+		}
+
+		Long readChunkSize = theJobParameters.getLong("readChunkSize");
+		String errorMessage = "";
+		if (readChunkSize == null || readChunkSize < 1) {
+			errorMessage += "There must be a valid number for readChunkSize, which is at least 1. ";
+		}
 		String jobUUID = theJobParameters.getString("jobUUID");
 		if (StringUtils.isBlank(jobUUID)) {
-			throw new JobParametersInvalidException("You did not pass a jobUUID to this job!");
+			errorMessage += "You did not pass a jobUUID to this job! ";
 		}
 
 		Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(jobUUID);
 		if (!oJob.isPresent()) {
-			throw new JobParametersInvalidException("There is no persisted job that exists with UUID: " + jobUUID);
+			errorMessage += "There is no persisted job that exists with UUID: " + jobUUID + ". ";
+		}
+		if (!StringUtils.isEmpty(errorMessage)) {
+			throw new JobParametersInvalidException(errorMessage);
 		}
 	}
 }
