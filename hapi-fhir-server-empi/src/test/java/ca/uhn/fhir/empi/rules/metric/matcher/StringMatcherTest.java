@@ -72,6 +72,7 @@ public class StringMatcherTest extends BaseMatcherTest {
 		assertFalse(EmpiMetricEnum.EXACT.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-09-08")));
 	}
 
+
 	@Test
 	public void testExactGender() {
 		Enumeration<Enumerations.AdministrativeGender> male = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
@@ -92,4 +93,22 @@ public class StringMatcherTest extends BaseMatcherTest {
 		assertFalse(EmpiMetricEnum.SOUNDEX.match(ourFhirContext, new StringType("Fred"), new StringType("Frank")));
 		assertFalse(EmpiMetricEnum.SOUNDEX.match(ourFhirContext, new StringType("Thomas"), new StringType("Tom")));
 	}
+
+	@Test
+	public void testCaverphone2() {
+		assertTrue(EmpiMetricEnum.CAVERPHONE2.match(ourFhirContext, new StringType("Gail"), new StringType("Gail")));
+
+		assertFalse(EmpiMetricEnum.CAVERPHONE2.match(ourFhirContext, new StringType("Fred"), new StringType("Frank")));
+		assertFalse(EmpiMetricEnum.CAVERPHONE2.match(ourFhirContext, new StringType("Thomas"), new StringType("Tom")));
+	}
+
+	@Test
+	public void testNormalizeSubstring() {
+		assertTrue(EmpiMetricEnum.NORMALIZE_SUBSTRING.match(ourFhirContext, new StringType("BILLY"), new StringType("Bill")));
+		assertTrue(EmpiMetricEnum.NORMALIZE_SUBSTRING.match(ourFhirContext, new StringType("Bill"), new StringType("Billy")));
+		assertTrue(EmpiMetricEnum.NORMALIZE_SUBSTRING.match(ourFhirContext, new StringType("FRED"), new StringType("Frederik")));
+
+		assertFalse(EmpiMetricEnum.NORMALIZE_SUBSTRING.match(ourFhirContext, new StringType("Fred"), new StringType("Friederik")));
+	}
+
 }
