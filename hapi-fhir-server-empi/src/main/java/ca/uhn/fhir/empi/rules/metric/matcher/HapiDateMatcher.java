@@ -8,7 +8,7 @@ public class HapiDateMatcher implements IEmpiFieldMatcher {
 	private final HapiDateMatcherR4 myHapiDateMatcherR4 = new HapiDateMatcherR4();
 
 	@Override
-	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 				return myHapiDateMatcherDstu3.match(theLeftBase, theRightBase);

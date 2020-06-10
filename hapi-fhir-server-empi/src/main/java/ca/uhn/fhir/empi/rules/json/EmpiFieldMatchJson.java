@@ -45,6 +45,11 @@ public class EmpiFieldMatchJson implements IModelJson {
 	EmpiMetricEnum myMetric;
 	@JsonProperty("matchThreshold")
 	Double myMatchThreshold;
+	/**
+	 * For String value types, should the values be normalized (case, accents) before they are compared
+	 */
+	@JsonProperty(value = "exact")
+	boolean myExact;
 
 	public EmpiMetricEnum getMetric() {
 		return myMetric;
@@ -89,6 +94,15 @@ public class EmpiFieldMatchJson implements IModelJson {
 
 	public EmpiFieldMatchJson setName(@Nonnull String theName) {
 		myName = theName;
+		return this;
+	}
+
+	public boolean getExact() {
+		return myExact;
+	}
+
+	public EmpiFieldMatchJson setExact(boolean theExact) {
+		myExact = theExact;
 		return this;
 	}
 }

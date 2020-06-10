@@ -21,8 +21,6 @@ package ca.uhn.fhir.empi.rules.metric.matcher;
  */
 
 public enum EmpiPersonNameMatchModeEnum {
-	STANDARD_ANY_ORDER,
-	EXACT_ANY_ORDER,
-	STANDARD_FIRST_AND_LAST,
-	EXACT_FIRST_AND_LAST
+	ANY_ORDER,
+	FIRST_AND_LAST
 }

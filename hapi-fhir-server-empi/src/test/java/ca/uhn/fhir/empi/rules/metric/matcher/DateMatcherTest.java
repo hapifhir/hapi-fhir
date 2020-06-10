@@ -27,20 +27,24 @@ public class DateMatcherTest extends BaseMatcherTest {
 		Date sameYear = sameYearCal.getTime();
 		Date otherYear = otherYearCal.getTime();
 
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.DAY), new DateType(date, TemporalPrecisionEnum.DAY)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.DAY), new DateType(sameMonth, TemporalPrecisionEnum.DAY)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.DAY), new DateType(sameYear, TemporalPrecisionEnum.DAY)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.DAY), new DateType(otherYear, TemporalPrecisionEnum.DAY)));
+		assertTrue(dateMatch(date, date, TemporalPrecisionEnum.DAY));
+		assertFalse(dateMatch(date, sameMonth, TemporalPrecisionEnum.DAY));
+		assertFalse(dateMatch(date, sameYear, TemporalPrecisionEnum.DAY));
+		assertFalse(dateMatch(date, otherYear, TemporalPrecisionEnum.DAY));
 
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.MONTH), new DateType(date, TemporalPrecisionEnum.MONTH)));
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.MONTH), new DateType(sameMonth, TemporalPrecisionEnum.MONTH)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.MONTH), new DateType(sameYear, TemporalPrecisionEnum.MONTH)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.MONTH), new DateType(otherYear, TemporalPrecisionEnum.MONTH)));
+		assertTrue(dateMatch(date, date, TemporalPrecisionEnum.MONTH));
+		assertTrue(dateMatch(date, sameMonth, TemporalPrecisionEnum.MONTH));
+		assertFalse(dateMatch(date, sameYear, TemporalPrecisionEnum.MONTH));
+		assertFalse(dateMatch(date, otherYear, TemporalPrecisionEnum.MONTH));
 
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.YEAR), new DateType(date, TemporalPrecisionEnum.YEAR)));
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.YEAR), new DateType(sameMonth, TemporalPrecisionEnum.YEAR)));
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.YEAR), new DateType(sameYear, TemporalPrecisionEnum.YEAR)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(date, TemporalPrecisionEnum.YEAR), new DateType(otherYear, TemporalPrecisionEnum.YEAR)));
+		assertTrue(dateMatch(date, date, TemporalPrecisionEnum.YEAR));
+		assertTrue(dateMatch(date, sameMonth, TemporalPrecisionEnum.YEAR));
+		assertTrue(dateMatch(date, sameYear, TemporalPrecisionEnum.YEAR));
+		assertFalse(dateMatch(date, otherYear, TemporalPrecisionEnum.YEAR));
+	}
+
+	private boolean dateMatch(Date theDate, Date theSameMonth, TemporalPrecisionEnum theTheDay) {
+		return EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), true);
 	}
 
 	@Test
@@ -57,25 +61,29 @@ public class DateMatcherTest extends BaseMatcherTest {
 
 		// Same precision
 
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.DAY), new DateTimeType(date, TemporalPrecisionEnum.DAY)));
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.DAY), new DateTimeType(sameSecond, TemporalPrecisionEnum.DAY)));
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.DAY), new DateTimeType(sameDay, TemporalPrecisionEnum.DAY)));
+		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY));
+		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY));
+		assertTrue(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY));
 
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.SECOND), new DateTimeType(date, TemporalPrecisionEnum.SECOND)));
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.SECOND), new DateTimeType(sameSecond, TemporalPrecisionEnum.SECOND)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.SECOND), new DateTimeType(sameDay, TemporalPrecisionEnum.SECOND)));
+		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND));
+		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND));
+		assertFalse(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND));
 
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.MILLI), new DateTimeType(date, TemporalPrecisionEnum.MILLI)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.MILLI), new DateTimeType(sameSecond, TemporalPrecisionEnum.MILLI)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.MILLI), new DateTimeType(sameDay, TemporalPrecisionEnum.MILLI)));
+		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI));
+		assertFalse(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI));
+		assertFalse(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI));
 
 		// Different precision matches by coarser precision
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.SECOND), new DateTimeType(date, TemporalPrecisionEnum.DAY)));
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.SECOND), new DateTimeType(sameSecond, TemporalPrecisionEnum.DAY)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.SECOND), new DateTimeType(sameDay, TemporalPrecisionEnum.DAY)));
+		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
+		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
+		assertFalse(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
 
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.DAY), new DateTimeType(date, TemporalPrecisionEnum.SECOND)));
-		assertTrue(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.DAY), new DateTimeType(sameSecond, TemporalPrecisionEnum.SECOND)));
-		assertFalse(EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(date, TemporalPrecisionEnum.DAY), new DateTimeType(sameDay, TemporalPrecisionEnum.SECOND)));
+		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
+		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
+		assertFalse(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
+	}
+
+	private boolean dateTimeMatch(Date theDate, Date theSameSecond, TemporalPrecisionEnum theTheDay, TemporalPrecisionEnum theTheDay2) {
+		return EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(theDate, theTheDay), new DateTimeType(theSameSecond, theTheDay2), true);
 	}
 }

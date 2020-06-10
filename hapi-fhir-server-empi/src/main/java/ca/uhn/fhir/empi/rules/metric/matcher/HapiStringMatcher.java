@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.rules.metric.matcher;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.StringUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -39,11 +40,19 @@ public class HapiStringMatcher implements IEmpiFieldMatcher {
 	}
 
 	@Override
-	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			IPrimitiveType<?> leftString = (IPrimitiveType<?>) theLeftBase;
-			IPrimitiveType<?> rightString = (IPrimitiveType<?>) theRightBase;
-			return myStringMatcher.matches(leftString.getValueAsString(), rightString.getValueAsString());
+			IPrimitiveType<?> leftValue = (IPrimitiveType<?>) theLeftBase;
+			IPrimitiveType<?> rightValue = (IPrimitiveType<?>) theRightBase;
+
+
+			String leftString = leftValue.getValueAsString();
+			String rightString = rightValue.getValueAsString();
+			if (!theExact) {
+				leftString = StringUtil.normalizeStringForSearchIndexing(leftString);
+				rightString = StringUtil.normalizeStringForSearchIndexing(rightString);
+			}
+			return myStringMatcher.matches(leftString, rightString);
 		}
 		return false;
 	}

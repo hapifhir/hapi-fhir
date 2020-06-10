@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 public class CustomResourceMatcherR4Test extends BaseR4Test {
 
-	public static final String FIELD_EXACT_MATCH_NAME = EmpiMetricEnum.EXACT_NAME_ANY_ORDER.name();
+	public static final String FIELD_EXACT_MATCH_NAME = EmpiMetricEnum.NAME_ANY_ORDER.name();
 	private static Patient ourJohnHenry;
 	private static Patient ourJohnHENRY;
 	private static Patient ourJaneHenry;
@@ -38,7 +38,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 
 	@Test
 	public void testExactNameAnyOrder() {
-		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameAnyOrderRules(EmpiMetricEnum.EXACT_NAME_ANY_ORDER));
+		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(EmpiMetricEnum.NAME_ANY_ORDER, true));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJohn));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJOHN));
@@ -50,8 +50,8 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	}
 
 	@Test
-	public void testStandardNameAnyOrder() {
-		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameAnyOrderRules(EmpiMetricEnum.STANDARD_NAME_ANY_ORDER));
+	public void testNormalizedNameAnyOrder() {
+		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(EmpiMetricEnum.NAME_ANY_ORDER, false));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJohn));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJOHN));
@@ -65,11 +65,11 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 
 	@Test
 	public void testExactNameFirstAndLast() {
-		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameAnyOrderRules(EmpiMetricEnum.EXACT_NAME_FIRST_AND_LAST));
+		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(EmpiMetricEnum.NAME_FIRST_AND_LAST, true));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJohn));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJOHN));
-		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHENRY));
+		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHENRY));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJaneHenry));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnSmith));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnBillyHenry));
@@ -77,12 +77,12 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	}
 
 	@Test
-	public void testStandardNameFirstAndLast() {
-		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameAnyOrderRules(EmpiMetricEnum.STANDARD_NAME_FIRST_AND_LAST));
+	public void testNormalizedNameFirstAndLast() {
+		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(EmpiMetricEnum.NAME_FIRST_AND_LAST, false));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJohn));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJOHN));
-		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHENRY));
+		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHENRY));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJaneHenry));
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnSmith));
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnBillyHenry));
@@ -100,12 +100,13 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 		return patient;
 	}
 
-	private EmpiRulesJson buildNameAnyOrderRules(EmpiMetricEnum theExactNameAnyOrder) {
+	private EmpiRulesJson buildNameRules(EmpiMetricEnum theExactNameAnyOrder, boolean theExact) {
 		EmpiFieldMatchJson nameAnyOrderFieldMatch = new EmpiFieldMatchJson()
 			.setName(FIELD_EXACT_MATCH_NAME)
 			.setResourceType("Patient")
 			.setResourcePath("name")
-			.setMetric(theExactNameAnyOrder);
+			.setMetric(theExactNameAnyOrder)
+			.setExact(theExact);
 
 		EmpiRulesJson retval = new EmpiRulesJson();
 		retval.addMatchField(nameAnyOrderFieldMatch);

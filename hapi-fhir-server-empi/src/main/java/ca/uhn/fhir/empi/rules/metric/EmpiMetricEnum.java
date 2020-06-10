@@ -33,6 +33,7 @@ import ca.uhn.fhir.empi.rules.metric.matcher.NormalizeSubstringStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.StringEncoderMatcher;
 import ca.uhn.fhir.empi.rules.metric.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.empi.rules.metric.similarity.IEmpiFieldSimilarity;
+import com.google.common.annotations.VisibleForTesting;
 import info.debatty.java.stringsimilarity.Cosine;
 import info.debatty.java.stringsimilarity.Jaccard;
 import info.debatty.java.stringsimilarity.JaroWinkler;
@@ -52,6 +53,7 @@ import javax.annotation.Nullable;
 public enum EmpiMetricEnum {
 	METAPHONE(new HapiStringMatcher(new MetaphoneStringMatcher())),
 	DOUBLE_METAPHONE(new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
+	// FIXME rename these three
 	NORMALIZE_CASE(new HapiStringMatcher(new NormalizeCaseStringMatcher())),
 	NORMALIZE_SUBSTRING(new HapiStringMatcher(new NormalizeSubstringStringMatcher())),
 	EXACT(new HapiStringMatcher()),
@@ -64,10 +66,8 @@ public enum EmpiMetricEnum {
 	JACCARD(new HapiStringSimilarity(new Jaccard())),
 	NORMALIZED_LEVENSCHTEIN(new HapiStringSimilarity(new NormalizedLevenshtein())),
 	SORENSEN_DICE(new HapiStringSimilarity(new SorensenDice())),
-	STANDARD_NAME_ANY_ORDER(new NameMatcher(EmpiPersonNameMatchModeEnum.STANDARD_ANY_ORDER)),
-	EXACT_NAME_ANY_ORDER(new NameMatcher(EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER)),
-	STANDARD_NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.STANDARD_FIRST_AND_LAST)),
-	EXACT_NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.EXACT_FIRST_AND_LAST));
+	NAME_ANY_ORDER(new NameMatcher(EmpiPersonNameMatchModeEnum.ANY_ORDER)),
+	NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.FIRST_AND_LAST));
 
 	private final IEmpiFieldMetric myEmpiFieldMetric;
 
@@ -75,20 +75,24 @@ public enum EmpiMetricEnum {
 		myEmpiFieldMetric = theEmpiFieldMetric;
 	}
 
-	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
-		return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase);
+	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
+		return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase, theExact);
 	}
 
-	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, @Nullable Double theThreshold) {
+	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, @Nullable Double theThreshold) {
 		if (isSimilarity()) {
 			return ((IEmpiFieldSimilarity) myEmpiFieldMetric).similarity(theFhirContext, theLeftBase, theRightBase) >= theThreshold;
 		} else {
-			// Convert boolean to double
-			return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase);
+			return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase, theExact);
 		}
 	}
 
     public boolean isSimilarity() {
 		return myEmpiFieldMetric instanceof IEmpiFieldSimilarity;
     }
+
+	@VisibleForTesting
+	public boolean matchForUnitTest(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
+		return match(theFhirContext, theLeftBase, theRightBase, false);
+	}
 }

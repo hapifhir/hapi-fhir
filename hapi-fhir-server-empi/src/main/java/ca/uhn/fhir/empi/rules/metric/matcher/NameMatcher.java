@@ -40,7 +40,7 @@ public class NameMatcher implements IEmpiFieldMatcher {
 	}
 
 	@Override
-	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
 		String leftFamilyName = NameUtil.extractFamilyName(theFhirContext, theLeftBase);
 		String rightFamilyName = NameUtil.extractFamilyName(theFhirContext, theRightBase);
 		if (StringUtils.isEmpty(leftFamilyName) || StringUtils.isEmpty(rightFamilyName)) {
@@ -48,14 +48,11 @@ public class NameMatcher implements IEmpiFieldMatcher {
 		}
 
 		boolean match = false;
-		boolean exact =
-			myMatchMode == EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER ||
-				myMatchMode == EmpiPersonNameMatchModeEnum.STANDARD_FIRST_AND_LAST;
 
 		List<String> leftGivenNames = NameUtil.extractGivenNames(theFhirContext, theLeftBase);
 		List<String> rightGivenNames = NameUtil.extractGivenNames(theFhirContext, theRightBase);
 
-		if (!exact) {
+		if (!theExact) {
 			leftFamilyName = StringUtil.normalizeStringForSearchIndexing(leftFamilyName);
 			rightFamilyName = StringUtil.normalizeStringForSearchIndexing(rightFamilyName);
 			leftGivenNames = leftGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());
@@ -65,7 +62,7 @@ public class NameMatcher implements IEmpiFieldMatcher {
 		for (String leftGivenName : leftGivenNames) {
 			for (String rightGivenName : rightGivenNames) {
 				match |= leftGivenName.equals(rightGivenName) && leftFamilyName.equals(rightFamilyName);
-				if (myMatchMode == EmpiPersonNameMatchModeEnum.STANDARD_ANY_ORDER || myMatchMode == EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER) {
+				if (myMatchMode == EmpiPersonNameMatchModeEnum.ANY_ORDER || myMatchMode == EmpiPersonNameMatchModeEnum.ANY_ORDER) {
 					match |= leftGivenName.equals(rightFamilyName) && leftFamilyName.equals(rightGivenName);
 				}
 			}
