@@ -36,17 +36,17 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		super(theWrap.getFhirContext(), theWrap);
 		myValidateCodeCache = Caffeine
 			.newBuilder()
-			.expireAfterWrite(60, TimeUnit.SECONDS)
+			.expireAfterWrite(10, TimeUnit.MINUTES)
 			.maximumSize(5000)
 			.build();
 		myLookupCodeCache = Caffeine
 			.newBuilder()
-			.expireAfterWrite(60, TimeUnit.SECONDS)
+			.expireAfterWrite(10, TimeUnit.MINUTES)
 			.maximumSize(5000)
 			.build();
 		myCache = Caffeine
 			.newBuilder()
-			.expireAfterWrite(60, TimeUnit.SECONDS)
+			.expireAfterWrite(10, TimeUnit.MINUTES)
 			.maximumSize(5000)
 			.build();
 	}
