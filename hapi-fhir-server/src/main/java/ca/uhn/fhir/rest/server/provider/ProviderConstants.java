@@ -80,4 +80,5 @@ public class ProviderConstants {
 	public static final String EMPI_QUERY_LINKS_LINK_SOURCE = "linkSource";
 
 	public static final String EMPI_DUPLICATE_PERSONS = "$empi-duplicate-persons";
+	public static final String EMPI_NOT_DUPLICATE = "$empi-not-duplicate";
 }

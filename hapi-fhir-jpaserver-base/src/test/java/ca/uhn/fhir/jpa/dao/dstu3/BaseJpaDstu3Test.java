@@ -354,8 +354,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@After
 	public void afterClearTerminologyCaches() {
 		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
-		baseHapiTerminologySvc.clearTranslationCache();
-		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		baseHapiTerminologySvc.clearCaches();
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationCache();
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl deferredSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);

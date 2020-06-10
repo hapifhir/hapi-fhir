@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.log.Logs;
@@ -56,20 +58,38 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	@Override
 	@Transactional
 	public IAnyResource mergePersons(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
-		// TODO EMPI replace this with a post containing the manually merged fields
-		myPersonHelper.mergePersonFields(theFromPerson, theToPerson);
-		mergeLinks(theFromPerson, theToPerson, theEmpiTransactionContext);
-		myEmpiResourceDaoSvc.updatePerson(theToPerson);
-		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
+		Long toPersonPid = myIdHelperService.getPidOrThrowException(theToPerson);
 
+		myPersonHelper.mergePersonFields(theFromPerson, theToPerson);
+		mergeLinks(theFromPerson, theToPerson, toPersonPid, theEmpiTransactionContext);
+
+		refreshLinksAndUpdatePerson(theToPerson, theEmpiTransactionContext);
+
+		Long fromPersonPid = myIdHelperService.getPidOrThrowException(theFromPerson);
+		addMergeLink(fromPersonPid, toPersonPid);
 		myPersonHelper.deactivatePerson(theFromPerson);
-		myEmpiResourceDaoSvc.updatePerson(theFromPerson);
-		log(theEmpiTransactionContext, "Deactivated " + theFromPerson.getIdElement().toVersionless());
+
+		refreshLinksAndUpdatePerson(theFromPerson, theEmpiTransactionContext);
+
+		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
 		return theToPerson;
 	}
 
-	private void mergeLinks(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
-		long toPersonPid = myIdHelperService.getPidOrThrowException(theToPerson);
+	private void addMergeLink(Long theFromPersonPid, Long theToPersonPid) {
+		EmpiLink empiLink = new EmpiLink()
+			.setPersonPid(theFromPersonPid)
+			.setTargetPid(theToPersonPid)
+			.setMatchResult(EmpiMatchResultEnum.MATCH)
+			.setLinkSource(EmpiLinkSourceEnum.MANUAL);
+		myEmpiLinkDaoSvc.save(empiLink);
+	}
+
+	private void refreshLinksAndUpdatePerson(IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
+		myEmpiResourceDaoSvc.updatePerson(theToPerson);
+	}
+
+	private void mergeLinks(IAnyResource theFromPerson, IAnyResource theToPerson, Long theToPersonPid, EmpiTransactionContext theEmpiTransactionContext) {
 		List<EmpiLink> incomingLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(theFromPerson);
 		List<EmpiLink> origLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(theToPerson);
 
@@ -97,13 +117,10 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 				}
 			}
 			// The original links didn't contain this target, so move it over to the toPerson
-			incomingLink.setPersonPid(toPersonPid);
+			incomingLink.setPersonPid(theToPersonPid);
 			ourLog.trace("Saving link {}", incomingLink);
 			myEmpiLinkDaoSvc.save(incomingLink);
 		}
-
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theFromPerson, theEmpiTransactionContext);
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
 	}
 
 	private Optional<EmpiLink> findLinkWithMatchingTarget(List<EmpiLink> theEmpiLinks, EmpiLink theLinkWithTargetToMatch) {

@@ -65,16 +65,16 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
 
 	@Bean(name = "myDefaultProfileValidationSupport")
-	public IValidationSupport defaultProfileValidationSupport() {
+	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
 		return new DefaultProfileValidationSupport(fhirContext());
 	}
 
 	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
-	public ValidationSupportChain jpaValidationSupportChain() {
+	public JpaValidationSupportChain jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(fhirContext());
 	}
 
-	@Bean(name = "myJpaValidationSupport")
+	@Bean(name = JPA_VALIDATION_SUPPORT)
 	public IValidationSupport jpaValidationSupport() {
 		return new JpaPersistedResourceValidationSupport(fhirContext());
 	}
