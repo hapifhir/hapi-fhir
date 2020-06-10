@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.config.EmpiSettings;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -19,7 +21,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 
-public class EIDHelperR4Test {
+public class EIDHelperR4Test extends BaseR4Test {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
 	private static final String EXTERNAL_ID_SYSTEM_FOR_TEST = "http://testsystem.io/naming-system/empi";
@@ -28,12 +30,17 @@ public class EIDHelperR4Test {
 		setEnterpriseEIDSystem(EXTERNAL_ID_SYSTEM_FOR_TEST);
 	}};
 
-	private static final EmpiSettings ourSettings = new EmpiSettings(new EmpiRuleValidator(ourFhirContext)) {{
-		setEmpiRules(ourRules);
-	}};
+	private EmpiSettings myEmpiSettings;
 
-	private static final EIDHelper EID_HELPER = new EIDHelper(ourFhirContext, ourSettings);
+	private EIDHelper myEidHelper;
 
+	@Before
+	public void before() {
+		myEmpiSettings = new EmpiSettings(new EmpiRuleValidator(ourFhirContext, mySearchParamRetriever)) {{
+			setEmpiRules(ourRules);
+		}};
+		myEidHelper = new EIDHelper(ourFhirContext, myEmpiSettings);
+	}
 
 	@Test
 	public void testExtractionOfInternalEID() {
@@ -43,7 +50,7 @@ public class EIDHelperR4Test {
 			.setValue("simpletest")
 			.setUse(Identifier.IdentifierUse.SECONDARY);
 
-		List<CanonicalEID> externalEid = EID_HELPER.getHapiEid(patient);
+		List<CanonicalEID> externalEid = myEidHelper.getHapiEid(patient);
 
 		assertThat(externalEid.isEmpty(), is(false));
 		assertThat(externalEid.get(0).getValue(), is(equalTo("simpletest")));
@@ -60,7 +67,7 @@ public class EIDHelperR4Test {
 			.setSystem(EXTERNAL_ID_SYSTEM_FOR_TEST)
 			.setValue(uniqueID);
 
-		List<CanonicalEID> externalEid = EID_HELPER.getExternalEid(patient);
+		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
 		assertThat(externalEid.isEmpty(), is(false));
 		assertThat(externalEid.get(0).getValue(), is(equalTo(uniqueID)));
@@ -70,7 +77,7 @@ public class EIDHelperR4Test {
 	@Test
 	public void testCreationOfInternalEIDGeneratesUuidEID() {
 
-		CanonicalEID internalEid = EID_HELPER.createHapiEid();
+		CanonicalEID internalEid = myEidHelper.createHapiEid();
 
 		assertThat(internalEid.getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(internalEid.getValue().length(), is(equalTo(36)));

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.empi.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.BaseR4Test;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -15,15 +15,11 @@ import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-public class EmpiRuleValidatorTest {
-	protected static final FhirContext ourFhirContext = FhirContext.forR4();
-
-	private EmpiRuleValidator myEmpiRuleValidator = new EmpiRuleValidator(ourFhirContext);
-
+public class EmpiRuleValidatorTest extends BaseR4Test {
    @Test
    public void testValidate() throws IOException {
 		try {
-			setScript("bad-rules-bad-url.json");
+			setEmpiRuleJson("bad-rules-bad-url.json");
 			fail();
 		} catch (ConfigurationException e){
 			assertThat(e.getMessage(), is("Enterprise Identifier System (eidSystem) must be a valid URI"));
@@ -33,7 +29,7 @@ public class EmpiRuleValidatorTest {
 	@Test
 	public void testNonExistentMatchField() throws IOException {
 		try {
-			setScript("bad-rules-missing-name.json");
+			setEmpiRuleJson("bad-rules-missing-name.json");
 			fail();
 		} catch (ConfigurationException e) {
 			assertThat(e.getMessage(), is("There is no matchField with name foo"));
@@ -43,7 +39,7 @@ public class EmpiRuleValidatorTest {
 	@Test
 	public void testSimilarityHasThreshold() throws IOException {
 		try {
-			setScript("bad-rules-missing-threshold.json");
+			setEmpiRuleJson("bad-rules-missing-threshold.json");
 			fail();
 		} catch (ConfigurationException e) {
 			assertThat(e.getMessage(), is("MatchField given-name metric COSINE requires a matchThreshold"));
@@ -53,7 +49,7 @@ public class EmpiRuleValidatorTest {
 	@Test
 	public void testMatcherUnusedThreshold() throws IOException {
 		try {
-			setScript("bad-rules-unused-threshold.json");
+			setEmpiRuleJson("bad-rules-unused-threshold.json");
 			fail();
 		} catch (ConfigurationException e) {
 			assertThat(e.getMessage(), is("MatchField given-name metric EXACT should not have a matchThreshold"));
@@ -63,15 +59,36 @@ public class EmpiRuleValidatorTest {
 	@Test
 	public void testMatcherBadPath() throws IOException {
 		try {
-			setScript("bad-rules-bad-path.json");
+			setEmpiRuleJson("bad-rules-bad-path.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("MatchField given-name resourceType Patient has invalid path 'name.first'.  Unknown child name 'first' in element Patient"));
+			assertThat(e.getMessage(), startsWith("MatchField given-name resourceType Patient has invalid path 'name.first'.  Unknown child name 'first' in element HumanName"));
 		}
 	}
 
-	private void setScript(String theTheS) throws IOException {
-		EmpiSettings empiSettings = new EmpiSettings(myEmpiRuleValidator);
+	@Test
+	public void testMatcherBadSearchParam() throws IOException {
+		try {
+			setEmpiRuleJson("bad-rules-bad-searchparam.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), startsWith("Error in candidateSearchParams: Patient does not have a search parameter called 'foo'"));
+		}
+	}
+
+	@Test
+	public void testMatcherBadFilter() throws IOException {
+		try {
+			setEmpiRuleJson("bad-rules-bad-filter.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), startsWith("Error in candidateFilterSearchParams: Patient does not have a search parameter called 'foo'"));
+		}
+	}
+
+	private void setEmpiRuleJson(String theTheS) throws IOException {
+		EmpiRuleValidator empiRuleValidator = new EmpiRuleValidator(ourFhirContext, mySearchParamRetriever);
+		EmpiSettings empiSettings = new EmpiSettings(empiRuleValidator);
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource(theTheS);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);

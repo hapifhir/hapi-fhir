@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 
 public class HapiDateMatcherR4 {
-	// TODO KHS code duplication
+	// TODO KHS code duplication (tried generalizing it with generics, but it got too convoluted)
 	public boolean match(IBase theLeftBase, IBase theRightBase) {
 		if (theLeftBase instanceof BaseDateTimeType && theRightBase instanceof BaseDateTimeType) {
 			BaseDateTimeType leftDate = (BaseDateTimeType) theLeftBase;

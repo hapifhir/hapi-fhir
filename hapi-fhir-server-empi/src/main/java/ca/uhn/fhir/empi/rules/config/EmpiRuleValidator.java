@@ -23,10 +23,15 @@ package ca.uhn.fhir.empi.rules.config;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
+import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
+import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,33 +40,51 @@ import java.net.URISyntaxException;
 
 @Service
 public class EmpiRuleValidator {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiRuleValidator.class);
+
+	// FIXME KHS remove
 	private final FhirContext myFhirContext;
+	private final ISearchParamRetriever mySearchParamRetriever;
 	private final Class<? extends IBaseResource> myPatientClass;
 	private final Class<? extends IBaseResource> myPractitionerClass;
 	private final FhirTerser myTerser;
 
 	@Autowired
-	public EmpiRuleValidator(FhirContext theFhirContext) {
+	public EmpiRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
 		myFhirContext = theFhirContext;
 		myPatientClass = theFhirContext.getResourceDefinition("Patient").getImplementingClass();
 		myPractitionerClass = theFhirContext.getResourceDefinition("Practitioner").getImplementingClass();
 		myTerser = theFhirContext.newTerser();
+		mySearchParamRetriever = theSearchParamRetriever;
 	}
 
 	public void validate(EmpiRulesJson theEmpiRulesJson) {
-		validateSystemIsUri(theEmpiRulesJson);
+		validateSearchParams(theEmpiRulesJson);
 		validateMatchFields(theEmpiRulesJson);
+		validateSystemIsUri(theEmpiRulesJson);
 	}
 
-	private void validateSystemIsUri(EmpiRulesJson theEmpiRulesJson) {
-		if (theEmpiRulesJson.getEnterpriseEIDSystem() == null) {
-			return;
+	private void validateSearchParams(EmpiRulesJson theEmpiRulesJson) {
+		for (EmpiResourceSearchParamJson searchParam : theEmpiRulesJson.getCandidateSearchParams()) {
+			validateSearchParam("candidateSearchParams", searchParam.getResourceType(), searchParam.getSearchParam());
 		}
+		for (EmpiFilterSearchParamJson filter : theEmpiRulesJson.getCandidateFilterSearchParams()) {
+			validateSearchParam("candidateFilterSearchParams", filter.getResourceType(), filter.getSearchParam());
+		}
+	}
 
-		try {
-			new URI(theEmpiRulesJson.getEnterpriseEIDSystem());
-		} catch (URISyntaxException e) {
-			throw new ConfigurationException("Enterprise Identifier System (eidSystem) must be a valid URI");
+	private void validateSearchParam(String theFieldName, String theTheResourceType, String theTheSearchParam) {
+		if ("*".equals(theTheResourceType)) {
+			validateResourceSearchParam(theFieldName, "Patient", theTheSearchParam);
+			validateResourceSearchParam(theFieldName, "Practitioner", theTheSearchParam);
+		} else {
+			validateResourceSearchParam(theFieldName, theTheResourceType, theTheSearchParam);
+		}
+	}
+
+	private void validateResourceSearchParam(String theFieldName, String theResourceType, String theSearchParam) {
+		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, theSearchParam) == null) {
+			throw new ConfigurationException("Error in " + theFieldName + ": " + theResourceType + " does not have a search parameter called '" + theSearchParam + "'");
 		}
 	}
 
@@ -101,8 +124,8 @@ public class EmpiRuleValidator {
 
 	private void validatePatientPath(EmpiFieldMatchJson theFieldMatch) {
 		try {
-			myTerser.getDefinition(myPatientClass, theFieldMatch.getResourcePath());
-		} catch (DataFormatException e) {
+			myTerser.getDefinition(myPatientClass, "Patient." + theFieldMatch.getResourcePath());
+		} catch (DataFormatException|ConfigurationException e) {
 			throw new ConfigurationException("MatchField " +
 				theFieldMatch.getName() +
 				" resourceType " +
@@ -114,7 +137,7 @@ public class EmpiRuleValidator {
 
 	private void validatePractitionerPath(EmpiFieldMatchJson theFieldMatch) {
 		try {
-			myTerser.getDefinition(myPractitionerClass, theFieldMatch.getResourcePath());
+			myTerser.getDefinition(myPractitionerClass, "Practitioner." + theFieldMatch.getResourcePath());
 		} catch (DataFormatException e) {
 			throw new ConfigurationException("MatchField " +
 				theFieldMatch.getName() +
@@ -125,4 +148,15 @@ public class EmpiRuleValidator {
 		}
 	}
 
+	private void validateSystemIsUri(EmpiRulesJson theEmpiRulesJson) {
+		if (theEmpiRulesJson.getEnterpriseEIDSystem() == null) {
+			return;
+		}
+
+		try {
+			new URI(theEmpiRulesJson.getEnterpriseEIDSystem());
+		} catch (URISyntaxException e) {
+			throw new ConfigurationException("Enterprise Identifier System (eidSystem) must be a valid URI");
+		}
+	}
 }

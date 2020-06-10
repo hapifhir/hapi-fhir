@@ -1,6 +1,5 @@
 package ca.uhn.fhir.empi.rules.svc;
 
-import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -16,7 +15,7 @@ import static junit.framework.TestCase.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
-public class EmpiResourceFieldMatcherR4Test extends BaseR4Test {
+public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
 	protected EmpiResourceFieldMatcher myComparator;
 	private Patient myJohn;
 	private Patient myJohny;
@@ -24,6 +23,7 @@ public class EmpiResourceFieldMatcherR4Test extends BaseR4Test {
 	@Before
 	public void before() {
 		super.before();
+
 
 		myComparator = new EmpiResourceFieldMatcher(ourFhirContext, myGivenNameMatchField);
 		myJohn = buildJohn();

@@ -36,9 +36,9 @@ import java.util.Map;
 @JsonDeserialize(converter = EmpiRulesJson.EmpiRulesJsonConverter.class)
 public class EmpiRulesJson implements IModelJson {
 	@JsonProperty(value = "candidateSearchParams", required = true)
-	List<EmpiResourceSearchParamJson> myResourceSearchParams = new ArrayList<>();
+	List<EmpiResourceSearchParamJson> myCandidateSearchParams = new ArrayList<>();
 	@JsonProperty(value = "candidateFilterSearchParams", required = true)
-	List<EmpiFilterSearchParamJson> myFilterSearchParams = new ArrayList<>();
+	List<EmpiFilterSearchParamJson> myCandidateFilterSearchParams = new ArrayList<>();
 	@JsonProperty(value = "matchFields", required = true)
 	List<EmpiFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
 	@JsonProperty(value = "matchResultMap", required = true)
@@ -53,11 +53,11 @@ public class EmpiRulesJson implements IModelJson {
 	}
 
 	public void addResourceSearchParam(EmpiResourceSearchParamJson theSearchParam) {
-		myResourceSearchParams.add(theSearchParam);
+		myCandidateSearchParams.add(theSearchParam);
 	}
 
 	public void addFilterSearchParam(EmpiFilterSearchParamJson theSearchParam) {
-		myFilterSearchParams.add(theSearchParam);
+		myCandidateFilterSearchParams.add(theSearchParam);
 	}
 
 	int size() {
@@ -97,12 +97,12 @@ public class EmpiRulesJson implements IModelJson {
 		return Collections.unmodifiableList(myMatchFieldJsonList);
 	}
 
-	public List<EmpiResourceSearchParamJson> getResourceSearchParams() {
-		return Collections.unmodifiableList(myResourceSearchParams);
+	public List<EmpiResourceSearchParamJson> getCandidateSearchParams() {
+		return Collections.unmodifiableList(myCandidateSearchParams);
 	}
 
-	public List<EmpiFilterSearchParamJson> getFilterSearchParams() {
-		return Collections.unmodifiableList(myFilterSearchParams);
+	public List<EmpiFilterSearchParamJson> getCandidateFilterSearchParams() {
+		return Collections.unmodifiableList(myCandidateFilterSearchParams);
 	}
 
 	public String getEnterpriseEIDSystem() {
@@ -132,8 +132,8 @@ public class EmpiRulesJson implements IModelJson {
 	}
 
 	public String getSummary() {
-		return myResourceSearchParams.size() + " Candidate Search Params, " +
-			myFilterSearchParams.size() + " Filter Search Params, " +
+		return myCandidateSearchParams.size() + " Candidate Search Params, " +
+			myCandidateFilterSearchParams.size() + " Filter Search Params, " +
 			myMatchFieldJsonList.size() + " Match Fields, " +
 			myMatchResultMap.size() + " Match Result Entries";
 	}
