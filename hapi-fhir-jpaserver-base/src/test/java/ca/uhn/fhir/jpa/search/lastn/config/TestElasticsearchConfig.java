@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
 import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

@@ -283,7 +283,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	}
 
-	public IBulkDataExportSvc.JobInfo awaitJobCompletion(String theJobId) throws InterruptedException {
+	public void awaitJobCompletion(String theJobId) throws InterruptedException {
 		await().until(() -> myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId).getStatus() == BulkJobStatusEnum.COMPLETE);
 	}
 
