@@ -28,8 +28,8 @@ import ca.uhn.fhir.empi.rules.metric.matcher.HapiStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.IEmpiFieldMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.MetaphoneStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.NameMatcher;
-import ca.uhn.fhir.empi.rules.metric.matcher.NormalizeSubstringStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.StringEncoderMatcher;
+import ca.uhn.fhir.empi.rules.metric.matcher.SubstringStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.empi.rules.metric.similarity.IEmpiFieldSimilarity;
 import info.debatty.java.stringsimilarity.Cosine;
@@ -52,7 +52,7 @@ public enum EmpiMetricEnum {
 	METAPHONE(new HapiStringMatcher(new MetaphoneStringMatcher())),
 	DOUBLE_METAPHONE(new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
 	STRING(new HapiStringMatcher()),
-	SUBSTRING(new HapiStringMatcher(new NormalizeSubstringStringMatcher())),
+	SUBSTRING(new HapiStringMatcher(new SubstringStringMatcher())),
 	SOUNDEX(new HapiStringMatcher(new StringEncoderMatcher(new Soundex()))),
 	CAVERPHONE1(new HapiStringMatcher(new StringEncoderMatcher(new Caverphone1()))),
 	CAVERPHONE2(new HapiStringMatcher(new StringEncoderMatcher(new Caverphone2()))),
@@ -60,7 +60,7 @@ public enum EmpiMetricEnum {
 	JARO_WINKLER(new HapiStringSimilarity(new JaroWinkler())),
 	COSINE(new HapiStringSimilarity(new Cosine())),
 	JACCARD(new HapiStringSimilarity(new Jaccard())),
-	NORMALIZED_LEVENSCHTEIN(new HapiStringSimilarity(new NormalizedLevenshtein())),
+	LEVENSCHTEIN(new HapiStringSimilarity(new NormalizedLevenshtein())),
 	SORENSEN_DICE(new HapiStringSimilarity(new SorensenDice())),
 	NAME_ANY_ORDER(new NameMatcher(EmpiPersonNameMatchModeEnum.ANY_ORDER)),
 	NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.FIRST_AND_LAST));
@@ -77,7 +77,7 @@ public enum EmpiMetricEnum {
 
 	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, @Nullable Double theThreshold) {
 		if (isSimilarity()) {
-			return ((IEmpiFieldSimilarity) myEmpiFieldMetric).similarity(theFhirContext, theLeftBase, theRightBase) >= theThreshold;
+			return ((IEmpiFieldSimilarity) myEmpiFieldMetric).similarity(theFhirContext, theLeftBase, theRightBase, theExact) >= theThreshold;
 		} else {
 			return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase, theExact);
 		}

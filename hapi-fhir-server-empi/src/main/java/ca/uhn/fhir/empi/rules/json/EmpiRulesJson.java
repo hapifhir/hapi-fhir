@@ -142,6 +142,18 @@ public class EmpiRulesJson implements IModelJson {
 		return myVectorMatchResultMap.getFieldMatchNames(theVector);
 	}
 
+	public String getDetailedFieldMatchResultForUnmatchedVector(long theVector) {
+		List<String> fieldMatchResult = new ArrayList<>();
+		for (int i = 0; i < myMatchFieldJsonList.size(); ++i) {
+			if ((theVector & (1 << i)) == 0) {
+				fieldMatchResult.add(myMatchFieldJsonList.get(i).getName() + ": NO");
+			} else {
+				fieldMatchResult.add(myMatchFieldJsonList.get(i).getName() + ": YES");
+			}
+		}
+		return String.join("\n" ,fieldMatchResult);
+	}
+
 	@VisibleForTesting
 	VectorMatchResultMap getVectorMatchResultMapForUnitTest() {
 		return myVectorMatchResultMap;

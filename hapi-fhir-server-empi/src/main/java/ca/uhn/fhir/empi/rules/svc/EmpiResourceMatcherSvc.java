@@ -85,8 +85,12 @@ public class EmpiResourceMatcherSvc {
 	EmpiMatchResultEnum match(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long matchVector = getMatchVector(theLeftResource, theRightResource);
 		EmpiMatchResultEnum matchResult = myEmpiRulesJson.getMatchResult(matchVector);
-		if (ourLog.isTraceEnabled() && matchResult == EmpiMatchResultEnum.MATCH || matchResult == EmpiMatchResultEnum.POSSIBLE_MATCH) {
-			ourLog.trace("{} {} with field matchers {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myEmpiRulesJson.getFieldMatchNamesForVector(matchVector));
+		if (ourLog.isDebugEnabled()) {
+			if (matchResult == EmpiMatchResultEnum.MATCH || matchResult == EmpiMatchResultEnum.POSSIBLE_MATCH) {
+				ourLog.debug("{} {} with field matchers {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myEmpiRulesJson.getFieldMatchNamesForVector(matchVector));
+			} else if (ourLog.isTraceEnabled()) {
+				ourLog.trace("{} {}.  Field matcher results: {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myEmpiRulesJson.getDetailedFieldMatchResultForUnmatchedVector(matchVector));
+			}
 		}
 		return matchResult;
 	}

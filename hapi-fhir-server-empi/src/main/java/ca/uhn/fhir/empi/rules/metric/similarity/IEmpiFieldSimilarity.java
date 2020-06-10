@@ -28,5 +28,5 @@ import org.hl7.fhir.instance.model.api.IBase;
  * Measure how similar two IBase (resource fields) are to one another.  1.0 means identical.  0.0 means completely different.
  */
 public interface IEmpiFieldSimilarity extends IEmpiFieldMetric {
-	double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase);
+	double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact);
 }

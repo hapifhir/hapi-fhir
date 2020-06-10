@@ -44,8 +44,16 @@ public class VectorMatchResultMap {
 		}
 	}
 
+	// FIXME KHS sort the vector on the way in to put all the MATCH ones first
+	// or better yet maintain two maps
+	// FIXME KHS cache the results
+	// Note this logic requires that MATCH results should be ordered before POSSIBLE_MATCH
 	public EmpiMatchResultEnum get(Long theMatchVector) {
-		return myVectorToMatchResultMap.get(theMatchVector);
+		return myVectorToMatchResultMap.entrySet().stream()
+			.filter(e -> (e.getKey() & theMatchVector) != 0)
+			.map(Map.Entry::getValue)
+			.findFirst()
+			.orElse(null);
 	}
 
 	private void put(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {
