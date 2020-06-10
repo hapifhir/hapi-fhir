@@ -145,14 +145,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		// Validate once
 		myCaptureQueriesListener.clear();
 		myObservationDao.validate(obs, null, null, null, null, null, null);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(myCaptureQueriesListener.logSelectQueriesForCurrentThread(), 10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(myCaptureQueriesListener.logUpdateQueriesForCurrentThread(), 0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(myCaptureQueriesListener.logInsertQueriesForCurrentThread(), 0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(myCaptureQueriesListener.logDeleteQueriesForCurrentThread(), 0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();
@@ -1131,8 +1127,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(8, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(myCaptureQueriesListener.logSelectQueriesForCurrentThread(), 3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(myCaptureQueriesListener.logInsertQueriesForCurrentThread(), 8, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
