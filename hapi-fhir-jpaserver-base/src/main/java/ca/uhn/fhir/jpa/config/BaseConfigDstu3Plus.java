@@ -65,7 +65,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
 
 	@Bean(name = "myDefaultProfileValidationSupport")
-	public IValidationSupport defaultProfileValidationSupport() {
+	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
 		return new DefaultProfileValidationSupport(fhirContext());
 	}
 
