@@ -52,7 +52,7 @@ public class EmpiRuleValidatorTest extends BaseR4Test {
 			setEmpiRuleJson("bad-rules-unused-threshold.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), is("MatchField given-name metric EXACT should not have a matchThreshold"));
+			assertThat(e.getMessage(), is("MatchField given-name metric STRING should not have a matchThreshold"));
 		}
 	}
 

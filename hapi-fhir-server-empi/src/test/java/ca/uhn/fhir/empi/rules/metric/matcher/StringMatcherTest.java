@@ -42,34 +42,34 @@ public class StringMatcherTest extends BaseMatcherTest {
 
 	@Test
 	public void testNormalizeCase() {
-		assertTrue(EmpiMetricEnum.NORMALIZE_CASE.matchForUnitTest(ourFhirContext, new StringType("joe"), new StringType("JoE")));
-		assertTrue(EmpiMetricEnum.NORMALIZE_CASE.matchForUnitTest(ourFhirContext, new StringType("MCTAVISH"), new StringType("McTavish")));
+		assertTrue(EmpiMetricEnum.STRING.matchForUnitTest(ourFhirContext, new StringType("joe"), new StringType("JoE")));
+		assertTrue(EmpiMetricEnum.STRING.matchForUnitTest(ourFhirContext, new StringType("MCTAVISH"), new StringType("McTavish")));
 
-		assertFalse(EmpiMetricEnum.NORMALIZE_CASE.matchForUnitTest(ourFhirContext, new StringType("joey"), new StringType("joe")));
-		assertFalse(EmpiMetricEnum.NORMALIZE_CASE.matchForUnitTest(ourFhirContext, new StringType("joe"), new StringType("joey")));
+		assertFalse(EmpiMetricEnum.STRING.matchForUnitTest(ourFhirContext, new StringType("joey"), new StringType("joe")));
+		assertFalse(EmpiMetricEnum.STRING.matchForUnitTest(ourFhirContext, new StringType("joe"), new StringType("joey")));
 	}
 
 	@Test
 	public void testExactString() {
-		assertTrue(EmpiMetricEnum.EXACT.match(ourFhirContext, new StringType("Jilly"), new StringType("Jilly"), true));
+		assertTrue(EmpiMetricEnum.STRING.match(ourFhirContext, new StringType("Jilly"), new StringType("Jilly"), true));
 
-		assertFalse(EmpiMetricEnum.EXACT.match(ourFhirContext, new StringType("MCTAVISH"), new StringType("McTavish"), true));
-		assertFalse(EmpiMetricEnum.EXACT.match(ourFhirContext, new StringType("Durie"), new StringType("dury"), true));
+		assertFalse(EmpiMetricEnum.STRING.match(ourFhirContext, new StringType("MCTAVISH"), new StringType("McTavish"), true));
+		assertFalse(EmpiMetricEnum.STRING.match(ourFhirContext, new StringType("Durie"), new StringType("dury"), true));
 	}
 
 	@Test
 	public void testExactBoolean() {
-		assertTrue(EmpiMetricEnum.EXACT.match(ourFhirContext, new BooleanType(true), new BooleanType(true), true));
+		assertTrue(EmpiMetricEnum.STRING.match(ourFhirContext, new BooleanType(true), new BooleanType(true), true));
 
-		assertFalse(EmpiMetricEnum.EXACT.match(ourFhirContext, new BooleanType(true), new BooleanType(false), true));
-		assertFalse(EmpiMetricEnum.EXACT.match(ourFhirContext, new BooleanType(false), new BooleanType(true), true));
+		assertFalse(EmpiMetricEnum.STRING.match(ourFhirContext, new BooleanType(true), new BooleanType(false), true));
+		assertFalse(EmpiMetricEnum.STRING.match(ourFhirContext, new BooleanType(false), new BooleanType(true), true));
 	}
 
 	@Test
-	public void testExactDate() {
-		assertTrue(EmpiMetricEnum.EXACT.matchForUnitTest(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-08-09")));
+	public void testExactDateString() {
+		assertTrue(EmpiMetricEnum.STRING.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-08-09"), true));
 
-		assertFalse(EmpiMetricEnum.EXACT.matchForUnitTest(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-09-08")));
+		assertFalse(EmpiMetricEnum.STRING.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-09-08"), true));
 	}
 
 
@@ -81,9 +81,9 @@ public class StringMatcherTest extends BaseMatcherTest {
 		Enumeration<Enumerations.AdministrativeGender> female = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
 		female.setValue(Enumerations.AdministrativeGender.FEMALE);
 
-		assertTrue(EmpiMetricEnum.EXACT.matchForUnitTest(ourFhirContext, male, male));
+		assertTrue(EmpiMetricEnum.STRING.match(ourFhirContext, male, male, true));
 
-		assertFalse(EmpiMetricEnum.EXACT.matchForUnitTest(ourFhirContext, male, female));
+		assertFalse(EmpiMetricEnum.STRING.match(ourFhirContext, male, female, true));
 	}
 
 	@Test
@@ -104,11 +104,11 @@ public class StringMatcherTest extends BaseMatcherTest {
 
 	@Test
 	public void testNormalizeSubstring() {
-		assertTrue(EmpiMetricEnum.NORMALIZE_SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("BILLY"), new StringType("Bill")));
-		assertTrue(EmpiMetricEnum.NORMALIZE_SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("Bill"), new StringType("Billy")));
-		assertTrue(EmpiMetricEnum.NORMALIZE_SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("FRED"), new StringType("Frederik")));
+		assertTrue(EmpiMetricEnum.SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("BILLY"), new StringType("Bill")));
+		assertTrue(EmpiMetricEnum.SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("Bill"), new StringType("Billy")));
+		assertTrue(EmpiMetricEnum.SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("FRED"), new StringType("Frederik")));
 
-		assertFalse(EmpiMetricEnum.NORMALIZE_SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("Fred"), new StringType("Friederik")));
+		assertFalse(EmpiMetricEnum.SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("Fred"), new StringType("Friederik")));
 	}
 
 }

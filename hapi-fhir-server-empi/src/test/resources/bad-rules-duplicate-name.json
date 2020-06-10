@@ -6,13 +6,14 @@
 			"name": "foo",
 			"resourceType": "Patient",
 			"resourcePath": "name.family",
-			"metric": "EXACT"
+			"metric": "STRING",
+			"exact": true
 		},
 		{
 			"name": "foo",
 			"resourceType": "Patient",
 			"resourcePath": "name.given",
-			"metric": "EXACT"
+			"metric": "STRING"
 		}
 	],
 	"matchResultMap": {

@@ -28,7 +28,6 @@ import ca.uhn.fhir.empi.rules.metric.matcher.HapiStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.IEmpiFieldMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.MetaphoneStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.NameMatcher;
-import ca.uhn.fhir.empi.rules.metric.matcher.NormalizeCaseStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.NormalizeSubstringStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.StringEncoderMatcher;
 import ca.uhn.fhir.empi.rules.metric.similarity.HapiStringSimilarity;
@@ -53,10 +52,8 @@ import javax.annotation.Nullable;
 public enum EmpiMetricEnum {
 	METAPHONE(new HapiStringMatcher(new MetaphoneStringMatcher())),
 	DOUBLE_METAPHONE(new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
-	// FIXME rename these three
-	NORMALIZE_CASE(new HapiStringMatcher(new NormalizeCaseStringMatcher())),
-	NORMALIZE_SUBSTRING(new HapiStringMatcher(new NormalizeSubstringStringMatcher())),
-	EXACT(new HapiStringMatcher()),
+	STRING(new HapiStringMatcher()),
+	SUBSTRING(new HapiStringMatcher(new NormalizeSubstringStringMatcher())),
 	SOUNDEX(new HapiStringMatcher(new StringEncoderMatcher(new Soundex()))),
 	CAVERPHONE1(new HapiStringMatcher(new StringEncoderMatcher(new Caverphone1()))),
 	CAVERPHONE2(new HapiStringMatcher(new StringEncoderMatcher(new Caverphone2()))),

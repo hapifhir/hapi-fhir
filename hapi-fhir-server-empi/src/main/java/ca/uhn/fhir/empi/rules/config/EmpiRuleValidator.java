@@ -44,7 +44,6 @@ import java.util.Set;
 public class EmpiRuleValidator {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiRuleValidator.class);
 
-	// FIXME KHS remove
 	private final FhirContext myFhirContext;
 	private final ISearchParamRetriever mySearchParamRetriever;
 	private final Class<? extends IBaseResource> myPatientClass;
@@ -56,7 +55,7 @@ public class EmpiRuleValidator {
 		myFhirContext = theFhirContext;
 		myPatientClass = theFhirContext.getResourceDefinition("Patient").getImplementingClass();
 		myPractitionerClass = theFhirContext.getResourceDefinition("Practitioner").getImplementingClass();
-		myTerser = theFhirContext.newTerser();
+		myTerser = myFhirContext.newTerser();
 		mySearchParamRetriever = theSearchParamRetriever;
 	}
 
@@ -112,7 +111,6 @@ public class EmpiRuleValidator {
 		}
 	}
 
-	// FIXME KHS validate the other parts of the rules
 	private void validatePath(EmpiFieldMatchJson theFieldMatch) {
 		String resourceType = theFieldMatch.getResourceType();
 		if ("*".equals(resourceType)) {
