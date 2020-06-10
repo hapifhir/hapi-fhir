@@ -32,7 +32,6 @@ import ca.uhn.fhir.empi.rules.metric.matcher.NormalizeSubstringStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.StringEncoderMatcher;
 import ca.uhn.fhir.empi.rules.metric.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.empi.rules.metric.similarity.IEmpiFieldSimilarity;
-import com.google.common.annotations.VisibleForTesting;
 import info.debatty.java.stringsimilarity.Cosine;
 import info.debatty.java.stringsimilarity.Jaccard;
 import info.debatty.java.stringsimilarity.JaroWinkler;
@@ -87,9 +86,4 @@ public enum EmpiMetricEnum {
     public boolean isSimilarity() {
 		return myEmpiFieldMetric instanceof IEmpiFieldSimilarity;
     }
-
-	@VisibleForTesting
-	public boolean matchForUnitTest(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
-		return match(theFhirContext, theLeftBase, theRightBase, false);
-	}
 }

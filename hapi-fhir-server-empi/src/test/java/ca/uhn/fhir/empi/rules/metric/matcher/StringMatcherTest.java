@@ -14,39 +14,39 @@ import static org.junit.Assert.assertTrue;
 public class StringMatcherTest extends BaseMatcherTest {
 	@Test
 	public void testMetaphone() {
-		assertTrue(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Durie"), new StringType("dury")));
-		assertTrue(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Balo"), new StringType("ballo")));
-		assertTrue(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Hans Peter"), new StringType("Hanspeter")));
-		assertTrue(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Lawson"), new StringType("Law son")));
+		assertTrue(match(EmpiMetricEnum.METAPHONE, new StringType("Durie"), new StringType("dury")));
+		assertTrue(match(EmpiMetricEnum.METAPHONE, new StringType("Balo"), new StringType("ballo")));
+		assertTrue(match(EmpiMetricEnum.METAPHONE, new StringType("Hans Peter"), new StringType("Hanspeter")));
+		assertTrue(match(EmpiMetricEnum.METAPHONE, new StringType("Lawson"), new StringType("Law son")));
 
-		assertFalse(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Allsop"), new StringType("Allsob")));
-		assertFalse(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Gevne"), new StringType("Geve")));
-		assertFalse(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Bruce"), new StringType("Bruch")));
-		assertFalse(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Smith"), new StringType("Schmidt")));
-		assertFalse(EmpiMetricEnum.METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Jyothi"), new StringType("Jyoti")));
+		assertFalse(match(EmpiMetricEnum.METAPHONE, new StringType("Allsop"), new StringType("Allsob")));
+		assertFalse(match(EmpiMetricEnum.METAPHONE, new StringType("Gevne"), new StringType("Geve")));
+		assertFalse(match(EmpiMetricEnum.METAPHONE, new StringType("Bruce"), new StringType("Bruch")));
+		assertFalse(match(EmpiMetricEnum.METAPHONE, new StringType("Smith"), new StringType("Schmidt")));
+		assertFalse(match(EmpiMetricEnum.METAPHONE, new StringType("Jyothi"), new StringType("Jyoti")));
 	}
 
 	@Test
 	public void testDoubleMetaphone() {
-		assertTrue(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Durie"), new StringType("dury")));
-		assertTrue(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Balo"), new StringType("ballo")));
-		assertTrue(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Hans Peter"), new StringType("Hanspeter")));
-		assertTrue(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Lawson"), new StringType("Law son")));
-		assertTrue(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Allsop"), new StringType("Allsob")));
+		assertTrue(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Durie"), new StringType("dury")));
+		assertTrue(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Balo"), new StringType("ballo")));
+		assertTrue(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Hans Peter"), new StringType("Hanspeter")));
+		assertTrue(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Lawson"), new StringType("Law son")));
+		assertTrue(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Allsop"), new StringType("Allsob")));
 
-		assertFalse(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Gevne"), new StringType("Geve")));
-		assertFalse(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Bruce"), new StringType("Bruch")));
-		assertFalse(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Smith"), new StringType("Schmidt")));
-		assertFalse(EmpiMetricEnum.DOUBLE_METAPHONE.matchForUnitTest(ourFhirContext, new StringType("Jyothi"), new StringType("Jyoti")));
+		assertFalse(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Gevne"), new StringType("Geve")));
+		assertFalse(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Bruce"), new StringType("Bruch")));
+		assertFalse(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Smith"), new StringType("Schmidt")));
+		assertFalse(match(EmpiMetricEnum.DOUBLE_METAPHONE, new StringType("Jyothi"), new StringType("Jyoti")));
 	}
 
 	@Test
 	public void testNormalizeCase() {
-		assertTrue(EmpiMetricEnum.STRING.matchForUnitTest(ourFhirContext, new StringType("joe"), new StringType("JoE")));
-		assertTrue(EmpiMetricEnum.STRING.matchForUnitTest(ourFhirContext, new StringType("MCTAVISH"), new StringType("McTavish")));
+		assertTrue(match(EmpiMetricEnum.STRING, new StringType("joe"), new StringType("JoE")));
+		assertTrue(match(EmpiMetricEnum.STRING, new StringType("MCTAVISH"), new StringType("McTavish")));
 
-		assertFalse(EmpiMetricEnum.STRING.matchForUnitTest(ourFhirContext, new StringType("joey"), new StringType("joe")));
-		assertFalse(EmpiMetricEnum.STRING.matchForUnitTest(ourFhirContext, new StringType("joe"), new StringType("joey")));
+		assertFalse(match(EmpiMetricEnum.STRING, new StringType("joey"), new StringType("joe")));
+		assertFalse(match(EmpiMetricEnum.STRING, new StringType("joe"), new StringType("joey")));
 	}
 
 	@Test
@@ -88,27 +88,30 @@ public class StringMatcherTest extends BaseMatcherTest {
 
 	@Test
 	public void testSoundex() {
-		assertTrue(EmpiMetricEnum.SOUNDEX.matchForUnitTest(ourFhirContext, new StringType("Gail"), new StringType("Gail")));
+		assertTrue(match(EmpiMetricEnum.SOUNDEX, new StringType("Gail"), new StringType("Gail")));
 
-		assertFalse(EmpiMetricEnum.SOUNDEX.matchForUnitTest(ourFhirContext, new StringType("Fred"), new StringType("Frank")));
-		assertFalse(EmpiMetricEnum.SOUNDEX.matchForUnitTest(ourFhirContext, new StringType("Thomas"), new StringType("Tom")));
+		assertFalse(match(EmpiMetricEnum.SOUNDEX, new StringType("Fred"), new StringType("Frank")));
+		assertFalse(match(EmpiMetricEnum.SOUNDEX, new StringType("Thomas"), new StringType("Tom")));
 	}
 
 	@Test
 	public void testCaverphone2() {
-		assertTrue(EmpiMetricEnum.CAVERPHONE2.matchForUnitTest(ourFhirContext, new StringType("Gail"), new StringType("Gail")));
+		assertTrue(match(EmpiMetricEnum.CAVERPHONE2, new StringType("Gail"), new StringType("Gail")));
 
-		assertFalse(EmpiMetricEnum.CAVERPHONE2.matchForUnitTest(ourFhirContext, new StringType("Fred"), new StringType("Frank")));
-		assertFalse(EmpiMetricEnum.CAVERPHONE2.matchForUnitTest(ourFhirContext, new StringType("Thomas"), new StringType("Tom")));
+		assertFalse(match(EmpiMetricEnum.CAVERPHONE2, new StringType("Fred"), new StringType("Frank")));
+		assertFalse(match(EmpiMetricEnum.CAVERPHONE2, new StringType("Thomas"), new StringType("Tom")));
 	}
 
 	@Test
 	public void testNormalizeSubstring() {
-		assertTrue(EmpiMetricEnum.SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("BILLY"), new StringType("Bill")));
-		assertTrue(EmpiMetricEnum.SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("Bill"), new StringType("Billy")));
-		assertTrue(EmpiMetricEnum.SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("FRED"), new StringType("Frederik")));
+		assertTrue(match(EmpiMetricEnum.SUBSTRING, new StringType("BILLY"), new StringType("Bill")));
+		assertTrue(match(EmpiMetricEnum.SUBSTRING, new StringType("Bill"), new StringType("Billy")));
+		assertTrue(match(EmpiMetricEnum.SUBSTRING, new StringType("FRED"), new StringType("Frederik")));
 
-		assertFalse(EmpiMetricEnum.SUBSTRING.matchForUnitTest(ourFhirContext, new StringType("Fred"), new StringType("Friederik")));
+		assertFalse(match(EmpiMetricEnum.SUBSTRING, new StringType("Fred"), new StringType("Friederik")));
 	}
 
+	private boolean match(EmpiMetricEnum theMetric, StringType theLeft, StringType theRight) {
+		return theMetric.match(ourFhirContext, theLeft, theRight, false);
+	}
 }
