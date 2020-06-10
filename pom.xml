@@ -665,7 +665,7 @@
 
 	<properties>
 
-		<fhir_core_version>5.0.1-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>5.0.7-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -895,7 +895,7 @@
 			<dependency>
 				<groupId>org.hl7.fhir.testcases</groupId>
 				<artifactId>fhir-test-cases</artifactId>
-				<version>1.1.14-SNAPSHOT</version> 
+				<version>1.1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains</groupId>
@@ -1008,6 +1008,11 @@
 				<groupId>io.github.devacfr.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
 				<version>2.0.0-beta2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>1.6.1</version>
 			</dependency>
 			<dependency>
 				<groupId>mysql</groupId>
