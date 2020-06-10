@@ -98,7 +98,7 @@ public class CreatePackageCommandTest extends BaseTest {
 		ourLog.info("Package.json:\n{}", packageJsonContents);
 
 		String expectedPackageJson = "{\n" +
-			"  \"name\": \"@fhir/com.example.ig\",\n" +
+			"  \"name\": \"com.example.ig\",\n" +
 			"  \"version\": \"1.0.1\",\n" +
 			"  \"dependencies\": {\n" +
 			"    \"hl7.fhir.core\": \"4.0.1\",\n" +

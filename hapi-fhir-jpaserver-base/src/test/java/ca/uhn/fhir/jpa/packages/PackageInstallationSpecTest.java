@@ -18,7 +18,7 @@ public class PackageInstallationSpecTest {
 
 		output = new PackageInstallationSpec.ExampleSupplier2().get();
 		json = JsonUtil.serialize(output);
-		assertThat(json, containsString("\"packageUrl\" : \"classpath:my-resources.tgz\""));
+		assertThat(json, containsString("\"packageUrl\" : \"classpath:/my-resources.tgz\""));
 	}
 
 }
