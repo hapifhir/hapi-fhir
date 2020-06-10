@@ -68,13 +68,14 @@ public class BulkExportDaoSvc {
 	public void setJobToStatus(String theJobUUID, BulkJobStatusEnum theStatus) {
 		Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(theJobUUID);
 		if (!oJob.isPresent()) {
-			ourLog.error("Job doesn't exist!");
-		} else {
-			ourLog.info("Setting job with UUID {} to {}", theJobUUID, theStatus);
-			BulkExportJobEntity bulkExportJobEntity = oJob.get();
-			bulkExportJobEntity.setStatus(theStatus);
-			myBulkExportJobDao.save(bulkExportJobEntity);
+			ourLog.error("Job with UUID {} doesn't exist!", theJobUUID);
+			return;
 		}
+
+		ourLog.info("Setting job with UUID {} to {}", theJobUUID, theStatus);
+		BulkExportJobEntity bulkExportJobEntity = oJob.get();
+		bulkExportJobEntity.setStatus(theStatus);
+		myBulkExportJobDao.save(bulkExportJobEntity);
 
 	}
 
