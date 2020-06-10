@@ -27,7 +27,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Autowired
-	private FhirContext myContext;
+	private FhirContext myFhirContext;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -52,7 +52,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 
 	@PostConstruct
 	public void start() {
-		myParser = myContext.newJsonParser().setPrettyPrint(false);
+		myParser = myFhirContext.newJsonParser().setPrettyPrint(false);
 		myBinaryDao = getBinaryDao();
 	}
 
@@ -73,7 +73,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	}
 
 	private IIdType createBinaryFromOutputStream() {
-		IBaseBinary binary = BinaryUtil.newBinary(myContext);
+		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
 		binary.setContentType(Constants.CT_FHIR_NDJSON);
 		binary.setContent(myOutputStream.toByteArray());
 
@@ -97,6 +97,8 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		}
 
 		Optional<IIdType> createdId = flushToFiles();
-		createdId.ifPresent(theIIdType -> ourLog.warn("Created resources for bulk export file containing {} resources of type ", theIIdType.toUnqualifiedVersionless().getValue()));
+		if (createdId.isPresent()) {
+			ourLog.info("Created resources for bulk export file containing {} resources of type ", createdId.get().toUnqualifiedVersionless().getValue());
+		}
 	}
 }

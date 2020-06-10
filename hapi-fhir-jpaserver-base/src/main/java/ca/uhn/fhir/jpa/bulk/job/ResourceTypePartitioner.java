@@ -28,11 +28,7 @@ public class ResourceTypePartitioner implements Partitioner {
 		Map<String, ExecutionContext> partitionContextMap = new HashMap<>();
 
 		Map<Long, String> idToResourceType = myBulkExportDaoSvc.getBulkJobCollectionIdToResourceTypeMap(	myJobUUID);
-		//observation -> obs1.json, obs2.json, obs3.json BulkJobCollectionEntity
-		//bulk Collection Entity ID -> patient
 
-		// 123123-> Patient
-		// 91876389126-> Observation
 		idToResourceType.entrySet().stream()
 			.forEach(entry -> {
 				String resourceType = entry.getValue();

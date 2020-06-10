@@ -58,7 +58,7 @@ public class BulkExportDaoSvc {
 	private BulkExportJobEntity loadJob(String theJobUUID) {
 		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(theJobUUID);
 		if (!jobOpt.isPresent()) {
-			ourLog.info("Job appears to be deleted");
+			ourLog.warn("Job with UUID {} appears to be deleted", theJobUUID);
 			return null;
 		}
 		return jobOpt.get();

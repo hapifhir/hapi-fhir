@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.Date;
 import java.util.UUID;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -264,7 +265,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			.addLong("readChunkSize", 10L);
 		myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 
-		IBulkDataExportSvc.JobInfo jobInfo = awaitJobCompletion(jobDetails.getJobId());
+		awaitJobCompletion(jobDetails.getJobId());
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(2));
 	}
@@ -281,14 +284,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	public IBulkDataExportSvc.JobInfo awaitJobCompletion(String theJobId) throws InterruptedException {
-		while(true) {
-			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId);
-			if (jobInfo.getStatus() != BulkJobStatusEnum.COMPLETE) {
-				Thread.sleep(1000L);
-			} else {
-				return jobInfo;
-			}
-		}
+		await().until(() -> myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId).getStatus() == BulkJobStatusEnum.COMPLETE);
 	}
 
 	@Test

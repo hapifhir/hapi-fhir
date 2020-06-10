@@ -8,14 +8,12 @@ import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
-import ca.uhn.fhir.model.dstu2.resource.Provenance;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 
@@ -43,7 +41,8 @@ public class TestJPAConfig {
 	}
 
 	/*
-	I had to rename this bean as it was clashing with Spring Batch `transactionManager` in SimpleBatchConfiguration
+	Please do not rename this bean to "transactionManager()" as this will conflict with the transactionManager
+	provided by Spring Batch.
 	 */
 	@Bean
 	@Primary

@@ -58,7 +58,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private void loadResourcePids() {
 		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(myJobUUID);
 		if (!jobOpt.isPresent()) {
-			ourLog.info("Job appears to be deleted");
+			ourLog.warn("Job appears to be deleted");
 			return;
 		}
 		myJobEntity = jobOpt.get();
