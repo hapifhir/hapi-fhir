@@ -120,6 +120,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
@@ -408,7 +409,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		if (stream == null) {
 			fail("Unable to load resource: " + resourceName);
 		}
-		String string = IOUtils.toString(stream, "UTF-8");
+		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
 		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
 		return newJsonParser.parseResource(type, string);
 	}

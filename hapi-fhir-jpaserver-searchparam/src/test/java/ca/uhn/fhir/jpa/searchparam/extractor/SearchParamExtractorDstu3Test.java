@@ -19,7 +19,7 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.util.StringNormalizer;
+import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
@@ -74,7 +74,7 @@ public class SearchParamExtractorDstu3Test {
 		String value = IntStream.range(1, 200).mapToObj(v -> "a").collect(Collectors.joining()) + "ئ";
 		assertEquals(value.length(), 200);
 		assertEquals(Normalizer.normalize(value, Normalizer.Form.NFD).length(), 201);
-		assertEquals(StringNormalizer.normalizeStringForSearchIndexing(value).length(), 201);
+		assertEquals(StringUtil.normalizeStringForSearchIndexing(value).length(), 201);
 
 		Questionnaire questionnaire = new Questionnaire();
 		questionnaire.setDescription(value);

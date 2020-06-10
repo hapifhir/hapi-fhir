@@ -22,7 +22,7 @@ package ca.uhn.fhir.empi.rules.similarity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.util.NameUtil;
-import ca.uhn.fhir.util.StringNormalizer;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -56,10 +56,10 @@ public class NameSimilarity implements IEmpiFieldSimilarity {
 		List<String> rightGivenNames = NameUtil.extractGivenNames(theFhirContext, theRightBase);
 
 		if (!exact) {
-			leftFamilyName = StringNormalizer.normalizeStringForSearchIndexing(leftFamilyName);
-			rightFamilyName = StringNormalizer.normalizeStringForSearchIndexing(rightFamilyName);
-			leftGivenNames = leftGivenNames.stream().map(StringNormalizer::normalizeStringForSearchIndexing).collect(Collectors.toList());
-			rightGivenNames = rightGivenNames.stream().map(StringNormalizer::normalizeStringForSearchIndexing).collect(Collectors.toList());
+			leftFamilyName = StringUtil.normalizeStringForSearchIndexing(leftFamilyName);
+			rightFamilyName = StringUtil.normalizeStringForSearchIndexing(rightFamilyName);
+			leftGivenNames = leftGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());
+			rightGivenNames = rightGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());
 		}
 
 		for (String leftGivenName : leftGivenNames) {

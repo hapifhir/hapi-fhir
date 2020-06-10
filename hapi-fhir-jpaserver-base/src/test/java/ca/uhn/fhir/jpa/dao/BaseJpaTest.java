@@ -437,11 +437,15 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	public static String loadClasspath(String resource) throws IOException {
+		return new String(loadClasspathBytes(resource), Constants.CHARSET_UTF8);
+	}
+
+	public static byte[] loadClasspathBytes(String resource) throws IOException {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream(resource);
 		if (bundleRes == null) {
 			throw new NullPointerException("Can not load " + resource);
 		}
-		return IOUtils.toString(bundleRes, Constants.CHARSET_UTF8);
+		return IOUtils.toByteArray(bundleRes);
 	}
 
 	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportSvc theBulkDataExportSvc) {
