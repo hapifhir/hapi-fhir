@@ -85,4 +85,11 @@ public class StringMatcherTest extends BaseMatcherTest {
 		assertFalse(EmpiMetricEnum.EXACT.match(ourFhirContext, male, female));
 	}
 
+	@Test
+	public void testSoundex() {
+		assertTrue(EmpiMetricEnum.SOUNDEX.match(ourFhirContext, new StringType("Gail"), new StringType("Gail")));
+
+		assertFalse(EmpiMetricEnum.SOUNDEX.match(ourFhirContext, new StringType("Fred"), new StringType("Frank")));
+		assertFalse(EmpiMetricEnum.SOUNDEX.match(ourFhirContext, new StringType("Thomas"), new StringType("Tom")));
+	}
 }

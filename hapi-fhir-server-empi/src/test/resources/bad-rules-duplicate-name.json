@@ -1,0 +1,21 @@
+{
+	"candidateSearchParams": [],
+	"candidateFilterSearchParams": [],
+	"matchFields": [
+		{
+			"name": "foo",
+			"resourceType": "Patient",
+			"resourcePath": "name.family",
+			"metric": "EXACT"
+		},
+		{
+			"name": "foo",
+			"resourceType": "Patient",
+			"resourcePath": "name.given",
+			"metric": "EXACT"
+		}
+	],
+	"matchResultMap": {
+		"foo": "POSSIBLE_MATCH"
+	}
+}

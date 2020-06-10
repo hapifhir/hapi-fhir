@@ -37,6 +37,8 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class EmpiRuleValidator {
@@ -89,7 +91,12 @@ public class EmpiRuleValidator {
 	}
 
 	private void validateMatchFields(EmpiRulesJson theEmpiRulesJson) {
+		Set<String> names = new HashSet<>();
 		for (EmpiFieldMatchJson fieldMatch : theEmpiRulesJson.getMatchFields()) {
+			if (names.contains(fieldMatch.getName())) {
+				throw new ConfigurationException("Two MatchFields have the same name '" + fieldMatch.getName() + "'");
+			}
+			names.add(fieldMatch.getName());
 			validateThreshold(fieldMatch);
 			validatePath(fieldMatch);
 		}

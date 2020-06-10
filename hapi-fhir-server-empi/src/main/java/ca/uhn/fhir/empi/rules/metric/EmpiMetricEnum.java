@@ -29,6 +29,7 @@ import ca.uhn.fhir.empi.rules.metric.matcher.IEmpiFieldMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.MetaphoneStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.NameMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.NormalizeCaseStringMatcher;
+import ca.uhn.fhir.empi.rules.metric.matcher.SoundexStringMatcher;
 import ca.uhn.fhir.empi.rules.metric.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.empi.rules.metric.similarity.IEmpiFieldSimilarity;
 import info.debatty.java.stringsimilarity.Cosine;
@@ -49,6 +50,7 @@ public enum EmpiMetricEnum {
 	DOUBLE_METAPHONE(new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
 	NORMALIZE_CASE(new HapiStringMatcher(new NormalizeCaseStringMatcher())),
 	EXACT(new HapiStringMatcher()),
+	SOUNDEX(new HapiStringMatcher(new SoundexStringMatcher())),
 	DATE(new HapiDateMatcher()),
 	JARO_WINKLER(new HapiStringSimilarity(new JaroWinkler())),
 	COSINE(new HapiStringSimilarity(new Cosine())),

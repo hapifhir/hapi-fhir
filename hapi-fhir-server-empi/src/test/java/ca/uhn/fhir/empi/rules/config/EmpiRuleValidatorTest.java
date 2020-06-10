@@ -86,6 +86,17 @@ public class EmpiRuleValidatorTest extends BaseR4Test {
 		}
 	}
 
+	@Test
+	public void testMatcherduplicateName() throws IOException {
+		try {
+			setEmpiRuleJson("bad-rules-duplicate-name.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), startsWith("Two MatchFields have the same name 'foo'"));
+		}
+	}
+
+
 	private void setEmpiRuleJson(String theTheS) throws IOException {
 		EmpiRuleValidator empiRuleValidator = new EmpiRuleValidator(ourFhirContext, mySearchParamRetriever);
 		EmpiSettings empiSettings = new EmpiSettings(empiRuleValidator);
