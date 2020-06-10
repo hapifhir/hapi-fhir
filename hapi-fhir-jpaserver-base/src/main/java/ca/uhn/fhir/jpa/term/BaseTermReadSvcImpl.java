@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -173,8 +174,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
 	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
+	private static final TermCodeSystemVersion NO_CURRENT_VERSION = new TermCodeSystemVersion().setId(-1L);
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
 	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
+	private final int myFetchSize = DEFAULT_FETCH_SIZE;
+	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
@@ -209,7 +213,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private DaoConfig myDaoConfig;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
-	private final int myFetchSize = DEFAULT_FETCH_SIZE;
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
@@ -227,12 +230,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ITermCodeSystemStorageSvc myConceptStorageSvc;
 	@Autowired
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 	private volatile IValidationSupport myJpaValidationSupport;
 	private volatile IValidationSupport myValidationSupport;
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		return supportsSystem(theSystem);
+		TermCodeSystemVersion cs = getCurrentCodeSystemVersion(theSystem);
+		return cs != null;
 	}
 
 	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
@@ -283,16 +289,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
-	public void clearTranslationCache() {
+	public void clearCaches() {
 		myTranslationCache.invalidateAll();
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting()
-	public void clearTranslationWithReverseCache() {
 		myTranslationWithReverseCache.invalidateAll();
+		myCodeSystemCurrentVersionCache.invalidateAll();
 	}
 
 	public void deleteConceptMap(ResourceTable theResourceTable) {
@@ -1289,14 +1289,34 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
 		return txTemplate.execute(t -> {
-			TermCodeSystemVersion csv = null;
-			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theCodeSystem);
-			if (cs != null && cs.getCurrentVersion() != null) {
-				csv = cs.getCurrentVersion();
+			TermCodeSystemVersion csv = getCurrentCodeSystemVersion(theCodeSystem);
+			if (csv == null) {
+				return null;
 			}
 			return myConceptDao.findByCodeSystemAndCode(csv, theCode);
 		});
 	}
+
+	@Nullable
+	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theUri) {
+		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(theUri, uri -> {
+			TermCodeSystemVersion csv = null;
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(uri);
+			if (cs != null && cs.getCurrentVersion() != null) {
+				csv = cs.getCurrentVersion();
+			}
+			if (csv != null) {
+				return csv;
+			} else {
+				return NO_CURRENT_VERSION;
+			}
+		});
+		if (retVal == NO_CURRENT_VERSION) {
+			return null;
+		}
+		return retVal;
+	}
+
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
@@ -1713,12 +1733,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return theOutput;
 		}
 		return null;
-	}
-
-	@Override
-	public boolean supportsSystem(String theSystem) {
-		TermCodeSystem cs = getCodeSystem(theSystem);
-		return cs != null;
 	}
 
 	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
