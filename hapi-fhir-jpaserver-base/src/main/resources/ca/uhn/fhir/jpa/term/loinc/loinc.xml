@@ -51,6 +51,7 @@ Version History of this specification
   <contact>
     <telecom>
       <value value="http://loinc.org"/>
+		<system value="url"/>
     </telecom>
   </contact>
   
@@ -61,7 +62,7 @@ Version History of this specification
   <copyright value="This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use"/>
   <caseSensitive  value="false"/>
   
-  <valueSet value=" http://loinc.org/vs"/>
+  <valueSet value="http://loinc.org/vs"/>
    <!--
     for a version specific reference:
     <valueSet value="http://loinc.org/2.56/vs"/>
@@ -138,13 +139,13 @@ Version History of this specification
     <code value="parent"/>
     <uri value="http://hl7.org/fhir/concept-properties#parent"/> 
     <description value="A parent code in the Multiaxial Hierarchy"/>
-    <type value=""/>
+    <type value="code"/>
   </property>
   <property>
     <code value="child"/>
     <uri value="http://hl7.org/fhir/concept-properties#child"/>
     <description value="A child code in the Multiaxial Hierarchy"/>
-    <type value=""/>
+    <type value="code"/>
   </property>
   <!-- 
     LOINC properties. 
