@@ -163,7 +163,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 			assertEquals("0.12.0", versionEntity.getVersionId());
 			assertEquals(3001, versionEntity.getPackageSizeBytes());
 			assertEquals(true, versionEntity.isCurrentVersion());
-			assertEquals("hl7.fhir.uv.shorthand", versionEntity.getName());
+			assertEquals("hl7.fhir.uv.shorthand", versionEntity.getPackageId());
 			assertEquals("4.0.1", versionEntity.getFhirVersionId());
 			assertEquals(FhirVersionEnum.R4, versionEntity.getFhirVersion());
 
