@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.batch.log;
 
 /*-
  * #%L
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
