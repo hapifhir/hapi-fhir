@@ -73,8 +73,7 @@ public class EmpiRulesJson implements IModelJson {
 	}
 
 	public EmpiMatchResultEnum getMatchResult(Long theMatchVector) {
-		EmpiMatchResultEnum result = myVectorMatchResultMap.get(theMatchVector);
-		return (result == null) ? EmpiMatchResultEnum.NO_MATCH : result;
+		return myVectorMatchResultMap.get(theMatchVector);
 	}
 
 	public void putMatchResult(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {

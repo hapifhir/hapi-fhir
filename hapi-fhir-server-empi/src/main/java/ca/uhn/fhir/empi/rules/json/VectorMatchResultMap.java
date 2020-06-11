@@ -25,11 +25,15 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class VectorMatchResultMap {
 	private final EmpiRulesJson myEmpiRulesJson;
 	private Map<Long, EmpiMatchResultEnum> myVectorToMatchResultMap = new HashMap<>();
+	private Set<Long> myMatchVectors = new HashSet<>();
+	private Set<Long> myPossibleMatchVectors = new HashSet<>();
 	private Map<Long, String> myVectorToFieldMatchNamesMap = new HashMap<>();
 
 	VectorMatchResultMap(EmpiRulesJson theEmpiRulesJson) {
@@ -44,22 +48,31 @@ public class VectorMatchResultMap {
 		}
 	}
 
-	// FIXME KHS sort the vector on the way in to put all the MATCH ones first
-	// or better yet maintain two maps
-	// FIXME KHS cache the results
-	// Note this logic requires that MATCH results should be ordered before POSSIBLE_MATCH
+	// FIXME KHS make sure this doesn't check for null
+	@Nonnull
 	public EmpiMatchResultEnum get(Long theMatchVector) {
-		return myVectorToMatchResultMap.entrySet().stream()
-			.filter(e -> (e.getKey() & theMatchVector) != 0)
-			.map(Map.Entry::getValue)
-			.findFirst()
-			.orElse(null);
+		return myVectorToMatchResultMap.computeIfAbsent(theMatchVector, this::computeMatchResult);
+	}
+
+	private EmpiMatchResultEnum computeMatchResult(Long theVector) {
+		if (myMatchVectors.stream().anyMatch(v -> (v & theVector) != 0)) {
+			return EmpiMatchResultEnum.MATCH;
+		}
+		if (myPossibleMatchVectors.stream().anyMatch(v -> (v & theVector) != 0)) {
+			return EmpiMatchResultEnum.POSSIBLE_MATCH;
+		}
+		return EmpiMatchResultEnum.NO_MATCH;
 	}
 
 	private void put(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {
 		long vector = getVector(theFieldMatchNames);
 		myVectorToFieldMatchNamesMap.put(vector, theFieldMatchNames);
 		myVectorToMatchResultMap.put(vector, theMatchResult);
+		if (theMatchResult == EmpiMatchResultEnum.MATCH) {
+			myMatchVectors.add(vector);
+		} else if (theMatchResult == EmpiMatchResultEnum.POSSIBLE_MATCH) {
+			myPossibleMatchVectors.add(vector);
+		}
 	}
 
 	public long getVector(String theFieldMatchNames) {
