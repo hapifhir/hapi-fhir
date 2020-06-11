@@ -5,7 +5,7 @@ import org.apache.commons.codec.StringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StringEncoderMatcher implements IEmpiStringMatcher{
+public class StringEncoderMatcher implements IEmpiStringMatcher {
 	private static final Logger ourLog = LoggerFactory.getLogger(StringEncoderMatcher.class);
 
 	private final StringEncoder myStringEncoder;

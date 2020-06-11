@@ -115,14 +115,12 @@ public class EmpiRuleValidator {
 		String resourceType = theFieldMatch.getResourceType();
 		if ("*".equals(resourceType)) {
 			validatePatientPath(theFieldMatch);
-			// FIXME KHS test where one matches and the other doesnt
 			validatePractitionerPath(theFieldMatch);
 		} else if ("Patient".equals(resourceType)) {
 			validatePatientPath(theFieldMatch);
 		} else if ("Practitioner".equals(resourceType)) {
 			validatePractitionerPath(theFieldMatch);
 		} else {
-			// FIXME KHS test
 			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " has unknown resourceType " + resourceType);
 		}
 	}
