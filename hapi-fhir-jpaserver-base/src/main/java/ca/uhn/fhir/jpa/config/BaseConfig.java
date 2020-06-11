@@ -21,7 +21,11 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.packages.IgInstallerSvc;
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
+import ca.uhn.fhir.jpa.packages.JpaPackageCache;
+import ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl;
+import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
@@ -47,11 +51,13 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.cache.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -113,15 +119,15 @@ import java.util.Date;
 public abstract class BaseConfig {
 
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
+	public static final String JPA_VALIDATION_SUPPORT = "myJpaValidationSupport";
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER = "PersistedJpaSearchFirstPageBundleProvider";
-	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
-
+	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 	@Autowired
 	protected Environment myEnv;
 	@Autowired
@@ -183,9 +189,28 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
+	public MemoryCacheService memoryCacheService() {
+		return new MemoryCacheService();
+	}
+
+	@Bean
 	@Primary
 	public IResourceLinkResolver daoResourceLinkResolver() {
 		return new DaoResourceLinkResolver();
+	}
+
+	@Bean
+	public IHapiPackageCacheManager packageCacheManager() {
+		JpaPackageCache retVal = new JpaPackageCache();
+		retVal.getPackageServers().clear();
+		retVal.getPackageServers().add(FilesystemPackageCacheManager.PRIMARY_SERVER);
+		retVal.getPackageServers().add(FilesystemPackageCacheManager.SECONDARY_SERVER);
+		return retVal;
+	}
+
+	@Bean
+	public NpmJpaValidationSupport npmJpaValidationSupport() {
+		return new NpmJpaValidationSupport();
 	}
 
 	@Bean
@@ -252,7 +277,9 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public IgInstallerSvc igInstallerSvc() { return new IgInstallerSvc(); }
+	public IPackageInstallerSvc npmInstallerSvc() {
+		return new PackageInstallerSvcImpl();
+	}
 
 	@Bean
 	public IConsentContextServices consentContextServices() {

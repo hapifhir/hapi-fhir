@@ -9,11 +9,16 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -25,7 +30,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.contains;
 
 public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
@@ -113,6 +117,52 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
+
+
+	@Test
+	public void testValidate() {
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("bar-1").setDisplay("Bar 1");
+		cs.addConcept().setCode("bar-2").setDisplay("Bar 2");
+		myCodeSystemDao.create(cs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+
+		Observation obs = new Observation();
+//		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+		obs.getCode().addCoding().setSystem("http://foo/cs").setCode("bar-1");
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+		// Validate once
+		myCaptureQueriesListener.clear();
+		myObservationDao.validate(obs, null, null, null, null, null, null);
+		assertEquals(myCaptureQueriesListener.logSelectQueriesForCurrentThread(), 10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(myCaptureQueriesListener.logUpdateQueriesForCurrentThread(), 0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(myCaptureQueriesListener.logInsertQueriesForCurrentThread(), 0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(myCaptureQueriesListener.logDeleteQueriesForCurrentThread(), 0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		// Validate again (should rely only on caches)
+		myCaptureQueriesListener.clear();
+		myObservationDao.validate(obs, null, null, null, null, null, null);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
 
 	@Test
 	public void testVRead() {
@@ -488,12 +538,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	}
 
 
-	
-	
 	@Test
 	public void testTransactionWithMultipleReferences() {
 		Bundle input = new Bundle();
-		
+
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
 		patient.setActive(true);
@@ -1054,6 +1102,49 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 	}
+
+
+	@Test
+	public void testTransactionWithMultipleProfiles() {
+		myDaoConfig.setDeleteEnabled(true);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		// Create transaction
+
+		Bundle input = new Bundle();
+		for (int i = 0; i < 5; i++) {
+			Patient patient = new Patient();
+			patient.getMeta().addProfile("http://example.com/profile");
+			patient.getMeta().addTag().setSystem("http://example.com/tags").setCode("tag-1");
+			patient.getMeta().addTag().setSystem("http://example.com/tags").setCode("tag-2");
+			input.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Patient");
+		}
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(myCaptureQueriesListener.logSelectQueriesForCurrentThread(), 3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(myCaptureQueriesListener.logInsertQueriesForCurrentThread(), 8, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Do the same a second time
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

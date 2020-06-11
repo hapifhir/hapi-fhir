@@ -162,6 +162,11 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
 	/**
+	 * Operation name for the "$lastn" operation
+	 */
+	public static final String OPERATION_LASTN = "$lastn";
+
+	/**
 	 * <p>
 	 * This extension should be of type <code>string</code> and should be
 	 * placed on the <code>Subscription.channel</code> element

@@ -25,7 +25,6 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -155,6 +154,10 @@ public class EmpiLink {
 
 	public boolean isPossibleMatch() {
 		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_MATCH;
+	}
+
+	public boolean isPossibleDuplicate() {
+		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_DUPLICATE;
 	}
 
 	public EmpiLinkSourceEnum getLinkSource() {

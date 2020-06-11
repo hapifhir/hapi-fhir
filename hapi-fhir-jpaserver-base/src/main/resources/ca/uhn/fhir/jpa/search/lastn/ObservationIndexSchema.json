@@ -1,0 +1,50 @@
+{
+  "mappings" : {
+    "ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity" : {
+      "properties" : {
+        "codeconceptid" : {
+          "type" : "keyword"
+        },
+        "codeconcepttext" : {
+          "type" : "text"
+        },
+        "codeconceptcodingcode" : {
+          "type" : "keyword"
+        },
+        "codeconceptcodingsystem" : {
+          "type" : "keyword"
+        },
+        "codeconceptcodingcode_system_hash" : {
+          "type" : "keyword"
+        },
+        "codeconceptcodingdisplay" : {
+          "type" : "text"
+        },
+        "categoryconcepttext" : {
+          "type" : "text"
+        },
+        "categoryconceptcodingcode" : {
+          "type" : "keyword"
+        },
+        "categoryconceptcodingsystem" : {
+          "type" : "keyword"
+        },
+        "categoryconceptcodingcode_system_hash" : {
+          "type" : "keyword"
+        },
+        "categoryconceptcodingdisplay" : {
+          "type" : "text"
+        },
+        "effectivedtm" : {
+          "type" : "date"
+        },
+        "identifier" : {
+          "type" : "keyword"
+        },
+        "subject" : {
+          "type" : "keyword"
+        }
+      }
+    }
+  }
+}

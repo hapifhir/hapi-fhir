@@ -68,7 +68,60 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init420(); // 20191015 - 20200217
 		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - 20200513
-		init501(); // 20200514 - present
+		init501(); // 20200514 - 20200515
+		init510(); // 20200516 - present
+	}
+
+	private void init510() {
+		Builder version = forVersion(VersionEnum.V5_1_0);
+
+		// NPM Packages
+		version.addIdGenerator("20200610.1", "SEQ_NPM_PACK");
+		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20200610.2", "NPM_PACKAGE", "PID");
+		pkg.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkg.addColumn("PACKAGE_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkg.addColumn("CUR_VERSION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkg.addColumn("UPDATED_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		pkg.addColumn("PACKAGE_DESC").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkg.addIndex("20200610.3", "IDX_PACK_ID").unique(true).withColumns("PACKAGE_ID");
+
+		version.addIdGenerator("20200610.4", "SEQ_NPM_PACKVER");
+		Builder.BuilderAddTableByColumns pkgVer = version.addTableByColumns("20200610.5", "NPM_PACKAGE_VER", "PID");
+		pkgVer.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkgVer.addColumn("PACKAGE_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkgVer.addColumn("VERSION_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkgVer.addColumn("PACKAGE_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkgVer.addColumn("BINARY_RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkgVer.addColumn("SAVED_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		pkgVer.addColumn("PKG_DESC").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkgVer.addColumn("DESC_UPPER").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkgVer.addColumn("CURRENT_VERSION").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+		pkgVer.addColumn("FHIR_VERSION_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 10);
+		pkgVer.addColumn("FHIR_VERSION").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 10);
+		pkgVer.addColumn("PACKAGE_SIZE_BYTES").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkgVer.addColumn("UPDATED_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		pkgVer.addForeignKey("20200610.6", "FK_NPM_PKV_PKG").toColumn("PACKAGE_PID").references("NPM_PACKAGE", "PID");
+		pkgVer.addForeignKey("20200610.7", "FK_NPM_PKV_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		pkgVer.addIndex("20200610.8", "IDX_PACKVER").unique(true).withColumns("PACKAGE_ID", "VERSION_ID");
+
+		version.addIdGenerator("20200610.9", "SEQ_NPM_PACKVERRES");
+		Builder.BuilderAddTableByColumns pkgVerRes = version.addTableByColumns("20200610.10", "NPM_PACKAGE_VER_RES", "PID");
+		pkgVerRes.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkgVerRes.addColumn("PACKVER_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkgVerRes.addColumn("BINARY_RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkgVerRes.addColumn("FILE_DIR").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkgVerRes.addColumn("FILE_NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkgVerRes.addColumn("RES_TYPE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		pkgVerRes.addColumn("CANONICAL_URL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkgVerRes.addColumn("CANONICAL_VERSION").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		pkgVerRes.addColumn("FHIR_VERSION_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 10);
+		pkgVerRes.addColumn("FHIR_VERSION").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 10);
+		pkgVerRes.addColumn("RES_SIZE_BYTES").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		pkgVerRes.addColumn("UPDATED_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		pkgVerRes.addForeignKey("20200610.11", "FK_NPM_PACKVERRES_PACKVER").toColumn("PACKVER_PID").references("NPM_PACKAGE_VER", "PID");
+		pkgVerRes.addForeignKey("20200610.12", "FK_NPM_PKVR_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "PID");
+		pkgVerRes.addIndex("20200610.13", "IDX_PACKVERRES_URL").unique(false).withColumns("CANONICAL_URL");
+
 	}
 
 	private void init501() { //20200514 - present
@@ -103,9 +156,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 
 		empiLink.addIndex("20200517.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
-
-		// TRM_CONCEPT_PROPERTY
-//		version.onTable("TRM_CONCEPT_PROPERTY").addIndex("20200523.1", "IDX_CONCEPTPROP_CONCEPTPID").unique(false).withColumns("CONCEPT_PID");
 
 	}
 
@@ -249,7 +299,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init420() { // 20191015 - 20200217
 		Builder version = forVersion(VersionEnum.V4_2_0);
 
-    // TermValueSetConceptDesignation
+		// TermValueSetConceptDesignation
 		version.onTable("TRM_VALUESET_C_DESIGNATION").dropIndex("20200202.1", "IDX_VALUESET_C_DSGNTN_VAL").failureAllowed();
 		Builder.BuilderWithTableName searchTable = version.onTable("HFJ_SEARCH");
 		searchTable.dropIndex("20200203.1", "IDX_SEARCH_LASTRETURNED");
@@ -447,7 +497,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("TRM_CONCEPT")
 			.renameColumn("20190722.29", "CODE", "CODEVAL", false, true);
-
 
 
 		// TermValueSet
@@ -752,9 +801,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(AddColumnTask.ColumnTypeEnum.LONG);
 			spidxString
-				.addIndex("20180903.27","IDX_SP_STRING_HASH_EXCT")
+				.addIndex("20180903.27", "IDX_SP_STRING_HASH_EXCT")
 				.unique(false)
-				.withColumns( "HASH_EXACT");
+				.withColumns("HASH_EXACT");
 			spidxString
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.28")
 					.setColumnName("HASH_NORM_PREFIX")
@@ -792,17 +841,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.unique(false)
 				.withColumns("HASH_IDENTITY");
 			spidxToken
-				.addIndex("20180903.36","IDX_SP_TOKEN_HASH_S")
+				.addIndex("20180903.36", "IDX_SP_TOKEN_HASH_S")
 				.unique(false)
-				.withColumns( "HASH_SYS");
+				.withColumns("HASH_SYS");
 			spidxToken
 				.addIndex("20180903.37", "IDX_SP_TOKEN_HASH_SV")
 				.unique(false)
 				.withColumns("HASH_SYS_AND_VALUE");
 			spidxToken
-				.addIndex("20180903.38","IDX_SP_TOKEN_HASH_V")
+				.addIndex("20180903.38", "IDX_SP_TOKEN_HASH_V")
 				.unique(false)
-				.withColumns( "HASH_VALUE");
+				.withColumns("HASH_VALUE");
 			spidxToken
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.39")
 					.setColumnName("HASH_IDENTITY")
@@ -830,9 +879,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(AddColumnTask.ColumnTypeEnum.LONG);
 			spidxUri
-				.addIndex("20180903.43","IDX_SP_URI_HASH_URI")
+				.addIndex("20180903.43", "IDX_SP_URI_HASH_URI")
 				.unique(false)
-				.withColumns( "HASH_URI");
+				.withColumns("HASH_URI");
 			spidxUri
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.44")
 					.setColumnName("HASH_IDENTITY")
@@ -888,7 +937,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		trmConcept
 			.addIndex("20180903.51", "IDX_CONCEPT_UPDATED")
 			.unique(false)
-			.withColumns( "CONCEPT_UPDATED");
+			.withColumns("CONCEPT_UPDATED");
 		trmConcept
 			.modifyColumn("20180903.52", "CODE")
 			.nonNullable()

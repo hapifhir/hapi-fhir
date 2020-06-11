@@ -86,28 +86,30 @@ public class BaseDstu2Config extends BaseConfig {
 
 	@Bean(name = "myInstanceValidator")
 	@Lazy
-	public IInstanceValidatorModule instanceValidator() {
-		ValidationSupportChain validationSupportChain = validationSupportChain();
-		CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(validationSupportChain));
+	public IInstanceValidatorModule instanceValidator(ValidationSupportChain theValidationSupportChain) {
+		CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupportChain));
 		FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		return retVal;
 	}
 
+	@Bean(name = "myDefaultProfileValidationSupport")
+	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
+		return new DefaultProfileValidationSupport(fhirContext());
+	}
+
 	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
-	public ValidationSupportChain validationSupportChain() {
-		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(fhirContext());
+	public ValidationSupportChain validationSupportChain(DefaultProfileValidationSupport theDefaultProfileValidationSupport) {
 		InMemoryTerminologyServerValidationSupport inMemoryTerminologyServer = new InMemoryTerminologyServerValidationSupport(fhirContextDstu2());
 		IValidationSupport jpaValidationSupport = jpaValidationSupportDstu2();
 		CommonCodeSystemsTerminologyService commonCodeSystemsTermSvc = new CommonCodeSystemsTerminologyService(fhirContext());
-		return new ValidationSupportChain(defaultProfileValidationSupport, jpaValidationSupport, inMemoryTerminologyServer, commonCodeSystemsTermSvc);
+		return new ValidationSupportChain(theDefaultProfileValidationSupport, jpaValidationSupport, inMemoryTerminologyServer, commonCodeSystemsTermSvc);
 	}
 
 	@Primary
-	@Bean
+	@Bean(name = JPA_VALIDATION_SUPPORT)
 	public IValidationSupport jpaValidationSupportDstu2() {
-		JpaPersistedResourceValidationSupport retVal = new JpaPersistedResourceValidationSupport(fhirContextDstu2());
-		return retVal;
+		return new JpaPersistedResourceValidationSupport(fhirContextDstu2());
 	}
 
 	@Bean(name = "myResourceCountsCache")

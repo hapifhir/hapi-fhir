@@ -131,13 +131,15 @@ public class TestUtil {
 				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
 				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
 				boolean isOtherSideOfOneToOneMapping = oneToOne != null && isNotBlank(oneToOne.mappedBy());
+				boolean isField = nextField.getAnnotation(org.hibernate.search.annotations.Field.class) != null;
 				Validate.isTrue(
 					hasEmbedded ||
 					hasColumn ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||
 						isOtherSideOfOneToOneMapping ||
-						hasEmbeddedId, "Non-transient has no @Column or @JoinColumn or @EmbeddedId: " + nextField);
+						hasEmbeddedId ||
+						isField, "Non-transient has no @Column or @JoinColumn or @EmbeddedId: " + nextField);
 			}
 
 

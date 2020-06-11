@@ -665,7 +665,7 @@
 
 	<properties>
 
-		<fhir_core_version>5.0.1-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>5.0.7-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -894,7 +894,7 @@
 			<dependency>
 				<groupId>org.hl7.fhir.testcases</groupId>
 				<artifactId>fhir-test-cases</artifactId>
-				<version>1.1.14-SNAPSHOT</version> 
+				<version>1.1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains</groupId>
@@ -1007,6 +1007,11 @@
 				<groupId>io.github.devacfr.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
 				<version>2.0.0-beta2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>1.6.1</version>
 			</dependency>
 			<dependency>
 				<groupId>mysql</groupId>
@@ -1644,7 +1649,7 @@
 				<plugin>
 					<groupId>org.basepom.maven</groupId>
 					<artifactId>duplicate-finder-maven-plugin</artifactId>
-					<version>1.3.0</version>
+					<version>1.4.0</version>
 				</plugin>
 				<plugin>
 					<groupId>de.jpdigital</groupId>
@@ -2039,26 +2044,6 @@
 									</message>
 								</requireJavaVersion>
 							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>enforce-property</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requireJavaVersion>
-									<version>11</version>
-								</requireJavaVersion>
-							</rules>
-							<fail>true</fail>
 						</configuration>
 					</execution>
 				</executions>
@@ -2578,6 +2563,7 @@
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-igpacks</module>
+				<module>hapi-fhir-elasticsearch-6</module>
 				<module>hapi-fhir-jpaserver-api</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>

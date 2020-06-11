@@ -65,8 +65,8 @@ public class ProviderConstants {
 	public static final String EMPI_MATCH_RESOURCE = "resource";
 
 	public static final String EMPI_MERGE_PERSONS = "$empi-merge-persons";
-	public static final String EMPI_MERGE_PERSONS_PERSON_ID_TO_DELETE = "personIdToDelete";
-	public static final String EMPI_MERGE_PERSONS_PERSON_ID_TO_KEEP = "personIdToKeep";
+	public static final String EMPI_MERGE_PERSONS_FROM_PERSON_ID = "fromPersonId";
+	public static final String EMPI_MERGE_PERSONS_TO_PERSON_ID = "toPersonId";
 
 	public static final String EMPI_UPDATE_LINK = "$empi-update-link";
 	public static final String EMPI_UPDATE_LINK_PERSON_ID = "personId";
@@ -80,4 +80,5 @@ public class ProviderConstants {
 	public static final String EMPI_QUERY_LINKS_LINK_SOURCE = "linkSource";
 
 	public static final String EMPI_DUPLICATE_PERSONS = "$empi-duplicate-persons";
+	public static final String EMPI_NOT_DUPLICATE = "$empi-not-duplicate";
 }

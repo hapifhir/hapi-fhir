@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.test;
  */
 
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
@@ -66,10 +67,14 @@ public abstract class BaseJpaTest {
 	@Autowired
 	ApplicationContext myApplicationContext;
 
+	@Autowired
+	MemoryCacheService myMemoryCacheService;
+
 	@After
 	public void after() {
 		ourLog.info("\n  ---  @After  ---");
 		myExpungeEverythingService.expungeEverything(null);
+		myMemoryCacheService.invalidateAllCaches();
 	}
 
 	public TransactionTemplate newTxTemplate() {

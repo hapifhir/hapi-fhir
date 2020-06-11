@@ -30,7 +30,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.util.StringNormalizer;
+import ca.uhn.fhir.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -131,7 +131,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 		}
 
 		if (myDontUseHashesForSearch) {
-			String likeExpression = StringNormalizer.normalizeStringForSearchIndexing(rawSearchTerm);
+			String likeExpression = StringUtil.normalizeStringForSearchIndexing(rawSearchTerm);
 			if (myDaoConfig.isAllowContainsSearches()) {
 				if (theParameter instanceof StringParam) {
 					if (((StringParam) theParameter).isContains()) {
@@ -161,7 +161,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 			return theBuilder.equal(theFrom.get("myHashExact").as(Long.class), hash);
 		} else {
 			// Normalized Match
-			String normalizedString = StringNormalizer.normalizeStringForSearchIndexing(rawSearchTerm);
+			String normalizedString = StringUtil.normalizeStringForSearchIndexing(rawSearchTerm);
 			String likeExpression;
 			if ((theParameter instanceof StringParam) &&
 				(((((StringParam) theParameter).isContains()) &&
