@@ -23,19 +23,23 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface ISearchParamRegistry extends ISearchParamRetriever {
+public interface ISearchParamRegistry {
 
 	/**
 	 * Request that the cache be refreshed now, in the current thread
 	 */
 	void forceRefresh();
+
+	/**
+	 * @return Returns {@literal null} if no match
+	 */
+	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
 	boolean refreshCacheIfNecessary();
 
