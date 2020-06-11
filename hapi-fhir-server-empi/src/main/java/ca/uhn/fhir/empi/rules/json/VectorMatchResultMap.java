@@ -48,7 +48,6 @@ public class VectorMatchResultMap {
 		}
 	}
 
-	// FIXME KHS make sure this doesn't check for null
 	@Nonnull
 	public EmpiMatchResultEnum get(Long theMatchVector) {
 		return myVectorToMatchResultMap.computeIfAbsent(theMatchVector, this::computeMatchResult);
