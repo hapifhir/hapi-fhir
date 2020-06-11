@@ -47,7 +47,7 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -132,8 +132,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiRuleValidator empiRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRegistry) {
-		return new EmpiRuleValidator(theFhirContext, theSearchParamRegistry);
+	EmpiRuleValidator empiRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
+		return new EmpiRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
 
 	@Bean
