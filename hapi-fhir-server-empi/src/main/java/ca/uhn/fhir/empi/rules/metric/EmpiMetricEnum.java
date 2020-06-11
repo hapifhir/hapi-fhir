@@ -49,10 +49,10 @@ import javax.annotation.Nullable;
  * calculating differences between strings (https://en.wikipedia.org/wiki/String_metric)
  */
 public enum EmpiMetricEnum {
-	METAPHONE(new HapiStringMatcher(new MetaphoneStringMatcher())),
-	DOUBLE_METAPHONE(new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
 	STRING(new HapiStringMatcher()),
 	SUBSTRING(new HapiStringMatcher(new SubstringStringMatcher())),
+	METAPHONE(new HapiStringMatcher(new MetaphoneStringMatcher())),
+	DOUBLE_METAPHONE(new HapiStringMatcher(new DoubleMetaphoneStringMatcher())),
 	SOUNDEX(new HapiStringMatcher(new StringEncoderMatcher(new Soundex()))),
 	CAVERPHONE1(new HapiStringMatcher(new StringEncoderMatcher(new Caverphone1()))),
 	CAVERPHONE2(new HapiStringMatcher(new StringEncoderMatcher(new Caverphone2()))),

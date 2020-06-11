@@ -88,15 +88,30 @@ public class StringMatcherTest extends BaseMatcherTest {
 
 	@Test
 	public void testSoundex() {
-		assertTrue(match(EmpiMetricEnum.SOUNDEX, new StringType("Gail"), new StringType("Gail")));
+		assertTrue(match(EmpiMetricEnum.SOUNDEX, new StringType("Gail"), new StringType("Gale")));
+		assertTrue(match(EmpiMetricEnum.SOUNDEX, new StringType("John"), new StringType("Jon")));
+		assertTrue(match(EmpiMetricEnum.SOUNDEX, new StringType("Thom"), new StringType("Tom")));
 
 		assertFalse(match(EmpiMetricEnum.SOUNDEX, new StringType("Fred"), new StringType("Frank")));
 		assertFalse(match(EmpiMetricEnum.SOUNDEX, new StringType("Thomas"), new StringType("Tom")));
 	}
 
+
+	@Test
+	public void testCaverphone1() {
+		assertTrue(match(EmpiMetricEnum.CAVERPHONE1, new StringType("Gail"), new StringType("Gael")));
+		assertTrue(match(EmpiMetricEnum.CAVERPHONE1, new StringType("John"), new StringType("Jon")));
+
+		assertFalse(match(EmpiMetricEnum.CAVERPHONE1, new StringType("Gail"), new StringType("Gale")));
+		assertFalse(match(EmpiMetricEnum.CAVERPHONE1, new StringType("Fred"), new StringType("Frank")));
+		assertFalse(match(EmpiMetricEnum.CAVERPHONE1, new StringType("Thomas"), new StringType("Tom")));
+	}
+
 	@Test
 	public void testCaverphone2() {
-		assertTrue(match(EmpiMetricEnum.CAVERPHONE2, new StringType("Gail"), new StringType("Gail")));
+		assertTrue(match(EmpiMetricEnum.CAVERPHONE2, new StringType("Gail"), new StringType("Gael")));
+		assertTrue(match(EmpiMetricEnum.CAVERPHONE2, new StringType("John"), new StringType("Jon")));
+		assertTrue(match(EmpiMetricEnum.CAVERPHONE2, new StringType("Gail"), new StringType("Gale")));
 
 		assertFalse(match(EmpiMetricEnum.CAVERPHONE2, new StringType("Fred"), new StringType("Frank")));
 		assertFalse(match(EmpiMetricEnum.CAVERPHONE2, new StringType("Thomas"), new StringType("Tom")));
