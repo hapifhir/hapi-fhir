@@ -250,24 +250,16 @@ The following metrics are currently supported:
      </tbody>
 </table>
 
-See [java-string-similarity](https://github.com/tdebatty/java-string-similarity) for a description of the first five metrics.  For the last four, STANDARd means ignore case and accents whereas EXACT must match casing and accents exactly.  Name any order matches first and last names irrespective of order, whereas FIRST_AND_LAST metrics require the name match to be in order.
-
-* **matchResultMap** A map which converts combinations of successful matchFields into an EMPI Match Result score for overall matching of a given pair of resources.
+* **matchResultMap** converts combinations of successful matchFields into an EMPI Match Result for overall matching of a given pair of resources.  MATCH results are evaluated take precedence over POSSIBLE_MATCH results.
 
 ```json
-"matchResultMap" : {
-    "given-name-cosine" : "POSSIBLE_MATCH",
-    "given-name-jaro, last-name-jaro" : "MATCH"
+{
+	"matchResultMap": {
+		"cosine-given-name" : "POSSIBLE_MATCH",
+		"cosine-given-name,jaro-last-name" : "MATCH"
+	}
 }
 ```
 
-* **eidSystem**: The external EID system that the HAPI EMPI system should expect to see on incoming Patient resources. Must be a valid URI.
+* **eidSystem**: The external EID system that the HAPI EMPI system should expect to see on incoming Patient resources. Must be a valid URI.  See [EMPI EID](/hapi-fhir/docs/server_jpa_empi/empi_eid.html) for details on how EIDs are managed by HAPI EMPI.
 
-# Enterprise Identifiers
-
-An Enterprise Identifier(EID) is a unique identifier that can be attached to Patients or Practitioners. Each implementation is expected to use exactly one EID system for incoming resources, 
-defined in the mentioned `empi-rules.json` file. If a Patient or Practitioner with a valid EID is added to the system, that EID will be copied over to the Person that was matched. In the case that 
-the incoming Patient or Practitioner had no EID assigned, an internal EID will be created for it. There are thus two classes of EID. Internal EIDs, created by HAPI-EMPI, and External EIDs, provided 
-by the install. 
-
-There are many edge cases for determining what will happen in merge and update scenarios, which will be provided in future documentation.
