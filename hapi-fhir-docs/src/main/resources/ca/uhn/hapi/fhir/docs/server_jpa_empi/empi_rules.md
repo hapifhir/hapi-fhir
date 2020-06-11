@@ -192,6 +192,22 @@ The following metrics are currently supported:
             <td>2019-12,Month = 2019-12-19,Day</td>
         </tr>
         <tr>
+            <td>NAME_ANY_ORDER</td>
+            <td>matcher</td>
+            <td>
+               Match names as strings in any order
+            </td>
+            <td>John Henry = Henry JOHN when exact = false</td>
+        </tr>        
+        <tr>
+            <td>NAME_FIRST_AND_LAST</td>
+            <td>matcher</td>
+            <td>
+               Match names as strings in any order
+            </td>
+            <td>John Henry = John HENRY when exact=false, John Henry != Henry John</td>
+        </tr>     
+        <tr>
             <td>JARO_WINKLER</td>
             <td>similarity</td>
             <td>
@@ -230,23 +246,7 @@ The following metrics are currently supported:
               <a href="https://github.com/tdebatty/java-string-similarity#sorensen-dice-coefficient">tdebatty Sorensen-Dice coefficient</a>          
             </td>
             <td></td>
-        </tr>
-        <tr>
-            <td>NAME_ANY_ORDER</td>
-            <td>matcher</td>
-            <td>
-               Match names as strings in any order
-            </td>
-            <td>John Henry = Henry JOHN when exact = false</td>
-        </tr>        
-        <tr>
-            <td>NAME_FIRST_AND_LAST</td>
-            <td>matcher</td>
-            <td>
-               Match names as strings in any order
-            </td>
-            <td>John Henry = John HENRY when exact=false, John Henry != Henry John</td>
-        </tr>        
+        </tr>   
      </tbody>
 </table>
 
