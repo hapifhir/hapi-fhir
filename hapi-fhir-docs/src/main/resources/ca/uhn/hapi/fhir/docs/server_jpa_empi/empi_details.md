@@ -19,7 +19,7 @@ With EMPI enabled, the basic default behavior of the EMPI is simply to create a 
 
 In a typical configuration it is often desirable to have links be created automatically using matching rules. For example, you might decide that if a Patient shares the same name, gender, and date of birth as another Patient, you have at least a little confidence that they are the same Person.
 
-This automatic linking is done via configurable matching rules that create a links between Patients and Persons.  Based on the strength of the match configured in these rules, the link will be set to either POSSIBLE_MATCH or MATCHED.
+This automatic linking is done via configurable matching rules that create links between Patients and Persons.  Based on the strength of the match configured in these rules, the link will be set to either POSSIBLE_MATCH or MATCHED.
 
 ## Design
 
