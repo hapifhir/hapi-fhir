@@ -45,7 +45,7 @@ Below are some simplifying principles HAPI EMPI enforces to reduce complexity an
 
 1. Once a link has been manually assigned as NO_MATCH or MATCHED, the system will not change it.
 
-1. When a new Patient resource is created/updated then it is compared to all other Patient resources in the repository.  The outcome of each of these comparisons is either NO_MATCH, POSSIBLE_MATCH or MATCHED.
+1. When a new Patient resource is created/updated it is then compared to all other Patient resources in the repository.  The outcome of each of these comparisons is either NO_MATCH, POSSIBLE_MATCH or MATCHED.
 
 1. Whenever a MATCHED link is established between a Patient resource and a Person resource, that Patient is always added to that Person resource links.  All MATCHED links have corresponding Person resource links and all Person resource links have corresponding MATCHED empi-link records.  You can think of the fields of the empi-link records as extra meta-data associated with each Person.link.target.
 
