@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1921
+title: "A new optional `type` parameter has been added to the `$mark-all-resources-for-reindexing` operation, allowing
+   resources of a specific type to be marked."
