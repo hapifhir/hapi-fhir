@@ -22,41 +22,65 @@ package ca.uhn.fhir.jpa.bulk.job;
 
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
  * This class will prevent a job from running if the UUID does not exist or is invalid.
  */
-public class JobExistsParameterValidator implements JobParametersValidator {
+public class BulkExportJobParameterValidator implements JobParametersValidator {
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
 
 	@Override
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 		if (theJobParameters == null) {
-			throw new JobParametersInvalidException("This job requires Parameters: [readChunkSize] and [jobUUID]");
+			throw new JobParametersInvalidException("This job needs Parameters: [readChunkSize], [jobUUID], [filters], [outputFormat], [resourceTypes]");
 		}
 
+		StringBuilder errorBuilder = new StringBuilder();
 		Long readChunkSize = theJobParameters.getLong("readChunkSize");
-		String errorMessage = "";
 		if (readChunkSize == null || readChunkSize < 1) {
-			errorMessage += "There must be a valid number for readChunkSize, which is at least 1. ";
+			 errorBuilder.append("There must be a valid number for readChunkSize, which is at least 1. ");
+
 		}
 		String jobUUID = theJobParameters.getString("jobUUID");
-		if (StringUtils.isBlank(jobUUID)) {
-			errorMessage += "Missing jobUUID Job parameter. ";
+		Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(jobUUID);
+		if (!StringUtils.isBlank(jobUUID) && !oJob.isPresent()) {
+			errorBuilder.append("There is no persisted job that exists with UUID: " + jobUUID + ". ");
 		}
 
-		Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(jobUUID);
-		if (!oJob.isPresent()) {
-			errorMessage += "There is no persisted job that exists with UUID: " + jobUUID + ". ";
+
+		boolean hasExistingJob = oJob.isPresent();
+		//Check for to-be-created parameters.
+		if (!hasExistingJob) {
+			String resourceTypes = theJobParameters.getString("resourceTypes");
+			if (StringUtils.isBlank(resourceTypes)) {
+				errorBuilder.append("You must include [resourceTypes] as a Job Parameter");
+			} else {
+				String[] resourceArray = resourceTypes.split(",");
+				Arrays.stream(resourceArray).filter(resourceType -> resourceType.equalsIgnoreCase("Binary"))
+					.findFirst()
+					.ifPresent(resourceType -> {
+						errorBuilder.append("Bulk export of Binary resources is forbidden");
+					});
+			}
+
+			String outputFormat = theJobParameters.getString("outputFormat");
+			if (!StringUtils.isBlank(outputFormat) && !Constants.CT_FHIR_NDJSON.equals(outputFormat)) {
+				errorBuilder.append("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
+			}
+
+
 		}
+		String errorMessage = errorBuilder.toString();
 		if (!StringUtils.isEmpty(errorMessage)) {
 			throw new JobParametersInvalidException(errorMessage);
 		}

@@ -20,7 +20,6 @@ abstract public class BaseBatchR4Test {
 
  	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
-
 	@Autowired
 	protected JobLauncher myJobLauncher;
 	@Autowired

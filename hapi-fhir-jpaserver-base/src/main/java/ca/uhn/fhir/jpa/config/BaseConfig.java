@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.InMemoryJobRepositoryBatchConfig;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -114,10 +115,11 @@ import java.util.Date;
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*Test.*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.searchparam.*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.empi.*")
+	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.empi.*"),
+	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.batch.*")
 })
 @Import({
-	SearchParamConfig.class, BatchJobsConfig.class
+	SearchParamConfig.class, BatchJobsConfig.class, InMemoryJobRepositoryBatchConfig.class
 })
 public abstract class BaseConfig {
 
@@ -150,6 +152,8 @@ public abstract class BaseConfig {
 	public IBatchJobSubmitter batchJobSubmitter() {
 		return new BatchJobSubmitterImpl();
 	}
+
+
 
 	/**
 	 * This method should be overridden to provide an actual completed

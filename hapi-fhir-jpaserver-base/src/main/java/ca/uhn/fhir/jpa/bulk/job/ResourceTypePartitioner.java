@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,20 +35,18 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ResourceTypePartitioner implements Partitioner {
 	private static final Logger ourLog = getLogger(ResourceTypePartitioner.class);
 
+
+	@Value("#{jobExecutionContext['jobUUID']}")
 	private String myJobUUID;
 
 	@Autowired
 	private BulkExportDaoSvc myBulkExportDaoSvc;
 
-	public ResourceTypePartitioner(String theJobUUID) {
-		myJobUUID = theJobUUID;
-	}
-
 	@Override
 	public Map<String, ExecutionContext> partition(int gridSize) {
 		Map<String, ExecutionContext> partitionContextMap = new HashMap<>();
 
-		Map<Long, String> idToResourceType = myBulkExportDaoSvc.getBulkJobCollectionIdToResourceTypeMap(	myJobUUID);
+		Map<Long, String> idToResourceType = myBulkExportDaoSvc.getBulkJobCollectionIdToResourceTypeMap(myJobUUID);
 
 		idToResourceType.entrySet().stream()
 			.forEach(entry -> {

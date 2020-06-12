@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.job.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -24,12 +25,15 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -59,7 +63,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("bulkExportJob")
 	private Job myBulkJob;
-
 
 	@Test
 	public void testPurgeExpiredJobs() {
@@ -188,6 +191,26 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testBatchJobIsCapableOfCreatingAnExportEntityIfNoJobIsProvided() throws Exception {
+		createResources();
+
+		//Add the UUID to the job
+		BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder();
+		paramBuilder.setReadChunkSize(100L)
+			.setOutputFormat(Constants.CT_FHIR_NDJSON)
+			.setResourceTypes(Arrays.asList("Patient", "Observation"));
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		String jobUUID = (String)jobExecution.getExecutionContext().get("jobUUID");
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobUUID);
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
+	}
+
+	@Test
 	public void testSubmitWithoutSpecificResources() {
 
 		// Create some resources to load
@@ -260,12 +283,13 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
 
 		//Add the UUID to the job
-		JobParametersBuilder paramBuilder = new JobParametersBuilder()
-			.addString("jobUUID", jobDetails.getJobId())
-			.addLong("readChunkSize", 10L);
-		myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+		BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder()
+			.setJobUUID(jobDetails.getJobId())
+			.setReadChunkSize(10L);
 
-		awaitJobCompletion(jobDetails.getJobId());
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
@@ -283,8 +307,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	}
 
-	public void awaitJobCompletion(String theJobId) throws InterruptedException {
-		await().until(() -> myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId).getStatus() == BulkJobStatusEnum.COMPLETE);
+	//Note that if the job is generated, and doesnt rely on an existed persisted BulkExportJobEntity, it will need to
+	//create one itself, which means that its jobUUID isnt known until it starts. to get around this, we move
+	public void awaitJobCompletion(JobExecution theJobExecution) throws InterruptedException {
+		await().until(() -> {
+			return theJobExecution.getStatus() == BatchStatus.COMPLETED;
+			//String jobUUID = theJobExecution.getExecutionContext().getString("jobUUID");
+			//return myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobUUID).getStatus() == BulkJobStatusEnum.COMPLETE;
+		});
 	}
 
 	@Test

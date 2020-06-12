@@ -32,10 +32,9 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
@@ -55,21 +54,34 @@ public class BulkExportJobConfig {
 	@Autowired
 	private PidToIBaseResourceProcessor myPidToIBaseResourceProcessor;
 
-	@Autowired
-	private TaskExecutor myTaskExecutor;
-
 	@Bean
+	@Lazy
 	public Job bulkExportJob() {
 		return myJobBuilderFactory.get("bulkExportJob")
 			.validator(jobExistsValidator())
-			.start(partitionStep())
-			.listener(bulkExportJobCompletionListener())
+			.start(createBulkExportEntityStep())
+			.next(partitionStep())
+			.next(closeJobStep())
 			.build();
 	}
 
 	@Bean
+	public Step createBulkExportEntityStep() {
+		return myStepBuilderFactory.get("createBulkExportEntityStep")
+			.tasklet(createBulkExportEntityTasklet())
+			.listener(bulkExportJobStartedListener())
+			.build();
+	}
+
+	@Bean
+	public CreateBulkExportEntityTasklet createBulkExportEntityTasklet() {
+		return new CreateBulkExportEntityTasklet();
+	}
+
+
+	@Bean
 	public JobParametersValidator jobExistsValidator() {
-		return new JobExistsParameterValidator();
+		return new BulkExportJobParameterValidator();
 	}
 
 
@@ -77,39 +89,51 @@ public class BulkExportJobConfig {
 	public Step bulkExportGenerateResourceFilesStep() {
 		return myStepBuilderFactory.get("bulkExportGenerateResourceFilesStep")
 			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(100) //1000 resources per generated file, as the reader returns 10 resources at a time.
-			.reader(bulkItemReader(null))
+			.reader(bulkItemReader())
 			.processor(myPidToIBaseResourceProcessor)
 			.writer(resourceToFileWriter())
 			.build();
 	}
 
+
+
 	@Bean
 	@JobScope
-	public BulkExportJobStatusChangeListener bulkExportJobCompletionListener() {
-		return new BulkExportJobStatusChangeListener();
+	public BulkExportJobCloser bulkExportJobCloser() {
+		return new BulkExportJobCloser();
+	}
+
+	@Bean
+	public Step closeJobStep() {
+		return myStepBuilderFactory.get("closeJobStep")
+			.tasklet(bulkExportJobCloser())
+			.build();
+	}
+
+	@Bean
+	@JobScope
+	public BulkExportJobStartedListener bulkExportJobStartedListener() {
+		return new BulkExportJobStartedListener();
 	}
 
 	@Bean
 	public Step partitionStep() {
 		return myStepBuilderFactory.get("partitionStep")
-			.partitioner("bulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner(null))
+			.partitioner("bulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
 			.step(bulkExportGenerateResourceFilesStep())
-			.taskExecutor(myTaskExecutor)
 			.build();
 	}
 
 	@Bean
 	@StepScope
-	public BulkItemReader bulkItemReader(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
-		BulkItemReader bulkItemReader = new BulkItemReader();
-		bulkItemReader.setJobUUID(theJobUUID);
-		return bulkItemReader;
+	public BulkItemReader bulkItemReader(){
+		return new BulkItemReader();
 	}
 
 	@Bean
 	@JobScope
-	public ResourceTypePartitioner bulkExportResourceTypePartitioner(@Value("#{jobParameters['jobUUID']}") String theJobUUID) {
-		return new ResourceTypePartitioner(theJobUUID);
+	public ResourceTypePartitioner bulkExportResourceTypePartitioner() {
+		return new ResourceTypePartitioner();
 	}
 
 	@Bean

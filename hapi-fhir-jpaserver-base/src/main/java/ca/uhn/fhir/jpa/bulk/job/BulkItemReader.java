@@ -68,6 +68,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 
 	private BulkExportJobEntity myJobEntity;
 
+	@Value("#{jobExecutionContext['jobUUID']}")
 	private String myJobUUID;
 
 	@Value("#{stepExecutionContext['resourceType']}")
@@ -103,10 +104,6 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 			myReadPids.add(myResultIterator.next());
 		}
 		myPidIterator = myReadPids.iterator();
-	}
-
-	public void setJobUUID(String theUUID) {
-		this.myJobUUID = theUUID;
 	}
 
 	@Override

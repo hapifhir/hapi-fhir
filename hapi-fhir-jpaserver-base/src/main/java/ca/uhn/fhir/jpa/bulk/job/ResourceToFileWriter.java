@@ -62,6 +62,9 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	@Value("#{stepExecutionContext['bulkExportCollectionEntityId']}")
 	private Long myBulkExportCollectionEntityId;
 
+	@Value("#{stepExecutionContext['resourceType']}")
+	private String myReosurceType;
+
 	private IFhirResourceDao<IBaseBinary> myBinaryDao;
 
 
@@ -109,16 +112,18 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	@Override
 	public void write(List<? extends List<IBaseResource>> theList) throws Exception {
 
+		int count = 0;
 		for (List<IBaseResource> resourceList : theList) {
 			for (IBaseResource nextFileResource : resourceList) {
 				myParser.encodeResourceToWriter(nextFileResource, myWriter);
 				myWriter.append("\n");
+				count++;
 			}
 		}
 
 		Optional<IIdType> createdId = flushToFiles();
 		if (createdId.isPresent()) {
-			ourLog.info("Created resources for bulk export file containing {} resources of type ", createdId.get().toUnqualifiedVersionless().getValue());
+			ourLog.info("Created {} resources for bulk export file containing {} resources of type {} ", count, createdId.get().toUnqualifiedVersionless().getValue(), myReosurceType);
 		}
 	}
 }
