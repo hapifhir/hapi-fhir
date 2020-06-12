@@ -58,7 +58,7 @@ public class BulkExportJobConfig {
 	@Lazy
 	public Job bulkExportJob() {
 		return myJobBuilderFactory.get("bulkExportJob")
-			.validator(jobExistsValidator())
+			.validator(bulkJobParameterValidator())
 			.start(createBulkExportEntityStep())
 			.next(partitionStep())
 			.next(closeJobStep())
@@ -80,7 +80,7 @@ public class BulkExportJobConfig {
 
 
 	@Bean
-	public JobParametersValidator jobExistsValidator() {
+	public JobParametersValidator bulkJobParameterValidator() {
 		return new BulkExportJobParameterValidator();
 	}
 
