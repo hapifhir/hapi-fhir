@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  * Similarity measure for two IBase name fields
  */
 public class NameMatcher implements IEmpiFieldMatcher {
+
 	private final EmpiPersonNameMatchModeEnum myMatchMode;
 
 	public NameMatcher(EmpiPersonNameMatchModeEnum theMatchMode) {
