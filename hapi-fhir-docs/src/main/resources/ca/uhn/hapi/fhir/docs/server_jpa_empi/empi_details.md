@@ -65,7 +65,7 @@ When a new Patient resource is compared with all other resources of that type in
 
 * CASE 2: All of the MATCHED Patient resources are already linked to the same Person -> a new Link is created between the new Patient and that Person and is set to MATCHED.
 
-* CASE 3: The MATCHED Patient resources link to more than one Person -> Mark all links as POSSIBLE_MATCHED.  All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.  These duplicates are manually reviewed later and either merged or marked as NO_MATCH and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICATE is the only link type that can have a Person as both the source and target of the link.
+* CASE 3: The MATCHED Patient resources link to more than one Person -> Mark all links as POSSIBLE_MATCH.  All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.  These duplicates are manually reviewed later and either merged or marked as NO_MATCH and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICATE is the only link type that can have a Person as both the source and target of the link.
 
 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, empi-link records are created with POSSIBLE_MATCH outcome and await manual assignment to either NO_MATCH or MATCHED.  Person resources are not changed.
 
