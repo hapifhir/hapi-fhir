@@ -61,7 +61,7 @@ Below are some simplifying principles HAPI EMPI enforces to reduce complexity an
 
 When a new Patient resource is compared with all other resources of that type in the repository, there are four possible cases:
 
-* CASE 1: No MATCHED and no POSSIBLE_MATCHED outcomes -> a new Person resource is created and linked to that Patient as MATCHED.  All fields are copied from the Patient to the Person.  If the incoming resource has an EID, it is copied to the Person.  Otherwise a new UUID is created and used as the internal EID.
+* CASE 1: No MATCHED and no POSSIBLE_MATCH outcomes -> a new Person resource is created and linked to that Patient as MATCHED.  All fields are copied from the Patient to the Person.  If the incoming resource has an EID, it is copied to the Person.  Otherwise a new UUID is created and used as the internal EID.
 
 * CASE 2: All of the MATCHED Patient resources are already linked to the same Person -> a new Link is created between the new Patient and that Person and is set to MATCHED.
 
