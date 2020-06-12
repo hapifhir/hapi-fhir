@@ -76,7 +76,7 @@ Here is a description of how each section of this document is configured.
 } ]
 ```
 
-* **matchFields** Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField return `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of metrics: `Matcher` and `Similarity`.  Matcher metrics return a `true` or `false` directly, whereas Similarity metrics return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 8.0.
+* **matchFields** Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of metrics: `Matcher` and `Similarity`.  Matcher metrics return a `true` or `false` directly, whereas Similarity metrics return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 8.0.
 
 By default, all matchFields have `exact=false` which means that they will have all diacritical marks removed and converted to upper case before matching.  `exact=true` can be added to any matchField to compare the strings as they are originally capitalized and accented.
 
@@ -262,4 +262,3 @@ The following metrics are currently supported:
 ```
 
 * **eidSystem**: The external EID system that the HAPI EMPI system should expect to see on incoming Patient resources. Must be a valid URI.  See [EMPI EID](/hapi-fhir/docs/server_jpa_empi/empi_eid.html) for details on how EIDs are managed by HAPI EMPI.
-
