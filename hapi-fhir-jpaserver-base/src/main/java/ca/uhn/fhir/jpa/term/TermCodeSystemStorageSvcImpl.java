@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -49,6 +48,7 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -199,23 +199,30 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.NEVER)
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
 		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
 
-		myEntityManager.flush();
-		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
-		cs.setCurrentVersion(null);
-		myCodeSystemDao.save(cs);
-		myCodeSystemDao.flush();
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.executeWithoutResult(t -> {
+			myEntityManager.flush();
+			TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
+			cs.setCurrentVersion(null);
+			myCodeSystemDao.save(cs);
+			myCodeSystemDao.flush();
+		});
 
 		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
 		for (TermCodeSystemVersion next : codeSystemVersions) {
 			deleteCodeSystemVersion(next.getPid());
 		}
-		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
-		myCodeSystemDao.delete(theCodeSystem);
 
-		myEntityManager.flush();
+		txTemplate.executeWithoutResult(t -> {
+			myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
+			myCodeSystemDao.delete(theCodeSystem);
+			myEntityManager.flush();
+		});
 	}
 
 	/**
@@ -679,27 +686,30 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 
+	@SuppressWarnings("ConstantConditions")
 	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, IHapiJpaRepository<T> theDao) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
-		int totalCount = theCounter.get();
+		int totalCount = txTemplate.execute(t -> theCounter.get());
 		StopWatch sw = new StopWatch();
 		count = 0;
 		while (true) {
-			Slice<Long> link = theLoader.get();
+			Slice<Long> link = txTemplate.execute(t -> theLoader.get());
 			if (!link.hasContent()) {
 				break;
 			}
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(t -> {
 				link.forEach(id -> theDao.deleteByPid(id));
 				return null;
 			});
 
 			count += link.getNumberOfElements();
-			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
+			ourLog.info(" * {} {} deleted ({}/{}) remaining - {}/sec - ETA: {}", count, theDescriptor, count, totalCount, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
+
 		}
 		theDao.flush();
 	}
