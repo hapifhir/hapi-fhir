@@ -26,7 +26,7 @@ Based on how well two patients match, the EMPI Rules may link the Patient to the
 
 Another thing that can happen in the linking process is HAPI EMPI can determine that two Person resources may be duplicates.  In this case, it marks them as POSSIBLE_DUPLICATE and the user can use [EMPI Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html) to either merge the two Persons or mark them as NO_MATCH in which case HAPI EMPI will know not to mark them as possible duplicates in the future.
 
-HAPI EMPI keeps track of which links were automatically established vs manually verified.  Manual links always take precedence over automatic links.  Once a link for a patient has been manually verified, HAPI EMPI won't touch it.
+HAPI EMPI keeps track of which links were automatically established vs manually verified.  Manual links always take precedence over automatic links.  Once a link for a patient has been manually verified, HAPI EMPI won't modify or remove it.
 
 ## EMPI Settings
 
