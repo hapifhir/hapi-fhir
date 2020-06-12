@@ -62,7 +62,7 @@ public class NameMatcher implements IEmpiFieldMatcher {
 		for (String leftGivenName : leftGivenNames) {
 			for (String rightGivenName : rightGivenNames) {
 				match |= leftGivenName.equals(rightGivenName) && leftFamilyName.equals(rightFamilyName);
-				if (myMatchMode == EmpiPersonNameMatchModeEnum.ANY_ORDER || myMatchMode == EmpiPersonNameMatchModeEnum.ANY_ORDER) {
+				if (myMatchMode == EmpiPersonNameMatchModeEnum.ANY_ORDER) {
 					match |= leftGivenName.equals(rightFamilyName) && leftFamilyName.equals(rightGivenName);
 				}
 			}
