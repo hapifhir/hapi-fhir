@@ -19,7 +19,7 @@ public class StringEncoderMatcher implements IEmpiStringMatcher {
 		try {
 			return myStringEncoder.encode(theLeftString).equals(myStringEncoder.encode(theRightString));
 		} catch (EncoderException e) {
-			ourLog.error("Failed to match strings '" + theLeftString + "' and '" + theRightString + "' using encoder " + myStringEncoder.getClass().getName(), e);
+			ourLog.error("Failed to match strings '{}' and '{}' using encoder {}", theLeftString, theRightString, myStringEncoder.getClass().getName(), e);
 		}
 		return false;
 	}
