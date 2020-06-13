@@ -13,7 +13,7 @@ import java.util.GregorianCalendar;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class DateMatcherTest extends BaseMatcherTest {
+public class DateMatcherR4Test extends BaseMatcherR4Test {
 
 	@Test
 	public void testExactDatePrecision() {

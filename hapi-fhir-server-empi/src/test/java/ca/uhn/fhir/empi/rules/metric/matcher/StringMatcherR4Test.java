@@ -11,7 +11,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class StringMatcherTest extends BaseMatcherTest {
+public class StringMatcherR4Test extends BaseMatcherR4Test {
 	@Test
 	public void testMetaphone() {
 		assertTrue(match(EmpiMetricEnum.METAPHONE, new StringType("Durie"), new StringType("dury")));
