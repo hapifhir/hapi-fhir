@@ -37,7 +37,9 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -188,8 +190,14 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Override
 	@Transactional(Transactional.TxType.REQUIRED)
 	public Long markAllResourcesForReindexing(String theType) {
+
 		String typeDesc;
 		if (isNotBlank(theType)) {
+			try {
+				myContext.getResourceType(theType);
+			} catch (DataFormatException e) {
+				throw new InvalidRequestException("Unknown resource type: " + theType);
+			}
 			myReindexJobDao.markAllOfTypeAsDeleted(theType);
 			typeDesc = theType;
 		} else {
