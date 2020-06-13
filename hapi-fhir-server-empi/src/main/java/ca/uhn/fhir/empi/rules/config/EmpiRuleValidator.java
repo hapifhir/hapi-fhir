@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
@@ -75,7 +76,7 @@ public class EmpiRuleValidator {
 	}
 
 	private void validateSearchParam(String theFieldName, String theTheResourceType, String theTheSearchParam) {
-		if ("*".equals(theTheResourceType)) {
+		if (EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE.equals(theTheResourceType)) {
 			validateResourceSearchParam(theFieldName, "Patient", theTheSearchParam);
 			validateResourceSearchParam(theFieldName, "Practitioner", theTheSearchParam);
 		} else {
@@ -113,7 +114,7 @@ public class EmpiRuleValidator {
 
 	private void validatePath(EmpiFieldMatchJson theFieldMatch) {
 		String resourceType = theFieldMatch.getResourceType();
-		if ("*".equals(resourceType)) {
+		if (EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE.equals(resourceType)) {
 			validatePatientPath(theFieldMatch);
 			validatePractitionerPath(theFieldMatch);
 		} else if ("Patient".equals(resourceType)) {
