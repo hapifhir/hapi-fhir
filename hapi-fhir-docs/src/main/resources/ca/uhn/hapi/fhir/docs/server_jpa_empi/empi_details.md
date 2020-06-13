@@ -51,7 +51,7 @@ Below are some simplifying principles HAPI EMPI enforces to reduce complexity an
 
 1. HAPI EMPI stores these extra link details in a table called `MPI_LINK`.
 
-1. Each record in an `MPI_LINK` table corresponds to a `link.target` entry on a Person resource.  HAPI EMPI uses the following convention for the Person.link.assurance level:
+1. Each record in the `MPI_LINK` table corresponds to a `link.target` entry on a Person resource unless it is a NO_MATCH record.  HAPI EMPI uses the following convention for the Person.link.assurance level:
     1. Level 1: not used
     1. Level 2: POSSIBLE_MATCH
     1. Level 3: AUTO MATCH
