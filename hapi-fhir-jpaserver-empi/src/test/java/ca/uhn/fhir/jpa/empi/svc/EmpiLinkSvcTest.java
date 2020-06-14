@@ -36,7 +36,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	public void compareEmptyPatients() {
 		Patient patient = new Patient();
 		patient.setId("Patient/1");
-		EmpiMatchResultEnum result = myEmpiResourceComparatorSvc.getMatchResult(patient, patient);
+		EmpiMatchResultEnum result = myEmpiResourceMatcherSvc.getMatchResult(patient, patient);
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, result);
 	}
 

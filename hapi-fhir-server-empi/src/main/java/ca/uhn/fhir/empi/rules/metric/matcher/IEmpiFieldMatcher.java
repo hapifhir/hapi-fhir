@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.similarity;
+package ca.uhn.fhir.empi.rules.metric.matcher;
 
 /*-
  * #%L
@@ -21,12 +21,12 @@ package ca.uhn.fhir.empi.rules.similarity;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.rules.metric.IEmpiFieldMetric;
 import org.hl7.fhir.instance.model.api.IBase;
 
-public class ReferenceMatchSimilarity implements IEmpiFieldSimilarity {
-	@Override
-	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
-		System.out.println("wip!");
-		return 1;
-	}
+/**
+ * Measure how similar two IBase (resource fields) are to one another.  1.0 means identical.  0.0 means completely different.
+ */
+public interface IEmpiFieldMatcher extends IEmpiFieldMetric {
+	boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact);
 }
