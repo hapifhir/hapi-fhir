@@ -190,6 +190,12 @@ public class AuthorizationInterceptorR4Test {
 			retVal.setId(new IdType("Patient", (long) theId));
 		}
 		retVal.addName().setFamily("FAM");
+		Identifier identifier = new Identifier();
+		identifier.setSystem("system");
+		identifier.setValue("code");
+		List<Identifier> identifierList = new ArrayList<>();
+		identifierList.add(identifier);
+		retVal.setIdentifier(identifierList);
 		return retVal;
 	}
 
@@ -2264,6 +2270,29 @@ public class AuthorizationInterceptorR4Test {
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
+	}
+
+	@Test
+	public void testReadByCompartmentReadByIdentifier() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().allResources().inCompartment("Patient", new IdType("Patient/123")).andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		ourReturn = Collections.singletonList(createPatient(123));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_identifier=system%7Ccode");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
