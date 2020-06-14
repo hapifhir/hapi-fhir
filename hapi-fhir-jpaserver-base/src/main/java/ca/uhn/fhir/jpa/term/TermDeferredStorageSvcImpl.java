@@ -64,7 +64,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	private boolean myProcessDeferred = true;
-	private List<TermCodeSystem> myCodeSystemsToDelete = Collections.synchronizedList(new ArrayList<>());
+	private List<TermCodeSystem> myDefferedCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
 	private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
@@ -109,7 +109,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
 		theCodeSystem.setCodeSystemUri("urn:uuid:" + UUID.randomUUID().toString());
 		myCodeSystemDao.save(theCodeSystem);
-		myCodeSystemsToDelete.add(theCodeSystem);
+		myDefferedCodeSystemsDeletions.add(theCodeSystem);
 	}
 
 	@Override
@@ -155,8 +155,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			ourLog.info("Saving {} deferred concept relationships...", count);
 			while (relCount < count && myConceptLinksToSaveLater.size() > 0) {
 				TermConceptParentChildLink next = myConceptLinksToSaveLater.remove(0);
+				assert next.getChild() != null;
+				assert next.getParent() != null;
 
-				if (!myConceptDao.findById(next.getChild().getId()).isPresent() || !myConceptDao.findById(next.getParent().getId()).isPresent()) {
+				if ((next.getChild().getId() == null || !myConceptDao.findById(next.getChild().getId()).isPresent())
+					|| (next.getParent().getId() == null || !myConceptDao.findById(next.getParent().getId()).isPresent())) {
 					ourLog.warn("Not inserting link from child {} to parent {} because it appears to have been deleted", next.getParent().getCode(), next.getChild().getCode());
 					continue;
 				}
@@ -194,6 +197,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myDeferredValueSets.clear();
 		myDeferredConceptMaps.clear();
 		myDeferredConcepts.clear();
+		myDefferedCodeSystemsDeletions.clear();
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -243,10 +247,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private void processDeferredCodeSystemDeletions() {
-		for (TermCodeSystem next : myCodeSystemsToDelete) {
+		for (TermCodeSystem next : myDefferedCodeSystemsDeletions) {
 			myCodeSystemStorageSvc.deleteCodeSystem(next);
 		}
-		myCodeSystemsToDelete.clear();
+		myDefferedCodeSystemsDeletions.clear();
 	}
 
 	@Override
@@ -277,7 +281,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private boolean isDeferredCodeSystemDeletions() {
-		return !myCodeSystemsToDelete.isEmpty();
+		return !myDefferedCodeSystemsDeletions.isEmpty();
 	}
 
 	private boolean isDeferredConcepts() {
