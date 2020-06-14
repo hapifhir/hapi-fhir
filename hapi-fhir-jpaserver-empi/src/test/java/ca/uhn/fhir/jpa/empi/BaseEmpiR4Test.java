@@ -256,6 +256,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return thePatient;
 	}
 
+	protected Person addExternalEID(Person thePerson, String theEID) {
+		thePerson.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
+		return thePerson;
+	}
+
 	protected Patient clearExternalEIDs(Patient thePatient) {
 		thePatient.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
 		return thePatient;

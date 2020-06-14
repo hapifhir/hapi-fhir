@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -55,10 +56,12 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	private IBinaryStorageEntityDao myBinaryStorageEntityDao;
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	@Override
 	@Transactional(Transactional.TxType.SUPPORTS)
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) {
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
 		Date publishedDate = new Date();
 
 		HashingInputStream hashingInputStream = createHashingInputStream(theInputStream);
@@ -74,7 +77,13 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		Session session = (Session) myEntityManager.getDelegate();
 		LobHelper lobHelper = session.getLobHelper();
-		Blob dataBlob = lobHelper.createBlob(countingInputStream, 0);
+		Blob dataBlob;
+		if (myDaoConfig.isPreloadBlobFromInputStream()) {
+			byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
+			dataBlob = lobHelper.createBlob(loadedStream);
+		}  else {
+			dataBlob = lobHelper.createBlob(countingInputStream, 0);
+		}
 		entity.setBlob(dataBlob);
 
 		// Save the entity

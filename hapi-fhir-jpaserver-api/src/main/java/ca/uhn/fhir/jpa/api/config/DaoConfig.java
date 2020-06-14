@@ -223,6 +223,11 @@ public class DaoConfig {
 	private boolean myLastNEnabled = false;
 
 	/**
+	 * @since 5.1.0
+	 */
+	private boolean myPreloadBlobFromInputStream = false;
+
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -2081,6 +2086,44 @@ public class DaoConfig {
 	 */
 	public void setMaximumDeleteConflictQueryCount(Integer theMaximumDeleteConflictQueryCount) {
 		myMaximumDeleteConflictQueryCount = theMaximumDeleteConflictQueryCount;
+	}
+
+	/**
+	 * <p>
+	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
+	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
+	 * in advance.
+	 * </p>
+	 * <p>
+	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public boolean isPreloadBlobFromInputStream() {
+		return myPreloadBlobFromInputStream;
+	}
+
+	/**
+	 * <p>
+	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
+	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
+	 * in advance.
+	 * </p>
+	 * <p>
+	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
+		myPreloadBlobFromInputStream = thePreloadBlobFromInputStream;
 	}
 
 }

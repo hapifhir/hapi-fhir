@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -50,6 +52,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
@@ -57,8 +60,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@Autowired
 	protected ITermConceptDao myConceptDao;
 	@Autowired
+	protected ITermCodeSystemDao myCodeSystemDao;
+	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	private boolean myProcessDeferred = true;
+	private List<TermCodeSystem> myCodeSystemsToDelete = Collections.synchronizedList(new ArrayList<>());
 	private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
 	private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
@@ -96,6 +102,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	public void addValueSetsToStorageQueue(List<ValueSet> theValueSets) {
 		Validate.notNull(theValueSets);
 		myDeferredValueSets.addAll(theValueSets);
+	}
+
+	@Override
+	@Transactional
+	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
+		theCodeSystem.setCodeSystemUri("urn:uuid:" + UUID.randomUUID().toString());
+		myCodeSystemDao.save(theCodeSystem);
+		myCodeSystemsToDelete.add(theCodeSystem);
 	}
 
 	@Override
@@ -194,7 +208,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			if (!isDeferredConcepts() &&
 				!isConceptLinksToSaveLater() &&
 				!isDeferredValueSets() &&
-				!isDeferredConceptMaps()) {
+				!isDeferredConceptMaps() &&
+				!isDeferredCodeSystemDeletions()) {
 				return;
 			}
 
@@ -213,6 +228,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 					return null;
 				});
 			}
+
 			if (isDeferredConceptMaps()) {
 				tt.execute(t -> {
 					processDeferredConceptMaps();
@@ -220,7 +236,17 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 				});
 			}
 
+			if (isDeferredCodeSystemDeletions()) {
+				processDeferredCodeSystemDeletions();
+			}
 		}
+	}
+
+	private void processDeferredCodeSystemDeletions() {
+		for (TermCodeSystem next : myCodeSystemsToDelete) {
+			myCodeSystemStorageSvc.deleteCodeSystem(next);
+		}
+		myCodeSystemsToDelete.clear();
 	}
 
 	@Override
@@ -231,6 +257,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		retVal &= !isConceptLinksToSaveLater();
 		retVal &= !isDeferredValueSets();
 		retVal &= !isDeferredConceptMaps();
+		retVal &= !isDeferredCodeSystemDeletions();
 		return retVal;
 	}
 
@@ -247,6 +274,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private boolean isDeferredConceptsOrConceptLinksToSaveLater() {
 		return isDeferredConcepts() || isConceptLinksToSaveLater();
+	}
+
+	private boolean isDeferredCodeSystemDeletions() {
+		return !myCodeSystemsToDelete.isEmpty();
 	}
 
 	private boolean isDeferredConcepts() {

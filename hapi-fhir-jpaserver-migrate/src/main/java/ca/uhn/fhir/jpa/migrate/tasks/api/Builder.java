@@ -343,12 +343,12 @@ public class Builder {
 					myNullable = theNullable;
 				}
 
-				public void withType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType) {
+				public void withType(ColumnTypeEnum theColumnType) {
 					withType(theColumnType, null);
 				}
 
-				public void withType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, Integer theLength) {
-					if (theColumnType == BaseTableColumnTypeTask.ColumnTypeEnum.STRING) {
+				public void withType(ColumnTypeEnum theColumnType, Integer theLength) {
+					if (theColumnType == ColumnTypeEnum.STRING) {
 						if (theLength == null || theLength == 0) {
 							throw new IllegalArgumentException("Can not specify length 0 for column of type " + theColumnType);
 						}
@@ -439,11 +439,11 @@ public class Builder {
 					myNullable = theNullable;
 				}
 
-				public BuilderCompleteTask type(AddColumnTask.ColumnTypeEnum theColumnType) {
+				public BuilderCompleteTask type(ColumnTypeEnum theColumnType) {
 					return type(theColumnType, null);
 				}
 
-				public BuilderCompleteTask type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
+				public BuilderCompleteTask type(ColumnTypeEnum theColumnType, Integer theLength) {
 					AddColumnTask task = new AddColumnTask(myRelease, myVersion);
 					task.setColumnName(myColumnName);
 					task.setNullable(myNullable);

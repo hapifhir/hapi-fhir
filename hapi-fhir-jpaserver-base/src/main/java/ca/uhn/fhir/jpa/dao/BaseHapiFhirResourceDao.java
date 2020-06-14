@@ -932,7 +932,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public IBaseResource readByPid(ResourcePersistentId thePid) {
+	public T readByPid(ResourcePersistentId thePid) {
 		StopWatch w = new StopWatch();
 
 		Optional<ResourceTable> entity = myResourceTableDao.findById(thePid.getIdAsLong());
