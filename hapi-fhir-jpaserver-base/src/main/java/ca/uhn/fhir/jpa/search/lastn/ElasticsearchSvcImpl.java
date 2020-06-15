@@ -95,8 +95,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	// Aggregation Constants
 	private final String GROUP_BY_SUBJECT = "group_by_subject";
-	private final String GROUP_BY_SYSTEM = "group_by_system";
-	private final String GROUP_BY_CODE = "group_by_code";
+//	private final String GROUP_BY_SYSTEM = "group_by_system";
+	private final String GROUP_BY_CODE_ID = "group_by_code_id";
 	private final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
 
 	// Observation index document element names
@@ -277,17 +277,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private TermsAggregationBuilder createObservationCodeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field(OBSERVATION_CODEVALUE_FIELD_NAME);
-		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
+		TermsAggregationBuilder observationCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE_ID, ValueType.STRING).field(OBSERVATION_CODE_IDENTIFIER_FIELD_NAME);
+		observationCodeAggregationBuilder.order(BucketOrder.key(true));
 		// Top Hits Aggregation
-		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
+		observationCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
 			.sort(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, SortOrder.DESC)
 			.fetchSource(theTopHitsInclude, null).size(theMaxNumberObservationsPerCode));
-		observationCodeCodeAggregationBuilder.size(10000);
-		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
-		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
-		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
-		return observationCodeSystemAggregationBuilder;
+		observationCodeAggregationBuilder.size(10000);
+
+		return observationCodeAggregationBuilder;
 	}
 
 	private SearchResponse executeSearchRequest(SearchRequest searchRequest) throws IOException {
@@ -355,12 +353,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	private List<? extends Terms.Bucket> getObservationCodeBuckets(Aggregations theObservationCodeSystemAggregations) {
 		List<Terms.Bucket> retVal = new ArrayList<>();
-		ParsedTerms aggregatedObservationCodeSystems = theObservationCodeSystemAggregations.get(GROUP_BY_SYSTEM);
-		for(Terms.Bucket observationCodeSystem : aggregatedObservationCodeSystems.getBuckets()) {
-			Aggregations observationCodeCodeAggregations = observationCodeSystem.getAggregations();
-			ParsedTerms aggregatedObservationCodeCodes = observationCodeCodeAggregations.get(GROUP_BY_CODE);
-			retVal.addAll(aggregatedObservationCodeCodes.getBuckets());
-		}
+//		ParsedTerms aggregatedObservationCodeSystems = theObservationCodeSystemAggregations.get(GROUP_BY_SYSTEM);
+		ParsedTerms aggregatedObservationCode = theObservationCodeSystemAggregations.get(GROUP_BY_CODE_ID);
+//		for(Terms.Bucket observationCodeSystem : aggregatedObservationCodeSystems.getBuckets()) {
+//			Aggregations observationCodeCodeAggregations = observationCodeSystem.getAggregations();
+//			ParsedTerms aggregatedObservationCodeCodes = observationCodeCodeAggregations.get(GROUP_BY_CODE);
+//			retVal.addAll(aggregatedObservationCodeCodes.getBuckets());
+//		}
+		retVal.addAll(aggregatedObservationCode.getBuckets());
 		return retVal;
 	}
 
@@ -590,7 +590,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@VisibleForTesting
 	public List<ObservationJson> executeLastNWithAllFieldsForTest(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext) {
-		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, null, t -> t, 100);
+		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, null, t -> t, 200);
 	}
 
 	@VisibleForTesting

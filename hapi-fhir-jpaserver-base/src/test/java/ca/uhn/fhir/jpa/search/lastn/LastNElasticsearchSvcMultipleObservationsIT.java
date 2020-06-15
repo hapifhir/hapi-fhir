@@ -345,6 +345,18 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
 		assertEquals(0, observations.size());
 
+		// Invalid observation combination of observation system and code
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(validPatientParam));
+		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(validCategoryCodeParam));
+		codeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-alt-code-1");
+		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
+		searchParameterMap.add(Observation.SP_DATE, validDateParam);
+		searchParameterMap.setLastNMax(100);
+
+		observations = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
+		assertEquals(0, observations.size());
+
 		// Invalid category code
 		searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(validPatientParam));
@@ -457,17 +469,22 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	private void createMultiplePatientsAndObservations() throws IOException {
 		// Create CodeableConcepts for two Codes, each with three codings.
+
 //		String codeableConceptId1 = UUID.randomUUID().toString();
 		CodeJson codeJson1 = new CodeJson();
 		codeJson1.setCodeableConceptText("Test Codeable Concept Field for First Code");
 //		codeJson1.setCodeableConceptId(codeableConceptId1);
 		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "1-Observation Code1");
+		codeJson1.addCoding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-1", "test-alt-code-1 display");
+		codeJson1.addCoding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-1", "test-second-alt-code-1 display");
 
 //		String codeableConceptId2 = UUID.randomUUID().toString();
 		CodeJson codeJson2 = new CodeJson();
 		codeJson2.setCodeableConceptText("Test Codeable Concept Field for Second Code");
 //		codeJson2.setCodeableConceptId(codeableConceptId1);
 		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "2-Observation Code2");
+		codeJson2.addCoding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-2", "test-alt-code-2 display");
+		codeJson2.addCoding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-2", "test-second-alt-code-2 display");
 
 		// Create CodeableConcepts for two categories, each with three codings.
 		// Create three codings and first category CodeableConcept

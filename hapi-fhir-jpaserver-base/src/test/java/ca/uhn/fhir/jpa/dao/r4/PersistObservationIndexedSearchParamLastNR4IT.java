@@ -289,14 +289,19 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 				observation.setEffective(new DateTimeType(effectiveDtm));
 
 				testObservationPersist.indexObservation(observation);
+
+				elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+				elasticsearchSvc.updateObservationCode(observationId.getIdPart());
+				elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+				elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 			}
 
 		}
 
 		multiSubjectParams = new ReferenceAndListParam().addAnd(subjectParams);
 
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+//		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+//		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 
 	}
 

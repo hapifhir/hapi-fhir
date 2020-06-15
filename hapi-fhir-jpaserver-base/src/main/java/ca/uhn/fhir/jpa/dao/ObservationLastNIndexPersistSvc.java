@@ -86,12 +86,12 @@ public class ObservationLastNIndexPersistSvc {
 
 		// Determine if an index already exists for Observation:
 		ObservationJson indexedObservation = null;
-		if (resourcePID != null) {
-			indexedObservation = myElasticsearchSvc.getObservationDocument(resourcePID);
-		}
-		if (indexedObservation == null) {
+//		if (resourcePID != null) {
+//			indexedObservation = myElasticsearchSvc.getObservationDocument(resourcePID);
+//		}
+//		if (indexedObservation == null) {
 			indexedObservation = new ObservationJson();
-		}
+//		}
 
 		indexedObservation.setEffectiveDtm(theEffectiveDtm);
 		indexedObservation.setIdentifier(resourcePID);
