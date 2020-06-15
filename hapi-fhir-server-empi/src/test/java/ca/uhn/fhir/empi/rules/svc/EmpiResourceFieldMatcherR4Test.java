@@ -1,8 +1,7 @@
 package ca.uhn.fhir.empi.rules.svc;
 
-import ca.uhn.fhir.empi.BaseR4Test;
-import ca.uhn.fhir.empi.rules.json.DistanceMetricEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
+import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
@@ -16,8 +15,8 @@ import static junit.framework.TestCase.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
-public class EmpiResourceFieldComparatorR4Test extends BaseR4Test {
-	protected EmpiResourceFieldComparator myComparator;
+public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
+	protected EmpiResourceFieldMatcher myComparator;
 	private Patient myJohn;
 	private Patient myJohny;
 
@@ -25,7 +24,8 @@ public class EmpiResourceFieldComparatorR4Test extends BaseR4Test {
 	public void before() {
 		super.before();
 
-		myComparator = new EmpiResourceFieldComparator(ourFhirContext, myGivenNameMatchField);
+
+		myComparator = new EmpiResourceFieldMatcher(ourFhirContext, myGivenNameMatchField);
 		myJohn = buildJohn();
 		myJohny = buildJohny();
 	}
@@ -64,9 +64,9 @@ public class EmpiResourceFieldComparatorR4Test extends BaseR4Test {
 				.setName("patient-foo")
 				.setResourceType("Patient")
 				.setResourcePath("foo")
-				.setMetric(DistanceMetricEnum.COSINE)
+				.setMetric(EmpiMetricEnum.COSINE)
 				.setMatchThreshold(NAME_THRESHOLD);
-			EmpiResourceFieldComparator comparator = new EmpiResourceFieldComparator(ourFhirContext, matchField);
+			EmpiResourceFieldMatcher comparator = new EmpiResourceFieldMatcher(ourFhirContext, matchField);
 			comparator.match(myJohn, myJohny);
 			fail();
 		} catch (DataFormatException e) {

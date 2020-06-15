@@ -71,11 +71,11 @@ public class EmpiCandidateSearchSvc {
 	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource) {
 		Map<Long, IAnyResource> matchedPidsToResources = new HashMap<>();
 
-		List<EmpiFilterSearchParamJson> filterSearchParams = myEmpiConfig.getEmpiRules().getFilterSearchParams();
+		List<EmpiFilterSearchParamJson> filterSearchParams = myEmpiConfig.getEmpiRules().getCandidateFilterSearchParams();
 
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
 
-		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiConfig.getEmpiRules().getResourceSearchParams()) {
+		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiConfig.getEmpiRules().getCandidateSearchParams()) {
 
 			if (!isSearchParamForResource(theResourceType, resourceSearchParam)) {
 				continue;
