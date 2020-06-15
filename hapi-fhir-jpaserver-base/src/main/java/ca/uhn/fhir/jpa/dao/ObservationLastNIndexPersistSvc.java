@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
+//import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
@@ -108,14 +108,14 @@ public class ObservationLastNIndexPersistSvc {
 	private void addCodeToObservationIndex(List<IBase> theObservationCodeCodeableConcepts,
 														ObservationJson theIndexedObservation) {
 		// Determine if a Normalized ID was created previously for Observation Code
-		String existingObservationCodeNormalizedId = getCodeCodeableConceptId(theObservationCodeCodeableConcepts.get(0));
+//		String existingObservationCodeNormalizedId = getCodeCodeableConceptId(theObservationCodeCodeableConcepts.get(0));
 
 		// Create/update normalized Observation Code index record
 		CodeJson codeableConceptField =
-			getCodeCodeableConcept(theObservationCodeCodeableConcepts.get(0),
-				existingObservationCodeNormalizedId);
+			getCodeCodeableConcept(theObservationCodeCodeableConcepts.get(0)); //,
+//				existingObservationCodeNormalizedId);
 
-		myElasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptField.getCodeableConceptId(), codeableConceptField);
+//		myElasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptField.getCodeableConceptId(), codeableConceptField);
 
 		theIndexedObservation.setCode(codeableConceptField);
 		theIndexedObservation.setCode_concept_id(codeableConceptField.getCodeableConceptId());
@@ -144,11 +144,11 @@ public class ObservationLastNIndexPersistSvc {
 		return categoryCodeableConcept;
 	}
 
-	private CodeJson getCodeCodeableConcept(IBase theValue, String observationCodeNormalizedId) {
+	private CodeJson getCodeCodeableConcept(IBase theValue) { //}, String observationCodeNormalizedId) {
 		String text = mySearchParameterExtractor.getDisplayTextFromCodeableConcept(theValue);
 		CodeJson codeCodeableConcept = new CodeJson();
 		codeCodeableConcept.setCodeableConceptText(text);
-		codeCodeableConcept.setCodeableConceptId(observationCodeNormalizedId);
+//		codeCodeableConcept.setCodeableConceptId(observationCodeNormalizedId);
 
 		List<IBase> codings = mySearchParameterExtractor.getCodingsFromCodeableConcept(theValue);
 		for (IBase nextCoding : codings) {
@@ -158,7 +158,7 @@ public class ObservationLastNIndexPersistSvc {
 		return codeCodeableConcept;
 	}
 
-	private String getCodeCodeableConceptId(IBase theValue) {
+/*	private String getCodeCodeableConceptId(IBase theValue) {
 		List<IBase> codings = mySearchParameterExtractor.getCodingsFromCodeableConcept(theValue);
 		Optional<String> codeCodeableConceptIdOptional = Optional.empty();
 
@@ -182,7 +182,7 @@ public class ObservationLastNIndexPersistSvc {
 		}
 
 		return codeCodeableConceptIdOptional.orElse(UUID.randomUUID().toString());
-	}
+	}*/
 
 	private void addCategoryCoding(IBase theValue, CodeJson theCategoryCodeableConcept) {
 		ResourceIndexedSearchParamToken param = mySearchParameterExtractor.createSearchParamForCoding("Observation",

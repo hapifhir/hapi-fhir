@@ -457,16 +457,16 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	private void createMultiplePatientsAndObservations() throws IOException {
 		// Create CodeableConcepts for two Codes, each with three codings.
-		String codeableConceptId1 = UUID.randomUUID().toString();
+//		String codeableConceptId1 = UUID.randomUUID().toString();
 		CodeJson codeJson1 = new CodeJson();
 		codeJson1.setCodeableConceptText("Test Codeable Concept Field for First Code");
-		codeJson1.setCodeableConceptId(codeableConceptId1);
+//		codeJson1.setCodeableConceptId(codeableConceptId1);
 		codeJson1.addCoding("http://mycodes.org/fhir/observation-code", "test-code-1", "1-Observation Code1");
 
-		String codeableConceptId2 = UUID.randomUUID().toString();
+//		String codeableConceptId2 = UUID.randomUUID().toString();
 		CodeJson codeJson2 = new CodeJson();
 		codeJson2.setCodeableConceptText("Test Codeable Concept Field for Second Code");
-		codeJson2.setCodeableConceptId(codeableConceptId1);
+//		codeJson2.setCodeableConceptId(codeableConceptId1);
 		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "2-Observation Code2");
 
 		// Create CodeableConcepts for two categories, each with three codings.
@@ -501,19 +501,26 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 				if (entryCount % 2 == 1) {
 					observationJson.setCategories(categoryConcepts1);
 					observationJson.setCode(codeJson1);
-					observationJson.setCode_concept_id(codeableConceptId1);
-					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId1, codeJson1));
+//					observationJson.setCode_concept_id(codeableConceptId1);
+//					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId1, codeJson1));
 				} else {
 					observationJson.setCategories(categoryConcepts2);
 					observationJson.setCode(codeJson2);
-					observationJson.setCode_concept_id(codeableConceptId2);
-					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId2, codeJson2));
+//					observationJson.setCode_concept_id(codeableConceptId2);
+//					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId2, codeJson2));
 				}
 
 				Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10-entryCount)*3600*1000));
 				observationJson.setEffectiveDtm(effectiveDtm);
 
 				assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(identifier, observationJson));
+				elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+
+				elasticsearchSvc.updateObservationCode(identifier);
+				elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+				elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+
+				observationJson = elasticsearchSvc.getObservationDocument(identifier);
 
 				if (createdPatientObservationMap.containsKey(subject)) {
 					Map<String, List<Date>> observationCodeMap = createdPatientObservationMap.get(subject);
@@ -540,9 +547,6 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 			}
 		}
 
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
-
 	}
 
 	@Test
@@ -553,10 +557,14 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		assertEquals(2, observations.size());
 
-		String observationCode1 = observations.get(0).getCode_coding_code_system_hash();
-		String observationCode2 = observations.get(1).getCode_coding_code_system_hash();
+		List<String> observationCode1 = observations.get(0).getCode_coding_code_system_hash();
+		List<String> observationCode2 = observations.get(1).getCode_coding_code_system_hash();
 
-		assertNotEquals(observationCode1, observationCode2);
+		assertEquals(observationCode1.size(), observationCode2.size());
+		for (int idx =0; idx<observationCode1.size(); idx++) {
+			assertNotEquals(observationCode1.get(idx), observationCode2.get(idx));
+		}
+
 
 	}
 

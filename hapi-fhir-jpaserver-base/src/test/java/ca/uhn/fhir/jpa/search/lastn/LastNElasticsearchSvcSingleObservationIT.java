@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -73,7 +74,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	final String THIRDCATEGORYTHIRDCODINGCODE = "test-2nd-alt-vitals-panel";
 	final String THIRDCATEGORYTHIRDCODINGDISPLAY = "test-2nd-alt-vitals-panel display";
 
-	final String OBSERVATIONSINGLECODEID = UUID.randomUUID().toString();
+//	final String OBSERVATIONSINGLECODEID = UUID.randomUUID().toString();
 	final String OBSERVATIONCODETEXT = "Test Codeable Concept Field for Code";
 	final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	final String CODEFIRSTCODINGCODE = "test-code";
@@ -120,22 +121,32 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(1, observationIdsOnly.size());
 		assertEquals(RESOURCEPID, observationIdsOnly.get(0));
 
+		ObservationJson observationJson = elasticsearchSvc.getObservationDocument(RESOURCEPID);
+		validateFullObservationSearch(observationJson);
+
 		// execute Observation search for all search fields
 		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
+		assertEquals(1, observations.size());
+		observationJson = observations.get(0);
+		validateFullObservationSearch(observationJson);
 
-		validateFullObservationSearch(observations);
+		// delete Observation
+		elasticsearchSvc.deleteObservationDocument(RESOURCEPID);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		observationJson = elasticsearchSvc.getObservationDocument(RESOURCEPID);
+		assertNull(observationJson);
+
 	}
 
-	private void validateFullObservationSearch(List<ObservationJson> observations) throws IOException {
+	private void validateFullObservationSearch(ObservationJson observation) throws IOException {
 
-		assertEquals(1, observations.size());
-		ObservationJson observation = observations.get(0);
 		assertEquals(RESOURCEPID, observation.getIdentifier());
 
 		assertEquals(SUBJECTID, observation.getSubject());
 		assertEquals(RESOURCEPID, observation.getIdentifier());
 		assertEquals(EFFECTIVEDTM, observation.getEffectiveDtm());
-		assertEquals(OBSERVATIONSINGLECODEID, observation.getCode_concept_id());
+//		assertEquals(OBSERVATIONSINGLECODEID, observation.getCode_concept_id());
+		assertEquals(ElasticsearchSvcImpl.INITIAL_OBSERVATION_CODE_ID, observation.getCode_concept_id());
 
 		List<String> category_concept_text_values = observation.getCategory_concept_text();
 		assertEquals(3, category_concept_text_values.size());
@@ -216,25 +227,25 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		String code_concept_text_values = observation.getCode_concept_text();
 		assertEquals(OBSERVATIONCODETEXT, code_concept_text_values);
 
-		String code_coding_systems = observation.getCode_coding_system();
-		assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems);
+		List<String> code_coding_systems = observation.getCode_coding_system();
+		assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems.get(0));
 
-		String code_coding_codes = observation.getCode_coding_code();
-		assertEquals(CODEFIRSTCODINGCODE, code_coding_codes);
+		List<String> code_coding_codes = observation.getCode_coding_code();
+		assertEquals(CODEFIRSTCODINGCODE, code_coding_codes.get(0));
 
-		String code_coding_display = observation.getCode_coding_display();
-		assertEquals(CODEFIRSTCODINGDISPLAY, code_coding_display);
+		List<String> code_coding_display = observation.getCode_coding_display();
+		assertEquals(CODEFIRSTCODINGDISPLAY, code_coding_display.get(0));
 
-		String code_coding_code_system_hash = observation.getCode_coding_code_system_hash();
-		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash);
+		List<String> code_coding_code_system_hash = observation.getCode_coding_code_system_hash();
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash.get(0));
 
 		// Retrieve all Observation codes
-		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
+/*		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
 		assertEquals(1, codes.size());
 		CodeJson persistedObservationCode = codes.get(0);
 
 		String persistedCodeConceptID = persistedObservationCode.getCodeableConceptId();
-		assertEquals(OBSERVATIONSINGLECODEID, persistedCodeConceptID);
+		assertEquals(ElasticsearchSvcImpl.INITIAL_OBSERVATION_CODE_ID, persistedCodeConceptID);
 		String persistedCodeConceptText = persistedObservationCode.getCodeableConceptText();
 		assertEquals(OBSERVATIONCODETEXT, persistedCodeConceptText);
 
@@ -253,7 +264,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		List<String> persistedCodeCodingCodeSystemHashes = persistedObservationCode.getCoding_code_system_hash();
 		assertEquals(1, persistedCodeCodingCodeSystemHashes.size());
 		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), persistedCodeCodingCodeSystemHashes.get(0));
-
+*/
 
 	}
 
@@ -290,7 +301,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		indexedObservation.setCategories(categoryConcepts);
 
 		// Create CodeableConcept for Code with three codings.
-		indexedObservation.setCode_concept_id(OBSERVATIONSINGLECODEID);
+//		indexedObservation.setCode_concept_id(OBSERVATIONSINGLECODEID);
 		CodeJson codeableConceptField = new CodeJson();
 		codeableConceptField.setCodeableConceptText(OBSERVATIONCODETEXT);
 		codeableConceptField.addCoding(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE, CODEFIRSTCODINGDISPLAY);
@@ -298,8 +309,8 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 		assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(RESOURCEPID, indexedObservation));
 
-		codeableConceptField.setCodeableConceptId(OBSERVATIONSINGLECODEID);
-		assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(OBSERVATIONSINGLECODEID, codeableConceptField));
+//		codeableConceptField.setCodeableConceptId(OBSERVATIONSINGLECODEID);
+//		assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(OBSERVATIONSINGLECODEID, codeableConceptField));
 
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);

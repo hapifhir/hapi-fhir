@@ -39,16 +39,16 @@ public class CodeJson {
     private String myCodeableConceptText;
 
     @JsonProperty(value = "codingcode", required = false)
-    private List<String> myCoding_code = new ArrayList<>();
+    private final List<String> myCoding_code = new ArrayList<>();
 
     @JsonProperty(value = "codingcode_system_hash", required = true)
-    private List<String> myCoding_code_system_hash = new ArrayList<>();
+    private final List<String> myCoding_code_system_hash = new ArrayList<>();
 
     @JsonProperty(value = "codingdisplay", required = false)
-    private List<String> myCoding_display = new ArrayList<>();
+    private final List<String> myCoding_display = new ArrayList<>();
 
     @JsonProperty(value = "codingsystem", required = false)
-    private List<String> myCoding_system = new ArrayList<>();
+    private final List<String> myCoding_system = new ArrayList<>();
 
     public CodeJson(){
     }
@@ -62,6 +62,13 @@ public class CodeJson {
 		myCoding_system.add(theCoding_system);
 		myCoding_display.add(theCoding_display);
 		myCoding_code_system_hash.add(String.valueOf(CodeSystemHash.hashCodeSystem(theCoding_system, theCoding_code)));
+	}
+
+	public void addCoding(List<String> theCoding_system, List<String> theCoding_code, List<String> theCoding_display, List<String> theCoding_code_system_hash) {
+		myCoding_code.addAll(theCoding_code);
+		myCoding_system.addAll(theCoding_system);
+		myCoding_display.addAll(theCoding_display);
+		myCoding_code_system_hash.addAll(theCoding_code_system_hash);
 	}
 
 	public String getCodeableConceptId() {

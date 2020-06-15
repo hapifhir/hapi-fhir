@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.search.lastn.json;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,19 +39,19 @@ public class ObservationJson {
 	private String mySubject;
 
 	@JsonProperty(value = "categoryconcepttext", required = false)
-	private List<String> myCategory_concept_text = new ArrayList<>();
+	private final List<String> myCategory_concept_text = new ArrayList<>();
 
 	@JsonProperty(value = "categoryconceptcodingcode", required = false)
-	private List<List<String>> myCategory_coding_code = new ArrayList<>();
+	private final List<List<String>> myCategory_coding_code = new ArrayList<>();
 
 	@JsonProperty(value = "categoryconceptcodingcode_system_hash", required = false)
-	private List<List<String>> myCategory_coding_code_system_hash = new ArrayList<>();
+	private final List<List<String>> myCategory_coding_code_system_hash = new ArrayList<>();
 
 	@JsonProperty(value = "categoryconceptcodingdisplay", required = false)
-	private List<List<String>> myCategory_coding_display = new ArrayList<>();
+	private final List<List<String>> myCategory_coding_display = new ArrayList<>();
 
 	@JsonProperty(value = "categoryconceptcodingsystem", required = false)
-	private List<List<String>> myCategory_coding_system = new ArrayList<>();
+	private final List<List<String>> myCategory_coding_system = new ArrayList<>();
 
 	@JsonProperty(value = "codeconceptid", required = false)
 	private String myCode_concept_id;
@@ -61,16 +60,16 @@ public class ObservationJson {
 	private String myCode_concept_text;
 
 	@JsonProperty(value = "codeconceptcodingcode", required = false)
-	private String myCode_coding_code;
+	private final List<String> myCode_coding_code = new ArrayList<>();
 
 	@JsonProperty(value = "codeconceptcodingcode_system_hash", required = false)
-	private String myCode_coding_code_system_hash;
+	private final List<String> myCode_coding_code_system_hash = new ArrayList<>();
 
 	@JsonProperty(value = "codeconceptcodingdisplay", required = false)
-	private String myCode_coding_display;
+	private final List<String> myCode_coding_display = new ArrayList<>();
 
 	@JsonProperty(value = "codeconceptcodingsystem", required = false)
-	private String myCode_coding_system;
+	private final List<String> myCode_coding_system = new ArrayList<>();
 
 	@JsonProperty(value = "effectivedtm", required = true)
 	private Date myEffectiveDtm;
@@ -89,22 +88,10 @@ public class ObservationJson {
 	public void setCategories(List<CodeJson> theCategories) {
 		for (CodeJson theConcept : theCategories) {
 			myCategory_concept_text.add(theConcept.getCodeableConceptText());
-			List<String> coding_code_system_hashes = new ArrayList<>();
-			List<String> coding_codes = new ArrayList<>();
-			List<String> coding_displays = new ArrayList<>();
-			List<String> coding_systems = new ArrayList<>();
-			for (String theCategoryCoding_code : theConcept.getCoding_code()) {
-				coding_codes.add(theCategoryCoding_code);
-			}
-			for (String theCategoryCoding_system : theConcept.getCoding_system()) {
-				coding_systems.add(theCategoryCoding_system);
-			}
-			for (String theCategoryCoding_code_system_hash : theConcept.getCoding_code_system_hash()) {
-				coding_code_system_hashes.add(theCategoryCoding_code_system_hash);
-			}
-			for (String theCategoryCoding_display : theConcept.getCoding_display()) {
-				coding_displays.add(theCategoryCoding_display);
-			}
+			List<String> coding_codes = new ArrayList<>(theConcept.getCoding_code());
+			List<String> coding_systems = new ArrayList<>(theConcept.getCoding_system());
+			List<String> coding_code_system_hashes = new ArrayList<>(theConcept.getCoding_code_system_hash());
+			List<String> coding_displays = new ArrayList<>(theConcept.getCoding_display());
 			myCategory_coding_code_system_hash.add(coding_code_system_hashes);
 			myCategory_coding_code.add(coding_codes);
 			myCategory_coding_display.add(coding_displays);
@@ -135,10 +122,10 @@ public class ObservationJson {
 	public void setCode(CodeJson theCode) {
 		myCode_concept_text = theCode.getCodeableConceptText();
 		// Currently can only support one Coding for Observation Code
-		myCode_coding_code_system_hash = theCode.getCoding_code_system_hash().get(0);
-		myCode_coding_code = theCode.getCoding_code().get(0);
-		myCode_coding_display = theCode.getCoding_display().get(0);
-		myCode_coding_system = theCode.getCoding_system().get(0);
+		myCode_coding_code_system_hash.addAll(theCode.getCoding_code_system_hash());
+		myCode_coding_code.addAll(theCode.getCoding_code());
+		myCode_coding_display.addAll(theCode.getCoding_display());
+		myCode_coding_system.addAll(theCode.getCoding_system());
 
 	}
 
@@ -146,19 +133,19 @@ public class ObservationJson {
 		return myCode_concept_text;
 	}
 
-	public String getCode_coding_code_system_hash() {
+	public List<String> getCode_coding_code_system_hash() {
 		return myCode_coding_code_system_hash;
 	}
 
-	public String getCode_coding_code() {
+	public List<String> getCode_coding_code() {
 		return myCode_coding_code;
 	}
 
-	public String getCode_coding_display() {
+	public List<String> getCode_coding_display() {
 		return myCode_coding_display;
 	}
 
-	public String getCode_coding_system() {
+	public List<String> getCode_coding_system() {
 		return myCode_coding_system;
 	}
 

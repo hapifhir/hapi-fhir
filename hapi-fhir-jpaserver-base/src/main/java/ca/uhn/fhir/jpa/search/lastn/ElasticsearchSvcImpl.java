@@ -74,7 +74,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -88,6 +91,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public static final String CODE_DOCUMENT_TYPE = "ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity";
 	public static final String OBSERVATION_INDEX_SCHEMA_FILE = "ObservationIndexSchema.json";
 	public static final String OBSERVATION_CODE_INDEX_SCHEMA_FILE = "ObservationCodeIndexSchema.json";
+	final static String INITIAL_OBSERVATION_CODE_ID = "observation_code_id_not_defined";
 
 	// Aggregation Constants
 	private final String GROUP_BY_SUBJECT = "group_by_subject";
@@ -109,10 +113,12 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
 	private final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
 	private final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
+	private final String OBSERVATION_CODE_IDENTIFIER_FIELD_NAME = "codeconceptid";
 
 	// Code index document element names
-	private final String CODE_HASH = "codingcode_system_hash";
-	private final String CODE_TEXT = "text";
+	private final String CODE_HASH_FIELD_NAME = "codingcode_system_hash";
+	private final String CODE_TEXT_FIELD_NAME = "text";
+	private final String CODE_IDENTIFIER_FIELD_NAME = "codeable_concept_id";
 
 	private final RestHighLevelClient myRestHighLevelClient;
 
@@ -645,7 +651,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return searchRequest;
 	}
 
-	@Override
+/*	@Override
 	public CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText) {
 		if(theCodeSystemHash == null && theText == null) {
 			throw new InvalidRequestException("Require a non-null code system hash value or display value for observation code document query");
@@ -673,9 +679,9 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 		if (theCodeSystemHash != null) {
-			boolQueryBuilder.must(QueryBuilders.termQuery(CODE_HASH, theCodeSystemHash));
+			boolQueryBuilder.must(QueryBuilders.termQuery(CODE_HASH_FIELD_NAME, theCodeSystemHash));
 		} else {
-			boolQueryBuilder.must(QueryBuilders.matchPhraseQuery(CODE_TEXT, theText));
+			boolQueryBuilder.must(QueryBuilders.matchPhraseQuery(CODE_TEXT_FIELD_NAME, theText));
 		}
 
 		searchSourceBuilder.query(boolQueryBuilder);
@@ -685,10 +691,125 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 		return searchRequest;
 	}
+*/
+	private CodeJson getOrCreateObservationCodeDocument(ObservationJson theObservationJson) {
+		if(theObservationJson.getCode_coding_code_system_hash() == null && theObservationJson.getCode_concept_text() == null) {
+			throw new InvalidRequestException("Require a non-null code system hash value or display value for observation code document query");
+		}
+		Map<String, CodeJson> indexedCodeJsons;
+		boolean unindexedCodings = false;
+		CodeJson indexedCodeJson = null;
+		try {
+			indexedCodeJsons = new HashMap<>();
+			if (theObservationJson.getCode_coding_code_system_hash() != null && !theObservationJson.getCode_coding_code_system_hash().isEmpty()) {
+				// Process Codings
+				for (String codeSystemHash : theObservationJson.getCode_coding_code_system_hash()) {
+					SearchRequest theSearchRequest = buildSingleObservationCodeValueSearchRequest(codeSystemHash, CODE_HASH_FIELD_NAME);
+					List<CodeJson> codeJsonsForCoding = getCodeJsonsFromSearchRequest(theSearchRequest);
+					if (codeJsonsForCoding.isEmpty()) {
+						unindexedCodings = true;
+					} else {
+						for(CodeJson codeJsonForCoding : codeJsonsForCoding) {
+							indexedCodeJsons.put(codeJsonForCoding.getCodeableConceptId(), codeJsonForCoding);
+						}
+					}
+				}
+			} else {
+				// Process Text
+				SearchRequest theSearchRequest = buildSingleObservationCodeValueSearchRequest(theObservationJson.getCode_concept_text(), CODE_TEXT_FIELD_NAME);
+				List<CodeJson> codeJsonsForCoding = getCodeJsonsFromSearchRequest(theSearchRequest);
+				if (codeJsonsForCoding.isEmpty()) {
+					unindexedCodings = true;
+				} else {
+					for(CodeJson codeJsonForCoding : codeJsonsForCoding) {
+						indexedCodeJsons.put(codeJsonForCoding.getCodeableConceptId(), codeJsonForCoding);
+					}
+				}
+			}
+			if (indexedCodeJsons.size() == 1 && !unindexedCodings) {
+				// Only one index found and it includes all codings.
+				for(String codeId : indexedCodeJsons.keySet()) {
+					indexedCodeJson = indexedCodeJsons.get(codeId);
+				}
+			} else {
+				// Either no index found or multiple found. Either way, create a new index for code.
+				indexedCodeJson = new CodeJson();
+				indexedCodeJson.addCoding(theObservationJson.getCode_coding_system(), theObservationJson.getCode_coding_code(),
+					theObservationJson.getCode_coding_display(), theObservationJson.getCode_coding_code_system_hash());
+				String codeableConceptId = UUID.randomUUID().toString();
+				indexedCodeJson.setCodeableConceptId(codeableConceptId);
+				String codeJsonDecoded = objectMapper.writeValueAsString(indexedCodeJson);
+				performIndex(OBSERVATION_CODE_INDEX, codeableConceptId, codeJsonDecoded, CODE_DOCUMENT_TYPE);
+				if (indexedCodeJsons.size() > 1) {
+					// Multiple indexes found. Replace these with the new index.
+					mergeCodeIndexes(indexedCodeJsons, indexedCodeJson);
+				}
+			}
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to execute observation code document query hash code or display", theE);
+		}
+
+		return indexedCodeJson;
+	}
+
+	private List<CodeJson> getCodeJsonsFromSearchRequest(SearchRequest theSearchRequest) throws IOException {
+		List<CodeJson> codeJsons = new ArrayList<>();
+		SearchResponse observationCodeDocumentResponse = executeSearchRequest(theSearchRequest);
+		if (observationCodeDocumentResponse.getHits()!=null) {
+			SearchHit[] observationCodeDocumentHits = observationCodeDocumentResponse.getHits().getHits();
+			for (SearchHit observationCodeDocumentHit : observationCodeDocumentHits) {
+				String observationCodeDocument = observationCodeDocumentHit.getSourceAsString();
+				codeJsons.add(objectMapper.readValue(observationCodeDocument, CodeJson.class));
+			}
+		}
+		return codeJsons;
+	}
+
+	private SearchRequest buildSingleObservationCodeValueSearchRequest(String theSearchValue, String theSearchField) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_CODE_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		boolQueryBuilder.must(QueryBuilders.matchPhraseQuery(theSearchField, theSearchValue));
+
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(1);
+
+		searchRequest.source(searchSourceBuilder);
+
+		return searchRequest;
+	}
+
+	private void mergeCodeIndexes(Map<String, CodeJson> theOldCodeJsons, CodeJson theNewCodeJson) throws IOException {
+		for (String codeId : theOldCodeJsons.keySet()) {
+			List<String> observationIds = getObservationsForCodeId(codeId);
+			for (String observationId : observationIds) {
+				ObservationJson observationJson = getObservationDocument(observationId);
+				observationJson.setCode_concept_id(theNewCodeJson.getCodeableConceptId());
+				createOrUpdateObservationIndex(observationId, observationJson);
+			}
+			deleteObservationCodeDocument(codeId);
+		}
+	}
+
+	private void deleteObservationCodeDocument(String theCodeDocumentId) {
+		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(OBSERVATION_CODE_INDEX);
+		deleteByQueryRequest.setQuery(QueryBuilders.termQuery(CODE_IDENTIFIER_FIELD_NAME, theCodeDocumentId));
+		try {
+			myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to delete Observation Code" + theCodeDocumentId);
+		}
+	}
 
 	@Override
 	public Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument){
+		// Ensure that we reset the Observation Code document ID.
+		return createOrUpdateObservationIndexWithCode(theDocumentId, INITIAL_OBSERVATION_CODE_ID, theObservationDocument);
+	}
+
+	private Boolean createOrUpdateObservationIndexWithCode(String theDocumentId, String theCodeId, ObservationJson theObservationDocument) {
 		try {
+			theObservationDocument.setCode_concept_id(theCodeId);
 			String documentToIndex = objectMapper.writeValueAsString(theObservationDocument);
 			return performIndex(OBSERVATION_INDEX, theDocumentId, documentToIndex, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE);
 		} catch (IOException theE) {
@@ -696,7 +817,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 	}
 
-	@Override
+
+/*	@Override
 	public Boolean createOrUpdateObservationCodeIndex(String theCodeableConceptID, CodeJson theObservationCodeDocument) {
 		try {
 			String documentToIndex = objectMapper.writeValueAsString(theObservationCodeDocument);
@@ -705,7 +827,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			throw new InvalidRequestException("Unable to persist Observation Code document " + theCodeableConceptID);
 		}
 	}
-
+*/
 	private boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
 		IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
 			RequestOptions.DEFAULT);
@@ -716,6 +838,43 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	@Override
 	public void close() throws IOException {
 		myRestHighLevelClient.close();
+	}
+
+	@Override
+	public List<String> getObservationsNeedingCodeUpdate() {
+		try {
+			return getObservationsForCodeId(INITIAL_OBSERVATION_CODE_ID);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to query index for Observations needing code update");
+		}
+	}
+
+	private List<String> getObservationsForCodeId(String theCodeId) throws IOException {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		// Query
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_CODE_IDENTIFIER_FIELD_NAME, theCodeId));
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(10000);
+
+		searchRequest.source(searchSourceBuilder);
+		SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
+		SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
+		List<String> observationIdentifiers = new ArrayList<>();
+		for (SearchHit observationDocumentHit : observationDocumentHits) {
+			String observationDocument = observationDocumentHit.getSourceAsString();
+			ObservationJson observationDocumentJson = objectMapper.readValue(observationDocument, ObservationJson.class);
+			observationIdentifiers.add(observationDocumentJson.getIdentifier());
+		}
+		return observationIdentifiers;
+	}
+
+	@Override
+	public void updateObservationCode(String theDocumentId) {
+		ObservationJson observationJson = getObservationDocument(theDocumentId);
+		CodeJson codeJson = getOrCreateObservationCodeDocument(observationJson);
+		createOrUpdateObservationIndexWithCode(theDocumentId, codeJson.getCodeableConceptId(), observationJson);
 	}
 
 	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {

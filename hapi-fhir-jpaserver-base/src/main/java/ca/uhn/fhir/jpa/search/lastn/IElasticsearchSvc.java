@@ -41,10 +41,10 @@ public interface IElasticsearchSvc {
 
 	/**
 	 * Returns index document for a single Observation
-	 * @param theDocumentID Identifier of Observation resource.
+	 * @param theDocumentId Identifier of Observation resource.
 	 * @return
 	 */
-	ObservationJson getObservationDocument(String theDocumentID);
+	ObservationJson getObservationDocument(String theDocumentId);
 
 	/**
 	 * Returns index document for a single Observation Code that either has a coding that matches a specified Code value and system or that has a specified text value.
@@ -52,7 +52,7 @@ public interface IElasticsearchSvc {
 	 * @param theText A text value used to match to an Observation Code.
 	 * @return
 	 */
-	CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText);
+//	CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText);
 
 	/**
 	 * Creates or updates index for an Observation Resource.
@@ -64,11 +64,11 @@ public interface IElasticsearchSvc {
 
 	/**
 	 * Creates or updates index for an Observation Code.
-	 * @param theCodeableConceptID Identifier for Observation resource.
+	 * @param theCodeableConceptId Identifier for Observation resource.
 	 * @param theObservationCodeDocument Indexing document for Observation.
 	 * @return True if Observation Code indexed successfully.
 	 */
-	Boolean createOrUpdateObservationCodeIndex(String theCodeableConceptID, CodeJson theObservationCodeDocument);
+//	Boolean createOrUpdateObservationCodeIndex(String theCodeableConceptId, CodeJson theObservationCodeDocument);
 
 	/**
 	 * Deletes index for an Observation Resource.
@@ -80,5 +80,18 @@ public interface IElasticsearchSvc {
 	 * Invoked when shutting down.
 	 */
 	void close() throws IOException;
+
+	/**
+	 * Returns a list of IDs of observations that were recently created or updated and which need Observation Code ID to be updated.
+	 * @return
+	 */
+	List<String> getObservationsNeedingCodeUpdate();
+
+	/**
+	 * Performs indexing of the Observation Code in the observation document if necessary, and updates the Observation Code index ID in the
+	 * Observation document.
+	 * @param theDocumentId
+	 */
+	void updateObservationCode(String theDocumentId);
 
 }
