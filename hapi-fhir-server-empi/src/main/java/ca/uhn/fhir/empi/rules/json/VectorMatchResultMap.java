@@ -20,15 +20,20 @@ package ca.uhn.fhir.empi.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class VectorMatchResultMap {
 	private final EmpiRulesJson myEmpiRulesJson;
 	private Map<Long, EmpiMatchResultEnum> myVectorToMatchResultMap = new HashMap<>();
+	private Set<Long> myMatchVectors = new HashSet<>();
+	private Set<Long> myPossibleMatchVectors = new HashSet<>();
 	private Map<Long, String> myVectorToFieldMatchNamesMap = new HashMap<>();
 
 	VectorMatchResultMap(EmpiRulesJson theEmpiRulesJson) {
@@ -43,14 +48,30 @@ public class VectorMatchResultMap {
 		}
 	}
 
+	@Nonnull
 	public EmpiMatchResultEnum get(Long theMatchVector) {
-		return myVectorToMatchResultMap.get(theMatchVector);
+		return myVectorToMatchResultMap.computeIfAbsent(theMatchVector, this::computeMatchResult);
+	}
+
+	private EmpiMatchResultEnum computeMatchResult(Long theVector) {
+		if (myMatchVectors.stream().anyMatch(v -> (v & theVector) != 0)) {
+			return EmpiMatchResultEnum.MATCH;
+		}
+		if (myPossibleMatchVectors.stream().anyMatch(v -> (v & theVector) != 0)) {
+			return EmpiMatchResultEnum.POSSIBLE_MATCH;
+		}
+		return EmpiMatchResultEnum.NO_MATCH;
 	}
 
 	private void put(String theFieldMatchNames, EmpiMatchResultEnum theMatchResult) {
 		long vector = getVector(theFieldMatchNames);
 		myVectorToFieldMatchNamesMap.put(vector, theFieldMatchNames);
 		myVectorToMatchResultMap.put(vector, theMatchResult);
+		if (theMatchResult == EmpiMatchResultEnum.MATCH) {
+			myMatchVectors.add(vector);
+		} else if (theMatchResult == EmpiMatchResultEnum.POSSIBLE_MATCH) {
+			myPossibleMatchVectors.add(vector);
+		}
 	}
 
 	public long getVector(String theFieldMatchNames) {
@@ -58,7 +79,7 @@ public class VectorMatchResultMap {
 		for (String fieldMatchName : splitFieldMatchNames(theFieldMatchNames)) {
 			int index = getFieldMatchIndex(fieldMatchName);
 			if (index == -1) {
-				throw new IllegalArgumentException("There is no matchField with name " + fieldMatchName);
+				throw new ConfigurationException("There is no matchField with name " + fieldMatchName);
 			}
 			retval |= (1 << index);
 		}

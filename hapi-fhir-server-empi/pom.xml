@@ -69,6 +69,10 @@
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
 		<!-- test -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

@@ -1,0 +1,9 @@
+{
+	"candidateSearchParams" : [{
+		"resourceType" : "Patient",
+		"searchParam" : "foo"
+	}],
+	"candidateFilterSearchParams" : [],
+	"matchFields" : [],
+	"matchResultMap" : {}
+}
