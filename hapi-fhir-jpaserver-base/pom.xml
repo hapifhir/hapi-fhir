@@ -153,11 +153,6 @@
 		</dependency>
 
 
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>net.ttddyy</groupId>
@@ -388,6 +383,11 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-websocket</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- Hibernate -->
 		<dependency>
@@ -603,6 +603,11 @@
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 
