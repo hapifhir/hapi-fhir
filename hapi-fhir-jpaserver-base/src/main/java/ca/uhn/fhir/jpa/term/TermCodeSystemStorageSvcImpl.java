@@ -717,9 +717,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ourLog.info(" * {} {} deleted ({}/{}) remaining - {}/sec - ETA: {}", count, theDescriptor, count, totalCount, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
 
 		}
-		txTemplate.execute(t -> {
+		txTemplate.executeWithoutResult(t -> {
 			theDao.flush();
-			return null;
 		});
 
 	}
