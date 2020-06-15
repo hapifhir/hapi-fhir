@@ -190,12 +190,6 @@ public class AuthorizationInterceptorR4Test {
 			retVal.setId(new IdType("Patient", (long) theId));
 		}
 		retVal.addName().setFamily("FAM");
-		Identifier identifier = new Identifier();
-		identifier.setSystem("system");
-		identifier.setValue("code");
-		List<Identifier> identifierList = new ArrayList<>();
-		identifierList.add(identifier);
-		retVal.setIdentifier(identifierList);
 		return retVal;
 	}
 
@@ -2292,6 +2286,14 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourReturn = Collections.singletonList(createPatient(456));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_identifier=system%7Ccode");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 
