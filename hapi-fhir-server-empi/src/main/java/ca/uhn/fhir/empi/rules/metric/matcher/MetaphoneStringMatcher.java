@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.similarity;
+package ca.uhn.fhir.empi.rules.metric.matcher;
 
 /*-
  * #%L
@@ -20,13 +20,11 @@ package ca.uhn.fhir.empi.rules.similarity;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.api.IBase;
+import org.apache.commons.codec.language.Metaphone;
 
-public class ReferenceMatchSimilarity implements IEmpiFieldSimilarity {
+public class MetaphoneStringMatcher implements IEmpiStringMatcher {
 	@Override
-	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
-		System.out.println("wip!");
-		return 1;
+	public boolean matches(String theLeftString, String theRightString) {
+		return new Metaphone().isMetaphoneEqual(theLeftString, theRightString);
 	}
 }

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.empi.rules.similarity;
+package ca.uhn.fhir.rest.server.util;
 
 /*-
  * #%L
- * HAPI FHIR - Enterprise Master Patient Index
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,9 +20,11 @@ package ca.uhn.fhir.empi.rules.similarity;
  * #L%
  */
 
-public enum EmpiPersonNameMatchModeEnum {
-	STANDARD_ANY_ORDER,
-	EXACT_ANY_ORDER,
-	STANDARD_FIRST_AND_LAST,
-	EXACT_FIRST_AND_LAST
+import ca.uhn.fhir.context.RuntimeSearchParam;
+
+public interface ISearchParamRetriever {
+	/**
+	 * @return Returns {@literal null} if no match
+	 */
+	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 }

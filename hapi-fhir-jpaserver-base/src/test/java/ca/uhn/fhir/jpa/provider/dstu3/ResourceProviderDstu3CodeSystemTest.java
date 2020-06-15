@@ -114,10 +114,13 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		// Create the code system
 		CodeSystem cs = (CodeSystem) myFhirCtx.newJsonParser().parseResource(input);
 		ourClient.update().resource(cs).execute();
-		runInTransaction(() -> assertEquals(26, myConceptDao.count()));
+		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
 
 		// Delete the code system
 		ourClient.delete().resource(cs).execute();
+		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
+
+		myTerminologyDeferredStorageSvc.saveDeferred();
 		runInTransaction(() -> assertEquals(24L, myConceptDao.count()));
 
 	}

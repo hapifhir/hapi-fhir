@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.helper;
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -26,13 +27,13 @@ public class EmpiHelperConfig {
 
 	@Primary
 	@Bean
-	IEmpiSettings empiProperties() throws IOException {
+	IEmpiSettings empiSettings(EmpiRuleValidator theEmpiRuleValidator) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 
 		// Set Enabled to true, and set strict mode.
-		return new EmpiSettings()
+		return new EmpiSettings(theEmpiRuleValidator)
 			.setEnabled(true)
 			.setScriptText(json)
 			.setPreventEidUpdates(myPreventEidUpdates)

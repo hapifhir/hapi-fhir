@@ -27,9 +27,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class EmpiResourceSearchParamJson implements IModelJson {
-	@JsonProperty("resourceType")
+	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
-	@JsonProperty("searchParam")
+	@JsonProperty(value = "searchParam", required = true)
 	String mySearchParam;
 
 	public String getResourceType() {
