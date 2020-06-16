@@ -1935,6 +1935,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
+	@Transactional
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 
 		IPrimitiveType<?> urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
