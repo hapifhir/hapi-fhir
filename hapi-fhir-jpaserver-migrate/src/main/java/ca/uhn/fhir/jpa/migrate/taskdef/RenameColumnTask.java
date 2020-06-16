@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
@@ -30,6 +31,7 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 
 public class RenameColumnTask extends BaseTableTask {
@@ -82,6 +84,20 @@ public class RenameColumnTask extends BaseTableTask {
 					throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
 				}
 
+				if (getDriverType().equals(DriverTypeEnum.MYSQL_5_7)) {
+					// Some DBs such as MYSQL require that foreign keys depending on the column be dropped before the column itself is dropped.
+					logInfo(ourLog, "Table {} has columns {} and {} - Going to drop any foreign keys depending on column {} before renaming", getTableName(), myOldName, myNewName, myNewName);
+					Set<String> foreignKeys = JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), myNewName, getTableName());
+					if(foreignKeys != null) {
+						for (String foreignKey:foreignKeys) {
+							List<String> dropFkSqls = DropForeignKeyTask.generateSql(getTableName(), foreignKey, getDriverType());
+							for(String dropFkSql : dropFkSqls) {
+								executeSql(getTableName(), dropFkSql);
+							}
+						}
+					}
+				}
+
 				logInfo(ourLog, "Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
 				String sql = DropColumnTask.createSql(getTableName(), myNewName);
 				executeSql(getTableName(), sql);
@@ -124,7 +140,8 @@ public class RenameColumnTask extends BaseTableTask {
 				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN " + myOldName + " TO " + myNewName;
 				break;
 			case MYSQL_5_7:
-				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN " + myOldName + " " + myNewName + " " + theExistingType + " " + theExistingNotNull;
+				// Quote the column names as "SYSTEM" is a reserved word in MySQL
+				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN `" + myOldName + "` `" + myNewName + "` " + theExistingType + " " + theExistingNotNull;
 				break;
 			case POSTGRES_9_4:
 			case ORACLE_12C:
