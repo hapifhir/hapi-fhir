@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.batch.config;
  */
 
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.MapJobExplorerFactoryBean;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -30,11 +29,12 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PostConstruct;
 
-@EnableBatchProcessing
+@Component
 @Configuration
 public class InMemoryJobRepositoryBatchConfig implements BatchConfigurer {
 
@@ -42,6 +42,7 @@ public class InMemoryJobRepositoryBatchConfig implements BatchConfigurer {
 	private JobLauncher myJobLauncher;
 	private JobRepository myJobRepository;
 	private JobExplorer myJobExplorer;
+
 
 	@Override
 	public PlatformTransactionManager getTransactionManager() {

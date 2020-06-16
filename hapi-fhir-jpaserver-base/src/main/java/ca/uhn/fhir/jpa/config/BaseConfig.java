@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.config.InMemoryJobRepositoryBatchConfig;
+import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -28,8 +28,8 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.JpaPackageCache;
-import ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
+import ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
@@ -63,6 +63,8 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.cache.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -119,8 +121,9 @@ import java.util.Date;
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.batch.*")
 })
 @Import({
-	SearchParamConfig.class, BatchJobsConfig.class, InMemoryJobRepositoryBatchConfig.class
+	SearchParamConfig.class, BatchJobsConfig.class
 })
+@EnableBatchProcessing
 public abstract class BaseConfig {
 
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -137,6 +140,11 @@ public abstract class BaseConfig {
 	protected Environment myEnv;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Bean
+	public BatchConfigurer batchConfigurer() {
+		return new NonPersistedBatchConfigurer();
+	}
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
