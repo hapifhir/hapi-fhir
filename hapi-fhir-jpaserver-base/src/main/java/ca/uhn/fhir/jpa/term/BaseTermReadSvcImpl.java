@@ -1299,7 +1299,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Nullable
 	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theUri) {
-		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(theUri, uri -> {
+		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(theUri, uri -> myTxTemplate.execute(tx->{
 			TermCodeSystemVersion csv = null;
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(uri);
 			if (cs != null && cs.getCurrentVersion() != null) {
@@ -1310,7 +1310,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			} else {
 				return NO_CURRENT_VERSION;
 			}
-		});
+		}));
 		if (retVal == NO_CURRENT_VERSION) {
 			return null;
 		}
