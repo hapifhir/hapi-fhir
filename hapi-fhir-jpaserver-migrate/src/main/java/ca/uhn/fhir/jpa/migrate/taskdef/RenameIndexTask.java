@@ -110,6 +110,9 @@ public class RenameIndexTask extends BaseTableTask {
 		// Drop constraint
 		switch (theDriverType) {
 			case MYSQL_5_7:
+				// Quote the index names as "PRIMARY" is a reserved word in MySQL
+				sql.add("rename index `" + theOldIndexName + "` to `" + theNewIndexName + "`");
+				break;
 			case MARIADB_10_1:
 			case DERBY_EMBEDDED:
 				sql.add("rename index " + theOldIndexName + " to " + theNewIndexName);

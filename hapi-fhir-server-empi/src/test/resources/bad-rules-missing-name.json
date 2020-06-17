@@ -11,6 +11,5 @@
 	"matchResultMap" : {
 		"given-name" : "POSSIBLE_MATCH",
 		"foo" : "MATCH"
-	},
-	"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
+	}
 }

@@ -29,13 +29,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * candidate searching. e.g. When doing candidate matching, only consider candidates that match all EmpiFilterSearchParams.
  */
 public class EmpiFilterSearchParamJson implements IModelJson {
-	@JsonProperty("resourceType")
+	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
-	@JsonProperty("searchParam")
+	@JsonProperty(value = "searchParam", required = true)
 	String mySearchParam;
-	@JsonProperty("qualifier")
+	@JsonProperty(value = "qualifier", required = true)
 	TokenParamModifier myTokenParamModifier;
-	@JsonProperty("fixedValue")
+	@JsonProperty(value = "fixedValue", required = true)
 	String myFixedValue;
 
 	public String getResourceType() {

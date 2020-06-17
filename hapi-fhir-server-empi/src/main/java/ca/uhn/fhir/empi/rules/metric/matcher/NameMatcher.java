@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.similarity;
+package ca.uhn.fhir.empi.rules.metric.matcher;
 
 /*-
  * #%L
@@ -32,30 +32,28 @@ import java.util.stream.Collectors;
 /**
  * Similarity measure for two IBase name fields
  */
-public class NameSimilarity implements IEmpiFieldSimilarity {
+public class NameMatcher implements IEmpiFieldMatcher {
+
 	private final EmpiPersonNameMatchModeEnum myMatchMode;
 
-	public NameSimilarity(EmpiPersonNameMatchModeEnum theMatchMode) {
+	public NameMatcher(EmpiPersonNameMatchModeEnum theMatchMode) {
 		myMatchMode = theMatchMode;
 	}
 
 	@Override
-	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase) {
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
 		String leftFamilyName = NameUtil.extractFamilyName(theFhirContext, theLeftBase);
 		String rightFamilyName = NameUtil.extractFamilyName(theFhirContext, theRightBase);
 		if (StringUtils.isEmpty(leftFamilyName) || StringUtils.isEmpty(rightFamilyName)) {
-			return 0.0;
+			return false;
 		}
 
 		boolean match = false;
-		boolean exact =
-			myMatchMode == EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER ||
-				myMatchMode == EmpiPersonNameMatchModeEnum.STANDARD_FIRST_AND_LAST;
 
 		List<String> leftGivenNames = NameUtil.extractGivenNames(theFhirContext, theLeftBase);
 		List<String> rightGivenNames = NameUtil.extractGivenNames(theFhirContext, theRightBase);
 
-		if (!exact) {
+		if (!theExact) {
 			leftFamilyName = StringUtil.normalizeStringForSearchIndexing(leftFamilyName);
 			rightFamilyName = StringUtil.normalizeStringForSearchIndexing(rightFamilyName);
 			leftGivenNames = leftGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());
@@ -65,12 +63,12 @@ public class NameSimilarity implements IEmpiFieldSimilarity {
 		for (String leftGivenName : leftGivenNames) {
 			for (String rightGivenName : rightGivenNames) {
 				match |= leftGivenName.equals(rightGivenName) && leftFamilyName.equals(rightFamilyName);
-				if (myMatchMode == EmpiPersonNameMatchModeEnum.STANDARD_ANY_ORDER || myMatchMode == EmpiPersonNameMatchModeEnum.EXACT_ANY_ORDER) {
+				if (myMatchMode == EmpiPersonNameMatchModeEnum.ANY_ORDER) {
 					match |= leftGivenName.equals(rightFamilyName) && leftFamilyName.equals(rightGivenName);
 				}
 			}
 		}
 
-		return match ? 1.0 : 0.0;
+		return match;
 	}
 }

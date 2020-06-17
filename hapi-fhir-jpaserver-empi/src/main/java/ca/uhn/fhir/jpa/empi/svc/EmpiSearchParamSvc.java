@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class EmpiSearchParamSvc {
+public class EmpiSearchParamSvc implements ISearchParamRetriever {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
@@ -54,5 +55,10 @@ public class EmpiSearchParamSvc {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, theFilterSearchParam.getSearchParam());
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
+	}
+
+	@Override
+	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		return mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 	}
 }

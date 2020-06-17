@@ -23,10 +23,15 @@ package ca.uhn.fhir.empi.rules.config;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Component
 public class EmpiSettings implements IEmpiSettings {
+	private final EmpiRuleValidator myEmpiRuleValidator;
+
 	private boolean myEnabled;
 	private int myConcurrentConsumers = EMPI_DEFAULT_CONCURRENT_CONSUMERS;
 	private String myScriptText;
@@ -41,6 +46,11 @@ public class EmpiSettings implements IEmpiSettings {
 	 *
 	 */
 	private boolean myPreventMultipleEids;
+
+	@Autowired
+	public EmpiSettings(EmpiRuleValidator theEmpiRuleValidator) {
+		myEmpiRuleValidator = theEmpiRuleValidator;
+	}
 
 	@Override
 	public boolean isEnabled() {
@@ -68,7 +78,7 @@ public class EmpiSettings implements IEmpiSettings {
 
 	public EmpiSettings setScriptText(String theScriptText) throws IOException {
 		myScriptText = theScriptText;
-		myEmpiRules = JsonUtil.deserialize(theScriptText, EmpiRulesJson.class);
+		setEmpiRules(JsonUtil.deserialize(theScriptText, EmpiRulesJson.class));
 		return this;
 	}
 
@@ -88,6 +98,7 @@ public class EmpiSettings implements IEmpiSettings {
 	}
 
 	public EmpiSettings setEmpiRules(EmpiRulesJson theEmpiRules) {
+		myEmpiRuleValidator.validate(theEmpiRules);
 		myEmpiRules = theEmpiRules;
 		return this;
 	}

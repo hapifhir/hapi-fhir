@@ -213,9 +213,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			myCodeSystemDao.flush();
 		});
 
-		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
-		for (TermCodeSystemVersion next : codeSystemVersions) {
-			deleteCodeSystemVersion(next.getPid());
+		List<Long> codeSystemVersionPids = txTemplate.execute(t -> {
+			List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
+			return codeSystemVersions
+				.stream()
+				.map(v -> v.getPid())
+				.collect(Collectors.toList());
+		});
+		for (Long next : codeSystemVersionPids) {
+			deleteCodeSystemVersion(next);
 		}
 
 		txTemplate.executeWithoutResult(t -> {

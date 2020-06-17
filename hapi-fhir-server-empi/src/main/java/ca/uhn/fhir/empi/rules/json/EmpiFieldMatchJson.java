@@ -20,35 +20,42 @@ package ca.uhn.fhir.empi.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Contains all business data for determining if a match exists on a particular field, given:
  *
- * 1. A {@link DistanceMetricEnum} which determines the actual similarity values.
+ * 1. A {@link EmpiMetricEnum} which determines the actual similarity values.
  * 2. A given resource type (e.g. Patient)
  * 3. A given FHIRPath expression for finding the particular primitive to be used for comparison. (e.g. name.given)
  */
 public class EmpiFieldMatchJson implements IModelJson {
-	@JsonProperty("name")
+	@JsonProperty(value = "name", required = true)
 	String myName;
-	@JsonProperty("resourceType")
+	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
-	@JsonProperty("resourcePath")
+	@JsonProperty(value = "resourcePath", required = true)
 	String myResourcePath;
-	@JsonProperty("metric")
-	DistanceMetricEnum myMetric;
+	@JsonProperty(value = "metric", required = true)
+	EmpiMetricEnum myMetric;
 	@JsonProperty("matchThreshold")
-	double myMatchThreshold;
+	Double myMatchThreshold;
+	/**
+	 * For String value types, should the values be normalized (case, accents) before they are compared
+	 */
+	@JsonProperty(value = "exact")
+	boolean myExact;
 
-	public DistanceMetricEnum getMetric() {
+	public EmpiMetricEnum getMetric() {
 		return myMetric;
 	}
 
-	public EmpiFieldMatchJson setMetric(DistanceMetricEnum theMetric) {
+	public EmpiFieldMatchJson setMetric(EmpiMetricEnum theMetric) {
 		myMetric = theMetric;
 		return this;
 	}
@@ -71,7 +78,8 @@ public class EmpiFieldMatchJson implements IModelJson {
 		return this;
 	}
 
-	public double getMatchThreshold() {
+	@Nullable
+	public Double getMatchThreshold() {
 		return myMatchThreshold;
 	}
 
@@ -86,6 +94,15 @@ public class EmpiFieldMatchJson implements IModelJson {
 
 	public EmpiFieldMatchJson setName(@Nonnull String theName) {
 		myName = theName;
+		return this;
+	}
+
+	public boolean getExact() {
+		return myExact;
+	}
+
+	public EmpiFieldMatchJson setExact(boolean theExact) {
+		myExact = theExact;
 		return this;
 	}
 }
