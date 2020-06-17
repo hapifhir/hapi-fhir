@@ -89,6 +89,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -177,6 +178,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private static final TermCodeSystemVersion NO_CURRENT_VERSION = new TermCodeSystemVersion().setId(-1L);
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
 	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
+	private static Runnable myInvokeOnNextCallForUnitTest;
 	private final int myFetchSize = DEFAULT_FETCH_SIZE;
 	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 	@Autowired
@@ -1299,7 +1301,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Nullable
 	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theUri) {
-		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(theUri, uri -> myTxTemplate.execute(tx->{
+		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(theUri, uri -> myTxTemplate.execute(tx -> {
 			TermCodeSystemVersion csv = null;
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(uri);
 			if (cs != null && cs.getCurrentVersion() != null) {
@@ -1938,6 +1940,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Transactional
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 
+		if (myInvokeOnNextCallForUnitTest != null) {
+			Runnable invokeOnNextCallForUnitTest = myInvokeOnNextCallForUnitTest;
+			myInvokeOnNextCallForUnitTest = null;
+			invokeOnNextCallForUnitTest.run();
+		}
+
 		IPrimitiveType<?> urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
 		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
@@ -2105,6 +2113,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		public void execute(JobExecutionContext theContext) {
 			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
 		}
+	}
+
+	@VisibleForTesting
+	public static void setInvokeOnNextCallForUnitTest(Runnable theInvokeOnNextCallForUnitTest) {
+		myInvokeOnNextCallForUnitTest = theInvokeOnNextCallForUnitTest;
 	}
 
 	static List<TermConcept> toPersistedConcepts(List<CodeSystem.ConceptDefinitionComponent> theConcept, TermCodeSystemVersion theCodeSystemVersion) {

@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
@@ -28,9 +27,27 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -39,8 +56,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -67,6 +82,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvcc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private JpaValidationSupportChain myJpaValidationSupportChain;
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
 
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
@@ -166,13 +185,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 
-
-
 	}
 
 	/**
 	 * Per: https://chat.fhir.org/#narrow/stream/179166-implementers/topic/Handling.20incomplete.20CodeSystems
-	 *
+	 * <p>
 	 * We should generate a warning if a code can't be found but the codesystem is a fragment
 	 */
 	@Test
@@ -229,7 +246,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertEquals(OperationOutcome.IssueSeverity.ERROR, outcome.getIssueFirstRep().getSeverity());
 		}
 	}
-
 
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
@@ -314,20 +330,13 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
-
-	@Autowired
-	private JpaValidationSupportChain myJpaValidationSupportChain;
-
-	@Autowired
-	private PlatformTransactionManager myTransactionManager;
-
 	/**
 	 * Make sure that we do something sane when validating throws an unexpected exception
 	 */
 	@Test
-	public void testValidate_ThrowsException() throws Exception {
+	public void testValidate_ValidationSupportThrowsException() {
 		IValidationSupport validationSupport = mock(IValidationSupport.class);
-		when(validationSupport.validateCodeInValueSet(any(),any(), any(), any(), any(), any())).thenAnswer(t->{
+		when(validationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
 			// This will fail with a constraint error
 			try {
 				myResourceTableDao.save(new ResourceTable());
@@ -362,6 +371,71 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		} finally {
 			myJpaValidationSupportChain.removeValidationSupport(validationSupport);
 		}
+	}
+
+	/**
+	 * Make sure that we do something sane when validating throws an unexpected exception
+	 */
+	@Test
+	public void testValidate_TermSvcHasDatabaseRollback() {
+		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
+			try {
+				myResourceTableDao.save(new ResourceTable());
+				myResourceTableDao.flush();
+			} catch (Exception e) {
+				ourLog.info("Hit expected exception: {}", e.toString());
+			}
+		});
+
+		Observation obs = new Observation();
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
+	/**
+	 * Make sure that we do something sane when validating throws an unexpected exception
+	 */
+	@Test
+	public void testValidate_TermSvcHasNpe() {
+		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
+			throw new NullPointerException("MY ERROR");
+		});
+
+		Observation obs = new Observation();
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+		try {
+			validateAndReturnOutcome(obs);
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("MY ERROR", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -666,6 +740,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+
+		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 	}
 
 	@Test
