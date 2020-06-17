@@ -107,6 +107,9 @@ public class DropIndexTask extends BaseTableTask {
 			// Drop constraint
 			switch (theDriverType) {
 				case MYSQL_5_7:
+					// Need to quote the index name as the word "PRIMARY" is reserved in MySQL
+					sql.add("alter table " + theTableName + " drop index `" + theIndexName + "`");
+					break;
 				case MARIADB_10_1:
 					sql.add("alter table " + theTableName + " drop index " + theIndexName);
 					break;
@@ -114,15 +117,13 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("drop index " + theIndexName);
 					break;
 				case DERBY_EMBEDDED:
+				case ORACLE_12C:
+				case MSSQL_2012:
 					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
 					break;
 				case POSTGRES_9_4:
 					sql.add("alter table " + theTableName + " drop constraint if exists " + theIndexName + " cascade");
 					sql.add("drop index if exists " + theIndexName + " cascade");
-					break;
-				case ORACLE_12C:
-				case MSSQL_2012:
-					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
 					break;
 			}
 		} else {

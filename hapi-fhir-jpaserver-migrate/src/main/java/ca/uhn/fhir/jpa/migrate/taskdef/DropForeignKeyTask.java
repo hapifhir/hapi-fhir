@@ -102,8 +102,7 @@ public class DropForeignKeyTask extends BaseTableTask {
 		switch (theDriverType) {
 			case MYSQL_5_7:
 				// Lousy MYQL....
-				sqls.add("alter table " + theTableName + " drop constraint " + theConstraintName);
-				sqls.add("alter table " + theTableName + " drop index " + theConstraintName);
+				sqls.add("alter table " + theTableName + " drop foreign key " + theConstraintName);
 				break;
 			case MARIADB_10_1:
 			case POSTGRES_9_4:

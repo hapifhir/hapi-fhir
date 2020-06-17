@@ -118,7 +118,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkgVerRes.addColumn("RES_SIZE_BYTES").nonNullable().type(ColumnTypeEnum.LONG);
 		pkgVerRes.addColumn("UPDATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 		pkgVerRes.addForeignKey("20200610.11", "FK_NPM_PACKVERRES_PACKVER").toColumn("PACKVER_PID").references("NPM_PACKAGE_VER", "PID");
-		pkgVerRes.addForeignKey("20200610.12", "FK_NPM_PKVR_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "PID");
+		pkgVerRes.addForeignKey("20200610.12", "FK_NPM_PKVR_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		pkgVerRes.addIndex("20200610.13", "IDX_PACKVERRES_URL").unique(false).withColumns("CANONICAL_URL");
 
 	}
