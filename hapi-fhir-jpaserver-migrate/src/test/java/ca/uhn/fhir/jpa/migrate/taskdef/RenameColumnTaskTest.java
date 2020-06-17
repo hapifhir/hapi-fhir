@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -134,7 +133,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	}
 
 	@Test
-	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget() throws SQLException {
+	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget() {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL, myTextCol) VALUES (123, 'AAA', 'BBB')");
 
