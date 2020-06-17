@@ -408,7 +408,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				.build()
 				.execute(new HttpGet(thePackageUrl))) {
 				if (request.getStatusLine().getStatusCode() != 200) {
-					throw new IOException("Received HTTP " + request.getStatusLine().getStatusCode());
+					throw new ResourceNotFoundException("Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
 				}
 				return IOUtils.toByteArray(request.getEntity().getContent());
 			} catch (IOException e) {
