@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -41,6 +42,8 @@ public class RenameColumnTask extends BaseTableTask {
 	private String myNewName;
 	private boolean myIsOkayIfNeitherColumnExists;
 	private boolean myDeleteTargetColumnFirstIfBothExist;
+
+	private boolean mySimulateMySQLForTest = false;
 
 	public RenameColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -84,8 +87,8 @@ public class RenameColumnTask extends BaseTableTask {
 					throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
 				}
 
-				if (getDriverType().equals(DriverTypeEnum.MYSQL_5_7)) {
-					// Some DBs such as MYSQL require that foreign keys depending on the column be dropped before the column itself is dropped.
+				if (getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || mySimulateMySQLForTest) {
+					// Some DBs such as MYSQL require that foreign keys depending on the column be explicitly dropped before the column itself is dropped.
 					logInfo(ourLog, "Table {} has columns {} and {} - Going to drop any foreign keys depending on column {} before renaming", getTableName(), myOldName, myNewName, myNewName);
 					Set<String> foreignKeys = JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), myNewName, getTableName());
 					if(foreignKeys != null) {
@@ -172,5 +175,10 @@ public class RenameColumnTask extends BaseTableTask {
 		super.generateHashCode(theBuilder);
 		theBuilder.append(myOldName);
 		theBuilder.append(myNewName);
+	}
+
+	@VisibleForTesting
+	void setSimulateMySQLForTest(boolean theSimulateMySQLForTest) {
+		mySimulateMySQLForTest = theSimulateMySQLForTest;
 	}
 }
