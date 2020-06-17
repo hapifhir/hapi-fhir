@@ -1013,4 +1013,30 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 
+	@Test
+	public void testDeliverSearchSet() throws Exception {
+		{
+			Subscription subscription = newSubscription("Observation?", "application/json");
+			subscription.addExtension(JpaConstants.EXT_SUBSCRIPTION_DELIVER_BUNDLE_SEARCH_RESULT, new StringType("Observation?_id=${resource_id}&_include=*"));
+			MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+			mySubscriptionIds.add(methodOutcome.getId());
+			waitForActivatedSubscriptionCount(1);
+		}
+
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+			Observation observation = new Observation();
+			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("Catheter"));
+			observation.getSubject().setReferenceElement(patientId);
+			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			assertEquals(true, methodOutcome.getCreated());
+			waitForQueueToDrain();
+			waitForSize(1, ourTransactions);
+		}
+
+	}
+
 }

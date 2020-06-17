@@ -64,6 +64,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
 	private Map<String, List<String>> myChannelExtensions;
+	@JsonProperty("deliverBundleSearchResult")
+	private String myDeliverBundleSearchResult;
 
 	/**
 	 * Constructor
@@ -276,7 +278,11 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		}
 	}
 
-	public static class EmailDetails implements IModelJson {
+    public void setDeliverBundleSearchResult(String theDeliverBundleSearchResult) {
+		myDeliverBundleSearchResult = theDeliverBundleSearchResult;
+    }
+
+    public static class EmailDetails implements IModelJson {
 
 		@JsonProperty("from")
 		private String myFrom;

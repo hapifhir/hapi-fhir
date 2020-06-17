@@ -7,13 +7,14 @@ import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.collect.Lists;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -22,9 +23,19 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
-import org.junit.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Subscription;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -36,28 +47,23 @@ import java.util.List;
 @Ignore
 public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
-
-	private static Server ourListenerServer;
-    protected static int ourListenerPort;
+	protected static int ourListenerPort;
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
+	protected static List<Bundle> ourTransactions = Collections.synchronizedList(Lists.newArrayList());
+	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static Server ourListenerServer;
 	private static SingleQueryCountHolder ourCountHolder;
-
-	@Autowired
-	private SingleQueryCountHolder myCountHolder;
+	private static String ourListenerServerBase;
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
 	protected SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-
 	protected CountingInterceptor myCountingInterceptor;
-
-	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static String ourListenerServerBase;
-
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-
+	@Autowired
+	private SingleQueryCountHolder myCountHolder;
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -87,6 +93,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	public void beforeReset() throws Exception {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
+		ourTransactions.clear();
 		ourContentTypes.clear();
 		ourHeaders.clear();
 
@@ -162,8 +169,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 
-
-	public static class ObservationListener implements IResourceProvider {
+	public static class ObservationResourceProvider implements IResourceProvider {
 
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
@@ -202,6 +208,16 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	}
 
+	public static class PlainProvider {
+
+		@Transaction
+		public Bundle transaction(@RequestParam Bundle theInput) {
+			ourTransactions.add(theInput);
+			return theInput;
+		}
+
+	}
+
 	@AfterClass
 	public static void reportTotalSelects() {
 		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
@@ -214,9 +230,9 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
 		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR4());
-		
-		ObservationListener obsListener = new ObservationListener();
-		ourListenerRestServer.setResourceProviders(obsListener);
+
+		ObservationResourceProvider observationResourceProvider = new ObservationResourceProvider();
+		ourListenerRestServer.setResourceProviders(observationResourceProvider);
 
 		ourListenerServer = new Server(0);
 
@@ -229,8 +245,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);
-        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterClass
