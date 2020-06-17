@@ -470,7 +470,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		// Part link
 		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept, propertyNamesToTypes);
-		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRTIMARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		IOUtils.closeQuietly(theDescriptors);
