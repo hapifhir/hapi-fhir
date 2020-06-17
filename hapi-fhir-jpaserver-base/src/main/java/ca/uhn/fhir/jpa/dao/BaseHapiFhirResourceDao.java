@@ -1395,6 +1395,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequest) {
 		if (theRequest != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, theResource, null, theId);
