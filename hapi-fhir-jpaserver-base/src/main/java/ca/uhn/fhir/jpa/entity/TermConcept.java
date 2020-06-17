@@ -412,8 +412,4 @@ public class TermConcept implements Serializable {
 		return getChildren().stream().map(t -> t.getChild()).collect(Collectors.toList());
 	}
 
-
-	public VersionIndependentConcept toVersionIndependentConcept() {
-		return new VersionIndependentConcept(myCodeSystem.getCodeSystem().getCodeSystemUri(), myCode);
-	}
 }
