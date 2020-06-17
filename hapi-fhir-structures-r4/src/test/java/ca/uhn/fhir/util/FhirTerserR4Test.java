@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -30,6 +31,15 @@ public class FhirTerserR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
+
+	@Test
+	public void testGetValuesCreateEnumeration_SetsEnumFactory() {
+
+		Patient patient = new Patient();
+
+		Enumeration<?> enumeration = (Enumeration<?>) ourCtx.newTerser().getValues(patient, "Patient.gender", Enumeration.class, true).get(0);
+		assertNotNull(enumeration.getEnumFactory());
+	}
 
 	@Test
 	public void testClear() {
