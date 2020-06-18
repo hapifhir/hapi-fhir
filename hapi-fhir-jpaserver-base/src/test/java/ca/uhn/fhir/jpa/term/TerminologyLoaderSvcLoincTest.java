@@ -76,18 +76,20 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Normal LOINC code
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
+		// Coding Property
 		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
 		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
-		assertEquals("EKG.MEAS", code.getStringProperty("CLASS"));
+		// String Property
+		assertEquals("2", code.getStringProperty("CLASSTYPE"));
 		assertEquals("R' wave amplitude in lead I", code.getDisplay());
-
+		// Coding Property from Part File
+		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("TIME_ASPCT").get(0).getSystem());
+		assertEquals("LP6960-1", code.getCodingProperties("TIME_ASPCT").get(0).getCode());
+		assertEquals("Pt", code.getCodingProperties("TIME_ASPCT").get(0).getDisplay());
 		// Code with component that has a divisor
 		code = concepts.get("17788-1");
 		assertEquals("17788-1", code.getCode());
-		assertEquals(1, code.getCodingProperties("COMPONENT").size());
-		assertEquals("http://loinc.org", code.getCodingProperties("COMPONENT").get(0).getSystem());
-		assertEquals("LP19258-0", code.getCodingProperties("COMPONENT").get(0).getCode());
 
 		// LOINC code with answer
 		code = concepts.get("61438-8");
@@ -417,7 +419,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
 		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
-		assertEquals("EKG.MEAS", code.getStringProperty("CLASS"));
+		assertEquals("2", code.getStringProperty("CLASSTYPE"));
 		assertEquals("R' wave amplitude in lead I", code.getDisplay());
 
 		// Codes with parent and child properties

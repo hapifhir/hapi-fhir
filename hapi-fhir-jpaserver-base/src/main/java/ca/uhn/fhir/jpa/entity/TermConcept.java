@@ -152,7 +152,9 @@ public class TermConcept implements Serializable {
 		property.setType(thePropertyType);
 		property.setKey(thePropertyName);
 		property.setValue(thePropertyValue);
-		getProperties().add(property);
+		if (!getProperties().contains(property)) {
+			getProperties().add(property);
+		}
 
 		return property;
 	}

@@ -96,9 +96,9 @@ public class LoincPartLinkHandler implements IRecordHandler {
 
 		ourLog.info("Adding new property {} = {}", propertyPart, partNumber);
 		if (propertyType == CodeSystem.PropertyType.STRING) {
-			loincConcept.addPropertyString(property, partName);
+			loincConcept.addPropertyString(propertyPart, partName);
 		} else {
-			loincConcept.addPropertyCoding(property, ITermLoaderSvc.LOINC_URI, partNumber, partName);
+			loincConcept.addPropertyCoding(propertyPart, ITermLoaderSvc.LOINC_URI, partNumber, partName);
 		}
 
 	}
