@@ -309,7 +309,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 */
 	public void invalidateCaches() {
 		myValidationSupport.invalidateCaches();
-		myWrappedWorkerContext.invalidateCaches();
+		if (myWrappedWorkerContext != null) {
+			myWrappedWorkerContext.invalidateCaches();
+		}
 	}
 
 

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -61,6 +62,8 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemDstu3.class);
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
+	@Autowired
+	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
 	@Autowired
@@ -134,7 +137,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		if (isNotBlank(codeSystemUrl)) {
 			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
 			if (persCs != null) {
-				myTerminologyCodeSystemStorageSvc.deleteCodeSystem(persCs);
+				myTermDeferredStorageSvc.deleteCodeSystem(persCs);
 			}
 		}
 	}

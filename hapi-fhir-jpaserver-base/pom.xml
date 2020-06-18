@@ -150,6 +150,12 @@
 			<artifactId>hapi-fhir-elasticsearch-6</artifactId>
 			<version>${project.version}</version>
 			<classifier>shaded6</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 

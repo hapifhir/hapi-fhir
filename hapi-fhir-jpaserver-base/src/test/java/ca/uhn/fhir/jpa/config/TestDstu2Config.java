@@ -41,6 +41,11 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		 * starvation
 		 */
 		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+
+		if ("true".equals(System.getProperty("single_db_connection"))) {
+			ourMaxThreads = 1;
+		}
+
 	}
 
 	private Exception myLastStackTrace;

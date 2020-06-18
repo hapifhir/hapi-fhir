@@ -1,8 +1,8 @@
-package ca.uhn.fhir.empi.rules.similarity;
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 /*-
  * #%L
- * HAPI FHIR - Enterprise Master Patient Index
+ * HAPI FHIR JPA Server - Migration
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,9 +20,16 @@ package ca.uhn.fhir.empi.rules.similarity;
  * #L%
  */
 
-public enum EmpiPersonNameMatchModeEnum {
-	STANDARD_ANY_ORDER,
-	EXACT_ANY_ORDER,
-	STANDARD_FIRST_AND_LAST,
-	EXACT_FIRST_AND_LAST
+public enum ColumnTypeEnum {
+
+    LONG,
+    STRING,
+    DATE_ONLY,
+    DATE_TIMESTAMP,
+    BOOLEAN,
+    FLOAT,
+    INT,
+    BLOB,
+    CLOB
+
 }

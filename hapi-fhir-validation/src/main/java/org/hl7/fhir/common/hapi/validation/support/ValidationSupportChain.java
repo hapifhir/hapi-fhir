@@ -122,6 +122,14 @@ public class ValidationSupportChain implements IValidationSupport {
 		myChain.add(theIndex, theValidationSupport);
 	}
 
+	/**
+	 * Removes an item from the chain. Note that this method is mostly intended for testing. Removing items from the chain while validation is
+	 * actually occurring is not an expected use case for this class.
+	 */
+	public void removeValidationSupport(IValidationSupport theValidationSupport) {
+		myChain.remove(theValidationSupport);
+	}
+
 	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		for (IValidationSupport next : myChain) {

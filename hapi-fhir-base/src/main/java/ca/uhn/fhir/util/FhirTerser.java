@@ -454,7 +454,14 @@ public class FhirTerser {
 		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
 
 		if (values.isEmpty() && theCreate) {
-			IBase value = nextDef.getChildByName(name).newInstance();
+			BaseRuntimeElementDefinition<?> childByName = nextDef.getChildByName(name);
+			Object arg = nextDef.getInstanceConstructorArguments();
+			IBase value;
+			if (arg != null) {
+				value = childByName.newInstance(arg);
+			} else {
+				value = childByName.newInstance();
+			}
 			nextDef.getMutator().addValue(theCurrentObj, value);
 			List<IBase> list = new ArrayList<>();
 			list.add(value);
