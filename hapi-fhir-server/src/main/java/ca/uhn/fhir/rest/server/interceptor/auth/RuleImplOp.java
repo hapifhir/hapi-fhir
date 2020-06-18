@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -142,13 +141,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 								}
 								if (appliesToResourceId.isEmpty()) {
 									appliesToResourceId = null;
-								}
-							}
-							if (theRequestDetails.getParameters().containsKey("_identifier")) {
-								appliesToResourceId = new ArrayList<>();
-								Optional<IIdType> idType = myClassifierCompartmentOwners.stream().map(IIdType::toUnqualified).findFirst();
-								if (idType.isPresent()) {
-									appliesToResourceId.add(idType.get());
 								}
 							}
 							break;

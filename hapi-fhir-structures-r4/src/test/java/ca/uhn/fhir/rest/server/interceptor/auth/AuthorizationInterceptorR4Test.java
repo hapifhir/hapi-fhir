@@ -89,6 +89,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -190,6 +191,12 @@ public class AuthorizationInterceptorR4Test {
 			retVal.setId(new IdType("Patient", (long) theId));
 		}
 		retVal.addName().setFamily("FAM");
+		Identifier identifier = new Identifier();
+		identifier.setSystem("smilecdr");
+		identifier.setValue("12345");
+		List<Identifier> identifierList = new ArrayList<>();
+		identifierList.add(identifier);
+		retVal.setIdentifier(identifierList);
 		return retVal;
 	}
 
@@ -2265,24 +2272,27 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}
-
+	
 	@Test
 	public void testReadByCompartmentReadByIdentifier() throws Exception {
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
 					.allow("Rule 1").read().allResources().inCompartment("Patient", new IdType("Patient/123")).andThen()
 					.build();
 			}
-		});
+		};
+		interceptor.setFlags(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS);
+		ourServlet.registerInterceptor(interceptor);
 
 		HttpGet httpGet;
 		HttpResponse status;
+		String response;
 
 		ourReturn = Collections.singletonList(createPatient(123));
 		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_identifier=system%7Ccode");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_identifier=smilecdr%7C12345");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -2290,10 +2300,11 @@ public class AuthorizationInterceptorR4Test {
 
 		ourReturn = Collections.singletonList(createPatient(456));
 		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_identifier=system%7Ccode");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_identifier=smilecdr%7C12345");
 		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
+		response = extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
 		assertTrue(ourHitMethod);
 	}
 
