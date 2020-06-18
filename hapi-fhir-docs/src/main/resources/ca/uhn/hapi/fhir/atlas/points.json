@@ -337,7 +337,17 @@
 			"lat": 21.026058,
 			"lon": 105.822715,
 			"added": "2020-03-06"
+		},
+		{
+			"title": "Ohum - OhumSKY, OhumG and OhumAIR",
+			"description": "Ohumhealthcare Pvt Ltd",
+			"link": "http://ohumhealthcare.com",
+			"contactName": "Sumeet Chhetri",
+			"contactEmail": "sumeetc@ohumhealthcare.com",
+			"city": "Pune,India",
+			"lat": 18.5204,
+			"lon": 73.8567,
+			"added": "2020-06-18"
 		}
-
 	]
 }
