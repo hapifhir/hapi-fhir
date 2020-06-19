@@ -1,0 +1,4 @@
+---
+type: add
+issue: 1926
+title: "Spring Batch has been added to HAPI FHIR in the `hapi-fhir-jpaserver-batch` project."
