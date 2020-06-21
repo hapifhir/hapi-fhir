@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
+import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -35,6 +36,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
@@ -42,6 +44,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
@@ -86,6 +89,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private JpaValidationSupportChain myJpaValidationSupportChain;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
+	@Autowired
+	private ValidationSettings myValidationSettings;
 
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
@@ -186,6 +191,200 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 
 	}
+
+	@Test
+	public void testValidateProfileTargetType_PolicyCheckValid() throws IOException {
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_VALID);
+
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://loinc.org");
+		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
+		myCodeSystemDao.create(cs);
+
+		Group group = new Group();
+		group.setId("ABC");
+		group.setActive(true);
+		myGroupDao.update(group);
+
+		Patient patient = new Patient();
+		patient.setId("DEF");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("P");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.addPerformer(new Reference("Practitioner/P"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+
+		// Non-existent target
+		obs.setSubject(new Reference("Group/123"));
+		OperationOutcome oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of wrong type
+		obs.setSubject(new Reference("Group/ABC"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Invalid Resource target type. Found Group, but expected one of ([Patient])", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of right type
+		obs.setSubject(new Reference("Patient/DEF"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
+	@Test
+	public void testValidateProfileTargetType_PolicyCheckExistsAndType() throws IOException {
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_EXISTS_AND_TYPE);
+
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://loinc.org");
+		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
+		myCodeSystemDao.create(cs);
+
+		Group group = new Group();
+		group.setId("ABC");
+		group.setActive(true);
+		myGroupDao.update(group);
+
+		Patient patient = new Patient();
+		patient.setId("DEF");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("P");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.addPerformer(new Reference("Practitioner/P"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+
+		// Non-existent target
+		obs.setSubject(new Reference("Group/123"));
+		OperationOutcome oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of wrong type
+		obs.setSubject(new Reference("Group/ABC"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Unable to find matching profile for Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of right type
+		obs.setSubject(new Reference("Patient/DEF"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
+
+	@Test
+	public void testValidateProfileTargetType_PolicyCheckExists() throws IOException {
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_EXISTS);
+
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://loinc.org");
+		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
+		myCodeSystemDao.create(cs);
+
+		Group group = new Group();
+		group.setId("ABC");
+		group.setActive(true);
+		myGroupDao.update(group);
+
+		Patient patient = new Patient();
+		patient.setId("DEF");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("P");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.addPerformer(new Reference("Practitioner/P"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+
+		// Non-existent target
+		obs.setSubject(new Reference("Group/123"));
+		OperationOutcome oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of wrong type
+		obs.setSubject(new Reference("Group/ABC"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of right type
+		obs.setSubject(new Reference("Patient/DEF"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
 
 	/**
 	 * Per: https://chat.fhir.org/#narrow/stream/179166-implementers/topic/Handling.20incomplete.20CodeSystems
@@ -743,6 +942,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 
 		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
+
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.IGNORE);
 	}
 
 	@Test
