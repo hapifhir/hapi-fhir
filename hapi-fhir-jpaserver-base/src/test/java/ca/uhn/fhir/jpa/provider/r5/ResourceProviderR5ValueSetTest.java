@@ -318,27 +318,20 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"1\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1000\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"11378-7\"/>\n",
-			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
-			"</contains>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"8493-9\"/>\n",
-			"<display value=\"Systolic blood pressure 10 hour minimum\"/>\n",
-			"</contains>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(23, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(0).getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContains().get(0).getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContains().get(0).getDisplay());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(1).getSystem());
+		assertEquals("8493-9", expanded.getExpansion().getContains().get(1).getCode());
+		assertEquals("Systolic blood pressure 10 hour minimum", expanded.getExpansion().getContains().get(1).getDisplay());
 
 	}
 
@@ -359,23 +352,17 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"0\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"0\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"8450-9\"/>\n",
-			"<display value=\"Systolic blood pressure--expiration\"/>\n",
-			"</contains>\n",
-			"</expansion>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(0, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("8450-9", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure--expiration", expanded.getExpansion().getContainsFirstRep().getDisplay());
 
 	}
 
@@ -397,23 +384,17 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"1\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"11378-7\"/>\n",
-			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
-			"</contains>\n",
-			"</expansion>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContainsFirstRep().getDisplay());
 
 	}
 
@@ -536,27 +517,20 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"1\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1000\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"11378-7\"/>\n",
-			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
-			"</contains>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"8493-9\"/>\n",
-			"<display value=\"Systolic blood pressure 10 hour minimum\"/>\n",
-			"</contains>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(23, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(0).getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContains().get(0).getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContains().get(0).getDisplay());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(1).getSystem());
+		assertEquals("8493-9", expanded.getExpansion().getContains().get(1).getCode());
+		assertEquals("Systolic blood pressure 10 hour minimum", expanded.getExpansion().getContains().get(1).getDisplay());
 
 	}
 
@@ -578,23 +552,17 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"0\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"0\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"8450-9\"/>\n",
-			"<display value=\"Systolic blood pressure--expiration\"/>\n",
-			"</contains>\n",
-			"</expansion>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(0, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("8450-9", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure--expiration", expanded.getExpansion().getContainsFirstRep().getDisplay());
 
 	}
 
@@ -617,23 +585,17 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"1\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"11378-7\"/>\n",
-			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
-			"</contains>\n",
-			"</expansion>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContainsFirstRep().getDisplay());
 
 	}
 
@@ -724,27 +686,20 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"1\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1000\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"11378-7\"/>\n",
-			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
-			"</contains>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"8493-9\"/>\n",
-			"<display value=\"Systolic blood pressure 10 hour minimum\"/>\n",
-			"</contains>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(23, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(0).getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContains().get(0).getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContains().get(0).getDisplay());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(1).getSystem());
+		assertEquals("8493-9", expanded.getExpansion().getContains().get(1).getCode());
+		assertEquals("Systolic blood pressure 10 hour minimum", expanded.getExpansion().getContains().get(1).getDisplay());
 
 	}
 
@@ -768,23 +723,17 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"0\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"0\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"8450-9\"/>\n",
-			"<display value=\"Systolic blood pressure--expiration\"/>\n",
-			"</contains>\n",
-			"</expansion>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(0, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("8450-9", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure--expiration", expanded.getExpansion().getContainsFirstRep().getDisplay());
 
 	}
 
@@ -809,23 +758,17 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<total value=\"24\"/>\n",
-			"<offset value=\"1\"/>\n",
-			"<parameter>\n",
-			"<name value=\"offset\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<parameter>\n",
-			"<name value=\"count\"/>\n",
-			"<valueInteger value=\"1\"/>\n",
-			"</parameter>\n",
-			"<contains>\n",
-			"<system value=\"http://acme.org\"/>\n",
-			"<code value=\"11378-7\"/>\n",
-			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
-			"</contains>\n",
-			"</expansion>"));
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContainsFirstRep().getDisplay());
 
 	}
 
