@@ -302,6 +302,122 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	@Test
+	public void testExpandByIdWithPreExpansionWithOffset() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "offset", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"1\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1000\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"11378-7\"/>\n",
+			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
+			"</contains>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"8493-9\"/>\n",
+			"<display value=\"Systolic blood pressure 10 hour minimum\"/>\n",
+			"</contains>"));
+
+	}
+
+	@Test
+	public void testExpandByIdWithPreExpansionWithCount() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"0\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"0\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"8450-9\"/>\n",
+			"<display value=\"Systolic blood pressure--expiration\"/>\n",
+			"</contains>\n",
+			"</expansion>"));
+
+	}
+
+	@Test
+	public void testExpandByIdWithPreExpansionWithOffsetAndCount() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"1\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"11378-7\"/>\n",
+			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
+			"</contains>\n",
+			"</expansion>"));
+
+	}
+
+	@Test
 	public void testExpandByIdWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
@@ -403,6 +519,125 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	@Test
+	public void testExpandByUrlWithPreExpansionWithOffset() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("offset", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"1\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1000\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"11378-7\"/>\n",
+			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
+			"</contains>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"8493-9\"/>\n",
+			"<display value=\"Systolic blood pressure 10 hour minimum\"/>\n",
+			"</contains>"));
+
+	}
+
+	@Test
+	public void testExpandByUrlWithPreExpansionWithCount() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"0\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"0\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"8450-9\"/>\n",
+			"<display value=\"Systolic blood pressure--expiration\"/>\n",
+			"</contains>\n",
+			"</expansion>"));
+
+	}
+
+	@Test
+	public void testExpandByUrlWithPreExpansionWithOffsetAndCount() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"1\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"11378-7\"/>\n",
+			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
+			"</contains>\n",
+			"</expansion>"));
+
+	}
+
+	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
 
@@ -448,7 +683,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testExpandByValueSetWithPreExpansion() throws IOException {
 		myDaoConfig.setPreExpandValueSets(true);
 
-		loadAndPersistCodeSystem(HTTPVerb.POST);
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
@@ -466,6 +701,131 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
+	}
+
+	@Test
+	public void testExpandByValueSetWithPreExpansionWithOffset() throws IOException {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("offset", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"1\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1000\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"11378-7\"/>\n",
+			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
+			"</contains>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"8493-9\"/>\n",
+			"<display value=\"Systolic blood pressure 10 hour minimum\"/>\n",
+			"</contains>"));
+
+	}
+
+	@Test
+	public void testExpandByValueSetWithPreExpansionWithCount() throws IOException {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"0\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"0\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"8450-9\"/>\n",
+			"<display value=\"Systolic blood pressure--expiration\"/>\n",
+			"</contains>\n",
+			"</expansion>"));
+
+	}
+
+	@Test
+	public void testExpandByValueSetWithPreExpansionWithOffsetAndCount() throws IOException {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<total value=\"24\"/>\n",
+			"<offset value=\"1\"/>\n",
+			"<parameter>\n",
+			"<name value=\"offset\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<parameter>\n",
+			"<name value=\"count\"/>\n",
+			"<valueInteger value=\"1\"/>\n",
+			"</parameter>\n",
+			"<contains>\n",
+			"<system value=\"http://acme.org\"/>\n",
+			"<code value=\"11378-7\"/>\n",
+			"<display value=\"Systolic blood pressure at First encounter\"/>\n",
+			"</contains>\n",
+			"</expansion>"));
 
 	}
 
