@@ -181,6 +181,16 @@ public class FhirTerserR4Test {
 		Assert.assertEquals("FOO", ((StringType) exts.get(0).getValue()).getValue());
 	}
 
+	@Test
+	public void testCloneEnumeration() {
+		Patient patient = new Patient();
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+		Patient target = new Patient();
+		ourCtx.newTerser().cloneInto(patient, target, false);
+
+		assertEquals("aa", target.getGenderElement().getSystem());
+	}
 
 	@Test
 	public void testCloneIntoPrimitive() {
