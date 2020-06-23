@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionalAspect;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
@@ -268,8 +269,13 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public HapiTransactionalAspect myHapiTransactionalAspect() {
+	public HapiTransactionalAspect hapiTransactionalAspect() {
 		return new HapiTransactionalAspect();
+	}
+
+	@Bean
+	public HapiTransactionService hapiTransactionService() {
+		return new HapiTransactionService();
 	}
 
 	@Bean
