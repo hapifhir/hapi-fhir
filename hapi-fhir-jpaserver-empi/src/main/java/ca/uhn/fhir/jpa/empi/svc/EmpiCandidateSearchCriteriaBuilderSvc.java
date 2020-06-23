@@ -19,7 +19,7 @@ public class EmpiCandidateSearchCriteriaBuilderSvc {
 	 * Given a list of criteria upon which to block, a resource search parameter, and a list of values for that given search parameter,
 	 * build a query url. e.g.
 	 *
-	 * Patient?active=true&name.given=Gary,Grant&name.last=Graham
+	 * Patient?active=true&name.given=Gary,Grant&name.family=Graham
 	 */
 	@Nonnull
 	public Optional<String> buildResourceQueryString(String theResourceType, IAnyResource theResource, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam) {
