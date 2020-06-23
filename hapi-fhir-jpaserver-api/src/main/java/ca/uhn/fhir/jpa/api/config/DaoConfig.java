@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import org.apache.commons.codec.StringEncoder;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -2124,6 +2125,45 @@ public class DaoConfig {
 	 */
 	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
 		myPreloadBlobFromInputStream = thePreloadBlobFromInputStream;
+	}
+
+	/**
+	 * Indicates whether a StringEncoder has been configured
+	 *
+	 * @see #getStringEncoder()
+	 * @since 5.1.0
+	 */
+	public boolean hasStringEncoder() {
+		return myModelConfig.hasStringEncoder();
+	}
+
+	/**
+	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
+	 * the String using this encoder.
+	 *
+	 * @since 5.1.0
+	 */
+	public StringEncoder getStringEncoder() {
+		return myModelConfig.getStringEncoder();
+	}
+
+	/**
+	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
+	 * the String using this encoder.
+	 *
+	 * @since 5.1.0
+	 */
+	public void setStringEncoder(StringEncoder theStringEncoder) {
+		myModelConfig.setStringEncoder(theStringEncoder);
+	}
+
+	/**
+	 * Normalize the string using our StringEncoder
+	 *
+	 * @since 5.1.0
+	 */
+	public String encode(String theString) {
+		return myModelConfig.encode(theString);
 	}
 
 }

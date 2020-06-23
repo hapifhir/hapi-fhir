@@ -39,6 +39,8 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 	@Test
 	public void phoneticMatch() {
+		myDaoConfig.setStringEncoder(new Soundex());
+
 		Patient patient;
 		SearchParameterMap map;
 
@@ -59,5 +61,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		map = new SearchParameterMap();
 		map.add(Patient.SP_PHONETIC, new StringParam(GAIL));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
+
+		myDaoConfig.setStringEncoder(new DaoConfig().getStringEncoder());
 	}
 }

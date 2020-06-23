@@ -22,11 +22,15 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.StringEncoder;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +40,7 @@ import java.util.Set;
 
 // TODO: move this to ca.uhn.fhir.jpa.model.config
 public class ModelConfig {
+	private static final Logger ourLog = LoggerFactory.getLogger(ModelConfig.class);
 
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
@@ -88,6 +93,7 @@ public class ModelConfig {
 
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
 	private IPrimitiveType<Date> myPeriodIndexEndOfTime;
+	private StringEncoder myStringEncoder;
 
 	/**
 	 * Constructor
@@ -573,6 +579,53 @@ public class ModelConfig {
 		myPeriodIndexEndOfTime = thePeriodIndexEndOfTime;
 	}
 
+	/**
+	 * Indicates whether a StringEncoder has been configured
+	 *
+	 * @see #getStringEncoder()
+	 * @since 5.1.0
+	 */
+	public boolean hasStringEncoder() {
+		return myStringEncoder != null;
+	}
+
+	/**
+	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
+	 * the String using this encoder.
+	 *
+	 * @since 5.1.0
+	 */
+	public StringEncoder getStringEncoder() {
+		return myStringEncoder;
+	}
+
+	/**
+	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
+	 * the String using this encoder.
+	 *
+	 * @since 5.1.0
+	 */
+	public void setStringEncoder(StringEncoder theStringEncoder) {
+		myStringEncoder = theStringEncoder;
+	}
+
+	/**
+	 * Normalize the string using our StringEncoder
+	 *
+	 * @since 5.1.0
+	 */
+	public String encode(String theString) {
+		String retval = theString;
+		if (myStringEncoder != null) {
+			try {
+				retval = myStringEncoder.encode(theString);
+			} catch (EncoderException e) {
+				// None of the encoders we use throw this exception...
+				ourLog.error("Failed to encode " + retval, e);
+			}
+		}
+		return retval;
+	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");

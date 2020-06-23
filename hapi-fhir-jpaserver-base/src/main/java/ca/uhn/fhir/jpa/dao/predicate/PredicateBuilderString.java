@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.StringUtil;
-import org.apache.commons.codec.language.Soundex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -46,8 +45,6 @@ import java.util.List;
 @Component
 @Scope("prototype")
 class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
-
-	private final Soundex ourSoundex = new Soundex();
 
 	@Autowired
 	DaoConfig myDaoConfig;
@@ -121,9 +118,8 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 				if (!myDaoConfig.isAllowContainsSearches()) {
 					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
 				}
-			} else if (Patient.SP_PHONETIC.equals(theParamName)) {
-				// FIXME KHS configurable
-				rawSearchTerm = ourSoundex.encode(rawSearchTerm);
+			} else if (myDaoConfig.hasStringEncoder() && Patient.SP_PHONETIC.equals(theParamName)) {
+				rawSearchTerm = myDaoConfig.encode(rawSearchTerm);
 			}
 		} else if (theParameter instanceof IPrimitiveDatatype<?>) {
 			IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) theParameter;

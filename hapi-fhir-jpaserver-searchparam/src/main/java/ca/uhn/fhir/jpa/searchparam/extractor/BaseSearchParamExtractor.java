@@ -45,7 +45,6 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StringUtil;
-import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -87,8 +86,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 	private static final Pattern SPLIT_R4 = Pattern.compile("\\|");
-	// According to the documentation, this class is thread-safe
-	private static final Soundex ourSoundex = new Soundex();
 	@Autowired
 	protected ApplicationContext myApplicationContext;
 	@Autowired
@@ -256,7 +253,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
 		IExtractor extractor;
-		switch(theSearchParam.getParamType()) {
+		switch (theSearchParam.getParamType()) {
 			case DATE:
 				extractor = createDateExtractor(theResource);
 				break;
@@ -978,9 +975,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		for (String next : names) {
 			String value = next;
-			if (Patient.SP_PHONETIC.equals(theSearchParam.getName())) {
-				// FIXME KHS configurable
-				value = ourSoundex.encode(value);
+			if (myModelConfig.hasStringEncoder() && Patient.SP_PHONETIC.equals(theSearchParam.getName())) {
+				value = myModelConfig.encode(value);
 			}
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value);
 		}
