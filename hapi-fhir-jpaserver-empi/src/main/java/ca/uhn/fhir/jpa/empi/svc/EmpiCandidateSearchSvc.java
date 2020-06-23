@@ -58,7 +58,7 @@ public class EmpiCandidateSearchSvc {
 	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
-	private EmpiCriteriaBuilderSvc myEmpiCriteriaBuilderSvc;
+	private EmpiCandidateSearchCriteriaBuilderSvc myEmpiCandidateSearchCriteriaBuilderSvc;
 
 	public EmpiCandidateSearchSvc() {
 	}
@@ -111,7 +111,7 @@ public class EmpiCandidateSearchSvc {
 	@SuppressWarnings("rawtypes")
 	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam) {
 		//1.
-		Optional<String> oResourceCriteria = myEmpiCriteriaBuilderSvc.buildResourceQueryString(theResourceType, theResource, theFilterCriteria, resourceSearchParam);
+		Optional<String> oResourceCriteria = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(theResourceType, theResource, theFilterCriteria, resourceSearchParam);
 		if (!oResourceCriteria.isPresent()) {
 			return;
 		}

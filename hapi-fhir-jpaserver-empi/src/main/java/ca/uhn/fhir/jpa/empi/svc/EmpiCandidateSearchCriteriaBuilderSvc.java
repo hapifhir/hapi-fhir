@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class EmpiCriteriaBuilderSvc {
+public class EmpiCandidateSearchCriteriaBuilderSvc {
 	@Autowired
 	private EmpiSearchParamSvc myEmpiSearchParamSvc;
 

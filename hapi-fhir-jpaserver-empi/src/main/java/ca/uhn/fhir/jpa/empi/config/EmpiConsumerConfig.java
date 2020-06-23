@@ -37,8 +37,8 @@ import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
+import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkQuerySvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
@@ -159,8 +159,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiCriteriaBuilderSvc empiCriteriaBuilderSvc() {
-		return new EmpiCriteriaBuilderSvc();
+	EmpiCandidateSearchCriteriaBuilderSvc empiCriteriaBuilderSvc() {
+		return new EmpiCandidateSearchCriteriaBuilderSvc();
 	}
 
 	@Bean
