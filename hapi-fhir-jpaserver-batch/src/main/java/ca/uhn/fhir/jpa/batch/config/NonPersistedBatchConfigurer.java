@@ -42,6 +42,7 @@ public class NonPersistedBatchConfigurer extends DefaultBatchConfigurer {
 		return myPlatformTransactionManager;
 	}
 
+
 	@Override
 	protected JobRepository createJobRepository() throws Exception {
 		MapJobRepositoryFactoryBean factory = new MapJobRepositoryFactoryBean();
