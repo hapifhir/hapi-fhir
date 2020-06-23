@@ -102,7 +102,7 @@ For example, if the incoming patient looked like this:
 
 then the above `candidateSearchParams` and `candidateFilterSearchParams` would result in the following two consecutive searches for candidates:
 * `Patient?given=Peter,James&family=Chalmers&active=true`
-* `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345` 
+* `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true` 
  
 
 ### matchFields
