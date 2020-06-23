@@ -11,15 +11,15 @@ Here is an example of a full HAPI EMPI rules json document:
 	"candidateSearchParams": [
 		{
 			"resourceType": "Patient",
-			"searchParam": "birthdate"
+			"searchParams": ["birthdate"]
 		},
 		{
 			"resourceType": "*",
-			"searchParam": "identifier"
+			"searchParams": ["identifier"]
 		},
 		{
 			"resourceType": "Patient",
-			"searchParam": "general-practitioner"
+			"searchParams": ["general-practitioner"]
 		}
 	],
 	"candidateFilterSearchParams": [

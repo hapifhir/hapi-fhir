@@ -25,14 +25,16 @@ public class EmpiCandidateSearchCriteriaBuilderSvc {
 	public Optional<String> buildResourceQueryString(String theResourceType, IAnyResource theResource, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam) {
 		List<String> criteria = new ArrayList<>(theFilterCriteria);
 
-		//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
-		List<String> valuesFromResourceForSearchParam = myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, resourceSearchParam);
-		if (valuesFromResourceForSearchParam.isEmpty()) {
+		resourceSearchParam.iterator().forEachRemaining(searchParam -> {
+			//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
+			List<String> valuesFromResourceForSearchParam = myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
+			if (!valuesFromResourceForSearchParam.isEmpty()) {
+				criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
+			}
+		});
+		if (criteria.isEmpty()) {
 			return Optional.empty();
 		}
-
-		criteria.add(buildResourceMatchQuery(resourceSearchParam.getSearchParam(), valuesFromResourceForSearchParam));
-
 		return Optional.of(theResourceType + "?" +  String.join("&", criteria));
 	}
 
