@@ -2139,7 +2139,7 @@ public class DaoConfig {
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
-	 * the String using this encoder.
+	 * the String with this encoder.
 	 *
 	 * @since 5.1.0
 	 */
@@ -2149,7 +2149,7 @@ public class DaoConfig {
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
-	 * the String using this encoder.
+	 * the String with this encoder.
 	 *
 	 * @since 5.1.0
 	 */
@@ -2158,7 +2158,7 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Normalize the string using our StringEncoder
+	 * Normalize the string using the configured StringEncoder
 	 *
 	 * @since 5.1.0
 	 */
