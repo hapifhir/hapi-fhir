@@ -11,7 +11,7 @@ Here is an example of a full HAPI EMPI rules json document:
 	"candidateSearchParams": [
 		{
 			"resourceType": "Patient",
-			"searchParams": ["birthdate"]
+			"searchParams": ["given", "family"]
 		},
 		{
 			"resourceType": "*",
@@ -56,18 +56,21 @@ Here is an example of a full HAPI EMPI rules json document:
 
 Here is a description of how each section of this document is configured.
 
-* **candidateSearchParams**: These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday.  The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some EMPI systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).
+### candidateSearchParams
+These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday.  The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some EMPI systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).
+
 ```json
 [ {
     "resourceType" : "Patient",
-    "searchParam" : "birthdate"
+    "searchParams" : ["given", "family"]
 }, {
     "resourceType" : "Patient",
     "searchParam" : "identifier"
 } ]
 ```
 
-* **candidateFilterSearchParams** When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients for which active=true.  Another way to think of these filters is all of them are "AND"ed with each candidateSearchParam above.
+### candidateFilterSearchParams
+When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients for which active=true.  Another way to think of these filters is all of them are "AND"ed with each candidateSearchParam above.
 ```json
 [ {
     "resourceType" : "Patient",
@@ -76,7 +79,35 @@ Here is a description of how each section of this document is configured.
 } ]
 ```
 
-* **matchFields** Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of metrics: `Matcher` and `Similarity`.  Matcher metrics return a `true` or `false` directly, whereas Similarity metrics return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 8.0.
+For example, if the incoming patient looked like this:
+
+```json
+{
+  "resourceType": "Patient",
+  "id": "example",
+  "identifier": [{
+      "system": "urn:oid:1.2.36.146.595.217.0.1",
+      "value": "12345"
+    }],
+  "name": [
+    {
+      "family": "Chalmers",
+      "given": [
+        "Peter",
+        "James"
+      ]
+    }
+}
+```
+
+then the above `candidateSearchParams` and `candidateFilterSearchParams` would result in the following two consecutive searches for candidates:
+* `Patient?given=Peter,James&family=Chalmers&active=true`
+* `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345` 
+ 
+
+### matchFields
+
+Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of metrics: `Matcher` and `Similarity`.  Matcher metrics return a `true` or `false` directly, whereas Similarity metrics return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 8.0.
 
 By default, all matchFields have `exact=false` which means that they will have all diacritical marks removed and converted to upper case before matching.  `exact=true` can be added to any matchField to compare the strings as they are originally capitalized and accented.
 
@@ -250,7 +281,9 @@ The following metrics are currently supported:
      </tbody>
 </table>
 
-* **matchResultMap** converts combinations of successful matchFields into an EMPI Match Result for overall matching of a given pair of resources.  MATCH results are evaluated take precedence over POSSIBLE_MATCH results.
+### matchResultMap
+
+These entries convert combinations of successful matchFields into an EMPI Match Result for overall matching of a given pair of resources.  MATCH results are evaluated take precedence over POSSIBLE_MATCH results.
 
 ```json
 {
@@ -261,4 +294,6 @@ The following metrics are currently supported:
 }
 ```
 
-* **eidSystem**: The external EID system that the HAPI EMPI system should expect to see on incoming Patient resources. Must be a valid URI.  See [EMPI EID](/hapi-fhir/docs/server_jpa_empi/empi_eid.html) for details on how EIDs are managed by HAPI EMPI.
+### eidSystem
+
+The external EID system that the HAPI EMPI system should expect to see on incoming Patient resources. Must be a valid URI.  See [EMPI EID](/hapi-fhir/docs/server_jpa_empi/empi_eid.html) for details on how EIDs are managed by HAPI EMPI.

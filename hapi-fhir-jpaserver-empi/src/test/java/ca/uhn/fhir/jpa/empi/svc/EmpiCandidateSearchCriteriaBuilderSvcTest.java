@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -43,12 +46,24 @@ public class EmpiCandidateSearchCriteriaBuilderSvcTest extends BaseEmpiR4Test {
 		Patient patient = new Patient();
 		HumanName humanName = patient.addName();
 		humanName.addGiven("Jose");
+		humanName.addGiven("Martin");
 		humanName.setFamily("Fernandez");
 		EmpiResourceSearchParamJson searchParamJson = new EmpiResourceSearchParamJson();
 		searchParamJson.addSearchParam("given");
 		searchParamJson.addSearchParam("family");
 		Optional<String> result = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertTrue(result.isPresent());
-		assertEquals("Patient?given=Jose&family=Fernandez", result.get());
+		assertThat(result.get(), anyOf(equalTo("Patient?given=Jose,Martin&family=Fernandez"), equalTo("Patient?given=Martin,Jose&family=Fernandez")));
+	}
+
+	@Test
+	public void testIdentifier() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:oid:1.2.36.146.595.217.0.1").setValue("12345");
+		EmpiResourceSearchParamJson searchParamJson = new EmpiResourceSearchParamJson();
+		searchParamJson.addSearchParam("identifier");
+		Optional<String> result = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
+		assertTrue(result.isPresent());
+		assertEquals(result.get(), "Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345");
 	}
 }
