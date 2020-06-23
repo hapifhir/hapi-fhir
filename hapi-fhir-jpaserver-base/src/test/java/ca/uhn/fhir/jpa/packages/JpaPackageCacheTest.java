@@ -19,7 +19,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSavePackage() throws IOException {
-		try (InputStream stream = IgInstallerTestDstu3.class.getResourceAsStream("/packages/basisprofil.de.tar.gz")) {
+		try (InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/basisprofil.de.tar.gz")) {
 			myPackageCacheManager.addPackageToCache("basisprofil.de", "0.2.40", stream, "basisprofil.de");
 		}
 

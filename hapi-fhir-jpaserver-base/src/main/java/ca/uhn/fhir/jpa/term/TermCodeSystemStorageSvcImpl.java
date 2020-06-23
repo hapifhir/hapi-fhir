@@ -447,16 +447,19 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			doDelete(descriptor, loader, counter, myConceptDao);
 		}
 
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
-		if (codeSystemOpt.isPresent()) {
-			TermCodeSystem codeSystem = codeSystemOpt.get();
-			ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
-			codeSystem.setCurrentVersion(null);
-			myCodeSystemDao.save(codeSystem);
-		}
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.executeWithoutResult(tx -> {
+			Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
+			if (codeSystemOpt.isPresent()) {
+				TermCodeSystem codeSystem = codeSystemOpt.get();
+				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
+				codeSystem.setCurrentVersion(null);
+				myCodeSystemDao.save(codeSystem);
+			}
 
-		ourLog.info(" * Deleting code system version");
-		myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+			ourLog.info(" * Deleting code system version");
+			myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+		});
 
 	}
 

@@ -100,6 +100,11 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		 * starvation
 		 */
 		int maxThreads = (int) (Math.random() * 6.0) + 1;
+
+		if ("true".equals(System.getProperty("single_db_connection"))) {
+			maxThreads = 1;
+		}
+
 		retVal.setMaxTotal(maxThreads);
 
 		return retVal;

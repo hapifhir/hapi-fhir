@@ -41,6 +41,11 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		 */
 		if (ourMaxThreads == null) {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+
+			if ("true".equals(System.getProperty("single_db_connection"))) {
+				ourMaxThreads = 1;
+			}
+
 		}
 	}
 

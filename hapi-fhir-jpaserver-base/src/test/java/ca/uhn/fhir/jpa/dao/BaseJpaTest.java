@@ -43,6 +43,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.jdbc.Work;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -133,7 +134,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
 	@Autowired
 	private IValidationSupport myJpaPersistedValidationSupport;
-
+	@Autowired
+	private FhirInstanceValidator myFhirInstanceValidator;
 
 	@After
 	public void afterPerformCleanup() {
@@ -150,7 +152,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myJpaPersistedValidationSupport != null) {
 			ProxyUtil.getSingletonTarget(myJpaPersistedValidationSupport, JpaPersistedResourceValidationSupport.class).clearCaches();
 		}
-
+		if (myFhirInstanceValidator != null) {
+			myFhirInstanceValidator.invalidateCaches();
+		}
 
 	}
 

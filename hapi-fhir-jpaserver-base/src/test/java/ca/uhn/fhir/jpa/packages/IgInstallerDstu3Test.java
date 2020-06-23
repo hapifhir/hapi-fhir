@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import org.eclipse.jetty.server.Server;
@@ -30,9 +31,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
+public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(IgInstallerTestDstu3.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(IgInstallerDstu3Test.class);
 	@Autowired
 	private DaoConfig daoConfig;
 	@Autowired
@@ -185,7 +186,7 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 			);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah", e.getMessage());
 		}
 
 	}
@@ -199,8 +200,8 @@ public class IgInstallerTestDstu3 extends BaseJpaDstu3Test {
 				.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
 			);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Received HTTP 404 from URL: http://localhost:" + myPort + "/foo.tgz", e.getMessage());
 		}
 
 	}
