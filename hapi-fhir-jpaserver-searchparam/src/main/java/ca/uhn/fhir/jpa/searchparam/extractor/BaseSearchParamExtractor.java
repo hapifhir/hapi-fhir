@@ -40,10 +40,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StringUtil;
+import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -81,10 +83,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
-	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
-
-	private static final Pattern SPLIT_R4 = Pattern.compile("\\|");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
+
+	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
+	private static final Pattern SPLIT_R4 = Pattern.compile("\\|");
+	// According to the documentation, this class is thread-safe
+	private static final Soundex ourSoundex = new Soundex();
 	@Autowired
 	protected ApplicationContext myApplicationContext;
 	@Autowired
@@ -968,16 +972,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addString_HumanName(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		List<String> families = extractValuesAsStrings(myHumanNameFamilyValueChild, theValue);
-		for (String next : families) {
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
-		}
+		List<String> names = new ArrayList<>();
+		names.addAll(extractValuesAsStrings(myHumanNameFamilyValueChild, theValue));
+		names.addAll(extractValuesAsStrings(myHumanNameGivenValueChild, theValue));
 
-		List<String> givens = extractValuesAsStrings(myHumanNameGivenValueChild, theValue);
-		for (String next : givens) {
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
+		for (String next : names) {
+			String value = next;
+			if (Patient.SP_PHONETIC.equals(theSearchParam.getName())) {
+				// FIXME KHS configurable
+				value = ourSoundex.encode(value);
+			}
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value);
 		}
-
 	}
 
 	private void addString_Quantity(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
