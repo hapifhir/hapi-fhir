@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactional;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -104,7 +105,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -125,7 +125,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@Transactional(propagation = Propagation.REQUIRED)
+@HapiTransactional
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
@@ -1274,143 +1274,130 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
 	public DaoMethodOutcome update(T theResource) {
 		return update(theResource, null, null);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
 	public DaoMethodOutcome update(T theResource, RequestDetails theRequestDetails) {
 		return update(theResource, null, theRequestDetails);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
 	public DaoMethodOutcome update(T theResource, String theMatchUrl) {
 		return update(theResource, theMatchUrl, null);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails) {
 		return update(theResource, theMatchUrl, true, theRequestDetails);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
 		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails, new TransactionDetails());
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.SUPPORTS)
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		TransactionCallback<DaoMethodOutcome> task = tx -> {
-			if (theResource == null) {
-				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingBody");
-				throw new InvalidRequestException(msg);
-			}
+		if (theResource == null) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingBody");
+			throw new InvalidRequestException(msg);
+		}
 
-			StopWatch w = new StopWatch();
+		StopWatch w = new StopWatch();
 
-			T resource = (T) getContext().getResourceDefinition(theResource).newInstance();
-			getContext().newTerser().cloneInto(theResource, resource, false);
+		T resource = (T) getContext().getResourceDefinition(theResource).newInstance();
+		getContext().newTerser().cloneInto(theResource, resource, false);
 
-			// FIXME: remove
-			ourLog.info("**** Clone: {}", w.toString());
+		preProcessResourceForStorage(resource);
 
-			preProcessResourceForStorage(resource);
+		final ResourceTable entity;
 
-			final ResourceTable entity;
-
-			IIdType resourceId;
-			if (isNotBlank(theMatchUrl)) {
-				Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theRequest);
-				if (match.size() > 1) {
-					String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
-					throw new PreconditionFailedException(msg);
-				} else if (match.size() == 1) {
-					ResourcePersistentId pid = match.iterator().next();
-					entity = myEntityManager.find(ResourceTable.class, pid.getId());
-					resourceId = entity.getIdDt();
-				} else {
-					return create(resource, null, thePerformIndexing, theTransactionDetails, theRequest);
-				}
+		IIdType resourceId;
+		if (isNotBlank(theMatchUrl)) {
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theRequest);
+			if (match.size() > 1) {
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
+				throw new PreconditionFailedException(msg);
+			} else if (match.size() == 1) {
+				ResourcePersistentId pid = match.iterator().next();
+				entity = myEntityManager.find(ResourceTable.class, pid.getId());
+				resourceId = entity.getIdDt();
 			} else {
-				/*
-				 * Note: resourceId will not be null or empty here, because we
-				 * check it and reject requests in
-				 * BaseOutcomeReturningMethodBindingWithResourceParam
-				 */
-				resourceId = resource.getIdElement();
-
-				RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, resource, getResourceName());
-				try {
-					entity = readEntityLatestVersion(resourceId, requestPartitionId);
-				} catch (ResourceNotFoundException e) {
-					return doCreate(resource, null, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId);
-				}
+				return create(resource, null, thePerformIndexing, theTransactionDetails, theRequest);
 			}
-
-			if (resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) != entity.getVersion()) {
-				throw new ResourceVersionConflictException("Trying to update " + resourceId + " but this is not the current version");
-			}
-
-			if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
-				throw new UnprocessableEntityException(
-					"Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
-			}
-
-			IBaseResource oldResource = toResource(entity, false);
-
+		} else {
 			/*
-			 * Mark the entity as not deleted - This is also done in the actual updateInternal()
-			 * method later on so it usually doesn't matter whether we do it here, but in the
-			 * case of a transaction with multiple PUTs we don't get there until later so
-			 * having this here means that a transaction can have a reference in one
-			 * resource to another resource in the same transaction that is being
-			 * un-deleted by the transaction. Wacky use case, sure. But it's real.
-			 *
-			 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
-			 * for a test that needs this.
+			 * Note: resourceId will not be null or empty here, because we
+			 * check it and reject requests in
+			 * BaseOutcomeReturningMethodBindingWithResourceParam
 			 */
-			boolean wasDeleted = entity.getDeleted() != null;
-			entity.setDeleted(null);
+			resourceId = resource.getIdElement();
 
-			/*
-			 * If we aren't indexing, that means we're doing this inside a transaction.
-			 * The transaction will do the actual storage to the database a bit later on,
-			 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
-			 * directly. So we just bail now.
-			 */
-			if (!thePerformIndexing) {
-				resource.setId(entity.getIdDt().getValue());
-				DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource).setCreated(wasDeleted);
-				outcome.setPreviousResource(oldResource);
-				return outcome;
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, resource, getResourceName());
+			try {
+				entity = readEntityLatestVersion(resourceId, requestPartitionId);
+			} catch (ResourceNotFoundException e) {
+				return doCreate(resource, null, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId);
 			}
+		}
 
-			/*
-			 * Otherwise, we're not in a transaction
-			 */
-			ResourceTable savedEntity = updateInternal(theRequest, resource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
-			DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, resource).setCreated(wasDeleted);
+		if (resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) != entity.getVersion()) {
+			throw new ResourceVersionConflictException("Trying to update " + resourceId + " but this is not the current version");
+		}
 
-			if (!thePerformIndexing) {
-				IIdType id = getContext().getVersion().newIdType();
-				id.setValue(entity.getIdDt().getValue());
-				outcome.setId(id);
-			}
+		if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
+			throw new UnprocessableEntityException(
+				"Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
+		}
 
-			String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
-			outcome.setOperationOutcome(createInfoOperationOutcome(msg));
+		IBaseResource oldResource = toResource(entity, false);
 
-			ourLog.debug(msg);
+		/*
+		 * Mark the entity as not deleted - This is also done in the actual updateInternal()
+		 * method later on so it usually doesn't matter whether we do it here, but in the
+		 * case of a transaction with multiple PUTs we don't get there until later so
+		 * having this here means that a transaction can have a reference in one
+		 * resource to another resource in the same transaction that is being
+		 * un-deleted by the transaction. Wacky use case, sure. But it's real.
+		 *
+		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
+		 * for a test that needs this.
+		 */
+		boolean wasDeleted = entity.getDeleted() != null;
+		entity.setDeleted(null);
+
+		/*
+		 * If we aren't indexing, that means we're doing this inside a transaction.
+		 * The transaction will do the actual storage to the database a bit later on,
+		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
+		 * directly. So we just bail now.
+		 */
+		if (!thePerformIndexing) {
+			resource.setId(entity.getIdDt().getValue());
+			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource).setCreated(wasDeleted);
+			outcome.setPreviousResource(oldResource);
 			return outcome;
-		};
+		}
 
-		return executeInTransaction(task);
+		/*
+		 * Otherwise, we're not in a transaction
+		 */
+		ResourceTable savedEntity = updateInternal(theRequest, resource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
+		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, resource).setCreated(wasDeleted);
+
+		if (!thePerformIndexing) {
+			IIdType id = getContext().getVersion().newIdType();
+			id.setValue(entity.getIdDt().getValue());
+			outcome.setId(id);
+		}
+
+		String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
+		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
+
+		ourLog.debug(msg);
+		return outcome;
 	}
 
 	@Override

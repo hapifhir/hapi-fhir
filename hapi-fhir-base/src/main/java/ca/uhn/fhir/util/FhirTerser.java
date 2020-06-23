@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.RuntimeExtensionDtDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
@@ -128,6 +130,12 @@ public class FhirTerser {
 		Validate.notNull(theSource, "theSource must not be null");
 		Validate.notNull(theTarget, "theTarget must not be null");
 
+		if (theSource instanceof IBaseElement) {
+			IBaseElement source = (IBaseElement) theSource;
+			IBaseElement target = (IBaseElement) theTarget;
+			target.setId(source.getId());
+		}
+
 		if (theSource instanceof IPrimitiveType<?>) {
 			if (theTarget instanceof IPrimitiveType<?>) {
 				((IPrimitiveType<?>) theTarget).setValueAsString(((IPrimitiveType<?>) theSource).getValueAsString());
@@ -159,7 +167,13 @@ public class FhirTerser {
 				}
 
 				BaseRuntimeElementDefinition<?> element = myContext.getElementDefinition(nextValue.getClass());
-				IBase target = element.newInstance();
+				Object instanceConstructorArg = targetChild.getInstanceConstructorArguments();
+				IBase target;
+				if (instanceConstructorArg != null) {
+					target = element.newInstance(instanceConstructorArg);
+				} else {
+					target = element.newInstance();
+				}
 
 				targetChild.getMutator().addValue(theTarget, target);
 				cloneInto(nextValue, target, theIgnoreMissingFields);

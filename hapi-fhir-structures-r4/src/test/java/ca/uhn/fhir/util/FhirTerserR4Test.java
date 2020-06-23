@@ -182,6 +182,22 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
+	public void testCloneIntoExtensionWithChildExtension() {
+		Patient patient = new Patient();
+
+		Extension ext = new Extension("http://example.com", new StringType("FOO"));
+		patient.addExtension((Extension) new Extension().setUrl("http://foo").addExtension(ext));
+
+		Patient target = new Patient();
+		ourCtx.newTerser().cloneInto(patient, target, false);
+
+		List<Extension> exts = target.getExtensionsByUrl("http://foo");
+		assertEquals(1, exts.size());
+		exts = exts.get(0).getExtensionsByUrl("http://example.com");
+		Assert.assertEquals("FOO", ((StringType) exts.get(0).getValue()).getValue());
+	}
+
+	@Test
 	public void testCloneEnumeration() {
 		Patient patient = new Patient();
 		patient.setGender(Enumerations.AdministrativeGender.MALE);
@@ -189,17 +205,19 @@ public class FhirTerserR4Test {
 		Patient target = new Patient();
 		ourCtx.newTerser().cloneInto(patient, target, false);
 
-		assertEquals("aa", target.getGenderElement().getSystem());
+		assertEquals("http://hl7.org/fhir/administrative-gender", target.getGenderElement().getSystem());
 	}
 
 	@Test
 	public void testCloneIntoPrimitive() {
 		StringType source = new StringType("STR");
+		source.setId("STRING_ID");
 		MarkdownType target = new MarkdownType();
 
 		ourCtx.newTerser().cloneInto(source, target, true);
 
-		Assert.assertEquals("STR", target.getValueAsString());
+		assertEquals("STR", target.getValueAsString());
+		assertEquals("STRING_ID", target.getId());
 	}
 
 

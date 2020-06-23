@@ -1,7 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -15,8 +20,11 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
@@ -44,6 +52,49 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			p.setActive(true);
 			p.addIdentifier().setValue("VAL" + i);
 			Runnable task = () -> myPatientDao.update(p);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (Exception e) {
+				ourLog.info("Future produced exception: {}", e.toString());
+				throw new AssertionError("Failed with message: " + e.toString(), e);
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+	@Test
+	public void testCreateWithClientAssignedId_InTransaction() {
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+
+			Bundle bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle
+				.addEntry()
+				.setResource(p)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl("Patient/ABC");
+			Runnable task = () -> mySystemDao.transaction(mySrd, bundle);
+
 			Future<?> future = myExecutor.submit(task);
 			futures.add(future);
 		}
@@ -95,10 +146,16 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
 			Patient p = new Patient();
-			p.setId("ABC");
 			p.setGender(Enumerations.AdministrativeGender.MALE);
 			p.addIdentifier().setValue("VAL" + i);
-			Runnable task = () -> myPatientDao.update(p);
+			Runnable task = () -> {
+				try {
+					myPatientDao.create(p);
+				} catch (PreconditionFailedException e) {
+					// expected - This is as a result of the unique SP
+					assertThat(e.getMessage(), containsString("it would create a duplicate index matching query"));
+				}
+			};
 			Future<?> future = myExecutor.submit(task);
 			futures.add(future);
 		}
@@ -114,10 +171,15 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			}
 		}
 
+		runInTransaction(() -> {
+			ourLog.info("Uniques:\n * " + myResourceIndexedCompositeStringUniqueDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
 		// Make sure we saved the object
-		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals(true, patient.getActive());
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male")));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, search.sizeOrThrowNpe());
 
 	}
 

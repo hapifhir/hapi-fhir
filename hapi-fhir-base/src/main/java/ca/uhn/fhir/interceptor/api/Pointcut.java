@@ -1563,6 +1563,42 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a transaction has been rolled back as a result of a {@link ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException},
+	 * meaning that a database constraint has been violated. This pointcut allows an interceptor to specify a resolution strategy
+	 * other than simply returning the error to the client. This interceptor will be fired after the database transaction rollback
+	 * has been completed.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy</code>. Hooks should not
+	 * throw any exception.
+	 * </p>
+	 */
+	STORAGE_VERSION_CONFLICT(
+		"ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
 	 * <b>EMPI Hook:</b>
 	 * Invoked whenever a persisted Patient/Practitioner resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) has been matched against related resources and EMPI links have been updated.

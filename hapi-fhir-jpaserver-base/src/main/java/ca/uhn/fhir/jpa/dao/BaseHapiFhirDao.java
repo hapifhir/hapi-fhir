@@ -359,28 +359,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	}
 
-	protected <T> T executeInTransaction(TransactionCallback<T> theJob) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		for (int i = 0;;i++) {
-			try {
-				return txTemplate.execute(theJob);
-			} catch (ResourceVersionConflictException e) {
-//			 FIXME: logs?
-			ourLog.info("Version conflict: {}", e.toString());
-//			theCleanupTask.run();
-				try {
-					Thread.sleep(100 * i);
-				} catch (InterruptedException e2) {
-					// ignore
-				}
-				if (i > 10) {
-					throw e;
-				}
-			}
-		}
-	}
-
-
 	private Set<ResourceTag> getAllTagDefinitions(ResourceTable theEntity) {
 		HashSet<ResourceTag> retVal = Sets.newHashSet();
 		if (theEntity.isHasTags()) {

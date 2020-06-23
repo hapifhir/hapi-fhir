@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionalAspect;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -83,6 +84,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
@@ -121,6 +123,8 @@ public abstract class BaseTransactionProcessor {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
+	@Autowired
+	private HapiTransactionalAspect myHapiTransactionalAspect;
 
 	@PostConstruct
 	public void start() {
@@ -403,13 +407,13 @@ public abstract class BaseTransactionProcessor {
 		 * heavy load with lots of concurrent transactions using all available
 		 * database connections.
 		 */
-		TransactionTemplate txManager = new TransactionTemplate(myTxManager);
-		Map<IBase, IBasePersistedResource> entriesToProcess = txManager.execute(status -> {
+		TransactionCallback<Map<IBase, IBasePersistedResource>> txCallback = status -> {
 			Map<IBase, IBasePersistedResource> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, transactionDetails, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch);
 
 			transactionStopWatch.startTask("Commit writes to database");
 			return retVal;
-		});
+		};
+		Map<IBase, IBasePersistedResource> entriesToProcess = myHapiTransactionalAspect.execute(txCallback);
 		transactionStopWatch.endCurrentTask();
 
 		for (Map.Entry<IBase, IBasePersistedResource> nextEntry : entriesToProcess.entrySet()) {
