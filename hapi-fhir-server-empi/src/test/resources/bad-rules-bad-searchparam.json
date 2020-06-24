@@ -1,7 +1,7 @@
 {
 	"candidateSearchParams" : [{
 		"resourceType" : "Patient",
-		"searchParam" : "foo"
+		"searchParams" : ["foo"]
 	}],
 	"candidateFilterSearchParams" : [],
 	"matchFields" : [],
