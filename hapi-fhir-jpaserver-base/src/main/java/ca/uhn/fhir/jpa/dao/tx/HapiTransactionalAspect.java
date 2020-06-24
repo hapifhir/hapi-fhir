@@ -33,7 +33,8 @@ public class HapiTransactionalAspect {
 	 * {@literal @annotation(ca.uhn.fhir.jpa.dao.tx.HapiTransactional)}
 	 */
 	@Around("within(@ca.uhn.fhir.jpa.dao.tx.HapiTransactional *) && execution(* *(..))")
-	public Object runAsSystem(ProceedingJoinPoint theJoinPoint) throws Throwable {
+	public Object wrapCallInTransactionForType(ProceedingJoinPoint theJoinPoint) throws Throwable {
+
 		TransactionCallback<Object> txCallback = tx -> {
 			try {
 				return theJoinPoint.proceed();
@@ -42,7 +43,7 @@ public class HapiTransactionalAspect {
 				throw new HapiTransactionService.MyException(theThrowable);
 			}
 		};
-		return myHapiTransactionService.execute(txCallback);
+		return myHapiTransactionService.execute(null, txCallback);
 
 	}
 

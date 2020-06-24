@@ -22,25 +22,27 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
 
-		for (String headerValue : theRequestDetails.getHeaders(HEADER_NAME)) {
-			if (isNotBlank(headerValue)) {
+		if (theRequestDetails != null) {
+			for (String headerValue : theRequestDetails.getHeaders(HEADER_NAME)) {
+				if (isNotBlank(headerValue)) {
 
-				StringTokenizer tok = new StringTokenizer(headerValue, ";");
-				while (tok.hasMoreTokens()) {
-					String next = trim(tok.nextToken());
-					if (next.equals(RETRY)) {
-						retVal.setRetry(true);
-					} else if (next.startsWith(MAX_RETRIES + "=")) {
+					StringTokenizer tok = new StringTokenizer(headerValue, ";");
+					while (tok.hasMoreTokens()) {
+						String next = trim(tok.nextToken());
+						if (next.equals(RETRY)) {
+							retVal.setRetry(true);
+						} else if (next.startsWith(MAX_RETRIES + "=")) {
 
-						String val = trim(next.substring((MAX_RETRIES + "=").length()));
-						int maxRetries = Integer.parseInt(val);
-						maxRetries = Math.min(100, maxRetries);
-						retVal.setMaxRetries(maxRetries);
+							String val = trim(next.substring((MAX_RETRIES + "=").length()));
+							int maxRetries = Integer.parseInt(val);
+							maxRetries = Math.min(100, maxRetries);
+							retVal.setMaxRetries(maxRetries);
+
+						}
 
 					}
 
 				}
-
 			}
 		}
 

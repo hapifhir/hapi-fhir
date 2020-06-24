@@ -412,7 +412,7 @@ public abstract class BaseTransactionProcessor {
 			transactionStopWatch.startTask("Commit writes to database");
 			return retVal;
 		};
-		Map<IBase, IBasePersistedResource> entriesToProcess = myHapiTransactionService.execute(txCallback);
+		Map<IBase, IBasePersistedResource> entriesToProcess = myHapiTransactionService.execute(theRequestDetails, txCallback);
 		transactionStopWatch.endCurrentTask();
 
 		for (Map.Entry<IBase, IBasePersistedResource> nextEntry : entriesToProcess.entrySet()) {

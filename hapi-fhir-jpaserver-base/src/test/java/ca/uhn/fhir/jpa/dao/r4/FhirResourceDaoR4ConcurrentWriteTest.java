@@ -5,7 +5,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -18,7 +20,9 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -42,6 +46,10 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	public void before() {
 		myExecutor = Executors.newFixedThreadPool(10);
 		myRetryInterceptor = new UserRequestRetryVersionConflictsInterceptor();
+
+		RestfulServer server = new RestfulServer(myFhirCtx);
+		when(mySrd.getServer()).thenReturn(server);
+
 	}
 
 	@After
@@ -51,7 +59,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithClientAssignedId() {
+	public void testCreateWithClientAssignedId_RequestRetry() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
 		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
 		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
@@ -86,7 +94,126 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithClientAssignedId_InTransaction() {
+	public void testDontRequestRetry() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p, mySrd);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (ExecutionException | InterruptedException e) {
+				if (e.getCause() instanceof ResourceVersionConflictException) {
+					// this is expected since we're not retrying
+					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
+				} else {
+					ourLog.info("Future produced exception: {}", e.toString());
+					throw new AssertionError("Failed with message: " + e.toString(), e);
+				}
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+	@Test
+	public void testNoRetryInterceptor() {
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p, mySrd);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (ExecutionException | InterruptedException e) {
+				if (e.getCause() instanceof ResourceVersionConflictException) {
+					// this is expected since we're not retrying
+					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
+				} else {
+					ourLog.info("Future produced exception: {}", e.toString());
+					throw new AssertionError("Failed with message: " + e.toString(), e);
+				}
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+
+	@Test
+	public void testInvocationWithoutRequestDetails() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (ExecutionException | InterruptedException e) {
+				if (e.getCause() instanceof ResourceVersionConflictException) {
+					// this is expected since we're not retrying
+					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
+				} else {
+					ourLog.info("Future produced exception: {}", e.toString());
+					throw new AssertionError("Failed with message: " + e.toString(), e);
+				}
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+
+	@Test
+	public void testTransactionWithCreate() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {

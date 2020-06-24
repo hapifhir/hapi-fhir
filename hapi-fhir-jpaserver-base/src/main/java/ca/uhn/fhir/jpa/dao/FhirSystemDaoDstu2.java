@@ -143,7 +143,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					// create their own
 					nextResponseBundle = callback.doInTransaction(null);
 				} else {
-					nextResponseBundle = myHapiTransactionalService.execute(callback);
+					nextResponseBundle = myHapiTransactionalService.execute(theRequestDetails, callback);
 				}
 				caughtEx = null;
 
