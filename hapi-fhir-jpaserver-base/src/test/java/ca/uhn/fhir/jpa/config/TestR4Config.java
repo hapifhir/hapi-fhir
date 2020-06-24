@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
@@ -34,8 +33,6 @@ import static org.junit.Assert.fail;
 @Import({TestJPAConfig.class, BatchJobsConfig.class})
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
-
-	CountDownLatch jobLatch = new CountDownLatch(1);
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
 	public static Integer ourMaxThreads;
@@ -47,7 +44,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * starvation
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 2;
 
 			if ("true".equals(System.getProperty("single_db_connection"))) {
 				ourMaxThreads = 1;

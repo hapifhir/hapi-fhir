@@ -28,14 +28,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -59,6 +64,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
+	@Autowired
+	private JobExplorer myJobExplorer;
 
 	@Autowired
 	@Qualifier("bulkExportJob")
@@ -165,6 +172,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
 
+		awaitAllBulkJobCompletions();
+
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
@@ -235,6 +244,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
 
+		awaitAllBulkJobCompletions();
+
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
@@ -258,6 +269,25 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			}
 
 		}
+	}
+
+	public void awaitAllBulkJobCompletions() {
+		List<JobInstance> bulkExport = myJobExplorer.findJobInstancesByJobName("bulkExportJob", 0, 100);
+		if (bulkExport.isEmpty()) {
+			fail("There are no bulk export jobs running!");
+		}
+		List<JobExecution> bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
+		awaitJobCompletions(bulkExportExecutions);
+	}
+
+	public void awaitJobCompletions(Collection<JobExecution> theJobs) {
+		theJobs.stream().forEach(jobExecution -> {
+			try {
+				awaitJobCompletion(jobExecution);
+			} catch (InterruptedException theE) {
+				fail();
+			}
+		});
 	}
 
 	@Test
@@ -345,6 +375,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
+		
+		awaitAllBulkJobCompletions();
 
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
