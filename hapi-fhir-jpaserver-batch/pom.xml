@@ -19,12 +19,12 @@
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-core</artifactId>
-			<version>4.2.2.RELEASE</version>
+			<version>${spring_batch_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-infrastructure</artifactId>
-			<version>4.2.2.RELEASE</version>
+			<version>${spring_batch_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-test</artifactId>
-			<version>4.2.2.RELEASE</version>
+			<version>${spring_batch_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
