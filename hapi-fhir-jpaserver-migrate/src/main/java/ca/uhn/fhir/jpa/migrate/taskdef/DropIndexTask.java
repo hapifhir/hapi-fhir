@@ -107,11 +107,9 @@ public class DropIndexTask extends BaseTableTask {
 			// Drop constraint
 			switch (theDriverType) {
 				case MYSQL_5_7:
+				case MARIADB_10_1:
 					// Need to quote the index name as the word "PRIMARY" is reserved in MySQL
 					sql.add("alter table " + theTableName + " drop index `" + theIndexName + "`");
-					break;
-				case MARIADB_10_1:
-					sql.add("alter table " + theTableName + " drop index " + theIndexName);
 					break;
 				case H2_EMBEDDED:
 					sql.add("drop index " + theIndexName);
