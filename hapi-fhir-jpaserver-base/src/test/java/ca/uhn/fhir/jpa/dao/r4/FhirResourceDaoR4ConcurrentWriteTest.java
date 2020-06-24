@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -16,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,25 +27,34 @@ import java.util.stream.Collectors;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ConcurrentWriteTest.class);
 	private ExecutorService myExecutor;
+	private UserRequestRetryVersionConflictsInterceptor myRetryInterceptor;
+
 
 	@Before
 	public void before() {
 		myExecutor = Executors.newFixedThreadPool(10);
+		myRetryInterceptor = new UserRequestRetryVersionConflictsInterceptor();
 	}
 
 	@After
 	public void after() {
 		myExecutor.shutdown();
+		myInterceptorRegistry.unregisterInterceptor(myRetryInterceptor);
 	}
 
 	@Test
 	public void testCreateWithClientAssignedId() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
@@ -51,7 +62,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			p.setId("ABC");
 			p.setActive(true);
 			p.addIdentifier().setValue("VAL" + i);
-			Runnable task = () -> myPatientDao.update(p);
+			Runnable task = () -> myPatientDao.update(p, mySrd);
 			Future<?> future = myExecutor.submit(task);
 			futures.add(future);
 		}
