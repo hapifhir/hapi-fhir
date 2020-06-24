@@ -37,10 +37,10 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 
 		EmpiResourceSearchParamJson patientBirthdayBlocking = new EmpiResourceSearchParamJson()
 			.setResourceType("Patient")
-			.setSearchParam(Patient.SP_BIRTHDATE);
+			.addSearchParam(Patient.SP_BIRTHDATE);
 		EmpiResourceSearchParamJson patientIdentifierBlocking = new EmpiResourceSearchParamJson()
 			.setResourceType("Patient")
-			.setSearchParam(Patient.SP_IDENTIFIER);
+			.addSearchParam(Patient.SP_IDENTIFIER);
 
 
 		EmpiFieldMatchJson lastNameMatchField = new EmpiFieldMatchJson()
