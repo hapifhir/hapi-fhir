@@ -876,6 +876,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
 			obs.setDevice(new Reference(devId));
+			IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			DiagnosticReport dr = new DiagnosticReport();
+			dr.addResult().setReference(obsId.getValue());
+			dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 			myObservationDao.create(obs, mySrd);
 		}
 
@@ -895,6 +900,51 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|NOLINK"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), empty());
 	}
+
+	@Test
+	public void testHasParameterDouble() {
+		// Matching
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("00");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
+			obs.setSubject(new Reference(pid0));
+			IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			DiagnosticReport dr = new DiagnosticReport();
+			dr.addResult().setReference(obsId.getValue());
+			dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+			myDiagnosticReportDao.create(dr, mySrd);
+		}
+
+		// Matching
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			IIdType pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
+			obs.setSubject(new Reference(pid1));
+			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+		}
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+
+		// Double _has
+		params = new SearchParameterMap();
+		params.add("_has", new HasParam("Observation", "subject", "_has:DiagnosticReport:result:status", "final"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), containsInAnyOrder(pid0.getValue()));
+
+	}
+
 
 	@Test
 	public void testHasParameterChained() {

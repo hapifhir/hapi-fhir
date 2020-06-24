@@ -62,6 +62,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -944,30 +945,46 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				throw new InvalidRequestException("Invalid resource type: " + targetResourceType);
 			}
 
-			//Ensure that the name of the search param
-			// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
-			// exists on the target resource type.
-			RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
-			if (owningParameterDef == null) {
-				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
-			}
-
-			//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
-			//exists on the target resource.
-			owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramReference);
-			if (owningParameterDef == null) {
-				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
-			}
-
-			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
-
-			IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myContext, paramDef, paramName, parameters);
-
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
 
-			for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
-				orValues.addAll(next.getValuesAsQueryTokens());
+			if (paramName.startsWith("_has:")) {
+
+				ourLog.trace("Handing double _has query: {}", paramName);
+
+				String qualifier = paramName.substring(4);
+				paramName = Constants.PARAM_HAS;
+				for (IQueryParameterType next : nextOrList) {
+					HasParam nextHasParam = new HasParam();
+					nextHasParam.setValueAsQueryToken(myContext, Constants.PARAM_HAS, qualifier, next.getValueAsQueryToken(myContext));
+					orValues.add(nextHasParam);
+				}
+
+			} else {
+
+				//Ensure that the name of the search param
+				// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
+				// exists on the target resource type.
+				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
+				if (owningParameterDef == null) {
+					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
+				}
+
+				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
+				//exists on the target resource.
+				owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramReference);
+				if (owningParameterDef == null) {
+					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
+				}
+
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
+				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myContext, paramDef, paramName, parameters);
+
+				for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
+					orValues.addAll(next.getValuesAsQueryTokens());
+				}
+
 			}
+
 			//Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
 				String chainedPartOfParameter = getChainedPart(parameterName);
