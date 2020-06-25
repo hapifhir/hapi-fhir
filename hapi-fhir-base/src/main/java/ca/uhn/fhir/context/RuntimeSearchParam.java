@@ -245,7 +245,6 @@ public class RuntimeSearchParam {
 		return myProvidesMembershipInCompartments;
 	}
 
-
 	public enum RuntimeSearchParamStatusEnum {
 		ACTIVE,
 		DRAFT,

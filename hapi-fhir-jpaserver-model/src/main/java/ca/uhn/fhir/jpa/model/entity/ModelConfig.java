@@ -608,19 +608,6 @@ public class ModelConfig {
 		myStringEncoder = theStringEncoder;
 	}
 
-	/**
-	 * Normalize the string using our StringEncoder
-	 *
-	 * @since 5.1.0
-	 */
-	public String encode(String theString) {
-		if (myStringEncoder == null) {
-			return theString;
-		} else {
-			return myStringEncoder.encode(theString);
-		}
-	}
-
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 

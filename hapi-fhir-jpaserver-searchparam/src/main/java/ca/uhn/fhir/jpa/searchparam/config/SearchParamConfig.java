@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.PhoneticEncoderSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
@@ -79,6 +80,12 @@ public class SearchParamConfig {
 	@Lazy
 	public SearchParamExtractorService searchParamExtractorService(){
 		return new SearchParamExtractorService();
+	}
+
+	@Bean
+	@Lazy
+	public PhoneticEncoderSvc phoneticEncoderSvc() {
+		return new PhoneticEncoderSvc();
 	}
 
 	@Bean

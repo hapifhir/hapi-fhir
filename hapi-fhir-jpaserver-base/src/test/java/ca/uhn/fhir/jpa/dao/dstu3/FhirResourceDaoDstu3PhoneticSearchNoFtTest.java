@@ -91,7 +91,8 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		searchParameter.setType(Enumerations.SearchParamType.STRING);
 		searchParameter.setTitle("Test Name Soundex");
 		searchParameter.setExpression("Patient.name");
-		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
+// Maybe use in the future?  RuntimeSearchParam doesn't store this...
+//		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.addExtension()
 			.setUrl(JpaConstants.EXT_SEARCHPARAM_PHONETIC_ENCODER)

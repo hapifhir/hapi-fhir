@@ -21,12 +21,11 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.searchparam.extractor.PhoneticEncoderSvc;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -47,7 +46,7 @@ import java.util.List;
 class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
 
 	@Autowired
-	DaoConfig myDaoConfig;
+	PhoneticEncoderSvc myPhoneticEncoderSvc;
 
 	PredicateBuilderString(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
@@ -118,8 +117,9 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 				if (!myDaoConfig.isAllowContainsSearches()) {
 					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
 				}
-			} else if (myDaoConfig.hasStringEncoder() && Patient.SP_PHONETIC.equals(theParamName)) {
-				rawSearchTerm = myDaoConfig.encode(rawSearchTerm);
+			} else {
+				// FIXME KHS collapse these params and instead pass down the runtime searchparam?
+				rawSearchTerm = myPhoneticEncoderSvc.encode(theResourceName, theParamName, rawSearchTerm);
 			}
 		} else if (theParameter instanceof IPrimitiveDatatype<?>) {
 			IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) theParameter;

@@ -2157,14 +2157,4 @@ public class DaoConfig {
 	public void setStringEncoder(IPhoneticEncoder theStringEncoder) {
 		myModelConfig.setStringEncoder(theStringEncoder);
 	}
-
-	/**
-	 * Normalize the string using the configured StringEncoder
-	 *
-	 * @since 5.1.0
-	 */
-	public String encode(String theString) {
-		return myModelConfig.encode(theString);
-	}
-
 }
