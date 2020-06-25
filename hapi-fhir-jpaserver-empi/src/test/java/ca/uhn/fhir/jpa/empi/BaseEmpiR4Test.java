@@ -48,11 +48,8 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -102,30 +99,19 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-
-	private TransactionTemplate myTxTemplate;
-
-	@PostConstruct
-	public void initTxTemplate() {
-		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
-	}
 
 	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
 	@Override
 	@After
 	public void after() {
-		// TODO KHS Why does adding Spring Batch now require us to wrap this in a transaction?
-		myTxTemplate.executeWithoutResult(t -> myEmpiLinkDao.deleteAll());
+		myEmpiLinkDao.deleteAll();
 		assertEquals(0, myEmpiLinkDao.count());
 		super.after();
 	}
 
-	// TODO KHS Why does adding Spring Batch now require us to wrap this in a transaction?
-	protected void saveLink(EmpiLink theNoMatchLink) {
-		myTxTemplate.executeWithoutResult(t -> myEmpiLinkDaoSvc.save(theNoMatchLink));
+	protected void saveLink(EmpiLink theEmpiLink) {
+		myEmpiLinkDaoSvc.save(theEmpiLink);
 	}
 
 	@Nonnull
