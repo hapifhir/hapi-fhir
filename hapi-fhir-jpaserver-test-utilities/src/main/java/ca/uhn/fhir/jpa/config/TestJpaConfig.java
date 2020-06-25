@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 // TODO RC1 can use in jpa tests?
@@ -46,7 +45,7 @@ public class TestJpaConfig {
 
 	@Bean
 	@Primary
-	public PlatformTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
+	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
