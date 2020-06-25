@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -340,9 +341,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	//create one itself, which means that its jobUUID isnt known until it starts. to get around this, we move
 	public void awaitJobCompletion(JobExecution theJobExecution) throws InterruptedException {
 		await().until(() -> {
-			//return theJobExecution.getStatus() == BatchStatus.COMPLETED;
-			String jobUUID = theJobExecution.getExecutionContext().getString("jobUUID");
-			return myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobUUID).getStatus() == BulkJobStatusEnum.COMPLETE;
+			return theJobExecution.getStatus() == BatchStatus.COMPLETED;
 		});
 	}
 

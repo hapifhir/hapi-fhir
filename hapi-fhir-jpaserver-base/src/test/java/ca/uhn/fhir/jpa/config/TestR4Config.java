@@ -44,7 +44,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * starvation
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 2;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 
 			if ("true".equals(System.getProperty("single_db_connection"))) {
 				ourMaxThreads = 1;

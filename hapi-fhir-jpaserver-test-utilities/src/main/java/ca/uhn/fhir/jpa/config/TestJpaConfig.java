@@ -45,7 +45,7 @@ public class TestJpaConfig {
 
 	@Bean
 	@Primary
-	public JpaTransactionManager hapiransactionManager(EntityManagerFactory entityManagerFactory) {
+	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
