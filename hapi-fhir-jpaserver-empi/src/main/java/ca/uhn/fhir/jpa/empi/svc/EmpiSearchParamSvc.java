@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -51,9 +50,9 @@ public class EmpiSearchParamSvc implements ISearchParamRetriever {
 		return myMatchUrlService.translateMatchUrl(theResourceCriteria, resourceDef);
 	}
 
-	public List<String> getValueFromResourceForSearchParam(IBaseResource theResource, EmpiResourceSearchParamJson theFilterSearchParam) {
+	public List<String> getValueFromResourceForSearchParam(IBaseResource theResource, String theSearchParam) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, theFilterSearchParam.getSearchParam());
+		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, theSearchParam);
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 
