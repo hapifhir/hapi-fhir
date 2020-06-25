@@ -35,13 +35,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
@@ -58,6 +57,11 @@ public class EmpiCandidateSearchSvc {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IdHelperService myIdHelperService;
+	@Autowired
+	private EmpiCandidateSearchCriteriaBuilderSvc myEmpiCandidateSearchCriteriaBuilderSvc;
+
+	public EmpiCandidateSearchSvc() {
+	}
 
 	/**
 	 * Given a target resource, search for all resources that are considered an EMPI match based on defined EMPI rules.
@@ -81,13 +85,7 @@ public class EmpiCandidateSearchSvc {
 				continue;
 			}
 
-			//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
-			List<String> valuesFromResourceForSearchParam = myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, resourceSearchParam);
-			if (valuesFromResourceForSearchParam.isEmpty()) {
-				continue;
-			}
-
-			searchForIdsAndAddToMap(theResourceType, matchedPidsToResources, filterCriteria, resourceSearchParam, valuesFromResourceForSearchParam);
+			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam);
 		}
 		//Obviously we don't want to consider the freshly added resource as a potential candidate.
 		//Sometimes, we are running this function on a resource that has not yet been persisted,
@@ -111,9 +109,13 @@ public class EmpiCandidateSearchSvc {
 	 * 4. Store all results in `theMatchedPidsToResources`
 	 */
 	@SuppressWarnings("rawtypes")
-	private void searchForIdsAndAddToMap(String theResourceType, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
+	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam) {
 		//1.
-		String resourceCriteria = buildResourceQueryString(theResourceType, theFilterCriteria, resourceSearchParam, theValuesFromResourceForSearchParam);
+		Optional<String> oResourceCriteria = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(theResourceType, theResource, theFilterCriteria, resourceSearchParam);
+		if (!oResourceCriteria.isPresent()) {
+			return;
+		}
+		String resourceCriteria = oResourceCriteria.get();
 		ourLog.debug("Searching for {} candidates with {}", theResourceType, resourceCriteria);
 
 		//2.
@@ -137,24 +139,6 @@ public class EmpiCandidateSearchSvc {
 		if (ourLog.isDebugEnabled()) {
 			ourLog.debug("Candidate search added {} {}s", newSize - initialSize, theResourceType);
 		}
-	}
-
-	/*
-	 * Given a list of criteria upon which to block, a resource search parameter, and a list of values for that given search parameter,
-	 * build a query url. e.g.
-	 *
-	 * Patient?active=true&name.given=Gary,Grant
-	 */
-	@Nonnull
-	private String buildResourceQueryString(String theResourceType, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam, List<String> theValuesFromResourceForSearchParam) {
-		List<String> criteria = new ArrayList<>(theFilterCriteria);
-		criteria.add(buildResourceMatchQuery(resourceSearchParam.getSearchParam(), theValuesFromResourceForSearchParam));
-
-		return theResourceType + "?" +  String.join("&", criteria);
-	}
-
-	private String buildResourceMatchQuery(String theSearchParamName, List<String> theResourceValues) {
-		return theSearchParamName + "=" + String.join(",", theResourceValues);
 	}
 
 	private List<String> buildFilterQuery(List<EmpiFilterSearchParamJson> theFilterSearchParams, String theResourceType) {
