@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -96,6 +95,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private ModelConfig myModelConfig;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private PhoneticEncoderSvc myPhoneticEncoderSvc;
+
 	private Set<String> myIgnoredForSearchDatatypes;
 	private BaseRuntimeChildDefinition myQuantityValueValueChild;
 	private BaseRuntimeChildDefinition myQuantitySystemValueChild;
@@ -974,10 +976,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		names.addAll(extractValuesAsStrings(myHumanNameGivenValueChild, theValue));
 
 		for (String next : names) {
-			String value = next;
-			if (myModelConfig.hasStringEncoder() && Patient.SP_PHONETIC.equals(theSearchParam.getName())) {
-				value = myModelConfig.encode(value);
-			}
+			String value = myPhoneticEncoderSvc.encode(theSearchParam, next);
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value);
 		}
 	}
