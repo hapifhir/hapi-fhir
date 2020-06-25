@@ -249,6 +249,11 @@ public class JpaConstants {
 	public static final String EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-token-suppress-text-index";
 
 	/**
+	 * Extension URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
+	 */
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
+
+	/**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {

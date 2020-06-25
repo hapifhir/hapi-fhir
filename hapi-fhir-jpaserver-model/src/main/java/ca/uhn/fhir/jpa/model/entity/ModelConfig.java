@@ -20,10 +20,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.config.IPhoneticEncoder;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.StringEncoder;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -93,7 +92,7 @@ public class ModelConfig {
 
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
 	private IPrimitiveType<Date> myPeriodIndexEndOfTime;
-	private StringEncoder myStringEncoder;
+	private IPhoneticEncoder myStringEncoder;
 
 	/**
 	 * Constructor
@@ -595,7 +594,7 @@ public class ModelConfig {
 	 *
 	 * @since 5.1.0
 	 */
-	public StringEncoder getStringEncoder() {
+	public IPhoneticEncoder getStringEncoder() {
 		return myStringEncoder;
 	}
 
@@ -605,7 +604,7 @@ public class ModelConfig {
 	 *
 	 * @since 5.1.0
 	 */
-	public void setStringEncoder(StringEncoder theStringEncoder) {
+	public void setStringEncoder(IPhoneticEncoder theStringEncoder) {
 		myStringEncoder = theStringEncoder;
 	}
 
@@ -615,16 +614,11 @@ public class ModelConfig {
 	 * @since 5.1.0
 	 */
 	public String encode(String theString) {
-		String retval = theString;
-		if (myStringEncoder != null) {
-			try {
-				retval = myStringEncoder.encode(theString);
-			} catch (EncoderException e) {
-				// None of the encoders we use throw this exception...
-				ourLog.error("Failed to encode " + retval, e);
-			}
+		if (myStringEncoder == null) {
+			return theString;
+		} else {
+			return myStringEncoder.encode(theString);
 		}
-		return retval;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

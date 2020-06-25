@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.api.config;
 
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
+import ca.uhn.fhir.jpa.model.config.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -8,7 +9,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-import org.apache.commons.codec.StringEncoder;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -2143,7 +2143,7 @@ public class DaoConfig {
 	 *
 	 * @since 5.1.0
 	 */
-	public StringEncoder getStringEncoder() {
+	public IPhoneticEncoder getStringEncoder() {
 		return myModelConfig.getStringEncoder();
 	}
 
@@ -2152,8 +2152,9 @@ public class DaoConfig {
 	 * the String with this encoder.
 	 *
 	 * @since 5.1.0
+	 * @param theStringEncoder
 	 */
-	public void setStringEncoder(StringEncoder theStringEncoder) {
+	public void setStringEncoder(IPhoneticEncoder theStringEncoder) {
 		myModelConfig.setStringEncoder(theStringEncoder);
 	}
 

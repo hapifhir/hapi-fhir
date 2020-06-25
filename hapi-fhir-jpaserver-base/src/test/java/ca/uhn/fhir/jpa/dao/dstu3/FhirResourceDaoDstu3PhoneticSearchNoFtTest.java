@@ -1,14 +1,22 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.ApacheEncoder;
+import ca.uhn.fhir.jpa.model.config.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.codec.language.Soundex;
+import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.SearchParameter;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,12 +31,19 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3PhoneticSearchNoFtTest.class);
 	public static final String GALE = "Gale";
 	public static final String GAIL = "Gail";
+	public static final String NAME_SOUNDEX_SP = "nameSoundex";
+
+	@Autowired
+	ISearchParamRegistry mySearchParamRegistry;
 
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
+
+		createNameSoundexSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX);
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Test
@@ -39,7 +54,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 	@Test
 	public void phoneticMatch() {
-		myDaoConfig.setStringEncoder(new Soundex());
+		myDaoConfig.setStringEncoder(new ApacheEncoder(new Soundex()));
 
 		Patient patient;
 		SearchParameterMap map;
@@ -50,18 +65,39 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		IIdType pId1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<ResourceIndexedSearchParamString> stringParams = myResourceIndexedSearchParamStringDao.findAll();
-		assertThat(stringParams, hasSize(3));
+		assertThat(stringParams, hasSize(4));
 		List<String> stringParamNames = stringParams.stream().map(ResourceIndexedSearchParamString::getParamName).collect(Collectors.toList());
-		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC));
+		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP));
 
-		map = new SearchParameterMap();
-		map.add(Patient.SP_PHONETIC, new StringParam(GALE));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
-
-		map = new SearchParameterMap();
-		map.add(Patient.SP_PHONETIC, new StringParam(GAIL));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
+		assertSearchMatch(pId1, Patient.SP_PHONETIC, GALE);
+		assertSearchMatch(pId1, Patient.SP_PHONETIC, GAIL);
+		assertSearchMatch(pId1, NAME_SOUNDEX_SP, GAIL);
+		assertSearchMatch(pId1, NAME_SOUNDEX_SP, GALE);
 
 		myDaoConfig.setStringEncoder(new DaoConfig().getStringEncoder());
 	}
+
+	private void assertSearchMatch(IIdType thePId1, String theSp, String theValue) {
+		SearchParameterMap map;
+		map = new SearchParameterMap();
+		map.add(theSp, new StringParam(theValue));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(thePId1)));
+	}
+
+	private void createNameSoundexSearchParameter(String theCode, PhoneticEncoderEnum theEncoder) {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("Patient");
+		searchParameter.setCode(theCode);
+		searchParameter.setType(Enumerations.SearchParamType.STRING);
+		searchParameter.setTitle("Test Name Soundex");
+		searchParameter.setExpression("Patient.name");
+		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.addExtension()
+			.setUrl(JpaConstants.EXT_SEARCHPARAM_PHONETIC_ENCODER)
+			.setValue(new StringType(theEncoder.name()));
+		mySearchParameterDao.create(searchParameter, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+
 }
