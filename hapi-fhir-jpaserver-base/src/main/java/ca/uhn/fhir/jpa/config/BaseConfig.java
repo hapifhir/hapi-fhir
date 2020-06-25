@@ -136,8 +136,10 @@ public abstract class BaseConfig {
 	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
+
 	@Autowired
 	protected Environment myEnv;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -160,8 +162,6 @@ public abstract class BaseConfig {
 	public IBatchJobSubmitter batchJobSubmitter() {
 		return new BatchJobSubmitterImpl();
 	}
-
-
 
 	/**
 	 * This method should be overridden to provide an actual completed

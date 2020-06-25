@@ -30,7 +30,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
-
+// TODO RC1 can use in jpa tests?
 @Configuration
 public class TestJpaConfig {
 	@Bean
