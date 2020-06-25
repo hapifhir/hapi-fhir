@@ -9,7 +9,6 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -18,8 +17,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 abstract public class BaseBatchR4Test {
  	private static final Logger ourLog = getLogger(BaseBatchR4Test.class);
 
- 	@Autowired
-	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	protected JobLauncher myJobLauncher;
 	@Autowired
