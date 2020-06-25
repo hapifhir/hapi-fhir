@@ -610,11 +610,6 @@
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 	</dependencies>
 
 
