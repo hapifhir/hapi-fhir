@@ -25,6 +25,8 @@ import org.springframework.mock.env.MockEnvironment;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -81,15 +83,7 @@ public class FhirAutoConfigurationTest {
 
 	@Test
 	public void withJpaServer() {
-		load(
-			Arrays.array(
-				EmbeddedDataSourceConfiguration.class,
-				HibernateJpaAutoConfiguration.class,
-				PropertyPlaceholderAutoConfiguration.class,
-				FhirAutoConfiguration.class),
-			"hapi.fhir.version:DSTU3",
-			"spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles",
-			"spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
+		load("hapi.fhir.version:DSTU3", "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles", "spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
 		assertThat(this.context.getBeansOfType(DaoConfig.class)).hasSize(1);
 		assertThat(this.context.getBeansOfType(Dstu3.class)).hasSize(1);
 	}
@@ -137,11 +131,14 @@ public class FhirAutoConfigurationTest {
 	}
 
 	private void load(String... environment) {
-		load(new Class<?>[]{FhirAutoConfiguration.class}, null, environment);
+		load(new Class<?>[]{EmbeddedDataSourceConfiguration.class,HibernateJpaAutoConfiguration.class,PropertyPlaceholderAutoConfiguration.class, FhirAutoConfiguration.class}, null, environment);
+
+
+
 	}
 
 	private void load(ClassLoader classLoader, String... environment) {
-		load(new Class<?>[]{FhirAutoConfiguration.class}, classLoader, environment);
+		load(new Class<?>[]{EmbeddedDataSourceConfiguration.class,HibernateJpaAutoConfiguration.class,PropertyPlaceholderAutoConfiguration.class, FhirAutoConfiguration.class}, classLoader, environment);
 	}
 
 	private void load(Class<?>[] configs, String... environment) {
@@ -149,13 +146,24 @@ public class FhirAutoConfigurationTest {
 	}
 
 	private void load(Class<?>[] configs, ClassLoader classLoader, String... environment) {
+		List<String> baseEnv = new ArrayList<>();
+		baseEnv.add("hapi.fhir.version:DSTU3");
+		baseEnv.add("spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
+		baseEnv.add("spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles");
 
 		MockEnvironment env = new MockEnvironment();
+
+		for (String next: baseEnv) {
+			String nextKey = next.substring(0, next.indexOf(':'));
+			String nextValue = next.substring(next.indexOf(':') + 1);
+			env.setProperty(nextKey, nextValue);
+		}
 		for (String next : environment) {
 			String nextKey = next.substring(0, next.indexOf(':'));
 			String nextValue = next.substring(next.indexOf(':') + 1);
 			env.setProperty(nextKey, nextValue);
 		}
+
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.setEnvironment(env);
