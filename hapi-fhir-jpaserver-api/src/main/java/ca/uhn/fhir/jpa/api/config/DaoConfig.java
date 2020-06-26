@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.api.config;
 
-import ca.uhn.fhir.context.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -2127,34 +2126,4 @@ public class DaoConfig {
 		myPreloadBlobFromInputStream = thePreloadBlobFromInputStream;
 	}
 
-	/**
-	 * Indicates whether a StringEncoder has been configured
-	 *
-	 * @see #getStringEncoder()
-	 * @since 5.1.0
-	 */
-	public boolean hasStringEncoder() {
-		return myModelConfig.hasStringEncoder();
-	}
-
-	/**
-	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
-	 * the String with this encoder.
-	 *
-	 * @since 5.1.0
-	 */
-	public IPhoneticEncoder getStringEncoder() {
-		return myModelConfig.getStringEncoder();
-	}
-
-	/**
-	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
-	 * the String with this encoder.
-	 *
-	 * @since 5.1.0
-	 * @param theStringEncoder
-	 */
-	public void setStringEncoder(IPhoneticEncoder theStringEncoder) {
-		myModelConfig.setStringEncoder(theStringEncoder);
-	}
 }

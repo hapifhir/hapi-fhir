@@ -2,13 +2,11 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.config.PhoneticEncoderEnum;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DatatypeUtil;
@@ -40,10 +38,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParameterCanonicalizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterCanonicalizer.class);
 
+	private final FhirContext myFhirContext;
+
 	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private ModelConfig myModelConfig;
+	public SearchParameterCanonicalizer(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
 	protected RuntimeSearchParam canonicalizeSearchParameter(IBaseResource theSearchParameter) {
 		JpaRuntimeSearchParam retVal;
@@ -67,14 +67,7 @@ public class SearchParameterCanonicalizer {
 				throw new InternalErrorException("SearchParameter canonicalization not supported for FHIR version" + myFhirContext.getVersion().getVersion());
 		}
 		extractExtensions(theSearchParameter, retVal);
-		setPhoneticEncoder(retVal);
 		return retVal;
-	}
-
-	private void setPhoneticEncoder(JpaRuntimeSearchParam theSearchParam) {
-		if (myModelConfig.hasStringEncoder() && Patient.SP_PHONETIC.equals(theSearchParam.getName())) {
-			theSearchParam.setPhoneticEncoder(myModelConfig.getStringEncoder());
-		}
 	}
 
 	private JpaRuntimeSearchParam canonicalizeSearchParameterDstu2(ca.uhn.fhir.model.dstu2.resource.SearchParameter theNextSp) {

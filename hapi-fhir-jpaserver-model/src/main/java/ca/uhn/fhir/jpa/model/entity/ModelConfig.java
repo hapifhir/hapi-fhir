@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.context.IPhoneticEncoder;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
@@ -28,8 +27,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +36,6 @@ import java.util.Set;
 
 // TODO: move this to ca.uhn.fhir.jpa.model.config
 public class ModelConfig {
-	private static final Logger ourLog = LoggerFactory.getLogger(ModelConfig.class);
 
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
@@ -92,7 +88,6 @@ public class ModelConfig {
 
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
 	private IPrimitiveType<Date> myPeriodIndexEndOfTime;
-	private IPhoneticEncoder myStringEncoder;
 
 	/**
 	 * Constructor
@@ -578,35 +573,6 @@ public class ModelConfig {
 		myPeriodIndexEndOfTime = thePeriodIndexEndOfTime;
 	}
 
-	/**
-	 * Indicates whether a StringEncoder has been configured
-	 *
-	 * @see #getStringEncoder()
-	 * @since 5.1.0
-	 */
-	public boolean hasStringEncoder() {
-		return myStringEncoder != null;
-	}
-
-	/**
-	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
-	 * the String using this encoder.
-	 *
-	 * @since 5.1.0
-	 */
-	public IPhoneticEncoder getStringEncoder() {
-		return myStringEncoder;
-	}
-
-	/**
-	 * When indexing a HumanName, if a StringEncoder is provided, then the "phonetic" search parameter will normalize
-	 * the String using this encoder.
-	 *
-	 * @since 5.1.0
-	 */
-	public void setStringEncoder(IPhoneticEncoder theStringEncoder) {
-		myStringEncoder = theStringEncoder;
-	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");

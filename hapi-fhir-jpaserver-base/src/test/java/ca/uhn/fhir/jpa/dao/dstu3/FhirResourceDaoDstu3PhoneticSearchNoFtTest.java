@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.context.phonetic.ApacheEncoder;
+import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.config.ApacheEncoder;
-import ca.uhn.fhir.jpa.model.config.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,13 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 		createNameSoundexSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX);
 		mySearchParamRegistry.forceRefresh();
+
+		myFhirCtx.setStringEncoder(new ApacheEncoder(new Soundex()));
+	}
+
+	@After
+	public void resetStringEncoder() {
+		myFhirCtx.setStringEncoder(null);
 	}
 
 	@Test
@@ -54,7 +62,6 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 	@Test
 	public void phoneticMatch() {
-		myDaoConfig.setStringEncoder(new ApacheEncoder(new Soundex()));
 
 		Patient patient;
 		SearchParameterMap map;
@@ -73,8 +80,6 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		assertSearchMatch(pId1, Patient.SP_PHONETIC, GAIL);
 		assertSearchMatch(pId1, NAME_SOUNDEX_SP, GAIL);
 		assertSearchMatch(pId1, NAME_SOUNDEX_SP, GALE);
-
-		myDaoConfig.setStringEncoder(new DaoConfig().getStringEncoder());
 	}
 
 	private void assertSearchMatch(IIdType thePId1, String theSp, String theValue) {

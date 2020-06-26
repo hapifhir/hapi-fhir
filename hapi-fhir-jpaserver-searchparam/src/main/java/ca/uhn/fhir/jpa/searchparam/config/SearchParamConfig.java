@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.IndexedSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,7 +82,11 @@ public class SearchParamConfig {
 		return new SearchParamExtractorService();
 	}
 
-	// FIXME KHS add canonicalizer?
+	@Bean
+	@Lazy
+	public SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
+		return new SearchParameterCanonicalizer(theFhirContext);
+	}
 
 	@Bean
 	public IndexedSearchParamExtractor indexedSearchParamExtractor() {

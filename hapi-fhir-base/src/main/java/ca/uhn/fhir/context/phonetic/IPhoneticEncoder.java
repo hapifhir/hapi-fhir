@@ -1,4 +1,4 @@
-package ca.uhn.fhir.context;
+package ca.uhn.fhir.context.phonetic;
 
 public interface IPhoneticEncoder {
 	/**

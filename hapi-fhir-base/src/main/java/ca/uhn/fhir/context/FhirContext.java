@@ -1,6 +1,7 @@
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -116,6 +117,7 @@ public class FhirContext {
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private IValidationSupport myValidationSupport;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
+	private IPhoneticEncoder myStringEncoder;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -465,6 +467,7 @@ public class FhirContext {
 
 	/**
 	 * Returns the name of a given resource class.
+	 *
 	 * @param theResourceType
 	 * @return
 	 */
@@ -1052,4 +1055,22 @@ public class FhirContext {
 		return retVal;
 	}
 
+	/**
+	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
+	 * the String using this encoder.
+	 *
+	 * @since 5.1.0
+	 */
+
+	public void setStringEncoder(IPhoneticEncoder theStringEncoder) {
+		myStringEncoder = theStringEncoder;
+
+		for (RuntimeResourceDefinition resourceDef : myNameToResourceDefinition.values()) {
+			for (RuntimeSearchParam searchParam : resourceDef.getSearchParams()) {
+				if ("phonetic".equals(searchParam.getName())) {
+					searchParam.setPhoneticEncoder(theStringEncoder);
+				}
+			}
+		}
+	}
 }

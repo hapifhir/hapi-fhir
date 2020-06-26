@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -229,19 +228,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 		myActiveParamNamesToUniqueSearchParams = activeParamNamesToUniqueSearchParams;
 	}
 
-	@VisibleForTesting
-	void setFhirContextForUnitTest(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
-
 	@PostConstruct
 	public void postConstruct() {
 		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
-	}
-
-	@VisibleForTesting
-	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
-		mySearchParamProvider = theSearchParamProvider;
 	}
 
 	public int doRefresh(long theRefreshInterval) {
@@ -403,11 +392,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 		requiresActiveSearchParams();
 		return Collections.unmodifiableMap(myActiveSearchParams);
-	}
-
-	@VisibleForTesting
-	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
-		mySchedulerService = theSchedulerService;
 	}
 
 	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {

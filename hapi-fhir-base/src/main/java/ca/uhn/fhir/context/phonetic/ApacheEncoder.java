@@ -1,6 +1,5 @@
-package ca.uhn.fhir.jpa.model.config;
+package ca.uhn.fhir.context.phonetic;
 
-import ca.uhn.fhir.context.IPhoneticEncoder;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.StringEncoder;
 import org.slf4j.Logger;
