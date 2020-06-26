@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 
@@ -27,10 +28,11 @@ import javax.annotation.Nullable;
 import javax.persistence.criteria.Predicate;
 import java.util.List;
 
+// FIXME KHS search for SearchParamRegistry in this package and ensure we aren't re-looking up any searchparams (pass it through instead)
 public interface IPredicateBuilder {
 	@Nullable
 	Predicate addPredicate(String theResourceName,
-								  String theParamName,
+								  RuntimeSearchParam theSearchParam,
 								  List<? extends IQueryParameterType> theList,
 								  SearchFilterParser.CompareOperation operation,
 								  RequestPartitionId theRequestPartitionId);

@@ -22,6 +22,7 @@ public class PhoneticEncoderSvc {
 	ISearchParamRegistry mySearchParamRegistry;
 
 	public String encode(RuntimeSearchParam theSearchParam, String theString) {
+		// FIXME KHS move all this logic into RuntimeSearchParam and evaluate whether it's phonetic up front and then only call this method if the flag is set
 		String retval = theString;
 
 		if (myModelConfig.hasStringEncoder() && Patient.SP_PHONETIC.equals(theSearchParam.getName())) {
@@ -32,18 +33,19 @@ public class PhoneticEncoderSvc {
 		return retval;
 	}
 
-	public String encode(String theResourceName, String theParamName, String theString) {
-		String retval = theString;
-
-		if (myModelConfig.hasStringEncoder() && Patient.SP_PHONETIC.equals(theParamName)) {
-			retval = myModelConfig.getStringEncoder().encode(theString);
-		} else {
-			// FIXME KHS pass this down so we don't have to look it up again?
-			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-			retval = encodeWithPhoneticSearchParam(theString, retval, searchParam);
-		}
-		return retval;
-	}
+	// FIXME KHS
+//	public String encode(String theResourceName, String theParamName, String theString) {
+//		String retval = theString;
+//
+//		if (myModelConfig.hasStringEncoder() && Patient.SP_PHONETIC.equals(theParamName)) {
+//			retval = myModelConfig.getStringEncoder().encode(theString);
+//		} else {
+//			// FIXME KHS pass this down so we don't have to look it up again?
+//			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+//			retval = encodeWithPhoneticSearchParam(theString, retval, searchParam);
+//		}
+//		return retval;
+//	}
 
 	private String encodeWithPhoneticSearchParam(String theString, String theRetval, RuntimeSearchParam theSearchParam) {
 		if (theSearchParam != null) {
