@@ -76,12 +76,14 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
 import javax.annotation.Nullable;
@@ -258,6 +260,18 @@ public abstract class BaseConfig {
 		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
 		return retVal;
 	}
+
+	@Bean
+	public TaskExecutor jobLaunchingTaskExecutor() {
+		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
+		asyncTaskExecutor.setCorePoolSize(5);
+		asyncTaskExecutor.setMaxPoolSize(10);
+		asyncTaskExecutor.setQueueCapacity(500);
+		asyncTaskExecutor.setThreadNamePrefix("JobLauncher-");
+		asyncTaskExecutor.initialize();
+		return asyncTaskExecutor;
+	}
+
 
 	@Bean
 	public IResourceReindexingSvc resourceReindexingSvc() {
