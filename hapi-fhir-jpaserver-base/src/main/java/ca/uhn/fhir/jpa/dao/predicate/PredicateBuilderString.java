@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.searchparam.extractor.PhoneticEncoderSvc;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -32,7 +31,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.StringUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -45,10 +43,6 @@ import java.util.List;
 @Component
 @Scope("prototype")
 class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
-
-	@Autowired
-	PhoneticEncoderSvc myPhoneticEncoderSvc;
-
 	PredicateBuilderString(SearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
@@ -120,8 +114,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
 				}
 			} else {
-				// FIXME KHS collapse these params and instead pass down the runtime searchparam?
-				rawSearchTerm = myPhoneticEncoderSvc.encode(theSearchParam, rawSearchTerm);
+				rawSearchTerm = theSearchParam.encode(rawSearchTerm);
 			}
 		} else if (theParameter instanceof IPrimitiveDatatype<?>) {
 			IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) theParameter;

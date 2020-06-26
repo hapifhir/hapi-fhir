@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.config;
 
+import ca.uhn.fhir.context.IPhoneticEncoder;
 import org.apache.commons.codec.language.Soundex;
 
 public enum PhoneticEncoderEnum {

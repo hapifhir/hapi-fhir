@@ -95,8 +95,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private ModelConfig myModelConfig;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private PhoneticEncoderSvc myPhoneticEncoderSvc;
 
 	private Set<String> myIgnoredForSearchDatatypes;
 	private BaseRuntimeChildDefinition myQuantityValueValueChild;
@@ -976,7 +974,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		names.addAll(extractValuesAsStrings(myHumanNameGivenValueChild, theValue));
 
 		for (String next : names) {
-			String value = myPhoneticEncoderSvc.encode(theSearchParam, next);
+			String value = theSearchParam.encode(next);
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value);
 		}
 	}

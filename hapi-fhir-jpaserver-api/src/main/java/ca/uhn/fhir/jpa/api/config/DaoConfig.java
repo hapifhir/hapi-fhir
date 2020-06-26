@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.api.config;
 
+import ca.uhn.fhir.context.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
-import ca.uhn.fhir.jpa.model.config.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;

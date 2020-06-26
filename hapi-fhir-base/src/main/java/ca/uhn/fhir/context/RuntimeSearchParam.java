@@ -55,6 +55,7 @@ public class RuntimeSearchParam {
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
+	private IPhoneticEncoder myPhoneticEncoder;
 
 	/**
 	 * Constructor
@@ -252,4 +253,15 @@ public class RuntimeSearchParam {
 		UNKNOWN
 	}
 
+	public RuntimeSearchParam setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
+		myPhoneticEncoder = thePhoneticEncoder;
+		return this;
+	}
+
+	public String encode(String theString) {
+		if (myPhoneticEncoder == null || theString == null) {
+			return theString;
+		}
+		return myPhoneticEncoder.encode(theString);
+	}
 }

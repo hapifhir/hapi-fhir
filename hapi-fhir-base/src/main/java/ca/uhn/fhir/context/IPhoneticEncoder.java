@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.config;
+package ca.uhn.fhir.context;
 
 public interface IPhoneticEncoder {
 	/**
