@@ -87,6 +87,48 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
+	@Test
+	public void testValidateCode() throws IOException {
+		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/bl/bb-vs.json"));
+		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/bl/bb-sd.json"));
+
+		OperationOutcome outcome;
+
+		{
+			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			assertThat(outcomeStr, containsString("AA"));
+		}
+
+		try {
+			myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-not-in-valueset.json"), null, null, null, null, null, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			outcome = (OperationOutcome) e.getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			assertThat(outcomeStr, containsString("The Coding provided is not in the value set https://bb/ValueSet/BBDemographicAgeUnit"));
+		}
+
+		try {
+			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-value-is-not-quantity2.json"), null, null, null, null, null, mySrd).getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			fail();
+		} catch (PreconditionFailedException e) {
+			outcome = (OperationOutcome) e.getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			assertThat(outcomeStr, containsString("The Coding provided is not in the value set https://bb/ValueSet/BBDemographicAgeUnit"));
+		}
+
+		outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-value-is-not-quantity.json"), null, null, null, null, null, mySrd).getOperationOutcome();
+		String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info("Validation outcome: {}", outcomeStr);
+		assertThat(outcomeStr, containsString("The Coding provided is not in the value set https://bb/ValueSet/BBDemographicAgeUnit"));
+	}
+
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
 	 * in memory, and make sure we can still validate correctly, even if we're using

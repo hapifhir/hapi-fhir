@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "profile": [
+      "https://bb/StructureDefinition/BBDemographicAge"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "L7b8daLEuY",
+        "system": "https://bbl.health"
+      }
+    ]
+  },
+  "resourceType": "Observation",
+  "status": "final",
+	"valueDecimal" : 1.23
+}
