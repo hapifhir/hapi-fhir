@@ -90,14 +90,6 @@ import java.util.concurrent.ScheduledExecutorService;
 @EnableConfigurationProperties(FhirProperties.class)
 public class FhirAutoConfiguration {
 
-	@Autowired
-	private EntityManagerFactory emf;
-
-	@Bean
-	@Primary
-	public PlatformTransactionManager hapiTransactionManager() {
-		return new JpaTransactionManager(emf);
-	}
 
 	private final FhirProperties properties;
 
@@ -190,6 +182,15 @@ public class FhirAutoConfiguration {
 			SubscriptionSubmitterConfig.class
 		})
 		static class FhirJpaDaoConfiguration {
+
+			@Autowired
+			private EntityManagerFactory emf;
+
+			@Bean
+			@Primary
+			public PlatformTransactionManager hapiTransactionManager() {
+				return new JpaTransactionManager(emf);
+			}
 
 			@Bean
 			@ConditionalOnMissingBean

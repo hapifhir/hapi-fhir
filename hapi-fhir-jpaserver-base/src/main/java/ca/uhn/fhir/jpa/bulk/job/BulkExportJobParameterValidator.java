@@ -49,7 +49,6 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 		Long readChunkSize = theJobParameters.getLong("readChunkSize");
 		if (readChunkSize == null || readChunkSize < 1) {
 			 errorBuilder.append("There must be a valid number for readChunkSize, which is at least 1. ");
-
 		}
 		String jobUUID = theJobParameters.getString("jobUUID");
 		Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(jobUUID);
