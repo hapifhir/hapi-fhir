@@ -178,6 +178,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 						uniqueSearchParams.add(nextCandidateCasted);
 					}
 				}
+
+				setPhoneticEncoder(nextCandidate);
 			}
 
 		}
@@ -425,12 +427,21 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
 		myPhoneticEncoder = thePhoneticEncoder;
 
-		for (Map<String, RuntimeSearchParam> nextBuiltInMap : myBuiltInSearchParams.values()) {
-			for (RuntimeSearchParam searchParam : nextBuiltInMap.values()) {
-				if ("phonetic".equals(searchParam.getName())) {
-					searchParam.setPhoneticEncoder(thePhoneticEncoder);
-				}
+		if (myActiveSearchParams == null) {
+			return;
+		}
+		for (Map<String, RuntimeSearchParam> activeUniqueSearchParams : myActiveSearchParams.values()) {
+			for (RuntimeSearchParam searchParam : activeUniqueSearchParams.values()) {
+				setPhoneticEncoder(searchParam);
 			}
+		}
+	}
+
+	private void setPhoneticEncoder(RuntimeSearchParam searchParam) {
+		if ("phonetic".equals(searchParam.getName())) {
+			ourLog.debug("Setting search param {} on {} phonetic encoder to {}",
+				searchParam.getName(), searchParam.getPath(), myPhoneticEncoder == null ? "null" : myPhoneticEncoder.name());
+			searchParam.setPhoneticEncoder(myPhoneticEncoder);
 		}
 	}
 }

@@ -11,15 +11,15 @@ import org.apache.commons.codec.language.RefinedSoundex;
 import org.apache.commons.codec.language.Soundex;
 
 public enum PhoneticEncoderEnum {
-	CAVERPHONE1(new ApacheEncoder(new Caverphone1())),
-	CAVERPHONE2(new ApacheEncoder(new Caverphone2())),
-	COLOGNE(new ApacheEncoder(new ColognePhonetic())),
-	DOUBLE_METAPHONE(new ApacheEncoder(new DoubleMetaphone())),
-	MATCH_RATING_APPROACH(new ApacheEncoder(new MatchRatingApproachEncoder())),
-	METAPHONE(new ApacheEncoder(new Metaphone())),
-	NYSIIS(new ApacheEncoder(new Nysiis())),
-	REFINED_SOUNDEX(new ApacheEncoder(new RefinedSoundex())),
-	SOUNDEX(new ApacheEncoder(new Soundex()));
+	CAVERPHONE1(new ApacheEncoder("CAVERPHONE1", new Caverphone1())),
+	CAVERPHONE2(new ApacheEncoder("CAVERPHONE2", new Caverphone2())),
+	COLOGNE(new ApacheEncoder("COLOGNE", new ColognePhonetic())),
+	DOUBLE_METAPHONE(new ApacheEncoder("DOUBLE_METAPHONE", new DoubleMetaphone())),
+	MATCH_RATING_APPROACH(new ApacheEncoder("MATCH_RATING_APPROACH", new MatchRatingApproachEncoder())),
+	METAPHONE(new ApacheEncoder("METAPHONE", new Metaphone())),
+	NYSIIS(new ApacheEncoder("NYSIIS", new Nysiis())),
+	REFINED_SOUNDEX(new ApacheEncoder("REFINED_SOUNDEX", new RefinedSoundex())),
+	SOUNDEX(new ApacheEncoder("SOUNDEX", new Soundex()));
 
 	private final IPhoneticEncoder myPhoneticEncoder;
 

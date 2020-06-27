@@ -45,8 +45,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 		createNameSoundexSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX);
 		mySearchParamRegistry.forceRefresh();
-
-		mySearchParamRegistry.setPhoneticEncoder(new ApacheEncoder(new Soundex()));
+		mySearchParamRegistry.setPhoneticEncoder(new ApacheEncoder(PhoneticEncoderEnum.SOUNDEX.name(), new Soundex()));
 	}
 
 	@After

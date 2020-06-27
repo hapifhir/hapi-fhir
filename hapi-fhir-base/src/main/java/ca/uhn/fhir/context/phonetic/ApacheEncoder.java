@@ -8,10 +8,17 @@ import org.slf4j.LoggerFactory;
 public class ApacheEncoder implements IPhoneticEncoder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ApacheEncoder.class);
 
+	private final String myName;
 	private final StringEncoder myStringEncoder;
 
-	public ApacheEncoder(StringEncoder theStringEncoder) {
+	public ApacheEncoder(String theName, StringEncoder theStringEncoder) {
+		myName = theName;
 		myStringEncoder = theStringEncoder;
+	}
+
+	@Override
+	public String name() {
+		return myName;
 	}
 
 	@Override
