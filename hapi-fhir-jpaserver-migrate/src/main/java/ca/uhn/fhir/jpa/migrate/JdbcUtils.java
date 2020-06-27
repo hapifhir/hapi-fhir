@@ -318,6 +318,47 @@ public class JdbcUtils {
 	}
 
 	/**
+	 * Retrieve names of foreign keys that reference a specified foreign key column.
+	 */
+	public static Set<String> getForeignKeysForColumn(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theForeignKeyColumn, String theForeignTable) throws SQLException {
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+
+		try (Connection connection = dataSource.getConnection()) {
+			return theConnectionProperties.getTxTemplate().execute(t -> {
+				DatabaseMetaData metadata;
+				try {
+					metadata = connection.getMetaData();
+					String catalog = connection.getCatalog();
+					String schema = connection.getSchema();
+
+
+					List<String> parentTables = new ArrayList<>();
+					parentTables.addAll(JdbcUtils.getTableNames(theConnectionProperties));
+
+					String foreignTable = massageIdentifier(metadata, theForeignTable);
+
+					Set<String> fkNames = new HashSet<>();
+					for (String nextParentTable : parentTables) {
+						ResultSet indexes = metadata.getCrossReference(catalog, schema, nextParentTable, catalog, schema, foreignTable);
+
+						while (indexes.next()) {
+							if (theForeignKeyColumn.equals(indexes.getString("FKCOLUMN_NAME"))) {
+								String fkName = indexes.getString("FK_NAME");
+								fkName = toUpperCase(fkName, Locale.US);
+								fkNames.add(fkName);
+							}
+						}
+					}
+
+					return fkNames;
+				} catch (SQLException e) {
+					throw new InternalErrorException(e);
+				}
+			});
+		}
+	}
+
+	/**
 	 * Retrieve all index names
 	 */
 	public static Set<String> getColumnNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {

@@ -4,11 +4,13 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
@@ -145,7 +147,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		// Validate once
 		myCaptureQueriesListener.clear();
 		myObservationDao.validate(obs, null, null, null, null, null, null);
-		assertEquals(myCaptureQueriesListener.logSelectQueriesForCurrentThread(), 10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(myCaptureQueriesListener.logSelectQueriesForCurrentThread(), 9, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(myCaptureQueriesListener.logUpdateQueriesForCurrentThread(), 0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(myCaptureQueriesListener.logInsertQueriesForCurrentThread(), 0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(myCaptureQueriesListener.logDeleteQueriesForCurrentThread(), 0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
@@ -537,6 +539,53 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(1, StringUtils.countMatches(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true).toLowerCase(), "join"));
 	}
 
+
+	@Test
+	public void testSearchOnReverseInclude() {
+		Patient patient = new Patient();
+		patient.getMeta().addTag("http://system", "value1", "display");
+		patient.setId("P1");
+		patient.getNameFirstRep().setFamily("FAM1");
+		myPatientDao.update(patient);
+
+		patient = new Patient();
+		patient.setId("P2");
+		patient.getMeta().addTag("http://system", "value1", "display");
+		patient.getNameFirstRep().setFamily("FAM2");
+		myPatientDao.update(patient);
+
+		for (int i = 0; i < 3; i++) {
+			CareTeam ct = new CareTeam();
+			ct.setId("CT1-" + i);
+			ct.getMeta().addTag("http://system", "value11", "display");
+			ct.getSubject().setReference("Patient/P1");
+			myCareTeamDao.update(ct);
+
+			ct = new CareTeam();
+			ct.setId("CT2-" + i);
+			ct.getMeta().addTag("http://system", "value22", "display");
+			ct.getSubject().setReference("Patient/P2");
+			myCareTeamDao.update(ct);
+		}
+
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.addRevInclude(CareTeam.INCLUDE_SUBJECT)
+			.setSort(new SortSpec(Patient.SP_NAME));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myPatientDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(
+			"Patient/P1", "CareTeam/CT1-0", "CareTeam/CT1-1","CareTeam/CT1-2",
+			"Patient/P2", "CareTeam/CT2-0", "CareTeam/CT2-1","CareTeam/CT2-2"
+		));
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
 
 	@Test
 	public void testTransactionWithMultipleReferences() {

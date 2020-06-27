@@ -8,7 +8,7 @@ public class RenameColumnTaskDbSpecificTest {
 
 	@Test
 	public void testBuildSqlStatementForMySql() {
-		assertEquals("ALTER TABLE SOMETABLE CHANGE COLUMN myTextCol TEXTCOL integer null", createRenameColumnSql(DriverTypeEnum.MYSQL_5_7));
+		assertEquals("ALTER TABLE SOMETABLE CHANGE COLUMN `myTextCol` `TEXTCOL` integer null", createRenameColumnSql(DriverTypeEnum.MYSQL_5_7));
 	}
 
 	private String createRenameColumnSql(DriverTypeEnum theDriverTypeEnum) {
@@ -27,7 +27,7 @@ public class RenameColumnTaskDbSpecificTest {
 
 	@Test
 	public void testBuildSqlStatementForMariaDB() {
-		assertEquals("ALTER TABLE SOMETABLE CHANGE COLUMN myTextCol TO TEXTCOL", createRenameColumnSql(DriverTypeEnum.MARIADB_10_1));
+		assertEquals("ALTER TABLE SOMETABLE CHANGE COLUMN `myTextCol` `TEXTCOL` integer null", createRenameColumnSql(DriverTypeEnum.MARIADB_10_1));
 	}
 
 	@Test

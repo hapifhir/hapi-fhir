@@ -53,9 +53,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 		String sql;
 		switch (getDriverType()) {
-			case DERBY_EMBEDDED:
-			case MARIADB_10_1:
 			case MYSQL_5_7:
+			case MARIADB_10_1:
+				// Quote the column name as "SYSTEM" is a reserved word in MySQL
+				sql = "alter table " + getTableName() + " add column `" + getColumnName() + "` " + typeStatement;
+				break;
+			case DERBY_EMBEDDED:
 			case POSTGRES_9_4:
 				sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + typeStatement;
 				break;
