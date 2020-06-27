@@ -713,6 +713,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			txTemplate.execute(t -> {
 				link.forEach(id -> theDao.deleteByPid(id));
+				theDao.flush();
 				return null;
 			});
 
@@ -720,9 +721,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ourLog.info(" * {} {} deleted ({}/{}) remaining - {}/sec - ETA: {}", count, theDescriptor, count, totalCount, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
 
 		}
-		txTemplate.executeWithoutResult(t -> {
-			theDao.flush();
-		});
 
 	}
 
