@@ -180,7 +180,7 @@ The following metrics are currently supported:
             <td>
               <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/ColognePhonetic.html">Apache Cologne Phonetic</a>          
             </td>
-            <td>/td>
+            <td></td>
         </tr>        
         <tr>
             <td>DOUBLE_METAPHONE</td>
@@ -230,7 +230,6 @@ The following metrics are currently supported:
             </td>
             <td>Jon = John, Thomas != Tom</td>
         </tr>
-
         <tr>
             <td>STRING</td>
             <td>matcher</td>

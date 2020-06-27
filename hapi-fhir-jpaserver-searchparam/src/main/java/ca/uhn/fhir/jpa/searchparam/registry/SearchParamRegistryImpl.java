@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -78,6 +79,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
+	private IPhoneticEncoder myPhoneticEncoder;
+
 	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
 	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
@@ -410,5 +413,24 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 			}
 		}
 		return Collections.unmodifiableMap(resourceNameToSearchParams);
+	}
+
+	/**
+	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
+	 * the String using this encoder.
+	 *
+	 * @since 5.1.0
+	 */
+
+	public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
+		myPhoneticEncoder = thePhoneticEncoder;
+
+		for (Map<String, RuntimeSearchParam> nextBuiltInMap : myBuiltInSearchParams.values()) {
+			for (RuntimeSearchParam searchParam : nextBuiltInMap.values()) {
+				if ("phonetic".equals(searchParam.getName())) {
+					searchParam.setPhoneticEncoder(thePhoneticEncoder);
+				}
+			}
+		}
 	}
 }

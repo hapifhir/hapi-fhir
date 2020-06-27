@@ -46,12 +46,12 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		createNameSoundexSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX);
 		mySearchParamRegistry.forceRefresh();
 
-		myFhirCtx.setStringEncoder(new ApacheEncoder(new Soundex()));
+		mySearchParamRegistry.setPhoneticEncoder(new ApacheEncoder(new Soundex()));
 	}
 
 	@After
 	public void resetStringEncoder() {
-		myFhirCtx.setStringEncoder(null);
+		mySearchParamRegistry.setPhoneticEncoder(null);
 	}
 
 	@Test
@@ -101,7 +101,8 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.addExtension()
 			.setUrl(JpaConstants.EXT_SEARCHPARAM_PHONETIC_ENCODER)
-			.setValue(new StringType(theEncoder.name()));
+		.setValue(new StringType(theEncoder.name()));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.create(searchParameter, mySrd).getId().toUnqualifiedVersionless();
 	}
 
