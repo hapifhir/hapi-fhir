@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -46,6 +47,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private final FhirContext myFhirContext;
+	private final HashSet<String> mySupportedValuets = new HashSet<>();
 
 	/**
 	 * Constructor
@@ -54,12 +56,23 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		Validate.notNull(theFhirContext);
 
 		myFhirContext = theFhirContext;
+
+		mySupportedValuets.add(LANGUAGES_VALUESET_URL);
+		mySupportedValuets.add(MIMETYPES_VALUESET_URL);
+		mySupportedValuets.add(CURRENCIES_VALUESET_URL);
+		mySupportedValuets.add(UCUM_VALUESET_URL);
+		mySupportedValuets.add(USPS_VALUESET_URL);
 	}
 
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		String url = getValueSetUrl(theValueSet);
 		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
+	}
+
+	@Override
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		return mySupportedValuets.contains(theValueSetUrl);
 	}
 
 	@Override
@@ -185,8 +198,18 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 
 	public String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
+		FhirContext fhirContext = getFhirContext();
+		return getValueSetUrl(theValueSet, fhirContext);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	public static String getValueSetUrl(@Nonnull IBaseResource theValueSet, FhirContext theFhirContext) {
 		String url;
-		switch (getFhirContext().getVersion().getVersion()) {
+		switch (theFhirContext.getVersion().getVersion()) {
 			case DSTU2: {
 				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
 				break;
@@ -209,14 +232,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + getFhirContext().getVersion().getVersion());
+				throw new IllegalArgumentException("Can not handle version: " + theFhirContext.getVersion().getVersion());
 		}
 		return url;
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
 	}
 
 	private static HashMap<String, String> buildUspsCodes() {
