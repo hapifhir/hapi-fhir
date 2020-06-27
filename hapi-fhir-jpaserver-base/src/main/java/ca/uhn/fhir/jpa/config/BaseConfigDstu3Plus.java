@@ -97,12 +97,6 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	}
 
 	@Bean
-	public ValidationSettings validationSettings() {
-		return new ValidationSettings();
-	}
-
-
-	@Bean
 	public abstract ITermReadSvc terminologyService();
 
 	@Bean
