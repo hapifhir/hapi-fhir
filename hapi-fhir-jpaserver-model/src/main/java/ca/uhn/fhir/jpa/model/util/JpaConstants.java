@@ -244,12 +244,12 @@ public class JpaConstants {
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
 
 	/**
-	 * Extension URL for extension on a SearchParameter indicating that text values should not be indexed
+	 * URL for extension on a SearchParameter indicating that text values should not be indexed
 	 */
 	public static final String EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-token-suppress-text-index";
 
 	/**
-	 * Extension URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
+	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
 	 */
 	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
 

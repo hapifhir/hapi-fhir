@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
 public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test {
@@ -33,6 +34,11 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	public static final String GALE = "Gale";
 	public static final String GAIL = "Gail";
 	public static final String NAME_SOUNDEX_SP = "nameSoundex";
+	public static final String ADDRESS_LINE_SOUNDEX_SP = "addressLineSoundex";
+	private static final String BOB = "BOB";
+	private static final String ADDRESS = "123 Nohili St";
+	private static final String ADDRESS_CLOSE = "123 Nohily St";
+	private static final String ADDRESS_FAR = "123 College St";
 
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
@@ -43,7 +49,8 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
 
-		createNameSoundexSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX);
+		createSoundexSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX, "Patient.name");
+		createSoundexSearchParameter(ADDRESS_LINE_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX, "Patient.address.line");
 		mySearchParamRegistry.forceRefresh();
 		mySearchParamRegistry.setPhoneticEncoder(new ApacheEncoder(PhoneticEncoderEnum.SOUNDEX.name(), new Soundex()));
 	}
@@ -57,28 +64,40 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	public void testSoundex() {
 		Soundex soundex = new Soundex();
 		assertEquals(soundex.encode(GALE), soundex.encode(GAIL));
+		assertNotEquals(soundex.encode(GALE), soundex.encode(BOB));
+		assertEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_CLOSE));
+		assertNotEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_FAR));
 	}
 
 	@Test
 	public void phoneticMatch() {
-
 		Patient patient;
 		SearchParameterMap map;
 
 		patient = new Patient();
 		patient.addName().addGiven(GALE);
+		patient.addAddress().addLine(ADDRESS);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
-		IIdType pId1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		IIdType pId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<ResourceIndexedSearchParamString> stringParams = myResourceIndexedSearchParamStringDao.findAll();
-		assertThat(stringParams, hasSize(4));
-		List<String> stringParamNames = stringParams.stream().map(ResourceIndexedSearchParamString::getParamName).collect(Collectors.toList());
-		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP));
 
-		assertSearchMatch(pId1, Patient.SP_PHONETIC, GALE);
-		assertSearchMatch(pId1, Patient.SP_PHONETIC, GAIL);
-		assertSearchMatch(pId1, NAME_SOUNDEX_SP, GAIL);
-		assertSearchMatch(pId1, NAME_SOUNDEX_SP, GALE);
+		assertThat(stringParams, hasSize(6));
+		List<String> stringParamNames = stringParams.stream().map(ResourceIndexedSearchParamString::getParamName).collect(Collectors.toList());
+		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP, Patient.SP_ADDRESS, ADDRESS_LINE_SOUNDEX_SP));
+
+		assertSearchMatch(pId, Patient.SP_PHONETIC, GALE);
+		assertSearchMatch(pId, Patient.SP_PHONETIC, GAIL);
+		assertNoMatch(Patient.SP_PHONETIC, BOB);
+
+		assertSearchMatch(pId, NAME_SOUNDEX_SP, GAIL);
+		assertSearchMatch(pId, NAME_SOUNDEX_SP, GALE);
+		assertNoMatch(NAME_SOUNDEX_SP, BOB);
+
+		assertSearchMatch(pId, ADDRESS_LINE_SOUNDEX_SP, ADDRESS);
+		assertSearchMatch(pId, ADDRESS_LINE_SOUNDEX_SP, ADDRESS_CLOSE);
+		assertNoMatch(ADDRESS_LINE_SOUNDEX_SP, ADDRESS_FAR);
 	}
 
 	private void assertSearchMatch(IIdType thePId1, String theSp, String theValue) {
@@ -88,19 +107,26 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(thePId1)));
 	}
 
-	private void createNameSoundexSearchParameter(String theCode, PhoneticEncoderEnum theEncoder) {
+	private void assertNoMatch(String theSp, String theValue) {
+		SearchParameterMap map;
+		map = new SearchParameterMap();
+		map.add(theSp, new StringParam(theValue));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), hasSize(0));
+	}
+
+	private void createSoundexSearchParameter(String theCode, PhoneticEncoderEnum theEncoder, String theFhirPath) {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("Patient");
 		searchParameter.setCode(theCode);
 		searchParameter.setType(Enumerations.SearchParamType.STRING);
-		searchParameter.setTitle("Test Name Soundex");
-		searchParameter.setExpression("Patient.name");
+		searchParameter.setTitle("Test Soundex");
+		searchParameter.setExpression(theFhirPath);
 // Maybe use in the future?  RuntimeSearchParam doesn't store this...
 //		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.addExtension()
 			.setUrl(JpaConstants.EXT_SEARCHPARAM_PHONETIC_ENCODER)
-		.setValue(new StringType(theEncoder.name()));
+			.setValue(new StringType(theEncoder.name()));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.create(searchParameter, mySrd).getId().toUnqualifiedVersionless();
 	}

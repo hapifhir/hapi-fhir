@@ -1052,4 +1052,5 @@ public class FhirContext {
 		}
 		return retVal;
 	}
+
 }

@@ -974,8 +974,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		names.addAll(extractValuesAsStrings(myHumanNameGivenValueChild, theValue));
 
 		for (String next : names) {
-			String value = theSearchParam.encode(next);
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
 	}
 
@@ -1098,11 +1097,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 			String searchParamName = theSearchParam.getName();
 			String valueNormalized = StringUtil.normalizeStringForSearchIndexing(value);
-			if (valueNormalized.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-				valueNormalized = valueNormalized.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+			String valueEncoded = theSearchParam.encode(valueNormalized);
+
+			if (valueEncoded.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+				valueEncoded = valueEncoded.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 			}
 
-			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getModelConfig(), theResourceType, searchParamName, valueNormalized, value);
+			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getModelConfig(), theResourceType, searchParamName, valueEncoded, value);
 
 			Set params = theParams;
 			params.add(nextEntity);
