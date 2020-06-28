@@ -67,12 +67,12 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		assertNotEquals(soundex.encode(GALE), soundex.encode(BOB));
 		assertEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_CLOSE));
 		assertNotEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_FAR));
+		ourLog.info("Encoded address: {}", soundex.encode(ADDRESS));
 	}
 
 	@Test
 	public void phoneticMatch() {
 		Patient patient;
-		SearchParameterMap map;
 
 		patient = new Patient();
 		patient.addName().addGiven(GALE);
