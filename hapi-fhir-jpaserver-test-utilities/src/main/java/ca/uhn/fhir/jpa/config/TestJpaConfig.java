@@ -24,10 +24,13 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 // TODO RC1 can use in jpa tests?
+@Configuration
 public class TestJpaConfig {
 	@Bean
 	public DaoConfig daoConfig() {
@@ -41,7 +44,8 @@ public class TestJpaConfig {
 	}
 
 	@Bean
-	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+	@Primary
+	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;

@@ -42,7 +42,6 @@
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<!-- Test Database -->
 		<dependency>
 			<groupId>com.h2database</groupId>

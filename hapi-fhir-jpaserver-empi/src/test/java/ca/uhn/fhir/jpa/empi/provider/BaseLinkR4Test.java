@@ -41,7 +41,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myLink = getOnlyPatientLink();
 		// Tests require our initial link to be a POSSIBLE_MATCH
 		myLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_MATCH);
-		myEmpiLinkDao.save(myLink);
+		saveLink(myLink);
 		assertEquals(EmpiLinkSourceEnum.AUTO, myLink.getLinkSource());
 	}
 

@@ -71,7 +71,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init510(); // 20200516 - present
 	}
 
-	private void init510() {
+	protected void init510() {
 		Builder version = forVersion(VersionEnum.V5_1_0);
 
 		// NPM Packages
