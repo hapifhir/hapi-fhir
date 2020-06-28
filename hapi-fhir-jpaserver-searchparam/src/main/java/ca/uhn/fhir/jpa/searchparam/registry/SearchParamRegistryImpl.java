@@ -418,8 +418,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	}
 
 	/**
-	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
-	 * the String using this encoder.
+	 * All SearchParameters with the name "phonetic" encode the normalized index value using this phonetic encoder.
 	 *
 	 * @since 5.1.0
 	 */

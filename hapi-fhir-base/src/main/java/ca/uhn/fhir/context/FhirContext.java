@@ -465,7 +465,6 @@ public class FhirContext {
 
 	/**
 	 * Returns the name of a given resource class.
-	 *
 	 * @param theResourceType
 	 * @return
 	 */

@@ -269,7 +269,4 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return retVal;
 	}
 
-	public FhirContext getFhirContext() {
-		return myContext;
-	}
 }

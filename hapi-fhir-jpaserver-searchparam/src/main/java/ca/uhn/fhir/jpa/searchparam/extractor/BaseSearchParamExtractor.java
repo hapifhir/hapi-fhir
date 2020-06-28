@@ -81,10 +81,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 
 	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 	private static final Pattern SPLIT_R4 = Pattern.compile("\\|");
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 	@Autowired
 	protected ApplicationContext myApplicationContext;
 	@Autowired
@@ -969,11 +969,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addString_HumanName(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		List<String> names = new ArrayList<>();
-		names.addAll(extractValuesAsStrings(myHumanNameFamilyValueChild, theValue));
-		names.addAll(extractValuesAsStrings(myHumanNameGivenValueChild, theValue));
-
-		for (String next : names) {
+		List<String> families = extractValuesAsStrings(myHumanNameFamilyValueChild, theValue);
+		for (String next : families) {
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
+		}
+		List<String> givens = extractValuesAsStrings(myHumanNameGivenValueChild, theValue);
+		for (String next : givens) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
 	}
