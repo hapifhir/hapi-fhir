@@ -215,9 +215,9 @@ public class JpaConstants {
 	 */
 	public static final String EXT_EXTERNALIZED_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
 	/**
-	 * For subscription, deliver a bundle containinf a search result instead of just a single resource
+	 * For subscription, deliver a bundle containing a search result instead of just a single resource
 	 */
-	public static final String EXT_SUBSCRIPTION_DELIVER_BUNDLE_SEARCH_RESULT = "http://hapifhir.io/fhir/StructureDefinition/subscription-deliver-bundle-search-result";
+	public static final String EXT_SUBSCRIPTION_PAYLOAD_SEARCH_RESULT = "http://hapifhir.io/fhir/StructureDefinition/subscription-payload-search-result";
 	/**
 	 * Placed in system-generated extensions
 	 */

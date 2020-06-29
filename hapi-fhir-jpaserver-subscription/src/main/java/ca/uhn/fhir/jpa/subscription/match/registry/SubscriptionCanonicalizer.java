@@ -113,6 +113,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setChannelExtensions(extractExtension(subscription));
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
+			retVal.setPayloadSearchResult(getExtensionString(subscription, JpaConstants.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_RESULT));
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -208,6 +209,7 @@ public class SubscriptionCanonicalizer {
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getChannel().getPayload());
+		retVal.setPayloadSearchResult(getExtensionString(subscription, JpaConstants.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_RESULT));
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
@@ -261,7 +263,7 @@ public class SubscriptionCanonicalizer {
 		retVal.setChannelExtensions(extractExtension(subscription));
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getContentType());
-		retVal.setDeliverBundleSearchResult(getExtensionString(subscription, JpaConstants.EXT_SUBSCRIPTION_DELIVER_BUNDLE_SEARCH_RESULT));
+		retVal.setPayloadSearchResult(getExtensionString(subscription, JpaConstants.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_RESULT));
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;

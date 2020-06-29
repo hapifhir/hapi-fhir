@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -211,7 +212,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	public static class PlainProvider {
 
 		@Transaction
-		public Bundle transaction(@RequestParam Bundle theInput) {
+		public Bundle transaction(@TransactionParam Bundle theInput) {
+			ourLog.info("Received transaction update");
 			ourTransactions.add(theInput);
 			return theInput;
 		}
@@ -231,8 +233,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	public static void startListenerServer() throws Exception {
 		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR4());
 
-		ObservationResourceProvider observationResourceProvider = new ObservationResourceProvider();
-		ourListenerRestServer.setResourceProviders(observationResourceProvider);
+		ourListenerRestServer.registerProvider(new ObservationResourceProvider());
+		ourListenerRestServer.registerProvider(new PlainProvider());
 
 		ourListenerServer = new Server(0);
 

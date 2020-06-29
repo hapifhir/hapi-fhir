@@ -25,11 +25,14 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
@@ -40,7 +43,10 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.TransactionBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
+import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -65,6 +71,9 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+
 	/**
 	 * Constructor
 	 */
@@ -81,31 +90,57 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
-		switch (theMsg.getOperationType()) {
-			case CREATE:
-			case UPDATE:
-				if (thePayloadResource == null || thePayloadResource.isEmpty()) {
-					if (thePayloadType != null) {
-						operation = theClient.create().resource(thePayloadResource);
+
+		if (isNotBlank(theSubscription.getPayloadSearchResult())) {
+			String resType = theSubscription.getPayloadSearchResult().substring(0, theSubscription.getPayloadSearchResult().indexOf('?'));
+			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
+			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
+
+			String payloadUrl = theSubscription.getPayloadSearchResult();
+			Map<String, String> valueMap = new HashMap<>(1);
+			valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
+			payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);
+			SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition);
+			payloadSearchMap.setLoadSynchronous(true);
+
+			IBundleProvider searchResults = dao.search(payloadSearchMap);
+
+			TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+			for (IBaseResource next : searchResults.getResources(0, searchResults.size())) {
+				builder.addUpdateEntry(next);
+			}
+
+			operation = theClient.transaction().withBundle(builder.getBundle());
+
+		} else {
+
+			switch (theMsg.getOperationType()) {
+				case CREATE:
+				case UPDATE:
+					if (thePayloadResource == null || thePayloadResource.isEmpty()) {
+						if (thePayloadType != null) {
+							operation = theClient.create().resource(thePayloadResource);
+						} else {
+							sendNotification(theMsg);
+							return;
+						}
 					} else {
-						sendNotification(theMsg);
-						return;
+						if (thePayloadType != null) {
+							operation = theClient.update().resource(thePayloadResource);
+						} else {
+							sendNotification(theMsg);
+							return;
+						}
 					}
-				} else {
-					if (thePayloadType != null) {
-						operation = theClient.update().resource(thePayloadResource);
-					} else {
-						sendNotification(theMsg);
-						return;
-					}
-				}
-				break;
-			case DELETE:
-				operation = theClient.delete().resourceById(theMsg.getPayloadId(myFhirContext));
-				break;
-			default:
-				ourLog.warn("Ignoring delivery message of type: {}", theMsg.getOperationType());
-				return;
+					break;
+				case DELETE:
+					operation = theClient.delete().resourceById(theMsg.getPayloadId(myFhirContext));
+					break;
+				default:
+					ourLog.warn("Ignoring delivery message of type: {}", theMsg.getOperationType());
+					return;
+			}
+
 		}
 
 		if (thePayloadType != null) {
