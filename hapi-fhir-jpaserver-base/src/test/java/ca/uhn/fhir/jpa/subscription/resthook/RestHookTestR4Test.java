@@ -1042,6 +1042,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 			Bundle xact = ourTransactions.get(0);
 			assertEquals(2, xact.getEntry().size());
+
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ourTransactions.get(0)));
 		}
 
 	}
