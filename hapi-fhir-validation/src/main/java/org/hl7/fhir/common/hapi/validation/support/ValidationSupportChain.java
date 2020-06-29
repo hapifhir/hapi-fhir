@@ -246,9 +246,6 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		for (IValidationSupport next : myChain) {
-			// FIXME: remove
-//			if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
-
 			String url = CommonCodeSystemsTerminologyService.getValueSetUrl(theValueSet, getFhirContext());
 			if (isBlank(url) || next.isValueSetSupported(theValidationSupportContext, url)) {
 				CodeValidationResult retVal = next.validateCodeInValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);

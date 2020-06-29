@@ -12,6 +12,8 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -93,12 +95,13 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private ValidationSettings myValidationSettings;
 
 	@Test
-	public void testValidateCode() throws IOException {
+	public void testValidateCodeUsingQuantityBinding() throws IOException {
 		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/bl/bb-vs.json"));
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/bl/bb-sd.json"));
 
 		OperationOutcome outcome;
 
+		// Use a code that's in the ValueSet
 		{
 			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
 			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -106,6 +109,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertThat(outcomeStr, not(containsString("\"error\"")));
 		}
 
+		// Use a code that's not in the ValueSet
 		try {
 			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-not-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
 			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -115,11 +119,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
-			assertThat(outcomeStr, containsString("The Coding provided is not in the value set https://bb/ValueSet/BBDemographicAgeUnit"));
+			assertThat(outcomeStr, containsString("Could not confirm that the codes provided are in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required"));
 		}
 
+		// Use the wrong datatype
 		try {
-			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-value-is-not-quantity2.json"), null, null, null, null, null, mySrd).getOperationOutcome();
+			myFhirCtx.setParserErrorHandler(new LenientErrorHandler());
+			Observation resource = loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-value-is-not-quantity2.json");
+			outcome = (OperationOutcome) myObservationDao.validate(resource, null, null, null, null, null, mySrd).getOperationOutcome();
 			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			fail();
@@ -127,13 +134,23 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
-			assertThat(outcomeStr, containsString("The Coding provided is not in the value set https://bb/ValueSet/BBDemographicAgeUnit"));
+			assertThat(outcomeStr, containsString("\"error\""));
 		}
 
-		outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-value-is-not-quantity.json"), null, null, null, null, null, mySrd).getOperationOutcome();
-		String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
-		ourLog.info("Validation outcome: {}", outcomeStr);
-		assertThat(outcomeStr, containsString("The Coding provided is not in the value set https://bb/ValueSet/BBDemographicAgeUnit"));
+		// Use the wrong datatype
+		try {
+			myFhirCtx.setParserErrorHandler(new LenientErrorHandler());
+			Observation resource = loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-value-is-not-quantity.json");
+			outcome = (OperationOutcome) myObservationDao.validate(resource, null, null, null, null, null, mySrd).getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			fail();
+		} catch (PreconditionFailedException e) {
+			outcome = (OperationOutcome) e.getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			assertThat(outcomeStr, containsString("The Profile \\\"https://bb/StructureDefinition/BBDemographicAge\\\" definition allows for the type Quantity but found type string"));
+		}
 	}
 
 	/**
@@ -988,6 +1005,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.IGNORE);
+		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 	}
 
 	@Test
