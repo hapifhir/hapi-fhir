@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.bulk;
+package ca.uhn.fhir.jpa.batch.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA Server - Batch Task Processor
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,11 +20,3 @@ package ca.uhn.fhir.jpa.bulk;
  * #L%
  */
 
-public enum BulkJobStatusEnum {
-
-	SUBMITTED,
-	BUILDING,
-	COMPLETE,
-	ERROR
-
-}
