@@ -100,7 +100,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			Map<String, String> valueMap = new HashMap<>(1);
 			valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
 			payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);
-			SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition);
+			SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
 			payloadSearchMap.setLoadSynchronous(true);
 
 			IBundleProvider searchResults = dao.search(payloadSearchMap);
