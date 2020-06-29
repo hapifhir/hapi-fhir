@@ -52,6 +52,7 @@ public class EmpiLinkDaoSvc {
 	@Autowired
 	private IdHelperService myIdHelperService;
 
+	@Transactional
 	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
 		Long personPid = myIdHelperService.getPidOrNull(thePerson);
 		Long resourcePid = myIdHelperService.getPidOrNull(theTarget);

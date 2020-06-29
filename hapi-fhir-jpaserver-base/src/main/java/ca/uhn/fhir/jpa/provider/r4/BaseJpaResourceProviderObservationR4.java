@@ -5,14 +5,16 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.UnsignedIntType;
 
 /*
  * #%L

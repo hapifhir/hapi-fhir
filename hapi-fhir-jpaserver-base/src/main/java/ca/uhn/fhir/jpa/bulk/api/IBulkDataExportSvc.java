@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk;
+package ca.uhn.fhir.jpa.bulk.api;
 
 /*-
  * #%L
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.transaction.Transactional;
@@ -36,7 +37,7 @@ public interface IBulkDataExportSvc {
 
 	JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters);
 
-	JobInfo getJobStatusOrThrowResourceNotFound(String theJobId);
+	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
 
 	void cancelAndPurgeAllJobs();
 
@@ -79,6 +80,7 @@ public interface IBulkDataExportSvc {
 				myFiles = new ArrayList<>();
 			}
 			return myFiles;
+
 		}
 
 		public BulkJobStatusEnum getStatus() {
@@ -129,6 +131,7 @@ public interface IBulkDataExportSvc {
 			return this;
 		}
 	}
+
 
 
 }

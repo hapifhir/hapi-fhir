@@ -106,7 +106,12 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@After
 	public void after() {
 		myEmpiLinkDao.deleteAll();
+		assertEquals(0, myEmpiLinkDao.count());
 		super.after();
+	}
+
+	protected void saveLink(EmpiLink theEmpiLink) {
+		myEmpiLinkDaoSvc.save(theEmpiLink);
 	}
 
 	@Nonnull

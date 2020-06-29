@@ -116,7 +116,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 			.setTargetPid(theTargetPid)
 			.setLinkSource(EmpiLinkSourceEnum.MANUAL)
 			.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDaoSvc.save(noMatchLink);
+		saveLink(noMatchLink);
 	}
 
 	@Test

@@ -147,6 +147,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-elasticsearch-6</artifactId>
 			<version>${project.version}</version>
 			<classifier>shaded6</classifier>
@@ -157,6 +162,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 
 
 		<dependency>
