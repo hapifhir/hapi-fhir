@@ -197,19 +197,14 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 
-	public String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
-		FhirContext fhirContext = getFhirContext();
-		return getValueSetUrl(theValueSet, fhirContext);
-	}
-
 	@Override
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
-	public static String getValueSetUrl(@Nonnull IBaseResource theValueSet, FhirContext theFhirContext) {
+	public static String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
 		String url;
-		switch (theFhirContext.getVersion().getVersion()) {
+		switch (theValueSet.getStructureFhirVersionEnum()) {
 			case DSTU2: {
 				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
 				break;
@@ -232,7 +227,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + theFhirContext.getVersion().getVersion());
+				throw new IllegalArgumentException("Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
 		}
 		return url;
 	}
