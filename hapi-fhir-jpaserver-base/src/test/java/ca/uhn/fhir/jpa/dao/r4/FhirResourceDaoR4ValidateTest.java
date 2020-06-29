@@ -5,6 +5,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -94,10 +96,18 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Autowired
 	private ValidationSettings myValidationSettings;
 
+	/**
+	 * Use a valueset that explicitly brings in some UCUM codes
+	 */
 	@Test
-	public void testValidateCodeUsingQuantityBinding() throws IOException {
+	public void testValidateCodeInValueSetWithBuiltInCodeSystem() throws IOException {
 		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/bl/bb-vs.json"));
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/bl/bb-sd.json"));
+
+		runInTransaction(() -> {
+			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vs.getExpansionStatus());
+		});
 
 		OperationOutcome outcome;
 
@@ -121,6 +131,55 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			assertThat(outcomeStr, containsString("Could not confirm that the codes provided are in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required"));
 		}
+
+		// Before, the VS wasn't pre-expanded. Try again with it pre-expanded
+		runInTransaction(() -> {
+			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vs.getExpansionStatus());
+		});
+
+		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		runInTransaction(() -> {
+			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vs.getExpansionStatus());
+		});
+
+		// Use a code that's in the ValueSet
+		{
+			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			assertThat(outcomeStr, not(containsString("\"error\"")));
+		}
+
+		// Use a code that's not in the ValueSet
+		try {
+			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-not-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			fail();
+		} catch (PreconditionFailedException e) {
+			outcome = (OperationOutcome) e.getOperationOutcome();
+			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info("Validation outcome: {}", outcomeStr);
+			assertThat(outcomeStr, containsString("Could not confirm that the codes provided are in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required"));
+		}
+
+	}
+
+
+	@Test
+	public void testValidateCodeUsingQuantityBinding() throws IOException {
+		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/bl/bb-vs.json"));
+		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/bl/bb-sd.json"));
+
+		runInTransaction(() -> {
+			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vs.getExpansionStatus());
+		});
+
+		OperationOutcome outcome;
 
 		// Use the wrong datatype
 		try {
@@ -475,10 +534,16 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://example.com/codesystem");
 		obs.getCode().getCodingFirstRep().setCode("foo-foo");
 		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
-		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
-		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo'", outcome.getIssueFirstRep().getDiagnostics());
-		assertEquals(OperationOutcome.IssueSeverity.WARNING, outcome.getIssueFirstRep().getSeverity());
+		try {
+			outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
+			ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+			fail();
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			assertEquals("None of the codes provided are in the value set http://example.com/valueset (http://example.com/valueset), and a code from this value set is required) (codes = http://example.com/codesystem#foo-foo)", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
+		}
 
 		// Correct codesystem, Code in codesystem
 		obs.getCode().getCodingFirstRep().setSystem("http://example.com/codesystem");
@@ -672,6 +737,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testValidate_TermSvcHasNpe() {
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://FOO");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
 		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
 			throw new NullPointerException("MY ERROR");
 		});
@@ -685,18 +756,15 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setValue(new StringType("This is the value"));
 
-		OperationOutcome oo;
 
 		// Valid code
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE99999").setDisplay("Display 3");
-		try {
-			validateAndReturnOutcome(obs);
-			fail();
-		} catch (NullPointerException e) {
-			assertEquals("MY ERROR", e.getMessage());
-		}
+		obs.getCode().getCodingFirstRep().setSystem("http://FOO").setCode("CODE99999").setDisplay("Display 3");
 
+		OperationOutcome oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals("Error MY ERROR validating Coding: java.lang.NullPointerException: MY ERROR", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
 	}
 
 	@Test

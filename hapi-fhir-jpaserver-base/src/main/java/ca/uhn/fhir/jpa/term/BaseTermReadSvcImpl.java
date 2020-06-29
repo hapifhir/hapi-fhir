@@ -89,7 +89,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -631,7 +630,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				if (theIncludeOrExclude.getConcept().size() > 0 && theWantConceptOrNull != null) {
 					if (defaultString(theIncludeOrExclude.getSystem()).equals(theWantConceptOrNull.getSystem())) {
-						if (theIncludeOrExclude.getConcept().stream().noneMatch(t->t.getCode().equals(theWantConceptOrNull.getCode()))) {
+						if (theIncludeOrExclude.getConcept().stream().noneMatch(t -> t.getCode().equals(theWantConceptOrNull.getCode()))) {
 							return false;
 						}
 					}
@@ -643,12 +642,34 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 					// This is a last ditch effort.. We don't have a CodeSystem resource for the desired CS, and we don't have
 					// anything at all in the database that matches it. So let's try asking the validation support context
-					// just in case there is a registered service that knows how to handle this.
+					// just in case there is a registered service that knows how to handle this. This can happen, for example,
+					// if someone creates a valueset that includes UCUM codes, since we don't have a CodeSystem resource for those
+					// but CommonCodeSystemsTerminologyService can validate individual codes.
+					List<VersionIndependentConcept> includedConcepts = null;
 					if (theWantConceptOrNull != null) {
-						LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), theWantConceptOrNull.getSystem(), theWantConceptOrNull.getCode());
-						if (lookup.isFound()) {
-							addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, theWantConceptOrNull.getCode(), lookup.getCodeDisplay());
+						includedConcepts = new ArrayList<>();
+						includedConcepts.add(theWantConceptOrNull);
+					} else if (!theIncludeOrExclude.getConcept().isEmpty()) {
+						includedConcepts = theIncludeOrExclude
+							.getConcept()
+							.stream()
+							.map(t->new VersionIndependentConcept(theIncludeOrExclude.getSystem(), t.getCode()))
+							.collect(Collectors.toList());
+					}
+
+					if (includedConcepts != null) {
+						int foundCount = 0;
+						for (VersionIndependentConcept next : includedConcepts) {
+							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), next.getSystem(), next.getCode());
+							if (lookup.isFound()) {
+								addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, next.getSystem(), next.getCode(), lookup.getCodeDisplay());
+								foundCount++;
+							}
+						}
+
+						if (foundCount == includedConcepts.size()) {
 							return false;
+							// ELSE, we'll continue below and throw an exception
 						}
 					}
 
@@ -1966,12 +1987,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	@Transactional
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-
-		if (myInvokeOnNextCallForUnitTest != null) {
-			Runnable invokeOnNextCallForUnitTest = myInvokeOnNextCallForUnitTest;
-			myInvokeOnNextCallForUnitTest = null;
-			invokeOnNextCallForUnitTest.run();
-		}
+		invokeRunnableForUnitTest();
 
 		IPrimitiveType<?> urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
 		String url = urlPrimitive.getValueAsString();
@@ -2139,6 +2155,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		@Override
 		public void execute(JobExecutionContext theContext) {
 			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
+		}
+	}
+
+	/**
+	 * This is only used for unit tests to test failure conditions
+	 */
+	static void invokeRunnableForUnitTest() {
+		if (myInvokeOnNextCallForUnitTest != null) {
+			Runnable invokeOnNextCallForUnitTest = myInvokeOnNextCallForUnitTest;
+			myInvokeOnNextCallForUnitTest = null;
+			invokeOnNextCallForUnitTest.run();
 		}
 	}
 
