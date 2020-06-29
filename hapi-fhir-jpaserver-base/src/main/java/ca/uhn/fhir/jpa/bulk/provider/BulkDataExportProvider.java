@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk;
+package ca.uhn.fhir.jpa.bulk.provider;
 
 /*-
  * #%L
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.bulk;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -123,7 +125,7 @@ public class BulkDataExportProvider {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(theJobId.getValueAsString());
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId.getValueAsString());
 
 		switch (status.getStatus()) {
 			case SUBMITTED:

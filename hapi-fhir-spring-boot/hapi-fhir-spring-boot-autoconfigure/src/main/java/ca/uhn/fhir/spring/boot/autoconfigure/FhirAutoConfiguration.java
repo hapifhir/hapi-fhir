@@ -68,9 +68,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.CollectionUtils;
 
+import javax.persistence.EntityManagerFactory;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
 import java.util.List;
@@ -85,6 +89,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @EnableConfigurationProperties(FhirProperties.class)
 public class FhirAutoConfiguration {
+
 
 	private final FhirProperties properties;
 
@@ -177,6 +182,15 @@ public class FhirAutoConfiguration {
 			SubscriptionSubmitterConfig.class
 		})
 		static class FhirJpaDaoConfiguration {
+
+			@Autowired
+			private EntityManagerFactory emf;
+
+			@Bean
+			@Primary
+			public PlatformTransactionManager hapiTransactionManager() {
+				return new JpaTransactionManager(emf);
+			}
 
 			@Bean
 			@ConditionalOnMissingBean

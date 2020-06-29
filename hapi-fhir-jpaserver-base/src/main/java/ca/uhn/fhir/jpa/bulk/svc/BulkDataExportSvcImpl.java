@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk;
+package ca.uhn.fhir.jpa.bulk.svc;
 
 /*-
  * #%L
@@ -21,44 +21,37 @@ package ca.uhn.fhir.jpa.bulk;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.dao.IResultIterator;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.BinaryUtil;
-import ca.uhn.fhir.util.StopWatch;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -67,18 +60,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
@@ -86,6 +71,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
+	private static final Long READ_CHUNK_SIZE = 10L;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
 	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
@@ -103,11 +89,15 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private FhirContext myContext;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
 	private TransactionTemplate myTxTemplate;
 
-	private long myFileMaxChars = 500 * FileUtils.ONE_KB;
+	@Autowired
+	private IBatchJobSubmitter myJobSubmitter;
+
+	@Autowired
+	@Qualifier("bulkExportJob")
+	private org.springframework.batch.core.Job myBulkExportJob;
+
 	private int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
 	/**
@@ -134,10 +124,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		String jobUuid = jobToProcessOpt.get().getJobId();
 
 		try {
-			myTxTemplate.execute(t -> {
-				processJob(jobUuid);
-				return null;
-			});
+			processJob(jobUuid);
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -203,112 +190,18 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 
 	private void processJob(String theJobUuid) {
+		JobParameters parameters = new JobParametersBuilder()
+			.addString("jobUUID", theJobUuid)
+			.addLong("readChunkSize", READ_CHUNK_SIZE)
+			.toJobParameters();
 
-		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(theJobUuid);
-		if (!jobOpt.isPresent()) {
-			ourLog.info("Job appears to be deleted");
-			return;
-		}
-
-		StopWatch jobStopwatch = new StopWatch();
-		AtomicInteger jobResourceCounter = new AtomicInteger();
-
-		BulkExportJobEntity job = jobOpt.get();
-		ourLog.info("Bulk export starting generation for batch export job: {}", job);
-
-		for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
-
-			String nextType = nextCollection.getResourceType();
-			IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextType);
-
-			ourLog.info("Bulk export assembling export of type {} for job {}", nextType, theJobUuid);
-
-			Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(nextType).getImplementingClass();
-			ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, nextType, nextTypeClass);
-
-			SearchParameterMap map = new SearchParameterMap();
-			map.setLoadSynchronous(true);
-			if (job.getSince() != null) {
-				map.setLastUpdated(new DateRangeParam(job.getSince(), null));
-			}
-
-			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null, RequestPartitionId.allPartitions());
-			storeResultsToFiles(nextCollection, sb, resultIterator, jobResourceCounter, jobStopwatch);
-		}
-
-		job.setStatus(BulkJobStatusEnum.COMPLETE);
-		updateExpiry(job);
-		myBulkExportJobDao.save(job);
-
-		ourLog.info("Bulk export completed job in {}: {}", jobStopwatch, job);
-
-	}
-
-	private void storeResultsToFiles(BulkExportCollectionEntity theExportCollection, ISearchBuilder theSearchBuilder, IResultIterator theResultIterator, AtomicInteger theJobResourceCounter, StopWatch theJobStopwatch) {
-
-		try (IResultIterator query = theResultIterator) {
-			if (!query.hasNext()) {
-				return;
-			}
-
-			AtomicInteger fileCounter = new AtomicInteger(0);
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			OutputStreamWriter writer = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
-			IParser parser = myContext.newJsonParser().setPrettyPrint(false);
-
-			List<ResourcePersistentId> pidsSpool = new ArrayList<>();
-			List<IBaseResource> resourcesSpool = new ArrayList<>();
-			while (query.hasNext()) {
-				pidsSpool.add(query.next());
-				fileCounter.incrementAndGet();
-				theJobResourceCounter.incrementAndGet();
-
-				if (pidsSpool.size() >= 10 || !query.hasNext()) {
-
-					theSearchBuilder.loadResourcesByPid(pidsSpool, Collections.emptyList(), resourcesSpool, false, null);
-
-					for (IBaseResource nextFileResource : resourcesSpool) {
-						parser.encodeResourceToWriter(nextFileResource, writer);
-						writer.append("\n");
-					}
-
-					pidsSpool.clear();
-					resourcesSpool.clear();
-
-					if (outputStream.size() >= myFileMaxChars || !query.hasNext()) {
-						Optional<IIdType> createdId = flushToFiles(theExportCollection, fileCounter, outputStream);
-						createdId.ifPresent(theIIdType -> ourLog.info("Created resource {} for bulk export file containing {} resources of type {} - Total {} resources ({}/sec)", theIIdType.toUnqualifiedVersionless().getValue(), fileCounter.get(), theExportCollection.getResourceType(), theJobResourceCounter.get(), theJobStopwatch.formatThroughput(theJobResourceCounter.get(), TimeUnit.SECONDS)));
-						fileCounter.set(0);
-					}
-
-				}
-			}
-
-		} catch (IOException e) {
-			throw new InternalErrorException(e);
+		try {
+			myJobSubmitter.runJob(myBulkExportJob, parameters);
+		} catch (JobParametersInvalidException theE) {
+			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
 		}
 	}
 
-	private Optional<IIdType> flushToFiles(BulkExportCollectionEntity theCollection, AtomicInteger theCounter, ByteArrayOutputStream theOutputStream) {
-		if (theOutputStream.size() > 0) {
-			IBaseBinary binary = BinaryUtil.newBinary(myContext);
-			binary.setContentType(Constants.CT_FHIR_NDJSON);
-			binary.setContent(theOutputStream.toByteArray());
-
-			IIdType createdId = getBinaryDao().create(binary).getResource().getIdElement();
-
-			BulkExportCollectionFileEntity file = new BulkExportCollectionFileEntity();
-			theCollection.getFiles().add(file);
-			file.setCollection(theCollection);
-			file.setResource(createdId.getIdPart());
-			myBulkExportCollectionFileDao.saveAndFlush(file);
-			theOutputStream.reset();
-
-			return Optional.of(createdId);
-		}
-
-		return Optional.empty();
-	}
 
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
@@ -429,7 +322,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@Transactional
 	@Override
-	public JobInfo getJobStatusOrThrowResourceNotFound(String theJobId) {
+	public JobInfo getJobInfoOrThrowResourceNotFound(String theJobId) {
 		BulkExportJobEntity job = myBulkExportJobDao
 			.findByJobId(theJobId)
 			.orElseThrow(() -> new ResourceNotFoundException(theJobId));
