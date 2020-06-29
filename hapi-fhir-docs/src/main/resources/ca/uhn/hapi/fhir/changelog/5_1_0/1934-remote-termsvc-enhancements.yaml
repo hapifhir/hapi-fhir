@@ -1,0 +1,8 @@
+---
+type: add
+issue: 1934
+title: "The **RemoteTerminologyServiceValidationSupport** validation support module, which is used to connect to 
+   external/remote terminology services, has been significantly enhanced to provide testing for supported
+   CodeSystems and ValueSets. It will also now validate codes in fields that are not bound to a specific
+   ValueSet."
+

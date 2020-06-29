@@ -134,7 +134,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
 		for (IValidationSupport next : myChain) {
 			// TODO: test if code system is supported?
-			ValueSetExpansionOutcome expanded = next.expandValueSet(theValidationSupportContext, null, theValueSetToExpand);
+			ValueSetExpansionOutcome expanded = next.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
 			if (expanded != null) {
 				return expanded;
 			}

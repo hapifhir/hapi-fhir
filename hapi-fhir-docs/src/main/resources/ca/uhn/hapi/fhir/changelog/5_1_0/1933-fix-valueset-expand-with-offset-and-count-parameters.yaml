@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1933
+title: "`BaseValidationSupportWrapper.expandValueSet(...)` and `ValidationSupportChain.expandValueSet(...)` were
+        incorrectly replacing expansion options (i.e. offset and count) with `null`, causing these parameters to be
+        ignored when invoking the `ValueSet$expand` operation. This has been corrected."

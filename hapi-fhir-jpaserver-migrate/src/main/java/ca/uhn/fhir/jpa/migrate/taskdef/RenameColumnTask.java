@@ -139,10 +139,8 @@ public class RenameColumnTask extends BaseTableTask {
 			case DERBY_EMBEDDED:
 				sql = "RENAME COLUMN " + getTableName() + "." + myOldName + " TO " + myNewName;
 				break;
-			case MARIADB_10_1:
-				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN " + myOldName + " TO " + myNewName;
-				break;
 			case MYSQL_5_7:
+			case MARIADB_10_1:
 				// Quote the column names as "SYSTEM" is a reserved word in MySQL
 				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN `" + myOldName + "` `" + myNewName + "` " + theExistingType + " " + theExistingNotNull;
 				break;

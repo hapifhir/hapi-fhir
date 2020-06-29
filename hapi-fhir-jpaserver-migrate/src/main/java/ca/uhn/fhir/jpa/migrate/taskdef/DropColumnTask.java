@@ -26,6 +26,7 @@ import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
@@ -52,8 +53,8 @@ public class DropColumnTask extends BaseTableColumnTask {
 			return;
 		}
 
-		if(getDriverType().equals(DriverTypeEnum.MYSQL_5_7)) {
-			// Some DBs such as MYSQL require that foreign keys depending on the column be dropped before the column itself is dropped.
+		if(getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || getDriverType().equals(DriverTypeEnum.MARIADB_10_1)) {
+			// Some DBs such as MYSQL and Maria DB require that foreign keys depending on the column be dropped before the column itself is dropped.
 			logInfo(ourLog, "Dropping any foreign keys on table {} depending on column {}", getTableName(), getColumnName());
 			Set<String> foreignKeys = JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), getColumnName(), getTableName());
 			if(foreignKeys != null) {
