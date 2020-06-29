@@ -25,7 +25,7 @@ public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 	public void testFindCandidates() {
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
-		Patient createdJane = createPatient(jane);
+		createPatient(jane);
 		Patient newJane = buildJanePatient();
 
 		Collection<IAnyResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);

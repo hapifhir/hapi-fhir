@@ -16,7 +16,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
-import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR5Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -429,8 +429,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@AfterEach
 	public void afterClearTerminologyCaches() {
 		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
-		baseHapiTerminologySvc.clearTranslationCache();
-		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		baseHapiTerminologySvc.clearCaches();
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationCache();
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl deferredStorageSvc = AopTestUtils.getTargetObject(myTermDeferredStorageSvc);

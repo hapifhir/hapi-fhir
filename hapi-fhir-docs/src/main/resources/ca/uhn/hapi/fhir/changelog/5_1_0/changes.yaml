@@ -4,6 +4,7 @@
     title: "The version of a few dependencies have been bumped to the latest versions
     (dependent HAPI modules listed in brackets):
     <ul>
+        <li>Guava (JPA): 28.2-jre -&gt; 29.0-jre</li>
     </ul>"
 - item:
     issue: "1862"

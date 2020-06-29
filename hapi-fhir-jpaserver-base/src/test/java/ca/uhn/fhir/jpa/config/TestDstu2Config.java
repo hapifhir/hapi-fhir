@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -40,6 +41,11 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		 * starvation
 		 */
 		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+
+		if ("true".equals(System.getProperty("single_db_connection"))) {
+			ourMaxThreads = 1;
+		}
+
 	}
 
 	private Exception myLastStackTrace;
@@ -152,12 +158,12 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor(IInstanceValidatorModule theInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidator());
+		requestValidator.addValidatorModule(theInstanceValidator);
 
 		return requestValidator;
 	}

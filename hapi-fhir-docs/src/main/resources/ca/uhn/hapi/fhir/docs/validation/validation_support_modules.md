@@ -118,6 +118,12 @@ The following table lists vocabulary that is validated by this module:
 
 This module validates codes using a remote FHIR-based terminology server.
 
+This module will invoke the following operations on the remote terminology server:
+
+* **GET [base]/CodeSystem?url=[url]** &ndash; Tests whether a given CodeSystem is supported on the server 
+* **GET [base]/ValueSet?url=[url]** &ndash; Tests whether a given ValueSet is supported on the server 
+* **POST [base]/CodeSystem/$validate-code** &ndash; Validate codes in fields where no specific ValueSet is bound 
+* **POST [base]/ValueSet/$validate-code** &ndash; Validate codes in fields where a specific ValueSet is bound 
 
 # Recipes
 

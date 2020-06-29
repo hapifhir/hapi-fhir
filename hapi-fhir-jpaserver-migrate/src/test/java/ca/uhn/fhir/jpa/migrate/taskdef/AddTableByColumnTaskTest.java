@@ -44,13 +44,13 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			Builder v = forVersion(VersionEnum.V3_5_0);
 
 			Builder.BuilderWithTableName targetTable = v.addTableByColumns("1", "TGT_TABLE", "PID");
-			targetTable.addColumn("2", "PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+			targetTable.addColumn("2", "PID").nonNullable().type(ColumnTypeEnum.LONG);
 
 			Builder.BuilderAddTableByColumns fooTable = v.addTableByColumns("3", "FOO_TABLE", "PID");
-			fooTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-			fooTable.addColumn("HELLO").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-			fooTable.addColumn("GOODBYE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-			fooTable.addColumn("COL_REF").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+			fooTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+			fooTable.addColumn("HELLO").nullable().type(ColumnTypeEnum.STRING, 200);
+			fooTable.addColumn("GOODBYE").nullable().type(ColumnTypeEnum.STRING, 200);
+			fooTable.addColumn("COL_REF").nullable().type(ColumnTypeEnum.LONG);
 			fooTable.addIndex("4", "IDX_HELLO").unique(true).withColumns("HELLO");
 			fooTable.addIndex("5", "IDX_GOODBYE").unique(true).withColumnsStub("GOODBYE");
 			fooTable.dropIndexStub("6", "IDX_HELLO");

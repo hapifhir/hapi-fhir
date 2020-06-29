@@ -504,7 +504,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		addFile(zos, LOINC_GROUP_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+		addFile(zos, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 		addFile(zos, LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());

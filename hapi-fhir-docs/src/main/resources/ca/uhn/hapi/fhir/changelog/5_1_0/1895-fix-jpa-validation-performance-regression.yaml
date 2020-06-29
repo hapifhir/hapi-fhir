@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1895
+title: "HAPI FHIR 5.0.0 introduced a regression in JPA validator performance, where a number of unnecessary database lookups
+   were introduced. This has been corrected."

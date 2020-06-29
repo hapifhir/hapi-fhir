@@ -67,7 +67,10 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		});
 
 		// Delete the code system
-		myCodeSystemDao.delete(id);
+		runInTransaction(()->{
+			myCodeSystemDao.delete(id);
+		});
+		myTerminologyDeferredStorageSvc.saveDeferred();
 		runInTransaction(()->{
 			assertEquals(0L, myConceptDao.count());
 		});

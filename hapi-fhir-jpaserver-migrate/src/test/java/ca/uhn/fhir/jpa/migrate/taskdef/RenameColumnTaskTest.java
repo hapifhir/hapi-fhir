@@ -31,6 +31,41 @@ public class RenameColumnTaskTest extends BaseTest {
 	}
 
 	@Test
+	public void testForeignKeyColumnAlreadyExists_MySql() throws SQLException {
+		testForeignKeyColumnAlreadyExists(true);
+	}
+
+	private void testForeignKeyColumnAlreadyExists(boolean isMySql) throws SQLException {
+		executeSql("create table PARENT (PID bigint not null, TEXTCOL varchar(255), primary key (PID))");
+		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint)");
+		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PID)");
+
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+
+		RenameColumnTask task = new RenameColumnTask("1",  "1");
+		task.setTableName("CHILD");
+		task.setOldName("myParentRef");
+		task.setNewName("PARENTREF");
+		task.setSimulateMySQLForTest(isMySql);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "PARENTREF"));
+
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+	}
+
+	@Test
+	public void testForeignKeyColumnAlreadyExists_OtherDB() throws SQLException {
+		testForeignKeyColumnAlreadyExists(false);
+	}
+
+	@Test
 	public void testBothExistDeleteTargetFirst() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 
@@ -49,7 +84,49 @@ public class RenameColumnTaskTest extends BaseTest {
 	}
 
 	@Test
-	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget() throws SQLException {
+	public void testForeignKeyColumnBothExistDeleteTargetFirst_MySql() throws SQLException {
+		testForeignKeyColumnBothExistDeleteTargetFirst(true);
+	}
+
+	private void testForeignKeyColumnBothExistDeleteTargetFirst(boolean isMySql) throws SQLException {
+		executeSql("create table PARENT (PARENTID bigint not null, TEXTCOL varchar(255), primary key (PARENTID))");
+		executeSql("create table RELATION (RELATIONID bigint not null, TEXTCOL varchar(255), primary key (RELATIONID))");
+		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint, NOKREF bigint)");
+		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PARENTID)");
+		executeSql("alter table CHILD add constraint FK_NOK foreign key (NOKREF) references RELATION(RELATIONID)");
+
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD"), hasSize(1));
+
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD"), containsInAnyOrder("FK_NOK"));
+
+		RenameColumnTask task = new RenameColumnTask("1",  "1");
+		task.setTableName("CHILD");
+		task.setOldName("PARENTREF");
+		task.setNewName("NOKREF");
+		task.setDeleteTargetColumnFirstIfBothExist(true);
+		task.setSimulateMySQLForTest(isMySql);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD"), empty());
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "NOKREF"));
+
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+
+	}
+
+	@Test
+	public void testForeignKeyColumnBothExistDeleteTargetFirst_OtherDB() throws SQLException {
+		testForeignKeyColumnBothExistDeleteTargetFirst(false);
+	}
+
+	@Test
+	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget() {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL, myTextCol) VALUES (123, 'AAA', 'BBB')");
 
@@ -84,6 +161,42 @@ public class RenameColumnTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+	}
+
+	@Test
+	public void testForeignKeyColumnDoesntAlreadyExist_MySql() throws SQLException {
+		testForeignKeyColumnDoesntAlreadyExist(true);
+	}
+
+	private void testForeignKeyColumnDoesntAlreadyExist(boolean isMySql) throws SQLException {
+		executeSql("create table PARENT (PARENTID bigint not null, TEXTCOL varchar(255), primary key (PARENTID))");
+		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint)");
+		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PARENTID)");
+
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+
+		RenameColumnTask task = new RenameColumnTask("1",  "1");
+		task.setTableName("CHILD");
+		task.setOldName("PARENTREF");
+		task.setNewName("MOMREF");
+		task.setSimulateMySQLForTest(isMySql);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "MOMREF"));
+
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "MOMREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+
+	}
+
+	@Test
+	public void testForeignKeyColumnDoesntAlreadyExist_OtherDB() throws SQLException {
+		testForeignKeyColumnDoesntAlreadyExist(false);
 	}
 
 	@Test

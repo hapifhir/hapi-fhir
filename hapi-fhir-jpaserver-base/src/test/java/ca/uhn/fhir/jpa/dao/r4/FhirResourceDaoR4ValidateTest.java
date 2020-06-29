@@ -1,12 +1,17 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
+import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -23,9 +28,29 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +58,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +82,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvcc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private JpaValidationSupportChain myJpaValidationSupportChain;
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
+	@Autowired
+	private ValidationSettings myValidationSettings;
 
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
@@ -136,11 +168,224 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
+		// Make sure we're caching the validations as opposed to hitting the DB every time
+		myCaptureQueriesListener.clear();
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCoding().clear();
+		obs.getCategory().clear();
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE4").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		myCaptureQueriesListener.clear();
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE4").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+
 	}
+
+	@Test
+	public void testValidateProfileTargetType_PolicyCheckValid() throws IOException {
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_VALID);
+
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://loinc.org");
+		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
+		myCodeSystemDao.create(cs);
+
+		Group group = new Group();
+		group.setId("ABC");
+		group.setActive(true);
+		myGroupDao.update(group);
+
+		Patient patient = new Patient();
+		patient.setId("DEF");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("P");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.addPerformer(new Reference("Practitioner/P"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+
+		// Non-existent target
+		obs.setSubject(new Reference("Group/123"));
+		OperationOutcome oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of wrong type
+		obs.setSubject(new Reference("Group/ABC"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Invalid Resource target type. Found Group, but expected one of ([Patient])", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of right type
+		obs.setSubject(new Reference("Patient/DEF"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
+	@Test
+	public void testValidateProfileTargetType_PolicyCheckExistsAndType() throws IOException {
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_EXISTS_AND_TYPE);
+
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://loinc.org");
+		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
+		myCodeSystemDao.create(cs);
+
+		Group group = new Group();
+		group.setId("ABC");
+		group.setActive(true);
+		myGroupDao.update(group);
+
+		Patient patient = new Patient();
+		patient.setId("DEF");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("P");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.addPerformer(new Reference("Practitioner/P"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+
+		// Non-existent target
+		obs.setSubject(new Reference("Group/123"));
+		OperationOutcome oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of wrong type
+		obs.setSubject(new Reference("Group/ABC"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Unable to find matching profile for Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of right type
+		obs.setSubject(new Reference("Patient/DEF"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
+
+	@Test
+	public void testValidateProfileTargetType_PolicyCheckExists() throws IOException {
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_EXISTS);
+
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://loinc.org");
+		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
+		myCodeSystemDao.create(cs);
+
+		Group group = new Group();
+		group.setId("ABC");
+		group.setActive(true);
+		myGroupDao.update(group);
+
+		Patient patient = new Patient();
+		patient.setId("DEF");
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("P");
+		practitioner.setActive(true);
+		myPractitionerDao.update(practitioner);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.addPerformer(new Reference("Practitioner/P"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
+
+		// Non-existent target
+		obs.setSubject(new Reference("Group/123"));
+		OperationOutcome oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of wrong type
+		obs.setSubject(new Reference("Group/ABC"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+		// Target of right type
+		obs.setSubject(new Reference("Patient/DEF"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
 
 	/**
 	 * Per: https://chat.fhir.org/#narrow/stream/179166-implementers/topic/Handling.20incomplete.20CodeSystems
-	 *
+	 * <p>
 	 * We should generate a warning if a code can't be found but the codesystem is a fragment
 	 */
 	@Test
@@ -197,7 +442,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertEquals(OperationOutcome.IssueSeverity.ERROR, outcome.getIssueFirstRep().getSeverity());
 		}
 	}
-
 
 	/**
 	 * Create a loinc valueset that expands to more results than the expander is willing to do
@@ -279,6 +523,115 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
 		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+
+	}
+
+	/**
+	 * Make sure that we do something sane when validating throws an unexpected exception
+	 */
+	@Test
+	public void testValidate_ValidationSupportThrowsException() {
+		IValidationSupport validationSupport = mock(IValidationSupport.class);
+		when(validationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
+			// This will fail with a constraint error
+			try {
+				myResourceTableDao.save(new ResourceTable());
+				myResourceTableDao.flush();
+			} catch (Exception e) {
+				ourLog.info("Hit expected exception: {}", e.toString());
+			}
+			return null;
+		});
+		when(validationSupport.getFhirContext()).thenReturn(myFhirCtx);
+
+		myJpaValidationSupportChain.addValidationSupport(0, validationSupport);
+		try {
+
+			Observation obs = new Observation();
+			obs.getText().setDivAsString("<div>Hello</div>");
+			obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+			obs.setSubject(new Reference("Patient/123"));
+			obs.addPerformer(new Reference("Practitioner/123"));
+			obs.setEffective(DateTimeType.now());
+			obs.setStatus(ObservationStatus.FINAL);
+			obs.setValue(new StringType("This is the value"));
+
+			OperationOutcome oo;
+
+			// Valid code
+			obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+			obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+			oo = validateAndReturnOutcome(obs);
+			assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+		} finally {
+			myJpaValidationSupportChain.removeValidationSupport(validationSupport);
+		}
+	}
+
+	/**
+	 * Make sure that we do something sane when validating throws an unexpected exception
+	 */
+	@Test
+	@Ignore
+	public void testValidate_TermSvcHasDatabaseRollback() {
+		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
+			try {
+				myResourceTableDao.save(new ResourceTable());
+				myResourceTableDao.flush();
+			} catch (Exception e) {
+				ourLog.info("Hit expected exception: {}", e.toString());
+			}
+		});
+
+		Observation obs = new Observation();
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
+	/**
+	 * Make sure that we do something sane when validating throws an unexpected exception
+	 */
+	@Test
+	public void testValidate_TermSvcHasNpe() {
+		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
+			throw new NullPointerException("MY ERROR");
+		});
+
+		Observation obs = new Observation();
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE99999").setDisplay("Display 3");
+		try {
+			validateAndReturnOutcome(obs);
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("MY ERROR", e.getMessage());
+		}
 
 	}
 
@@ -584,6 +937,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+
+		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
+
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.IGNORE);
 	}
 
 	@Test

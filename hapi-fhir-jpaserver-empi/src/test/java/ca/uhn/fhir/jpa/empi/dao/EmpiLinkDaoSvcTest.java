@@ -27,7 +27,7 @@ public class EmpiLinkDaoSvcTest extends BaseEmpiR4Test {
 		myEmpiLinkDaoSvc.save(empiLink);
 		assertThat(empiLink.getCreated(), is(notNullValue()));
 		assertThat(empiLink.getUpdated(), is(notNullValue()));
-		assertEquals(empiLink.getCreated(), empiLink.getUpdated());
+		assertTrue(empiLink.getUpdated().getTime() - empiLink.getCreated().getTime() < 1000);
 	}
 
 	@Test

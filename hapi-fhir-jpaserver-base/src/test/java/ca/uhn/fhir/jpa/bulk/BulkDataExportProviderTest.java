@@ -1,6 +1,10 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
+import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -179,7 +183,7 @@ public class BulkDataExportProviderTest {
 			.setJobId(A_JOB_ID)
 			.setStatus(BulkJobStatusEnum.BUILDING)
 			.setStatusTime(InstantType.now().getValue());
-		when(myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
+		when(myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
 
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
@@ -204,7 +208,7 @@ public class BulkDataExportProviderTest {
 			.setStatus(BulkJobStatusEnum.ERROR)
 			.setStatusTime(InstantType.now().getValue())
 			.setStatusMessage("Some Error Message");
-		when(myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
+		when(myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
 
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
@@ -233,7 +237,7 @@ public class BulkDataExportProviderTest {
 		jobInfo.addFile().setResourceType("Patient").setResourceId(new IdType("Binary/111"));
 		jobInfo.addFile().setResourceType("Patient").setResourceId(new IdType("Binary/222"));
 		jobInfo.addFile().setResourceType("Patient").setResourceId(new IdType("Binary/333"));
-		when(myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
+		when(myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
 
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
@@ -263,7 +267,7 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testPollForStatus_Gone() throws IOException {
 
-		when(myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(eq(A_JOB_ID))).thenThrow(new ResourceNotFoundException("Unknown job: AAA"));
+		when(myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(eq(A_JOB_ID))).thenThrow(new ResourceNotFoundException("Unknown job: AAA"));
 
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;

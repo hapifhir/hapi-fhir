@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -7,6 +10,7 @@ import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.io.IOUtils;
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.util.AopTestUtils;
 
 import java.io.IOException;
@@ -40,6 +45,9 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	private CachingValidationSupport myValidationSupport;
 	@Autowired
 	private FhirInstanceValidator myFhirInstanceValidator;
+	@Autowired
+	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
+	private IValidationSupport myPersistedResourceValidationSupport;
 
 	@Test
 	public void testValidateChangedQuestionnaire() {
@@ -78,6 +86,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		ourLog.info("Clearing cache");
 		myValidationSupport.invalidateCaches();
 		myFhirInstanceValidator.invalidateCaches();
+		ProxyUtil.getSingletonTarget(myPersistedResourceValidationSupport, JpaPersistedResourceValidationSupport.class).clearCaches();
 
 		try {
 			myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);

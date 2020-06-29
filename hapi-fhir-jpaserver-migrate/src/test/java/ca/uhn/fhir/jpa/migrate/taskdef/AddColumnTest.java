@@ -7,6 +7,7 @@ import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -22,7 +23,7 @@ public class AddColumnTest extends BaseTest {
 		AddColumnTask task = new AddColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("newcol");
-		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
+		task.setColumnType(ColumnTypeEnum.LONG);
 		task.setNullable(true);
 		getMigrator().addTask(task);
 
@@ -38,14 +39,14 @@ public class AddColumnTest extends BaseTest {
 		AddColumnTask task = new AddColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("newcolint");
-		task.setColumnType(AddColumnTask.ColumnTypeEnum.INT);
+		task.setColumnType(ColumnTypeEnum.INT);
 		task.setNullable(true);
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();
 
 		JdbcUtils.ColumnType type = JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "newcolint");
-		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.INT, type.getColumnTypeEnum());
+		assertEquals(ColumnTypeEnum.INT, type.getColumnTypeEnum());
 	}
 
 	@Test
@@ -55,7 +56,7 @@ public class AddColumnTest extends BaseTest {
 		AddColumnTask task = new AddColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("newcol");
-		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
+		task.setColumnType(ColumnTypeEnum.LONG);
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();
@@ -71,7 +72,7 @@ public class AddColumnTest extends BaseTest {
 			.onTable("FOO_TABLE")
 			.addColumn("2001.01", "FOO_COLUMN")
 			.nullable()
-			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+			.type(ColumnTypeEnum.INT);
 
 		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		try {
@@ -91,7 +92,7 @@ public class AddColumnTest extends BaseTest {
 			.onTable("FOO_TABLE")
 			.addColumn("2001.01", "FOO_COLUMN")
 			.nullable()
-			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT)
+			.type(ColumnTypeEnum.INT)
 			.failureAllowed();
 
 		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));

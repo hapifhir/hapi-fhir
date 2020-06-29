@@ -300,6 +300,103 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	@Test
+	public void testExpandByIdWithPreExpansionWithOffset() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "offset", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(23, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(0).getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContains().get(0).getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContains().get(0).getDisplay());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(1).getSystem());
+		assertEquals("8493-9", expanded.getExpansion().getContains().get(1).getCode());
+		assertEquals("Systolic blood pressure 10 hour minimum", expanded.getExpansion().getContains().get(1).getDisplay());
+
+	}
+
+	@Test
+	public void testExpandByIdWithPreExpansionWithCount() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(0, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("8450-9", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure--expiration", expanded.getExpansion().getContainsFirstRep().getDisplay());
+
+	}
+
+	@Test
+	public void testExpandByIdWithPreExpansionWithOffsetAndCount() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContainsFirstRep().getDisplay());
+
+	}
+
+	@Test
 	public void testExpandByIdWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
@@ -401,6 +498,106 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	@Test
+	public void testExpandByUrlWithPreExpansionWithOffset() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("offset", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(23, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(0).getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContains().get(0).getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContains().get(0).getDisplay());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(1).getSystem());
+		assertEquals("8493-9", expanded.getExpansion().getContains().get(1).getCode());
+		assertEquals("Systolic blood pressure 10 hour minimum", expanded.getExpansion().getContains().get(1).getDisplay());
+
+	}
+
+	@Test
+	public void testExpandByUrlWithPreExpansionWithCount() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(0, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("8450-9", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure--expiration", expanded.getExpansion().getContainsFirstRep().getDisplay());
+
+	}
+
+	@Test
+	public void testExpandByUrlWithPreExpansionWithOffsetAndCount() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContainsFirstRep().getDisplay());
+
+	}
+
+	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
 
@@ -446,7 +643,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testExpandByValueSetWithPreExpansion() throws IOException {
 		myDaoConfig.setPreExpandValueSets(true);
 
-		loadAndPersistCodeSystem(HTTPVerb.POST);
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
@@ -464,6 +661,112 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
+	}
+
+	@Test
+	public void testExpandByValueSetWithPreExpansionWithOffset() throws IOException {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("offset", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(23, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(0).getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContains().get(0).getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContains().get(0).getDisplay());
+		assertEquals("http://acme.org", expanded.getExpansion().getContains().get(1).getSystem());
+		assertEquals("8493-9", expanded.getExpansion().getContains().get(1).getCode());
+		assertEquals("Systolic blood pressure 10 hour minimum", expanded.getExpansion().getContains().get(1).getDisplay());
+
+	}
+
+	@Test
+	public void testExpandByValueSetWithPreExpansionWithCount() throws IOException {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(0, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("8450-9", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure--expiration", expanded.getExpansion().getContainsFirstRep().getDisplay());
+
+	}
+
+	@Test
+	public void testExpandByValueSetWithPreExpansionWithOffsetAndCount() throws IOException {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertEquals(24, expanded.getExpansion().getTotal());
+		assertEquals(1, expanded.getExpansion().getOffset());
+		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertEquals("http://acme.org", expanded.getExpansion().getContainsFirstRep().getSystem());
+		assertEquals("11378-7", expanded.getExpansion().getContainsFirstRep().getCode());
+		assertEquals("Systolic blood pressure at First encounter", expanded.getExpansion().getContainsFirstRep().getDisplay());
 
 	}
 

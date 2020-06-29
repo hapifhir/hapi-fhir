@@ -1,7 +1,9 @@
 package ca.uhn.fhir.empi.rules.json;
 
-import ca.uhn.fhir.empi.BaseR4Test;
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
+import ca.uhn.fhir.empi.rules.svc.BaseEmpiRulesR4Test;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class EmpiRulesJsonR4Test extends BaseR4Test {
+public class EmpiRulesJsonR4Test extends BaseEmpiRulesR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiRulesJsonR4Test.class);
 	private EmpiRulesJson myRules;
 
@@ -34,7 +36,7 @@ public class EmpiRulesJsonR4Test extends BaseR4Test {
 		assertEquals(EmpiMatchResultEnum.MATCH, rulesDeser.getMatchResult(myBothNameFields));
 		EmpiFieldMatchJson second = rulesDeser.get(1);
 		assertEquals("name.family", second.getResourcePath());
-		assertEquals(DistanceMetricEnum.JARO_WINKLER, second.getMetric());
+		TestCase.assertEquals(EmpiMetricEnum.JARO_WINKLER, second.getMetric());
 	}
 
 	@Test
@@ -54,7 +56,7 @@ public class EmpiRulesJsonR4Test extends BaseR4Test {
 		try {
 			vectorMatchResultMap.getVector("bad");
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (ConfigurationException e) {
 			assertEquals("There is no matchField with name bad", e.getMessage());
 		}
 	}

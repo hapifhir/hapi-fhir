@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.job.BulkExportJobParametersBuilder;
+import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
@@ -21,11 +25,24 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +59,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private IBatchJobSubmitter myBatchJobSubmitter;
+	@Autowired
+	private JobExplorer myJobExplorer;
 
+	@Autowired
+	@Qualifier("bulkExportJob")
+	private Job myBulkJob;
 
 	@Test
 	public void testPurgeExpiredJobs() {
@@ -138,15 +162,17 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter="+TEST_FILTER, status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
 
+		awaitAllBulkJobCompletions();
+
 		// Fetch the job again
-		status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(2, status.getFiles().size());
 
@@ -168,6 +194,26 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			}
 
 		}
+	}
+
+	@Test
+	public void testBatchJobIsCapableOfCreatingAnExportEntityIfNoJobIsProvided() throws Exception {
+		createResources();
+
+		//Add the UUID to the job
+		BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder();
+		paramBuilder.setReadChunkSize(100L)
+			.setOutputFormat(Constants.CT_FHIR_NDJSON)
+			.setResourceTypes(Arrays.asList("Patient", "Observation"));
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		String jobUUID = (String)jobExecution.getExecutionContext().get("jobUUID");
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobUUID);
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
 	}
 
 	@Test
@@ -188,15 +234,17 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson", status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
 
+		awaitAllBulkJobCompletions();
+
 		// Fetch the job again
-		status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(2, status.getFiles().size());
 
@@ -220,6 +268,25 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	public void awaitAllBulkJobCompletions() {
+		List<JobInstance> bulkExport = myJobExplorer.findJobInstancesByJobName("bulkExportJob", 0, 100);
+		if (bulkExport.isEmpty()) {
+			fail("There are no bulk export jobs running!");
+		}
+		List<JobExecution> bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
+		awaitJobCompletions(bulkExportExecutions);
+	}
+
+	public void awaitJobCompletions(Collection<JobExecution> theJobs) {
+		theJobs.stream().forEach(jobExecution -> {
+			try {
+				awaitJobCompletion(jobExecution);
+			} catch (InterruptedException theE) {
+				fail();
+			}
+		});
+	}
+
 	@Test
 	public void testSubmitReusesExisting() {
 
@@ -234,8 +301,48 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertEquals(jobDetails1.getJobId(), jobDetails2.getJobId());
 	}
 
+	@Test
+	public void testBatchJobSubmitsAndRuns() throws Exception {
+		createResources();
 
-		@Test
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
+
+		//Add the UUID to the job
+		BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder()
+			.setJobUUID(jobDetails.getJobId())
+			.setReadChunkSize(10L);
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
+	}
+
+	@Test
+	public void testJobParametersValidatorRejectsInvalidParameters() {
+		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", "I'm not real!");
+		try {
+			myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+			fail("Should have had invalid parameter execption!");
+		} catch (JobParametersInvalidException e) {
+		}
+
+	}
+
+	//Note that if the job is generated, and doesnt rely on an existed persisted BulkExportJobEntity, it will need to
+	//create one itself, which means that its jobUUID isnt known until it starts. to get around this, we move
+	public void awaitJobCompletion(JobExecution theJobExecution) throws InterruptedException {
+		await().until(() -> {
+			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
+			return jobExecution.getStatus() == BatchStatus.COMPLETED;
+		});
+	}
+
+	@Test
 	public void testSubmit_WithSince() throws InterruptedException {
 
 		// Create some resources to load
@@ -257,15 +364,17 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_since=" + cutoff.setTimeZoneZulu(true).getValueAsString(), status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
+		
+		awaitAllBulkJobCompletions();
 
 		// Fetch the job again
-		status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(1, status.getFiles().size());
 
@@ -283,7 +392,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			} else {
 				fail(next.getResourceType());
 			}
-
 		}
 	}
 

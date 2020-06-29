@@ -11,10 +11,28 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumeration;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MarkdownType;
+import org.hl7.fhir.r4.model.Money;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +61,15 @@ public class FhirTerserR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
+
+	@Test
+	public void testGetValuesCreateEnumeration_SetsEnumFactory() {
+
+		Patient patient = new Patient();
+
+		Enumeration<?> enumeration = (Enumeration<?>) ourCtx.newTerser().getValues(patient, "Patient.gender", Enumeration.class, true).get(0);
+		assertNotNull(enumeration.getEnumFactory());
+	}
 
 	@Test
 	public void testClear() {

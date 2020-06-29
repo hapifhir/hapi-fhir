@@ -47,6 +47,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	private PersonHelper myPersonHelper;
 
+	@Before
+	public void before() {
+		super.loadEmpiSearchParameters();
+	}
+
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {
 		createPatientAndUpdateLinks(buildJanePatient());
@@ -77,10 +82,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testWhenMatchOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap());
-		IAnyResource janePerson = (IAnyResource) search.getResources(0, 1).get(0);
+		IAnyResource janePerson = (IAnyResource) search.getResources(0,1).get(0);
 
 		//Create a manual NO_MATCH between janePerson and unmatchedJane.
-		Patient unmatchedJane = createPatient(buildJanePatient());
+		Patient unmatchedJane= createPatient(buildJanePatient());
 		myEmpiLinkSvc.updateLink(janePerson, unmatchedJane, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
 
 		//rerun EMPI rules against unmatchedJane.
@@ -160,7 +165,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testIncomingPatientWithEIDThatMatchesPersonWithHapiEidAddsExternalEidToPerson() {
+	public void testIncomingPatientWithEIDThatMatchesPersonWithHapiEidAddsExternalEidToPerson(){
 		// Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
@@ -168,7 +173,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
 		String foundHapiEid = hapiEid.get(0).getValue();
 
-		Patient janePatient = addExternalEID(buildJanePatient(), "12345");
+		Patient janePatient= addExternalEID(buildJanePatient(), "12345");
 		createPatientAndUpdateLinks(janePatient);
 
 		//We want to make sure the patients were linked to the same person.
@@ -270,7 +275,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testWhenThereAreNoMATCHOrPOSSIBLE_MATCHOutcomesThatANewPersonIsCreated() {
+	public void testWhenThereAreNoMATCHOrPOSSIBLE_MATCHOutcomesThatANewPersonIsCreated(){
 		/**
 		 * CASE 1: No MATCHED and no PROBABLE_MATCHED outcomes -> a new Person resource
 		 * is created and linked to that Pat/Prac.
@@ -282,7 +287,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testWhenAllMATCHResultsAreToSamePersonThatTheyAreLinked() {
+	public void testWhenAllMATCHResultsAreToSamePersonThatTheyAreLinked(){
 		/**
 		 * CASE 2: All of the MATCHED Pat/Prac resources are already linked to the same Person ->
 		 * a new Link is created between the new Pat/Prac and that Person and is set to MATCHED.
@@ -299,7 +304,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testMATCHResultWithMultipleCandidatesCreatesPOSSIBLE_DUPLICATELinksAndNoPersonIsCreated() {
+	public void testMATCHResultWithMultipleCandidatesCreatesPOSSIBLE_DUPLICATELinksAndNoPersonIsCreated(){
 		/**
 		 * CASE 3: The MATCHED Pat/Prac resources link to more than one Person -> Mark all links as POSSIBLE_MATCH.
 		 * All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.
@@ -329,25 +334,25 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoPersonIsCreated() {
+	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoPersonIsCreated(){
 		/**
 		 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, empi-link records are created with POSSIBLE_MATCH
 		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person resources are not changed.
 		 */
 		Patient patient = buildJanePatient();
 		patient.getNameFirstRep().setFamily("familyone");
-		patient = createPatientAndUpdateLinks(patient);
+		patient  = createPatientAndUpdateLinks(patient);
 		assertThat(patient, is(samePersonAs(patient)));
 
 		Patient patient2 = buildJanePatient();
 		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
-		patient2 = createPatientAndUpdateLinks(patient2);
+		patient2  = createPatientAndUpdateLinks(patient2);
 
 		assertThat(patient2, is(possibleMatchWith(patient)));
 
 		Patient patient3 = buildJanePatient();
 		patient3.getNameFirstRep().setFamily("pleasedonotmatchatall");
-		patient3 = createPatientAndUpdateLinks(patient3);
+		patient3  = createPatientAndUpdateLinks(patient3);
 
 		assertThat(patient3, is(possibleMatchWith(patient2)));
 		assertThat(patient3, is(possibleMatchWith(patient)));
@@ -357,16 +362,16 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testWhenAnIncomingResourceHasMatchesAndPossibleMatchesThatItLinksToMatch() {
 		Patient patient = buildJanePatient();
 		patient.getNameFirstRep().setFamily("familyone");
-		patient = createPatientAndUpdateLinks(patient);
+		patient  = createPatientAndUpdateLinks(patient);
 		assertThat(patient, is(samePersonAs(patient)));
 
 		Patient patient2 = buildJanePatient();
 		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
-		patient2 = createPatientAndUpdateLinks(patient2);
+		patient2  = createPatientAndUpdateLinks(patient2);
 
 		Patient patient3 = buildJanePatient();
 		patient3.getNameFirstRep().setFamily("familyone");
-		patient3 = createPatientAndUpdateLinks(patient3);
+		patient3  = createPatientAndUpdateLinks(patient3);
 
 		assertThat(patient2, is(not(samePersonAs(patient))));
 		assertThat(patient2, is(possibleMatchWith(patient)));
@@ -399,7 +404,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	//Case #1
 	@Test
 	public void testPatientUpdateOverwritesPersonDataOnChanges() {
-		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient= createPatientAndUpdateLinks(buildJanePatient());
 		Person janePerson = getPersonFromTarget(janePatient);
 
 		//Change Jane's name to paul.
@@ -431,7 +436,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(paul2, is(samePersonAs(paul)));
 
 		//Newly matched patients aren't allowed to overwrite Person Attributes unless they are empty, so gender should still be set to male.
-		Person paul2Person = getPersonFromTarget(paul2);
+		Person paul2Person= getPersonFromTarget(paul2);
 		assertThat(paul2Person.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
 	}
 

@@ -43,7 +43,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.StringNormalizer;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -1098,7 +1098,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			String searchParamName = theSearchParam.getName();
-			String valueNormalized = StringNormalizer.normalizeStringForSearchIndexing(value);
+			String valueNormalized = StringUtil.normalizeStringForSearchIndexing(value);
 			if (valueNormalized.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
 				valueNormalized = valueNormalized.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 			}

@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.MatchedTarget;
-import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
+import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class EmpiMatchFinderSvcImpl implements IEmpiMatchFinderSvc {
 	@Autowired
 	private EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 	@Autowired
-	private EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
+	private EmpiResourceMatcherSvc myEmpiResourceMatcherSvc;
 
 	@Override
 	@Nonnull
@@ -45,7 +45,7 @@ public class EmpiMatchFinderSvcImpl implements IEmpiMatchFinderSvc {
 		Collection<IAnyResource> targetCandidates = myEmpiCandidateSearchSvc.findCandidates(theResourceType, theResource);
 
 		return targetCandidates.stream()
-			.map(candidate -> new MatchedTarget(candidate, myEmpiResourceComparatorSvc.getMatchResult(theResource, candidate)))
+			.map(candidate -> new MatchedTarget(candidate, myEmpiResourceMatcherSvc.getMatchResult(theResource, candidate)))
 			.collect(Collectors.toList());
 	}
 
