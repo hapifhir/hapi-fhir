@@ -1026,7 +1026,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			Subscription subscription = newSubscription("Observation?", "application/json");
 			subscription.addExtension(HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA, new StringType("Observation?_id=${matched_resource_id}&_include=*"));
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
-			MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+			MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 			mySubscriptionIds.add(methodOutcome.getId());
 			waitForActivatedSubscriptionCount(1);
 		}
@@ -1034,12 +1034,12 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		{
 			Patient patient = new Patient();
 			patient.setActive(true);
-			IIdType patientId = ourClient.create().resource(patient).execute().getId();
+			IIdType patientId = myClient.create().resource(patient).execute().getId();
 
 			Observation observation = new Observation();
 			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("Catheter"));
 			observation.getSubject().setReferenceElement(patientId.toUnqualifiedVersionless());
-			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 			assertEquals(true, methodOutcome.getCreated());
 
 			waitForQueueToDrain();

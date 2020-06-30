@@ -220,7 +220,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void reportTotalSelects() {
 		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
 	}

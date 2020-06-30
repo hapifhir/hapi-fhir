@@ -13,8 +13,6 @@ import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
@@ -26,6 +24,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link FhirAutoConfiguration}.
@@ -33,9 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mathieu Ouellet
  */
 public class FhirAutoConfigurationTest {
-
-	@RegisterExtension
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private AnnotationConfigApplicationContext context;
 
@@ -83,7 +79,7 @@ public class FhirAutoConfigurationTest {
 		load(Arrays.array(EmbeddedDataSourceConfiguration.class,
 			HibernateJpaAutoConfiguration.class,
 			FhirAutoConfiguration.class),
-		"hapi.fhir.version:DSTU3", "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles", "spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
+			"hapi.fhir.version:DSTU3", "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles", "spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
 
 		assertThat(this.context.getBeansOfType(DaoConfig.class)).hasSize(1);
 		assertThat(this.context.getBeansOfType(Dstu3.class)).hasSize(1);
@@ -92,8 +88,12 @@ public class FhirAutoConfigurationTest {
 	@Test
 	public void withNoValidation() {
 		load("hapi.fhir.validation.enabled:false");
-		this.thrown.expect(NoSuchBeanDefinitionException.class);
-		this.context.getBean(RequestValidatingInterceptor.class);
+		try {
+			this.context.getBean(RequestValidatingInterceptor.class);
+			fail();
+		} catch (NoSuchBeanDefinitionException e) {
+			// good
+		}
 	}
 
 	@Test
