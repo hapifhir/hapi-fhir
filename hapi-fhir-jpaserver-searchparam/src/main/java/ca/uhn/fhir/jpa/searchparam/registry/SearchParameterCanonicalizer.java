@@ -5,11 +5,11 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DatatypeUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.EnumUtils;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
@@ -128,7 +128,7 @@ public class SearchParameterCanonicalizer {
 		String uri = "";
 		boolean unique = false;
 
-		List<ExtensionDt> uniqueExts = theNextSp.getUndeclaredExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
+		List<ExtensionDt> uniqueExts = theNextSp.getUndeclaredExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE);
 		if (uniqueExts.size() > 0) {
 			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
 			if (uniqueExtsValuePrimitive != null) {
@@ -208,7 +208,7 @@ public class SearchParameterCanonicalizer {
 		String uri = "";
 		boolean unique = false;
 
-		List<Extension> uniqueExts = theNextSp.getExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
+		List<Extension> uniqueExts = theNextSp.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE);
 		if (uniqueExts.size() > 0) {
 			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
 			if (uniqueExtsValuePrimitive != null) {
@@ -294,7 +294,7 @@ public class SearchParameterCanonicalizer {
 		String uri = "";
 		boolean unique = false;
 
-		List<org.hl7.fhir.r4.model.Extension> uniqueExts = theNextSp.getExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
+		List<org.hl7.fhir.r4.model.Extension> uniqueExts = theNextSp.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE);
 		if (uniqueExts.size() > 0) {
 			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
 			if (uniqueExtsValuePrimitive != null) {
@@ -380,7 +380,7 @@ public class SearchParameterCanonicalizer {
 		String uri = "";
 		boolean unique = false;
 
-		List<org.hl7.fhir.r5.model.Extension> uniqueExts = theNextSp.getExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
+		List<org.hl7.fhir.r5.model.Extension> uniqueExts = theNextSp.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE);
 		if (uniqueExts.size() > 0) {
 			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
 			if (uniqueExtsValuePrimitive != null) {
