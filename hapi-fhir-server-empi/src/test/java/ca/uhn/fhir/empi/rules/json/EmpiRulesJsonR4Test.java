@@ -36,7 +36,7 @@ public class EmpiRulesJsonR4Test extends BaseEmpiRulesR4Test {
 		assertEquals(EmpiMatchResultEnum.MATCH, rulesDeser.getMatchResult(myBothNameFields));
 		EmpiFieldMatchJson second = rulesDeser.get(1);
 		assertEquals("name.family", second.getResourcePath());
-		TestCase.assertEquals(EmpiMetricEnum.JARO_WINKLER, second.getMetric());
+		assertEquals(EmpiMetricEnum.JARO_WINKLER, second.getMetric());
 	}
 
 	@Test

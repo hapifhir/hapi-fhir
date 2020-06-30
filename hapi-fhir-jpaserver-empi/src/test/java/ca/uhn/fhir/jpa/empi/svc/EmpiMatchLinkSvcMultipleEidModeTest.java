@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 	@Autowired
 	private EIDHelper myEidHelper;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		super.loadEmpiSearchParameters();
 	}
@@ -167,8 +168,8 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		patient2 = updatePatientAndUpdateLinks(patient2);
 
 		assertThat(patient2, is(not(matchedToAPerson())));
-		assertThat(patient2,is(possibleMatchWith(patient1)));
-		assertThat(patient2,is(possibleMatchWith(patient3)));
+		assertThat(patient2, is(possibleMatchWith(patient1)));
+		assertThat(patient2, is(possibleMatchWith(patient3)));
 
 		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));

@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

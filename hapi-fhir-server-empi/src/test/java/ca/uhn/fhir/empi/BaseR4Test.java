@@ -7,11 +7,13 @@ import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public abstract class BaseR4Test {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4();
 	protected ISearchParamRetriever mySearchParamRetriever = mock(ISearchParamRetriever.class);

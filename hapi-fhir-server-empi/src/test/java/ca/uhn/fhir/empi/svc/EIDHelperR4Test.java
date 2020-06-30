@@ -9,6 +9,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 	private EIDHelper myEidHelper;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myEmpiSettings = new EmpiSettings(new EmpiRuleValidator(ourFhirContext, mySearchParamRetriever)) {{
 			setEmpiRules(ourRules);

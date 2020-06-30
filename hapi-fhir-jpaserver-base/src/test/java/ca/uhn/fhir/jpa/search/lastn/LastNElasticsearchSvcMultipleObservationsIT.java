@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,9 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(classes = {TestElasticsearchConfig.class})
 public class LastNElasticsearchSvcMultipleObservationsIT {
 
-	@Autowired
-	private ElasticsearchSvcImpl elasticsearchSvc;
-
+	static private final Calendar baseObservationDate = new GregorianCalendar();
 	private static ObjectMapper ourMapperNonPrettyPrint;
 
 	private static boolean indexLoaded = false;
@@ -60,18 +57,10 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
 
 	private final FhirContext myFhirContext = FhirContext.forR4();
+	@Autowired
+	private ElasticsearchSvcImpl elasticsearchSvc;
 
-	static private final Calendar baseObservationDate = new GregorianCalendar();
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourMapperNonPrettyPrint = new ObjectMapper();
-		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
-		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-	}
-
-	@Before
+	@BeforeEach
 	public void before() throws IOException {
 		if (!indexLoaded) {
 			createMultiplePatientsAndObservations();
@@ -222,7 +211,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
 		TokenParam categoryParam = new TokenParam(null, "test-heart-rate");
 		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		TokenParam codeParam = new TokenParam(null,"test-code-1");
+		TokenParam codeParam = new TokenParam(null, "test-code-1");
 		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
 		searchParameterMap.setLastNMax(100);
 
@@ -319,9 +308,9 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	public void testLastNNoMatchQueries() {
 
 		ReferenceParam validPatientParam = new ReferenceParam("Patient", "", "9");
-		TokenParam validCategoryCodeParam = new TokenParam("http://mycodes.org/fhir/observation-category","test-heart-rate");
+		TokenParam validCategoryCodeParam = new TokenParam("http://mycodes.org/fhir/observation-category", "test-heart-rate");
 		TokenParam validObservationCodeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-1");
-		DateParam validDateParam = new DateParam(ParamPrefixEnum.EQUAL, new Date(baseObservationDate.getTimeInMillis() - (9*3600*1000)));
+		DateParam validDateParam = new DateParam(ParamPrefixEnum.EQUAL, new Date(baseObservationDate.getTimeInMillis() - (9 * 3600 * 1000)));
 
 		// Ensure that valid parameters are indeed valid
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
@@ -395,8 +384,8 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	@Test
 	public void testLastNEffectiveDates() {
-		Date highDate = new Date(baseObservationDate.getTimeInMillis() - (3600*1000));
-		Date lowDate = new Date(baseObservationDate.getTimeInMillis() - (10*3600*1000));
+		Date highDate = new Date(baseObservationDate.getTimeInMillis() - (3600 * 1000));
+		Date lowDate = new Date(baseObservationDate.getTimeInMillis() - (10 * 3600 * 1000));
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "3");
@@ -457,7 +446,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		DateParam startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4*3600*1000)));
+		DateParam startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4 * 3600 * 1000)));
 		DateAndListParam dateAndListParam = new DateAndListParam();
 		dateAndListParam.addAnd(new DateOrListParam().addOr(startDateParam));
 		dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, highDate);
@@ -469,7 +458,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4*3600*1000)));
+		startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4 * 3600 * 1000)));
 		searchParameterMap.add(Observation.SP_DATE, startDateParam);
 		dateParam = new DateParam(ParamPrefixEnum.LESSTHAN, lowDate);
 		searchParameterMap.add(Observation.SP_DATE, dateParam);
@@ -534,7 +523,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId2, codeJson2));
 				}
 
-				Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10-entryCount)*3600*1000));
+				Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10 - entryCount) * 3600 * 1000));
 				observationJson.setEffectiveDtm(effectiveDtm);
 
 				assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(identifier, observationJson));
@@ -582,6 +571,14 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		assertNotEquals(observationCode1, observationCode2);
 
+	}
+
+	@BeforeAll
+	public static void beforeClass() {
+		ourMapperNonPrettyPrint = new ObjectMapper();
+		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
+		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
 	}
 
 

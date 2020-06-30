@@ -10,7 +10,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -26,10 +26,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -52,12 +52,12 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	@BeforeEach
 	public void before() {
 		myValueSetProvider = new MyValueSetProvider();
-		myRestfulServerRule.getRestfulServer().registerProvider(myValueSetProvider);
+		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
 
 		myCodeSystemProvider = new MyCodeSystemProvider();
-		myRestfulServerRule.getRestfulServer().registerProvider(myCodeSystemProvider);
+		myRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
 
-		String baseUrl = "http://localhost:" + myRestfulServerRule.getPort();
+		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
@@ -232,7 +232,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 
 		@Search
-		public List<CodeSystem> find(@RequiredParam(name="url") UriParam theUrlParam) {
+		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam) {
 			myLastUrlParam = theUrlParam;
 			assert myNextReturnCodeSystems != null;
 			return myNextReturnCodeSystems;
@@ -282,7 +282,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 
 		@Search
-		public List<ValueSet> find(@RequiredParam(name="url") UriParam theUrlParam) {
+		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam) {
 			myLastUrlParam = theUrlParam;
 			assert myNextReturnValueSets != null;
 			return myNextReturnValueSets;

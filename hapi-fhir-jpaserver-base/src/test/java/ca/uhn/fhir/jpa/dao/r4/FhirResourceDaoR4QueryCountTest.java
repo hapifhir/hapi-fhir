@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -20,6 +19,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -145,10 +145,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		// Validate once
 		myCaptureQueriesListener.clear();
 		myObservationDao.validate(obs, null, null, null, null, null, null);
-		assertEquals(myCaptureQueriesListener.logSelectQueriesForCurrentThread(), 9, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		assertEquals(myCaptureQueriesListener.logUpdateQueriesForCurrentThread(), 0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
-		assertEquals(myCaptureQueriesListener.logInsertQueriesForCurrentThread(), 0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		assertEquals(myCaptureQueriesListener.logDeleteQueriesForCurrentThread(), 0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(9, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();
@@ -574,8 +574,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPatientDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(
-			"Patient/P1", "CareTeam/CT1-0", "CareTeam/CT1-1","CareTeam/CT1-2",
-			"Patient/P2", "CareTeam/CT2-0", "CareTeam/CT2-1","CareTeam/CT2-2"
+			"Patient/P1", "CareTeam/CT1-0", "CareTeam/CT1-1", "CareTeam/CT1-2",
+			"Patient/P2", "CareTeam/CT2-0", "CareTeam/CT2-1", "CareTeam/CT2-2"
 		));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
