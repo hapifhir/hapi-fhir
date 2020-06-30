@@ -26,19 +26,27 @@ public class ExceptionPropertiesTest {
 
 	@Test
 	public void testConstructors() {
-		new FhirClientConnectionException("");
-		new FhirClientConnectionException("", new Exception());
-		new FhirClientConnectionException(new Exception());
-		new NotImplementedOperationException("");
-		new NotImplementedOperationException(null, new OperationOutcome());
-		new FhirClientInappropriateForServerException(new Exception());
-		new FhirClientInappropriateForServerException("", new Exception());
-		
+		test(new FhirClientConnectionException(""));
+		test(new FhirClientConnectionException("", new Exception()));
+		test(new FhirClientConnectionException(new Exception()));
+		test(new NotImplementedOperationException(""));
+		test(new NotImplementedOperationException(null, new OperationOutcome()));
+		test(new FhirClientInappropriateForServerException(new Exception()));
+		test(new FhirClientInappropriateForServerException("", new Exception()));
+
 		assertEquals("Resource Patient/123 is gone/deleted", new ResourceGoneException(new IdDt("Patient/123")).getMessage());
 		assertEquals("FOO", new ResourceGoneException("FOO", new OperationOutcome()).getMessage());
 		assertEquals("Resource of type Practitioner with ID Patient/123 is gone/deleted", new ResourceGoneException(Practitioner.class, new IdType("Patient/123")).getMessage());
 	}
-	
+
+	private void test(Exception theE) {
+		try {
+			throw theE;
+		} catch (Exception e) {
+			// good
+		}
+	}
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testExceptionsAreGood() throws Exception {
@@ -66,13 +74,13 @@ public class ExceptionPropertiesTest {
 				// This one is deprocated
 				continue;
 			}
-			
+
 			assertTrue(BaseServerResponseException.isExceptionTypeRegistered(next), "Type " + next + " is not registered");
-			
+
 			if (next == AuthenticationException.class) {
 				continue;
 			}
-			
+
 			try {
 				next.getConstructor(String.class, IBaseOperationOutcome.class);
 			} catch (NoSuchMethodException e) {
