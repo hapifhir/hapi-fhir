@@ -91,7 +91,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
 
-		if (isNotBlank(theSubscription.getPayloadSearchResult())) {
+		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			operation = createDeliveryRequestTransaction(theSubscription, theClient, thePayloadResource);
 		} else if (thePayloadType != null) {
 			operation = createDeliveryRequestNormal(theMsg, theClient, thePayloadResource);
@@ -141,11 +141,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 	private IClientExecutable<?, ?> createDeliveryRequestTransaction(CanonicalSubscription theSubscription, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
-		String resType = theSubscription.getPayloadSearchResult().substring(0, theSubscription.getPayloadSearchResult().indexOf('?'));
+		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
 
-		String payloadUrl = theSubscription.getPayloadSearchResult();
+		String payloadUrl = theSubscription.getPayloadSearchCriteria();
 		Map<String, String> valueMap = new HashMap<>(1);
 		valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
 		payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);

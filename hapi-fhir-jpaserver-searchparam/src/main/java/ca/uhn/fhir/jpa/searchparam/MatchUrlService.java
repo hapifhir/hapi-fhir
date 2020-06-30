@@ -81,7 +81,7 @@ public class MatchUrlService {
 		for (String nextParamName : nameToParamLists.keySet()) {
 			List<QualifiedParamList> paramList = nameToParamLists.get(nextParamName);
 
-			if (theFlags != null && theFlags.length > 0) {
+			if (theFlags != null) {
 				for (Flag next : theFlags) {
 					next.process(nextParamName, paramList, paramMap);
 				}
