@@ -1013,4 +1013,39 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 
+	@Test
+	public void testDeliverSearchResult() throws Exception {
+		{
+			Subscription subscription = newSubscription("Observation?", "application/json");
+			subscription.addExtension(JpaConstants.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_RESULT, new StringType("Observation?_id=${matched_resource_id}&_include=*"));
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
+			MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+			mySubscriptionIds.add(methodOutcome.getId());
+			waitForActivatedSubscriptionCount(1);
+		}
+
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+			Observation observation = new Observation();
+			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("Catheter"));
+			observation.getSubject().setReferenceElement(patientId.toUnqualifiedVersionless());
+			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			assertEquals(true, methodOutcome.getCreated());
+
+			waitForQueueToDrain();
+			waitForSize(1, ourTransactions);
+
+			ourLog.info("Received transaction: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ourTransactions.get(0)));
+
+			Bundle xact = ourTransactions.get(0);
+			assertEquals(2, xact.getEntry().size());
+
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ourTransactions.get(0)));
+		}
+
+	}
+
 }
