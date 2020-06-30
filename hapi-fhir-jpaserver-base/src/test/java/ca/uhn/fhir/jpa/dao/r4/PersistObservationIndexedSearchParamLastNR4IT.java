@@ -19,7 +19,10 @@ import org.aspectj.lang.annotation.Before;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -44,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	@Autowired
@@ -94,6 +98,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	private ReferenceAndListParam multiSubjectParams = null;
 
+	@Order(0)
 	@Test
 	public void testIndexObservationSingle() throws IOException {
 		indexSingleObservation();
@@ -194,6 +199,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		return codeableConceptField;
 	}
 
+	@Order(1)
 	@Test
 	public void testIndexObservationMultiple() throws IOException {
 		indexMultipleObservations();
@@ -299,6 +305,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
+	@Order(2)
 	@Test
 	public void testDeleteObservation() throws IOException {
 		indexMultipleObservations();
@@ -340,6 +347,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
+	@Order(4)
 	@Test
 	public void testUpdateObservation() throws IOException {
 		indexSingleObservation();
@@ -400,6 +408,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
+	@Order(5)
 	@Test
 	public void testSampleBundleInTransaction() throws IOException {
 		FhirContext myFhirCtx = FhirContext.forR4();

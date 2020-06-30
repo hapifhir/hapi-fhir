@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -30,8 +32,9 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 	@Autowired
 	protected DaoConfig myDaoConfig;
-
 	private List<Integer> originalPreFetchThresholds;
+	@Autowired
+	private ISearchDao mySearchDao;
 
 	@BeforeEach
 	public void before() {
@@ -62,6 +65,12 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 	@Test
 	public void testLastNChunking() {
+
+		runInTransaction(()->{
+			for (Search search : mySearchDao.findAll()) {
+				mySearchDao.updateDeleted(search.getId(), true);
+			}
+		});
 
 		// Set up search parameters that will return 75 Observations.
 		SearchParameterMap params = new SearchParameterMap();
