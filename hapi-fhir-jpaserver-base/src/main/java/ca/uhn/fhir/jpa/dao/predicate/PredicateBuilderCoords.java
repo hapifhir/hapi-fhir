@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
@@ -55,7 +56,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 
 	private Predicate createPredicateCoords(IQueryParameterType theParam,
 														 String theResourceName,
-														 String theParamName,
+														 RuntimeSearchParam theSearchParam,
 														 CriteriaBuilder theBuilder,
 														 From<?, ResourceIndexedSearchParamCoords> theFrom,
 														 RequestPartitionId theRequestPartitionId) {
@@ -119,7 +120,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 			longitudePredicate = longitudePredicateFromBox(theBuilder, theFrom, box);
 		}
 		Predicate singleCode = theBuilder.and(latitudePredicate, longitudePredicate);
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theSearchParam.getName(), theFrom, singleCode, theRequestPartitionId);
 	}
 
 	private Predicate latitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
@@ -145,14 +146,14 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-											String theParamName,
+											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
 											RequestPartitionId theRequestPartitionId) {
-		From<?, ResourceIndexedSearchParamCoords> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COORDS, theParamName);
+		From<?, ResourceIndexedSearchParamCoords> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COORDS, theSearchParam.getName());
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
@@ -163,7 +164,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 
 			Predicate singleCode = createPredicateCoords(nextOr,
 				theResourceName,
-				theParamName,
+				theSearchParam,
                     myCriteriaBuilder,
 				join,
                     theRequestPartitionId);

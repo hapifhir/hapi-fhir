@@ -85,6 +85,7 @@ public class SearchParamExtractorService {
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
 
+
 	/**
 	 * This method is responsible for scanning a resource for all of the search parameter instances. I.e. for all search parameters defined for
 	 * a given resource type, it extracts the associated indexes and populates {@literal theParams}.
