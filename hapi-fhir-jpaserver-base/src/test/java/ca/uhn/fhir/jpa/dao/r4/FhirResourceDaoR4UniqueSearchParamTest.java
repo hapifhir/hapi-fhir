@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
@@ -22,6 +21,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -140,7 +140,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-birthdate");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
@@ -182,7 +182,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setExpression("Coverage")
 			.setDefinition("/SearchParameter/coverage-identifier");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 		mySearchParamRegistry.forceRefresh();
@@ -210,7 +210,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setExpression("Observation")
 			.setDefinition("/SearchParameter/observation-subject");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 		mySearchParamRegistry.forceRefresh();
@@ -238,7 +238,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setExpression("Patient")
 			.setDefinition("/SearchParameter/patient-identifier");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 		mySearchParamRegistry.forceRefresh();
@@ -266,7 +266,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setExpression("Patient")
 			.setDefinition("/SearchParameter/patient-identifier");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 		mySearchParamRegistry.forceRefresh();
@@ -303,7 +303,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-organization");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
@@ -355,7 +355,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setExpression("Observation")
 			.setDefinition("SearchParameter/obs-code");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
@@ -487,7 +487,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setExpression("ServiceRequest")
 			.setDefinition(identifierParamId); // SearchParameter?base=ServiceRequest&name=identifier
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.create(sp);
 		mySearchParamRegistry.forceRefresh();

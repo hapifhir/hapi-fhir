@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -338,7 +338,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		subscription1
 			.getChannel()
-			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
+			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 
 		int modCount = myCountingInterceptor.getSentCount("Subscription");
@@ -414,7 +414,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Subscription subscription = newSubscription(criteria1, payload);
 		subscription
 			.getChannel()
-			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
+			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
 		myClient.create().resource(subscription).execute();
 
 		waitForActivatedSubscriptionCount(1);
@@ -1019,5 +1019,40 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	}
 
+
+	@Test
+	public void testDeliverSearchResult() throws Exception {
+		{
+			Subscription subscription = newSubscription("Observation?", "application/json");
+			subscription.addExtension(HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA, new StringType("Observation?_id=${matched_resource_id}&_include=*"));
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
+			MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+			mySubscriptionIds.add(methodOutcome.getId());
+			waitForActivatedSubscriptionCount(1);
+		}
+
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+			Observation observation = new Observation();
+			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("Catheter"));
+			observation.getSubject().setReferenceElement(patientId.toUnqualifiedVersionless());
+			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			assertEquals(true, methodOutcome.getCreated());
+
+			waitForQueueToDrain();
+			waitForSize(1, ourTransactions);
+
+			ourLog.info("Received transaction: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ourTransactions.get(0)));
+
+			Bundle xact = ourTransactions.get(0);
+			assertEquals(2, xact.getEntry().size());
+
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ourTransactions.get(0)));
+		}
+
+	}
 
 }

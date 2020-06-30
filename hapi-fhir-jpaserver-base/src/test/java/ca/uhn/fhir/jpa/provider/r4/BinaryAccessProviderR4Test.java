@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -193,7 +194,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(15, attachment.getSize());
 			assertEquals(null, attachment.getData());
 			assertEquals("2", ref.getMeta().getVersionId());
-			attachmentId = attachment.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
 		}
 
@@ -251,7 +252,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(15, attachment.getSize());
 			assertEquals(null, attachment.getData());
 			assertEquals("2", ref.getMeta().getVersionId());
-			attachmentId = attachment.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
 
 		}
@@ -286,7 +287,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		dr.addContent()
 			.getAttachment()
 			.getDataElement()
-			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("0000-1111") );
+			.addExtension(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID, new StringType("0000-1111") );
 
 		try {
 			myClient.create().resource(dr).execute();
@@ -332,7 +333,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(4, attachment.getSize());
 			assertArrayEquals(SOME_BYTES_2, attachment.getData());
 			assertEquals("2", ref.getMeta().getVersionId());
-			attachmentId = attachment.getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			attachmentId = attachment.getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertEquals(null, attachmentId);
 
 		}
@@ -382,7 +383,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), target.getContentType());
 			assertEquals(null, target.getData());
 			assertEquals("2", target.getMeta().getVersionId());
-			attachmentId = target.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			attachmentId = target.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
 
 		}
@@ -443,7 +444,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), target.getContentType());
 			assertEquals(null, target.getData());
 			assertEquals("2", target.getMeta().getVersionId());
-			attachmentId = target.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			attachmentId = target.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
 
 		}
@@ -507,7 +508,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
-			attachmentId = attachment.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
 		}
 

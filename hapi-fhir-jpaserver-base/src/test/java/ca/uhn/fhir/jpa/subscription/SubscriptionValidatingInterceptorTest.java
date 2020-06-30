@@ -86,6 +86,8 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_RestHook_NoEndpoint() {
+		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 		subscription.setCriteria("Patient?identifier=foo");
@@ -103,6 +105,8 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_RestHook_NoType() {
+		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 		subscription.setCriteria("Patient?identifier=foo");

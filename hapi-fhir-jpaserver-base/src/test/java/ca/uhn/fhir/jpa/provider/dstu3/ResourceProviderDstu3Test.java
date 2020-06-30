@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.BaseValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -4032,7 +4033,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 
 		patient.setId(patientid);
@@ -4040,12 +4041,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourClient.update().resource(patient).execute();
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 
 			readPatient.addName().setFamily("testUpdateWithSource");
 			ourClient.update().resource(readPatient).execute();
 			readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 	}
 

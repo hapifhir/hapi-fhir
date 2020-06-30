@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -43,31 +46,25 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-@Disabled
 public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
-
-	private static Server ourListenerServer;
-    protected static int ourListenerPort;
+	protected static int ourListenerPort;
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
+	protected static List<Bundle> ourTransactions = Collections.synchronizedList(Lists.newArrayList());
+	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static Server ourListenerServer;
 	private static SingleQueryCountHolder ourCountHolder;
-
-	@Autowired
-	private SingleQueryCountHolder myCountHolder;
+	private static String ourListenerServerBase;
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
 	protected SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-
 	protected CountingInterceptor myCountingInterceptor;
-
-	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static String ourListenerServerBase;
-
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-
+	@Autowired
+	private SingleQueryCountHolder myCountHolder;
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -97,6 +94,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	public void beforeReset() throws Exception {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
+		ourTransactions.clear();
 		ourContentTypes.clear();
 		ourHeaders.clear();
 
@@ -172,8 +170,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 
-
-	public static class ObservationListener implements IResourceProvider {
+	public static class ObservationResourceProvider implements IResourceProvider {
 
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
@@ -212,7 +209,18 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	}
 
-	@AfterAll
+	public static class PlainProvider {
+
+		@Transaction
+		public Bundle transaction(@TransactionParam Bundle theInput) {
+			ourLog.info("Received transaction update");
+			ourTransactions.add(theInput);
+			return theInput;
+		}
+
+	}
+
+	@AfterClass
 	public static void reportTotalSelects() {
 		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
 	}
@@ -223,10 +231,10 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.R4));
-		
-		ObservationListener obsListener = new ObservationListener();
-		ourListenerRestServer.setResourceProviders(obsListener);
+		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR4());
+
+		ourListenerRestServer.registerProvider(new ObservationResourceProvider());
+		ourListenerRestServer.registerProvider(new PlainProvider());
 
 		ourListenerServer = new Server(0);
 
@@ -239,8 +247,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);
-        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterAll

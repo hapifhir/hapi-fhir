@@ -20,7 +20,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
@@ -38,6 +37,8 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
@@ -64,7 +65,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
@@ -226,6 +226,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		// Create patient in partition 1
+		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setId("ONE");
@@ -251,6 +252,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	public void testCreate_CrossPartitionReference_ByForcedId_NotAllowed() {
 
 		// Create patient in partition 1
+		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setId("ONE");
@@ -297,6 +299,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testCreate_SamePartitionReference_DefaultPartition_ByForcedId() {
 		// Create patient in partition NULL
+		addReadDefaultPartition();
 		addCreateDefaultPartition(myPartitionDate);
 		Patient patient = new Patient();
 		patient.setId("ONE");
@@ -562,12 +565,14 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_ForcedId_WithPartition() {
+		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
 
+		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
@@ -588,12 +593,14 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_ForcedId_NoPartition() {
+		addReadDefaultPartition();
 		addCreateDefaultPartition();
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
 
+		addReadDefaultPartition();
 		addCreateDefaultPartition();
 		Patient p = new Patient();
 		p.setId("pat");
@@ -612,12 +619,14 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreate_ForcedId_DefaultPartition() {
+		addReadDefaultPartition();
 		addCreateDefaultPartition(myPartitionDate);
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
 
+		addReadDefaultPartition();
 		addCreateDefaultPartition(myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
@@ -686,7 +695,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 		// Create a resource
 		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.setActive(true);
@@ -699,6 +707,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		});
 
 		// Update that resource
+		addReadPartition(myPartitionId);
 		p = new Patient();
 		p.setId("Patient/" + patientId);
 		p.setActive(false);
@@ -944,9 +953,9 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testRead_ForcedId_SpecificPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withId("NULL"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withId("ONE"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withId("TWO"));
+		IIdType patientIdNull = createPatient(withPutPartition(null), withActiveTrue(), withId("NULL"));
+		IIdType patientId1 = createPatient(withPutPartition(1), withActiveTrue(), withId("ONE"));
+		IIdType patientId2 = createPatient(withPutPartition(2), withActiveTrue(), withId("TWO"));
 
 		// Read in correct Partition
 		addReadPartition(1);
@@ -974,9 +983,9 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testRead_ForcedId_DefaultPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withId("NULL"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withId("ONE"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withId("TWO"));
+		IIdType patientIdNull = createPatient(withPutPartition(null), withActiveTrue(), withId("NULL"));
+		IIdType patientId1 = createPatient(withPutPartition(1), withActiveTrue(), withId("ONE"));
+		IIdType patientId2 = createPatient(withPutPartition(2), withActiveTrue(), withId("TWO"));
 
 		// Read in correct Partition
 		addReadDefaultPartition();
@@ -1004,9 +1013,9 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testRead_ForcedId_AllPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withId("NULL"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withId("ONE"));
-		createPatient(withPartition(2), withActiveTrue(), withId("TWO"));
+		IIdType patientIdNull = createPatient(withPutPartition(null), withActiveTrue(), withId("NULL"));
+		IIdType patientId1 = createPatient(withPutPartition(1), withActiveTrue(), withId("ONE"));
+		createPatient(withPutPartition(2), withActiveTrue(), withId("TWO"));
 		{
 			addReadAllPartitions();
 			IdType gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
@@ -1022,9 +1031,9 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testRead_ForcedId_AllPartition_WithDuplicate() {
 		dropForcedIdUniqueConstraint();
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withId("FOO"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withId("FOO"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withId("FOO"));
+		IIdType patientIdNull = createPatient(withPutPartition(null), withActiveTrue(), withId("FOO"));
+		IIdType patientId1 = createPatient(withPutPartition(1), withActiveTrue(), withId("FOO"));
+		IIdType patientId2 = createPatient(withPutPartition(2), withActiveTrue(), withId("FOO"));
 		assertEquals(patientIdNull, patientId1);
 		assertEquals(patientIdNull, patientId2);
 
@@ -2000,7 +2009,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	public void testSearch_RefParam_TargetForcedId_SearchOnePartition() {
 		createUniqueCompositeSp();
 
-		IIdType patientId = createPatient(withPartition(myPartitionId), withId("ONE"), withBirthdate("2020-01-01"));
+		IIdType patientId = createPatient(withPutPartition(myPartitionId), withId("ONE"), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
 
 		addReadPartition(myPartitionId);
@@ -2036,7 +2045,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	public void testSearch_RefParam_TargetForcedId_SearchDefaultPartition() {
 		createUniqueCompositeSp();
 
-		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
+		IIdType patientId = createPatient(withPutPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
 
 		addReadDefaultPartition();
@@ -2069,11 +2078,23 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testUpdate_ResourcePreExistsInWrongPartition() {
+		IIdType patientId = createPatient(withPutPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
+
+		addReadAllPartitions();
+
+		Patient p = new Patient();
+		p.setId(patientId.toUnqualifiedVersionless());
+		p.setGender(Enumerations.AdministrativeGender.MALE);
+		myPatientDao.update(p);
+	}
+
+	@Test
 	public void testHistory_Instance_CorrectPartition() {
 		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
 
 		// Update the patient
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addReadPartition(myPartitionId);
 		Patient p = new Patient();
 		p.setActive(false);
 		p.setId(id);
@@ -2114,7 +2135,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
 
 		// Update the patient
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addReadPartition(myPartitionId);
 		Patient p = new Patient();
 		p.setActive(false);
 		p.setId(id);
@@ -2134,7 +2155,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		IIdType id = createPatient(withPartition(null), withBirthdate("2020-01-01"));
 
 		// Update the patient
-		addCreateDefaultPartition();
+		addReadDefaultPartition();
 		Patient p = new Patient();
 		p.setActive(false);
 		p.setId(id);
@@ -2175,7 +2196,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
 
 		// Update the patient
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addReadPartition(myPartitionId);
 		Patient p = new Patient();
 		p.setActive(false);
 		p.setId(id);
@@ -2392,7 +2413,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-birthdate");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
@@ -2444,6 +2465,18 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);
 			} else {
+				addCreateDefaultPartition();
+			}
+		};
+	}
+
+	private Consumer<IBaseResource> withPutPartition(Integer thePartitionId) {
+		return t -> {
+			if (thePartitionId != null) {
+				addReadPartition(thePartitionId);
+				addCreatePartition(thePartitionId, null);
+			} else {
+				addReadDefaultPartition();
 				addCreateDefaultPartition();
 			}
 		};
