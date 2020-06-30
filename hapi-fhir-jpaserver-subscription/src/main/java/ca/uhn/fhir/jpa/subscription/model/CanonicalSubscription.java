@@ -68,8 +68,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
 	private Map<String, List<String>> myChannelExtensions;
-	@JsonProperty("payloadSearchResult")
-	private String myPayloadSearchResult;
+	@JsonProperty("payloadSearchCriteria")
+	private String myPayloadSearchCriteria;
 
 	/**
 	 * Constructor
@@ -78,12 +78,12 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		super();
 	}
 
-	public String getPayloadSearchResult() {
-		return myPayloadSearchResult;
+	public String getPayloadSearchCriteria() {
+		return myPayloadSearchCriteria;
 	}
 
-	public void setPayloadSearchResult(String thePayloadSearchResult) {
-		myPayloadSearchResult = thePayloadSearchResult;
+	public void setPayloadSearchCriteria(String thePayloadSearchCriteria) {
+		myPayloadSearchCriteria = thePayloadSearchCriteria;
 	}
 
 	/**
