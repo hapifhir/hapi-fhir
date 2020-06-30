@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.rp.r4.MedicationRequestResourceProvider;
@@ -102,7 +103,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-			ourCtx = FhirContext.forR4();
+			ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);

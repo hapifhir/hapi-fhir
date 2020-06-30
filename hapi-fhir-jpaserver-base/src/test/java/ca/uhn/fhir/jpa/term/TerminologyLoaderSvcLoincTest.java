@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -298,7 +299,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
-		ourLog.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(FhirContext.forCached(FhirVersionEnum.R4).newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME, conceptMap.getName());
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI, conceptMap.getUrl());
 		assertEquals(1, conceptMap.getGroup().size());
@@ -323,7 +324,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Group - Parent
 		vs = valueSets.get("LG100-4");
-		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.info(FhirContext.forCached(FhirVersionEnum.R4).newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		assertEquals("Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>", vs.getName());
 		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
@@ -332,7 +333,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Group - Child
 		vs = valueSets.get("LG1695-8");
-		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.info(FhirContext.forCached(FhirVersionEnum.R4).newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		assertEquals("1,4-Dichlorobenzene|MCnc|Pt|ANYBldSerPl", vs.getName());
 		assertEquals("http://loinc.org/vs/LG1695-8", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());

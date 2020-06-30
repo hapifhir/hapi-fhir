@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -60,7 +61,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	private static boolean ourNextAfterRestHookDeliveryReturn;
 	private static boolean ourHitAfterRestHookDelivery;
 	private static boolean ourNextAddHeader;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
@@ -61,7 +62,7 @@ public class BulkDataExportProviderTest {
 	private static final String A_JOB_ID = "0000000-AAAAAA";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportProviderTest.class);
 	private Server myServer;
-	private FhirContext myCtx = FhirContext.forR4();
+	private FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
 	private int myPort;
 	@Mock
 	private IBulkDataExportSvc myBulkDataExportSvc;

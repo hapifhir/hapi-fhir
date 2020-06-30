@@ -2,6 +2,7 @@ package ca.uhn.fhir.validator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ public class ValidatorAcrossVersionsTest {
 
 	@Test
 	public void testWrongContextVersion() {
-		FhirContext ctxDstu2 = FhirContext.forDstu2();
+		FhirContext ctxDstu2 = FhirContext.forCached(FhirVersionEnum.DSTU2);
 		try {
 			ctxDstu2.getResourceDefinition(org.hl7.fhir.dstu3.model.Patient.class);
 			fail();
@@ -36,7 +37,7 @@ public class ValidatorAcrossVersionsTest {
 	@Test
 	public void testValidateProfileOnDstu2Resource() {
 
-		FhirContext ctxDstu2 = FhirContext.forDstu2();
+		FhirContext ctxDstu2 = FhirContext.forCached(FhirVersionEnum.DSTU2);
 		FhirValidator val = ctxDstu2.newValidator();
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);

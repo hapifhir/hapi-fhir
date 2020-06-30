@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {TestDstu3Config.class})
 public class MatchUrlServiceTest extends BaseJpaTest {
 
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.DSTU3);
 
 	@Autowired
 	MatchUrlService myMatchUrlService;

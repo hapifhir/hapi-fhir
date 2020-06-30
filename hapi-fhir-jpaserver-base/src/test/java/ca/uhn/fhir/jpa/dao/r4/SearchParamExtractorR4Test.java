@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -54,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class SearchParamExtractorR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 	private static IValidationSupport ourValidationSupport;
 	private MySearchParamRegistry mySearchParamRegistry;
 	private PartitionSettings myPartitionSettings;

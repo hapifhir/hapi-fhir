@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
@@ -25,7 +26,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@Mock
 	public DaoRegistry myDaoRegistry;
 	private SubscriptionValidatingInterceptor mySvc;
-	private FhirContext myCtx = FhirContext.forR4();
+	private FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
 	@Mock
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 

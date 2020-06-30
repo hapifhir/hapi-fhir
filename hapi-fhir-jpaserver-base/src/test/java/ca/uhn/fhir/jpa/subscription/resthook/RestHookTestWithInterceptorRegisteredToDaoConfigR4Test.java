@@ -2,6 +2,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
@@ -269,7 +270,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		ourListenerRestServer = new RestfulServer(FhirContext.forR4());	
+		ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.R4));
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);

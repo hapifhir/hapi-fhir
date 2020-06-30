@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import org.hl7.fhir.r4.model.Observation;
@@ -12,7 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TolerantJsonParserR4Test {
 
-	private FhirContext myFhirContext = FhirContext.forR4();
+	private FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Test
 	public void testParseInvalidNumeric_LeadingDecimal() {

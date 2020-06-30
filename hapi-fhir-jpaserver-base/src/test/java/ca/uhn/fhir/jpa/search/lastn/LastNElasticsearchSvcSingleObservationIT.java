@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
@@ -73,7 +74,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	final String CODEFIRSTCODINGCODE = "test-code";
 	final String CODEFIRSTCODINGDISPLAY = "test-code display";
-	final FhirContext myFhirContext = FhirContext.forR4();
+	final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 	@Autowired
 	ElasticsearchSvcImpl elasticsearchSvc;
 

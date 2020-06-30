@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
@@ -56,7 +57,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
 
-	private final FhirContext myFhirContext = FhirContext.forR4();
+	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 	@Autowired
 	private ElasticsearchSvcImpl elasticsearchSvc;
 

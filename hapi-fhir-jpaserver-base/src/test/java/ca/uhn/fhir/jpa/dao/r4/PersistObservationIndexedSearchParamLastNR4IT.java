@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
@@ -411,7 +412,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Order(1)
 	@Test
 	public void testSampleBundleInTransaction() throws IOException {
-		FhirContext myFhirCtx = FhirContext.forR4();
+		FhirContext myFhirCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 		PathMatchingResourcePatternResolver provider = new PathMatchingResourcePatternResolver();
 		final Resource[] bundleResources;

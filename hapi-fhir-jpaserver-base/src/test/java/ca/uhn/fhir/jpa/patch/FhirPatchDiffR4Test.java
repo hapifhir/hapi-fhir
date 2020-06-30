@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FhirPatchDiffR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatchDiffR4Test.class);
-	private static final FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Test
 	public void testReplaceIdentifier() {
