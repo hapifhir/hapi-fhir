@@ -38,6 +38,8 @@ import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.DatatypeUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
@@ -331,6 +333,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 			return 0;
 		}
 	}
+
 
 	@Override
 	public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {

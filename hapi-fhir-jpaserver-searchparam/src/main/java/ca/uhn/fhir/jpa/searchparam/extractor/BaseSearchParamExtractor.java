@@ -37,12 +37,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1375,7 +1375,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
-		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
+		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
 			.map(IBaseExtension::getValue)
 			.map(val -> (IPrimitiveType<?>) val)
 			.map(IPrimitiveType::getValueAsString)
