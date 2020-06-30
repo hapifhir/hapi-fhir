@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 
 public abstract class BaseTest {
@@ -33,9 +34,6 @@ public abstract class BaseTest {
 	private FlywayMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
-	@BeforeEach
-	@ParameterizedTest(name = "{index}: {0}")
-	@MethodSource("data")
 	public void before(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		TestDatabaseDetails testDatabaseDetails = theTestDatabaseDetails.get();
 		myUrl = testDatabaseDetails.myUrl;
@@ -106,7 +104,7 @@ public abstract class BaseTest {
 
 	}
 
-	public static Collection<Supplier<TestDatabaseDetails>> data() {
+	public static Stream<Supplier<TestDatabaseDetails>> data() {
 		ourLog.info("H2: {}", org.h2.Driver.class.toString());
 
 		ArrayList<Supplier<TestDatabaseDetails>> retVal = new ArrayList<>();
@@ -153,7 +151,7 @@ public abstract class BaseTest {
 			}
 		});
 
-		return retVal;
+		return retVal.stream();
 	}
 
 }

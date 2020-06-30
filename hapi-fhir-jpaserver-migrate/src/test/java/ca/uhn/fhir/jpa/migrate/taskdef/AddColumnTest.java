@@ -4,7 +4,8 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 import org.flywaydb.core.internal.command.DbMigrate;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
@@ -16,8 +17,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class AddColumnTest extends BaseTest {
 
-	@Test
-	public void testColumnDoesntAlreadyExist() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnDoesntAlreadyExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
 		AddColumnTask task = new AddColumnTask("1", "1");
@@ -32,8 +36,11 @@ public class AddColumnTest extends BaseTest {
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
 	}
 
-	@Test
-	public void testAddColumnInt() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testAddColumnInt(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
 		AddColumnTask task = new AddColumnTask("1", "1");
@@ -49,8 +56,11 @@ public class AddColumnTest extends BaseTest {
 		assertEquals(ColumnTypeEnum.INT, type.getColumnTypeEnum());
 	}
 
-	@Test
-	public void testColumnAlreadyExists() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
 		AddColumnTask task = new AddColumnTask("1", "1");
@@ -64,8 +74,11 @@ public class AddColumnTest extends BaseTest {
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
 	}
 
-	@Test
-	public void testAddColumnToNonExistantTable_Failing() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testAddColumnToNonExistantTable_Failing(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
 		tasks
 			.forVersion(VersionEnum.V4_0_0)
@@ -84,8 +97,11 @@ public class AddColumnTest extends BaseTest {
 	}
 
 
-	@Test
-	public void testAddColumnToNonExistantTable_FailureAllowed() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testAddColumnToNonExistantTable_FailureAllowed(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
 		tasks
 			.forVersion(VersionEnum.V4_0_0)

@@ -7,7 +7,8 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
 import com.google.common.collect.ImmutableList;
 import org.flywaydb.core.api.FlywayException;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
@@ -26,8 +27,11 @@ public class SchemaMigratorTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaMigratorTest.class);
 
 
-	@Test
-	public void testMigrationRequired() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testMigrationRequired(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		SchemaMigrator schemaMigrator = createTableMigrator();
 
 		try {
@@ -44,8 +48,11 @@ public class SchemaMigratorTest extends BaseTest {
 	}
 
 
-	@Test
-	public void testRepairFailedMigration() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testRepairFailedMigration(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create fable SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
 		try {
 			schemaMigrator.migrate();
@@ -57,8 +64,11 @@ public class SchemaMigratorTest extends BaseTest {
 		schemaMigrator.migrate();
 	}
 
-	@Test
-	public void testOutOfOrderMigration() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testOutOfOrderMigration(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "2");
 		schemaMigrator.migrate();
 
@@ -74,8 +84,11 @@ public class SchemaMigratorTest extends BaseTest {
 		schemaMigrator.migrate();
 	}
 
-	@Test
-	public void testSkipSchemaVersion() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testSkipSchemaVersion(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		AddTableRawSqlTask taskA = new AddTableRawSqlTask("V4_1_0", "20191214.1");
 		taskA.setTableName("SOMETABLE_A");
 		taskA.addSql(getDriverType(), "create table SOMETABLE_A (PID bigint not null, TEXTCOL varchar(255))");
@@ -104,8 +117,11 @@ public class SchemaMigratorTest extends BaseTest {
 		assertThat(tableNames, Matchers.containsInAnyOrder("SOMETABLE_A", "SOMETABLE_C"));
 	}
 
-	@Test
-	public void testMigrationRequiredNoFlyway() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testMigrationRequiredNoFlyway(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		SchemaMigrator schemaMigrator = createTableMigrator();
 		schemaMigrator.setDriverType(getDriverType());
 		schemaMigrator.setDontUseFlyway(true);

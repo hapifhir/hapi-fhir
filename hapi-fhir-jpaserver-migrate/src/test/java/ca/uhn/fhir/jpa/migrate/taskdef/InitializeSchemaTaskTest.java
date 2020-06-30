@@ -5,6 +5,8 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -16,8 +18,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class InitializeSchemaTaskTest extends BaseTest {
 
-	@Test
-	public void testInitializeTwice() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testInitializeTwice(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider());
 		getMigrator().addTask(task);
 		getMigrator().migrate();

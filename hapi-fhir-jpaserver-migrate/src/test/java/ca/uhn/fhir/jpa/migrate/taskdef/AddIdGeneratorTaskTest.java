@@ -4,7 +4,8 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
@@ -16,8 +17,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class AddIdGeneratorTaskTest extends BaseTest {
 
 
-	@Test
-	public void testAddIdGenerator() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testAddIdGenerator(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());
 
 		MyMigrationTasks migrationTasks = new MyMigrationTasks("123456.7");

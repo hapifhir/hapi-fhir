@@ -98,7 +98,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	private ReferenceAndListParam multiSubjectParams = null;
 
-	@Order(0)
+	@Order(3)
 	@Test
 	public void testIndexObservationSingle() throws IOException {
 		indexSingleObservation();
@@ -199,7 +199,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		return codeableConceptField;
 	}
 
-	@Order(1)
+	@Order(2)
 	@Test
 	public void testIndexObservationMultiple() throws IOException {
 		indexMultipleObservations();
@@ -305,7 +305,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
-	@Order(2)
+	@Order(0)
 	@Test
 	public void testDeleteObservation() throws IOException {
 		indexMultipleObservations();
@@ -408,7 +408,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
-	@Order(5)
+	@Order(1)
 	@Test
 	public void testSampleBundleInTransaction() throws IOException {
 		FhirContext myFhirCtx = FhirContext.forR4();

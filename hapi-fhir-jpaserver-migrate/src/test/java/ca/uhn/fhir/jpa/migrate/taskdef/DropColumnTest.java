@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
@@ -12,8 +13,11 @@ import static org.hamcrest.Matchers.hasSize;
 
 public class DropColumnTest extends BaseTest {
 
-	@Test
-	public void testDropColumn() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testDropColumn(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
 		DropColumnTask task = new DropColumnTask("1",  "1");
@@ -31,8 +35,11 @@ public class DropColumnTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testDropForeignKeyColumn() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testDropForeignKeyColumn(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table PARENT (PID bigint not null, TEXTCOL varchar(255), primary key (PID))");
 		executeSql("create table SIBLING (PID bigint not null, TEXTCOL varchar(255), primary key (PID))");
 		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint, SIBLINGREF bigint)");
