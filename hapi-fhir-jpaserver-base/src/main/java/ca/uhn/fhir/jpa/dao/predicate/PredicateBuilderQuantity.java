@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -52,15 +53,15 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-											String theParamName,
+											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
 											RequestPartitionId theRequestPartitionId) {
 
-		From<?, ResourceIndexedSearchParamQuantity> join = myQueryStack.createJoin(SearchBuilderJoinEnum.QUANTITY, theParamName);
+		From<?, ResourceIndexedSearchParamQuantity> join = myQueryStack.createJoin(SearchBuilderJoinEnum.QUANTITY, theSearchParam.getName());
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, theList.get(0).getMissing(), join, theRequestPartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
@@ -68,7 +69,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		for (IQueryParameterType nextOr : theList) {
-			Predicate singleCode = createPredicateQuantity(nextOr, theResourceName, theParamName, myCriteriaBuilder, join, theOperation, theRequestPartitionId);
+			Predicate singleCode = createPredicateQuantity(nextOr, theResourceName, theSearchParam.getName(), myCriteriaBuilder, join, theOperation, theRequestPartitionId);
 			codePredicates.add(singleCode);
 		}
 

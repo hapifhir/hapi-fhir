@@ -16,6 +16,7 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -299,6 +300,11 @@ public class SearchParamExtractorMegaTest {
 		@Override
 		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
 			return null;
+		}
+
+		@Override
+		public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
+			// nothing
 		}
 	}
 

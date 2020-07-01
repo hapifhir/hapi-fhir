@@ -20,11 +20,22 @@ package ca.uhn.fhir.empi.rules.metric.matcher;
  * #L%
  */
 
-import org.apache.commons.codec.language.Metaphone;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class MetaphoneStringMatcher implements IEmpiStringMatcher {
+public class PhoneticEncoderMatcher implements IEmpiStringMatcher {
+	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderMatcher.class);
+
+	private final IPhoneticEncoder myStringEncoder;
+
+	public PhoneticEncoderMatcher(PhoneticEncoderEnum thePhoneticEnum) {
+		myStringEncoder = thePhoneticEnum.getPhoneticEncoder();
+	}
+
 	@Override
 	public boolean matches(String theLeftString, String theRightString) {
-		return new Metaphone().isMetaphoneEqual(theLeftString, theRightString);
+		return myStringEncoder.encode(theLeftString).equals(myStringEncoder.encode(theRightString));
 	}
 }

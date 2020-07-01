@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Narrative;
@@ -1289,6 +1290,27 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("OO: {}", encoded);
 		assertThat(encoded, containsString("No issues detected"));
+	}
+
+	/**
+	 * See #1780
+	 */
+	@Test
+	public void testExpand() {
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("test.com/testValueSet");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose()
+			.addInclude().setSystem("http://hl7.org/fhir/action-cardinality-behavior");
+		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
+
+		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet expansion = myValueSetDao.expand(id, null, 0, 10000, mySrd);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+
+		assertEquals(2, expansion.getExpansion().getContains().size());
 	}
 
 
