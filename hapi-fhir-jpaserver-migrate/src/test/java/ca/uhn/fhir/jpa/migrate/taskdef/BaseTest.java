@@ -7,16 +7,12 @@ import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
