@@ -490,6 +490,31 @@ public class SearchDstu2Test {
 		assertEquals("searchWhitelist01", ourLastMethod);
 	}
 
+	@Test
+	public void testSearchByLastUpdated() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchMethodBindingIssue=aaa&_lastUpdated=ge2019-11-15T12%3A16%3A15.066%2B01%3A00&_lastUpdated=le2019-11-15T13%3A16%3A14.066%2B01%3A00&_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals("searchMethodBindingIssueWithLastUpdated", ourLastMethod);
+	}
+
+	@Test
+	public void testSearchReverseChaining() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchMethodBindingIssue=aaa&_lastUpdated=ge2019-11-15T12%3A16%3A15.066%2B01%3A00&_lastUpdated=le2019-11-15T13%3A16%3A14.066%2B01%3A00&_has:Observation:patient:_has:AuditEvent:entity:user=MyUserId&_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals("searchMethodBindingIssueHas", ourLastMethod);
+	}
+
+
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -502,12 +527,14 @@ public class SearchDstu2Test {
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 		DummyPatientResourceNoIdProvider patientResourceNoIdProviderProvider = new DummyPatientResourceNoIdProvider();
+		DummyPatientResourceLastUpdatedBindingIssueProvider patientResourceLastUpdatedBindingIssueProvider = new DummyPatientResourceLastUpdatedBindingIssueProvider();
+		DummyPatientResourceReverseChainingMethodBindingIssueProvider patientResourceReverseChainingMethodBindingIssueProvider = new DummyPatientResourceReverseChainingMethodBindingIssueProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10));
 		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		ourServlet.setResourceProviders(patientResourceNoIdProviderProvider, patientProvider);
+		ourServlet.setResourceProviders(patientResourceNoIdProviderProvider, patientProvider, patientResourceLastUpdatedBindingIssueProvider, patientResourceReverseChainingMethodBindingIssueProvider);
 
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -520,6 +547,62 @@ public class SearchDstu2Test {
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 
+	}
+
+	public static class DummyPatientResourceLastUpdatedBindingIssueProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+		//@formatter:off
+		@Search()
+		public List<Patient> searchMethodBindingIssue(
+			@RequiredParam(name = "searchMethodBindingIssue") StringParam stringParam) {
+			ourLastMethod = "searchMethodBindingIssueNoLastUpdated";
+			return Collections.emptyList();
+		}
+		//@formatter:on
+
+		//@formatter:off
+		@Search()
+		public List<Patient> searchByLastUpdated(
+			@RequiredParam(name = "searchMethodBindingIssue") StringParam stringParam,
+			@RequiredParam(name = Constants.PARAM_LASTUPDATED) DateRangeParam dateRangeParam) {
+			ourLastMethod = "searchMethodBindingIssueWithLastUpdated";
+			return Collections.emptyList();
+		}
+		//@formatter:on
+
+	}
+
+	public static class DummyPatientResourceReverseChainingMethodBindingIssueProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+		//@formatter:off
+		@Search()
+		public List<Patient> searchMethodBindingIssue(
+			@RequiredParam(name = "searchMethodBindingIssue") StringParam stringParam) {
+			ourLastMethod = "searchMethodBindingIssueNoLastUpdated";
+			return Collections.emptyList();
+		}
+		//@formatter:on
+
+		//@formatter:off
+		@Search()
+		public List<Patient> reverseChaining(
+			@RequiredParam(name = "searchMethodBindingIssue") StringParam stringParam,
+			@RequiredParam(name = Constants.PARAM_LASTUPDATED) DateRangeParam dateRangeParam,
+			@OptionalParam(name = Constants.PARAM_HAS) HasAndListParam reverseChainParam) {
+			ourLastMethod = "searchMethodBindingIssueHas";
+			return Collections.emptyList();
+		}
+		//@formatter:on
 	}
 
 	public static class DummyPatientResourceNoIdProvider implements IResourceProvider {
