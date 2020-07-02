@@ -1,8 +1,8 @@
-package ca.uhn.fhir.empi.rules.metric.matcher;
+package ca.uhn.fhir.context.phonetic;
 
 /*-
  * #%L
- * HAPI FHIR - Enterprise Master Patient Index
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -25,22 +25,29 @@ import org.apache.commons.codec.StringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StringEncoderMatcher implements IEmpiStringMatcher {
-	private static final Logger ourLog = LoggerFactory.getLogger(StringEncoderMatcher.class);
+public class ApacheEncoder implements IPhoneticEncoder {
+	private static final Logger ourLog = LoggerFactory.getLogger(ApacheEncoder.class);
 
+	private final String myName;
 	private final StringEncoder myStringEncoder;
 
-	public StringEncoderMatcher(StringEncoder theStringEncoder) {
+	public ApacheEncoder(String theName, StringEncoder theStringEncoder) {
+		myName = theName;
 		myStringEncoder = theStringEncoder;
 	}
 
 	@Override
-	public boolean matches(String theLeftString, String theRightString) {
+	public String name() {
+		return myName;
+	}
+
+	@Override
+	public String encode(String theString) {
 		try {
-			return myStringEncoder.encode(theLeftString).equals(myStringEncoder.encode(theRightString));
+			return myStringEncoder.encode(theString);
 		} catch (EncoderException e) {
-			ourLog.error("Failed to match strings '{}' and '{}' using encoder {}", theLeftString, theRightString, myStringEncoder.getClass().getName(), e);
+			ourLog.error("Failed to encode string " + theString, e);
+			return theString;
 		}
-		return false;
 	}
 }

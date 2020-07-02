@@ -1,8 +1,8 @@
-package ca.uhn.fhir.empi.rules.metric.matcher;
+package ca.uhn.fhir.context.phonetic;
 
 /*-
  * #%L
- * HAPI FHIR - Enterprise Master Patient Index
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,11 +20,13 @@ package ca.uhn.fhir.empi.rules.metric.matcher;
  * #L%
  */
 
-import org.apache.commons.codec.language.DoubleMetaphone;
+public interface IPhoneticEncoder {
+	String name();
 
-public class DoubleMetaphoneStringMatcher implements IEmpiStringMatcher {
-	@Override
-	public boolean matches(String theLeftString, String theRightString) {
-		return new DoubleMetaphone().isDoubleMetaphoneEqual(theLeftString, theRightString);
-	}
+	/**
+	 * Encode the provided string using a phonetic encoder like Soundex
+	 * @param theString
+	 * @return
+	 */
+	String encode(String theString);
 }
