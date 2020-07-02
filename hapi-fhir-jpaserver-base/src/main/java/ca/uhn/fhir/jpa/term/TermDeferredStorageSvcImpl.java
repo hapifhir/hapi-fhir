@@ -64,7 +64,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	protected ITermCodeSystemDao myCodeSystemDao;
 	@Autowired
    protected ITermCodeSystemVersionDao myCodeSystemVersionDao;
-   @Autowired	protected PlatformTransactionManager myTransactionMgr;
+   @Autowired
+	protected PlatformTransactionManager myTransactionMgr;
 	private boolean myProcessDeferred = true;
 	private List<TermCodeSystem> myDefferedCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -147,7 +148,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			if(myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
          	codeCount += myCodeSystemStorageSvc.saveConcept(next);
 			} else {
-				ourLog.warn("Unable to save deferred TermConcept {} because Code System {} version PID {} is no longer valid. Code system may have since been updated.",
+				ourLog.warn("Unable to save deferred TermConcept {} because Code System {} version PID {} is no longer valid. Code system may have since been replaced.",
 					next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), next.getCodeSystemVersion().getPid());
 			}
 		}
@@ -346,5 +347,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@VisibleForTesting
 	void setConceptDaoForUnitTest(ITermConceptDao theConceptDao) {
 		myConceptDao = theConceptDao;
+	}
+
+	@VisibleForTesting
+	void setCodeSystemVersionDaoForUnitTest(ITermCodeSystemVersionDao theCodeSystemVersionDao) {
+		myCodeSystemVersionDao = theCodeSystemVersionDao;
 	}
 }
