@@ -4775,6 +4775,48 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 
+	@Test
+	public void testSearchChain_DontOptmizeSingleValueInPredicate() {
+		Patient p = new Patient();
+		p.setActive(true);
+		String patientId = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		AuditEvent audit = new AuditEvent();
+		audit.addEntity().getWhat().setReference(patientId);
+		String auditId = myAuditEventDao.create(audit).getId().toUnqualifiedVersionless().getValue();
+
+
+		// Default
+		{
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(AuditEvent.SP_ENTITY, new ReferenceParam("Patient", "active", "true"));
+			IBundleProvider outcome = myAuditEventDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(auditId));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true), not(containsString("HFJ_RESOURCE resourceta2_")));
+		}
+
+		// Disable optmization
+		try {
+			System.setProperty(HFJ_FORCE_IN_CLAUSES_HF_50, "true");
+			JpaSystemProperties.updateSettingsBasedOnCurrentSystemProperties();
+
+			myCaptureQueriesListener.clear();
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(AuditEvent.SP_ENTITY, new ReferenceParam("Patient", "active", "true"));
+			IBundleProvider outcome = myAuditEventDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(auditId));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true), containsString("HFJ_RESOURCE resourceta2_"));
+		} finally {
+			System.clearProperty(HFJ_FORCE_IN_CLAUSES_HF_50);
+			JpaSystemProperties.updateSettingsBasedOnCurrentSystemProperties();
+		}
+	}
+
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();
 		for (Object next : theResults) {
