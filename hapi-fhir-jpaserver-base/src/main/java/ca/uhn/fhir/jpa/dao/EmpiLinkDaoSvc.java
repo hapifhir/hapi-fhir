@@ -27,8 +27,9 @@ import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.jpa.entity.EmpiTargetType;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -42,6 +43,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmpiLinkDaoSvc {
@@ -183,6 +185,26 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.findAll(example);
 	}
 
+	public List<Long> deleteAllEmpiLinksAndReturnPersonPids() {
+		List<EmpiLink> all = myEmpiLinkDao.findAll();
+		return deleteEmpiLinksAndReturnPersonPids(all);
+	}
+
+	private List<Long> deleteEmpiLinksAndReturnPersonPids(List<EmpiLink> theLinks) {
+		List<Long> collect = theLinks.stream().map(link -> link.getPersonPid()).collect(Collectors.toList());
+		myEmpiLinkDao.deleteAll();
+		return collect;
+	}
+
+	public List<Long> deleteAllEmpiLinksOfTypeAndReturnPersonPids(EmpiTargetType theTargetType) {
+		EmpiLink link = new EmpiLink();
+		link.setEmpiTargetType(theTargetType);
+		Example<EmpiLink> exampleLink = Example.of(link);
+		List<EmpiLink> allOfType = myEmpiLinkDao.findAll(exampleLink);
+		return deleteEmpiLinksAndReturnPersonPids(allOfType);
+
+	}
+
 	public EmpiLink save(EmpiLink theEmpiLink) {
 		if (theEmpiLink.getCreated() == null) {
 			theEmpiLink.setCreated(new Date());
@@ -195,7 +217,7 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.findAll(theExampleLink);
    }
 
-	public List<EmpiLink> findEmpiLinksByTarget(Patient theTargetResource) {
+	public List<EmpiLink> findEmpiLinksByTarget(IAnyResource theTargetResource) {
 		Long pid = myIdHelperService.getPidOrNull(theTargetResource);
 		if (pid == null) {
 			return Collections.emptyList();

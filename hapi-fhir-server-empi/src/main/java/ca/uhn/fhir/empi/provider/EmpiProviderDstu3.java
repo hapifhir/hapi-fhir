@@ -23,6 +23,7 @@ package ca.uhn.fhir.empi.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
@@ -52,6 +53,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	private final IEmpiPersonMergerSvc myPersonMergerSvc;
 	private final IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
 	private final IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
+	private final IEmpiExpungeSvc myEmpiExpungeSvc;
 
 	/**
 	 * Constructor
@@ -59,12 +61,13 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderDstu3(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader) {
+	public EmpiProviderDstu3(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader, IEmpiExpungeSvc theEmpiExpungeSvc) {
 		super(theFhirContext, theResourceLoader);
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 		myPersonMergerSvc = thePersonMergerSvc;
 		myEmpiLinkUpdaterSvc = theEmpiLinkUpdaterSvc;
 		myEmpiLinkQuerySvc = theEmpiLinkQuerySvc;
+		myEmpiExpungeSvc = theEmpiExpungeSvc;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, type = Patient.class)

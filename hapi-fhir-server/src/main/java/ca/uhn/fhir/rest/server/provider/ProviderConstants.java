@@ -81,4 +81,7 @@ public class ProviderConstants {
 
 	public static final String EMPI_DUPLICATE_PERSONS = "$empi-duplicate-persons";
 	public static final String EMPI_NOT_DUPLICATE = "$empi-not-duplicate";
+
+	public static final String EMPI_CLEAR = "$empi-clear";
+	public static final String EMPI_CLEAR_TARGET_TYPE = "targetType";
 }

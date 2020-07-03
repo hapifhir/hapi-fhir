@@ -88,6 +88,12 @@ public class EmpiLink {
 	@Column(name = "UPDATED", nullable = false)
 	private Date myUpdated;
 
+	@Column(name = "TARGET_TYPE", nullable = true)
+	private EmpiTargetType myEmpiTargetType;
+
+	@Column(name = "SCORE", nullable = true)
+	private Double myScore;
+
 	public Long getId() {
 		return myId;
 	}
@@ -204,5 +210,21 @@ public class EmpiLink {
 	public EmpiLink setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
 		return this;
+	}
+
+	public EmpiTargetType getEmpiTargetType() {
+		return myEmpiTargetType;
+	}
+
+	public void setEmpiTargetType(EmpiTargetType theEmpiTargetType) {
+		myEmpiTargetType = theEmpiTargetType;
+	}
+
+	public Double getScore() {
+		return myScore;
+	}
+
+	public void setScore(Double theScore) {
+		myScore = theScore;
 	}
 }

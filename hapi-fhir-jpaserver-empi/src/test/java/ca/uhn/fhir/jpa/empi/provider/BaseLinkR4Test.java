@@ -50,8 +50,10 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		return myEmpiLinkDaoSvc.findEmpiLinkByTarget(myPatient).get();
 	}
 
+
 	@Nonnull
 	protected List<EmpiLink> getPatientLinks() {
 		return myEmpiLinkDaoSvc.findEmpiLinksByTarget(myPatient);
 	}
+
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
+import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
@@ -21,11 +22,13 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 	private IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
 	@Autowired
 	private IResourceLoader myResourceLoader;
+	@Autowired
+	private IEmpiExpungeSvc myEmpiExpungeSvc;
 
 	EmpiProviderR4 myEmpiProviderR4;
 
 	@Before
 	public void before() {
-		myEmpiProviderR4 = new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader);
+		myEmpiProviderR4 = new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiExpungeSvc);
 	}
 }

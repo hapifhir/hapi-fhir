@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
@@ -47,14 +48,16 @@ public class EmpiProviderLoader {
 	private IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
 	@Autowired
 	private IResourceLoader myResourceLoader;
+	@Autowired
+	private IEmpiExpungeSvc myEmpiExpungeSvc;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiExpungeSvc));
 				break;
 			case R4:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiExpungeSvc));
 				break;
 			default:
 				throw new ConfigurationException("EMPI not supported for FHIR version " + myFhirContext.getVersion().getVersion());
