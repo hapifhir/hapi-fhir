@@ -13,14 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.Optional;
-
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TermDeferredStorageSvcImplTest {
-
 
 	@Mock
 	private PlatformTransactionManager myTxManager;
@@ -53,7 +50,6 @@ public class TermDeferredStorageSvcImplTest {
 		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
 		svc.setDaoConfigForUnitTest(new DaoConfig());
 
-		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
@@ -76,11 +72,13 @@ public class TermDeferredStorageSvcImplTest {
 		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
 		svc.setDaoConfigForUnitTest(new DaoConfig());
 
+		when(myTermConceptStorageSvc.saveConcept(concept)).thenThrow(new RuntimeException("Foreign Constraint Violation"));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
 		svc.saveDeferred();
-		verify(myTermConceptStorageSvc, times(0)).saveConcept(same(concept));
+
+		verify(myTermConceptStorageSvc, times(1)).saveConcept(same(concept));
 		verifyNoMoreInteractions(myTermConceptStorageSvc);
 
 	}
