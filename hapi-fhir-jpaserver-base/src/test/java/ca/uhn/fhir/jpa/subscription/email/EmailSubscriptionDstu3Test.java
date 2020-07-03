@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -166,10 +166,10 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Assert.assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("mailto:myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 
@@ -220,10 +220,10 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
 		Assert.assertNotNull(subscriptionTemp);
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 

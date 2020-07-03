@@ -203,9 +203,6 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
 		assertEquals(100, observationDocuments.size());
 
-		//List<CodeJson> codeDocuments = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
-		//assertEquals(2, codeDocuments.size());
-
 		// Check that all observations were indexed.
 		searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);

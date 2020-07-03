@@ -159,46 +159,6 @@ The following metrics are currently supported:
     </thead>
     <tbody>
         <tr>
-            <td>STRING</td>
-            <td>matcher</td>
-            <td>
-               Match the values as strings.  This matcher should be used with tokens (e.g. gender).
-            </td>
-            <td>MCTAVISH = McTavish when exact = false, MCTAVISH != McTavish when exact = true</td>
-        </tr>
-        <tr>
-            <td>SUBSTRING</td>
-            <td>matcher</td>
-            <td>
-               True if one string starts with the other.
-            </td>
-            <td>Bill = Billy, Egbert = Bert</td>
-        </tr>    
-        <tr>
-            <td>METAPHONE</td>
-            <td>matcher</td>
-            <td>
-              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Metaphone.html">Apache Metaphone</a>          
-            </td>
-            <td>Dury = Durie, Allsop != Allsob, Smith != Schmidt</td>
-        </tr>
-        <tr>
-            <td>DOUBLE_METAPHONE</td>
-            <td>matcher</td>
-            <td>
-              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/DoubleMetaphone.html">Apache Double Metaphone</a>          
-            </td>
-            <td>Dury = Durie, Allsop = Allsob, Smith != Schmidt</td>
-        </tr>
-        <tr>
-            <td>SOUNDEX</td>
-            <td>matcher</td>
-            <td>
-              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Soundex.html">Apache Soundex</a>          
-            </td>
-            <td>Jon = John, Thomas != Tom</td>
-        </tr>
-        <tr>
             <td>CAVERPHONE1</td>
             <td>matcher</td>
             <td>
@@ -214,6 +174,78 @@ The following metrics are currently supported:
             </td>
             <td>Gail = Gael, Gail = Gale, Thomas != Tom</td>
         </tr>
+        <tr>
+            <td>COLOGNE</td>
+            <td>matcher</td>
+            <td>
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/ColognePhonetic.html">Apache Cologne Phonetic</a>          
+            </td>
+            <td></td>
+        </tr>        
+        <tr>
+            <td>DOUBLE_METAPHONE</td>
+            <td>matcher</td>
+            <td>
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/DoubleMetaphone.html">Apache Double Metaphone</a>          
+            </td>
+            <td>Dury = Durie, Allsop = Allsob, Smith != Schmidt</td>
+        </tr>
+        <tr>
+            <td>MATCH_RATING_APPROACH</td>
+            <td>matcher</td>
+            <td>
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/MatchRatingApproachEncoder.html">Apache Match Rating Approach Encoder</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>METAPHONE</td>
+            <td>matcher</td>
+            <td>
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Metaphone.html">Apache Metaphone</a>          
+            </td>
+            <td>Dury = Durie, Allsop != Allsob, Smith != Schmidt</td>
+        </tr>
+        <tr>
+            <td>NYSIIS</td>
+            <td>matcher</td>
+            <td>
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Nysiis.html">Apache Nysiis</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>REFINED_SOUNDEX</td>
+            <td>matcher</td>
+            <td>
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/RefinedSoundex.html">Apache Refined Soundex</a>          
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>SOUNDEX</td>
+            <td>matcher</td>
+            <td>
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Soundex.html">Apache Soundex</a>          
+            </td>
+            <td>Jon = John, Thomas != Tom</td>
+        </tr>
+        <tr>
+            <td>STRING</td>
+            <td>matcher</td>
+            <td>
+               Match the values as strings.  This matcher should be used with tokens (e.g. gender).
+            </td>
+            <td>MCTAVISH = McTavish when exact = false, MCTAVISH != McTavish when exact = true</td>
+        </tr>
+        <tr>
+            <td>SUBSTRING</td>
+            <td>matcher</td>
+            <td>
+               True if one string starts with the other.
+            </td>
+            <td>Bill = Billy, Egbert = Bert</td>
+        </tr>    
         <tr>
             <td>DATE</td>
             <td>matcher</td>

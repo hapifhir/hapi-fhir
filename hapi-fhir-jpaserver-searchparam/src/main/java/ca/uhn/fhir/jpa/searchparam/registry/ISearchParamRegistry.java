@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 
 import java.util.Collection;
@@ -59,4 +60,12 @@ public interface ISearchParamRegistry {
 	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
 
 	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
+
+	/**
+	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
+	 * the String using this encoder.
+	 *
+	 * @since 5.1.0
+	 */
+	void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder);
 }
