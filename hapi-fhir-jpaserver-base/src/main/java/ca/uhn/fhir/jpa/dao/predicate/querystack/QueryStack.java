@@ -281,4 +281,8 @@ public class QueryStack {
 	public Predicate addNeverMatchingPredicate() {
 		return top().addNeverMatchingPredicate();
 	}
+
+	public void forceTypeSelection() {
+		top().forceTypeSelection();
+	}
 }

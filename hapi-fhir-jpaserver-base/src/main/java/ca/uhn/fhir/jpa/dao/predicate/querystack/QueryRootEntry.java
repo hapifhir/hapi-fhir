@@ -121,4 +121,6 @@ abstract class QueryRootEntry {
 	abstract Expression<Long> getResourcePidColumn();
 
 	abstract Subquery<Long> subqueryForTagNegation();
+
+	public abstract void forceTypeSelection();
 }

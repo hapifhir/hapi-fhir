@@ -353,7 +353,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
-		myQueryStack.addPredicate(predicate);
+		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
 		return predicate;
 	}
 
@@ -539,6 +539,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			myQueryStack.pushIndexTableSubQuery();
 		} else {
 			myQueryStack.pushResourceTableSubQuery(theSubResourceName);
+			myQueryStack.forceTypeSelection();
 		}
 
 		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
