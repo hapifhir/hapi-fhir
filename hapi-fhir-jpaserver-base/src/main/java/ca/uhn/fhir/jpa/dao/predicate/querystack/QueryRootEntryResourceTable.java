@@ -202,4 +202,14 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 		return myQuery.subquery(Long.class);
 	}
 
+	@Override
+	public void forceTypeSelection() {
+		if (mySearchParameterMap.getEverythingMode() == null) {
+			addPredicate(myCriteriaBuilder.equal(getRoot().get("myResourceType"), myResourceType));
+		}
+		addPredicate(myCriteriaBuilder.isNull(getRoot().get("myDeleted")));
+
+		setHasImplicitTypeSelection(true);
+	}
+
 }

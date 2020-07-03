@@ -4794,7 +4794,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			map.add(AuditEvent.SP_ENTITY, new ReferenceParam("Patient", "active", "true"));
 			IBundleProvider outcome = myAuditEventDao.search(map);
 			assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(auditId));
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+//			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true), not(containsString("HFJ_RESOURCE resourceta2_")));
 		}
 
@@ -4809,8 +4809,42 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			map.add(AuditEvent.SP_ENTITY, new ReferenceParam("Patient", "active", "true"));
 			IBundleProvider outcome = myAuditEventDao.search(map);
 			assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(auditId));
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true), containsString("HFJ_RESOURCE resourceta2_"));
+			ourLog.info("*********** QUERY ***********");
+			String expected = "select\n" +
+				"        resourceta0_.RES_ID as col_0_0_ \n" +
+				"    from\n" +
+				"        HFJ_RESOURCE resourceta0_ \n" +
+				"    left outer join\n" +
+				"        HFJ_RES_LINK myresource1_ \n" +
+				"            on resourceta0_.RES_ID=myresource1_.SRC_RESOURCE_ID \n" +
+				"    where\n" +
+				"        (\n" +
+				"            myresource1_.SRC_PATH in (\n" +
+				"                'AuditEvent.entity.what'\n" +
+				"            )\n" +
+				"        ) \n" +
+				"        and (\n" +
+				"            myresource1_.TARGET_RESOURCE_ID in (\n" +
+				"                select\n" +
+				"                    resourceta2_.RES_ID \n" +
+				"                from\n" +
+				"                    HFJ_RESOURCE resourceta2_ \n" +
+				"                left outer join\n" +
+				"                    HFJ_SPIDX_TOKEN myparamsto3_ \n" +
+				"                        on resourceta2_.RES_ID=myparamsto3_.RES_ID \n" +
+				"                where\n" +
+				"                    resourceta2_.RES_TYPE='Patient' \n" +
+				"                    and (\n" +
+				"                        resourceta2_.RES_DELETED_AT is null\n" +
+				"                    ) \n" +
+				"                    and (\n" +
+				"                        myparamsto3_.HASH_VALUE in (\n" +
+				"                            '7943378963388545453'\n" +
+				"                        )\n" +
+				"                    )\n" +
+				"            )\n" +
+				"        )";
+			assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		} finally {
 			System.clearProperty(HFJ_FORCE_IN_CLAUSES_HF_50);
 			JpaSystemProperties.updateSettingsBasedOnCurrentSystemProperties();
