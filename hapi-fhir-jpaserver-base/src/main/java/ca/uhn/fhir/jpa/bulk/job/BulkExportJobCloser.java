@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.bulk.job;
 
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
+import org.slf4j.Logger;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -30,10 +31,14 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * Will run before and after a job to set the status to whatever is appropriate.
  */
 public class BulkExportJobCloser implements Tasklet {
+	private static final Logger ourLog = getLogger(BulkExportJobCloser.class);
+
 
 	@Value("#{jobExecutionContext['jobUUID']}")
 	private String myJobUUID;
@@ -44,8 +49,10 @@ public class BulkExportJobCloser implements Tasklet {
 	@Override
 	public RepeatStatus execute(StepContribution theStepContribution, ChunkContext theChunkContext) throws Exception {
 		if (theChunkContext.getStepContext().getStepExecution().getJobExecution().getStatus() == BatchStatus.STARTED) {
+			ourLog.warn("Job Closer is setting job to COMPLETE!");
 			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.COMPLETE);
 		} else {
+			ourLog.error("Job Closer is setting job to ERROR!");
 			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.ERROR);
 		}
 		return RepeatStatus.FINISHED;

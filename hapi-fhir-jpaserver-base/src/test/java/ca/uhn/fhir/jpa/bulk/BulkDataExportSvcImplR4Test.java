@@ -340,7 +340,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	//create one itself, which means that its jobUUID isnt known until it starts. to get around this, we move
 	public void awaitJobCompletion(JobExecution theJobExecution) throws InterruptedException {
 		await().until(() -> {
+			ourLog.warn("Checking to see if jobExecution {} is finished", theJobExecution.getId());
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
+			ourLog.warn("That jobExecution currently has status: {}", jobExecution.getStatus());
 			return jobExecution.getStatus() == BatchStatus.COMPLETED;
 		});
 	}
