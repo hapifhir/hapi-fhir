@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.bulk.job;
 
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
-import org.slf4j.Logger;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -31,14 +30,10 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 /**
  * Will run before and after a job to set the status to whatever is appropriate.
  */
 public class BulkExportJobCloser implements Tasklet {
-	private static final Logger ourLog = getLogger(BulkExportJobCloser.class);
-
 
 	@Value("#{jobExecutionContext['jobUUID']}")
 	private String myJobUUID;
