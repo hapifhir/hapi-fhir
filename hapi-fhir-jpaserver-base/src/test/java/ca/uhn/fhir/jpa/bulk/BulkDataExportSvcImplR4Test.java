@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
@@ -339,7 +340,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	//Note that if the job is generated, and doesnt rely on an existed persisted BulkExportJobEntity, it will need to
 	//create one itself, which means that its jobUUID isnt known until it starts. to get around this, we move
 	public void awaitJobCompletion(JobExecution theJobExecution) throws InterruptedException {
-		await().until(() -> {
+		await().atMost(100, TimeUnit.SECONDS).until(() -> {
 			ourLog.warn("Checking to see if jobExecution {} is finished", theJobExecution.getId());
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
 			ourLog.warn("That jobExecution currently has status: {}", jobExecution.getStatus());
