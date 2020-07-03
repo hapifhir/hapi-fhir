@@ -404,13 +404,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> ids;
 		SearchParameterMap map;
 		IBundleProvider results;
+		String searchSql;
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "foo|bar").setChain("identifier"));
 		myCaptureQueriesListener.clear();
 		results = myEncounterDao.search(map);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		searchSql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertEquals(0, StringUtils.countMatches(searchSql, "RES_DELETED_AT"));
+		assertEquals(0, StringUtils.countMatches(searchSql, "RES_TYPE"));
 		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids, hasItems(enc1Id, enc2Id));
 

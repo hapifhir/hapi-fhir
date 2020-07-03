@@ -340,8 +340,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	//Note that if the job is generated, and doesnt rely on an existed persisted BulkExportJobEntity, it will need to
 	//create one itself, which means that its jobUUID isnt known until it starts. to get around this, we move
 	public void awaitJobCompletion(JobExecution theJobExecution) throws InterruptedException {
-		await().atMost(30, TimeUnit.SECONDS).until(() -> {
+		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
+			ourLog.info("JobExecution {} currently has status: {}", theJobExecution.getId(), jobExecution.getStatus());
 			return jobExecution.getStatus() == BatchStatus.COMPLETED;
 		});
 	}
