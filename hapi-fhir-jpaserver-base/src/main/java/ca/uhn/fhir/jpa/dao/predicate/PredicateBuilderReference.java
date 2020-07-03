@@ -354,7 +354,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
-		myQueryStack.addPredicate(predicate);
+		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
 		return predicate;
 	}
 
