@@ -50,7 +50,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -146,10 +145,15 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		ourLog.info("Saving {} deferred concepts...", count);
 		while (codeCount < count && myDeferredConcepts.size() > 0) {
 			TermConcept next = myDeferredConcepts.remove(0);
-			try {
-         	codeCount += myCodeSystemStorageSvc.saveConcept(next);
-			} catch (Exception theE) {
-				ourLog.warn("Unable to save deferred TermConcept {}, possibly because Code System {} version PID {} may have since been replaced.",
+			if(myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
+				try {
+					codeCount += myCodeSystemStorageSvc.saveConcept(next);
+				} catch (Exception theE) {
+					ourLog.error("Exception thrown when attempting to save TermConcept {} in Code System {}",
+						next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), theE);
+				}
+			} else {
+				ourLog.warn("Unable to save deferred TermConcept {} because Code System {} version PID {} is no longer valid. Code system may have since been replaced.",
 					next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), next.getCodeSystemVersion().getPid());
 			}
 		}

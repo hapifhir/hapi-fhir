@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
@@ -50,6 +52,7 @@ public class TermDeferredStorageSvcImplTest {
 		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
 		svc.setDaoConfigForUnitTest(new DaoConfig());
 
+		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
@@ -65,6 +68,7 @@ public class TermDeferredStorageSvcImplTest {
 		concept.setCode("CODE_A");
 
 		TermCodeSystemVersion myTermCodeSystemVersion = new TermCodeSystemVersion();
+		myTermCodeSystemVersion.setId(1L);
 		concept.setCodeSystemVersion(myTermCodeSystemVersion);
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
@@ -72,6 +76,34 @@ public class TermDeferredStorageSvcImplTest {
 		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
 		svc.setDaoConfigForUnitTest(new DaoConfig());
 
+		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.empty());
+		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
+		svc.setProcessDeferred(true);
+		svc.addConceptToStorageQueue(concept);
+		svc.saveDeferred();
+
+		verify(myTermConceptStorageSvc, times(0)).saveConcept(same(concept));
+		verifyNoMoreInteractions(myTermConceptStorageSvc);
+
+	}
+
+	@Test
+	public void testSaveDeferred_Concept_Exception() {
+		// There is a small
+		TermConcept concept = new TermConcept();
+		concept.setCode("CODE_A");
+
+		TermCodeSystemVersion myTermCodeSystemVersion = new TermCodeSystemVersion();
+		myTermCodeSystemVersion.setId(1L);
+		concept.setCodeSystemVersion(myTermCodeSystemVersion);
+
+		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
+		svc.setTransactionManagerForUnitTest(myTxManager);
+		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setDaoConfigForUnitTest(new DaoConfig());
+
+		// Simulate the case where an exception is thrown despite a valid code system version.
+		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
 		when(myTermConceptStorageSvc.saveConcept(concept)).thenThrow(new RuntimeException("Foreign Constraint Violation"));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
