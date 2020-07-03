@@ -146,7 +146,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		while (codeCount < count && myDeferredConcepts.size() > 0) {
 			TermConcept next = myDeferredConcepts.remove(0);
 			if(myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
-         	codeCount += myCodeSystemStorageSvc.saveConcept(next);
+				try {
+					codeCount += myCodeSystemStorageSvc.saveConcept(next);
+				} catch (Exception theE) {
+					ourLog.error("Exception thrown when attempting to save TermConcept {} in Code System {}",
+						next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), theE);
+				}
 			} else {
 				ourLog.warn("Unable to save deferred TermConcept {} because Code System {} version PID {} is no longer valid. Code system may have since been replaced.",
 					next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), next.getCodeSystemVersion().getPid());

@@ -12,6 +12,28 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 
+	@Test
+	public void testStoreNewCodeSystemVersionForExistingCodeSystem() {
+		CodeSystem upload = createCodeSystemWithMoreThan100Concepts();
+
+		// Create CodeSystem resource
+		ResourceTable codeSystemResourceEntity = (ResourceTable)myCodeSystemDao.create(upload, mySrd).getEntity();
+
+		// Update the CodeSystem resource
+		runInTransaction(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(upload, codeSystemResourceEntity));
+
+		/*
+			Because there are more than 100 concepts in the code system, the first 100 will be persisted immediately and
+			the remaining 25 concepts will be queued up for "deferred save".
+
+			As the CodeSystem was persisted twice, the extra 25 term concepts will be queued twice, each with a different
+			CodeSystem version PID. Only one set of the term concepts should be persisted (i.e. 125 term concepts in total).
+		 */
+		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		assertEquals(125, myTermConceptDao.count());
+	}
+
 	private CodeSystem createCodeSystemWithMoreThan100Concepts() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
@@ -23,21 +45,6 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 		return codeSystem;
 
-	}
-
-	@Test
-	public void testStoreNewCodeSystemVersionForExistingCodeSystem() {
-		CodeSystem upload = createCodeSystemWithMoreThan100Concepts();
-
-		ResourceTable codeSystemResourceEntity = (ResourceTable)myCodeSystemDao.create(upload, mySrd).getEntity();
-
-		runInTransaction(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(upload, codeSystemResourceEntity));
-
-		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-
-		assertEquals(125, myTermConceptDao.count());
 	}
 
 
