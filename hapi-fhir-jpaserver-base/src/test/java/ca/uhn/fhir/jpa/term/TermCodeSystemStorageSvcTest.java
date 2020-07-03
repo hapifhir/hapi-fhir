@@ -4,9 +4,9 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
@@ -17,7 +17,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		CodeSystem upload = createCodeSystemWithMoreThan100Concepts();
 
 		// Create CodeSystem resource
-		ResourceTable codeSystemResourceEntity = (ResourceTable)myCodeSystemDao.create(upload, mySrd).getEntity();
+		ResourceTable codeSystemResourceEntity = (ResourceTable) myCodeSystemDao.create(upload, mySrd).getEntity();
 
 		// Update the CodeSystem resource
 		runInTransaction(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(upload, codeSystemResourceEntity));
