@@ -49,10 +49,8 @@ public class BulkExportJobCloser implements Tasklet {
 	@Override
 	public RepeatStatus execute(StepContribution theStepContribution, ChunkContext theChunkContext) throws Exception {
 		if (theChunkContext.getStepContext().getStepExecution().getJobExecution().getStatus() == BatchStatus.STARTED) {
-			ourLog.warn("Job Closer is setting job to COMPLETE!");
 			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.COMPLETE);
 		} else {
-			ourLog.error("Job Closer is setting job to ERROR!");
 			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.ERROR);
 		}
 		return RepeatStatus.FINISHED;
