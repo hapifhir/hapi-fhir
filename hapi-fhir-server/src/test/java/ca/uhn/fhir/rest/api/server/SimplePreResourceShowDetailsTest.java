@@ -1,14 +1,16 @@
 package ca.uhn.fhir.rest.api.server;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SimplePreResourceShowDetailsTest {
 
 	@Mock
@@ -16,16 +18,26 @@ public class SimplePreResourceShowDetailsTest {
 	@Mock
 	private IBaseResource myResource2;
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetResource_TooLow() {
-		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
-		details.setResource(-1, myResource2);
+		try {
+			SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
+			details.setResource(-1, myResource2);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Invalid index -1 - theIndex must not be < 0", e.getMessage());
+		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetResource_TooHigh() {
-		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
-		details.setResource(2, myResource2);
+		try {
+			SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
+			details.setResource(2, myResource2);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Invalid index {} - theIndex must be < 2", e.getMessage());
+		}
 	}
 
 	@Test

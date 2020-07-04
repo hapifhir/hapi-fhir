@@ -5,27 +5,27 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.dstu3.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.dstu3.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.ConceptMapEquivalence;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ImportCsvToConceptMapCommandDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandDstu3Test.class);
@@ -53,38 +53,10 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		System.setProperty("test", "true");
 	}
 
-	@After
+	@AfterEach
 	public void afterClearResourceProvider() {
 		HashMapResourceProviderConceptMapDstu3 resourceProvider = (HashMapResourceProviderConceptMapDstu3) restfulServer.getResourceProviders().iterator().next();
 		resourceProvider.clear();
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler servletHandler = new ServletHandler();
-
-		restfulServer = new RestfulServer(ourCtx);
-		restfulServer.registerInterceptor(new VerboseLoggingInterceptor());
-		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapDstu3(ourCtx));
-
-		ServletHolder servletHolder = new ServletHolder(restfulServer);
-		servletHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(servletHandler);
-
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		ourBase = "http://localhost:" + ourPort;
-
-		ourClient = ourCtx.newRestfulGenericClient(ourBase);
 	}
 
 	@Test
@@ -149,7 +121,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		File fileToImport = new File(classLoader.getResource(FILENAME).getFile());
 		ImportCsvToConceptMapCommandDstu3Test.file = fileToImport.getAbsolutePath();
 
-		App.main(new String[] {"import-csv-to-conceptmap",
+		App.main(new String[]{"import-csv-to-conceptmap",
 			"-v", ourVersion,
 			"-t", ourBase,
 			"-u", CM_URL,
@@ -345,7 +317,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 		assertEquals("3d This is a comment.", target.getComment());
 
-		App.main(new String[] {"import-csv-to-conceptmap",
+		App.main(new String[]{"import-csv-to-conceptmap",
 			"-v", ourVersion,
 			"-t", ourBase,
 			"-u", CM_URL,
@@ -364,5 +336,33 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
 		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/2", conceptMap.getId());
+	}
+
+	@AfterAll
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeAll
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
+
+		ServletHandler servletHandler = new ServletHandler();
+
+		restfulServer = new RestfulServer(ourCtx);
+		restfulServer.registerInterceptor(new VerboseLoggingInterceptor());
+		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapDstu3(ourCtx));
+
+		ServletHolder servletHolder = new ServletHolder(restfulServer);
+		servletHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(servletHandler);
+
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		ourBase = "http://localhost:" + ourPort;
+
+		ourClient = ourCtx.newRestfulGenericClient(ourBase);
 	}
 }

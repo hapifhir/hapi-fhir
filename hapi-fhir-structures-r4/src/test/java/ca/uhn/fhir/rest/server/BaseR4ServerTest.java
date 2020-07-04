@@ -9,7 +9,7 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 public class BaseR4ServerTest {
 	private FhirContext myCtx = FhirContext.forR4();
@@ -17,7 +17,7 @@ public class BaseR4ServerTest {
 	protected IGenericClient myClient;
 	protected String myBaseUrl;
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
 	}

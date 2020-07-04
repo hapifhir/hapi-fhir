@@ -15,27 +15,27 @@ import org.apache.commons.text.RandomStringGenerator;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
-	@After
+	@AfterEach
 	public final void after() {
 		when(mySrd.getRequestId()).thenReturn(null);
 		myDaoConfig.setStoreMetaSourceInformation(new DaoConfig().getStoreMetaSourceInformation());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
 	}
@@ -218,11 +218,6 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(e.getMessage(), "The _source parameter is disabled on this server");
 		}
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {

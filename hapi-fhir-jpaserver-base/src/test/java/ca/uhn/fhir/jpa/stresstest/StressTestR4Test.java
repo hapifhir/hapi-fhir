@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -38,11 +37,10 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -64,14 +62,14 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @TestPropertySource(properties = {
 	"max_db_connections=10"
 })
 @DirtiesContext
-@Ignore
+@Disabled
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	static {
@@ -85,7 +83,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	private int myPreviousMaxPageSize;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -101,7 +99,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -143,7 +141,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		Map<String, IBaseResource> ids = new HashMap<>();
 
-		IGenericClient fhirClient = this.ourClient;
+		IGenericClient fhirClient = this.myClient;
 
 		String url = ourServerBase + "/Observation?date=gt2000&_sort=-_lastUpdated";
 
@@ -226,7 +224,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		// Load from DAOs
 		List<String> ids = new ArrayList<>();
-		Bundle resultBundle = ourClient.search().forResource("Observation").count(100).returnBundle(Bundle.class).execute();
+		Bundle resultBundle = myClient.search().forResource("Observation").count(100).returnBundle(Bundle.class).execute();
 		int pageIndex = 0;
 		while (true) {
 			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
@@ -234,7 +232,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 				break;
 			}
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
-			resultBundle = ourClient.loadPage().next(resultBundle).execute();
+			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
 		assertEquals(count, ids.size());
 		assertEquals(count, Sets.newHashSet(ids).size());
@@ -287,7 +285,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		// Load from DAOs
 		List<String> ids = new ArrayList<>();
-		Bundle resultBundle = ourClient.search().forResource("Observation").count(300).returnBundle(Bundle.class).execute();
+		Bundle resultBundle = myClient.search().forResource("Observation").count(300).returnBundle(Bundle.class).execute();
 		int pageIndex = 0;
 		while (true) {
 			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
@@ -295,7 +293,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 				break;
 			}
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
-			resultBundle = ourClient.loadPage().next(resultBundle).execute();
+			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
 		assertEquals(count, ids.size());
 		assertEquals(count, Sets.newHashSet(ids).size());
@@ -350,7 +348,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1202, resultsAndIncludes.size());
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testUpdateListWithLargeNumberOfEntries() {
 		int numPatients = 3000;
@@ -399,7 +397,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			p.addIdentifier().setSystem("http://test").setValue("BAR");
 			input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		}
-		ourClient.transaction().withBundle(input).execute();
+		myClient.transaction().withBundle(input).execute();
 
 
 		List<BaseTask> tasks = Lists.newArrayList();
@@ -438,7 +436,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 				input.addEntry().setResource(p).setFullUrl("Patient/A" + finalI).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/A" + finalI);
 
 				try {
-					ourClient.transaction().withBundle(input).execute();
+					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
 					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure"));
@@ -489,7 +487,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 				input.addEntry().setResource(updatePatient).setFullUrl(updatePatient.getId()).getRequest().setMethod(HTTPVerb.PUT).setUrl(updatePatient.getId());
 
 				try {
-					ourClient.transaction().withBundle(input).execute();
+					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
 					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."));
@@ -535,7 +533,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			p.addIdentifier().setSystem("http://test").setValue("BAR");
 			input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		}
-		ourClient.transaction().withBundle(input).execute();
+		myClient.transaction().withBundle(input).execute();
 
 		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"))) {
 			assertEquals(200, getMeta.getStatusLine().getStatusCode());
@@ -607,7 +605,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					getResp = ourHttpClient.execute(get);
 					try {
 						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
-						assertEquals(respBundleString, 200, getResp.getStatusLine().getStatusCode());
+						assertEquals(200, getResp.getStatusLine().getStatusCode(), respBundleString);
 						respBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {
@@ -645,7 +643,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					Patient p = new Patient();
 					p.addIdentifier().setSystem("http://test").setValue("BAR").setType(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("bar")));
 					p.setGender(org.hl7.fhir.r4.model.Enumerations.AdministrativeGender.MALE);
-					ourClient.create().resource(p).execute();
+					myClient.create().resource(p).execute();
 
 					ourSearchParamRegistry.forceRefresh();
 
@@ -656,11 +654,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 				}
 			}
 		}
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

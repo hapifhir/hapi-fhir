@@ -20,36 +20,30 @@ package ca.uhn.fhir.test.utilities.server;
  * #L%
  */
 
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class ResourceProviderRule implements TestRule {
+public class ResourceProviderExtension implements BeforeEachCallback, AfterEachCallback {
 
-	private final RestfulServerRule myRestfulServerRule;
+	private final RestfulServerExtension myRestfulServerExtension;
 	private Object myProvider;
 
 	/**
 	 * Constructor
 	 */
-	public ResourceProviderRule(RestfulServerRule theRestfulServerRule, Object theProvider) {
-		myRestfulServerRule = theRestfulServerRule;
+	public ResourceProviderExtension(RestfulServerExtension theRestfulServerExtension, Object theProvider) {
+		myRestfulServerExtension = theRestfulServerExtension;
 		myProvider = theProvider;
 	}
 
 	@Override
-	public Statement apply(Statement base, Description description) {
-		return new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				myRestfulServerRule.getRestfulServer().registerProvider(myProvider);
-				try {
-					base.evaluate();
-				} finally {
-					myRestfulServerRule.getRestfulServer().unregisterProvider(myProvider);
-				}
-			}
-		};
+	public void afterEach(ExtensionContext context) {
+		myRestfulServerExtension.getRestfulServer().unregisterProvider(myProvider);
 	}
 
+	@Override
+	public void beforeEach(ExtensionContext context) {
+		myRestfulServerExtension.getRestfulServer().registerProvider(myProvider);
+	}
 }

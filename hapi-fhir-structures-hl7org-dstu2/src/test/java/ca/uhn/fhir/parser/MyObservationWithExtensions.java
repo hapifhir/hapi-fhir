@@ -1,17 +1,16 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.util.ElementUtil;
 import org.hl7.fhir.dstu2.model.Attachment;
 import org.hl7.fhir.dstu2.model.BackboneElement;
 import org.hl7.fhir.dstu2.model.DateType;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.util.ElementUtil;
 
 
 @ResourceDef(name="Patient")

@@ -5,14 +5,16 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.PractitionerRole;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.URLEncoder;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3Test {
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();

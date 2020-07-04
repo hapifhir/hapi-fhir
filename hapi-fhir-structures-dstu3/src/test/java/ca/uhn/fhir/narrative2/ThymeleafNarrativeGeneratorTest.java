@@ -3,15 +3,15 @@ package ca.uhn.fhir.narrative2;
 import ca.uhn.fhir.context.FhirContext;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ThymeleafNarrativeGeneratorTest {
 

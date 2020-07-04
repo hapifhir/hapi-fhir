@@ -7,12 +7,12 @@ import org.apache.commons.lang3.StringUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.MatcherAssert.assertThat
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
-import org.junit.AfterClass
-import org.junit.Assert.assertThat
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import javax.ws.rs.core.Response
 
 class ExtendedOrganizationResourceTest {
@@ -36,7 +36,7 @@ class ExtendedOrganizationResourceTest {
       private lateinit var jettyServer: Server
 
       @JvmStatic
-      @AfterClass
+      @AfterAll
       @Throws(Exception::class)
       fun afterClassClearContext() {
          JettyUtil.closeServer(jettyServer)
@@ -44,7 +44,7 @@ class ExtendedOrganizationResourceTest {
       }
 
       @JvmStatic
-      @BeforeClass
+      @BeforeAll
       @Throws(Exception::class)
       fun setUpClass() {
          val context = ServletContextHandler(ServletContextHandler.SESSIONS).also {

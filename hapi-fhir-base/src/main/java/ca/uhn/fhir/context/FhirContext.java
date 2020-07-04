@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,6 +95,7 @@ import java.util.Set;
 public class FhirContext {
 
 	private static final List<Class<? extends IBaseResource>> EMPTY_LIST = Collections.emptyList();
+	private static final Map<FhirVersionEnum, FhirContext> ourStaticContexts = Collections.synchronizedMap(new EnumMap<>(FhirVersionEnum.class));
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContext.class);
 	private final IFhirVersion myVersion;
 	private AddProfileTagEnum myAddProfileTagWhenEncoding = AddProfileTagEnum.ONLY_FOR_CUSTOM;
@@ -465,6 +467,7 @@ public class FhirContext {
 
 	/**
 	 * Returns the name of a given resource class.
+	 *
 	 * @param theResourceType
 	 * @return
 	 */
@@ -1032,6 +1035,17 @@ public class FhirContext {
 	 */
 	public static FhirContext forR5() {
 		return new FhirContext(FhirVersionEnum.R5);
+	}
+
+	/**
+	 * Returns a statically cached {@literal FhirContext} instance for the given version, creating one if none exists in the
+	 * cache. One FhirContext will be kept in the cache for each FHIR version that is requested (by calling
+	 * this method for that version), and the cache will never be expired.
+	 *
+	 * @since 5.1.0
+	 */
+	public static FhirContext forCached(FhirVersionEnum theFhirVersionEnum) {
+		return ourStaticContexts.computeIfAbsent(theFhirVersionEnum, v -> new FhirContext(v));
 	}
 
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {

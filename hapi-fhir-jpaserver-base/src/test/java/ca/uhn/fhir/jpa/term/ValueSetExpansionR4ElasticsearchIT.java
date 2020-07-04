@@ -28,19 +28,19 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -48,10 +48,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4ConfigWithElasticSearch.class})
 public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
+	protected static final String CS_URL = "http://example.com/my_code_system";
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
@@ -68,12 +69,12 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	protected ITermReadSvcR4 myTermSvc;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
-
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	protected ServletRequestDetails mySrd;
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
 	PlatformTransactionManager myTxManager;
-
 	@Autowired
 	private IFhirSystemDao mySystemDao;
 	@Autowired
@@ -84,21 +85,15 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
-
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	protected ServletRequestDetails mySrd;
-
-	protected static final String CS_URL = "http://example.com/my_code_system";
-
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
 	}
 
-	@After
+	@AfterEach
 	public void afterPurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}

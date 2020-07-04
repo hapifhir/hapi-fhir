@@ -1,17 +1,18 @@
 package ca.uhn.fhir.validator;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.AttachmentUtil;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AttachmentUtilTest {
 
 	@Test
 	public void testCreateAttachmentDstu3() {
-		FhirContext ctx = FhirContext.forDstu3();
+		FhirContext ctx = FhirContext.forCached(FhirVersionEnum.DSTU3);
 		ICompositeType attachment = AttachmentUtil.newInstance(ctx);
 		AttachmentUtil.setData(ctx, attachment, new byte[]{0, 1, 2, 3});
 		AttachmentUtil.setUrl(ctx, attachment, "http://foo");
@@ -26,7 +27,7 @@ public class AttachmentUtilTest {
 
 	@Test
 	public void testCreateAttachmentR4() {
-		FhirContext ctx = FhirContext.forR4();
+		FhirContext ctx = FhirContext.forCached(FhirVersionEnum.R4);
 		ICompositeType attachment = AttachmentUtil.newInstance(ctx);
 		AttachmentUtil.setData(ctx, attachment, new byte[]{0, 1, 2, 3});
 		AttachmentUtil.setUrl(ctx, attachment, "http://foo");
@@ -41,7 +42,7 @@ public class AttachmentUtilTest {
 
 	@Test
 	public void testCreateAttachmentR5() {
-		FhirContext ctx = FhirContext.forR5();
+		FhirContext ctx = FhirContext.forCached(FhirVersionEnum.R5);
 		ICompositeType attachment = AttachmentUtil.newInstance(ctx);
 		AttachmentUtil.setData(ctx, attachment, new byte[]{0, 1, 2, 3});
 		AttachmentUtil.setUrl(ctx, attachment, "http://foo");

@@ -22,37 +22,26 @@ package ca.uhn.fhir.test.utilities;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class HttpClientRule implements TestRule {
+public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
 	private CloseableHttpClient myClient;
-
-	@Override
-	public Statement apply(Statement theBase, Description theDescription) {
-		return new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				startClient();
-				theBase.evaluate();
-				stopClient();
-			}
-		};
-	}
-
-
-	private void stopClient() throws Exception {
-		myClient.close();
-	}
-
-	private void startClient() {
-		myClient = HttpClientBuilder
-			.create()
-			.build();
-	}
 
 	public CloseableHttpClient getClient() {
 		return myClient;
+	}
+
+	@Override
+	public void afterEach(ExtensionContext theExtensionContext) throws Exception {
+		myClient.close();
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
+		myClient = HttpClientBuilder
+			.create()
+			.build();
 	}
 }

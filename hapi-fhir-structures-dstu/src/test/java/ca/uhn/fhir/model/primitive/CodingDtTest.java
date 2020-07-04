@@ -1,9 +1,9 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
@@ -58,7 +58,7 @@ public class CodingDtTest {
 		assertEquals("|b\\|c", dt.getValueAsQueryToken(ourCtx));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

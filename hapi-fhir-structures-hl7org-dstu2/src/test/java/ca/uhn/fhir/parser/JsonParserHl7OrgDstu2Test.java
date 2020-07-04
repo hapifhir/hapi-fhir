@@ -11,7 +11,6 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu2.model.*;
 import org.hl7.fhir.dstu2.model.Address.AddressUse;
 import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
@@ -23,32 +22,44 @@ import org.hl7.fhir.dstu2.model.Patient.ContactComponent;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionAnswerComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ValueSetCodeSystemComponent;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonParserHl7OrgDstu2Test {
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgDstu2Test.class);
 
-  @After
+  @AfterEach
   public void after() {
     ourCtx.setNarrativeGenerator(null);
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClassClearContext() {
     TestUtil.clearAllStaticFieldsForUnitTest();
   }
@@ -121,7 +132,7 @@ public class JsonParserHl7OrgDstu2Test {
     Patient patient = new Patient();
     patient.addAddress().setUse(AddressUse.HOME);
     EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
-    PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+    PrimitiveType<AddressUse> enumeration = new Enumeration<>(fact).setValue(AddressUse.HOME);
     patient.addExtension().setUrl("urn:foo").setValue(enumeration);
 
     String val = parser.encodeResourceToString(patient);
@@ -1101,7 +1112,7 @@ public class JsonParserHl7OrgDstu2Test {
    * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
    */
   @Test
-  @Ignore
+  @Disabled
   public void testParseWithIncorrectReference() throws IOException {
     String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
     jsonString = jsonString.replace("\"reference\"", "\"resource\"");
@@ -1250,8 +1261,8 @@ public class JsonParserHl7OrgDstu2Test {
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<Extension> extlst = fhirPat.getExtension();
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
   @Test

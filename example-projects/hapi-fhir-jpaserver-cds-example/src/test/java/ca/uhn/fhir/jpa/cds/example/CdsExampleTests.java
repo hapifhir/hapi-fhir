@@ -11,7 +11,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
-// TODO Remove @Ignore once Chris Schuler has fixed the external jar this project depends on
-@Ignore
+// TODO Remove @Disabled once Chris Schuler has fixed the external jar this project depends on
+@Disabled
 public class CdsExampleTests {
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -34,7 +34,7 @@ public class CdsExampleTests {
 
 	private static Collection<IResourceProvider> providers;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 
 		// Configure and spin up server
@@ -67,7 +67,7 @@ public class CdsExampleTests {
 		putResource("general-fhirhelpers-3.json", "FHIRHelpers");
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
