@@ -30,13 +30,14 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
-import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
+import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
+import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkQuerySvcImpl;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
+import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -63,8 +65,6 @@ public class EmpiConsumerConfig {
 
 	@Autowired
 	IEmpiSettings myEmpiProperties;
-	@Autowired
-	EmpiRuleValidator myEmpiRuleValidator;
 	@Autowired
 	EmpiProviderLoader myEmpiProviderLoader;
 	@Autowired
@@ -133,8 +133,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiRuleValidator empiRuleValidator() {
-		return new EmpiRuleValidator();
+	EmpiRuleValidator empiRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
+		return new EmpiRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
 
 	@Bean
@@ -159,8 +159,13 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiResourceComparatorSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
-		return new EmpiResourceComparatorSvc(theFhirContext, theEmpiConfig);
+	EmpiCandidateSearchCriteriaBuilderSvc empiCriteriaBuilderSvc() {
+		return new EmpiCandidateSearchCriteriaBuilderSvc();
+	}
+
+	@Bean
+    EmpiResourceMatcherSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
+		return new EmpiResourceMatcherSvc(theFhirContext, theEmpiConfig);
 	}
 
 	@Bean
@@ -178,8 +183,6 @@ public class EmpiConsumerConfig {
 		if (!myEmpiProperties.isEnabled()) {
 			return;
 		}
-
-		myEmpiRuleValidator.validate(myEmpiProperties.getEmpiRules());
 	}
 
 	@EventListener(classes = {ContextRefreshedEvent.class})

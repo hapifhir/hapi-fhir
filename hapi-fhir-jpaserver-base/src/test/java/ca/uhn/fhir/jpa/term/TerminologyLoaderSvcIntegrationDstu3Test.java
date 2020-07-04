@@ -86,7 +86,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("10019-8", "10013-1", "10014-9", "10016-4", "17788-1", "10000-8", "10017-2", "10015-6", "10020-6", "10018-0"));
+		assertThat(codes, containsInAnyOrder("10013-1"));
 
 		// Search by display name
 		input = new ValueSet();
@@ -101,7 +101,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(codes, containsInAnyOrder("10019-8", "10013-1", "10014-9", "10016-4", "17788-1", "10000-8", "10017-2", "10015-6", "10020-6", "10018-0"));
+		assertThat(codes, containsInAnyOrder("10013-1"));
 
 		// Search by something that doesn't match
 		input = new ValueSet();
@@ -149,7 +149,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("10019-8", "10013-1", "10014-9", "10000-8", "10016-4", "10017-2", "10015-6", "10020-6", "10018-0"));
+		assertThat(codes, containsInAnyOrder("10013-1"));
 	}
 
 	@Test
@@ -188,7 +188,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("17788-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, null);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
@@ -196,8 +196,8 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
 		assertTrue(propertyValue.isPresent());
 		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
-		assertEquals("LP19258-0", propertyValue.get().getCode());
-		assertEquals("Large unstained cells/100 leukocytes", propertyValue.get().getDisplay());
+		assertEquals("LP31101-6", propertyValue.get().getCode());
+		assertEquals("R' wave amplitude.lead I", propertyValue.get().getDisplay());
 	}
 
 	@Test

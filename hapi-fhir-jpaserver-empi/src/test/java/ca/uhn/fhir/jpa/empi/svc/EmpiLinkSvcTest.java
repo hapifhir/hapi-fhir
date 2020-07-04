@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -24,16 +25,18 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
 
+	@Override
 	@After
 	public void after() {
 		myExpungeEverythingService.expungeEverythingByType(EmpiLink.class);
 		super.after();
 	}
+
 	@Test
 	public void compareEmptyPatients() {
 		Patient patient = new Patient();
 		patient.setId("Patient/1");
-		EmpiMatchResultEnum result = myEmpiResourceComparatorSvc.getMatchResult(patient, patient);
+		EmpiMatchResultEnum result = myEmpiResourceMatcherSvc.getMatchResult(patient, patient);
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, result);
 	}
 
@@ -58,6 +61,62 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(0, newPerson.getLink().size());
 		}
+	}
+
+
+	@Test
+	public void testPossibleDuplicate() {
+		assertLinkCount(0);
+		Person person = createPerson();
+		Person target = createPerson();
+
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		assertLinkCount(1);
+	}
+
+	@Test
+	public void testNoMatchBlocksPossibleDuplicate() {
+		assertLinkCount(0);
+		Person person = createPerson();
+		Person target = createPerson();
+
+		Long personPid = myIdHelperService.getPidOrNull(person);
+		Long targetPid = myIdHelperService.getPidOrNull(target);
+		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personPid, targetPid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(targetPid, personPid).isPresent());
+
+		saveNoMatchLink(personPid, targetPid);
+
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPid, targetPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		assertLinkCount(1);
+	}
+
+	@Test
+	public void testNoMatchBlocksPossibleDuplicateReversed() {
+		assertLinkCount(0);
+		Person person = createPerson();
+		Person target = createPerson();
+
+		Long personPid = myIdHelperService.getPidOrNull(person);
+		Long targetPid = myIdHelperService.getPidOrNull(target);
+		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personPid, targetPid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(targetPid, personPid).isPresent());
+
+		saveNoMatchLink(targetPid, personPid);
+
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPid, targetPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		assertLinkCount(1);
+	}
+
+	private void saveNoMatchLink(Long thePersonPid, Long theTargetPid) {
+		EmpiLink noMatchLink = new EmpiLink()
+			.setPersonPid(thePersonPid)
+			.setTargetPid(theTargetPid)
+			.setLinkSource(EmpiLinkSourceEnum.MANUAL)
+			.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
+		saveLink(noMatchLink);
 	}
 
 	@Test

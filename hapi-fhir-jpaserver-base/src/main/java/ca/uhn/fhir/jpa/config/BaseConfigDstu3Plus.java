@@ -32,7 +32,9 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.jpa.validation.JpaFhirInstanceValidator;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
+import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -65,16 +67,16 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
 
 	@Bean(name = "myDefaultProfileValidationSupport")
-	public IValidationSupport defaultProfileValidationSupport() {
+	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
 		return new DefaultProfileValidationSupport(fhirContext());
 	}
 
 	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
-	public ValidationSupportChain jpaValidationSupportChain() {
+	public JpaValidationSupportChain jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(fhirContext());
 	}
 
-	@Bean(name = "myJpaValidationSupport")
+	@Bean(name = JPA_VALIDATION_SUPPORT)
 	public IValidationSupport jpaValidationSupport() {
 		return new JpaPersistedResourceValidationSupport(fhirContext());
 	}
@@ -88,12 +90,11 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	@Bean(name = "myInstanceValidator")
 	@Lazy
 	public IInstanceValidatorModule instanceValidator() {
-		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
+		FhirInstanceValidator val = new JpaFhirInstanceValidator(fhirContext());
 		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		val.setValidationSupport(validationSupportChain());
 		return val;
 	}
-
 
 	@Bean
 	public abstract ITermReadSvc terminologyService();

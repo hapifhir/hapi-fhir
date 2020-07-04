@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,15 +38,20 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myPersonId = new StringType(myPerson.getIdElement().getValue());
 		myVersionlessPersonId = new StringType(myPerson.getIdElement().toVersionless().getValue());
 
-		myLink = getLink();
+		myLink = getOnlyPatientLink();
 		// Tests require our initial link to be a POSSIBLE_MATCH
 		myLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_MATCH);
-		myEmpiLinkDao.save(myLink);
+		saveLink(myLink);
 		assertEquals(EmpiLinkSourceEnum.AUTO, myLink.getLinkSource());
 	}
 
 	@Nonnull
-	protected EmpiLink getLink() {
+	protected EmpiLink getOnlyPatientLink() {
 		return myEmpiLinkDaoSvc.findEmpiLinkByTarget(myPatient).get();
+	}
+
+	@Nonnull
+	protected List<EmpiLink> getPatientLinks() {
+		return myEmpiLinkDaoSvc.findEmpiLinksByTarget(myPatient);
 	}
 }

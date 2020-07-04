@@ -21,8 +21,11 @@ package ca.uhn.fhir.jpa.search.lastn;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
+import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface IElasticsearchSvc {
@@ -35,4 +38,47 @@ public interface IElasticsearchSvc {
 	 * @return
 	 */
 	List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch);
+
+	/**
+	 * Returns index document for a single Observation
+	 * @param theDocumentID Identifier of Observation resource.
+	 * @return
+	 */
+	ObservationJson getObservationDocument(String theDocumentID);
+
+	/**
+	 * Returns index document for a single Observation Code that either has a coding that matches a specified Code value and system or that has a specified text value.
+	 * @param theCodeSystemHash A hash string constructed from a Code value and Code system used to match to an Observation Code.
+	 * @param theText A text value used to match to an Observation Code.
+	 * @return
+	 */
+	CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText);
+
+	/**
+	 * Creates or updates index for an Observation Resource.
+	 * @param theDocumentId Identifier for Observation resource.
+	 * @param theObservationDocument Indexing document for Observation.
+	 * @return True if Observation indexed successfully.
+	 */
+	Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument);
+
+	/**
+	 * Creates or updates index for an Observation Code.
+	 * @param theCodeableConceptID Identifier for Observation resource.
+	 * @param theObservationCodeDocument Indexing document for Observation.
+	 * @return True if Observation Code indexed successfully.
+	 */
+	Boolean createOrUpdateObservationCodeIndex(String theCodeableConceptID, CodeJson theObservationCodeDocument);
+
+	/**
+	 * Deletes index for an Observation Resource.
+	 * @param theDocumentId Identifier for Observation resource.
+	 */
+	void deleteObservationDocument(String theDocumentId);
+
+	/**
+	 * Invoked when shutting down.
+	 */
+	void close() throws IOException;
+
 }

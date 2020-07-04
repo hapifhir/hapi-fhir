@@ -6,7 +6,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import ca.uhn.fhir.empi.rules.svc.EmpiResourceComparatorSvc;
+import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -82,7 +82,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
-	protected EmpiResourceComparatorSvc myEmpiResourceComparatorSvc;
+	protected EmpiResourceMatcherSvc myEmpiResourceMatcherSvc;
 	@Autowired
 	protected IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
@@ -102,10 +102,16 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
+	@Override
 	@After
 	public void after() {
 		myEmpiLinkDao.deleteAll();
+		assertEquals(0, myEmpiLinkDao.count());
 		super.after();
+	}
+
+	protected void saveLink(EmpiLink theEmpiLink) {
+		myEmpiLinkDaoSvc.save(theEmpiLink);
 	}
 
 	@Nonnull
@@ -253,6 +259,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
 		thePatient.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
 		return thePatient;
+	}
+
+	protected Person addExternalEID(Person thePerson, String theEID) {
+		thePerson.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
+		return thePerson;
 	}
 
 	protected Patient clearExternalEIDs(Patient thePatient) {

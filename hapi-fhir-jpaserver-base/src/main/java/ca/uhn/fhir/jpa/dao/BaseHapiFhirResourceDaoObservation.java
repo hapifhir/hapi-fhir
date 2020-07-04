@@ -54,12 +54,14 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion,
 			theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (!retVal.isUnchangedInCurrentOperation()) {
-			if (retVal.getDeleted() == null) {
-				// Update indexes here for LastN operation.
-				myObservationLastNIndexPersistSvc.indexObservation(theResource);
-			} else {
-				myObservationLastNIndexPersistSvc.deleteObservationIndex(theEntity);
+		if (myDaoConfig.isLastNEnabled()) {
+			if (!retVal.isUnchangedInCurrentOperation()) {
+				if (retVal.getDeleted() == null) {
+					// Update indexes here for LastN operation.
+					myObservationLastNIndexPersistSvc.indexObservation(theResource);
+				} else {
+					myObservationLastNIndexPersistSvc.deleteObservationIndex(theEntity);
+				}
 			}
 		}
 

@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -58,7 +57,7 @@ public class MetaUtil {
 		IBaseHasExtensions metaWithExtensions = theMeta;
 		List<? extends IBaseExtension<?, ?>> extensions = metaWithExtensions.getExtension();
 		for (IBaseExtension extension : extensions) {
-			if (Constants.EXT_META_SOURCE.equals(extension.getUrl())) {
+			if (HapiExtensions.EXT_META_SOURCE.equals(extension.getUrl())) {
 				IPrimitiveType<String> value = (IPrimitiveType<String>) extension.getValue();
 				return value.getValueAsString();
 			}
@@ -96,7 +95,7 @@ public class MetaUtil {
 			MetaUtil.setSource(theContext, theResource.getMeta(), theValue);
 		} else if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
 			IBaseExtension<?, ?> sourceExtension = ((IBaseHasExtensions) theResource.getMeta()).addExtension();
-			sourceExtension.setUrl(Constants.EXT_META_SOURCE);
+			sourceExtension.setUrl(HapiExtensions.EXT_META_SOURCE);
 			IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("uri").newInstance();
 			value.setValue(theValue);
 			sourceExtension.setValue(value);

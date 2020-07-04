@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1932
+title: "A new configuration bean called ValidationSettings has been added to the JPA server. This can be used
+  to enable validation of reference target resources if necessary."

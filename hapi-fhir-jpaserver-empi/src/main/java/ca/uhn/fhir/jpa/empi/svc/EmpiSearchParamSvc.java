@@ -23,11 +23,11 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class EmpiSearchParamSvc {
+public class EmpiSearchParamSvc implements ISearchParamRetriever {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
@@ -50,9 +50,14 @@ public class EmpiSearchParamSvc {
 		return myMatchUrlService.translateMatchUrl(theResourceCriteria, resourceDef);
 	}
 
-	public List<String> getValueFromResourceForSearchParam(IBaseResource theResource, EmpiResourceSearchParamJson theFilterSearchParam) {
+	public List<String> getValueFromResourceForSearchParam(IBaseResource theResource, String theSearchParam) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, theFilterSearchParam.getSearchParam());
+		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, theSearchParam);
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
+	}
+
+	@Override
+	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		return mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 	}
 }

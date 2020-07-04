@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -51,6 +50,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -403,13 +403,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> ids;
 		SearchParameterMap map;
 		IBundleProvider results;
+		String searchSql;
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "foo|bar").setChain("identifier"));
 		myCaptureQueriesListener.clear();
 		results = myEncounterDao.search(map);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		searchSql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertEquals(0, StringUtils.countMatches(searchSql, "RES_DELETED_AT"));
+		assertEquals(0, StringUtils.countMatches(searchSql, "RES_TYPE"));
 		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids, hasItems(enc1Id, enc2Id));
 
@@ -876,6 +879,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
 			obs.setDevice(new Reference(devId));
+			IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			DiagnosticReport dr = new DiagnosticReport();
+			dr.addResult().setReference(obsId.getValue());
+			dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 			myObservationDao.create(obs, mySrd);
 		}
 
@@ -895,6 +903,51 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|NOLINK"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), empty());
 	}
+
+	@Test
+	public void testHasParameterDouble() {
+		// Matching
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("00");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
+			obs.setSubject(new Reference(pid0));
+			IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			DiagnosticReport dr = new DiagnosticReport();
+			dr.addResult().setReference(obsId.getValue());
+			dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+			myDiagnosticReportDao.create(dr, mySrd);
+		}
+
+		// Matching
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			IIdType pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
+			obs.setSubject(new Reference(pid1));
+			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+		}
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+
+		// Double _has
+		params = new SearchParameterMap();
+		params.add("_has", new HasParam("Observation", "subject", "_has:DiagnosticReport:result:status", "final"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), containsInAnyOrder(pid0.getValue()));
+
+	}
+
 
 	@Test
 	public void testHasParameterChained() {
@@ -4792,7 +4845,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			sp.setCode("code");
 			sp.setExpression("Observation.code");
 			sp.addExtension()
-				.setUrl(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING)
+				.setUrl(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING)
 				.setValue(new BooleanType(true));
 			ourLog.info("SP:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 			mySearchParameterDao.update(sp);

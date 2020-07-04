@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +23,14 @@ import java.sql.SQLException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +41,21 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("databaseBlobBinaryStorageSvc")
 	private IBinaryStorageSvc mySvc;
+
+	@Autowired
+	private DaoConfig myDaoConfig;
+
+	@Before
+	public void backupDaoConfig() {
+		defaultPreloadBlobFromInputStream = myDaoConfig.isPreloadBlobFromInputStream();
+	}
+
+	@After
+	public void restoreDaoConfig() {
+		myDaoConfig.setPreloadBlobFromInputStream(defaultPreloadBlobFromInputStream);
+	}
+
+	boolean defaultPreloadBlobFromInputStream;
 
 	@Test
 	public void testStoreAndRetrieve() throws IOException {
@@ -76,6 +101,12 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		assertArrayEquals(SOME_BYTES, capture.toByteArray());
 		assertArrayEquals(SOME_BYTES, mySvc.fetchBlob(resourceId, outcome.getBlobId()));
+	}
+
+	@Test
+	public void testStoreAndRetrieveWithPreload() throws IOException {
+		myDaoConfig.setPreloadBlobFromInputStream(true);
+		testStoreAndRetrieve();
 	}
 
 

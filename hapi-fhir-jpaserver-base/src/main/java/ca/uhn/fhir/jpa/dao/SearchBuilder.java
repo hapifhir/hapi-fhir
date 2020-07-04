@@ -35,9 +35,9 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactory;
-import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryStack;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryStack;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -310,9 +310,6 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myParams.isLastN()) {
 						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
 					}
-				}
-				if(myParams.getLastNMax() == null) {
-					throw new InvalidRequestException("Max parameter is required for $lastn operation");
 				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
 				for (String lastnResourceId : lastnResourceIds) {
@@ -1380,7 +1377,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return ResourcePersistentId.fromLongList(query.getResultList());
 	}
 
-	static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
+	public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 }

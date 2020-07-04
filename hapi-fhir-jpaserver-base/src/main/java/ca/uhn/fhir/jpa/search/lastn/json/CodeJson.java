@@ -24,8 +24,6 @@ import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,22 +53,26 @@ public class CodeJson {
     public CodeJson(){
     }
 
-    public CodeJson(CodeableConcept theCodeableConcept, String theCodeableConceptId) {
-        myCodeableConceptText = theCodeableConcept.getText();
-        myCodeableConceptId = theCodeableConceptId;
-        for (Coding theCoding : theCodeableConcept.getCoding()) {
-            myCoding_code.add(theCoding.getCode());
-            myCoding_system.add(theCoding.getSystem());
-            myCoding_display.add(theCoding.getDisplay());
-            myCoding_code_system_hash.add(String.valueOf(CodeSystemHash.hashCodeSystem(theCoding.getSystem(), theCoding.getCode())));
-        }
-    }
+	public void setCodeableConceptId(String theCodeableConceptId) {
+		myCodeableConceptId = theCodeableConceptId;
+	}
 
-    public String getCodeableConceptId() {
+	public void addCoding(String theCoding_system, String theCoding_code, String theCoding_display) {
+		myCoding_code.add(theCoding_code);
+		myCoding_system.add(theCoding_system);
+		myCoding_display.add(theCoding_display);
+		myCoding_code_system_hash.add(String.valueOf(CodeSystemHash.hashCodeSystem(theCoding_system, theCoding_code)));
+	}
+
+	public String getCodeableConceptId() {
         return myCodeableConceptId;
     }
 
-    public String getCodeableConceptText() {
+    public void setCodeableConceptText(String theCodeableConceptText) {
+		myCodeableConceptText = theCodeableConceptText;
+	 }
+
+	 public String getCodeableConceptText() {
         return myCodeableConceptText;
     }
 
@@ -78,11 +80,11 @@ public class CodeJson {
         return myCoding_code;
     }
 
-    public List<String> getCoding_code_system_hash() {
+	public List<String> getCoding_code_system_hash() {
         return myCoding_code_system_hash;
     }
 
-    public List<String> getCoding_display() {
+	public List<String> getCoding_display() {
         return myCoding_display;
     }
 

@@ -103,11 +103,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@Override
 	public UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
-			List<String> loincUploadPropertiesFragment = Collections.singletonList(
-				LOINC_UPLOAD_PROPERTIES_FILE.getCode()
-			);
-			descriptors.verifyMandatoryFilesExist(loincUploadPropertiesFragment);
-
 			Properties uploadProperties = getProperties(descriptors, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 
 			List<String> mandatoryFilenameFragments = Arrays.asList(
@@ -119,7 +114,8 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE.getCode(), LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_IMAGING_DOCUMENT_CODES_FILE.getCode(), LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_PART_FILE.getCode(), LOINC_PART_FILE_DEFAULT.getCode()),
-				uploadProperties.getProperty(LOINC_PART_LINK_FILE.getCode(), LOINC_PART_LINK_FILE_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_PART_RELATED_CODE_MAPPING_FILE.getCode(), LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_RSNA_PLAYBOOK_FILE.getCode(), LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()),
@@ -238,6 +234,13 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@NotNull
 	private Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
 		Properties retVal = new Properties();
+
+		try (InputStream propertyStream = TermLoaderSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loincupload.properties")) {
+			retVal.load(propertyStream);
+		} catch (IOException e) {
+			throw new InternalErrorException("Failed to process loinc.properties", e);
+		}
+
 		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
 			if (next.getFilename().endsWith(thePropertiesFile)) {
 				try {
@@ -425,10 +428,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
 		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_RSNA_PLAYBOOK_FILE.getCode(), LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
-		// Part link
-		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept);
-		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE.getCode(), LOINC_PART_LINK_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
-
 		// Part related code mapping
 		handler = new LoincPartRelatedCodeMappingHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
 		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_RELATED_CODE_MAPPING_FILE.getCode(), LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
@@ -468,6 +467,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		// Parent group
 		handler = new LoincParentGroupFileHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
 		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PARENT_GROUP_FILE.getCode(), LOINC_PARENT_GROUP_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+
+		// Part link
+		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept, propertyNamesToTypes);
+		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		IOUtils.closeQuietly(theDescriptors);
 

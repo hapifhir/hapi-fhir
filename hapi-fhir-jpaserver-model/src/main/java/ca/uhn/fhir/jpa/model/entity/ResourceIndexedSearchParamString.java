@@ -24,7 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.util.StringNormalizer;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -266,7 +266,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			return false;
 		}
 		StringParam string = (StringParam) theParam;
-		String normalizedString = StringNormalizer.normalizeStringForSearchIndexing(defaultString(string.getValue()));
+		String normalizedString = StringUtil.normalizeStringForSearchIndexing(defaultString(string.getValue()));
 		return defaultString(getValueNormalized()).startsWith(normalizedString);
 	}
 

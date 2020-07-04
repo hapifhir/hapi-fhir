@@ -12,7 +12,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -120,6 +121,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
@@ -132,6 +134,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private static IValidationSupport ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	@Autowired
+	protected IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired
@@ -353,8 +357,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@After
 	public void afterClearTerminologyCaches() {
 		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
-		baseHapiTerminologySvc.clearTranslationCache();
-		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		baseHapiTerminologySvc.clearCaches();
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationCache();
 		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl deferredSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
@@ -409,7 +412,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		if (stream == null) {
 			fail("Unable to load resource: " + resourceName);
 		}
-		String string = IOUtils.toString(stream, "UTF-8");
+		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
 		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
 		return newJsonParser.parseResource(type, string);
 	}

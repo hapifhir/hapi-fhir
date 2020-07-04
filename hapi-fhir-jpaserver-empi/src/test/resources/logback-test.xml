@@ -47,6 +47,11 @@
 	<logger name="org.hibernate" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
+
+
+	<!--
+	Configuration for EMPI troubleshooting log
+	-->
 	<appender name="EMPI_TROUBLESHOOTING" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter"><level>DEBUG</level></filter>
 		<file>${smile.basedir}/log/empi-troubleshooting.log</file>
@@ -59,12 +64,13 @@
 			<maxFileSize>5MB</maxFileSize>
 		</triggeringPolicy>
 		<encoder>
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n${log.stackfilter.pattern}</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
 	<logger name="ca.uhn.fhir.log.empi_troubleshooting" level="TRACE">
 		<appender-ref ref="EMPI_TROUBLESHOOTING"/>
 	</logger>
+
 
 
 	<root level="info">

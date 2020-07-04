@@ -26,7 +26,7 @@ public class HashTest {
 		task.setTableName("TRM_CODESYSTEM_VER");
 		task.setColumnName("CS_VERSION_ID");
 		task.setNullable(true);
-		task.setColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING);
+		task.setColumnType(ColumnTypeEnum.STRING);
 		task.setColumnLength(255);
 		return task;
 	}

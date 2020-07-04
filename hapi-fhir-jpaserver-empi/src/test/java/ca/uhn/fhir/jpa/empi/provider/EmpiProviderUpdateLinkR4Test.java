@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.empi.provider;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.r4.model.Patient;
@@ -10,23 +11,40 @@ import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
 public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
+	@Test
+	public void testUpdateLinkNoMatch() {
+		assertLinkCount(1);
+		myEmpiProviderR4.updateLink(myPersonId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
+		assertLinkCount(2);
 
+		List<EmpiLink> links = getPatientLinks();
+		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(EmpiMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
+		assertEquals(EmpiLinkSourceEnum.AUTO, links.get(1).getLinkSource());
+		assertEquals(EmpiMatchResultEnum.MATCH, links.get(1).getMatchResult());
+		assertNotEquals(links.get(0).getPersonPid(), links.get(1).getPersonPid());
+	}
 
 	@Test
-	public void testUpdateLinkHappyPath() {
-		myEmpiProviderR4.updateLink(myPersonId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
+	public void testUpdateLinkMatch() {
+		assertLinkCount(1);
+		myEmpiProviderR4.updateLink(myPersonId, myPatientId, MATCH_RESULT, myRequestDetails);
+		assertLinkCount(1);
 
-		myLink = getLink();
-		assertEquals(EmpiLinkSourceEnum.MANUAL, myLink.getLinkSource());
-		assertEquals(EmpiMatchResultEnum.NO_MATCH, myLink.getMatchResult());
+		List<EmpiLink> links = getPatientLinks();
+		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(EmpiMatchResultEnum.MATCH, links.get(0).getMatchResult());
 	}
 
 	@Test

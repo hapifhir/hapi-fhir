@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR5Test;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.model.*;
 import org.junit.After;
@@ -299,7 +299,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(observation1.getIdElement().getVersionIdPart(), idElement.getVersionIdPart());
 
 		subscription1
-			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
+			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 
 		int modCount = myCountingInterceptor.getSentCount("Subscription");
@@ -375,7 +375,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		Subscription subscription = newSubscription(criteria1, payload);
 		subscription
-			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
+			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
 		ourClient.create().resource(subscription).execute();
 
 		waitForActivatedSubscriptionCount(1);

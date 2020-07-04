@@ -10,6 +10,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static ca.uhn.fhir.util.StringUtil.toUtf8String;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -46,7 +48,7 @@ public class XmlPatchUtils {
 			throw new InternalErrorException(e);
 		}
 		
-		String resultString = new String(result.toByteArray(), Constants.CHARSET_UTF8);
+		String resultString = toUtf8String(result.toByteArray());
 		T retVal = theCtx.newXmlParser().parseResource(clazz, resultString);
 		
 		return retVal;

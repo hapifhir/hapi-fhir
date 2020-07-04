@@ -1,7 +1,11 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -11,12 +15,10 @@ import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -28,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.fail;
 
 @Configuration
-@Import(TestJPAConfig.class)
+@Import({TestJPAConfig.class, BatchJobsConfig.class})
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
 
@@ -42,18 +44,31 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * starvation
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
+
+			if ("true".equals(System.getProperty("single_db_connection"))) {
+				ourMaxThreads = 1;
+			}
 		}
 	}
 
-	@Autowired
-	private Environment myEnvironment;
 
 	private Exception myLastStackTrace;
+
+
+	@Bean
+	public IBatchJobSubmitter batchJobSubmitter() {
+		return new BatchJobSubmitterImpl();
+	}
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
+	}
+
+	@Bean
+	public BulkExportDaoSvc bulkExportDaoSvc() {
+		return new BulkExportDaoSvc();
 	}
 
 	@Bean

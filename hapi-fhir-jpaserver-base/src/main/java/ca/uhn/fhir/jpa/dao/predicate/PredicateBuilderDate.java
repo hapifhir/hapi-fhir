@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -56,27 +57,28 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-											String theParamName,
+											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation operation,
 											RequestPartitionId theRequestPartitionId) {
 
+		String paramName = theSearchParam.getName();
 		boolean newJoin = false;
 		if (myJoinMap == null) {
 			myJoinMap = new HashMap<>();
 		}
-		String key = theResourceName + " " + theParamName;
+		String key = theResourceName + " " + paramName;
 
 		From<?, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
 		if (join == null) {
-			join = myQueryStack.createJoin(SearchBuilderJoinEnum.DATE, theParamName);
+			join = myQueryStack.createJoin(SearchBuilderJoinEnum.DATE, paramName);
 			myJoinMap.put(key, join);
 			newJoin = true;
 		}
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
-			addPredicateParamMissingForNonReference(theResourceName, theParamName, missing, join, theRequestPartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, paramName, missing, join, theRequestPartitionId);
 			return null;
 		}
 
@@ -94,7 +96,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		Predicate orPredicates = myCriteriaBuilder.or(toArray(codePredicates));
 
 		if (newJoin) {
-			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicates, theRequestPartitionId);
+			Predicate identityAndValuePredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, paramName, join, orPredicates, theRequestPartitionId);
 			myQueryStack.addPredicateWithImplicitTypeSelection(identityAndValuePredicate);
 		} else {
 			myQueryStack.addPredicateWithImplicitTypeSelection(orPredicates);

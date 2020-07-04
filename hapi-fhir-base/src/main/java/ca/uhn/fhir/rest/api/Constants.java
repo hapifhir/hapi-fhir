@@ -253,15 +253,6 @@ public class Constants {
 	 * Operation name for the $lastn operation
 	 */
 	public static final String OPERATION_LASTN = "$lastn";
-	/**
-	 * <p>
-	 * This extension represents the equivalent of the
-	 * <code>Resource.meta.source</code> field within R4+ resources, and is for
-	 * use in DSTU3 resources. It should contain a value of type <code>uri</code>
-	 * and will be located on the Resource.meta
-	 * </p>
-	 */
-	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
 	public static final String PARAM_FHIRPATH = "_fhirpath";
 	public static final String PARAM_TYPE = "_type";
 
@@ -271,6 +262,7 @@ public class Constants {
 	 * key will be of type {@link ca.uhn.fhir.interceptor.model.RequestPartitionId}.
 	 */
 	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
+	public static final String CT_APPLICATION_GZIP = "application/gzip";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

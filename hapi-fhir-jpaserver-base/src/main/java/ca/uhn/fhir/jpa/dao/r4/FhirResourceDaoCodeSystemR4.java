@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -65,6 +66,8 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
@@ -102,11 +105,11 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 			system = theSystem.getValue();
 		}
 
-		ourLog.info("Looking up {} / {}", system, code);
+		ourLog.debug("Looking up {} / {}", system, code);
 
 		if (myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system)) {
 
-			ourLog.info("Code system {} is supported", system);
+			ourLog.debug("Code system {} is supported", system);
 			IValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code);
 			if (retVal != null) {
 				return retVal;
@@ -132,7 +135,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		if (isNotBlank(codeSystemUrl)) {
 			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
 			if (persCs != null) {
-				myTerminologyCodeSystemStorageSvc.deleteCodeSystem(persCs);
+				myTermDeferredStorageSvc.deleteCodeSystem(persCs);
 			}
 		}
 	}

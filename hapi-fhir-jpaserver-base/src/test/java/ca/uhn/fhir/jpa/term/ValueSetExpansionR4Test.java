@@ -10,9 +10,9 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -796,7 +796,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 
-		Extension extensionByUrl = outcome.getExpansion().getExtensionByUrl(JpaConstants.EXT_VALUESET_EXPANSION_MESSAGE);
+		Extension extensionByUrl = outcome.getExpansion().getExtensionByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE);
 		assertEquals("Unknown CodeSystem URI \"http://unknown-system\" referenced from ValueSet", extensionByUrl.getValueAsPrimitive().getValueAsString());
 	}
 
