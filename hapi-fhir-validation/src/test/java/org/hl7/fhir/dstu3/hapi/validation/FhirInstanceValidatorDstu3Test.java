@@ -316,6 +316,24 @@ public class FhirInstanceValidatorDstu3Test {
 		return retVal;
 	}
 
+	@Test
+	public void testValidateWithIso3166() throws IOException {
+		loadNL();
+
+		Patient p = loadResource("/dstu3/nl/nl-core-patient-instance.json", Patient.class);
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+
+		ValidationResult result = val.validateWithResult(p);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+		assertEquals("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]", all.get(0).getMessage());
+
+	}
+
+
+
 	/**
 	 * See #873
 	 */
@@ -715,8 +733,20 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateUsingDifferentialProfile() throws IOException {
-		loadValueSet("/dstu3/nl/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000.json");
+		loadNL();
 
+		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
+		ValidationResult results = myVal.validateWithResult(resource);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome.toString(), containsString("Element matches more than one slice"));
+	}
+
+	private void loadNL() throws IOException {
+		loadValueSet("/dstu3/nl/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000.json");
+		loadValueSet("/dstu3/nl/LandGBACodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000.json");
+		loadValueSet("/dstu3/nl/LandISOCodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000.json");
+
+		loadStructureDefinition("/dstu3/nl/extension-code-specification.json");
 		loadStructureDefinition("/dstu3/nl/nl-core-patient.json");
 		loadStructureDefinition("/dstu3/nl/proficiency.json");
 		loadStructureDefinition("/dstu3/nl/zibpatientlegalstatus.json");
@@ -740,12 +770,6 @@ public class FhirInstanceValidatorDstu3Test {
 		loadStructureDefinition("/dstu3/nl/nl-core-practitioner.json");
 		loadStructureDefinition("/dstu3/nl/nl-core-relatedperson-role.json");
 		loadStructureDefinition("/dstu3/nl/PractitionerRoleReference.json");
-
-
-		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
-		ValidationResult results = myVal.validateWithResult(resource);
-		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("Element matches more than one slice"));
 	}
 
 	public void loadValueSet(String theFilename) throws IOException {
