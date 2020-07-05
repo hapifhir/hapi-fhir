@@ -1,16 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 	@Test

@@ -51,9 +51,9 @@ import org.hamcrest.core.StringEndsWith;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -69,14 +69,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -90,7 +90,7 @@ public class ClientR4Test {
 
 	// atom-document-large.xml
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
@@ -232,15 +232,6 @@ public class ClientR4Test {
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
-
-	interface MyClient extends IRestfulClient {
-
-		@Search()
-		List<Patient> search(@IncludeParam String theInclude);
-
-
-	}
-
 
 	@Test
 	public void testStringIncludeTest() throws Exception {
@@ -1214,20 +1205,24 @@ public class ClientR4Test {
 
 	}
 
-	@Test(expected = ResourceVersionConflictException.class)
+	@Test
 	public void testUpdateWithResourceConflict() throws Exception {
+		try {
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:foo").setValue("123");
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:foo").setValue("123");
+			ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+			when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+			when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+			when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
+			when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
 
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
-
-		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		client.updatePatient(new IdType("Patient/100/_history/200"), patient);
+			ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
+			client.updatePatient(new IdType("Patient/100/_history/200"), patient);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertEquals("HTTP 409 Conflict", e.getMessage());
+		}
 	}
 
 	@Test
@@ -1439,6 +1434,14 @@ public class ClientR4Test {
 		}
 	}
 
+	interface MyClient extends IRestfulClient {
+
+		@Search()
+		List<Patient> search(@IncludeParam String theInclude);
+
+
+	}
+
 	public interface ITestClientWithCreateWithInvalidParameterType extends IRestfulClient {
 
 		@Create()
@@ -1521,7 +1524,7 @@ public class ClientR4Test {
 		// nothing
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

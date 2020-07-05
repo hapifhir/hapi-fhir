@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;

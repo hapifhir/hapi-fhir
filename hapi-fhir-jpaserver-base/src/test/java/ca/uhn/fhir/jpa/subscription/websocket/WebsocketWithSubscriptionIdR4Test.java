@@ -15,9 +15,9 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Subscription;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
@@ -59,20 +59,20 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@After
+	@AfterEach
 	public void afterCloseWebsocket() throws Exception {
 		ourLog.info("Shutting down websocket client");
 		myWebSocketClient.stop();
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -83,7 +83,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		 */
 
 		Patient patient = FhirR4Util.getPatient();
-		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
 
 		/*
@@ -100,7 +100,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		channel.setPayload("application/json");
 		subscription.setChannel(channel);
 
-		methodOutcome = ourClient.create().resource(subscription).execute();
+		methodOutcome = myClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
 
 		/*
@@ -135,7 +135,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		observation.setSubject(reference);
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 
@@ -159,7 +159,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		observation.setSubject(reference);
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 

@@ -36,9 +36,9 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,33 +51,17 @@ import java.text.MessageFormat;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @version 1.0.0
  */
-public class LoggingRule implements TestRule {
+public class LoggingExtension implements BeforeEachCallback, AfterEachCallback {
 
-    /**
-     * Apply the test rule by building a wrapper {@link Statement} that logs a messages before and after evaluating
-     * <code>statement</code> and if
-     * @param statement The statement to be modified.
-     * @param description A description of the test implemented in <code>statement</code>.
-     * @return The modified statement.
-     */
-    @Override
-	 public Statement apply(final Statement statement, final Description description) {
-        return new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                final Logger logger = LoggerFactory.getLogger(description.getTestClass());
-                logger.info(MessageFormat.format("Starting test case [{0}]", description.getDisplayName()));
-                boolean success = false;
-                try {
-                    statement.evaluate();
-                    success = true;
-                } catch (final Throwable e) {
-                    logger.error(MessageFormat.format("Exception thrown in test case [{0}]: {1}", description.getDisplayName(), e.toString()), e);
-                    throw e;
-                } finally {
-                    logger.info(MessageFormat.format("Finished test case [{0}] (success={1})", description.getDisplayName(), success));
-                }
-            }
-        };
-    }
+	@Override
+	public void afterEach(ExtensionContext context) {
+		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
+		logger.info(MessageFormat.format("Finished test case [{0}]", context.getTestMethod().get().getName()));
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext context) {
+		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
+		logger.info(MessageFormat.format("Starting test case [{0}]", context.getTestMethod().get().getName()));
+	}
 }

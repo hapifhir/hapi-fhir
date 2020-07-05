@@ -12,10 +12,10 @@ import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -31,8 +31,8 @@ import java.util.zip.ZipOutputStream;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
@@ -48,7 +48,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
 		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
@@ -104,7 +104,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 	 * This is just for trying stuff, it won't run without
 	 * local files external to the git repo
 	 */
-	@Ignore
+	@Disabled
 	@Test
 	public void testLoadSnomedCtAgainstRealFile() throws Exception {
 		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
@@ -146,9 +146,5 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		}
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

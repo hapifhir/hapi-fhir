@@ -10,20 +10,20 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
@@ -31,14 +31,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
 	private IIdType myExtensionalVsId;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
-
-	@Before
+	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
@@ -152,20 +145,20 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 		// @formatter:off
 		assertThat(resp,
-			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
-				"<expansion>", 
-					"<contains>", 
-						"<system value=\"http://loinc.org\"/>",
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>", 
-					"</contains>",
-					"<contains>", 
-						"<system value=\"http://loinc.org\"/>",
-						"<code value=\"8450-9\"/>", 
-						"<display value=\"Systolic blood pressure--expiration\"/>", 
-					"</contains>",
-				"</expansion>" 
-					));
+			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
+				"<expansion>",
+				"<contains>",
+				"<system value=\"http://loinc.org\"/>",
+				"<code value=\"11378-7\"/>",
+				"<display value=\"Systolic blood pressure at First encounter\"/>",
+				"</contains>",
+				"<contains>",
+				"<system value=\"http://loinc.org\"/>",
+				"<code value=\"8450-9\"/>",
+				"<display value=\"Systolic blood pressure--expiration\"/>",
+				"</contains>",
+				"</expansion>"
+			));
 		//@formatter:on
 
 		/*
@@ -177,8 +170,8 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
 
 		/*
@@ -190,11 +183,11 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
 	}
-	
+
 	@Test
 	public void testExpandByIdentifier() {
 		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "11378");
@@ -202,8 +195,8 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
 
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
@@ -217,11 +210,12 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
 
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
+
 
 }

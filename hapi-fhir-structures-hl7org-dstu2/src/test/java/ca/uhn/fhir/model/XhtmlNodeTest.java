@@ -1,16 +1,16 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.assertEquals;
-
 import org.hl7.fhir.dstu2.model.Narrative;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class XhtmlNodeTest {
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testNamespaces() {
 		
 		Narrative type = new Narrative();

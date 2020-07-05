@@ -1,36 +1,40 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.*;
-import java.nio.charset.Charset;
-
-import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicStatusLine;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicStatusLine;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentCaptor;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class BaseResourceReferenceDtTest {
 
@@ -39,13 +43,13 @@ public class BaseResourceReferenceDtTest {
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu2();
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
@@ -54,7 +58,7 @@ public class BaseResourceReferenceDtTest {
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
-	private ArgumentCaptor<HttpUriRequest> fixtureJson() throws IOException, ClientProtocolException {
+	private ArgumentCaptor<HttpUriRequest> fixtureJson() throws IOException {
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAM");
 		final String input = ourCtx.newJsonParser().encodeResourceToString(patient);
@@ -67,13 +71,13 @@ public class BaseResourceReferenceDtTest {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(input), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(input), StandardCharsets.UTF_8);
 			}
 		});
 		return capt;
 	}
 
-	private ArgumentCaptor<HttpUriRequest> fixtureXml() throws IOException, ClientProtocolException {
+	private ArgumentCaptor<HttpUriRequest> fixtureXml() throws IOException {
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAM");
 		final String input = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -86,7 +90,7 @@ public class BaseResourceReferenceDtTest {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(input), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(input), StandardCharsets.UTF_8);
 			}
 		});
 		return capt;
@@ -150,7 +154,7 @@ public class BaseResourceReferenceDtTest {
 	}
 
 	@Test
-	public void testReturnAlreadyLoadedInstance() throws ClientProtocolException, IOException {
+	public void testReturnAlreadyLoadedInstance() throws IOException {
 		ArgumentCaptor<HttpUriRequest> capt = fixtureJson();
 		IClientType client = ourCtx.newRestfulClient(IClientType.class, "http://example4.com/fhir");
 

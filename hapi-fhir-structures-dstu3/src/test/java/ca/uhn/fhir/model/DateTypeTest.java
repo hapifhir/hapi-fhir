@@ -1,22 +1,21 @@
 package ca.uhn.fhir.model;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import org.hl7.fhir.dstu3.model.DateType;
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.util.TestUtil;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTypeTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateTypeTest.class);
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

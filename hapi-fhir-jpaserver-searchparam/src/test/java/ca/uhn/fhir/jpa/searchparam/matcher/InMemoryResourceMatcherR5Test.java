@@ -17,69 +17,44 @@ import org.hl7.fhir.r5.model.BaseDateTimeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class InMemoryResourceMatcherR5Test {
 	public static final String OBSERVATION_DATE = "1970-10-17";
+	public static final String OBSERVATION_CODE = "MATCH";
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
-	public static final String OBSERVATION_CODE = "MATCH";
 	private static final String SOURCE_URI = "urn:source:0";
 	private static final String REQUEST_ID = "a_request_id";
 	private static final String TEST_SOURCE = SOURCE_URI + "#" + REQUEST_ID;
-
-	@Autowired
-	private InMemoryResourceMatcher myInMemoryResourceMatcher;
-
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	private Observation myObservation;
 	private ResourceIndexedSearchParams mySearchParams;
 
-	@Configuration
-	public static class SpringConfig {
-		@Bean
-		InMemoryResourceMatcher inMemoryResourceMatcher() {
-			return new InMemoryResourceMatcher();
-		}
-
-		@Bean
-		MatchUrlService matchUrlService() {
-			return new MatchUrlService();
-		}
-
-		@Bean
-		FhirContext fhirContext() {
-			return FhirContext.forR5();
-		}
-
-		@Bean
-		ModelConfig modelConfig() {
-			return new ModelConfig();
-		}
-	}
-
-	@Before
+	@BeforeEach
 	public void before() {
 		RuntimeSearchParam dateSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		when(mySearchParamRegistry.getSearchParamByName(any(), eq("date"))).thenReturn(dateSearchParam);
@@ -163,17 +138,17 @@ public class InMemoryResourceMatcherR5Test {
 		String equation = "date=" + theOperator.getValue();
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + EARLY_DATE, myObservation, mySearchParams);
-			assertTrue(result.getUnsupportedReason(), result.supported());
+			assertTrue(result.supported(), result.getUnsupportedReason());
 			assertEquals(result.matched(), theEarly);
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBSERVATION_DATE, myObservation, mySearchParams);
-			assertTrue(result.getUnsupportedReason(), result.supported());
-			assertEquals(theSame, result.matched());
+			assertTrue(result.supported(), result.getUnsupportedReason());
+			assertEquals(result.matched(), theSame);
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + LATE_DATE, myObservation, mySearchParams);
-			assertTrue(result.getUnsupportedReason(), result.supported());
+			assertTrue(result.supported(), result.getUnsupportedReason());
 			assertEquals(result.matched(), theLater);
 		}
 	}
@@ -181,7 +156,7 @@ public class InMemoryResourceMatcherR5Test {
 	@Test
 	public void testNowPast() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.NOW_DATE_CONSTANT, myObservation, mySearchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -193,7 +168,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -205,14 +180,14 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
 	@Test
 	public void testTodayPast() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, myObservation, mySearchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -224,7 +199,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -236,7 +211,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
 	}
 
@@ -248,7 +223,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertFalse(result.matched());
 	}
 
@@ -266,7 +241,7 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertFalse(result.matched());
 	}
 
@@ -277,6 +252,29 @@ public class InMemoryResourceMatcherR5Test {
 		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
 		retval.myDateParams.add(dateParam);
 		return retval;
+	}
+
+	@Configuration
+	public static class SpringConfig {
+		@Bean
+		InMemoryResourceMatcher inMemoryResourceMatcher() {
+			return new InMemoryResourceMatcher();
+		}
+
+		@Bean
+		MatchUrlService matchUrlService() {
+			return new MatchUrlService();
+		}
+
+		@Bean
+		FhirContext fhirContext() {
+			return FhirContext.forR5();
+		}
+
+		@Bean
+		ModelConfig modelConfig() {
+			return new ModelConfig();
+		}
 	}
 
 }

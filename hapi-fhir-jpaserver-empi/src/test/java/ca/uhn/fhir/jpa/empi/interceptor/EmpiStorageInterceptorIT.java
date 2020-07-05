@@ -20,9 +20,9 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -35,12 +35,12 @@ import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -49,13 +49,13 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 
 	private static final Logger ourLog = getLogger(EmpiStorageInterceptorIT.class);
 
-	@Rule
+	@RegisterExtension
 	@Autowired
 	public EmpiHelperR4 myEmpiHelper;
 	@Autowired
 	private IdHelperService myIdHelperService;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		super.loadEmpiSearchParameters();
 	}
@@ -135,7 +135,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
-		for (IBaseResource person: resources) {
+		for (IBaseResource person : resources) {
 			assertThat(person.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED), is(notNullValue()));
 		}
 	}
@@ -153,7 +153,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 			myEmpiHelper.doUpdateResource(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("The HAPI-EMPI tag on a resource may not be changed once created.", e.getMessage() );
+			assertEquals("The HAPI-EMPI tag on a resource may not be changed once created.", e.getMessage());
 		}
 	}
 
@@ -168,7 +168,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		//Updating a Person who was created via EMPI should fail.
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(patient)).get();
 		Long personPid = empiLink.getPersonPid();
-		Person empiPerson= (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
+		Person empiPerson = (Person) myPersonDao.readByPid(new ResourcePersistentId(personPid));
 		empiPerson.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myEmpiHelper.doUpdateResource(empiPerson, true);
@@ -177,7 +177,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testEmpiPointcutReceivesTransactionLogMessages() throws InterruptedException {
 		EmpiHelperR4.OutcomeAndLogMessageWrapper wrapper = myEmpiHelper.createWithLatch(buildJanePatient());
@@ -205,6 +205,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		assertThat(externalEids, hasSize(1));
 		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));
 	}
+
 	@Test
 	public void testWhenEidUpdatesAreDisabledForbidsUpdatesToEidsOnTargets() throws InterruptedException {
 		setPreventEidUpdates(true);
@@ -240,11 +241,11 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	}
 
 	private void setPreventEidUpdates(boolean thePrevent) {
-		((EmpiSettings)myEmpiConfig).setPreventEidUpdates(thePrevent);
+		((EmpiSettings) myEmpiConfig).setPreventEidUpdates(thePrevent);
 	}
 
 	private void setPreventMultipleEids(boolean thePrevent) {
-		((EmpiSettings)myEmpiConfig).setPreventMultipleEids(thePrevent);
+		((EmpiSettings) myEmpiConfig).setPreventMultipleEids(thePrevent);
 	}
 
 }

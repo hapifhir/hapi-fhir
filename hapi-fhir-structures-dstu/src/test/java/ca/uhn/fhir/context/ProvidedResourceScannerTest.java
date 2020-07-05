@@ -5,12 +5,12 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.util.TestUtil;
 import junit.framework.TestCase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 
 public class ProvidedResourceScannerTest extends TestCase {
 	@Test
@@ -37,7 +37,7 @@ public class ProvidedResourceScannerTest extends TestCase {
 	public static class TestResourceProviderB {
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -17,9 +17,8 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -34,6 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonLikeParserTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -57,7 +60,7 @@ public class JsonLikeParserTest {
 		IJsonLikeParser jsonLikeparser = (IJsonLikeParser)ourCtx.newJsonParser();
 		
 		IBaseResource resource = jsonLikeparser.parseResource(jsonLikeStructure);
-		Assert.assertEquals("reparsed resource classes not equal", parsed.getClass().getName(), resource.getClass().getName());
+		assertEquals(parsed.getClass().getName(), resource.getClass().getName(), "reparsed resource classes not equal");
 	}
 
 	/**
@@ -79,20 +82,20 @@ public class JsonLikeParserTest {
 		
 		System.out.println("encoded map: " + jsonLikeMap.toString());
 
-		Assert.assertNotNull("Encoded resource missing 'resourceType' element", jsonLikeMap.get("resourceType"));
-		Assert.assertEquals("Expecting 'resourceType'='Patient'; found '"+jsonLikeMap.get("resourceType")+"'", jsonLikeMap.get("resourceType"), "Patient");
+		assertNotNull(jsonLikeMap.get("resourceType"), "Encoded resource missing 'resourceType' element");
+		assertEquals(jsonLikeMap.get("resourceType"), "Patient", "Expecting 'resourceType'='Patient'; found '"+jsonLikeMap.get("resourceType")+"'");
 
-		Assert.assertNotNull("Encoded resource missing 'extension' element", jsonLikeMap.get("extension"));
-		Assert.assertTrue("'extension' element is not a List", (jsonLikeMap.get("extension") instanceof List));
+		assertNotNull(jsonLikeMap.get("extension"), "Encoded resource missing 'extension' element");
+		assertTrue((jsonLikeMap.get("extension") instanceof List), "'extension' element is not a List");
 		
 		List<Object> extensions = (List<Object>)jsonLikeMap.get("extension");
-		Assert.assertEquals("'extnesion' array has more than one entry", 1, extensions.size());
-		Assert.assertTrue("'extension' array entry is not a Map", (extensions.get(0) instanceof Map));
+		assertEquals( 1, extensions.size(), "'extnesion' array has more than one entry");
+		assertTrue((extensions.get(0) instanceof Map), "'extension' array entry is not a Map");
 		
 		Map<String, Object> extension = (Map<String,Object>)extensions.get(0);
-		Assert.assertNotNull("'extension' entry missing 'url' member", extension.get("url"));
-		Assert.assertTrue("'extension' entry 'url' member is not a String", (extension.get("url") instanceof String));
-		Assert.assertEquals("Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'", "x1", (String)extension.get("url"));
+		assertNotNull(extension.get("url"), "'extension' entry missing 'url' member");
+		assertTrue((extension.get("url") instanceof String), "'extension' entry 'url' member is not a String");
+		assertEquals("x1", extension.get("url"), "Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'");
 	
 	}
 	
@@ -120,36 +123,36 @@ public class JsonLikeParserTest {
 		IJsonLikeParser parser = (IJsonLikeParser)ourCtx.newJsonParser();
 		Patient nonExt = parser.parseResource(Patient.class, jsonStructure);
 
-		Assert.assertEquals(Patient.class, nonExt.getClass());
-		Assert.assertEquals("urn:sys", nonExt.getIdentifier().get(0).getSystem());
-		Assert.assertEquals("id1", nonExt.getIdentifier().get(0).getValue());
-		Assert.assertEquals("urn:sys", nonExt.getIdentifier().get(1).getSystem());
-		Assert.assertEquals("id2", nonExt.getIdentifier().get(1).getValue());
+		assertEquals(Patient.class, nonExt.getClass());
+		assertEquals("urn:sys", nonExt.getIdentifier().get(0).getSystem());
+		assertEquals("id1", nonExt.getIdentifier().get(0).getValue());
+		assertEquals("urn:sys", nonExt.getIdentifier().get(1).getSystem());
+		assertEquals("id2", nonExt.getIdentifier().get(1).getValue());
 
 		List<Extension> ext = nonExt.getExtensionsByUrl("urn:ext");
-		Assert.assertEquals(1, ext.size());
-		Assert.assertEquals("urn:ext", ext.get(0).getUrl());
-		Assert.assertEquals(IntegerType.class, ext.get(0).getValueAsPrimitive().getClass());
-		Assert.assertEquals("100", ext.get(0).getValueAsPrimitive().getValueAsString());
+		assertEquals(1, ext.size());
+		assertEquals("urn:ext", ext.get(0).getUrl());
+		assertEquals(IntegerType.class, ext.get(0).getValueAsPrimitive().getClass());
+		assertEquals("100", ext.get(0).getValueAsPrimitive().getValueAsString());
 
 		List<Extension> modExt = nonExt.getExtensionsByUrl("urn:modExt");
-		Assert.assertEquals(1, modExt.size());
-		Assert.assertEquals("urn:modExt", modExt.get(0).getUrl());
-		Assert.assertEquals(IntegerType.class, modExt.get(0).getValueAsPrimitive().getClass());
-		Assert.assertEquals("200", modExt.get(0).getValueAsPrimitive().getValueAsString());
+		assertEquals(1, modExt.size());
+		assertEquals("urn:modExt", modExt.get(0).getUrl());
+		assertEquals(IntegerType.class, modExt.get(0).getValueAsPrimitive().getClass());
+		assertEquals("200", modExt.get(0).getValueAsPrimitive().getValueAsString());
 
 		ExtPatient va = ourCtx.newViewGenerator().newView(nonExt, ExtPatient.class);
-		Assert.assertEquals("urn:sys", va.getIdentifier().get(0).getSystem());
-		Assert.assertEquals("id1", va.getIdentifier().get(0).getValue());
-		Assert.assertEquals("urn:sys", va.getIdentifier().get(1).getSystem());
-		Assert.assertEquals("id2", va.getIdentifier().get(1).getValue());
-		Assert.assertEquals(100, va.getExt().getValue().intValue());
-		Assert.assertEquals(200, va.getModExt().getValue().intValue());
+		assertEquals("urn:sys", va.getIdentifier().get(0).getSystem());
+		assertEquals("id1", va.getIdentifier().get(0).getValue());
+		assertEquals("urn:sys", va.getIdentifier().get(1).getSystem());
+		assertEquals("id2", va.getIdentifier().get(1).getValue());
+		assertEquals(100, va.getExt().getValue().intValue());
+		assertEquals(200, va.getModExt().getValue().intValue());
 
-		Assert.assertEquals(0, va.getExtension().size());
+		assertEquals(0, va.getExtension().size());
 	}
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
@@ -194,7 +197,7 @@ public class JsonLikeParserTest {
 			NONE, OBJECT, ARRAY
 		}
 		private Block currentBlock = new Block(BlockType.NONE);
-		private Stack<Block> blockStack = new Stack<Block>(); 
+		private Stack<Block> blockStack = new Stack<>();
 
 		public JsonLikeMapWriter () {
 			super();
@@ -208,7 +211,7 @@ public class JsonLikeParserTest {
 		}
 
 		@Override
-		public JsonLikeWriter init() throws IOException {
+		public JsonLikeWriter init() {
 			if (target != null) {
 				target.clear();
 			}
@@ -235,18 +238,18 @@ public class JsonLikeParserTest {
 			if (currentBlock.getType() == BlockType.OBJECT) {
 				throw new IOException("Unnamed JSON elements can only be created in JSON arrays");
 			}
-			Map<String,Object> newObject = null;
+			Map<String,Object> newObject;
 			if (currentBlock.getType() == BlockType.NONE) {
 				if (null == target) {
 					// for this test, we don't care about ordering of map elements
 					// target = new EntryOrderedMap<String,Object>();
-					target = new HashMap<String,Object>();
+					target = new HashMap<>();
 				}
 				newObject = target;
 			} else {
 				// for this test, we don't care about ordering of map elements
 				// newObject = new EntryOrderedMap<String,Object>();
-				newObject = new HashMap<String,Object>();
+				newObject = new HashMap<>();
 			}
 			blockStack.push(currentBlock);
 			currentBlock = new Block(BlockType.OBJECT);
@@ -264,7 +267,7 @@ public class JsonLikeParserTest {
 			currentBlock.setName(name);
 			// for this test, we don't care about ordering of map elements
 			// currentBlock.setObject(new EntryOrderedMap<String,Object>());
-			currentBlock.setObject(new HashMap<String,Object>());
+			currentBlock.setObject(new HashMap<>());
 			return this;
 		}
 
@@ -276,7 +279,7 @@ public class JsonLikeParserTest {
 			blockStack.push(currentBlock);
 			currentBlock = new Block(BlockType.ARRAY);
 			currentBlock.setName(name);
-			currentBlock.setArray(new ArrayList<Object>());
+			currentBlock.setArray(new ArrayList<>());
 			return this;
 		}
 
