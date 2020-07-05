@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
+import javax.persistence.Column;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -120,6 +121,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkgVerRes.addForeignKey("20200610.11", "FK_NPM_PACKVERRES_PACKVER").toColumn("PACKVER_PID").references("NPM_PACKAGE_VER", "PID");
 		pkgVerRes.addForeignKey("20200610.12", "FK_NPM_PKVR_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		pkgVerRes.addIndex("20200610.13", "IDX_PACKVERRES_URL").unique(false).withColumns("CANONICAL_URL");
+
+		pkgVerRes.modifyColumn("20200629.1", "PKG_DESC").nullable().withType(ColumnTypeEnum.STRING, 200);
+		pkgVerRes.modifyColumn("20200629.2", "DESC_UPPER").nullable().withType(ColumnTypeEnum.STRING, 200);
 
 	}
 

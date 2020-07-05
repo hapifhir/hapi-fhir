@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1948
+title: "When validating resources containing codes in a ValueSet that included UCUM codes, the validator would
+  incorrectly report that the code was valid even if it was not in the ValueSet. This has been corrected."

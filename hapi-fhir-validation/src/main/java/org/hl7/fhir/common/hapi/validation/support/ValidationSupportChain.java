@@ -231,10 +231,12 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
-			if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
-				CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
-				if (retVal != null) {
-					return retVal;
+			if (isBlank(theValueSetUrl) || next.isValueSetSupported(theValidationSupportContext, theValueSetUrl)) {
+				if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
+					CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+					if (retVal != null) {
+						return retVal;
+					}
 				}
 			}
 		}
@@ -244,7 +246,8 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		for (IValidationSupport next : myChain) {
-			if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
+			String url = CommonCodeSystemsTerminologyService.getValueSetUrl(theValueSet);
+			if (isBlank(url) || next.isValueSetSupported(theValidationSupportContext, url)) {
 				CodeValidationResult retVal = next.validateCodeInValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 				if (retVal != null) {
 					return retVal;
