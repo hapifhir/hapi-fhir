@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
@@ -32,10 +33,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,18 +50,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SearchParamExtractorR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 	private static IValidationSupport ourValidationSupport;
 	private MySearchParamRegistry mySearchParamRegistry;
 	private PartitionSettings myPartitionSettings;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		mySearchParamRegistry = new MySearchParamRegistry();
@@ -409,12 +410,7 @@ public class SearchParamExtractorR4Test {
 		}
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	}

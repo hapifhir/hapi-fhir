@@ -2,15 +2,15 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class HashTest {
 
@@ -37,7 +37,7 @@ public class HashTest {
 		Map<String, Integer> hashesByVersion = new HashMap<>();
 		for (BaseTask task : tasks1) {
 			String version = task.getFlywayVersion();
-			assertNull("Duplicate flyway version " + version + " in " + HapiFhirJpaMigrationTasks.class.getName(), hashesByVersion.get(version));
+			assertNull(hashesByVersion.get(version), "Duplicate flyway version " + version + " in " + HapiFhirJpaMigrationTasks.class.getName());
 			hashesByVersion.put(version, task.hashCode());
 		}
 
@@ -45,7 +45,7 @@ public class HashTest {
 		for (BaseTask task : tasks2) {
 			String version = task.getFlywayVersion();
 			int origHash = hashesByVersion.get(version);
-			assertEquals("Hashes differ for task " + version, origHash, task.hashCode());
+			assertEquals(origHash, task.hashCode(), "Hashes differ for task " + version);
 		}
 	}
 }

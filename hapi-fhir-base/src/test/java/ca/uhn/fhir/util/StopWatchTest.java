@@ -2,21 +2,21 @@ package ca.uhn.fhir.util;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StopWatchTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StopWatchTest.class);
 
-	@After
+	@AfterEach
 	public void after() {
 		StopWatch.setNowForUnitTestForUnitTest(null);
 	}

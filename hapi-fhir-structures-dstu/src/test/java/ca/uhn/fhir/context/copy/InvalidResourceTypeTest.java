@@ -1,10 +1,10 @@
 package ca.uhn.fhir.context.copy;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -31,7 +31,7 @@ public class InvalidResourceTypeTest {
 	}
 
 
- 	@AfterClass
+ 	@AfterAll
  	public static void afterClassClearContext() {
  		TestUtil.clearAllStaticFieldsForUnitTest();
  	}

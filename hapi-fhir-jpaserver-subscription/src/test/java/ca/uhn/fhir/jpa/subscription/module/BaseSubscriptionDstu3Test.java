@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = {TestSubscriptionDstu3Config.class})
 public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {

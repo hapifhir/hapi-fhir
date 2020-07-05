@@ -1,10 +1,10 @@
 package org.hl7.fhir.r4.model;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ModelR4Test {
 

@@ -1,33 +1,11 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.util.*;
-
-import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicStatusLine;
-import org.hl7.fhir.dstu2016may.model.*;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -36,6 +14,39 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicStatusLine;
+import org.hl7.fhir.dstu2016may.model.Bundle;
+import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2016may.model.Extension;
+import org.hl7.fhir.dstu2016may.model.Location;
+import org.hl7.fhir.dstu2016may.model.StringType;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentCaptor;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class SearchClientDstu2_1Test {
 
@@ -44,12 +55,12 @@ public class SearchClientDstu2_1Test {
 	private HttpClient ourHttpClient;
 	private HttpResponse ourHttpResponse;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu2_1();
 

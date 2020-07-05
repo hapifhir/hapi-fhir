@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorR4;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -13,21 +12,22 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsR4Test.class);
 
 	@Override
+	@BeforeEach
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();
 
@@ -36,12 +36,12 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerInterceptor(interceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeEnableScheduling() {
 		myDaoConfig.setSchedulingDisabled(false);
 	}
@@ -55,7 +55,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setCriteria("Observation?identifier=123");
 		try {
-			ourClient.create().resource(subs).execute();
+			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
@@ -63,14 +63,14 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 		subs.setId("ABC");
 		try {
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.REQUESTED);
-		ourClient.update().resource(subs).execute();
+		myClient.update().resource(subs).execute();
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		subs.setStatus(SubscriptionStatus.ACTIVE);
 		subs.setCriteria("Observation?identifier=123");
 		try {
-			ourClient.create().resource(subs).execute();
+			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
@@ -90,7 +90,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 		subs.setId("ABC");
 		try {
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
@@ -107,21 +107,21 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setStatus(SubscriptionStatus.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
-		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
 
 		subs.setId(id);
 
 		try {
 			subs.setStatus(SubscriptionStatus.ACTIVE);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatus) null);
-			ourClient.update().resource(subs).execute();
+			subs.setStatus(null);
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
@@ -139,33 +139,29 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setCriteria("Observation?identifier=123");
 		subs.setStatus(SubscriptionStatus.REQUESTED);
-		IIdType id = ourClient.create().resource(subs).execute().getId();
+		IIdType id = myClient.create().resource(subs).execute().getId();
 		subs.setId(id);
 
 		try {
 			subs.setStatus(SubscriptionStatus.ACTIVE);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatus) null);
-			ourClient.update().resource(subs).execute();
+			subs.setStatus(null);
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.OFF);
-		ourClient.update().resource(subs).execute();
+		myClient.update().resource(subs).execute();
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	public class BaseSocket {
 		protected String myError;

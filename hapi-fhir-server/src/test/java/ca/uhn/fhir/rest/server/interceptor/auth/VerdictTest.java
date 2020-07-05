@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class VerdictTest {
 

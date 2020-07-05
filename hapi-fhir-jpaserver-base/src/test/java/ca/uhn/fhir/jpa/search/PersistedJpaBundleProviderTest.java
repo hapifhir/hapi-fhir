@@ -4,21 +4,21 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PersistedJpaBundleProviderTest {
 	private PersistedJpaBundleProvider myPersistedJpaBundleProvider;
 	private IDao myDao;
 	private SearchBuilderFactory mySearchBuilderFactory;
 
-	@Before
+	@BeforeEach
 	public void init() {
 		RequestDetails request = mock(RequestDetails.class);
 		String searchUuid = "this is not a hat";

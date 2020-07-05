@@ -4,20 +4,17 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingS
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test {
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void testInMemory() {
@@ -39,9 +36,12 @@ public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test
 		assertDatabase("Observation?code=17861-6&context.type=IHD");
 		assertDatabase("Observation?context.type=IHD&code=17861-6");
 
-		exception.expect(InvalidRequestException.class);
-		exception.expectMessage(containsString("Resource type Observation does not have a parameter with name: codeee"));
-		assertInMemory("Observation?codeee=SNOMED-CT|123&_format=xml");
+		try {
+			assertInMemory("Observation?codeee=SNOMED-CT|123&_format=xml");
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Resource type Observation does not have a parameter with name: codeee"));
+		}
 	}
 
 	private void assertDatabase(String theCriteria) {

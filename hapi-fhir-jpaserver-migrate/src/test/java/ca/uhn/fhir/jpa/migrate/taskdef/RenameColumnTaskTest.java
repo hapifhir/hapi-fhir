@@ -2,27 +2,27 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.flywaydb.core.api.FlywayException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RenameColumnTaskTest extends BaseTest {
 
-	public RenameColumnTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
 
-	@Test
-	public void testColumnAlreadyExists() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
@@ -37,8 +37,11 @@ public class RenameColumnTaskTest extends BaseTest {
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
 	}
 
-	@Test
-	public void testForeignKeyColumnAlreadyExists_MySql() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testForeignKeyColumnAlreadyExists_MySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		testForeignKeyColumnAlreadyExists(true);
 	}
 
@@ -67,13 +70,19 @@ public class RenameColumnTaskTest extends BaseTest {
 		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
 	}
 
-	@Test
-	public void testForeignKeyColumnAlreadyExists_OtherDB() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testForeignKeyColumnAlreadyExists_OtherDB(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		testForeignKeyColumnAlreadyExists(false);
 	}
 
-	@Test
-	public void testBothExistDeleteTargetFirst() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testBothExistDeleteTargetFirst(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
@@ -90,8 +99,11 @@ public class RenameColumnTaskTest extends BaseTest {
 		assertThat(columnNames.toString(), columnNames, containsInAnyOrder("PID", "TEXTCOL"));
 	}
 
-	@Test
-	public void testForeignKeyColumnBothExistDeleteTargetFirst_MySql() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testForeignKeyColumnBothExistDeleteTargetFirst_MySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		testForeignKeyColumnBothExistDeleteTargetFirst(true);
 	}
 
@@ -118,7 +130,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD"), empty());
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD"), hasSize(0));
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
 
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "NOKREF"));
@@ -127,13 +139,19 @@ public class RenameColumnTaskTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testForeignKeyColumnBothExistDeleteTargetFirst_OtherDB() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testForeignKeyColumnBothExistDeleteTargetFirst_OtherDB(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		testForeignKeyColumnBothExistDeleteTargetFirst(false);
 	}
 
-	@Test
-	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL, myTextCol) VALUES (123, 'AAA', 'BBB')");
 
@@ -154,8 +172,11 @@ public class RenameColumnTaskTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testColumnDoesntAlreadyExist() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnDoesntAlreadyExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, myTextCol varchar(255))");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
@@ -170,8 +191,11 @@ public class RenameColumnTaskTest extends BaseTest {
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
 	}
 
-	@Test
-	public void testForeignKeyColumnDoesntAlreadyExist_MySql() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testForeignKeyColumnDoesntAlreadyExist_MySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		testForeignKeyColumnDoesntAlreadyExist(true);
 	}
 
@@ -201,13 +225,19 @@ public class RenameColumnTaskTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testForeignKeyColumnDoesntAlreadyExist_OtherDB() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testForeignKeyColumnDoesntAlreadyExist_OtherDB(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		testForeignKeyColumnDoesntAlreadyExist(false);
 	}
 
-	@Test
-	public void testNeitherColumnExists() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testNeitherColumnExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null)");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
@@ -226,8 +256,11 @@ public class RenameColumnTaskTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testNeitherColumnExistsButAllowed() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testNeitherColumnExistsButAllowed(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null)");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
@@ -240,8 +273,11 @@ public class RenameColumnTaskTest extends BaseTest {
 		getMigrator().migrate();
 	}
 
-	@Test
-	public void testBothColumnsExist() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testBothColumnsExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, PID2 bigint)");
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");

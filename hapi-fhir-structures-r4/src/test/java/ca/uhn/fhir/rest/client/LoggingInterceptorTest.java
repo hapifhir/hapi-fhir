@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -20,17 +21,23 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentMatcher;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class LoggingInterceptorTest {
 
@@ -40,13 +47,13 @@ public class LoggingInterceptorTest {
 	private Logger myLoggerRoot;
 	private Appender<ILoggingEvent> myMockAppender;
 
-	@After
+	@AfterEach
 	public void after() {
 		myLoggerRoot.detachAppender(myMockAppender);
 	}
 
 	@SuppressWarnings("unchecked")
-	@Before
+	@BeforeEach
 	public void before() {
 
 		/*
@@ -123,13 +130,13 @@ public class LoggingInterceptorTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 
 		URL conf = LoggingInterceptor.class.getResource("/logback-test-dstuforce.xml");

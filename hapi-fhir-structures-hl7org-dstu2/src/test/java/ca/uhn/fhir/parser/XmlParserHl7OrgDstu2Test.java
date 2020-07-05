@@ -1,46 +1,5 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.dstu2.model.*;
-import org.hl7.fhir.dstu2.model.Address.AddressUse;
-import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2.model.Enumeration;
-import org.hl7.fhir.dstu2.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu2.model.Identifier.IdentifierUse;
-import org.hl7.fhir.dstu2.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.dstu2.model.Observation;
-import org.hl7.fhir.dstu2.model.Organization;
-import org.hl7.fhir.dstu2.model.Patient;
-import org.hl7.fhir.dstu2.model.PrimitiveType;
-import org.hl7.fhir.dstu2.model.Reference;
-import org.hl7.fhir.dstu2.model.Resource;
-import org.hl7.fhir.dstu2.model.SimpleQuantity;
-import org.hl7.fhir.dstu2.model.Specimen;
-import org.hl7.fhir.dstu2.model.StringType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-import org.xmlunit.builder.DiffBuilder;
-import org.xmlunit.builder.Input;
-import org.xmlunit.diff.*;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -51,13 +10,58 @@ import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredExte
 import ca.uhn.fhir.rest.api.Constants;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Address.AddressUse;
+import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu2.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu2.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.ComparisonControllers;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class XmlParserHl7OrgDstu2Test {
 
   private static FhirContext ourCtx;
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserHl7OrgDstu2Test.class);
 
-  @After
+  @AfterEach
   public void after() {
     ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
   }
@@ -343,7 +347,7 @@ public class XmlParserHl7OrgDstu2Test {
    * Disabled after conversation with Grahame
    */
   @Test
-  @Ignore
+  @Disabled
   public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
     IParser xmlParser = ourCtx.newXmlParser();
 
@@ -1011,7 +1015,7 @@ public class XmlParserHl7OrgDstu2Test {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void testEncodeNarrativeBlockInBundle() throws Exception {
     Patient p = new Patient();
     p.addIdentifier().setSystem("foo").setValue("bar");
@@ -1610,7 +1614,7 @@ public class XmlParserHl7OrgDstu2Test {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void testParseNarrative() throws Exception {
     // @formatter:off
     String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";
@@ -1735,16 +1739,16 @@ public class XmlParserHl7OrgDstu2Test {
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<Extension> extlst = fhirPat.getExtension();
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() {
     ourCtx = FhirContext.forDstu2Hl7Org();
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass2() {
     System.setProperty("file.encoding", "ISO-8859-1");
   }
@@ -1777,7 +1781,7 @@ public class XmlParserHl7OrgDstu2Test {
           .withComparisonController(ComparisonControllers.Default)
           .build();
 
-    assertTrue(d.toString(), !d.hasDifferences());
+    assertTrue(!d.hasDifferences(), d.toString());
  }
 
 }

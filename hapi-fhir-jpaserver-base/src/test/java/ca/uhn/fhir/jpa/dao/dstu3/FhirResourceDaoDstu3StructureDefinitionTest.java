@@ -2,20 +2,19 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3StructureDefinitionTest.class);
 
-	@After
+	@AfterEach
 	public final void after() {
 	}
 
@@ -30,10 +29,5 @@ public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Tes
 		assertEquals(54, output.getSnapshot().getElement().size());
 	}
 
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

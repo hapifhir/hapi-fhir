@@ -9,8 +9,8 @@ import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import static ca.uhn.fhir.empi.api.EmpiConstants.HAPI_ENTERPRISE_IDENTIFIER_SYST
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 
 public class EIDHelperR4Test extends BaseR4Test {
@@ -34,7 +34,7 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 	private EIDHelper myEidHelper;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myEmpiSettings = new EmpiSettings(new EmpiRuleValidator(ourFhirContext, mySearchParamRetriever)) {{
 			setEmpiRules(ourRules);

@@ -1,12 +1,12 @@
 package org.hl7.fhir.converter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.hl7.fhir.convertors.VersionConvertor_10_30;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu2.model.Resource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Date;

@@ -26,25 +26,25 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4ConfigWithElasticSearch.class})
 public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
@@ -64,11 +64,12 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	protected ServletRequestDetails mySrd;
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
 	PlatformTransactionManager myTxManager;
-
 	@Autowired
 	private IFhirSystemDao mySystemDao;
 	@Autowired
@@ -79,9 +80,6 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
-
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	protected ServletRequestDetails mySrd;
 
 	@Test
 	public void testExpandWithIncludeContainingDashesInInclude() {
@@ -111,7 +109,7 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 		concept = new TermConcept(cs, "LA9999-7");
 		cs.getConcepts().add(concept);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(URL_MY_VALUE_SET);
@@ -144,12 +142,12 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 		return myTxManager;
 	}
 
-	@After
+	@AfterEach
 	public void afterPurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

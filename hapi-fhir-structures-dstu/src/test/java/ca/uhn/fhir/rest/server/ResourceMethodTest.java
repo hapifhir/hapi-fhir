@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
@@ -13,9 +13,9 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -34,7 +34,7 @@ public class ResourceMethodTest {
 
 	private SearchMethodBinding rm;
 
-	@Before
+	@BeforeEach
 	public void before() throws NoSuchMethodException, SecurityException {
 		rm = new SearchMethodBinding(Patient.class, ResourceMethodTest.class.getMethod("foo"), FhirContext.forDstu1(), null);
 	}
@@ -142,7 +142,7 @@ public class ResourceMethodTest {
 		assertTrue(IResource.WILDCARD_ALL_SET.contains(IResource.INCLUDE_ALL));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

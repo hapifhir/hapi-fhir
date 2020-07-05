@@ -1,13 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -18,14 +16,20 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IncludeAndRevincludeParameterHl7OrgTest {
 
@@ -36,7 +40,7 @@ public class IncludeAndRevincludeParameterHl7OrgTest {
 	private static Set<Include> ourIncludes;
 	private static Set<Include> ourReverseIncludes;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourIncludes = null;
 		ourReverseIncludes = null;
@@ -68,12 +72,12 @@ public class IncludeAndRevincludeParameterHl7OrgTest {
 		assertThat(ourReverseIncludes, containsInAnyOrder(new Include("C.c"), new Include("D.d")));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 
 		ourCtx = FhirContext.forDstu2Hl7Org();

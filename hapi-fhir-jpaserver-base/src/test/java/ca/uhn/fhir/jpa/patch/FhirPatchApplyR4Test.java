@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -10,16 +11,16 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirPatchApplyR4Test {
 
-	private static final FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Test
 	public void testInvalidOperation() {

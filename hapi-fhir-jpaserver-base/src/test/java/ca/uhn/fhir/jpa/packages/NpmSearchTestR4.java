@@ -7,8 +7,8 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NpmSearchTestR4 extends BaseJpaR4Test {
 
@@ -35,7 +35,7 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 	@Autowired
 	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 		jpaPackageCache.getPackageServers().clear();
@@ -201,8 +201,8 @@ public class NpmSearchTestR4 extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 
-		runInTransaction(()->{
-			ourLog.info("Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));

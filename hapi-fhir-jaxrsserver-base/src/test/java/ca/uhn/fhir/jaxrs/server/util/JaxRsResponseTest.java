@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,8 +13,8 @@ import javax.ws.rs.core.Response;
 
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -29,7 +29,7 @@ public class JaxRsResponseTest {
 	private JaxRsRequest request;
 	private Set<SummaryEnum> theSummaryMode;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws URISyntaxException {
 		request = new JaxRsRequestTest().createRequestDetails();
 		this.response = (JaxRsResponse) request.getResponse();
