@@ -163,7 +163,7 @@ public class FhirInstanceValidatorR5Test {
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.WARNING).setMessage("Unknown code: " + system + " / " + code);
+					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code");
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -754,8 +754,8 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
-		assertThat(errors.toString(), containsString("warning"));
-		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertEquals("Unknown code for \"http://loinc.org#12345\"", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -877,7 +877,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Unknown code: http://acme.org / 9988877", errors.get(0).getMessage());
+		assertEquals("Unknown code for \"http://acme.org#9988877\"", errors.get(0).getMessage());
 
 	}
 
@@ -915,7 +915,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Unknown code: http://loinc.org / 1234", errors.get(0).getMessage());
+		assertEquals("Unknown code for \"http://loinc.org#1234\"", errors.get(0).getMessage());
 	}
 
 	@Test

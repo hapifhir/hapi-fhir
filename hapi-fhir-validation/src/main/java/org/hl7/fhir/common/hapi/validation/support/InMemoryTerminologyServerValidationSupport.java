@@ -440,39 +440,33 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				}
 
 				boolean ableToHandleCode = false;
-				if (codeSystem == null) {
+				if (codeSystem == null || codeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 
 					if (theWantCode != null) {
-						LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, system, theWantCode);
-						if (lookup != null && lookup.isFound()) {
-							CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
-								.addConcept()
-								.setCode(theWantCode)
-								.setDisplay(lookup.getCodeDisplay());
-							List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
-							addCodes(system, codesList, nextCodeList, wantCodes);
-							ableToHandleCode = true;
+						if (theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, system)) {
+							LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, system, theWantCode);
+							if (lookup != null && lookup.isFound()) {
+								CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
+									.addConcept()
+									.setCode(theWantCode)
+									.setDisplay(lookup.getCodeDisplay());
+								List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
+								addCodes(system, codesList, nextCodeList, wantCodes);
+								ableToHandleCode = true;
+							}
 						}
 					}
 
 				} else {
-
 					ableToHandleCode = true;
-
 				}
 
 				if (!ableToHandleCode) {
 					throw new ExpansionCouldNotBeCompletedInternallyException();
 				}
 
-				if (codeSystem != null) {
-
-					if (codeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-						throw new ExpansionCouldNotBeCompletedInternallyException();
-					}
-
+				if (codeSystem != null && codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 					addCodes(system, codeSystem.getConcept(), nextCodeList, wantCodes);
-
 				}
 
 			}
