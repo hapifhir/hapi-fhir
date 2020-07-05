@@ -661,7 +661,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						int foundCount = 0;
 						for (VersionIndependentConcept next : includedConcepts) {
 							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), next.getSystem(), next.getCode());
-							if (lookup.isFound()) {
+							if (lookup != null && lookup.isFound()) {
 								addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, next.getSystem(), next.getCode(), lookup.getCodeDisplay());
 								foundCount++;
 							}

@@ -1047,8 +1047,8 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
-		assertThat(errors.toString(), containsString("warning"));
-		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertEquals("Unknown code for \"http://loinc.org#12345\"", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1070,7 +1070,6 @@ public class FhirInstanceValidatorDstu3Test {
 		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString("Element 'Observation.context': max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString(""));
 	}
 
 	@Test
