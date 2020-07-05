@@ -21,9 +21,9 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -55,13 +55,13 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
@@ -145,7 +145,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		return names;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContextBaseResourceProviderDstu3Test() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		ourHttpClient.close();
@@ -153,7 +153,6 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		ourHttpClient = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

@@ -4,22 +4,23 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
-import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ArbitrarySqlTaskTest extends BaseTest {
 
-	public ArbitrarySqlTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
-	@Test
-	public void test350MigrateSearchParams() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void test350MigrateSearchParams(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table HFJ_SEARCH_PARM (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
 		executeSql("insert into HFJ_SEARCH_PARM (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
 		executeSql("insert into HFJ_SEARCH_PARM (PID, RES_TYPE, PARAM_NAME) values (2, 'Patient', 'family')");
@@ -27,7 +28,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (100, 1, true, null)");
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (101, 2, true, null)");
 
-		ArbitrarySqlTask task = new ArbitrarySqlTask(VersionEnum.V3_5_0,  "1", "HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
+		ArbitrarySqlTask task = new ArbitrarySqlTask(VersionEnum.V3_5_0, "1", "HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
 		task.setExecuteOnlyIfTableExists("hfj_search_parm");
 		task.setBatchSize(1);
 		String sql = "SELECT " +
@@ -59,9 +60,12 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 	}
 
 
-	@Test
-	public void testExecuteOnlyIfTableExists() {
-		ArbitrarySqlTask task = new ArbitrarySqlTask(VersionEnum.V3_5_0,  "1", "HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testExecuteOnlyIfTableExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
+		ArbitrarySqlTask task = new ArbitrarySqlTask(VersionEnum.V3_5_0, "1", "HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
 		task.setBatchSize(1);
 		String sql = "SELECT * FROM HFJ_SEARCH_PARM";
 		task.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
@@ -75,8 +79,11 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testUpdateTask() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testUpdateTask(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table TEST_UPDATE_TASK (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
 		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
 
@@ -98,8 +105,11 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testArbitrarySql() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testArbitrarySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table TEST_UPDATE_TASK (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
 		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
 		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Encounter', 'identifier')");

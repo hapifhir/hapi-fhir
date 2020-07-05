@@ -12,9 +12,9 @@ import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +26,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
@@ -463,7 +463,7 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testExcludeRootStuff() {
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 		Set<String> excludes = new HashSet<>();
@@ -664,7 +664,7 @@ public class JsonParserR4Test extends BaseTest {
 	 * 21:27:39.874 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1600 passes - 28ms / pass - 35.5 / second
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTimingsOutput() throws IOException {
 
 		Bundle b = createBigBundle();
@@ -702,7 +702,7 @@ public class JsonParserR4Test extends BaseTest {
 	 * 20:44:47.372 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 500 passes - 32ms / pass - 30.8 / second
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTimingsOutputXml() throws IOException {
 
 		Bundle b = createBigBundle();
@@ -740,7 +740,7 @@ public class JsonParserR4Test extends BaseTest {
 	 * 
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTimingsInput() {
 		Bundle b = createBigBundle();
 		IParser parser = ourCtx.newJsonParser();
@@ -773,7 +773,7 @@ public class JsonParserR4Test extends BaseTest {
 	 * 18:32:14.357 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:513] - Parsed 500 passes - 34ms / pass - 28.9 / second
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTimingsInputXml() throws IOException {
 		Bundle b = createBigBundle();
 		IParser parser = ourCtx.newXmlParser();
@@ -853,7 +853,7 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

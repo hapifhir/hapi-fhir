@@ -7,10 +7,10 @@ import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomResourceMatcherR4Test extends BaseR4Test {
 
@@ -23,18 +23,6 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	private static Patient ourBillyJohnHenry;
 	private static Patient ourHenryJohn;
 	private static Patient ourHenryJOHN;
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourJohnHenry = buildPatientWithNames("Henry", "John");
-		ourJohnHENRY = buildPatientWithNames("HENRY", "John");
-		ourJaneHenry = buildPatientWithNames("Henry", "Jane");
-		ourJohnSmith = buildPatientWithNames("Smith", "John");
-		ourJohnBillyHenry = buildPatientWithNames("Henry", "John", "Billy");
-		ourBillyJohnHenry = buildPatientWithNames("Henry", "Billy", "John");
-		ourHenryJohn = buildPatientWithNames("John", "Henry");
-		ourHenryJOHN = buildPatientWithNames("JOHN", "Henry");
-	}
 
 	@Test
 	public void testExactNameAnyOrder() {
@@ -62,7 +50,6 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourBillyJohnHenry));
 	}
 
-
 	@Test
 	public void testExactNameFirstAndLast() {
 		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(EmpiMetricEnum.NAME_FIRST_AND_LAST, true));
@@ -89,17 +76,6 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 		assertEquals(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourBillyJohnHenry));
 	}
 
-	protected static Patient buildPatientWithNames(String theFamilyName, String... theGivenNames) {
-		Patient patient = new Patient();
-		HumanName name = patient.addName();
-		name.setFamily(theFamilyName);
-		for (String givenName : theGivenNames) {
-			name.addGiven(givenName);
-		}
-		patient.setId("Patient/1");
-		return patient;
-	}
-
 	private EmpiRulesJson buildNameRules(EmpiMetricEnum theExactNameAnyOrder, boolean theExact) {
 		EmpiFieldMatchJson nameAnyOrderFieldMatch = new EmpiFieldMatchJson()
 			.setName(FIELD_EXACT_MATCH_NAME)
@@ -113,5 +89,28 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 		retval.putMatchResult(FIELD_EXACT_MATCH_NAME, EmpiMatchResultEnum.MATCH);
 
 		return retval;
+	}
+
+	@BeforeAll
+	public static void beforeClass() {
+		ourJohnHenry = buildPatientWithNames("Henry", "John");
+		ourJohnHENRY = buildPatientWithNames("HENRY", "John");
+		ourJaneHenry = buildPatientWithNames("Henry", "Jane");
+		ourJohnSmith = buildPatientWithNames("Smith", "John");
+		ourJohnBillyHenry = buildPatientWithNames("Henry", "John", "Billy");
+		ourBillyJohnHenry = buildPatientWithNames("Henry", "Billy", "John");
+		ourHenryJohn = buildPatientWithNames("John", "Henry");
+		ourHenryJOHN = buildPatientWithNames("JOHN", "Henry");
+	}
+
+	protected static Patient buildPatientWithNames(String theFamilyName, String... theGivenNames) {
+		Patient patient = new Patient();
+		HumanName name = patient.addName();
+		name.setFamily(theFamilyName);
+		for (String givenName : theGivenNames) {
+			name.addGiven(givenName);
+		}
+		patient.setId("Patient/1");
+		return patient;
 	}
 }

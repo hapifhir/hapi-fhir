@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.r5;
  */
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -32,15 +31,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Observation;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 public class FhirResourceDaoObservationR5 extends BaseHapiFhirResourceDaoObservation<Observation> {
-
-	@Autowired
-	ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
 
 	@Override
 	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap,  RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {

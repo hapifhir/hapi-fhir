@@ -1,6 +1,6 @@
 package ca.uhn.fhir.android.client;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,7 +10,7 @@ import java.util.Date;
 
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -41,7 +41,7 @@ public class GenericClientDstu3IT {
 	private Request myRequest;
 	private Protocol myProtocol;
 
-	@Before
+	@BeforeEach
 	public void before() throws IOException {
 		myHttpClient = mock(Call.Factory.class, Mockito.RETURNS_DEEP_STUBS);
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
@@ -82,7 +82,7 @@ public class GenericClientDstu3IT {
 	 * TODO: narratives don't work without stax
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testBinaryCreateWithFhirContentType() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
@@ -733,7 +733,7 @@ public class GenericClientDstu3IT {
 
 	//TODO: narratives don't work without stax
 	@Test
-	@Ignore
+	@Disabled
 	public void testUpdateById() throws Exception {
 		IParser p = ourCtx.newJsonParser();
 
@@ -773,7 +773,7 @@ public class GenericClientDstu3IT {
 
 	// TODO: narratives don't work without stax
 	@Test
-	@Ignore
+	@Disabled
 	public void testUpdateWithPreferRepresentationServerReturnsOO() throws Exception {
 		final IParser p = ourCtx.newJsonParser();
 
@@ -897,7 +897,7 @@ public class GenericClientDstu3IT {
 
 	// TODO: narratives don't work without stax
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidate() throws Exception {
 		final IParser p = ourCtx.newXmlParser();
 
@@ -938,12 +938,12 @@ public class GenericClientDstu3IT {
  */
 
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		
 //		// Force StAX to fail like it will on android

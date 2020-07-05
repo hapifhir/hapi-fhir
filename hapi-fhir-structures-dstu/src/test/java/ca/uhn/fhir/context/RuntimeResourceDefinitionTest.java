@@ -1,13 +1,13 @@
 package ca.uhn.fhir.context;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -33,7 +33,7 @@ public class RuntimeResourceDefinitionTest {
 	}
 	
 	@Test
-	@Ignore
+	@Disabled
 	public void testToProfileExtensions() throws Exception {
 		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class, Profile.class);
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(ResourceWithExtensionsA.class);
@@ -153,7 +153,7 @@ public class RuntimeResourceDefinitionTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDaoObservation;
-import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -32,7 +31,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -45,9 +43,6 @@ public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDaoObserva
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-
-	@Autowired
-	ObservationLastNIndexPersistSvc myObservationLastNIndexPersistSvc;
 
 	@Override
 	public IBundleProvider observationsLastN(SearchParameterMap theSearchParameterMap,  RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {

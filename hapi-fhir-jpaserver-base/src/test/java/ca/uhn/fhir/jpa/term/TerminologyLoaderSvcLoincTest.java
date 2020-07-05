@@ -1,12 +1,20 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.*;
+import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincImagingDocumentCodeHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsSiHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -14,10 +22,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -28,8 +36,13 @@ import java.util.List;
 import java.util.Map;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,7 +60,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
 		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
@@ -286,7 +299,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
-		ourLog.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(FhirContext.forCached(FhirVersionEnum.R4).newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME, conceptMap.getName());
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI, conceptMap.getUrl());
 		assertEquals(1, conceptMap.getGroup().size());
@@ -311,7 +324,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Group - Parent
 		vs = valueSets.get("LG100-4");
-		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.info(FhirContext.forCached(FhirVersionEnum.R4).newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		assertEquals("Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>", vs.getName());
 		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
@@ -320,7 +333,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Group - Child
 		vs = valueSets.get("LG1695-8");
-		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.info(FhirContext.forCached(FhirVersionEnum.R4).newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		assertEquals("1,4-Dichlorobenzene|MCnc|Pt|ANYBldSerPl", vs.getName());
 		assertEquals("http://loinc.org/vs/LG1695-8", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
@@ -330,7 +343,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testLoadLoincMandatoryFilesOnly() throws IOException {
 		addLoincMandatoryFilesToZip(myFiles);
 
@@ -500,9 +513,5 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("LP52960-9", doublyNestedChildCode.getChildren().get(2).getChild().getCode());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

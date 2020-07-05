@@ -2,26 +2,28 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.r4.model.Observation;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
-	@After
+	@AfterEach
 	public void resetMaximumPageSize() {
 		SearchBuilder.setMaxPageSize50ForTest(false);
 	}
@@ -49,7 +51,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		SearchBuilder.setMaxPageSize50ForTest(true);
 
 		myCaptureQueriesListener.clear();
-		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(),null));
+		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 		assertEquals(75, results.size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = myCaptureQueriesListener
@@ -63,7 +65,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
 		// The first and third chunked queries should have a full complement of PIDs
 		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
-		for (int pidIndex = 1; pidIndex<50; pidIndex++) {
+		for (int pidIndex = 1; pidIndex < 50; pidIndex++) {
 			firstQueryPattern.append(" , '[0-9]+'");
 		}
 		firstQueryPattern.append("\\).*");
@@ -72,21 +74,16 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
 		// the second and fourth chunked queries should be padded with "-1".
 		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
-		for (int pidIndex = 1; pidIndex<25; pidIndex++) {
+		for (int pidIndex = 1; pidIndex < 25; pidIndex++) {
 			secondQueryPattern.append(" , '[0-9]+'");
 		}
-		for (int pidIndex = 0; pidIndex<25; pidIndex++) {
+		for (int pidIndex = 0; pidIndex < 25; pidIndex++) {
 			secondQueryPattern.append(" , '-1'");
 		}
 		secondQueryPattern.append("\\).*");
 		assertThat(queries.get(1), matchesPattern(secondQueryPattern.toString()));
 		assertThat(queries.get(3), matchesPattern(secondQueryPattern.toString()));
 
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

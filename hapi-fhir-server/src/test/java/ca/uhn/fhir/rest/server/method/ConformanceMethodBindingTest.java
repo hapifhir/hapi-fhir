@@ -7,8 +7,8 @@ import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -21,7 +21,7 @@ public class ConformanceMethodBindingTest {
 	private FhirContext fhirContext;
 	private ConformanceMethodBinding conformanceMethodBinding;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		fhirContext = mock(FhirContext.class);
 	}

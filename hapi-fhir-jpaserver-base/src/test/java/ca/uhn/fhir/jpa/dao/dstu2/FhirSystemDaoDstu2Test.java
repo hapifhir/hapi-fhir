@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
@@ -12,10 +12,18 @@ import ca.uhn.fhir.model.dstu2.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.resource.Appointment;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryRequest;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryResponse;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
@@ -23,29 +31,34 @@ import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
@@ -1005,7 +1018,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 	}
 
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void testTransactionFailsWithDuplicateIds() {
 		Bundle request = new Bundle();
 
@@ -1019,7 +1032,12 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
 		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerbEnum.POST);
 
-		mySystemDao.transaction(mySrd, request);
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDusplicateIds", e.getMessage());
+		}
 	}
 
 	@Test
@@ -1774,9 +1792,9 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		assertEquals(BundleTypeEnum.TRANSACTION_RESPONSE, resp.getTypeElement().getValueAsEnum());
 		assertEquals(3, resp.getEntry().size());
 
-		assertTrue(resp.getEntry().get(0).getResponse().getLocation(), new IdDt(resp.getEntry().get(0).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
-		assertTrue(resp.getEntry().get(1).getResponse().getLocation(), new IdDt(resp.getEntry().get(1).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
-		assertTrue(resp.getEntry().get(2).getResponse().getLocation(), new IdDt(resp.getEntry().get(2).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+		assertTrue(new IdDt(resp.getEntry().get(0).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"), resp.getEntry().get(0).getResponse().getLocation());
+		assertTrue(new IdDt(resp.getEntry().get(1).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"), resp.getEntry().get(1).getResponse().getLocation());
+		assertTrue(new IdDt(resp.getEntry().get(2).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"), resp.getEntry().get(2).getResponse().getLocation());
 
 		o1 = myObservationDao.read(new IdDt(resp.getEntry().get(1).getResponse().getLocation()), mySrd);
 		o2 = myObservationDao.read(new IdDt(resp.getEntry().get(2).getResponse().getLocation()), mySrd);
@@ -1815,9 +1833,9 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		assertEquals(BundleTypeEnum.TRANSACTION_RESPONSE, resp.getTypeElement().getValueAsEnum());
 		assertEquals(3, resp.getEntry().size());
 
-		assertTrue(resp.getEntry().get(0).getResponse().getLocation(), new IdDt(resp.getEntry().get(0).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
-		assertTrue(resp.getEntry().get(1).getResponse().getLocation(), new IdDt(resp.getEntry().get(1).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
-		assertTrue(resp.getEntry().get(2).getResponse().getLocation(), new IdDt(resp.getEntry().get(2).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+		assertTrue(new IdDt(resp.getEntry().get(0).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"), resp.getEntry().get(0).getResponse().getLocation());
+		assertTrue(new IdDt(resp.getEntry().get(1).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"), resp.getEntry().get(1).getResponse().getLocation());
+		assertTrue(new IdDt(resp.getEntry().get(2).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"), resp.getEntry().get(2).getResponse().getLocation());
 
 		o1 = myObservationDao.read(new IdDt(resp.getEntry().get(1).getResponse().getLocation()), mySrd);
 		o2 = myObservationDao.read(new IdDt(resp.getEntry().get(2).getResponse().getLocation()), mySrd);
@@ -1976,9 +1994,5 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		assertEquals(attachment2.getUrl(), dr.getPresentedForm().get(1).getUrl());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

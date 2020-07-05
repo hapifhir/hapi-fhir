@@ -1,6 +1,6 @@
 package ca.uhn.fhir.android;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.util.*;
@@ -9,8 +9,8 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
@@ -22,7 +22,7 @@ public class BuiltJarDstu2ShadeIT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2ShadeIT.class);
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParserXml() throws Exception {
 
 		FhirContext ctx = FhirContext.forDstu2();

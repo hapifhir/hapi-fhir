@@ -2,8 +2,8 @@ package ca.uhn.fhir.context;
 
 import junit.framework.TestCase;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -82,7 +82,7 @@ public class DuplicateExtensionTest extends TestCase {
 	public static class CustomPatientProvider {
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

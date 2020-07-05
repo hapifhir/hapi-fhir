@@ -30,9 +30,9 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -68,7 +68,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		super();
 	}
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		myResourceCountsCache.clear();
@@ -76,7 +76,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		myResourceCountsCache.clear();
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -192,7 +192,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		return names;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContextBaseResourceProviderDstu3Test() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		ourHttpClient.close();
@@ -202,7 +202,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {

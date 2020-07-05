@@ -1,7 +1,7 @@
 package ca.uhn.fhir.testmindeps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,7 +12,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -112,12 +112,12 @@ public class ReadTest {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		ourServer.stop();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

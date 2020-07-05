@@ -1,19 +1,15 @@
 package ca.uhn.fhir.jpa.searchparam.retry;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RetrierTest {
-
-	@Rule
-	public ExpectedException myExpectedException = ExpectedException.none();
 
 	@Test
 	public void happyPath() {
@@ -43,10 +39,12 @@ public class RetrierTest {
 		};
 		Retrier<Boolean> retrier = new Retrier<>(supplier, 1);
 
-		myExpectedException.expect(RetryRuntimeException.class);
-		myExpectedException.expectMessage("test failure message");
-		retrier.runWithRetry();
-		assertEquals(5, counter.get());
+		try {
+			retrier.runWithRetry();
+			fail();
+		} catch (RetryRuntimeException e) {
+			assertEquals("test failure message", e.getMessage());
+		}
 	}
 
 	@Test
@@ -56,10 +54,13 @@ public class RetrierTest {
 			if (counter.incrementAndGet() < 10) throw new RetryRuntimeException("test");
 			return true;
 		};
-		myExpectedException.expect(IllegalArgumentException.class);
-		myExpectedException.expectMessage("maxRetries must be above zero.");
-		Retrier<Boolean> retrier = new Retrier<>(supplier, 0);
-		assertEquals(0, counter.get());
+
+		try {
+			new Retrier<>(supplier, 0);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("maxRetries must be above zero.", e.getMessage());
+		}
 	}
 
 	@Test
@@ -69,10 +70,13 @@ public class RetrierTest {
 			if (counter.incrementAndGet() < 10) throw new RetryRuntimeException("test");
 			return true;
 		};
-		myExpectedException.expect(IllegalArgumentException.class);
-		myExpectedException.expectMessage("maxRetries must be above zero.");
 
-		Retrier<Boolean> retrier = new Retrier<>(supplier, -1);
+		try {
+			new Retrier<>(supplier, -1);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("maxRetries must be above zero.", e.getMessage());
+		}
 		assertEquals(0, counter.get());
 	}
 

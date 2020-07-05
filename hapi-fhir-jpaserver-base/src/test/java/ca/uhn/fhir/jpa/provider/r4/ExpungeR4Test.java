@@ -6,12 +6,12 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -22,10 +22,10 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
@@ -53,12 +52,12 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 
-	@After
+	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeEnableExpunge() {
 		myDaoConfig.setExpungeEnabled(true);
 	}
@@ -104,7 +103,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-birthdate");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
@@ -465,9 +464,5 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

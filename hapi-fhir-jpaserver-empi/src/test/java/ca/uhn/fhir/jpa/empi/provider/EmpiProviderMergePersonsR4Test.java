@@ -9,16 +9,16 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
@@ -27,7 +27,8 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	private Person myToPerson;
 	private StringType myToPersonId;
 
-	@Before
+	@Override
+	@BeforeEach
 	public void before() {
 		super.before();
 		super.loadEmpiSearchParameters();

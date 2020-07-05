@@ -10,7 +10,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -20,19 +20,18 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RemoteTerminologyServiceValidationSupportTest {
 
@@ -43,29 +42,29 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static final String ERROR_MESSAGE = "This is an error message";
 	private static FhirContext ourCtx = FhirContext.forR4();
 
-	@Rule
-	public RestfulServerRule myRestfulServerRule = new RestfulServerRule(ourCtx);
+	@RegisterExtension
+	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
 	private MyValueSetProvider myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
 	private MyCodeSystemProvider myCodeSystemProvider;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myValueSetProvider = new MyValueSetProvider();
-		myRestfulServerRule.getRestfulServer().registerProvider(myValueSetProvider);
+		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
 
 		myCodeSystemProvider = new MyCodeSystemProvider();
-		myRestfulServerRule.getRestfulServer().registerProvider(myCodeSystemProvider);
+		myRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
 
-		String baseUrl = "http://localhost:" + myRestfulServerRule.getPort();
+		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(false));
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		assertThat(myValueSetProvider.myInvocationCount, lessThan(2));
 	}
@@ -233,7 +232,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 
 		@Search
-		public List<CodeSystem> find(@RequiredParam(name="url") UriParam theUrlParam) {
+		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam) {
 			myLastUrlParam = theUrlParam;
 			assert myNextReturnCodeSystems != null;
 			return myNextReturnCodeSystems;
@@ -283,7 +282,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 
 		@Search
-		public List<ValueSet> find(@RequiredParam(name="url") UriParam theUrlParam) {
+		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam) {
 			myLastUrlParam = theUrlParam;
 			assert myNextReturnValueSets != null;
 			return myNextReturnValueSets;
