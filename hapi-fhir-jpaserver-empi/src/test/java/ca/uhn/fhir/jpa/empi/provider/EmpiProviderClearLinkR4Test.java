@@ -1,20 +1,17 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
 import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.fail;
 
 public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 
@@ -22,7 +19,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(new Practitioner());
@@ -33,7 +30,6 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearAllLinks() {
 		assertLinkCount(2);
 		myEmpiProviderR4.clearEmpiLinks(null);
-		assertLinkCount(0);
 		assertNoLinksExist();
 	}
 
@@ -54,20 +50,14 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearPatientLinks() {
 		assertLinkCount(2);
 		myEmpiProviderR4.clearEmpiLinks(new StringType("patient"));
-		assertLinkCount(1);
-
-		assertNoLinksExist();
+		assertNoPatientLinksExist();
 	}
 
 	@Test
 	public void testClearPractitionerLinks() {
-		myEmpiProviderR4.updateLink(myPersonId, myPatientId, MATCH_RESULT, myRequestDetails);
-		try {
-			myEmpiProviderR4.updateLink(myPersonId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
-			fail();
-		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), matchesPattern("Requested resource Person/\\d+/_history/1 is not the latest version.  Latest version is Person/\\d+/_history/2"));
-		}
+		assertLinkCount(2);
+		myEmpiProviderR4.clearEmpiLinks(new StringType("patient"));
+		assertNoPractitionerLinksExist();
 	}
 
 	@Test
