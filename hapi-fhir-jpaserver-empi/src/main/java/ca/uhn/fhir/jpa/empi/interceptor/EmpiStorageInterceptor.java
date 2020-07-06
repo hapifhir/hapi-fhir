@@ -78,6 +78,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void blockManualPersonManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+
 		//If running in single EID mode, forbid multiple eids.
 		if (myEmpiSettings.isPreventMultipleEids()) {
 			forbidIfHasMultipleEids(theNewResource);
@@ -94,6 +95,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 		}
 		forbidIfEmpiManagedTagIsPresent(theOldResource);
 		forbidModifyingEmpiTag(theNewResource, theOldResource);
+
 		if (myEmpiSettings.isPreventEidUpdates()) {
 			forbidIfModifyingExternalEidOnTarget(theNewResource, theOldResource);
 		}
@@ -110,6 +112,10 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {
 		List<CanonicalEID> newExternalEids = myEIDHelper.getExternalEid(theNewResource);
 		List<CanonicalEID> oldExternalEids = myEIDHelper.getExternalEid(theOldResource);
+		if (oldExternalEids.isEmpty()) {
+			return;
+		}
+
 		if (!myEIDHelper.eidMatchExists(newExternalEids, oldExternalEids)) {
 			throwBlockEidChange();
 		}
@@ -143,7 +149,6 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	private boolean isInternalRequest(RequestDetails theRequestDetails) {
 		return theRequestDetails == null;
 	}
-
 
 	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
 		if (EmpiUtil.isEmpiManaged(theResource)) {
