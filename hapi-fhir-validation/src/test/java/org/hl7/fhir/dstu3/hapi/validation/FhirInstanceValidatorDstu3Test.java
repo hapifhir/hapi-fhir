@@ -762,7 +762,7 @@ public class FhirInstanceValidatorDstu3Test {
 		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
 		ValidationResult results = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("Element matches more than one slice"));
+		assertThat(outcome.toString(), containsString("The Coding provided is not in the value set http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000"));
 	}
 
 	private void loadNL() throws IOException {
