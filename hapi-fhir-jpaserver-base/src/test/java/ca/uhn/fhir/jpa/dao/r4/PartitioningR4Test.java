@@ -52,10 +52,9 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -70,14 +69,14 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -98,7 +97,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
 
-	@After
+	@AfterEach
 	public void after() {
 		myPartitionInterceptor.assertNoRemainingIds();
 
@@ -120,7 +119,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws ServletException {
 		super.before();
 
@@ -185,10 +184,10 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertEquals(2, selectQueries.size());
 		// Look up the partition
-		assertThat(selectQueries.get(0).getSql(true,false).toLowerCase(), containsString(" from hfj_partition "));
+		assertThat(selectQueries.get(0).getSql(true, false).toLowerCase(), containsString(" from hfj_partition "));
 		// Look up the referenced subject/patient
-		assertThat(selectQueries.get(1).getSql(true,false).toLowerCase(), containsString(" from hfj_resource "));
-		assertEquals(0, StringUtils.countMatches(selectQueries.get(1).getSql(true,false).toLowerCase(), "partition"));
+		assertThat(selectQueries.get(1).getSql(true, false).toLowerCase(), containsString(" from hfj_resource "));
+		assertEquals(0, StringUtils.countMatches(selectQueries.get(1).getSql(true, false).toLowerCase(), "partition"));
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
@@ -2372,8 +2371,8 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 		// Resolve forced IDs
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		assertEquals(sql, 1, countMatches(sql, "forcedid0_.RESOURCE_PID in"));
-		assertEquals(sql, 0, countMatches(sql, "PARTITION_ID is null"));
+		assertEquals(1, countMatches(sql, "forcedid0_.RESOURCE_PID in"), sql);
+		assertEquals(0, countMatches(sql, "PARTITION_ID is null"), sql);
 	}
 
 	@Test
@@ -2530,11 +2529,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(0, myCreateRequestPartitionIds.size());
 		}
 
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

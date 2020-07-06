@@ -1,12 +1,12 @@
 package ca.uhn.fhir.context.copy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.model.api.annotation.Compartment;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -85,7 +85,7 @@ public class ModelScannerDstu1Test {
 	 * TODO: re-enable this when Claim compartments are fixed
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchParamWithCompartmentForNonReferenceParam() {
 		try {
 			FhirContext.forDstu1().getResourceDefinition(CompartmentForNonReferenceParam.class);
@@ -132,7 +132,7 @@ public class ModelScannerDstu1Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -196,7 +196,6 @@ public class ExpungeEverythingService {
 
 			ourLog.info("Have deleted {} entities of type {} in {}", outcome, theEntityType.getSimpleName(), sw.toString());
 		}
-
 		return outcome;
 	}
 
@@ -206,5 +205,4 @@ public class ExpungeEverythingService {
 		ourLog.debug("SqlQuery affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
 		return outcome;
 	}
-
 }

@@ -1,22 +1,23 @@
 package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +26,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -36,28 +37,28 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = PartitionManagementProviderTest.MyConfig.class)
 public class PartitionManagementProviderTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionManagementProviderTest.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
-	@ClassRule
-	public static RestfulServerRule ourServerRule = new RestfulServerRule(ourCtx);
+	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	@RegisterExtension
+	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
 	@MockBean
 	private IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private PartitionManagementProvider myPartitionManagementProvider;
 	private IGenericClient myClient;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourServerRule.getRestfulServer().registerProvider(myPartitionManagementProvider);
 		myClient = ourServerRule.getFhirClient();
 		myClient.registerInterceptor(new LoggingInterceptor(false));
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		ourServerRule.getRestfulServer().unregisterProvider(myPartitionManagementProvider);
 	}

@@ -8,10 +8,10 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,6 +36,10 @@ import java.util.List;
  * 6. Execute the 'sendObservation' test
  * 7. Look in the 'attachWebSocket' terminal execution and wait for your ping with the subscription id
  */
+/**
+ * Ignored because this feature isn't implemented yet
+ */
+@Disabled
 public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookWithEventDefinitionR4Test.class);
@@ -51,22 +55,22 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 	}
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			myClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
@@ -74,7 +78,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -82,18 +86,14 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 
 	}
 
-	/**
-	 * Ignored because this feature isn't implemented yet
-	 */
 	@Test
-	@Ignore
 	public void testSubscriptionAddedTrigger() {
 		/*
 		 * Create patient
 		 */
 
 		Patient patient = FhirR4Util.getPatient();
-		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
 
 		/*
@@ -124,17 +124,17 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		channel.setPayload("application/json");
 		subscription.setChannel(channel);
 
-		methodOutcome = ourClient.create().resource(subscription).execute();
+		methodOutcome = myClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
 
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();

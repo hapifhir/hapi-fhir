@@ -1,12 +1,12 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.dstu2016may.model.DomainResource;
 import org.hl7.fhir.dstu2016may.model.Narrative;
 import org.hl7.fhir.dstu2016may.model.Patient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DomainResourceDstu2_1Test {
     /**

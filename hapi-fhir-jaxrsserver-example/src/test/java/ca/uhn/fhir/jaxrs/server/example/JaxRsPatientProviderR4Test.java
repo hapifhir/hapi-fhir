@@ -16,15 +16,15 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JaxRsPatientProviderR4Test {
 
@@ -34,13 +34,13 @@ public class JaxRsPatientProviderR4Test {
 	private static int ourPort;
 	private static Server jettyServer;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(jettyServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass()
 			throws Exception {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -135,7 +135,7 @@ public class JaxRsPatientProviderR4Test {
 
 	/** Search - Subsetting (_summary and _elements) */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSummary() {
 		client.search()
 				.forResource(Patient.class)
@@ -209,7 +209,7 @@ public class JaxRsPatientProviderR4Test {
 	}
 
 	/** Transaction - Server */
-	@Ignore
+	@Disabled
 	@Test
 	public void testTransaction() {
 		Bundle bundle = new Bundle();
@@ -226,7 +226,7 @@ public class JaxRsPatientProviderR4Test {
 
 	/** Conformance - Server */
 	@Test
-	@Ignore
+	@Disabled
 	public void testConformance() {
 		final CapabilityStatement caps = client.capabilities().ofType(CapabilityStatement.class).execute();
 		System.out.println(caps.getRest().get(0).getResource().get(0).getType());
@@ -255,7 +255,7 @@ public class JaxRsPatientProviderR4Test {
 				.execute();
 		String resultValue = outParams.getParameter().get(0).getValue().toString();
 		System.out.println(resultValue);
-		assertEquals("expected but found : " + resultValue, resultValue.contains("myAwesomeDummyValue"), true);
+		assertEquals(resultValue.contains("myAwesomeDummyValue"), true, "expected but found : " + resultValue);
 	}
 
 	@Test
@@ -276,7 +276,7 @@ public class JaxRsPatientProviderR4Test {
 				.execute();
 		String resultValue = outParams.getParameter().get(0).getValue().toString();
 		System.out.println(resultValue);
-		assertEquals("expected but found : " + resultValue, resultValue.contains("myAwesomeDummyValue"), true);
+		assertEquals(resultValue.contains("myAwesomeDummyValue"), true, "expected but found : " + resultValue);
 	}
 
 	@Test

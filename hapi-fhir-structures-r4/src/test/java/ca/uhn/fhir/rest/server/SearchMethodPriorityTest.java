@@ -8,34 +8,34 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchMethodPriorityTest {
 
-	@ClassRule
-	public static RestfulServerRule ourServerRule = new RestfulServerRule(FhirVersionEnum.R4);
+	@RegisterExtension
+	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(FhirVersionEnum.R4);
 
 	private String myLastMethod;
 	private IGenericClient myClient;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myLastMethod = null;
 		myClient = ourServerRule.getFhirClient();
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		ourServerRule.getRestfulServer().unregisterAllProviders();
 	}

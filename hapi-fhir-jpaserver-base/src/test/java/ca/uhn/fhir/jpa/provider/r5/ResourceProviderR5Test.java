@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.provider.r5;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -20,9 +19,9 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +31,9 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
@@ -43,7 +42,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -54,16 +53,17 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
-		ourClient.unregisterInterceptor(myCapturingInterceptor);
+		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
-		ourClient.registerInterceptor(myCapturingInterceptor);
+		myClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
 
@@ -84,7 +84,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		myPatientDao.create(pt3).getId().toUnqualifiedVersionless().getValue();
 
 
-		Bundle output = ourClient
+		Bundle output = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.NAME.contains().value("ZAB"))
@@ -93,7 +93,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		assertThat(ids, containsInAnyOrder(pt1id));
 
-		output = ourClient
+		output = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.NAME.contains().value("zab"))
@@ -111,7 +111,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		myPatientDao.create(pt1);
 
 		// Perform the search
-		Bundle response0 = ourClient.search()
+		Bundle response0 = myClient.search()
 			.forResource("Patient")
 			.where(Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
@@ -119,7 +119,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(1, response0.getEntry().size());
 
 		// Perform the search again (should return the same)
-		Bundle response1 = ourClient.search()
+		Bundle response1 = myClient.search()
 			.forResource("Patient")
 			.where(Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
@@ -137,7 +137,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		});
 
 		// Perform the search again (shouldn't return the errored out search)
-		Bundle response3 = ourClient.search()
+		Bundle response3 = myClient.search()
 			.forResource("Patient")
 			.where(Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
@@ -158,7 +158,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		myPatientDao.create(pt2);
 
 		// Perform a search for the first page
-		Bundle response0 = ourClient.search()
+		Bundle response0 = myClient.search()
 			.forResource("Patient")
 			.where(Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
@@ -177,7 +177,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		// Request the second page
 		try {
-			ourClient.loadPage().next(response0).execute();
+			myClient.loadPage().next(response0).execute();
 		} catch (NotImplementedOperationException e) {
 			assertEquals(501, e.getStatusCode());
 			assertThat(e.getMessage(), containsString("Some Failure Message"));
@@ -213,7 +213,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		observation.setEffective(new DateTimeType("1965-08-09"));
 		IIdType oid = myObservationDao.create(observation).getId().toUnqualified();
 		String nowParam = UrlUtil.escapeUrlParam("%now");
-		Bundle output = ourClient
+		Bundle output = myClient
 			.search()
 			.byUrl("Observation?date=lt" + nowParam)
 			.returnBundle(Bundle.class)
@@ -233,7 +233,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		observation.setEffective(new DateTimeType("1965-08-10"));
 		myObservationDao.create(observation).getId().toUnqualified();
 
-		Bundle output = ourClient
+		Bundle output = myClient
 			.search()
 			.byUrl("Observation?_count=0")
 			.returnBundle(Bundle.class)
@@ -243,9 +243,5 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(0, output.getEntry().size());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

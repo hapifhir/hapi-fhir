@@ -150,15 +150,15 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -170,15 +170,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class})
-public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBuilder {
+public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
@@ -451,11 +451,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
+	protected DaoRegistry myDaoRegistry;
+	@Autowired
 	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
@@ -463,7 +463,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 	@Autowired
 	protected IBatchJobSubmitter myBatchJobSubmitter;
 
-	@After()
+	@AfterEach()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
@@ -476,12 +476,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 	}
 
-	@After
+	@AfterEach
 	public void afterResetInterceptors() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
-	@After
+	@AfterEach
 	public void afterClearTerminologyCaches() {
 		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
@@ -491,13 +491,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 		termDeferredStorageSvc.clearDeferred();
 	}
 
-	@After()
+	@AfterEach()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
 		ourJpaValidationSupportChainR4 = myJpaValidationSupportChainR4;
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeCreateInterceptor() {
 		mySystemInterceptors = myInterceptorRegistry.getAllRegisteredInterceptors();
 
@@ -507,12 +507,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeUnregisterAllSubscriptions() {
 		mySubscriptionRegistry.unregisterAllSubscriptions();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
 			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
@@ -525,12 +525,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
-	@After
+	@AfterEach
 	public void afterPurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeResetConfig() {
 		myDaoConfig.setHardSearchLimit(1000);
 		myDaoConfig.setHardTagListLimit(1000);
@@ -629,11 +629,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest  implements ITestDataBui
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContextBaseJpaR4Test() {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainR4.invalidateCaches();
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	/**

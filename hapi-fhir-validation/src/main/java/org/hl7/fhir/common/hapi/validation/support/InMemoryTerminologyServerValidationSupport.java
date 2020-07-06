@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -119,7 +120,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult
+	validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 	org.hl7.fhir.r5.model.ValueSet expansion = expandValueSetToCanonical(theValidationSupportContext, theValueSet, theCodeSystem, theCode);
 		if (expansion == null) {
 			return null;
@@ -183,9 +185,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		IBaseResource system = null;
 		if (!theOptions.isInferSystem() && isNotBlank(theCodeSystem)) {
 			system = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
-			if (system == null) {
-				return null;
-			}
 		}
 
 		List<VersionIndependentConcept> codes = new ArrayList<>();
@@ -264,9 +263,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			boolean codeMatches;
 			if (caseSensitive) {
-				codeMatches = theCode.equals(nextExpansionCode.getCode());
+				codeMatches = defaultString(theCode).equals(nextExpansionCode.getCode());
 			} else {
-				codeMatches = theCode.equalsIgnoreCase(nextExpansionCode.getCode());
+				codeMatches = defaultString(theCode).equalsIgnoreCase(nextExpansionCode.getCode());
 			}
 			if (codeMatches) {
 				if (theOptions.isInferSystem() || nextExpansionCode.getSystem().equals(theCodeSystem)) {
@@ -439,39 +438,33 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				}
 
 				boolean ableToHandleCode = false;
-				if (codeSystem == null) {
+				if (codeSystem == null || codeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 
 					if (theWantCode != null) {
-						LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, system, theWantCode);
-						if (lookup != null && lookup.isFound()) {
-							CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
-								.addConcept()
-								.setCode(theWantCode)
-								.setDisplay(lookup.getCodeDisplay());
-							List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
-							addCodes(system, codesList, nextCodeList, wantCodes);
-							ableToHandleCode = true;
+						if (theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, system)) {
+							LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, system, theWantCode);
+							if (lookup != null && lookup.isFound()) {
+								CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
+									.addConcept()
+									.setCode(theWantCode)
+									.setDisplay(lookup.getCodeDisplay());
+								List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
+								addCodes(system, codesList, nextCodeList, wantCodes);
+								ableToHandleCode = true;
+							}
 						}
 					}
 
 				} else {
-
 					ableToHandleCode = true;
-
 				}
 
 				if (!ableToHandleCode) {
 					throw new ExpansionCouldNotBeCompletedInternallyException();
 				}
 
-				if (codeSystem != null) {
-
-					if (codeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-						throw new ExpansionCouldNotBeCompletedInternallyException();
-					}
-
+				if (codeSystem != null && codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 					addCodes(system, codeSystem.getConcept(), nextCodeList, wantCodes);
-
 				}
 
 			}

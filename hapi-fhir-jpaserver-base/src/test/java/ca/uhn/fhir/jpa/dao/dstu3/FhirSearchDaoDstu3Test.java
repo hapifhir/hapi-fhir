@@ -2,15 +2,15 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -20,12 +20,6 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;

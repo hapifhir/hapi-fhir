@@ -3,21 +3,19 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProviderR4Test {
 
@@ -28,7 +26,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 		StructureDefinition sd = loadResource(myFhirCtx, StructureDefinition.class, "/r4/sd-david-dhtest7.json");
 		myStructureDefinitionDao.update(sd);
 
-		Bundle response = ourClient
+		Bundle response = myClient
 			.search()
 			.forResource(StructureDefinition.class)
 			.returnBundle(Bundle.class)
@@ -43,7 +41,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 	public void testSnapshotWithResourceParameter() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onType(StructureDefinition.class)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -56,9 +54,9 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 	@Test
 	public void testSnapshotWithId() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
-		IIdType id = ourClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onInstance(id)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -71,9 +69,9 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 	@Test
 	public void testSnapshotWithUrl() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
-		IIdType id = ourClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onType(StructureDefinition.class)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -86,7 +84,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 	@Test
 	public void testSnapshotWithUrlAndId() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(new IdType("StructureDefinition/123"))
 				.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -101,7 +99,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 	@Test
 	public void testSnapshotWithInvalidUrl() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(StructureDefinition.class)
 				.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -113,8 +111,4 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 		}
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 }

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.validation;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -9,9 +9,9 @@ import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -53,7 +53,7 @@ public class ResourceValidatorTest {
 		}
 	}
 	
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		/*
 		 * We cache the default locale, but temporarily set it to a random value during this test. This helps ensure that there are no
@@ -196,7 +196,7 @@ public class ResourceValidatorTest {
 		return val;
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

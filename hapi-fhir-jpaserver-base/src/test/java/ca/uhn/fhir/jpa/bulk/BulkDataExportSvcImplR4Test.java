@@ -22,7 +22,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -40,20 +40,21 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImplR4Test.class);
 	public static final String TEST_FILTER = "Patient?gender=female";
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImplR4Test.class);
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
 	@Autowired
@@ -167,7 +168,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
-		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter="+TEST_FILTER, status.getRequest());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter=" + TEST_FILTER, status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
@@ -212,7 +213,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 
 		awaitJobCompletion(jobExecution);
-		String jobUUID = (String)jobExecution.getExecutionContext().get("jobUUID");
+		String jobUUID = (String) jobExecution.getExecutionContext().get("jobUUID");
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobUUID);
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
@@ -339,8 +340,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	//Note that if the job is generated, and doesnt rely on an existed persisted BulkExportJobEntity, it will need to
 	//create one itself, which means that its jobUUID isnt known until it starts. to get around this, we move
 	public void awaitJobCompletion(JobExecution theJobExecution) throws InterruptedException {
-		await().until(() -> {
+		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
+			ourLog.info("JobExecution {} currently has status: {}", theJobExecution.getId(), jobExecution.getStatus());
 			return jobExecution.getStatus() == BatchStatus.COMPLETED;
 		});
 	}
@@ -373,7 +375,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
-		
+
 		awaitAllBulkJobCompletions();
 
 		// Fetch the job again

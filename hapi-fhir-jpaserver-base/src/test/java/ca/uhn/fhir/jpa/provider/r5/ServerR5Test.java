@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.ExtensionConstants;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -14,9 +13,8 @@ import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -24,9 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServerR5Test extends BaseResourceProviderR5Test {
 
@@ -36,7 +34,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	private IFhirResourceDao<CapabilityStatement> myCapabilityStatementDao;
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCapabilityStatementValidates() throws IOException {
 		HttpGet get = new HttpGet(ourServerBase + "/metadata?_pretty=true&_format=json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
@@ -96,7 +94,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	public void testMetadataIncludesResourceCounts() {
 		Patient p = new Patient();
 		p.setActive(true);
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		/*
 		 * Initial fetch after a clear should return
@@ -104,7 +102,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 		 */
 		myResourceCountsCache.clear();
 
-		CapabilityStatement capabilityStatement = ourClient
+		CapabilityStatement capabilityStatement = myClient
 			.capabilities()
 			.ofType(CapabilityStatement.class)
 			.execute();
@@ -126,7 +124,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 		 */
 		myResourceCountsCache.update();
 
-		capabilityStatement = ourClient
+		capabilityStatement = myClient
 			.capabilities()
 			.ofType(CapabilityStatement.class)
 			.execute();
@@ -145,9 +143,5 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	}
 
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

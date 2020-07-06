@@ -1,17 +1,11 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSystemDaoDstu3SearchTest extends BaseJpaDstu3SystemTest {
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Test
 	public void testSearchByParans() {

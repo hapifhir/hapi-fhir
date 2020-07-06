@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +19,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -42,7 +44,7 @@ public class SearchClientR4Test {
   private HttpClient ourHttpClient;
   private HttpResponse ourHttpResponse;
 
-  @Before
+  @BeforeEach
   public void before() {
     ourCtx = FhirContext.forR4();
 
@@ -54,30 +56,27 @@ public class SearchClientR4Test {
   }
 
   private String createBundleWithSearchExtension() {
-    //@formatter:off
-		final String response = "<Bundle xmlns=\"http://hl7.org/fhir\">"
-				+ "<id value=\"f61f6ddc-95e8-4ef9-a4cd-17c79bbb74f3\"></id>"
-				+ "<meta><lastUpdated value=\"2016-02-19T12:04:02.616-05:00\"></lastUpdated></meta>"
-				+ "<type value=\"searchset\"></type>"
-				+ "<link><relation value=\"self\"></relation><url value=\"http://localhost:8081/hapi-fhir/fhir/Location?name=Sample+Clinic&amp;_query=match\"></url></link>"
-				+ "<entry>"
-				+ "<resource>"
-				+ "<Location xmlns=\"http://hl7.org/fhir\">"
-				+ "<id value=\"1\"></id>"
-				+ "<name value=\"Sample Clinic\"></name>"
-				+ "</Location>"
-				+ "</resource>"
-				+ "<search>"
-				+ "<extension url=\"http://hl7.org/fhir/StructureDefinition/algorithmic-match\">"
-				+ "<valueCode value=\"probable\"></valueCode>"
-				+ "</extension>"
-				+ "<score value=\"0.8000000000000000444089209850062616169452667236328125\">"
-				+ "</score>"
-				+ "</search>"
-				+ "</entry>"
-				+ "</Bundle>";
-		//@formatter:on
-    return response;
+    return "<Bundle xmlns=\"http://hl7.org/fhir\">"
+			 + "<id value=\"f61f6ddc-95e8-4ef9-a4cd-17c79bbb74f3\"></id>"
+			 + "<meta><lastUpdated value=\"2016-02-19T12:04:02.616-05:00\"></lastUpdated></meta>"
+			 + "<type value=\"searchset\"></type>"
+			 + "<link><relation value=\"self\"></relation><url value=\"http://localhost:8081/hapi-fhir/fhir/Location?name=Sample+Clinic&amp;_query=match\"></url></link>"
+			 + "<entry>"
+			 + "<resource>"
+			 + "<Location xmlns=\"http://hl7.org/fhir\">"
+			 + "<id value=\"1\"></id>"
+			 + "<name value=\"Sample Clinic\"></name>"
+			 + "</Location>"
+			 + "</resource>"
+			 + "<search>"
+			 + "<extension url=\"http://hl7.org/fhir/StructureDefinition/algorithmic-match\">"
+			 + "<valueCode value=\"probable\"></valueCode>"
+			 + "</extension>"
+			 + "<score value=\"0.8000000000000000444089209850062616169452667236328125\">"
+			 + "</score>"
+			 + "</search>"
+			 + "</entry>"
+			 + "</Bundle>";
   }
 
   /**
@@ -233,7 +232,7 @@ public class SearchClientR4Test {
     assertEquals("http://localhost/fhir/Bundle?_sort=param1%2C-param2", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClassClearContext() {
     TestUtil.clearAllStaticFieldsForUnitTest();
   }

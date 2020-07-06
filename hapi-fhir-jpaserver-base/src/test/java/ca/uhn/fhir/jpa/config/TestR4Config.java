@@ -27,7 +27,7 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({TestJPAConfig.class, BatchJobsConfig.class})
@@ -162,6 +162,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
+		extraProperties.put("hibernate.temp.use_jdbc_metadata_defaults","false");
 
 		return extraProperties;
 	}
