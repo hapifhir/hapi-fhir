@@ -663,6 +663,10 @@
 			<name>Mark Iantorno</name>
 			<organization>Smile CDR</organization>
 		</developer>
+		<developer>
+			<id>sqshq</id>
+			<name>Alexander Lukyanchikov</name>
+		</developer>
 	</developers>
 
 	<licenses>
