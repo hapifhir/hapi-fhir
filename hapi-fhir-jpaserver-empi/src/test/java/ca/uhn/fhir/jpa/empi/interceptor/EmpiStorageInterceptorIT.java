@@ -278,7 +278,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		Patient p = new Patient();
 		EmpiHelperR4.OutcomeAndLogMessageWrapper messageWrapper = myEmpiHelper.createWithLatch(p);
 		p.setId(messageWrapper.getDaoMethodOutcome().getId());
-		addExternalEID(p, "zoop");
+		addExternalEID(p, "external eid");
 		myEmpiHelper.updateWithLatch(p);
 		setPreventEidUpdates(false);
 	}
