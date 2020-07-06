@@ -242,8 +242,10 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testChecksOnlyApplyToRelevantResourceTypes() {
+	public void testInterceptorHandlesNonEmpiResources() {
 		setPreventEidUpdates(true);
+
+		//Create some arbitrary resource.
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
 		fooSp.addBase("Bundle");
@@ -254,9 +256,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 
 		myEmpiHelper.doCreateResource(fooSp, true);
-
 		fooSp.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
-
 		myEmpiHelper.doUpdateResource(fooSp, true);
 	}
 
