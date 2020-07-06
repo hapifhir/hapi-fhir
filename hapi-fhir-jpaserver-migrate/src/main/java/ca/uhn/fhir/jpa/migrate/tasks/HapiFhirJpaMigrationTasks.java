@@ -123,7 +123,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		init510_20200610();
 
-		Builder.BuilderWithTableName pkgVerResMod = version.onTable("NPM_PACKAGE_VER_RES");
+		Builder.BuilderWithTableName pkgVerResMod = version.onTable("NPM_PACKAGE_VER");
 		pkgVerResMod.modifyColumn("20200629.1", "PKG_DESC").nullable().withType(ColumnTypeEnum.STRING, 200);
 		pkgVerResMod.modifyColumn("20200629.2", "DESC_UPPER").nullable().withType(ColumnTypeEnum.STRING, 200);
 	}
