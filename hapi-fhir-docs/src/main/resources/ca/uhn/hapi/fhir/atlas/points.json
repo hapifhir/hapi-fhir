@@ -348,6 +348,16 @@
 			"lat": 18.5204,
 			"lon": 73.8567,
 			"added": "2020-06-18"
+},{
+			"title": "Grand Rounds, Inc.",
+			"description": "Our mission is to raise the standard of healthcare for everyone, everywhere.",
+			"link": "https://grandrounds.com",
+			"contactName": "Simon Yun",
+			"contactEmail": "simon.yun@grandrounds.com",
+			"city": "San Francisco, CA",
+			"lat": 37.7826622,
+			"lon": -122.3983786,
+			"added": "2020-05-06"
 		}
 	]
 }
