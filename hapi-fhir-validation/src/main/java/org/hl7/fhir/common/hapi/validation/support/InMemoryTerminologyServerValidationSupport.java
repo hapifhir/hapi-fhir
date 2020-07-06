@@ -184,9 +184,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		IBaseResource system = null;
 		if (!theOptions.isInferSystem() && isNotBlank(theCodeSystem)) {
 			system = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
-			if (system == null) {
-				return null;
-			}
 		}
 
 		List<VersionIndependentConcept> codes = new ArrayList<>();

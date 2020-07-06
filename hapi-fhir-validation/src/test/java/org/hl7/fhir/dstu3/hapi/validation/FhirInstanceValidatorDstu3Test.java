@@ -332,16 +332,28 @@ public class FhirInstanceValidatorDstu3Test {
 	public void testValidateWithIso3166() throws IOException {
 		loadNL();
 
-		Patient p = loadResource("/dstu3/nl/nl-core-patient-instance.json", Patient.class);
-
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
-		ValidationResult result = val.validateWithResult(p);
-		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-		assertFalse(result.isSuccessful());
-		assertEquals("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]", all.get(0).getMessage());
+		// Code in VS
+		{
+			Patient p = loadResource("/dstu3/nl/nl-core-patient-instance.json", Patient.class);
+			ValidationResult result = val.validateWithResult(p);
+			List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(result);
+			assertTrue(result.isSuccessful());
+			assertThat(all, empty());
+		}
 
+		// Code not in VS
+		{
+			Patient p = loadResource("/dstu3/nl/nl-core-patient-instance-invalid-country.json", Patient.class);
+			ValidationResult result = val.validateWithResult(p);
+			assertFalse(result.isSuccessful());
+			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+			assertEquals(1, all.size());
+			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
+			assertEquals("Validation failed for \"urn:iso:std:iso:3166#QQ\"", all.get(0).getMessage());
+		}
 	}
 
 
