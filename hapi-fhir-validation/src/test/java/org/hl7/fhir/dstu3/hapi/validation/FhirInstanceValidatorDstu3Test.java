@@ -328,6 +328,36 @@ public class FhirInstanceValidatorDstu3Test {
 		return retVal;
 	}
 
+	@Test
+	public void testValidateWithIso3166() throws IOException {
+		loadNL();
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+
+		// Code in VS
+		{
+			Patient p = loadResource("/dstu3/nl/nl-core-patient-instance.json", Patient.class);
+			ValidationResult result = val.validateWithResult(p);
+			List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(result);
+			assertTrue(result.isSuccessful());
+			assertThat(all, empty());
+		}
+
+		// Code not in VS
+		{
+			Patient p = loadResource("/dstu3/nl/nl-core-patient-instance-invalid-country.json", Patient.class);
+			ValidationResult result = val.validateWithResult(p);
+			assertFalse(result.isSuccessful());
+			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+			assertEquals(1, all.size());
+			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
+			assertEquals("Validation failed for \"urn:iso:std:iso:3166#QQ\"", all.get(0).getMessage());
+		}
+	}
+
+
+
 	/**
 	 * See #873
 	 */
@@ -727,8 +757,20 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateUsingDifferentialProfile() throws IOException {
-		loadValueSet("/dstu3/nl/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000.json");
+		loadNL();
 
+		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
+		ValidationResult results = myVal.validateWithResult(resource);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome.toString(), containsString("The Coding provided is not in the value set http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000"));
+	}
+
+	private void loadNL() throws IOException {
+		loadValueSet("/dstu3/nl/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000.json");
+		loadValueSet("/dstu3/nl/LandGBACodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000.json");
+		loadValueSet("/dstu3/nl/LandISOCodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000.json");
+
+		loadStructureDefinition("/dstu3/nl/extension-code-specification.json");
 		loadStructureDefinition("/dstu3/nl/nl-core-patient.json");
 		loadStructureDefinition("/dstu3/nl/proficiency.json");
 		loadStructureDefinition("/dstu3/nl/zibpatientlegalstatus.json");
@@ -752,12 +794,6 @@ public class FhirInstanceValidatorDstu3Test {
 		loadStructureDefinition("/dstu3/nl/nl-core-practitioner.json");
 		loadStructureDefinition("/dstu3/nl/nl-core-relatedperson-role.json");
 		loadStructureDefinition("/dstu3/nl/PractitionerRoleReference.json");
-
-
-		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
-		ValidationResult results = myVal.validateWithResult(resource);
-		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("Element matches more than one slice"));
 	}
 
 	public void loadValueSet(String theFilename) throws IOException {

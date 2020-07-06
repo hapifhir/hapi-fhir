@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -184,9 +185,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		IBaseResource system = null;
 		if (!theOptions.isInferSystem() && isNotBlank(theCodeSystem)) {
 			system = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
-			if (system == null) {
-				return null;
-			}
 		}
 
 		List<VersionIndependentConcept> codes = new ArrayList<>();
@@ -265,9 +263,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			boolean codeMatches;
 			if (caseSensitive) {
-				codeMatches = theCode.equals(nextExpansionCode.getCode());
+				codeMatches = defaultString(theCode).equals(nextExpansionCode.getCode());
 			} else {
-				codeMatches = theCode.equalsIgnoreCase(nextExpansionCode.getCode());
+				codeMatches = defaultString(theCode).equalsIgnoreCase(nextExpansionCode.getCode());
 			}
 			if (codeMatches) {
 				if (theOptions.isInferSystem() || nextExpansionCode.getSystem().equals(theCodeSystem)) {
