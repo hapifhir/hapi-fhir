@@ -167,6 +167,18 @@ public class FhirInstanceValidatorDstu3Test {
 				return retVal;
 			}
 		});
+//		when(mockSupport.isValueSetSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+//			@Override
+//			public Boolean answer(InvocationOnMock theInvocation) {
+//				String url = (String) theInvocation.getArguments()[1];
+//				boolean retVal = myValueSets.containsKey(url);
+//				return retVal;
+//			}
+//		});
+		when(mockSupport.fetchValueSet(any())).thenAnswer(t->{
+			String url = t.getArgument(0, String.class);
+			return myValueSets.get(url);
+		});
 		when(mockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
@@ -212,7 +224,7 @@ public class FhirInstanceValidatorDstu3Test {
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
@@ -1059,8 +1071,8 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
-		assertThat(errors.toString(), containsString("warning"));
-		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertEquals("Unknown code for \"http://loinc.org#12345\"", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1082,7 +1094,6 @@ public class FhirInstanceValidatorDstu3Test {
 		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString("Element 'Observation.context': max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString(""));
 	}
 
 	@Test
@@ -1174,7 +1185,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Unknown code: http://acme.org / 9988877", errors.get(0).getMessage());
+		assertEquals("Unknown code for \"http://acme.org#9988877\"", errors.get(0).getMessage());
 
 	}
 
@@ -1210,7 +1221,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Unknown code: http://loinc.org / 1234", errors.get(0).getMessage());
+		assertEquals("Unknown code for \"http://loinc.org#1234\"", errors.get(0).getMessage());
 	}
 
 	@Test

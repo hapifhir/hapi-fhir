@@ -37,6 +37,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String LANGUAGES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/languages";
 	public static final String MIMETYPES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/mimetypes";
+	public static final String MIMETYPES_CODESYSTEM_URL = "urn:ietf:bcp:13";
 	public static final String CURRENCIES_CODESYSTEM_URL = "urn:iso:std:iso:4217";
 	public static final String CURRENCIES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/currencies";
 	public static final String COUNTRIES_CODESYSTEM_URL = "urn:iso:std:iso:3166";
@@ -147,28 +148,56 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 
-		if (UCUM_CODESYSTEM_URL.equals(theSystem) && theValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+		switch (theSystem) {
+			case UCUM_CODESYSTEM_URL:
 
-			InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
-			try {
-				UcumEssenceService svc = new UcumEssenceService(input);
-				String outcome = svc.analyse(theCode);
-				if (outcome != null) {
+				InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
+				try {
+					UcumEssenceService svc = new UcumEssenceService(input);
+					String outcome = svc.analyse(theCode);
+					if (outcome != null) {
 
+						LookupCodeResult retVal = new LookupCodeResult();
+						retVal.setSearchedForCode(theCode);
+						retVal.setSearchedForSystem(theSystem);
+						retVal.setFound(true);
+						retVal.setCodeDisplay(outcome);
+						return retVal;
+
+					}
+				} catch (UcumException e) {
+					ourLog.debug("Failed parse UCUM code: {}", theCode, e);
+					return null;
+				} finally {
+					ClasspathUtil.close(input);
+				}
+				break;
+
+			case COUNTRIES_CODESYSTEM_URL:
+
+				String display = ISO_3166_CODES.get(theCode);
+				if (isNotBlank(display)) {
 					LookupCodeResult retVal = new LookupCodeResult();
 					retVal.setSearchedForCode(theCode);
 					retVal.setSearchedForSystem(theSystem);
 					retVal.setFound(true);
-					retVal.setCodeDisplay(outcome);
+					retVal.setCodeDisplay(display);
 					return retVal;
-
 				}
-			} catch (UcumException e) {
-				ourLog.debug("Failed parse UCUM code: {}", theCode, e);
+				break;
+
+			case MIMETYPES_CODESYSTEM_URL:
+
+				// This is a pretty naive implementation - Should be enhanced in future
+				LookupCodeResult retVal = new LookupCodeResult();
+				retVal.setSearchedForCode(theCode);
+				retVal.setSearchedForSystem(theSystem);
+				retVal.setFound(true);
+				return retVal;
+
+			default:
+
 				return null;
-			} finally {
-				ClasspathUtil.close(input);
-			}
 
 		} else if (COUNTRIES_CODESYSTEM_URL.equals(theSystem)) {
 
@@ -203,16 +232,36 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		switch (theSystem) {
 			case COUNTRIES_CODESYSTEM_URL:
 			case UCUM_CODESYSTEM_URL:
+			case MIMETYPES_CODESYSTEM_URL:
 				return true;
 		}
 
 		return false;
 	}
 
+	@Override
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 
-	public String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
+		switch (theValueSetUrl) {
+			case CURRENCIES_VALUESET_URL:
+			case LANGUAGES_VALUESET_URL:
+			case MIMETYPES_VALUESET_URL:
+			case UCUM_VALUESET_URL:
+			case USPS_VALUESET_URL:
+				return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	public static String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
 		String url;
-		switch (getFhirContext().getVersion().getVersion()) {
+		switch (theValueSet.getStructureFhirVersionEnum()) {
 			case DSTU2: {
 				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
 				break;
@@ -235,14 +284,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + getFhirContext().getVersion().getVersion());
+				throw new IllegalArgumentException("Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
 		}
 		return url;
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
 	}
 
 	private static HashMap<String, String> buildUspsCodes() {

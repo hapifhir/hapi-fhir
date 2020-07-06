@@ -199,6 +199,25 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 
 	@Test
+	public void testInstallR4PackageWithNoDescription() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/UK.Core.r4-1.1.0.tgz");
+		myFakeNpmServlet.myResponses.put("/UK.Core.r4/1.1.0", bytes);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("UK.Core.r4").setVersion("1.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		igInstaller.install(spec);
+
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
+
+		// Make sure we can fetch the package by ID and Version
+		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
+		assertEquals(null, pkg.description());
+		assertEquals("UK.Core.r4", pkg.name());
+	}
+
+	@Test
 	public void testLoadPackageMetadata() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
 
