@@ -126,6 +126,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName pkgVerMod = version.onTable("NPM_PACKAGE_VER");
 		pkgVerMod.modifyColumn("20200629.1", "PKG_DESC").nullable().withType(ColumnTypeEnum.STRING, 200);
 		pkgVerMod.modifyColumn("20200629.2", "DESC_UPPER").nullable().withType(ColumnTypeEnum.STRING, 200);
+
+		//EMPI Target Type
+		Builder.BuilderWithTableName empiLinkAdd = version.onTable("MPI_LINK");
+		empiLinkAdd.addColumn("20200707.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.INT);
+		empiLinkAdd.addColumn("20200707.2","SCORE").nullable().type(ColumnTypeEnum.FLOAT);
 	}
 
 	protected void init510_20200610() {
