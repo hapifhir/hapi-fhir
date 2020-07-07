@@ -4,17 +4,27 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@Ignore
+@Disabled
 public class RDFParserR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RDFParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -273,7 +283,7 @@ public class RDFParserR4Test {
 		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

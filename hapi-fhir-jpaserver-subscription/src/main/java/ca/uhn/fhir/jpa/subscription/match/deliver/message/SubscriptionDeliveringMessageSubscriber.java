@@ -74,7 +74,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException, URISyntaxException {
 		CanonicalSubscription subscription = theMessage.getSubscription();
 
-		// Interceptor call: SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY
+		// Interceptor call: SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY
 		HookParams params = new HookParams()
 			.add(CanonicalSubscription.class, subscription)
 			.add(ResourceDeliveryMessage.class, theMessage);
@@ -104,7 +104,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 		deliverPayload(theMessage, subscription, channelProducer);
 
-		// Interceptor call: SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY
+		// Interceptor call: SUBSCRIPTION_AFTER_MESSAGE_DELIVERY
 		params = new HookParams()
 			.add(CanonicalSubscription.class, subscription)
 			.add(ResourceDeliveryMessage.class, theMessage);

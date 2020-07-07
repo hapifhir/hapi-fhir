@@ -132,6 +132,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public int getClientRetryCount() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWorkerContext setClientRetryCount(int value) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void generateSnapshot(StructureDefinition input) throws FHIRException {
 		if (input.hasSnapshot()) {
 			return;

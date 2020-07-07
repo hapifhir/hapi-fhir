@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.binstore;
 
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NullBinaryStorageSvcImplTest {
 
@@ -14,33 +15,45 @@ public class NullBinaryStorageSvcImplTest {
 		assertFalse(mySvc.shouldStoreBlob(1, new IdType("Patient/2"), "application/json"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void storeBlob() {
-		mySvc.storeBlob(null, null, null, null);
+		assertThrows(UnsupportedOperationException.class, () -> {
+			mySvc.storeBlob(null, null, null, null);
+		});
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void fetchBlobDetails() {
-		mySvc.fetchBlobDetails(null, null);
+		assertThrows(UnsupportedOperationException.class, () -> {
+			mySvc.fetchBlobDetails(null, null);
+		});
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void writeBlob() {
-		mySvc.writeBlob(null, null, null);
+		assertThrows(UnsupportedOperationException.class, () -> {
+			mySvc.writeBlob(null, null, null);
+		});
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void expungeBlob() {
-		mySvc.expungeBlob(null, null);
+		assertThrows(UnsupportedOperationException.class, () -> {
+			mySvc.expungeBlob(null, null);
+		});
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void fetchBlob() {
-		mySvc.fetchBlob(null, null);
+		assertThrows(UnsupportedOperationException.class, () -> {
+			mySvc.fetchBlob(null, null);
+		});
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void newBlobId() {
-		mySvc.newBlobId();
+		assertThrows(UnsupportedOperationException.class, () -> {
+			mySvc.newBlobId();
+		});
 	}
 }

@@ -12,7 +12,9 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,7 @@ import static org.mockito.Mockito.when;
  * Note: all create/update functions take an optional isExternalHttpRequest boolean, to make it appear as though the request's
  * origin is an HTTP request.
  */
-public abstract class BaseEmpiHelper extends ExternalResource {
+public abstract class BaseEmpiHelper implements BeforeEachCallback, AfterEachCallback {
 	@Mock
 	protected ServletRequestDetails myMockSrd;
 	@Mock
@@ -48,11 +50,7 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 	protected RestfulServer myMockRestfulServer;
 	@Mock
 	protected FhirContext myMockFhirContext;
-	@Mock
-	private IInterceptorBroadcaster myMockInterceptorBroadcaster;
-
-	@Autowired
-	private IInterceptorService myInterceptorService;
+	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
 	@Autowired
 	EmpiQueueConsumerLoader myEmpiQueueConsumerLoader;
 	@Autowired
@@ -61,12 +59,20 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 	SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	EmpiSubscriptionLoader myEmpiSubscriptionLoader;
-
-	protected PointcutLatch myAfterEmpiLatch = new PointcutLatch(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED);
+	@Mock
+	private IInterceptorBroadcaster myMockInterceptorBroadcaster;
+	@Autowired
+	private IInterceptorService myInterceptorService;
 
 	@Override
-	protected void before() throws Throwable {
-		super.before();
+	public void afterEach(ExtensionContext context) throws Exception {
+		myInterceptorService.unregisterInterceptor(myAfterEmpiLatch);
+		myAfterEmpiLatch.clear();
+		waitUntilEmpiQueueIsEmpty();
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext context) throws Exception {
 		//This sets up mock servlet request details, which allows our DAO requests to appear as though
 		//they are coming from an external HTTP Request.
 		MockitoAnnotations.initMocks(this);
@@ -86,15 +92,9 @@ public abstract class BaseEmpiHelper extends ExternalResource {
 		waitForActivatedSubscriptionCount(2);
 	}
 
+
 	protected void waitForActivatedSubscriptionCount(int theSize) {
 		await("Active Subscription Count has reached " + theSize).until(() -> mySubscriptionRegistry.size() >= theSize);
-	}
-
-	@Override
-	protected void after() {
-		myInterceptorService.unregisterInterceptor(myAfterEmpiLatch);
-		myAfterEmpiLatch.clear();
-		waitUntilEmpiQueueIsEmpty();
 	}
 
 	private void waitUntilEmpiQueueIsEmpty() {

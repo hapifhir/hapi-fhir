@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 	@Test

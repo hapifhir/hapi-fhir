@@ -37,11 +37,11 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -51,9 +51,9 @@ import java.util.Set;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
@@ -64,14 +64,14 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Autowired
 	private CachingValidationSupport myCachingValidationSupport;
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 		
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
 		myCachingValidationSupport.invalidateCaches();
@@ -326,7 +326,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	}
 
 	// TODO: get this working
-	@Ignore
+	@Disabled
 	@Test
 	public void testExpandWithOpEquals() {
 		
@@ -719,7 +719,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	 * Can't currently abort costly
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testRefuseCostlyExpansionFhirCodesystem() {
 		createLocalCsAndVs();
 		myDaoConfig.setMaximumExpansionSize(1);
@@ -1152,7 +1152,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	 * Todo: not yet implemented
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchCodeNotInBuiltInValueSet() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
 		ai1.setClinicalStatus(AllergyIntoleranceClinicalStatus.ACTIVE);
@@ -1195,9 +1195,5 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		return retVal;
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

@@ -19,9 +19,9 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public static final String GIVEN_NAME = "Jenn";
@@ -57,7 +57,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	private Patient myTargetPatient2;
 	private Patient myTargetPatient3;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		super.loadEmpiSearchParameters();
 
@@ -79,7 +79,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() {
 		myInterceptorService.unregisterInterceptor(myEmpiStorageInterceptor);
 		super.after();
@@ -108,7 +108,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
 		EmpiLink empiLink = new EmpiLink().setPersonPid(myToPersonPid).setTargetPid(myFromPersonPid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
-		myEmpiLinkDaoSvc.save(empiLink);
+		saveLink(empiLink);
 		assertEquals(1, myEmpiLinkDao.count());
 		mergePersons();
 		assertEquals(0, myEmpiLinkDao.count());
@@ -164,7 +164,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink fromLink = createEmpiLink(myFromPerson, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		myEmpiLinkDaoSvc.save(fromLink);
+		saveLink(fromLink);
 
 		createEmpiLink(myToPerson, myTargetPatient1);
 
@@ -179,7 +179,8 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink fromLink = createEmpiLink(myFromPerson, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDaoSvc.save(fromLink);
+
+		saveLink(fromLink);
 
 		createEmpiLink(myToPerson, myTargetPatient1);
 
@@ -196,7 +197,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink toLink = createEmpiLink(myToPerson, myTargetPatient1);
 		toLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		toLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDaoSvc.save(toLink);
+		saveLink(toLink);
 
 		mergePersons();
 		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myToPerson);
@@ -209,12 +210,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink fromLink = createEmpiLink(myFromPerson, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDaoSvc.save(fromLink);
+		saveLink(fromLink);
 
 		EmpiLink toLink = createEmpiLink(myToPerson, myTargetPatient1);
 		toLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		toLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		myEmpiLinkDaoSvc.save(toLink);
+		saveLink(toLink);
 
 		try {
 			mergePersons();
@@ -229,12 +230,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink fromLink = createEmpiLink(myFromPerson, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		myEmpiLinkDaoSvc.save(fromLink);
+		saveLink(fromLink);
 
 		EmpiLink toLink = createEmpiLink(myToPerson, myTargetPatient1);
 		toLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		toLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDaoSvc.save(toLink);
+		saveLink(toLink);
 
 		try {
 			mergePersons();
@@ -249,12 +250,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		EmpiLink fromLink = createEmpiLink(myFromPerson, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
-		myEmpiLinkDaoSvc.save(fromLink);
+		saveLink(fromLink);
 
 		EmpiLink toLink = createEmpiLink(myToPerson, myTargetPatient2);
 		toLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		toLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		myEmpiLinkDaoSvc.save(toLink);
+		saveLink(toLink);
 
 		mergePersons();
 		assertEquals(1, myToPerson.getLink().size());

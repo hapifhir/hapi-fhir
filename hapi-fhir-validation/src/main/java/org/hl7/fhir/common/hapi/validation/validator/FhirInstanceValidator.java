@@ -21,6 +21,7 @@ import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -197,6 +198,21 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> theValidationCtx) {
+		VersionSpecificWorkerContextWrapper wrappedWorkerContext = provideWorkerContext();
+
+		return new ValidatorWrapper()
+			.setAnyExtensionsAllowed(isAnyExtensionsAllowed())
+			.setBestPracticeWarningLevel(getBestPracticeWarningLevel())
+			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
+			.setExtensionDomains(getExtensionDomains())
+			.setNoTerminologyChecks(isNoTerminologyChecks())
+			.setValidatorResourceFetcher(getValidatorResourceFetcher())
+			.setAssumeValidRestReferences(isAssumeValidRestReferences())
+			.validate(wrappedWorkerContext, theValidationCtx);
+	}
+
+	@Nonnull
+	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
 			VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter;
@@ -213,7 +229,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 								org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) nonCanonical;
 								if (valueSet.hasCodeSystem() && valueSet.getCodeSystem().hasSystem()) {
 									if (!valueSet.hasCompose()) {
-										org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet) retVal;
+										ValueSet valueSetR5 = (ValueSet) retVal;
 										valueSetR5.getCompose().addInclude().setSystem(valueSet.getCodeSystem().getSystem());
 									}
 								}
@@ -257,16 +273,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			wrappedWorkerContext = new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), converter);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
-
-		return new ValidatorWrapper()
-			.setAnyExtensionsAllowed(isAnyExtensionsAllowed())
-			.setBestPracticeWarningLevel(getBestPracticeWarningLevel())
-			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
-			.setExtensionDomains(getExtensionDomains())
-			.setNoTerminologyChecks(isNoTerminologyChecks())
-			.setValidatorResourceFetcher(getValidatorResourceFetcher())
-			.setAssumeValidRestReferences(isAssumeValidRestReferences())
-			.validate(wrappedWorkerContext, theValidationCtx);
+		return wrappedWorkerContext;
 	}
 
 	private FhirContext getDstu2Context() {
@@ -309,7 +316,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 */
 	public void invalidateCaches() {
 		myValidationSupport.invalidateCaches();
-		myWrappedWorkerContext.invalidateCaches();
+		if (myWrappedWorkerContext != null) {
+			myWrappedWorkerContext.invalidateCaches();
+		}
 	}
 
 

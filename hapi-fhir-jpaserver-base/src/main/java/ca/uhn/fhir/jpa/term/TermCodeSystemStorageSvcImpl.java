@@ -447,16 +447,19 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			doDelete(descriptor, loader, counter, myConceptDao);
 		}
 
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
-		if (codeSystemOpt.isPresent()) {
-			TermCodeSystem codeSystem = codeSystemOpt.get();
-			ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
-			codeSystem.setCurrentVersion(null);
-			myCodeSystemDao.save(codeSystem);
-		}
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.executeWithoutResult(tx -> {
+			Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
+			if (codeSystemOpt.isPresent()) {
+				TermCodeSystem codeSystem = codeSystemOpt.get();
+				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
+				codeSystem.setCurrentVersion(null);
+				myCodeSystemDao.save(codeSystem);
+			}
 
-		ourLog.info(" * Deleting code system version");
-		myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+			ourLog.info(" * Deleting code system version");
+			myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+		});
 
 	}
 
@@ -710,6 +713,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			txTemplate.execute(t -> {
 				link.forEach(id -> theDao.deleteByPid(id));
+				theDao.flush();
 				return null;
 			});
 
@@ -717,7 +721,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ourLog.info(" * {} {} deleted ({}/{}) remaining - {}/sec - ETA: {}", count, theDescriptor, count, totalCount, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
 
 		}
-		theDao.flush();
+
 	}
 
 

@@ -2,21 +2,19 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import com.google.common.testing.EqualsTester;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.APPROXIMATE;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateParamTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateParamTest.class);
@@ -101,7 +99,7 @@ public class DateParamTest {
 		ourLog.info("POST: " + dt.getValue());
 		assertEquals("2016-06-09T16:38:00.000-04:00", dt.getValueAsString());
 	}
-	
+
 	@Test
 	public void testParseLegacyPrefixes() {
 		assertEquals(ParamPrefixEnum.APPROXIMATE, new DateParam("ap2012").getPrefix());
@@ -115,16 +113,9 @@ public class DateParamTest {
 	public void testEqualsAndHashCode() {
 		Date now = new Date();
 		Date later = new Date(now.getTime() + SECONDS.toMillis(666));
-		new EqualsTester()
-			.addEqualityGroup(new DateParam(),
-				               new DateParam(null))
-			.addEqualityGroup(new DateParam(NOT_EQUAL, now),
-				               new DateParam(NOT_EQUAL, now.getTime()))
-			.addEqualityGroup(new DateParam(EQUAL, now),
-				               new DateParam(EQUAL, now.getTime()))
-			.addEqualityGroup(new DateParam(EQUAL, later),
-				               new DateParam(EQUAL, later.getTime()))
-			.addEqualityGroup(new DateParam(APPROXIMATE, "2011-11-11T11:11:11.111-11:11"))
-			.testEquals();
+		assertEquals(new DateParam(), new DateParam(null));
+		assertEquals(new DateParam(NOT_EQUAL, now), new DateParam(NOT_EQUAL, now.getTime()));
+		assertEquals(new DateParam(EQUAL, now), new DateParam(EQUAL, now.getTime()));
+		assertEquals(new DateParam(EQUAL, later), new DateParam(EQUAL, later.getTime()));
 	}
 }

@@ -70,14 +70,19 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 
 		if (theException instanceof ConstraintViolationException) {
 			String constraintName = ((ConstraintViolationException) theException).getConstraintName();
+
+			/*
+			 * Note: Compare the constraint name in a case-insensitive way. Most DBs preserve the case, but Postgresql
+			 * will return it as lowercase even though the definition is in caps.
+			 */
 			if (isNotBlank(constraintName)) {
-				if (constraintName.contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
+				if (constraintName.toUpperCase().contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
 				}
-				if (constraintName.contains(ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
+				if (constraintName.toUpperCase().contains(ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceIndexedCompositeStringUniqueConstraintFailure"));
 				}
-				if (constraintName.contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
+				if (constraintName.toUpperCase().contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
 				}
 			}

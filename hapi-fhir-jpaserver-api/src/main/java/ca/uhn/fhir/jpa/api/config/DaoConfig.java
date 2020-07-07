@@ -4,8 +4,8 @@ import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
@@ -1417,7 +1417,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link SearchParamConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link HapiExtensions#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1428,7 +1428,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link SearchParamConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link HapiExtensions#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.

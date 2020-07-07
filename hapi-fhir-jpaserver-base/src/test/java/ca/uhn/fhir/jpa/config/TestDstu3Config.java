@@ -10,7 +10,11 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -20,7 +24,7 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import(TestJPAConfig.class)
@@ -30,10 +34,12 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
 	private Exception myLastStackTrace;
 
+
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
 	}
+
 
 	@Bean
 	public BasicDataSource basicDataSource() {
@@ -94,6 +100,11 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		 * starvation
 		 */
 		int maxThreads = (int) (Math.random() * 6.0) + 1;
+
+		if ("true".equals(System.getProperty("single_db_connection"))) {
+			maxThreads = 1;
+		}
+
 		retVal.setMaxTotal(maxThreads);
 
 		return retVal;

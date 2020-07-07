@@ -9,8 +9,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.BaseTest;
-import ca.uhn.fhir.test.utilities.LoggingRule;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
@@ -43,16 +43,17 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.jdbc.Work;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -82,8 +83,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -109,8 +110,8 @@ public abstract class BaseJpaTest extends BaseTest {
 		TestUtil.setShouldRandomizeTimezones(false);
 	}
 
-	@Rule
-	public LoggingRule myLoggingRule = new LoggingRule();
+	@RegisterExtension
+	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService myRequestOperationCallback;
@@ -133,9 +134,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
 	@Autowired
 	private IValidationSupport myJpaPersistedValidationSupport;
+	@Autowired
+	private FhirInstanceValidator myFhirInstanceValidator;
 
-
-	@After
+	@AfterEach
 	public void afterPerformCleanup() {
 		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(false);
 		if (myCaptureQueriesListener != null) {
@@ -150,11 +152,13 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myJpaPersistedValidationSupport != null) {
 			ProxyUtil.getSingletonTarget(myJpaPersistedValidationSupport, JpaPersistedResourceValidationSupport.class).clearCaches();
 		}
-
+		if (myFhirInstanceValidator != null) {
+			myFhirInstanceValidator.invalidateCaches();
+		}
 
 	}
 
-	@After
+	@AfterEach
 	public void afterValidateNoTransaction() {
 		PlatformTransactionManager txManager = getTxManager();
 		if (txManager instanceof JpaTransactionManager) {
@@ -181,14 +185,14 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeInitPartitions() {
 		if (myPartitionConfigSvc != null) {
 			myPartitionConfigSvc.start();
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeInitMocks() {
 		myRequestOperationCallback = new InterceptorService();
 
@@ -415,18 +419,12 @@ public abstract class BaseJpaTest extends BaseTest {
 		return retVal.toArray(new String[0]);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
 		randomizeLocale();
 	}
 
-	@SuppressWarnings("RedundantThrows")
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@AfterClass
+	@AfterAll
 	public static void afterClassShutdownDerby() {
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		// try {
