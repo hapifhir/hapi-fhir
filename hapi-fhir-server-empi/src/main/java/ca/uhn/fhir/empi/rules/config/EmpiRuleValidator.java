@@ -67,8 +67,9 @@ public class EmpiRuleValidator {
 	}
 
 	private void validateSearchParams(EmpiRulesJson theEmpiRulesJson) {
-		for (EmpiResourceSearchParamJson searchParam : theEmpiRulesJson.getCandidateSearchParams()) {
-			validateSearchParam("candidateSearchParams", searchParam.getResourceType(), searchParam.getSearchParam());
+		for (EmpiResourceSearchParamJson searchParams : theEmpiRulesJson.getCandidateSearchParams()) {
+			searchParams.iterator().forEachRemaining(
+				searchParam -> validateSearchParam("candidateSearchParams", searchParams.getResourceType(), searchParam));
 		}
 		for (EmpiFilterSearchParamJson filter : theEmpiRulesJson.getCandidateFilterSearchParams()) {
 			validateSearchParam("candidateFilterSearchParams", filter.getResourceType(), filter.getSearchParam());
@@ -129,7 +130,7 @@ public class EmpiRuleValidator {
 	private void validatePatientPath(EmpiFieldMatchJson theFieldMatch) {
 		try {
 			myTerser.getDefinition(myPatientClass, "Patient." + theFieldMatch.getResourcePath());
-		} catch (DataFormatException|ConfigurationException e) {
+		} catch (DataFormatException | ConfigurationException e) {
 			throw new ConfigurationException("MatchField " +
 				theFieldMatch.getName() +
 				" resourceType " +

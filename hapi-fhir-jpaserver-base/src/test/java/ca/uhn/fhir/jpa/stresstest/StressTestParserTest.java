@@ -1,12 +1,13 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +22,9 @@ public class StressTestParserTest extends BaseTest {
 	 * @throws IOException
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void test() throws IOException {
-		FhirContext ctx = FhirContext.forR4();
+		FhirContext ctx = FhirContext.forCached(FhirVersionEnum.R4);
 		String input = loadResource("/org/hl7/fhir/r4/model/valueset/valuesets.xml");
 
 		Bundle parsed = ctx.newXmlParser().parseResource(Bundle.class, input);

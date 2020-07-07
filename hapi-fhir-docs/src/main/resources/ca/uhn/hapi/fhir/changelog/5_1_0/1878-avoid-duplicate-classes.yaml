@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1878
+title: "Several duplicate classes were removed from the testpage overlay, avoiding a warning on startup. Thanks to
+  Joel Schneider for the pull request!"

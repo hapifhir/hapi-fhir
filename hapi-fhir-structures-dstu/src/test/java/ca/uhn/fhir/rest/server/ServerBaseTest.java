@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,10 +14,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -44,7 +44,7 @@ public class ServerBaseTest {
 
 	}
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		if (myServer != null) {
 			myServer.stop();
@@ -150,7 +150,7 @@ public class ServerBaseTest {
 		assertEquals("http://localhost:" + port + "/Patient/123", entry.getId().getValue());
 		assertEquals("http://localhost:" + port + "/Patient/123/_history/456", entry.getLinkSelf().getValue());
 	}
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -179,7 +179,7 @@ public class ServerBaseTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -43,6 +43,17 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.fhir</groupId>
+			<artifactId>ucum</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 		</dependency>

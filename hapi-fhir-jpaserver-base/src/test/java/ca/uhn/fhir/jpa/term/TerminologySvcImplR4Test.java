@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -24,10 +23,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
-import org.junit.AfterClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
@@ -38,17 +34,17 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
+	ValidationOptions optsNoGuess = new ValidationOptions();
+	ValidationOptions optsGuess = new ValidationOptions().guessSystem();
 	private IIdType myConceptMapId;
 
 	private void createAndPersistConceptMap() {
@@ -81,8 +77,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		}
 	}
 
-
-
 	@Test
 	public void testCreateConceptMapWithMissingSourceSystem() {
 		ConceptMap conceptMap = new ConceptMap();
@@ -104,7 +98,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		}
 
 	}
-
 
 	@Test
 	public void testCreateConceptMapWithVirtualSourceSystem() {
@@ -253,20 +246,25 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	public void testDuplicateCodeSystemUrls() throws Exception {
 		loadAndPersistCodeSystem();
 
-		expectedException.expect(UnprocessableEntityException.class);
-		expectedException.expectMessage("Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
-
-		loadAndPersistCodeSystem();
+		try {
+			loadAndPersistCodeSystem();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart(), e.getMessage());
+		}
 	}
 
 	@Test
 	public void testDuplicateConceptMapUrls() {
 		createAndPersistConceptMap();
 
-		expectedException.expect(UnprocessableEntityException.class);
-		expectedException.expectMessage("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart());
+		try {
+			createAndPersistConceptMap();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+		}
 
-		createAndPersistConceptMap();
 	}
 
 	@Test
@@ -276,10 +274,13 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		// DM 2019-03-05 - We pre-load our custom CodeSystem otherwise pre-expansion of the ValueSet will fail.
 		loadAndPersistCodeSystemAndValueSet();
 
-		expectedException.expect(UnprocessableEntityException.class);
-		expectedException.expectMessage("Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart());
+		try {
+			loadAndPersistValueSet(HttpVerb.POST);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart(), e.getMessage());
+		}
 
-		loadAndPersistValueSet(HttpVerb.POST);
 	}
 
 	@Test
@@ -634,7 +635,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				assertEquals(Enumerations.ConceptMapEquivalence.NARROWER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
-	}
+			}
 		});
 	}
 
@@ -1837,9 +1838,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
-	ValidationOptions optsNoGuess = new ValidationOptions();
-	ValidationOptions optsGuess = new ValidationOptions().guessSystem();
-
 	@Test
 	public void testValidateCodeIsInPreExpandedValueSetWithClientAssignedId() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
@@ -1892,10 +1890,5 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		assertTrue(result.isResult());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 }

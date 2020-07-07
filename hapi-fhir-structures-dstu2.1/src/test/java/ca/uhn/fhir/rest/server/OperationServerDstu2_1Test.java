@@ -4,9 +4,9 @@ import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestOperationComponent;
 import org.hl7.fhir.dstu2016may.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
@@ -39,6 +39,9 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 public class OperationServerDstu2_1Test {
 	private static CloseableHttpClient ourClient;
@@ -56,7 +59,7 @@ public class OperationServerDstu2_1Test {
 	private static Server ourServer;
 	private IGenericClient myFhirClient;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastParam1 = null;
 		ourLastParam2 = null;
@@ -71,7 +74,7 @@ public class OperationServerDstu2_1Test {
 
 
 	@Test
-	public void testConformance() throws Exception {
+	public void testConformance() {
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLogResponseBody(true);
 		myFhirClient.registerInterceptor(loggingInterceptor);
@@ -524,13 +527,13 @@ public class OperationServerDstu2_1Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2_1();
 		ourServer = new Server(0);
@@ -719,7 +722,7 @@ public class OperationServerDstu2_1Test {
 		public IBundleProvider opInstanceReturnsBundleProvider() {
 			ourLastMethod = "$OP_INSTANCE_BUNDLE_PROVIDER";
 
-			List<IBaseResource> resources = new ArrayList<IBaseResource>();
+			List<IBaseResource> resources = new ArrayList<>();
 			for (int i =0; i < 100;i++) {
 				Patient p = new Patient();
 				p.setId("Patient/" + i);

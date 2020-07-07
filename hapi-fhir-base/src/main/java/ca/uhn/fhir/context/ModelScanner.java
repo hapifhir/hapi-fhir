@@ -21,13 +21,32 @@ package ca.uhn.fhir.context;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IResourceBlock;
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Compartment;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -37,8 +56,18 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -390,7 +419,7 @@ class ModelScanner {
 			for (String nextName : searchParam.compositeOf()) {
 				RuntimeSearchParam param = nameToParam.get(nextName);
 				if (param == null) {
-					ourLog.warn("Search parameter {}.{} declares that it is a composite with compositeOf value '{}' but that is not a valid parametr name itself. Valid values are: {}",
+					ourLog.warn("Search parameter {}.{} declares that it is a composite with compositeOf value '{}' but that is not a valid parameter name itself. Valid values are: {}",
 						theResourceDef.getName(), searchParam.name(), nextName, nameToParam.keySet());
 					continue;
 				}

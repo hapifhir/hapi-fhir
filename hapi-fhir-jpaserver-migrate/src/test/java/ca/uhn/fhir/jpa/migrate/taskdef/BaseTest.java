@@ -6,43 +6,32 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 
-@RunWith(Parameterized.class)
 public abstract class BaseTest {
 
 	private static final String DATABASE_NAME = "DATABASE";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
 	private static int ourDatabaseUrl = 0;
-	private final Supplier<TestDatabaseDetails> myTestDatabaseDetails;
 	private BasicDataSource myDataSource;
 	private String myUrl;
 	private FlywayMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
-	public BaseTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		myTestDatabaseDetails = theTestDatabaseDetails;
-	}
-
-	@Before
-	public void before() {
-		TestDatabaseDetails testDatabaseDetails = myTestDatabaseDetails.get();
-
+	public void before(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		TestDatabaseDetails testDatabaseDetails = theTestDatabaseDetails.get();
 		myUrl = testDatabaseDetails.myUrl;
 		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
 		myDataSource = testDatabaseDetails.myDataSource;
@@ -61,7 +50,7 @@ public abstract class BaseTest {
 		return myDataSource;
 	}
 
-	@After
+	@AfterEach
 	public void resetMigrationVersion() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		if (tableNames.contains(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME)) {
@@ -86,7 +75,7 @@ public abstract class BaseTest {
 		return myMigrator;
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		myConnectionProperties.close();
 	}
@@ -111,8 +100,7 @@ public abstract class BaseTest {
 
 	}
 
-	@Parameterized.Parameters(name = "{0}")
-	public static Collection<Supplier<TestDatabaseDetails>> data() {
+	public static Stream<Supplier<TestDatabaseDetails>> data() {
 		ourLog.info("H2: {}", org.h2.Driver.class.toString());
 
 		ArrayList<Supplier<TestDatabaseDetails>> retVal = new ArrayList<>();
@@ -159,7 +147,7 @@ public abstract class BaseTest {
 			}
 		});
 
-		return retVal;
+		return retVal.stream();
 	}
 
 }

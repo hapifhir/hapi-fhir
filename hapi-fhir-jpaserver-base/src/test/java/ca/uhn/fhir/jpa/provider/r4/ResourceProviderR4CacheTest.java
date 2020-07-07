@@ -11,9 +11,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +25,9 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
@@ -37,22 +37,23 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	private ISearchDao mySearchEntityDao;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setCacheControlNoStoreMaxResultsUpperLimit(new DaoConfig().getCacheControlNoStoreMaxResultsUpperLimit());
 
-		ourClient.unregisterInterceptor(myCapturingInterceptor);
+		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		myCapturingInterceptor = new CapturingInterceptor();
-		ourClient.registerInterceptor(myCapturingInterceptor);
+		myClient.registerInterceptor(myCapturingInterceptor);
 	}
 
 	@Test
@@ -60,9 +61,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAM");
-		ourClient.create().resource(pt1).execute();
+		myClient.create().resource(pt1).execute();
 
-		Bundle results = ourClient
+		Bundle results = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.FAMILY.matches().value("FAM"))
@@ -75,9 +76,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
-		ourClient.create().resource(pt2).execute();
+		myClient.create().resource(pt2).execute();
 
-		results = ourClient
+		results = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.FAMILY.matches().value("FAM"))
@@ -96,10 +97,10 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		for (int i = 0; i < 10; i++) {
 			Patient pt1 = new Patient();
 			pt1.addName().setFamily("FAM" + i);
-			ourClient.create().resource(pt1).execute();
+			myClient.create().resource(pt1).execute();
 		}
 
-		Bundle results = ourClient
+		Bundle results = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.FAMILY.matches().value("FAM"))
@@ -116,7 +117,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	public void testCacheNoStoreMaxResultsWithIllegalValue() {
 		myDaoConfig.setCacheControlNoStoreMaxResultsUpperLimit(123);
 		try {
-			ourClient
+			myClient
 				.search()
 				.forResource("Patient")
 				.where(Patient.FAMILY.matches().value("FAM"))
@@ -134,18 +135,18 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAM");
-		ourClient.create().resource(pt1).execute();
+		myClient.create().resource(pt1).execute();
 
-		Bundle results = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
+		Bundle results = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertEquals(1, results.getEntry().size());
 		assertEquals(1, mySearchEntityDao.count());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
-		ourClient.create().resource(pt2).execute();
+		myClient.create().resource(pt2).execute();
 
-		results = ourClient
+		results = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.FAMILY.matches().value("FAM"))
@@ -163,13 +164,13 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAM");
-		ourClient.create().resource(pt1).execute();
+		myClient.create().resource(pt1).execute();
 
 		Date beforeFirst = new Date();
 
 		TestUtil.sleepOneClick();
 
-		Bundle results1 = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
+		Bundle results1 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 
 		TestUtil.sleepOneClick();
 
@@ -183,9 +184,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
-		ourClient.create().resource(pt2).execute();
+		myClient.create().resource(pt2).execute();
 
-		Bundle results2 = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
+		Bundle results2 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertEquals(1, results2.getEntry().size());
 		assertEquals(1, mySearchEntityDao.count());
 		assertEquals("HIT from " + ourServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
@@ -203,7 +204,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		p.addName().setFamily("Foo");
 		String p2Id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 
-		Bundle resp1 = ourClient
+		Bundle resp1 = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.NAME.matches().value("foo"))
@@ -211,9 +212,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertEquals(2, resp1.getEntry().size());
 
-		ourClient.delete().resourceById(new IdType(p1Id)).execute();
+		myClient.delete().resourceById(new IdType(p1Id)).execute();
 
-		Bundle resp2 = ourClient
+		Bundle resp2 = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.NAME.matches().value("foo"))
@@ -226,9 +227,5 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		assertEquals(1, resp2.getEntry().size());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

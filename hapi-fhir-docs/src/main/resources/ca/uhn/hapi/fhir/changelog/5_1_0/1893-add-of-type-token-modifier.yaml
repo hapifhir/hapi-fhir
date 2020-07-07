@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1893
+title: "Support for the `:of-type` modifier has been added to TokenParamModifier. Thanks to Alexander Lukyanchikov 
+   for the pull request!"

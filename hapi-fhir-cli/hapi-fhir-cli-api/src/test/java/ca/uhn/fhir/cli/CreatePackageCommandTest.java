@@ -12,9 +12,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.cache.NpmPackage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CreatePackageCommandTest extends BaseTest {
 
@@ -41,14 +41,14 @@ public class CreatePackageCommandTest extends BaseTest {
 		System.setProperty("test", "true");
 	}
 
-	@Before
+	@BeforeEach
 	public void start() {
 		myWorkDirectory = Files.createTempDir();
 		myTargetDirectory = Files.createTempDir();
 		myExtractDirectory = Files.createTempDir();
 	}
 
-	@After
+	@AfterEach
 	public void stop() {
 		try {
 			FileUtils.deleteDirectory(myWorkDirectory);

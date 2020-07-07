@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.bulk.BulkJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;

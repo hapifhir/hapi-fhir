@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.*;
@@ -13,8 +13,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
@@ -28,7 +28,7 @@ public class JaxRsExceptionInterceptorTest {
 	JaxRsExceptionInterceptor interceptor = new JaxRsExceptionInterceptor();
 	private InvocationContext context;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		interceptor = new JaxRsExceptionInterceptor();
 		context = mock(InvocationContext.class);

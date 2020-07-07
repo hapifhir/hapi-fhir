@@ -8,8 +8,8 @@ import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StructureMapTest {
 
@@ -265,7 +265,7 @@ public class StructureMapTest {
 	/**
 	 * Sets up the resource paths as well as create the contexts using a defalut validator to start with.
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 		if (this.myCtx == null) {
 			this.myCtx = FhirContext.forDstu3();

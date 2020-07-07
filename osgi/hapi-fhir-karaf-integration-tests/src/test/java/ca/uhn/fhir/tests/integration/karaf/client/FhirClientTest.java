@@ -6,9 +6,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -29,7 +29,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConf
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-@Ignore(value = "Relies on external service being up and running")
+@Disabled(value = "Relies on external service being up and running")
 public class FhirClientTest {
 
 	private FhirContext fhirContext = FhirContext.forDstu3();

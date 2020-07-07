@@ -1,11 +1,10 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import ca.uhn.fhir.util.jar.DependencyLogFactory;
 import ca.uhn.fhir.util.jar.IDependencyLog;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DependencyLogUtilTest {
 

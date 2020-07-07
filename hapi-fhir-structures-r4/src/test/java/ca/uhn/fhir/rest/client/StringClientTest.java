@@ -1,11 +1,12 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.input.ReaderInputStream;
@@ -18,7 +19,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
@@ -39,7 +42,7 @@ public class StringClientTest {
 
 	// atom-document-large.xml
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ctx = FhirContext.forR4();
 
@@ -56,7 +59,7 @@ public class StringClientTest {
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), Charset.forName("UTF-8")));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello"));
@@ -72,7 +75,7 @@ public class StringClientTest {
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), Charset.forName("UTF-8")));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithoutParam("hello");
@@ -88,7 +91,7 @@ public class StringClientTest {
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), Charset.forName("UTF-8")));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello", true));
@@ -107,15 +110,15 @@ public class StringClientTest {
 	private interface IClient extends IBasicClient {
 
 		@Search(type=Patient.class)
-		public List<Patient> searchWithParam(@RequiredParam(name="withParam") StringParam theString);
+		List<Patient> searchWithParam(@RequiredParam(name = "withParam") StringParam theString);
 
 		@Search(type=Patient.class)
-		public List<Patient> searchWithoutParam(@RequiredParam(name="withoutParam") String theString);
+		List<Patient> searchWithoutParam(@RequiredParam(name = "withoutParam") String theString);
 
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

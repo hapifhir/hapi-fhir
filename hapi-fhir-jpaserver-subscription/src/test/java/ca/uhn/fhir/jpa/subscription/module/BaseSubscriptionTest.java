@@ -12,15 +12,15 @@ import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionConfig;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import org.junit.After;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	SearchParamConfig.class,
 	SubscriptionProcessorConfig.class,
@@ -38,7 +38,7 @@ public abstract class BaseSubscriptionTest {
 	@Autowired
 	MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
 
-	@After
+	@AfterEach
 	public void afterClearAnonymousLambdas() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}

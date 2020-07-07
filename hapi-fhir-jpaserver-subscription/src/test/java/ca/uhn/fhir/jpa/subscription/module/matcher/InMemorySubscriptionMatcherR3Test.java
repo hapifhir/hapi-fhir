@@ -14,17 +14,17 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.MedicationRequestCategory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test {
 	@Autowired
@@ -62,7 +62,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		assertEquals(theSubscriptionMatchingStrategy, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		myModelConfig.setTreatBaseUrlsAsLocal(new ModelConfig().getTreatBaseUrlsAsLocal());
 	}

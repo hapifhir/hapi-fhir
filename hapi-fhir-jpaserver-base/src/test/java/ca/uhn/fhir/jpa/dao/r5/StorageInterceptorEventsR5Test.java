@@ -12,18 +12,18 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings({"unchecked", "Duplicates"})
+@SuppressWarnings({"Duplicates"})
 public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StorageInterceptorEventsR5Test.class);
 
@@ -59,7 +59,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Initial search returns all
 		SearchParameterMap params = new SearchParameterMap();
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertTrue(search.getClass().toString(), search instanceof PersistedJpaBundleProvider);
+		assertTrue(search instanceof PersistedJpaBundleProvider, search.getClass().toString());
 		List<IBaseResource> found = search.getResources(0, 100);
 		assertEquals(3, found.size());
 		assertEquals(3, showedCounter.get());
@@ -103,7 +103,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertTrue(search.getClass().toString(), search instanceof SimpleBundleProvider);
+		assertTrue(search instanceof SimpleBundleProvider, search.getClass().toString());
 		List<IBaseResource> found = search.getResources(0, 100);
 		assertEquals(3, found.size());
 		assertEquals(3, showedCounter.get());
@@ -120,15 +120,10 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		assertEquals(2, showedCounter.get());
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

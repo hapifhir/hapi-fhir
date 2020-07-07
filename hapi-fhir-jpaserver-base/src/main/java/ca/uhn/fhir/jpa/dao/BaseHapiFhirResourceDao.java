@@ -1365,10 +1365,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			 */
 			resourceId = resource.getIdElement();
 
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, resource, getResourceName());
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
 			try {
 				entity = readEntityLatestVersion(resourceId, requestPartitionId);
 			} catch (ResourceNotFoundException e) {
+				requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource, getResourceName());
 				return doCreateForPostOrPut(resource, null, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId);
 			}
 		}

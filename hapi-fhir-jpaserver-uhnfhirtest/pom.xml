@@ -232,6 +232,9 @@
 						<overlay>
 							<groupId>ca.uhn.hapi.fhir</groupId>
 							<artifactId>hapi-fhir-testpage-overlay</artifactId>
+							<excludes>
+								<exclude>WEB-INF/classes/**/*.class</exclude>
+							</excludes>
 						</overlay>
 					</overlays>
 				</configuration>

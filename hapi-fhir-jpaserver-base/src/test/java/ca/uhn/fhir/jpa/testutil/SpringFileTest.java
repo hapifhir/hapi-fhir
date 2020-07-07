@@ -1,20 +1,9 @@
 package ca.uhn.fhir.jpa.testutil;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import org.apache.commons.io.IOUtils;
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.Test;
 
 public class SpringFileTest {
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 	@Test
@@ -22,5 +11,5 @@ public class SpringFileTest {
 		String text = IOUtils.toString(SpringFileTest.class.getResourceAsStream("/hapi-fhir-server-resourceproviders-dstu2.xml"));
 //		assertThat(text, not(containsString("OperationDefinition")));
 	}
-	
+
 }

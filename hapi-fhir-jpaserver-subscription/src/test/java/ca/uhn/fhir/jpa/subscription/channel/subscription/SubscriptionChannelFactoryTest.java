@@ -2,13 +2,13 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
@@ -16,15 +16,15 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SubscriptionChannelFactoryTest {
 
 	private SubscriptionChannelFactory mySvc;
@@ -36,7 +36,7 @@ public class SubscriptionChannelFactoryTest {
 	@Captor
 	private ArgumentCaptor<Exception> myExceptionCaptor;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		when(myChannelNamer.getChannelName(any(), any())).thenReturn("CHANNEL_NAME");
 		mySvc = new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(myChannelNamer));
