@@ -1,22 +1,24 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,10 +30,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
@@ -42,7 +45,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	private UserRequestRetryVersionConflictsInterceptor myRetryInterceptor;
 
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myExecutor = Executors.newFixedThreadPool(10);
 		myRetryInterceptor = new UserRequestRetryVersionConflictsInterceptor();
@@ -52,7 +55,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		myExecutor.shutdown();
 		myInterceptorRegistry.unregisterInterceptor(myRetryInterceptor);
@@ -212,8 +215,13 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithCreate() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+
+		ServletRequestDetails srd = mock(ServletRequestDetails.class);
 		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		when(srd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		when(srd.getUserData()).thenReturn(new HashMap<>());
+		when(srd.getServer()).thenReturn(new RestfulServer(myFhirCtx));
+		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
@@ -231,7 +239,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				.getRequest()
 				.setMethod(Bundle.HTTPVerb.PUT)
 				.setUrl("Patient/ABC");
-			Runnable task = () -> mySystemDao.transaction(mySrd, bundle);
+			Runnable task = () -> mySystemDao.transaction(srd, bundle);
 
 			Future<?> future = myExecutor.submit(task);
 			futures.add(future);
@@ -275,7 +283,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-gender");
 		sp.addExtension()
-			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 

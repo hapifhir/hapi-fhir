@@ -193,7 +193,7 @@ public class FhirTerserR4Test {
 		List<Extension> exts = target.getExtensionsByUrl("http://foo");
 		assertEquals(1, exts.size());
 		exts = exts.get(0).getExtensionsByUrl("http://example.com");
-		Assert.assertEquals("FOO", ((StringType) exts.get(0).getValue()).getValue());
+		assertEquals("FOO", ((StringType) exts.get(0).getValue()).getValue());
 	}
 
 	@Test
