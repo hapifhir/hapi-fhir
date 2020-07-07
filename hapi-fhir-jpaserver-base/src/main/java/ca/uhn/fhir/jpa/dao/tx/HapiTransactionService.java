@@ -64,6 +64,7 @@ public class HapiTransactionService {
 						continue;
 					}
 
+					ourLog.info("Max retries ({}) exceeded for version conflict", conflictResolutionStrategy.getMaxRetries());
 				}
 
 				throw e;

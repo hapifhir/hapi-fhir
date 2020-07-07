@@ -11,6 +11,15 @@ import java.util.StringTokenizer;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
+/**
+ * This interceptor looks for a header on incoming requests called <code>X-Retry-On-Version-Conflict</code> and
+ * if present, it will instruct the server to automatically retry JPA server operations that would have
+ * otherwise failed with a {@link ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException} (HTTP 409).
+ * <p>
+ *    The format of the header is:<br/>
+ *    <code>X-Retry-On-Version-Conflict: retry; max-retries=100</code>
+ * </p>
+ */
 @Interceptor
 public class UserRequestRetryVersionConflictsInterceptor {
 
@@ -18,7 +27,7 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	public static final String MAX_RETRIES = "max-retries";
 	public static final String RETRY = "retry";
 
-	@Hook(Pointcut.STORAGE_VERSION_CONFLICT)
+	@Hook(value = Pointcut.STORAGE_VERSION_CONFLICT, order = 100)
 	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
 

@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hibernate.HibernateException;
-import org.hibernate.StaleStateException;
+import org.hibernate.PessimisticLockException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +35,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 import javax.persistence.PersistenceException;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
@@ -76,13 +77,14 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			 * will return it as lowercase even though the definition is in caps.
 			 */
 			if (isNotBlank(constraintName)) {
-				if (constraintName.toUpperCase().contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
+				constraintName = constraintName.toUpperCase();
+				if (constraintName.contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
 				}
-				if (constraintName.toUpperCase().contains(ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
+				if (constraintName.contains(ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceIndexedCompositeStringUniqueConstraintFailure"));
 				}
-				if (constraintName.toUpperCase().contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
+				if (constraintName.contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
 				}
 			}
@@ -102,9 +104,17 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		 * class in a method called "checkBatched" currently. This can all be tested using the
 		 * StressTestR4Test method testMultiThreadedUpdateSameResourceInTransaction()
 		 */
-		if (theException instanceof StaleStateException) {
+		if (theException instanceof org.hibernate.StaleStateException) {
 			String msg = messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
 			throw new ResourceVersionConflictException(msg);
+		}
+		if (theException instanceof org.hibernate.PessimisticLockException) {
+			PessimisticLockException ex = (PessimisticLockException) theException;
+			String sql = defaultString(ex.getSQL()).toUpperCase();
+			if (sql.contains(ResourceHistoryTable.HFJ_RES_VER)) {
+				String msg = messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
+				throw new ResourceVersionConflictException(msg);
+			}
 		}
 
 		return super.convertHibernateAccessException(theException);

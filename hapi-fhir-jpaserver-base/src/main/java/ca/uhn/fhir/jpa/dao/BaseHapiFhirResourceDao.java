@@ -734,9 +734,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	@Transactional
 	public IBundleProvider history(final IIdType theId, final Date theSince, Date theUntil, RequestDetails theRequest) {
-		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getResourceName(), theId);
-		notifyInterceptors(RestOperationTypeEnum.HISTORY_INSTANCE, requestDetails);
+		if (theRequest != null) {
+			// Notify interceptors
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getResourceName(), theId);
+			notifyInterceptors(RestOperationTypeEnum.HISTORY_INSTANCE, requestDetails);
+		}
 
 		StopWatch w = new StopWatch();
 

@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -93,6 +95,52 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
+	}
+
+	@Test
+	public void testDelete_RequestRetry() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+
+		IIdType patientId = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setActive(true);
+			return myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		});
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			// Submit an update
+			Patient p = new Patient();
+			p.setId(patientId);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p, mySrd);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+
+			// Submit a delete
+			task = () -> myPatientDao.delete(patientId, mySrd);
+			future = myExecutor.submit(task);
+			futures.add(future);
+
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (Exception e) {
+				ourLog.info("Future produced exception: {}", e.toString());
+				throw new AssertionError("Failed with message: " + e.toString(), e);
+			}
+		}
+
+		// Make sure we saved the object
+		IBundleProvider patient = myPatientDao.history(patientId, null, null, null);
+		assertThat(patient.sizeOrThrowNpe(), greaterThanOrEqualTo(3));
 
 	}
 
@@ -299,7 +347,10 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 					myPatientDao.create(p);
 				} catch (PreconditionFailedException e) {
 					// expected - This is as a result of the unique SP
-					assertThat(e.getMessage(), containsString("it would create a duplicate index matching query"));
+					assertThat(e.getMessage(), containsString("duplicate index matching query: Patient?gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
+				} catch (ResourceVersionConflictException e) {
+					// expected - This is as a result of the unique SP
+					assertThat(e.getMessage(), containsString("would have resulted in a duplicate value for a unique index"));
 				}
 			};
 			Future<?> future = myExecutor.submit(task);
