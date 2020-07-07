@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.ClassifierTypeEnum.IN_COMPARTMENT;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -111,7 +112,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 							break;
 						case SEARCH_TYPE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS) || myClassifierType == IN_COMPARTMENT && !theRequestDetails.getParameters().containsKey("_id")) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							appliesToResourceType = theRequestDetails.getResourceName();
@@ -439,7 +440,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					}
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
 						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-					} else if (myClassifierType == ClassifierTypeEnum.IN_COMPARTMENT) {
+					} else if (myClassifierType == IN_COMPARTMENT) {
 						// ok we'll check below
 					}
 				}

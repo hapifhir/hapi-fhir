@@ -2283,7 +2283,6 @@ public class AuthorizationInterceptorR4Test {
 					.build();
 			}
 		};
-		interceptor.setFlags(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS);
 		ourServlet.registerInterceptor(interceptor);
 
 		HttpGet httpGet;
@@ -2343,8 +2342,8 @@ public class AuthorizationInterceptorR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?patient=Patient/2");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
@@ -2367,8 +2366,8 @@ public class AuthorizationInterceptorR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?subject=Patient/2");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -2408,8 +2407,8 @@ public class AuthorizationInterceptorR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -2458,8 +2457,8 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
@@ -2653,8 +2652,8 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
