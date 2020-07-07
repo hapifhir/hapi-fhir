@@ -46,11 +46,13 @@ public class EmpiExpungeSvcImpl implements IEmpiExpungeSvc {
 	@Autowired
 	private IResourceExpungeService myResourceExpungeService;
 
+
 	@Override
 	public void expungeEmpiLinks(String theResourceType) {
 		EmpiTargetType targetType = getTargetTypeOrThrowException(theResourceType);
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(targetType);
-		myResourceExpungeService.expungeHistoricalVersionsOfIds(null, longs, new AtomicInteger(longs.size()));
+		//TODO this expunge does not work!
+		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
 	}
 
 	private EmpiTargetType getTargetTypeOrThrowException(String theResourceType) {
@@ -66,7 +68,7 @@ public class EmpiExpungeSvcImpl implements IEmpiExpungeSvc {
 	@Override
 	public void expungeEmpiLinks() {
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
-		myResourceExpungeService.expungeHistoricalVersionsOfIds(null, longs, new AtomicInteger(longs.size()));;
+		myResourceExpungeService.expungeHistoricalVersionsOfIds(null, longs, new AtomicInteger(longs.size()));
 	}
 }
 

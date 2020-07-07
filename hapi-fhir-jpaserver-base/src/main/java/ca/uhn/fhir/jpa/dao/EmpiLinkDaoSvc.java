@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.log.Logs;
@@ -53,6 +54,8 @@ public class EmpiLinkDaoSvc {
 	private IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
 	private IdHelperService myIdHelperService;
+	@Autowired
+	private FhirContext myFhirContext;
 
 	@Transactional
 	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
@@ -62,12 +65,18 @@ public class EmpiLinkDaoSvc {
 		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
+		empiLink.setEmpiTargetType(determineTargetType(theTarget));
 
 		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchResult);
 		theEmpiTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(empiLink);
 		return empiLink;
+	}
+
+	private EmpiTargetType determineTargetType(IBaseResource theTarget) {
+		String resourceType = myFhirContext.getResourceType(theTarget);
+		return EmpiTargetType.valueOfCaseInsensitive(resourceType);
 	}
 
 
@@ -191,8 +200,8 @@ public class EmpiLinkDaoSvc {
 	}
 
 	private List<Long> deleteEmpiLinksAndReturnPersonPids(List<EmpiLink> theLinks) {
-		List<Long> collect = theLinks.stream().map(link -> link.getPersonPid()).collect(Collectors.toList());
-		myEmpiLinkDao.deleteAll();
+		List<Long> collect = theLinks.stream().map(EmpiLink::getPersonPid).collect(Collectors.toList());
+		theLinks.forEach(empiLink -> myEmpiLinkDao.delete(empiLink));
 		return collect;
 	}
 
@@ -202,7 +211,6 @@ public class EmpiLinkDaoSvc {
 		Example<EmpiLink> exampleLink = Example.of(link);
 		List<EmpiLink> allOfType = myEmpiLinkDao.findAll(exampleLink);
 		return deleteEmpiLinksAndReturnPersonPids(allOfType);
-
 	}
 
 	public EmpiLink save(EmpiLink theEmpiLink) {

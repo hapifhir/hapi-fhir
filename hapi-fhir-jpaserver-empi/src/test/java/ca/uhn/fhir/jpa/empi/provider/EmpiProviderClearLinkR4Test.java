@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
@@ -11,7 +12,10 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 
@@ -49,8 +53,11 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearPatientLinks() {
 		assertLinkCount(2);
+
 		myEmpiProviderR4.clearEmpiLinks(new StringType("patient"));
 		assertNoPatientLinksExist();
+		Person read = myPersonDao.read(new IdDt(myPersonId.getValueAsString()).toVersionless());
+		assertThat(read, is(equalTo(nullValue())));
 	}
 
 	@Test
