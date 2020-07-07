@@ -35,9 +35,11 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.transaction.Transactional;
 import java.util.HashSet;
 
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
@@ -83,6 +85,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	@Nonnull
 	@Override
 	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+
 		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
@@ -115,6 +119,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	@Nonnull
 	@Override
 	public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+
 		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
