@@ -2,8 +2,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -14,7 +15,6 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -51,6 +51,51 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		myCodeSystemDao.create(upload2, mySrd).getId().toUnqualifiedVersionless();
 
 	}
+
+	@Test
+	public void testExpandValueSetWithIso3166() throws IOException {
+		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/dstu3/nl/LandISOCodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000.json");
+		myValueSetDao.create(vs);
+
+		runInTransaction(() -> {
+			TermValueSet vsEntity = myTermValueSetDao.findByUrl("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000").orElseThrow(() -> new IllegalStateException());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsEntity.getExpansionStatus());
+		});
+
+		IFhirResourceDaoValueSet.ValidateCodeResult validationOutcome;
+		UriType vsIdentifier = new UriType("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000");
+		CodeType code = new CodeType();
+		CodeType system = new CodeType("urn:iso:std:iso:3166");
+
+		// Validate good
+		code.setValue("NL");
+		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
+		assertEquals(true, validationOutcome.isResult());
+
+		// Validate bad
+		code.setValue("QQ");
+		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
+		assertEquals(false, validationOutcome.isResult());
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		runInTransaction(() -> {
+			TermValueSet vsEntity = myTermValueSetDao.findByUrl("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000").orElseThrow(() -> new IllegalStateException());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vsEntity.getExpansionStatus());
+		});
+
+		// Validate good
+		code.setValue("NL");
+		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
+		assertEquals(true, validationOutcome.isResult());
+
+		// Validate bad
+		code.setValue("QQ");
+		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
+		assertEquals(false, validationOutcome.isResult());
+
+	}
+
 
 	@Test
 	@Disabled
@@ -255,7 +300,6 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		ourLog.info(result.getMessage());
 		assertTrue(result.isResult(), result.getMessage());
 	}
-
 
 
 }

@@ -8,8 +8,11 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,9 +124,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		if (isBlank(theValueSetUrl)) {
 			CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
-			if (validationResult != null) {
-				return validationResult;
-			}
+			return validationResult;
 		}
 
 		return null;
@@ -220,6 +221,50 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		retVal.setFound(false);
 		return retVal;
 
+	}
+
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+
+		Map<String, String> map;
+		switch (defaultString(theSystem)) {
+			case COUNTRIES_CODESYSTEM_URL:
+				map = ISO_3166_CODES;
+				break;
+			case CURRENCIES_CODESYSTEM_URL:
+				map = ISO_4217_CODES;
+				break;
+			default:
+				return null;
+		}
+
+		CodeSystem retVal = new CodeSystem();
+		retVal.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		retVal.setUrl(theSystem);
+		for (Map.Entry<String, String> nextEntry : map.entrySet()) {
+			retVal.addConcept().setCode(nextEntry.getKey()).setDisplay(nextEntry.getValue());
+		}
+
+		IBaseResource normalized = null;
+		switch (getFhirContext().getVersion().getVersion()) {
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+				return null;
+			case DSTU3:
+				normalized = VersionConvertor_30_40.convertResource(retVal, false);
+				break;
+			case R4:
+				normalized = retVal;
+				break;
+			case R5:
+				normalized = VersionConvertor_40_50.convertResource(retVal);
+				break;
+		}
+
+		Validate.notNull(normalized);
+
+		return normalized;
 	}
 
 	@Override
