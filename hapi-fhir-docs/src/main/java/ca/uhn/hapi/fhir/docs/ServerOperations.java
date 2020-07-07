@@ -53,9 +53,9 @@ public class ServerOperations {
 
 		ourLog.info("Received call with content type {} and {} bytes", contentType, bytes.length);
 
-		theServletResponse.setContentType(contentType);
-		theServletResponse.getOutputStream().write(bytes);
-		theServletResponse.getOutputStream().close();
+		theServletResponse.setContentType("text/plain");
+		theServletResponse.getWriter().write("hello");
+		theServletResponse.getWriter().close();
 	}
 	//END SNIPPET: manualInputAndOutput
 

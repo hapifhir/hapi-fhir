@@ -56,11 +56,6 @@ public class HapiTransactionService {
 				ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
 				if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
 					if (i <= conflictResolutionStrategy.getMaxRetries()) {
-						try {
-							Thread.sleep(100 * i);
-						} catch (InterruptedException e2) {
-							// ignore
-						}
 						continue;
 					}
 
