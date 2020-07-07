@@ -7,12 +7,14 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -215,6 +217,10 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
 		assertEquals(null, pkg.description());
 		assertEquals("UK.Core.r4", pkg.name());
+
+		// Ensure that we loaded the contents
+		IBundleProvider searchResult = myStructureDefinitionDao.search(SearchParameterMap.newSynchronous("url", new UriParam("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient")));
+		assertEquals(1, searchResult.sizeOrThrowNpe());
 	}
 
 	@Test
