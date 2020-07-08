@@ -40,7 +40,7 @@ public class FlywayMigrator extends BaseMigrator {
 	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigrator.class);
 
 	private final String myMigrationTableName;
-	private List<FlywayMigration> myTasks = new ArrayList<>();
+	private List<FlywayMigrationTask> myTasks = new ArrayList<>();
 
 	public FlywayMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		this(theMigrationTableName);
@@ -53,7 +53,7 @@ public class FlywayMigrator extends BaseMigrator {
 	}
 
 	public void addTask(BaseTask theTask) {
-		myTasks.add(new FlywayMigration(theTask, this));
+		myTasks.add(new FlywayMigrationTask(theTask, this));
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class FlywayMigrator extends BaseMigrator {
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
 			.callbacks(getCallbacks().toArray(new Callback[0]))
 			.load();
-		for (FlywayMigration task : myTasks) {
+		for (FlywayMigrationTask task : myTasks) {
 			task.setConnectionProperties(theConnectionProperties);
 		}
 		return flyway;

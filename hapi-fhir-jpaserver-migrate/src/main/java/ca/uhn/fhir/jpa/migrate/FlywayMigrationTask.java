@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.migration.Context;
@@ -32,14 +33,14 @@ import java.sql.SQLException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class FlywayMigration implements JavaMigration {
-	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigration.class);
+public class FlywayMigrationTask implements JavaMigration {
+	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigrationTask.class);
 
 	private final BaseTask myTask;
 	private final FlywayMigrator myFlywayMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
-	public FlywayMigration(BaseTask theTask, FlywayMigrator theFlywayMigrator) {
+	public FlywayMigrationTask(BaseTask theTask, FlywayMigrator theFlywayMigrator) {
 		myTask = theTask;
 		myFlywayMigrator = theFlywayMigrator;
 	}
@@ -76,8 +77,7 @@ public class FlywayMigration implements JavaMigration {
 		myTask.setNoColumnShrink(myFlywayMigrator.isNoColumnShrink());
 		myTask.setConnectionProperties(myConnectionProperties);
 		try {
-			myTask.execute();
-			myFlywayMigrator.addExecutedStatements(myTask.getExecutedStatements());
+			executeTask();
 		} catch (SQLException e) {
 			String description = myTask.getDescription();
 			if (isBlank(description)) {
@@ -86,6 +86,20 @@ public class FlywayMigration implements JavaMigration {
 			String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
 			throw new InternalErrorException(prefix + e.toString(), e);
 		}
+	}
+
+	private void executeTask() throws SQLException {
+		if (myFlywayMigrator.isSchemaWasInitialized() && !(myTask instanceof InitializeSchemaTask)) {
+			// Empty schema was initialized, stub out this non-schema-init task since we're starting with a fully migrated schema
+			myTask.setDoNothing(true);
+		}
+		myTask.execute();
+		if (myTask.initializedSchema()) {
+			ourLog.info("Empty schema was Initialized.  Stubbing out all following migration tasks that are not Schema Initializations.");
+			myFlywayMigrator.setSchemaWasInitialized(true);
+		}
+
+		myFlywayMigrator.addExecutedStatements(myTask.getExecutedStatements());
 	}
 
 	public void setConnectionProperties(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
