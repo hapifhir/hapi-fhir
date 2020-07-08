@@ -98,12 +98,12 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName("nictiz.fhir.nl.stu3.questionnaires")
 			.setVersion("1.0.2")
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
 			.setFetchDependencies(true)
 			.addDependencyExclude("hl7\\.fhir\\.[a-zA-Z0-9]+\\.core");
 		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
-		assertThat(outcome.getMessage(), hasItem("Indexing Resource[package/vl-QuestionnaireProvisioningTask.json] with URL: http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireProvisioningTask|1.0.1"));
+		assertThat(outcome.getMessage(), hasItem("Indexing StructureDefinition Resource[package/vl-QuestionnaireProvisioningTask.json] with URL: http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireProvisioningTask|1.0.1"));
 
 		runInTransaction(() -> {
 			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
@@ -207,6 +207,6 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		byte[] bytes = loadResourceAsByteArray("/packages/basisprofil.de.tar.gz");
 		myFakeNpmServlet.getResponses().put("/basisprofil.de/0.2.40", bytes);
 
-		igInstaller.install(new PackageInstallationSpec().setName("basisprofil.de").setVersion("0.2.40").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL));
+		igInstaller.install(new PackageInstallationSpec().setName("basisprofil.de").setVersion("0.2.40").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
 	}
 }

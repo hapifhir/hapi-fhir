@@ -268,7 +268,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
 		assertThat(outcome.getMessage(), hasItem("Marking package hl7.fhir.uv.shorthand#0.12.0 as current version"));
-		assertThat(outcome.getMessage(), hasItem("Indexing Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0"));
+		assertThat(outcome.getMessage(), hasItem("Indexing CodeSystem Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0"));
 
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		outcome = igInstaller.install(spec);
