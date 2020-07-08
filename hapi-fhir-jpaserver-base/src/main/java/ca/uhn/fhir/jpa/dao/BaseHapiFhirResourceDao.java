@@ -961,6 +961,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Transactional
 	public T readByPid(ResourcePersistentId thePid) {
 		StopWatch w = new StopWatch();
 
@@ -979,16 +980,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Transactional
 	public T read(IIdType theId) {
 		return read(theId, null);
 	}
 
 	@Override
+	@Transactional
 	public T read(IIdType theId, RequestDetails theRequestDetails) {
 		return read(theId, theRequestDetails, false);
 	}
 
 	@Override
+	@Transactional
 	public T read(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
@@ -1041,11 +1045,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Transactional
 	public BaseHasResource readEntity(IIdType theId, RequestDetails theRequest) {
 		return readEntity(theId, true, theRequest);
 	}
 
 	@Override
+	@Transactional
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
@@ -1128,6 +1134,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public void reindex(T theResource, ResourceTable theEntity) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+
 		ourLog.debug("Indexing resource {} - PID {}", theEntity.getIdDt().getValue(), theEntity.getId());
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
@@ -1140,11 +1148,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
+	@Transactional
 	@Override
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
 		removeTag(theId, theTagType, theScheme, theTerm, null);
 	}
 
+	@Transactional
 	@Override
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequest) {
 		// Notify interceptors
