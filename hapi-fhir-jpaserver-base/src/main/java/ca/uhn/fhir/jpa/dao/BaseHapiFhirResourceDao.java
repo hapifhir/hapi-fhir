@@ -1383,7 +1383,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			 * check it and reject requests in
 			 * BaseOutcomeReturningMethodBindingWithResourceParam
 			 */
-			resourceId = resource.getIdElement();
+			resourceId = theResource.getIdElement();
+			assert resourceId != null;
+			assert resourceId.hasResourceType();
+			assert resourceId.hasIdPart();
 
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
 			try {
