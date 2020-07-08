@@ -85,8 +85,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	@Nonnull
 	@Override
 	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-
 		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
@@ -119,8 +117,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	@Nonnull
 	@Override
 	public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-
 		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
