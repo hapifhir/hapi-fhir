@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -13,10 +14,14 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +69,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithClientAssignedId_RequestRetry() {
+	public void testCreateWithClientAssignedId() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
 		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
 		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
@@ -76,219 +81,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			p.setActive(true);
 			p.addIdentifier().setValue("VAL" + i);
 			Runnable task = () -> myPatientDao.update(p, mySrd);
-			Future<?> future = myExecutor.submit(task);
-			futures.add(future);
-		}
-
-		// Look for failures
-		for (Future<?> next : futures) {
-			try {
-				next.get();
-				ourLog.info("Future produced success");
-			} catch (Exception e) {
-				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e.toString(), e);
-			}
-		}
-
-		// Make sure we saved the object
-		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals(true, patient.getActive());
-
-	}
-
-	@Test
-	public void testDelete_RequestRetry() {
-		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
-
-		IIdType patientId = runInTransaction(() -> {
-			Patient p = new Patient();
-			p.setActive(true);
-			return myPatientDao.create(p).getId().toUnqualifiedVersionless();
-		});
-
-		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			// Submit an update
-			Patient p = new Patient();
-			p.setId(patientId);
-			p.addIdentifier().setValue("VAL" + i);
-			Runnable task = () -> myPatientDao.update(p, mySrd);
-			Future<?> future = myExecutor.submit(task);
-			futures.add(future);
-
-			// Submit a delete
-			task = () -> myPatientDao.delete(patientId, mySrd);
-			future = myExecutor.submit(task);
-			futures.add(future);
-
-		}
-
-		// Look for failures
-		for (Future<?> next : futures) {
-			try {
-				next.get();
-				ourLog.info("Future produced success");
-			} catch (Exception e) {
-				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e.toString(), e);
-			}
-		}
-
-		// Make sure we saved the object
-		IBundleProvider patient = myPatientDao.history(patientId, null, null, null);
-		assertThat(patient.sizeOrThrowNpe(), greaterThanOrEqualTo(3));
-
-	}
-
-	@Test
-	public void testDontRequestRetry() {
-		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
-
-		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			Patient p = new Patient();
-			p.setId("ABC");
-			p.setActive(true);
-			p.addIdentifier().setValue("VAL" + i);
-			Runnable task = () -> myPatientDao.update(p, mySrd);
-			Future<?> future = myExecutor.submit(task);
-			futures.add(future);
-		}
-
-		// Look for failures
-		for (Future<?> next : futures) {
-			try {
-				next.get();
-				ourLog.info("Future produced success");
-			} catch (ExecutionException | InterruptedException e) {
-				if (e.getCause() instanceof ResourceVersionConflictException) {
-					// this is expected since we're not retrying
-					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
-				} else {
-					ourLog.info("Future produced exception: {}", e.toString());
-					throw new AssertionError("Failed with message: " + e.toString(), e);
-				}
-			}
-		}
-
-		// Make sure we saved the object
-		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals(true, patient.getActive());
-
-	}
-
-	@Test
-	public void testNoRetryInterceptor() {
-		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			Patient p = new Patient();
-			p.setId("ABC");
-			p.setActive(true);
-			p.addIdentifier().setValue("VAL" + i);
-			Runnable task = () -> myPatientDao.update(p, mySrd);
-			Future<?> future = myExecutor.submit(task);
-			futures.add(future);
-		}
-
-		// Look for failures
-		for (Future<?> next : futures) {
-			try {
-				next.get();
-				ourLog.info("Future produced success");
-			} catch (ExecutionException | InterruptedException e) {
-				if (e.getCause() instanceof ResourceVersionConflictException) {
-					// this is expected since we're not retrying
-					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
-				} else {
-					ourLog.info("Future produced exception: {}", e.toString());
-					throw new AssertionError("Failed with message: " + e.toString(), e);
-				}
-			}
-		}
-
-		// Make sure we saved the object
-		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals(true, patient.getActive());
-
-	}
-
-
-	@Test
-	public void testInvocationWithoutRequestDetails() {
-		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
-
-		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			Patient p = new Patient();
-			p.setId("ABC");
-			p.setActive(true);
-			p.addIdentifier().setValue("VAL" + i);
-			Runnable task = () -> myPatientDao.update(p);
-			Future<?> future = myExecutor.submit(task);
-			futures.add(future);
-		}
-
-		// Look for failures
-		for (Future<?> next : futures) {
-			try {
-				next.get();
-				ourLog.info("Future produced success");
-			} catch (ExecutionException | InterruptedException e) {
-				if (e.getCause() instanceof ResourceVersionConflictException) {
-					// this is expected since we're not retrying
-					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
-				} else {
-					ourLog.info("Future produced exception: {}", e.toString());
-					throw new AssertionError("Failed with message: " + e.toString(), e);
-				}
-			}
-		}
-
-		// Make sure we saved the object
-		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals(true, patient.getActive());
-
-	}
-
-
-	@Test
-	public void testTransactionWithCreate() {
-		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-
-		ServletRequestDetails srd = mock(ServletRequestDetails.class);
-		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
-		when(srd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
-		when(srd.getUserData()).thenReturn(new HashMap<>());
-		when(srd.getServer()).thenReturn(new RestfulServer(myFhirCtx));
-		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
-
-		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-
-			Patient p = new Patient();
-			p.setId("ABC");
-			p.setActive(true);
-			p.addIdentifier().setValue("VAL" + i);
-
-			Bundle bundle = new Bundle();
-			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle
-				.addEntry()
-				.setResource(p)
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.PUT)
-				.setUrl("Patient/ABC");
-			Runnable task = () -> mySystemDao.transaction(srd, bundle);
-
 			Future<?> future = myExecutor.submit(task);
 			futures.add(future);
 		}
@@ -377,6 +169,273 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male")));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, search.sizeOrThrowNpe());
+
+	}
+
+	@Test
+	public void testDelete() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+
+		IIdType patientId = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setActive(true);
+			return myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		});
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			// Submit an update
+			Patient p = new Patient();
+			p.setId(patientId);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p, mySrd);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+
+			// Submit a delete
+			task = () -> myPatientDao.delete(patientId, mySrd);
+			future = myExecutor.submit(task);
+			futures.add(future);
+
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (Exception e) {
+				ourLog.info("Future produced exception: {}", e.toString());
+				throw new AssertionError("Failed with message: " + e.toString(), e);
+			}
+		}
+
+		// Make sure we saved the object
+		IBundleProvider patient = myPatientDao.history(patientId, null, null, null);
+		assertThat(patient.sizeOrThrowNpe(), greaterThanOrEqualTo(3));
+
+	}
+
+	@Test
+	public void testNoRetryRequest() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p, mySrd);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (ExecutionException | InterruptedException e) {
+				if (e.getCause() instanceof ResourceVersionConflictException) {
+					// this is expected since we're not retrying
+					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
+				} else {
+					ourLog.info("Future produced exception: {}", e.toString());
+					throw new AssertionError("Failed with message: " + e.toString(), e);
+				}
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+	@Test
+	public void testNoRetryInterceptor() {
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p, mySrd);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (ExecutionException | InterruptedException e) {
+				if (e.getCause() instanceof ResourceVersionConflictException) {
+					// this is expected since we're not retrying
+					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
+				} else {
+					ourLog.info("Future produced exception: {}", e.toString());
+					throw new AssertionError("Failed with message: " + e.toString(), e);
+				}
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+
+	@Test
+	public void testNoRequestDetails() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (ExecutionException | InterruptedException e) {
+				if (e.getCause() instanceof ResourceVersionConflictException) {
+					// this is expected since we're not retrying
+					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
+				} else {
+					ourLog.info("Future produced exception: {}", e.toString());
+					throw new AssertionError("Failed with message: " + e.toString(), e);
+				}
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+
+	@Test
+	public void testPatch() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+
+		Patient p = new Patient();
+		p.addName().setFamily("FAMILY");
+		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+
+			Parameters patch = new Parameters();
+			Parameters.ParametersParameterComponent operation = patch.addParameter();
+			operation.setName("operation");
+			operation
+				.addPart()
+				.setName("type")
+				.setValue(new CodeType("replace"));
+			operation
+				.addPart()
+				.setName("path")
+				.setValue(new StringType("Patient.name[0].family"));
+			operation
+				.addPart()
+				.setName("value")
+				.setValue(new StringType("FAMILY-" + i));
+
+			Runnable task = () -> myPatientDao.patch(pId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (Exception e) {
+				ourLog.info("Future produced exception: {}", e.toString());
+				throw new AssertionError("Failed with message: " + e.toString(), e);
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(pId);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals("11", patient.getMeta().getVersionId());
+
+	}
+
+
+
+	@Test
+	public void testTransactionWithCreate() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+
+		ServletRequestDetails srd = mock(ServletRequestDetails.class);
+		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
+		when(srd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		when(srd.getUserData()).thenReturn(new HashMap<>());
+		when(srd.getServer()).thenReturn(new RestfulServer(myFhirCtx));
+		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+
+			Bundle bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle
+				.addEntry()
+				.setResource(p)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl("Patient/ABC");
+			Runnable task = () -> mySystemDao.transaction(srd, bundle);
+
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (Exception e) {
+				ourLog.info("Future produced exception: {}", e.toString());
+				throw new AssertionError("Failed with message: " + e.toString(), e);
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
 
 	}
 
