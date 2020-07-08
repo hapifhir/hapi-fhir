@@ -40,13 +40,13 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	@Test
 	public void testUcum_LookupCode_Bad() {
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(new ValidationSupportContext(myCtx.getValidationSupport()), "http://unitsofmeasure.org", "AAAAA");
-		assertNull( outcome);
+		assertEquals(false, outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_UnknownSystem() {
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(new ValidationSupportContext(myCtx.getValidationSupport()), "http://foo", "AAAAA");
-		assertNull( outcome);
+		assertNull(outcome);
 	}
 
 	@Test
