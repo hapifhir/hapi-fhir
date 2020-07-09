@@ -1704,15 +1704,14 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_TagNotParam_SearchAllPartitions() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));
+		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));
 		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"));
 		createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code2"));
 		createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code2"));
 		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code2"));
 
 		addReadAllPartitions();
-
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
@@ -1725,6 +1724,26 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM='http://system'"));
+
+		// And with another param
+
+		addReadAllPartitions();
+		myCaptureQueriesListener.clear();
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
+		map.add(Patient.SP_IDENTIFIER, new TokenParam("http://foo", "bar"));
+		map.setLoadSynchronous(true);
+		 results = myPatientDao.search(map);
+		 ids = toUnqualifiedVersionlessIds(results);
+		assertThat(ids, Matchers.contains(patientIdNull, patientId1));
+
+		 searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM='http://system'"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "myparamsto1_.HASH_SYS_AND_VALUE in"));
+
+
 	}
 
 	@Test
