@@ -8,8 +8,11 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,9 +124,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		if (isBlank(theValueSetUrl)) {
 			CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
-			if (validationResult != null) {
-				return validationResult;
-			}
+			return validationResult;
 		}
 
 		return null;
@@ -147,70 +148,33 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 
+		Map<String, String> map;
 		switch (theSystem) {
 			case UCUM_CODESYSTEM_URL:
-
-				InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
-				try {
-					UcumEssenceService svc = new UcumEssenceService(input);
-					String outcome = svc.analyse(theCode);
-					if (outcome != null) {
-
-						LookupCodeResult retVal = new LookupCodeResult();
-						retVal.setSearchedForCode(theCode);
-						retVal.setSearchedForSystem(theSystem);
-						retVal.setFound(true);
-						retVal.setCodeDisplay(outcome);
-						return retVal;
-
-					}
-				} catch (UcumException e) {
-					ourLog.debug("Failed parse UCUM code: {}", theCode, e);
-					return null;
-				} finally {
-					ClasspathUtil.close(input);
-				}
-				break;
-
-			case COUNTRIES_CODESYSTEM_URL:
-
-				String display = ISO_3166_CODES.get(theCode);
-				if (isNotBlank(display)) {
-					LookupCodeResult retVal = new LookupCodeResult();
-					retVal.setSearchedForCode(theCode);
-					retVal.setSearchedForSystem(theSystem);
-					retVal.setFound(true);
-					retVal.setCodeDisplay(display);
-					return retVal;
-				}
-				break;
-
+				return lookupUcumCode(theCode);
 			case MIMETYPES_CODESYSTEM_URL:
-
-				// This is a pretty naive implementation - Should be enhanced in future
-				LookupCodeResult mimeRetVal = new LookupCodeResult();
-				mimeRetVal.setSearchedForCode(theCode);
-				mimeRetVal.setSearchedForSystem(theSystem);
-				mimeRetVal.setFound(true);
-				return mimeRetVal;
-
-			case CURRENCIES_CODESYSTEM_URL:
-
-				String currenciesDisplay = ISO_3166_CODES.get(theCode);
-				if (isNotBlank(currenciesDisplay)) {
-					LookupCodeResult retVal = new LookupCodeResult();
-					retVal.setSearchedForCode(theCode);
-					retVal.setSearchedForSystem(theSystem);
-					retVal.setFound(true);
-					retVal.setCodeDisplay(currenciesDisplay);
-					return retVal;
-				}
+				return lookupMimetypeCode(theCode);
+			case COUNTRIES_CODESYSTEM_URL:
+				map = ISO_3166_CODES;
 				break;
-
+			case CURRENCIES_CODESYSTEM_URL:
+				map = ISO_4217_CODES;
+				break;
+			case USPS_CODESYSTEM_URL:
+				map = USPS_CODES;
+				break;
 			default:
-
 				return null;
+		}
 
+		String display = map.get(theCode);
+		if (isNotBlank(display)) {
+			LookupCodeResult retVal = new LookupCodeResult();
+			retVal.setSearchedForCode(theCode);
+			retVal.setSearchedForSystem(theSystem);
+			retVal.setFound(true);
+			retVal.setCodeDisplay(display);
+			return retVal;
 		}
 
 		// If we get here it means we know the codesystem but the code was bad
@@ -222,6 +186,82 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	}
 
+	@Nonnull
+	private LookupCodeResult lookupMimetypeCode(String theCode) {
+		// This is a pretty naive implementation - Should be enhanced in future
+		LookupCodeResult mimeRetVal = new LookupCodeResult();
+		mimeRetVal.setSearchedForCode(theCode);
+		mimeRetVal.setSearchedForSystem(MIMETYPES_CODESYSTEM_URL);
+		mimeRetVal.setFound(true);
+		return mimeRetVal;
+	}
+
+	@Nonnull
+	private LookupCodeResult lookupUcumCode(String theCode) {
+		InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
+		String outcome = null;
+		try {
+			UcumEssenceService svc = new UcumEssenceService(input);
+			outcome = svc.analyse(theCode);
+		} catch (UcumException e) {
+			ourLog.warn("Failed parse UCUM code: {}", theCode, e);
+		} finally {
+			ClasspathUtil.close(input);
+		}
+		LookupCodeResult retVal = new LookupCodeResult();
+		retVal.setSearchedForCode(theCode);
+		retVal.setSearchedForSystem(UCUM_CODESYSTEM_URL);
+		if (outcome != null) {
+			retVal.setFound(true);
+			retVal.setCodeDisplay(outcome);
+		}
+		return retVal;
+	}
+
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+
+		Map<String, String> map;
+		switch (defaultString(theSystem)) {
+			case COUNTRIES_CODESYSTEM_URL:
+				map = ISO_3166_CODES;
+				break;
+			case CURRENCIES_CODESYSTEM_URL:
+				map = ISO_4217_CODES;
+				break;
+			default:
+				return null;
+		}
+
+		CodeSystem retVal = new CodeSystem();
+		retVal.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		retVal.setUrl(theSystem);
+		for (Map.Entry<String, String> nextEntry : map.entrySet()) {
+			retVal.addConcept().setCode(nextEntry.getKey()).setDisplay(nextEntry.getValue());
+		}
+
+		IBaseResource normalized = null;
+		switch (getFhirContext().getVersion().getVersion()) {
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+				return null;
+			case DSTU3:
+				normalized = VersionConvertor_30_40.convertResource(retVal, false);
+				break;
+			case R4:
+				normalized = retVal;
+				break;
+			case R5:
+				normalized = VersionConvertor_40_50.convertResource(retVal);
+				break;
+		}
+
+		Validate.notNull(normalized);
+
+		return normalized;
+	}
+
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 
@@ -229,6 +269,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			case COUNTRIES_CODESYSTEM_URL:
 			case UCUM_CODESYSTEM_URL:
 			case MIMETYPES_CODESYSTEM_URL:
+			case USPS_CODESYSTEM_URL:
 				return true;
 		}
 

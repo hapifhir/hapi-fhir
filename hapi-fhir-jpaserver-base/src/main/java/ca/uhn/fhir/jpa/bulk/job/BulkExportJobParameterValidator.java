@@ -29,6 +29,7 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 	private IBulkExportJobDao myBulkExportJobDao;
 
 	@Override
+	@Transactional
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 		if (theJobParameters == null) {
 			throw new JobParametersInvalidException("This job needs Parameters: [readChunkSize], [jobUUID], [filters], [outputFormat], [resourceTypes]");

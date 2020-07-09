@@ -66,13 +66,13 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PostConstruct
 	public void postConstruct() {
-		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
 		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
 		addValidationSupport(myNpmJpaValidationSupport);
+		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 	}
 
 }
