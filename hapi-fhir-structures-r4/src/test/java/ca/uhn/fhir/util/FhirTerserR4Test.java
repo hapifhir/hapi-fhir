@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -252,6 +253,35 @@ public class FhirTerserR4Test {
 		assertEquals("AAA", ((StringType) obs.getValue()).getValue());
 		assertEquals("COMMENTS", obs.getNote().get(0).getText());
 	}
+
+
+	@Test
+	public void testCloneIntoResourceCopiesId() {
+		Observation obs = new Observation();
+		obs.setId("http://foo/base/Observation/_history/123");
+		obs.setValue(new StringType("AAA"));
+		obs.addNote().setText("COMMENTS");
+
+		Observation target = new Observation();
+		ourCtx.newTerser().cloneInto(obs, target, false);
+
+		assertEquals("http://foo/base/Observation/_history/123", target.getId());
+	}
+
+
+	@Test
+	public void testCloneIntoResourceCopiesElementId() {
+		Observation obs = new Observation();
+		StringType string = new StringType("AAA");
+		string.setId("BBB");
+		obs.setValue(string);
+
+		Observation target = new Observation();
+		ourCtx.newTerser().cloneInto(obs, target, false);
+
+		assertEquals("BBB", target.getValueStringType().getId());
+	}
+
 
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDescendsIntoContained() {

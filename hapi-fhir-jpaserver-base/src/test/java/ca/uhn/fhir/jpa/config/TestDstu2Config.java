@@ -117,7 +117,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())

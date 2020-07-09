@@ -14,6 +14,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
@@ -130,10 +131,26 @@ public class FhirTerser {
 		Validate.notNull(theSource, "theSource must not be null");
 		Validate.notNull(theTarget, "theTarget must not be null");
 
+		// DSTU3+
 		if (theSource instanceof IBaseElement) {
 			IBaseElement source = (IBaseElement) theSource;
 			IBaseElement target = (IBaseElement) theTarget;
 			target.setId(source.getId());
+		}
+
+		// DSTU2 only
+		if (theSource instanceof IIdentifiableElement) {
+			IIdentifiableElement source = (IIdentifiableElement) theSource;
+			IIdentifiableElement target = (IIdentifiableElement) theTarget;
+			target.setElementSpecificId(source.getElementSpecificId());
+		}
+
+		// DSTU2 only
+		if (theSource instanceof IResource) {
+			IResource source = (IResource) theSource;
+			IResource target = (IResource) theTarget;
+			target.setId(source.getId());
+			target.getResourceMetadata().putAll(source.getResourceMetadata());
 		}
 
 		if (theSource instanceof IPrimitiveType<?>) {
