@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.empi.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.IEmpiBatchService;
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
+import ca.uhn.fhir.jpa.empi.svc.EmpiBatchSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
@@ -92,6 +94,10 @@ public class EmpiConsumerConfig {
 	@Bean
 	EmpiMatchLinkSvc empiMatchLinkSvc() {
 		return new EmpiMatchLinkSvc();
+	}
+	@Bean
+	IEmpiBatchService myEmpiBatchService() {
+		return new EmpiBatchSvcImpl();
 	}
 
 	@Bean

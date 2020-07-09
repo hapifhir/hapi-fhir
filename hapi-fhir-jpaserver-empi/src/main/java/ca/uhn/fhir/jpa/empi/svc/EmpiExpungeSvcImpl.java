@@ -51,7 +51,6 @@ public class EmpiExpungeSvcImpl implements IEmpiExpungeSvc {
 	public void expungeEmpiLinks(String theResourceType) {
 		EmpiTargetType targetType = getTargetTypeOrThrowException(theResourceType);
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(targetType);
-		//TODO this expunge does not work!
 		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
 	}
 
@@ -68,7 +67,7 @@ public class EmpiExpungeSvcImpl implements IEmpiExpungeSvc {
 	@Override
 	public void expungeEmpiLinks() {
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
-		myResourceExpungeService.expungeHistoricalVersionsOfIds(null, longs, new AtomicInteger(longs.size()));
+		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
 	}
 }
 

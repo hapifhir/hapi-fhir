@@ -84,4 +84,7 @@ public class ProviderConstants {
 
 	public static final String EMPI_CLEAR = "$empi-clear";
 	public static final String EMPI_CLEAR_TARGET_TYPE = "targetType";
+	public static final String EMPI_BATCH_RUN = "$empi-run";
+	public static final String EMPI_BATCH_RUN_TARGET_TYPE = "targetType" ;
+	public static final String EMPI_BATCH_RUN_RESOURCE_IDS = "resourceIds" ;
 }

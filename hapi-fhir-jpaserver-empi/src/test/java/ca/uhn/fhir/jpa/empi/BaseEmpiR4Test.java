@@ -154,6 +154,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		patient.setId(outcome.getId());
 		return patient;
 	}
+	@Nonnull
+	protected Practitioner createPractitioner(Practitioner thePractitioner) {
+		//Note that since our empi-rules block on active=true, all patients must be active.
+		thePractitioner.setActive(true);
+		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
+		thePractitioner.setId(daoMethodOutcome.getId());
+		return thePractitioner;
+	}
 
 	@Nonnull
 	protected Patient buildPatientWithNameAndId(String theGivenName, String theId) {

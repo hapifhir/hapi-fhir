@@ -23,6 +23,7 @@ package ca.uhn.fhir.empi.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiBatchService;
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
@@ -54,6 +55,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	private final IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
 	private final IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
 	private final IEmpiExpungeSvc myEmpiExpungeSvc;
+	private final IEmpiBatchService myEmpiBatchSvc;
 
 	/**
 	 * Constructor
@@ -61,13 +63,14 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderR4(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader, IEmpiExpungeSvc theEmpiExpungeSvc) {
+	public EmpiProviderR4(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader, IEmpiExpungeSvc theEmpiExpungeSvc, IEmpiBatchService theEmpiBatchSvc) {
 		super(theFhirContext, theResourceLoader);
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 		myPersonMergerSvc = thePersonMergerSvc;
 		myEmpiLinkUpdaterSvc = theEmpiLinkUpdaterSvc;
 		myEmpiLinkQuerySvc = theEmpiLinkQuerySvc;
 		myEmpiExpungeSvc = theEmpiExpungeSvc;
+		myEmpiBatchSvc = theEmpiBatchSvc;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, type = Patient.class)
@@ -161,5 +164,14 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		validateSameVersion(target, theTargetId);
 
 		return (Parameters) myEmpiLinkUpdaterSvc.notDuplicatePerson(person, target, createEmpiContext(theRequestDetails));
+	}
+
+	@Operation(name = ProviderConstants.EMPI_BATCH_RUN, idempotent = true)
+	public void batchRunEmpi(@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_TARGET_TYPE, max=1) StringType theTargetType, ServletRequestDetails theRequestDetails) {
+		if (theTargetType == null) {
+			myEmpiBatchSvc.runEmpiOnAllTargets();
+		} else {
+			myEmpiBatchSvc.runEmpiOnTargetType(theTargetType.toString());
+		}
 	}
 }

@@ -79,6 +79,7 @@ public class EmpiMessageHandler implements MessageHandler {
 					handleCreatePatientOrPractitioner(theMsg, empiContext);
 					break;
 				case UPDATE:
+				case MANUALLY_TRIGGERED:
 					handleUpdatePatientOrPractitioner(theMsg, empiContext);
 					break;
 				case DELETE:
@@ -105,6 +106,9 @@ public class EmpiMessageHandler implements MessageHandler {
 				break;
 			case UPDATE:
 				empiOperation = EmpiTransactionContext.OperationType.UPDATE;
+				break;
+			case MANUALLY_TRIGGERED:
+				empiOperation = EmpiTransactionContext.OperationType.BATCH;
 				break;
 			case DELETE:
 			default:
