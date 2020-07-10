@@ -1966,10 +1966,10 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, Matchers.contains(observationId));
 
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "myresource1_.PARTITION_ID='1'"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "myresource1_.SRC_PATH='Observation.subject'"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "myresource1_.SRC_PATH in ('Observation.subject')"));
 		assertEquals(1, StringUtils.countMatches(searchSql, "myresource1_.TARGET_RESOURCE_ID='" + patientId.getIdPartAsLong() + "'"));
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
@@ -2004,10 +2004,10 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, Matchers.contains(observationId));
 
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "myresource1_.PARTITION_ID is null"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "myresource1_.SRC_PATH='Observation.subject'"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "myresource1_.SRC_PATH in ('Observation.subject')"));
 		assertEquals(1, StringUtils.countMatches(searchSql, "myresource1_.TARGET_RESOURCE_ID='" + patientId.getIdPartAsLong() + "'"));
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
