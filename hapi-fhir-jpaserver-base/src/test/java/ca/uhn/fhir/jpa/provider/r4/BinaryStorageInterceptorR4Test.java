@@ -5,28 +5,23 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
@@ -41,7 +36,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myStorageSvc.setMinimumBinarySize(10);
@@ -50,7 +45,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		myStorageSvc.setMinimumBinarySize(0);
@@ -74,7 +69,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
 
 		// Now read it back and make sure it was de-externalized
@@ -98,7 +93,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
 
 		// Now read it back and make sure it was de-externalized
@@ -123,7 +118,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString("\"data\": \"BAMCAQ==\""));
-		assertThat(encoded, not(containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID)));
+		assertThat(encoded, not(containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID)));
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
@@ -146,14 +141,14 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
 		assertArrayEquals(SOME_BYTES, output.getData());
-		assertNotNull(output.getDataElement().getExtensionByUrl(JpaConstants.EXT_EXTERNALIZED_BINARY_ID).getValue());
+		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 
 	}
 
@@ -171,7 +166,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
 
 		// Now update
@@ -212,9 +207,9 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
-		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 		assertThat(binaryId, not(blankOrNullString()));
 
 		// Now update
@@ -223,7 +218,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		docRef.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
 		docRef.getContentFirstRep().getAttachment().setContentType("application/octet-stream");
 		docRef.getContentFirstRep().getAttachment().getDataElement().addExtension(
-			JpaConstants.EXT_EXTERNALIZED_BINARY_ID,
+			HapiExtensions.EXT_EXTERNALIZED_BINARY_ID,
 			new StringType(binaryId)
 		);
 		outcome = myDocumentReferenceDao.update(docRef, mySrd);
@@ -259,9 +254,9 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
-		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 		assertThat(binaryId, not(blankOrNullString()));
 
 		// Now update
@@ -271,13 +266,13 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		content = docRef.addContent();
 		content.getAttachment().setContentType("application/octet-stream");
 		content.getAttachment().getDataElement().addExtension(
-			JpaConstants.EXT_EXTERNALIZED_BINARY_ID,
+			HapiExtensions.EXT_EXTERNALIZED_BINARY_ID,
 			new StringType(binaryId)
 		);
 		content2 = docRef.addContent();
 		content2.getAttachment().setContentType("application/octet-stream");
 		content2.getAttachment().getDataElement().addExtension(
-			JpaConstants.EXT_EXTERNALIZED_BINARY_ID,
+			HapiExtensions.EXT_EXTERNALIZED_BINARY_ID,
 			new StringType("12345-67890")
 		);
 
@@ -305,14 +300,14 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
 		assertEquals(null, output.getData());
-		assertNotNull(output.getDataElement().getExtensionByUrl(JpaConstants.EXT_EXTERNALIZED_BINARY_ID).getValue());
+		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 
 	}
 

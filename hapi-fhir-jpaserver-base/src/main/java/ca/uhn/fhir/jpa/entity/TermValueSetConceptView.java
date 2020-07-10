@@ -38,7 +38,7 @@ import java.io.Serializable;
 	 * Note about the CONCAT function below- We need a primary key (an @Id) column
 	 * because hibernate won't allow the view the function without it, but
 	 */
-	"SELECT CONCAT(vsc.PID, CONCAT(' ', vscd.PID)) AS PID, " +
+	"SELECT CONCAT_WS(' ', vsc.PID, vscd.PID) AS PID, " +
 	"       vsc.PID              AS CONCEPT_PID, " +
 	"       vsc.VALUESET_PID     AS CONCEPT_VALUESET_PID, " +
 	"       vsc.VALUESET_ORDER   AS CONCEPT_VALUESET_ORDER, " +

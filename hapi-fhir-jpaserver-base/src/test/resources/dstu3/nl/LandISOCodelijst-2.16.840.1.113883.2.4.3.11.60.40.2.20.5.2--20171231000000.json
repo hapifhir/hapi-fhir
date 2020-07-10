@@ -1,0 +1,55 @@
+{
+	"resourceType": "ValueSet",
+	"id": "2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000",
+	"meta": {
+		"profile": [
+			"http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+		]
+	},
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/resource-effectivePeriod",
+			"valuePeriod": {
+				"start": "2017-12-31T00:00:00+02:00"
+			}
+		}
+	],
+	"url": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000",
+	"identifier": [
+		{
+			"use": "official",
+			"system": "http://art-decor.org/ns/oids/vs",
+			"value": "2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2"
+		}
+	],
+	"version": "2017-12-31T00:00:00",
+	"name": "LandISOCodelijst",
+	"title": "LandISOCodelijst",
+	"status": "active",
+	"experimental": false,
+	"publisher": "Registratie aan de bron",
+	"contact": [
+		{
+			"name": "Registratie aan de bron",
+			"telecom": [
+				{
+					"system": "url",
+					"value": "https://www.registratieaandebron.nl"
+				},
+				{
+					"system": "url",
+					"value": "https://zibs.nl"
+				}
+			]
+		}
+	],
+	"description": "ISO 3166-1 (alpha-2) - Alle waarden",
+	"immutable": false,
+	"compose": {
+		"include": [
+			{
+				"system": "urn:iso:std:iso:3166"
+			}
+		]
+	}
+}

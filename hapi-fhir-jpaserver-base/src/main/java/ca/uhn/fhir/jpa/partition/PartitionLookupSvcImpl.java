@@ -88,7 +88,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 				myPartitionDao.save(partitionEntity);
 			}
 		});
-
 	}
 
 	@Override

@@ -32,7 +32,9 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.jpa.validation.JpaFhirInstanceValidator;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
+import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -88,12 +90,11 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	@Bean(name = "myInstanceValidator")
 	@Lazy
 	public IInstanceValidatorModule instanceValidator() {
-		FhirInstanceValidator val = new FhirInstanceValidator(fhirContext());
+		FhirInstanceValidator val = new JpaFhirInstanceValidator(fhirContext());
 		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		val.setValidationSupport(validationSupportChain());
 		return val;
 	}
-
 
 	@Bean
 	public abstract ITermReadSvc terminologyService();

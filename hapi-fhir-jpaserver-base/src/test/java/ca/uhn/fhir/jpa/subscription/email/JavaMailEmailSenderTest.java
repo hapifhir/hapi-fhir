@@ -6,9 +6,9 @@ import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JavaMailEmailSenderTest {
 
@@ -58,12 +58,12 @@ public class JavaMailEmailSenderTest {
 		assertEquals("foo", foundBody);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() {
 		ourTestSmtp.stop();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);

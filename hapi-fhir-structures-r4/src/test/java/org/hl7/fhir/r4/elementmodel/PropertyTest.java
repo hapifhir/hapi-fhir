@@ -7,15 +7,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Created by axemj on 14/07/2017.
@@ -27,11 +27,15 @@ public class PropertyTest {
     private StructureDefinition sd;
     private HapiWorkerContext workerContext;
 
-    @Test(expected = Error.class)
+    @Test
     public void getChildPropertiesErrorTest() throws FHIRException {
-        final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
-        property = new Property(workerContext, ed, sd);
-        property.getChildProperties("birthdate", null);
+    	try {
+			final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
+			property = new Property(workerContext, ed, sd);
+			property.getChildProperties("birthdate", null);
+		} catch (Error e) {
+    		assertEquals("types == 0, and no children found on Patient.extension", e.getMessage());
+		}
     }
 
     @Test
@@ -54,7 +58,7 @@ public class PropertyTest {
         assertEquals("id.id", result.get(0).getDefinition().getPath());
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         final String sdString = IOUtils.toString(PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
         final IParser parser = ourCtx.newXmlParser();

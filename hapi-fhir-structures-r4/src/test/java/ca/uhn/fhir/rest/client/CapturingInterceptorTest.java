@@ -13,22 +13,26 @@ import org.apache.http.HttpVersion;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHttpResponse;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 public class CapturingInterceptorTest {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testClear() {
@@ -112,12 +116,14 @@ public class CapturingInterceptorTest {
 		IOException expectedCause = new IOException();
 		doThrow(expectedCause).when(response).bufferEntity();
 
-		thrown.expect(InternalErrorException.class);
-		thrown.expectMessage("Unable to buffer the entity for capturing");
-		thrown.expectCause(equalTo(expectedCause));
+		InternalErrorException exception = assertThrows(InternalErrorException.class, () -> {
+			CapturingInterceptor interceptor = new CapturingInterceptor();
+			interceptor.interceptResponse(response);
+		});
 
-		CapturingInterceptor interceptor = new CapturingInterceptor();
-		interceptor.interceptResponse(response);
+		assertEquals("Unable to buffer the entity for capturing", exception.getMessage());
+		assertEquals(expectedCause, exception.getCause());
+
 	}
 
 	@Test

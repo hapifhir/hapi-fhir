@@ -22,12 +22,25 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
@@ -38,11 +51,9 @@ import static org.apache.commons.lang3.StringUtils.length;
 @Table(name = "TRM_CONCEPT_PROPERTY", uniqueConstraints = {
 })
 public class TermConceptProperty implements Serializable {
-	private static final long serialVersionUID = 1L;
-
-	private static final int MAX_LENGTH = 500;
 	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
-
+	private static final long serialVersionUID = 1L;
+	private static final int MAX_LENGTH = 500;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
@@ -69,14 +80,6 @@ public class TermConceptProperty implements Serializable {
 	private byte[] myValueLob;
 	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)
 	private TermConceptPropertyTypeEnum myType;
-
-	/**
-	 * Constructor
-	 */
-	public TermConceptProperty() {
-		super();
-	}
-
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
@@ -87,6 +90,13 @@ public class TermConceptProperty implements Serializable {
 	 */
 	@Column(name = "PROP_DISPLAY", length = MAX_LENGTH, nullable = true)
 	private String myDisplay;
+
+	/**
+	 * Constructor
+	 */
+	public TermConceptProperty() {
+		super();
+	}
 
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
@@ -178,10 +188,6 @@ public class TermConceptProperty implements Serializable {
 		return myValueLob;
 	}
 
-	public String getValueLobAsString() {
-		return new String(myValueLob, StandardCharsets.UTF_8);
-	}
-
 	public TermConceptProperty setValueLob(byte[] theValueLob) {
 		myValueLob = theValueLob;
 		return this;
@@ -190,6 +196,10 @@ public class TermConceptProperty implements Serializable {
 	public TermConceptProperty setValueLob(String theValueLob) {
 		myValueLob = theValueLob.getBytes(StandardCharsets.UTF_8);
 		return this;
+	}
+
+	public String getValueLobAsString() {
+		return new String(myValueLob, StandardCharsets.UTF_8);
 	}
 
 	public TermConceptProperty setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
@@ -210,4 +220,35 @@ public class TermConceptProperty implements Serializable {
 			.toString();
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) {
+			return true;
+		}
+
+		if (theO == null || getClass() != theO.getClass()) {
+			return false;
+		}
+
+		TermConceptProperty that = (TermConceptProperty) theO;
+
+		return new EqualsBuilder()
+			.append(myKey, that.myKey)
+			.append(myValue, that.myValue)
+			.append(myType, that.myType)
+			.append(myCodeSystem, that.myCodeSystem)
+			.append(myDisplay, that.myDisplay)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myKey)
+			.append(myValue)
+			.append(myType)
+			.append(myCodeSystem)
+			.append(myDisplay)
+			.toHashCode();
+	}
 }

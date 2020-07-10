@@ -1,14 +1,13 @@
 package ca.uhn.fhir.rest.param;
 
-import static org.junit.Assert.assertEquals;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.TestUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QuantityParamTest {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -139,7 +138,7 @@ public class QuantityParamTest {
 		assertEquals("gt-5.4||", p.getValueAsQueryToken(ourCtx));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

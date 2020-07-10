@@ -1,0 +1,22 @@
+{
+  "code": {
+    "coding": [
+      {
+        "code": "L7b8daLEuY",
+        "system": "https://bbl.health"
+      }
+    ]
+  },
+  "meta": {
+    "profile": [
+      "https://bb/StructureDefinition/BBDemographicAge"
+    ]
+  },
+  "resourceType": "Observation",
+  "status": "final",
+	"valueQuantity" : {
+		"system" : "http://unitsofmeasure.org",
+		"code" : "cm",
+		"value" : 8
+	}
+}

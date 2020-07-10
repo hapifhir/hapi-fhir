@@ -1,7 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -9,8 +8,11 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This {@link IValidationSupport validation support module} can be used to validate codes against common
@@ -36,8 +39,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String LANGUAGES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/languages";
 	public static final String MIMETYPES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/mimetypes";
+	public static final String MIMETYPES_CODESYSTEM_URL = "urn:ietf:bcp:13";
 	public static final String CURRENCIES_CODESYSTEM_URL = "urn:iso:std:iso:4217";
 	public static final String CURRENCIES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/currencies";
+	public static final String COUNTRIES_CODESYSTEM_URL = "urn:iso:std:iso:3166";
 	public static final String UCUM_CODESYSTEM_URL = "http://unitsofmeasure.org";
 	public static final String UCUM_VALUESET_URL = "http://hl7.org/fhir/ValueSet/ucum-units";
 	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
@@ -45,6 +50,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
 	private static Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
 	private static Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
+	private static Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
 	private final FhirContext myFhirContext;
 
 	/**
@@ -118,9 +124,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		if (isBlank(theValueSetUrl)) {
 			CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
-			if (validationResult != null) {
-				return validationResult;
-			}
+			return validationResult;
 		}
 
 		return null;
@@ -144,49 +148,157 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 
-		if (UCUM_CODESYSTEM_URL.equals(theSystem) && theValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-
-			InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
-			try {
-				UcumEssenceService svc = new UcumEssenceService(input);
-				String outcome = svc.analyse(theCode);
-				if (outcome != null) {
-
-					LookupCodeResult retVal = new LookupCodeResult();
-					retVal.setSearchedForCode(theCode);
-					retVal.setSearchedForSystem(theSystem);
-					retVal.setFound(true);
-					retVal.setCodeDisplay(outcome);
-					return retVal;
-
-				}
-			} catch (UcumException e) {
-				ourLog.debug("Failed parse UCUM code: {}", theCode, e);
+		Map<String, String> map;
+		switch (theSystem) {
+			case UCUM_CODESYSTEM_URL:
+				return lookupUcumCode(theCode);
+			case MIMETYPES_CODESYSTEM_URL:
+				return lookupMimetypeCode(theCode);
+			case COUNTRIES_CODESYSTEM_URL:
+				map = ISO_3166_CODES;
+				break;
+			case CURRENCIES_CODESYSTEM_URL:
+				map = ISO_4217_CODES;
+				break;
+			case USPS_CODESYSTEM_URL:
+				map = USPS_CODES;
+				break;
+			default:
 				return null;
-			} finally {
-				ClasspathUtil.close(input);
-			}
-
 		}
 
-		return null;
+		String display = map.get(theCode);
+		if (isNotBlank(display)) {
+			LookupCodeResult retVal = new LookupCodeResult();
+			retVal.setSearchedForCode(theCode);
+			retVal.setSearchedForSystem(theSystem);
+			retVal.setFound(true);
+			retVal.setCodeDisplay(display);
+			return retVal;
+		}
+
+		// If we get here it means we know the codesystem but the code was bad
+		LookupCodeResult retVal = new LookupCodeResult();
+		retVal.setSearchedForCode(theCode);
+		retVal.setSearchedForSystem(theSystem);
+		retVal.setFound(false);
+		return retVal;
+
+	}
+
+	@Nonnull
+	private LookupCodeResult lookupMimetypeCode(String theCode) {
+		// This is a pretty naive implementation - Should be enhanced in future
+		LookupCodeResult mimeRetVal = new LookupCodeResult();
+		mimeRetVal.setSearchedForCode(theCode);
+		mimeRetVal.setSearchedForSystem(MIMETYPES_CODESYSTEM_URL);
+		mimeRetVal.setFound(true);
+		return mimeRetVal;
+	}
+
+	@Nonnull
+	private LookupCodeResult lookupUcumCode(String theCode) {
+		InputStream input = ClasspathUtil.loadResourceAsStream("/ucum-essence.xml");
+		String outcome = null;
+		try {
+			UcumEssenceService svc = new UcumEssenceService(input);
+			outcome = svc.analyse(theCode);
+		} catch (UcumException e) {
+			ourLog.warn("Failed parse UCUM code: {}", theCode, e);
+		} finally {
+			ClasspathUtil.close(input);
+		}
+		LookupCodeResult retVal = new LookupCodeResult();
+		retVal.setSearchedForCode(theCode);
+		retVal.setSearchedForSystem(UCUM_CODESYSTEM_URL);
+		if (outcome != null) {
+			retVal.setFound(true);
+			retVal.setCodeDisplay(outcome);
+		}
+		return retVal;
+	}
+
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+
+		Map<String, String> map;
+		switch (defaultString(theSystem)) {
+			case COUNTRIES_CODESYSTEM_URL:
+				map = ISO_3166_CODES;
+				break;
+			case CURRENCIES_CODESYSTEM_URL:
+				map = ISO_4217_CODES;
+				break;
+			default:
+				return null;
+		}
+
+		CodeSystem retVal = new CodeSystem();
+		retVal.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		retVal.setUrl(theSystem);
+		for (Map.Entry<String, String> nextEntry : map.entrySet()) {
+			retVal.addConcept().setCode(nextEntry.getKey()).setDisplay(nextEntry.getValue());
+		}
+
+		IBaseResource normalized = null;
+		switch (getFhirContext().getVersion().getVersion()) {
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+				return null;
+			case DSTU3:
+				normalized = VersionConvertor_30_40.convertResource(retVal, false);
+				break;
+			case R4:
+				normalized = retVal;
+				break;
+			case R5:
+				normalized = VersionConvertor_40_50.convertResource(retVal);
+				break;
+		}
+
+		Validate.notNull(normalized);
+
+		return normalized;
 	}
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 
 		switch (theSystem) {
+			case COUNTRIES_CODESYSTEM_URL:
 			case UCUM_CODESYSTEM_URL:
+			case MIMETYPES_CODESYSTEM_URL:
+			case USPS_CODESYSTEM_URL:
 				return true;
 		}
 
 		return false;
 	}
 
+	@Override
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 
-	public String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
+		switch (theValueSetUrl) {
+			case CURRENCIES_VALUESET_URL:
+			case LANGUAGES_VALUESET_URL:
+			case MIMETYPES_VALUESET_URL:
+			case UCUM_VALUESET_URL:
+			case USPS_VALUESET_URL:
+				return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	public static String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
 		String url;
-		switch (getFhirContext().getVersion().getVersion()) {
+		switch (theValueSet.getStructureFhirVersionEnum()) {
 			case DSTU2: {
 				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
 				break;
@@ -209,14 +321,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + getFhirContext().getVersion().getVersion());
+				throw new IllegalArgumentException("Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
 		}
 		return url;
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
 	}
 
 	private static HashMap<String, String> buildUspsCodes() {
@@ -469,6 +576,514 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		iso4217Codes.put("ZMW", "Zambian kwacha");
 		iso4217Codes.put("ZWL", "Zimbabwean dollar A/10");
 		return iso4217Codes;
+	}
+
+
+	private static HashMap<String, String> buildIso3166Codes() {
+		HashMap<String, String> codes = new HashMap<>();
+
+		// 2 letter codes
+		codes.put("AF", "Afghanistan");
+		codes.put("AX", "Åland Islands");
+		codes.put("AL", "Albania");
+		codes.put("DZ", "Algeria");
+		codes.put("AS", "American Samoa");
+		codes.put("AD", "Andorra");
+		codes.put("AO", "Angola");
+		codes.put("AI", "Anguilla");
+		codes.put("AQ", "Antarctica");
+		codes.put("AG", "Antigua & Barbuda");
+		codes.put("AR", "Argentina");
+		codes.put("AM", "Armenia");
+		codes.put("AW", "Aruba");
+		codes.put("AU", "Australia");
+		codes.put("AT", "Austria");
+		codes.put("AZ", "Azerbaijan");
+		codes.put("BS", "Bahamas");
+		codes.put("BH", "Bahrain");
+		codes.put("BD", "Bangladesh");
+		codes.put("BB", "Barbados");
+		codes.put("BY", "Belarus");
+		codes.put("BE", "Belgium");
+		codes.put("BZ", "Belize");
+		codes.put("BJ", "Benin");
+		codes.put("BM", "Bermuda");
+		codes.put("BT", "Bhutan");
+		codes.put("BO", "Bolivia");
+		codes.put("BA", "Bosnia & Herzegovina");
+		codes.put("BW", "Botswana");
+		codes.put("BV", "Bouvet Island");
+		codes.put("BR", "Brazil");
+		codes.put("IO", "British Indian Ocean Territory");
+		codes.put("VG", "British Virgin Islands");
+		codes.put("BN", "Brunei");
+		codes.put("BG", "Bulgaria");
+		codes.put("BF", "Burkina Faso");
+		codes.put("BI", "Burundi");
+		codes.put("KH", "Cambodia");
+		codes.put("CM", "Cameroon");
+		codes.put("CA", "Canada");
+		codes.put("CV", "Cape Verde");
+		codes.put("BQ", "Caribbean Netherlands");
+		codes.put("KY", "Cayman Islands");
+		codes.put("CF", "Central African Republic");
+		codes.put("TD", "Chad");
+		codes.put("CL", "Chile");
+		codes.put("CN", "China");
+		codes.put("CX", "Christmas Island");
+		codes.put("CC", "Cocos (Keeling) Islands");
+		codes.put("CO", "Colombia");
+		codes.put("KM", "Comoros");
+		codes.put("CG", "Congo - Brazzaville");
+		codes.put("CD", "Congo - Kinshasa");
+		codes.put("CK", "Cook Islands");
+		codes.put("CR", "Costa Rica");
+		codes.put("CI", "Côte d’Ivoire");
+		codes.put("HR", "Croatia");
+		codes.put("CU", "Cuba");
+		codes.put("CW", "Curaçao");
+		codes.put("CY", "Cyprus");
+		codes.put("CZ", "Czechia");
+		codes.put("DK", "Denmark");
+		codes.put("DJ", "Djibouti");
+		codes.put("DM", "Dominica");
+		codes.put("DO", "Dominican Republic");
+		codes.put("EC", "Ecuador");
+		codes.put("EG", "Egypt");
+		codes.put("SV", "El Salvador");
+		codes.put("GQ", "Equatorial Guinea");
+		codes.put("ER", "Eritrea");
+		codes.put("EE", "Estonia");
+		codes.put("SZ", "Eswatini");
+		codes.put("ET", "Ethiopia");
+		codes.put("FK", "Falkland Islands");
+		codes.put("FO", "Faroe Islands");
+		codes.put("FJ", "Fiji");
+		codes.put("FI", "Finland");
+		codes.put("FR", "France");
+		codes.put("GF", "French Guiana");
+		codes.put("PF", "French Polynesia");
+		codes.put("TF", "French Southern Territories");
+		codes.put("GA", "Gabon");
+		codes.put("GM", "Gambia");
+		codes.put("GE", "Georgia");
+		codes.put("DE", "Germany");
+		codes.put("GH", "Ghana");
+		codes.put("GI", "Gibraltar");
+		codes.put("GR", "Greece");
+		codes.put("GL", "Greenland");
+		codes.put("GD", "Grenada");
+		codes.put("GP", "Guadeloupe");
+		codes.put("GU", "Guam");
+		codes.put("GT", "Guatemala");
+		codes.put("GG", "Guernsey");
+		codes.put("GN", "Guinea");
+		codes.put("GW", "Guinea-Bissau");
+		codes.put("GY", "Guyana");
+		codes.put("HT", "Haiti");
+		codes.put("HM", "Heard & McDonald Islands");
+		codes.put("HN", "Honduras");
+		codes.put("HK", "Hong Kong SAR China");
+		codes.put("HU", "Hungary");
+		codes.put("IS", "Iceland");
+		codes.put("IN", "India");
+		codes.put("ID", "Indonesia");
+		codes.put("IR", "Iran");
+		codes.put("IQ", "Iraq");
+		codes.put("IE", "Ireland");
+		codes.put("IM", "Isle of Man");
+		codes.put("IL", "Israel");
+		codes.put("IT", "Italy");
+		codes.put("JM", "Jamaica");
+		codes.put("JP", "Japan");
+		codes.put("JE", "Jersey");
+		codes.put("JO", "Jordan");
+		codes.put("KZ", "Kazakhstan");
+		codes.put("KE", "Kenya");
+		codes.put("KI", "Kiribati");
+		codes.put("KW", "Kuwait");
+		codes.put("KG", "Kyrgyzstan");
+		codes.put("LA", "Laos");
+		codes.put("LV", "Latvia");
+		codes.put("LB", "Lebanon");
+		codes.put("LS", "Lesotho");
+		codes.put("LR", "Liberia");
+		codes.put("LY", "Libya");
+		codes.put("LI", "Liechtenstein");
+		codes.put("LT", "Lithuania");
+		codes.put("LU", "Luxembourg");
+		codes.put("MO", "Macao SAR China");
+		codes.put("MG", "Madagascar");
+		codes.put("MW", "Malawi");
+		codes.put("MY", "Malaysia");
+		codes.put("MV", "Maldives");
+		codes.put("ML", "Mali");
+		codes.put("MT", "Malta");
+		codes.put("MH", "Marshall Islands");
+		codes.put("MQ", "Martinique");
+		codes.put("MR", "Mauritania");
+		codes.put("MU", "Mauritius");
+		codes.put("YT", "Mayotte");
+		codes.put("MX", "Mexico");
+		codes.put("FM", "Micronesia");
+		codes.put("MD", "Moldova");
+		codes.put("MC", "Monaco");
+		codes.put("MN", "Mongolia");
+		codes.put("ME", "Montenegro");
+		codes.put("MS", "Montserrat");
+		codes.put("MA", "Morocco");
+		codes.put("MZ", "Mozambique");
+		codes.put("MM", "Myanmar (Burma)");
+		codes.put("NA", "Namibia");
+		codes.put("NR", "Nauru");
+		codes.put("NP", "Nepal");
+		codes.put("NL", "Netherlands");
+		codes.put("NC", "New Caledonia");
+		codes.put("NZ", "New Zealand");
+		codes.put("NI", "Nicaragua");
+		codes.put("NE", "Niger");
+		codes.put("NG", "Nigeria");
+		codes.put("NU", "Niue");
+		codes.put("NF", "Norfolk Island");
+		codes.put("KP", "North Korea");
+		codes.put("MK", "North Macedonia");
+		codes.put("MP", "Northern Mariana Islands");
+		codes.put("NO", "Norway");
+		codes.put("OM", "Oman");
+		codes.put("PK", "Pakistan");
+		codes.put("PW", "Palau");
+		codes.put("PS", "Palestinian Territories");
+		codes.put("PA", "Panama");
+		codes.put("PG", "Papua New Guinea");
+		codes.put("PY", "Paraguay");
+		codes.put("PE", "Peru");
+		codes.put("PH", "Philippines");
+		codes.put("PN", "Pitcairn Islands");
+		codes.put("PL", "Poland");
+		codes.put("PT", "Portugal");
+		codes.put("PR", "Puerto Rico");
+		codes.put("QA", "Qatar");
+		codes.put("RE", "Réunion");
+		codes.put("RO", "Romania");
+		codes.put("RU", "Russia");
+		codes.put("RW", "Rwanda");
+		codes.put("WS", "Samoa");
+		codes.put("SM", "San Marino");
+		codes.put("ST", "São Tomé & Príncipe");
+		codes.put("SA", "Saudi Arabia");
+		codes.put("SN", "Senegal");
+		codes.put("RS", "Serbia");
+		codes.put("SC", "Seychelles");
+		codes.put("SL", "Sierra Leone");
+		codes.put("SG", "Singapore");
+		codes.put("SX", "Sint Maarten");
+		codes.put("SK", "Slovakia");
+		codes.put("SI", "Slovenia");
+		codes.put("SB", "Solomon Islands");
+		codes.put("SO", "Somalia");
+		codes.put("ZA", "South Africa");
+		codes.put("GS", "South Georgia & South Sandwich Islands");
+		codes.put("KR", "South Korea");
+		codes.put("SS", "South Sudan");
+		codes.put("ES", "Spain");
+		codes.put("LK", "Sri Lanka");
+		codes.put("BL", "St. Barthélemy");
+		codes.put("SH", "St. Helena");
+		codes.put("KN", "St. Kitts & Nevis");
+		codes.put("LC", "St. Lucia");
+		codes.put("MF", "St. Martin");
+		codes.put("PM", "St. Pierre & Miquelon");
+		codes.put("VC", "St. Vincent & Grenadines");
+		codes.put("SD", "Sudan");
+		codes.put("SR", "Suriname");
+		codes.put("SJ", "Svalbard & Jan Mayen");
+		codes.put("SE", "Sweden");
+		codes.put("CH", "Switzerland");
+		codes.put("SY", "Syria");
+		codes.put("TW", "Taiwan");
+		codes.put("TJ", "Tajikistan");
+		codes.put("TZ", "Tanzania");
+		codes.put("TH", "Thailand");
+		codes.put("TL", "Timor-Leste");
+		codes.put("TG", "Togo");
+		codes.put("TK", "Tokelau");
+		codes.put("TO", "Tonga");
+		codes.put("TT", "Trinidad & Tobago");
+		codes.put("TN", "Tunisia");
+		codes.put("TR", "Turkey");
+		codes.put("TM", "Turkmenistan");
+		codes.put("TC", "Turks & Caicos Islands");
+		codes.put("TV", "Tuvalu");
+		codes.put("UM", "U.S. Outlying Islands");
+		codes.put("VI", "U.S. Virgin Islands");
+		codes.put("UG", "Uganda");
+		codes.put("UA", "Ukraine");
+		codes.put("AE", "United Arab Emirates");
+		codes.put("GB", "United Kingdom");
+		codes.put("US", "United States");
+		codes.put("UY", "Uruguay");
+		codes.put("UZ", "Uzbekistan");
+		codes.put("VU", "Vanuatu");
+		codes.put("VA", "Vatican City");
+		codes.put("VE", "Venezuela");
+		codes.put("VN", "Vietnam");
+		codes.put("WF", "Wallis & Futuna");
+		codes.put("EH", "Western Sahara");
+		codes.put("YE", "Yemen");
+		codes.put("ZM", "Zambia");
+		codes.put("ZW", "Zimbabwe");
+
+		// 3 letter codes
+		codes.put("ABW", "Aruba");
+		codes.put("AFG", "Afghanistan");
+		codes.put("AGO", "Angola");
+		codes.put("AIA", "Anguilla");
+		codes.put("ALA", "Åland Islands");
+		codes.put("ALB", "Albania");
+		codes.put("AND", "Andorra");
+		codes.put("ARE", "United Arab Emirates");
+		codes.put("ARG", "Argentina");
+		codes.put("ARM", "Armenia");
+		codes.put("ASM", "American Samoa");
+		codes.put("ATA", "Antarctica");
+		codes.put("ATF", "French Southern Territories");
+		codes.put("ATG", "Antigua and Barbuda");
+		codes.put("AUS", "Australia");
+		codes.put("AUT", "Austria");
+		codes.put("AZE", "Azerbaijan");
+		codes.put("BDI", "Burundi");
+		codes.put("BEL", "Belgium");
+		codes.put("BEN", "Benin");
+		codes.put("BES", "Bonaire, Sint Eustatius and Saba");
+		codes.put("BFA", "Burkina Faso");
+		codes.put("BGD", "Bangladesh");
+		codes.put("BGR", "Bulgaria");
+		codes.put("BHR", "Bahrain");
+		codes.put("BHS", "Bahamas");
+		codes.put("BIH", "Bosnia and Herzegovina");
+		codes.put("BLM", "Saint Barthélemy");
+		codes.put("BLR", "Belarus");
+		codes.put("BLZ", "Belize");
+		codes.put("BMU", "Bermuda");
+		codes.put("BOL", "Bolivia, Plurinational State of");
+		codes.put("BRA", "Brazil");
+		codes.put("BRB", "Barbados");
+		codes.put("BRN", "Brunei Darussalam");
+		codes.put("BTN", "Bhutan");
+		codes.put("BVT", "Bouvet Island");
+		codes.put("BWA", "Botswana");
+		codes.put("CAF", "Central African Republic");
+		codes.put("CAN", "Canada");
+		codes.put("CCK", "Cocos (Keeling) Islands");
+		codes.put("CHE", "Switzerland");
+		codes.put("CHL", "Chile");
+		codes.put("CHN", "China");
+		codes.put("CIV", "Côte d'Ivoire");
+		codes.put("CMR", "Cameroon");
+		codes.put("COD", "Congo, the Democratic Republic of the");
+		codes.put("COG", "Congo");
+		codes.put("COK", "Cook Islands");
+		codes.put("COL", "Colombia");
+		codes.put("COM", "Comoros");
+		codes.put("CPV", "Cabo Verde");
+		codes.put("CRI", "Costa Rica");
+		codes.put("CUB", "Cuba");
+		codes.put("CUW", "Curaçao");
+		codes.put("CXR", "Christmas Island");
+		codes.put("CYM", "Cayman Islands");
+		codes.put("CYP", "Cyprus");
+		codes.put("CZE", "Czechia");
+		codes.put("DEU", "Germany");
+		codes.put("DJI", "Djibouti");
+		codes.put("DMA", "Dominica");
+		codes.put("DNK", "Denmark");
+		codes.put("DOM", "Dominican Republic");
+		codes.put("DZA", "Algeria");
+		codes.put("ECU", "Ecuador");
+		codes.put("EGY", "Egypt");
+		codes.put("ERI", "Eritrea");
+		codes.put("ESH", "Western Sahara");
+		codes.put("ESP", "Spain");
+		codes.put("EST", "Estonia");
+		codes.put("ETH", "Ethiopia");
+		codes.put("FIN", "Finland");
+		codes.put("FJI", "Fiji");
+		codes.put("FLK", "Falkland Islands (Malvinas)");
+		codes.put("FRA", "France");
+		codes.put("FRO", "Faroe Islands");
+		codes.put("FSM", "Micronesia, Federated States of");
+		codes.put("GAB", "Gabon");
+		codes.put("GBR", "United Kingdom");
+		codes.put("GEO", "Georgia");
+		codes.put("GGY", "Guernsey");
+		codes.put("GHA", "Ghana");
+		codes.put("GIB", "Gibraltar");
+		codes.put("GIN", "Guinea");
+		codes.put("GLP", "Guadeloupe");
+		codes.put("GMB", "Gambia");
+		codes.put("GNB", "Guinea-Bissau");
+		codes.put("GNQ", "Equatorial Guinea");
+		codes.put("GRC", "Greece");
+		codes.put("GRD", "Grenada");
+		codes.put("GRL", "Greenland");
+		codes.put("GTM", "Guatemala");
+		codes.put("GUF", "French Guiana");
+		codes.put("GUM", "Guam");
+		codes.put("GUY", "Guyana");
+		codes.put("HKG", "Hong Kong");
+		codes.put("HMD", "Heard Island and McDonald Islands");
+		codes.put("HND", "Honduras");
+		codes.put("HRV", "Croatia");
+		codes.put("HTI", "Haiti");
+		codes.put("HUN", "Hungary");
+		codes.put("IDN", "Indonesia");
+		codes.put("IMN", "Isle of Man");
+		codes.put("IND", "India");
+		codes.put("IOT", "British Indian Ocean Territory");
+		codes.put("IRL", "Ireland");
+		codes.put("IRN", "Iran, Islamic Republic of");
+		codes.put("IRQ", "Iraq");
+		codes.put("ISL", "Iceland");
+		codes.put("ISR", "Israel");
+		codes.put("ITA", "Italy");
+		codes.put("JAM", "Jamaica");
+		codes.put("JEY", "Jersey");
+		codes.put("JOR", "Jordan");
+		codes.put("JPN", "Japan");
+		codes.put("KAZ", "Kazakhstan");
+		codes.put("KEN", "Kenya");
+		codes.put("KGZ", "Kyrgyzstan");
+		codes.put("KHM", "Cambodia");
+		codes.put("KIR", "Kiribati");
+		codes.put("KNA", "Saint Kitts and Nevis");
+		codes.put("KOR", "Korea, Republic of");
+		codes.put("KWT", "Kuwait");
+		codes.put("LAO", "Lao People's Democratic Republic");
+		codes.put("LBN", "Lebanon");
+		codes.put("LBR", "Liberia");
+		codes.put("LBY", "Libya");
+		codes.put("LCA", "Saint Lucia");
+		codes.put("LIE", "Liechtenstein");
+		codes.put("LKA", "Sri Lanka");
+		codes.put("LSO", "Lesotho");
+		codes.put("LTU", "Lithuania");
+		codes.put("LUX", "Luxembourg");
+		codes.put("LVA", "Latvia");
+		codes.put("MAC", "Macao");
+		codes.put("MAF", "Saint Martin (French part)");
+		codes.put("MAR", "Morocco");
+		codes.put("MCO", "Monaco");
+		codes.put("MDA", "Moldova, Republic of");
+		codes.put("MDG", "Madagascar");
+		codes.put("MDV", "Maldives");
+		codes.put("MEX", "Mexico");
+		codes.put("MHL", "Marshall Islands");
+		codes.put("MKD", "Macedonia, the former Yugoslav Republic of");
+		codes.put("MLI", "Mali");
+		codes.put("MLT", "Malta");
+		codes.put("MMR", "Myanmar");
+		codes.put("MNE", "Montenegro");
+		codes.put("MNG", "Mongolia");
+		codes.put("MNP", "Northern Mariana Islands");
+		codes.put("MOZ", "Mozambique");
+		codes.put("MRT", "Mauritania");
+		codes.put("MSR", "Montserrat");
+		codes.put("MTQ", "Martinique");
+		codes.put("MUS", "Mauritius");
+		codes.put("MWI", "Malawi");
+		codes.put("MYS", "Malaysia");
+		codes.put("MYT", "Mayotte");
+		codes.put("NAM", "Namibia");
+		codes.put("NCL", "New Caledonia");
+		codes.put("NER", "Niger");
+		codes.put("NFK", "Norfolk Island");
+		codes.put("NGA", "Nigeria");
+		codes.put("NIC", "Nicaragua");
+		codes.put("NIU", "Niue");
+		codes.put("NLD", "Netherlands");
+		codes.put("NOR", "Norway");
+		codes.put("NPL", "Nepal");
+		codes.put("NRU", "Nauru");
+		codes.put("NZL", "New Zealand");
+		codes.put("OMN", "Oman");
+		codes.put("PAK", "Pakistan");
+		codes.put("PAN", "Panama");
+		codes.put("PCN", "Pitcairn");
+		codes.put("PER", "Peru");
+		codes.put("PHL", "Philippines");
+		codes.put("PLW", "Palau");
+		codes.put("PNG", "Papua New Guinea");
+		codes.put("POL", "Poland");
+		codes.put("PRI", "Puerto Rico");
+		codes.put("PRK", "Korea, Democratic People's Republic of");
+		codes.put("PRT", "Portugal");
+		codes.put("PRY", "Paraguay");
+		codes.put("PSE", "Palestine, State of");
+		codes.put("PYF", "French Polynesia");
+		codes.put("QAT", "Qatar");
+		codes.put("REU", "Réunion");
+		codes.put("ROU", "Romania");
+		codes.put("RUS", "Russian Federation");
+		codes.put("RWA", "Rwanda");
+		codes.put("SAU", "Saudi Arabia");
+		codes.put("SDN", "Sudan");
+		codes.put("SEN", "Senegal");
+		codes.put("SGP", "Singapore");
+		codes.put("SGS", "South Georgia and the South Sandwich Islands");
+		codes.put("SHN", "Saint Helena, Ascension and Tristan da Cunha");
+		codes.put("SJM", "Svalbard and Jan Mayen");
+		codes.put("SLB", "Solomon Islands");
+		codes.put("SLE", "Sierra Leone");
+		codes.put("SLV", "El Salvador");
+		codes.put("SMR", "San Marino");
+		codes.put("SOM", "Somalia");
+		codes.put("SPM", "Saint Pierre and Miquelon");
+		codes.put("SRB", "Serbia");
+		codes.put("SSD", "South Sudan");
+		codes.put("STP", "Sao Tome and Principe");
+		codes.put("SUR", "Suriname");
+		codes.put("SVK", "Slovakia");
+		codes.put("SVN", "Slovenia");
+		codes.put("SWE", "Sweden");
+		codes.put("SWZ", "Swaziland");
+		codes.put("SXM", "Sint Maarten (Dutch part)");
+		codes.put("SYC", "Seychelles");
+		codes.put("SYR", "Syrian Arab Republic");
+		codes.put("TCA", "Turks and Caicos Islands");
+		codes.put("TCD", "Chad");
+		codes.put("TGO", "Togo");
+		codes.put("THA", "Thailand");
+		codes.put("TJK", "Tajikistan");
+		codes.put("TKL", "Tokelau");
+		codes.put("TKM", "Turkmenistan");
+		codes.put("TLS", "Timor-Leste");
+		codes.put("TON", "Tonga");
+		codes.put("TTO", "Trinidad and Tobago");
+		codes.put("TUN", "Tunisia");
+		codes.put("TUR", "Turkey");
+		codes.put("TUV", "Tuvalu");
+		codes.put("TWN", "Taiwan, Province of China");
+		codes.put("TZA", "Tanzania, United Republic of");
+		codes.put("UGA", "Uganda");
+		codes.put("UKR", "Ukraine");
+		codes.put("UMI", "United States Minor Outlying Islands");
+		codes.put("URY", "Uruguay");
+		codes.put("USA", "United States of America");
+		codes.put("UZB", "Uzbekistan");
+		codes.put("VAT", "Holy See");
+		codes.put("VCT", "Saint Vincent and the Grenadines");
+		codes.put("VEN", "Venezuela, Bolivarian Republic of");
+		codes.put("VGB", "Virgin Islands, British");
+		codes.put("VIR", "Virgin Islands, U.S.");
+		codes.put("VNM", "Viet Nam");
+		codes.put("VUT", "Vanuatu");
+		codes.put("WLF", "Wallis and Futuna");
+		codes.put("WSM", "Samoa");
+		codes.put("YEM", "Yemen");
+		codes.put("ZAF", "South Africa");
+		codes.put("ZMB", "Zambia");
+		codes.put("ZWE", "Zimbabwe");
+		return codes;
 	}
 
 }

@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
@@ -386,4 +387,10 @@ public class ParameterUtil {
 		return b.toString();
 	}
 
+	/**
+	 * Returns true if the value is :iterate or :recurse (the former name of :iterate) for an _include parameter
+	 */
+	public static boolean isIncludeIterate(String theQualifier) {
+		return Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(theQualifier) || Constants.PARAM_INCLUDE_QUALIFIER_ITERATE.equals(theQualifier);
+	}
 }

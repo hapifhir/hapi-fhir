@@ -2,7 +2,7 @@
 
 Most of the projects in this module are no longer supported.
 
-The test in hapi-fhir-jpaserver-cds-example is @Ignored until Chris Schuler is able to make a change to the pom
+The test in hapi-fhir-jpaserver-cds-example is @Disabledd until Chris Schuler is able to make a change to the pom
 this module depends on.
 
 ## Supported JPA Example:

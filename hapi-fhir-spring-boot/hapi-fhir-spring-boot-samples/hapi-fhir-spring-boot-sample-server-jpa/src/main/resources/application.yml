@@ -13,9 +13,14 @@ spring:
       hibernate.search.lucene_version: LUCENE_CURRENT
       hibernate.search.model_mapping: ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory
 
+  main:
+     allow-bean-definition-overriding: true
   h2:
     console:
       enabled: true
+  batch:
+    job:
+       enabled: false
 hapi:
   fhir:
     version: DSTU3

@@ -3,21 +3,21 @@ package ca.uhn.fhir.empi.rules.svc;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class EmpiResourceMatcherSvcR4Test extends BaseEmpiRulesR4Test {
-	private EmpiResourceMatcherSvc myEmpiResourceMatcherSvc;
 	public static final double NAME_DELTA = 0.0001;
-
+	private EmpiResourceMatcherSvc myEmpiResourceMatcherSvc;
 	private Patient myJohn;
 	private Patient myJohny;
 
-	@Before
+	@Override
+	@BeforeEach
 	public void before() {
 		super.before();
 

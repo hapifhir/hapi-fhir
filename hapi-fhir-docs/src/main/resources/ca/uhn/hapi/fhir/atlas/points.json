@@ -337,7 +337,27 @@
 			"lat": 21.026058,
 			"lon": 105.822715,
 			"added": "2020-03-06"
+		},
+		{
+			"title": "Ohum - OhumSKY, OhumG and OhumAIR",
+			"description": "Ohumhealthcare Pvt Ltd",
+			"link": "http://ohumhealthcare.com",
+			"contactName": "Sumeet Chhetri",
+			"contactEmail": "sumeetc@ohumhealthcare.com",
+			"city": "Pune,India",
+			"lat": 18.5204,
+			"lon": 73.8567,
+			"added": "2020-06-18"
+},{
+			"title": "Grand Rounds, Inc.",
+			"description": "Our mission is to raise the standard of healthcare for everyone, everywhere.",
+			"link": "https://grandrounds.com",
+			"contactName": "Simon Yun",
+			"contactEmail": "simon.yun@grandrounds.com",
+			"city": "San Francisco, CA",
+			"lat": 37.7826622,
+			"lon": -122.3983786,
+			"added": "2020-05-06"
 		}
-
 	]
 }

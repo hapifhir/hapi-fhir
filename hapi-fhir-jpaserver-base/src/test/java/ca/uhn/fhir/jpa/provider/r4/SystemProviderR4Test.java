@@ -1,12 +1,19 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
-import ca.uhn.fhir.jpa.rp.r4.*;
+import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.DiagnosticReportResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.LocationResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.OrganizationResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.PractitionerResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.ServiceRequestResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -22,7 +29,6 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -38,13 +44,26 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.junit.*;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationDefinition;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,33 +73,33 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderR4Test.class);
 	private static RestfulServer ourRestServer;
-	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
 	private static CloseableHttpClient ourHttpClient;
 	private static Server ourServer;
 	private static String ourServerBase;
+	private IGenericClient myClient;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@SuppressWarnings("deprecation")
-	@After
+	@AfterEach
 	public void after() {
-		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
+		myClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 	}
 
-	@Before
-	public void before() {
-		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
-	}
-
-	@Before
+	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (ourRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -122,13 +141,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-			ourCtx = FhirContext.forR4();
+			ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
 			JettyUtil.startServer(ourServer);
-            int myPort = JettyUtil.getPortForStartedServer(ourServer);
-            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+			int myPort = JettyUtil.getPortForStartedServer(ourServer);
+			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -136,10 +155,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			ourHttpClient = builder.build();
 
 			ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-			ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-			ourClient.setLogRequestAndResponse(true);
 			ourRestServer = restServer;
 		}
+
+		myClient = ourCtx.newRestfulGenericClient(ourServerBase);
+		myClient.setLogRequestAndResponse(true);
+		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
+		myClient.registerInterceptor(mySimpleHeaderInterceptor);
 
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		ourRestServer.setPagingProvider(myPagingProvider);
@@ -155,7 +177,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < 11; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("Name" + i);
-			ourClient.create().resource(p).execute();
+			myClient.create().resource(p).execute();
 		}
 
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
@@ -187,7 +209,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < 11; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("Name" + i);
-			ourClient.create().resource(p).execute();
+			myClient.create().resource(p).execute();
 		}
 
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
@@ -219,7 +241,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testGetOperationDefinition() {
-		OperationDefinition op = ourClient.read(OperationDefinition.class, "-s-get-resource-counts");
+		OperationDefinition op = myClient.read(OperationDefinition.class, "-s-get-resource-counts");
 		assertEquals("get-resource-counts", op.getCode());
 	}
 
@@ -304,7 +326,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		myObservationDao.update(obs, mySrd);
 
 		// Try to wait for the indexing to complete
-		waitForSize(2, ()-> fetchSuggestionCount(ptId));
+		waitForSize(2, () -> fetchSuggestionCount(ptId));
 
 		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
@@ -392,7 +414,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle req = new Bundle();
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_summary=count");
-		Bundle resp = ourClient.transaction().withBundle(req).execute();
+		Bundle resp = myClient.transaction().withBundle(req).execute();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(1, resp.getEntry().size());
@@ -406,10 +428,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.addName().setFamily("Unique762");
 		myPatientDao.create(patient, mySrd);
-		Bundle resp1 = (Bundle) ourClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
+		Bundle resp1 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
 		assertEquals(1, resp1.getTotal());
-		Bundle resp2 = (Bundle) ourClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
+		Bundle resp2 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
 		assertEquals(1, resp2.getTotal());
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
 	}
@@ -427,7 +449,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req = new Bundle();
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
-		resp = ourClient.transaction().withBundle(req).execute();
+		resp = myClient.transaction().withBundle(req).execute();
 		assertEquals(null, resp.getEntry().get(0).getResource());
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
@@ -437,7 +459,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req = new Bundle();
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
-		resp = ourClient.transaction().withBundle(req).execute();
+		resp = myClient.transaction().withBundle(req).execute();
 		assertEquals(null, resp.getEntry().get(0).getResource());
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
@@ -447,7 +469,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req = new Bundle();
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
-		resp = ourClient.transaction().withBundle(req).execute();
+		resp = myClient.transaction().withBundle(req).execute();
 		assertEquals(Patient.class, resp.getEntry().get(0).getResource().getClass());
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 	}
@@ -460,7 +482,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			ourLog.info("** Beginning pass {}", i);
 
 			Bundle input = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/createdeletebundle.json"), Charsets.UTF_8));
-			ourClient.transaction().withBundle(input).execute();
+			myClient.transaction().withBundle(input).execute();
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
 
@@ -495,9 +517,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	private void deleteAllOfType(String theType) {
-		BundleUtil.toListOfResources(myFhirCtx, ourClient.search().forResource(theType).execute())
+		BundleUtil.toListOfResources(myFhirCtx, myClient.search().forResource(theType).execute())
 			.forEach(t -> {
-				ourClient.delete().resourceById(t.getIdElement()).execute();
+				myClient.delete().resourceById(t.getIdElement()).execute();
 			});
 	}
 
@@ -509,7 +531,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
-		ourClient.read().resource(Patient.class).withId(id);
+		myClient.read().resource(Patient.class).withId(id);
 
 		Bundle inputBundle = new Bundle();
 		inputBundle.setType(BundleType.TRANSACTION);
@@ -536,7 +558,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		}
 
 		try {
-			ourClient.read().resource(Patient.class).withId(id).execute();
+			myClient.read().resource(Patient.class).withId(id).execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -548,7 +570,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	public void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
 
@@ -557,7 +579,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -573,7 +595,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		bundleRes = SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
 		bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 
 		resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -593,12 +615,12 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * This is Gramahe's test transaction - it requires some set up in order to work
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testTransactionFromBundle3() throws Exception {
 
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/grahame-transaction.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
 
@@ -606,7 +628,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	public void testTransactionFromBundle4() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdType id = new IdType(bundleResp.getEntry().get(0).getResponse().getLocation());
@@ -622,7 +644,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle2.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		try {
-			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+			myClient.transaction().withBundle(bundle).prettyPrint().execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
@@ -635,7 +657,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	public void testTransactionFromBundle6() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle3.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		// try {
 		// fail();
 		// } catch (InvalidRequestException e) {
@@ -656,7 +678,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle req = new Bundle();
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?");
-		Bundle resp = ourClient.transaction().withBundle(req).execute();
+		Bundle resp = myClient.transaction().withBundle(req).execute();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(1, resp.getEntry().size());
@@ -679,7 +701,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		bundle.addEntry().setResource(patient);
 
 		try {
-			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+			myClient.transaction().withBundle(bundle).prettyPrint().execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.toString(), containsString("missing or invalid HTTP Verb"));
@@ -748,7 +770,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * FOrmat has changed, source is no longer valid
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateUsingIncomingResources() throws Exception {
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
@@ -787,7 +809,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@Test()
 	public void testEndpointInterceptorIsCalledForTransaction() {
 		// Just to get this out of the way
-		ourClient.forceConformanceCheck();
+		myClient.forceConformanceCheck();
 
 		// Register an interceptor on the response
 		AtomicBoolean called = new AtomicBoolean(false);
@@ -812,7 +834,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Patient");
 
-			ourClient.transaction().withBundle(b).execute();
+			myClient.transaction().withBundle(b).execute();
 
 			assertTrue(called.get());
 
@@ -823,11 +845,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 
-
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }
