@@ -63,7 +63,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, Boolean theEidMatch, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
 		IIdType resourceId = theTarget.getIdElement().toUnqualifiedVersionless();
 
 		if (theMatchResult == EmpiMatchResultEnum.POSSIBLE_DUPLICATE && personsLinkedAsNoMatch(thePerson, theTarget)) {
@@ -89,7 +89,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 				break;
 		}
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
-		createOrUpdateLinkEntity(thePerson, theTarget, theMatchResult, theLinkSource, theEmpiTransactionContext);
+		createOrUpdateLinkEntity(thePerson, theTarget, theMatchResult, theEidMatch, theLinkSource, theEmpiTransactionContext);
 	}
 
 	private boolean personsLinkedAsNoMatch(IAnyResource thePerson, IAnyResource theTarget) {
@@ -175,8 +175,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiTransactionContext);
+	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResultEnum theMatchResult, Boolean theEidMatch, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theEidMatch, theLinkSource, theEmpiTransactionContext);
 	}
 
 	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {

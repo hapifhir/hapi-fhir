@@ -31,10 +31,11 @@ public interface IEmpiLinkSvc {
 	 *  @param thePerson                 the Person to link the target resource to.
 	 * @param theTargetResource               the target resource, which is a Patient or Practitioner
 	 * @param theMatchResult            the current status of the match to set the link to.
+	 * @param theEidMatch					the link was established via a shared EID
 	 * @param theLinkSource             MANUAL or AUTO: what caused the link.
 	 * @param theEmpiTransactionContext
 	 */
-	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
+	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, EmpiMatchResultEnum theMatchResult, Boolean theEidMatch, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
 
 	/**
 	 * Replace Person.link values from what they should be based on EmpiLink values

@@ -371,7 +371,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	private EmpiLink createEmpiLink(Person thePerson, Patient theTargetPatient) {
 		thePerson.addLink().setTarget(new Reference(theTargetPatient));
-		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, EmpiMatchResultEnum.POSSIBLE_MATCH, false, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 	}
 
 	private void populatePerson(Person thePerson) {

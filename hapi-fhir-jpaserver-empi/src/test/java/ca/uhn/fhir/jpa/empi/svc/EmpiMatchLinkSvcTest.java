@@ -53,6 +53,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		super.loadEmpiSearchParameters();
 	}
 
+	// FIXME KHS add tests to validate eidMatch flag is set properly
+
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {
 		createPatientAndUpdateLinks(buildJanePatient());
@@ -87,7 +89,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//Create a manual NO_MATCH between janePerson and unmatchedJane.
 		Patient unmatchedJane = createPatient(buildJanePatient());
-		myEmpiLinkSvc.updateLink(janePerson, unmatchedJane, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+		myEmpiLinkSvc.updateLink(janePerson, unmatchedJane, EmpiMatchResultEnum.NO_MATCH, false, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
 
 		//rerun EMPI rules against unmatchedJane.
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedJane, createContextForCreate());
@@ -105,7 +107,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient unmatchedPatient = createPatient(buildJanePatient());
 
 		//This simulates an admin specifically saying that unmatchedPatient does NOT match janePerson.
-		myEmpiLinkSvc.updateLink(janePerson, unmatchedPatient, EmpiMatchResultEnum.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+		myEmpiLinkSvc.updateLink(janePerson, unmatchedPatient, EmpiMatchResultEnum.NO_MATCH, false, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
 		//TODO change this so that it will only partially match.
 
 		//Now normally, when we run update links, it should link to janePerson. However, this manual NO_MATCH link
@@ -317,7 +319,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 		//own individual Persons for the purpose of this test.
 		IAnyResource person = myPersonHelper.createPersonFromEmpiTarget(janePatient2);
-		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchResultEnum.MATCH, false, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 		assertThat(janePatient, is(not(samePersonAs(janePatient2))));
 
 		//In theory, this will match both Persons!
@@ -393,7 +395,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testManualMatchesGenerateAssuranceLevel4() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		Person janePerson = getPersonFromTarget(patient);
-		myEmpiLinkSvc.updateLink(janePerson, patient, EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+		myEmpiLinkSvc.updateLink(janePerson, patient, EmpiMatchResultEnum.MATCH, false, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
 
 		janePerson = getPersonFromTarget(patient);
 		Person.PersonLinkComponent linkFirstRep = janePerson.getLinkFirstRep();

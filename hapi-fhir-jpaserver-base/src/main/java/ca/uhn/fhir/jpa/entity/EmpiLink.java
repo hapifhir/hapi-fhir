@@ -94,6 +94,9 @@ public class EmpiLink {
 	@Column(name = "VERSION", nullable = false)
 	private String myVersion;
 
+	@Column(name = "EID_MATCH")
+	private Boolean myEidMatch;
+
 	@Column(name = "SCORE")
 	private Double myScore;
 
@@ -225,6 +228,15 @@ public class EmpiLink {
 
 	public EmpiLink setScore(Double theScore) {
 		myScore = theScore;
+		return this;
+	}
+
+	public Boolean getEidMatch() {
+		return myEidMatch;
+	}
+
+	public EmpiLink setEidMatch(Boolean theEidMatch) {
+		myEidMatch = theEidMatch;
 		return this;
 	}
 

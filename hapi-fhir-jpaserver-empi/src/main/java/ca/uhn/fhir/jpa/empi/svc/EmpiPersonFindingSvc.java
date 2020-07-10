@@ -29,6 +29,8 @@ import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.empi.model.CandidateList;
+import ca.uhn.fhir.jpa.empi.model.MatchedPersonCandidate;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -73,8 +75,8 @@ public class EmpiPersonFindingSvc {
 	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
 	 * @return A list of {@link MatchedPersonCandidate} indicating all potential Person matches.
 	 */
-	public List<MatchedPersonCandidate> findPersonCandidates(IAnyResource theResource) {
-		List<MatchedPersonCandidate> matchedPersonCandidates = attemptToFindPersonCandidateFromIncomingEID(theResource);
+	public CandidateList findPersonCandidates(IAnyResource theResource) {
+		CandidateList matchedPersonCandidates = attemptToFindPersonCandidateFromIncomingEID(theResource);
 		if (matchedPersonCandidates.isEmpty()) {
 			matchedPersonCandidates = attemptToFindPersonCandidateFromEmpiLinkTable(theResource);
 		}
@@ -87,8 +89,8 @@ public class EmpiPersonFindingSvc {
 		return matchedPersonCandidates;
 	}
 
-	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromIncomingEID(IAnyResource theBaseResource) {
-		List<MatchedPersonCandidate> retval = new ArrayList<>();
+	private CandidateList attemptToFindPersonCandidateFromIncomingEID(IAnyResource theBaseResource) {
+		CandidateList retval = CandidateList.newEidMatchCandidateList();
 
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
 		if (!eidFromResource.isEmpty()) {
@@ -112,8 +114,8 @@ public class EmpiPersonFindingSvc {
 	 * @param theBaseResource the {@link IAnyResource} that we want to find candidate Persons for.
 	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
 	 */
-	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromEmpiLinkTable(IAnyResource theBaseResource) {
-		List<MatchedPersonCandidate> retval = new ArrayList<>();
+	private CandidateList attemptToFindPersonCandidateFromEmpiLinkTable(IAnyResource theBaseResource) {
+		CandidateList retval = CandidateList.newCandidateList();
 
 		Long targetPid = myIdHelperService.getPidOrNull(theBaseResource);
 		if (targetPid != null) {
@@ -135,8 +137,8 @@ public class EmpiPersonFindingSvc {
 	 * @param theBaseResource the {@link IBaseResource} which we want to find candidate Persons for.
 	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
 	 */
-	private List<MatchedPersonCandidate> attemptToFindPersonCandidateFromSimilarTargetResource(IAnyResource theBaseResource) {
-		List<MatchedPersonCandidate> retval = new ArrayList<>();
+	private CandidateList attemptToFindPersonCandidateFromSimilarTargetResource(IAnyResource theBaseResource) {
+		CandidateList retval = CandidateList.newCandidateList();
 
 		List<Long> personPidsToExclude = getNoMatchPersonPids(theBaseResource);
 		List<MatchedTarget> matchedCandidates = myEmpiMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theBaseResource), theBaseResource);
