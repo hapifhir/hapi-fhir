@@ -30,7 +30,9 @@ public interface ISchemaInitializationProvider {
 
 	String getSchemaExistsIndicatorTable();
 
-    String getSchemaDescription();
+	String getSchemaDescription();
 
 	ISchemaInitializationProvider setSchemaDescription(String theSchemaDescription);
+
+	boolean canInitializeSchema();
 }
