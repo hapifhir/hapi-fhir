@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -25,6 +27,16 @@ public class EmpiRulesJsonR4Test extends BaseEmpiRulesR4Test {
 		super.before();
 
 		myRules = buildActiveBirthdateIdRules();
+	}
+
+	@Test
+	public void testValidate() throws IOException {
+		EmpiRulesJson rules = new EmpiRulesJson();
+		try {
+			JsonUtil.serialize(rules);
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("version may not be blank"));
+		}
 	}
 
 	@Test

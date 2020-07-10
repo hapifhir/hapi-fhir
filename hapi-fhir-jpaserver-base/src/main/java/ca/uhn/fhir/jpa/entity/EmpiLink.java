@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -87,6 +89,19 @@ public class EmpiLink {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "UPDATED", nullable = false)
 	private Date myUpdated;
+
+	// FIXME KHS migration
+	@Column(name = "VERSION", nullable = false)
+	private String myVersion;
+
+	@Column(name = "SCORE")
+	private Double myScore;
+
+	public EmpiLink() {}
+
+	public EmpiLink(String theVersion) {
+		myVersion = theVersion;
+	}
 
 	public Long getId() {
 		return myId;
@@ -177,17 +192,6 @@ public class EmpiLink {
 		return myLinkSource == EmpiLinkSourceEnum.MANUAL;
 	}
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append("myPersonPid", myPersonPid)
-			.append("myTargetPid", myTargetPid)
-			.append("myMatchResult", myMatchResult)
-			.append("myLinkSource", myLinkSource)
-			.toString();
-	}
-
 	public Date getCreated() {
 		return myCreated;
 	}
@@ -204,5 +208,63 @@ public class EmpiLink {
 	public EmpiLink setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
 		return this;
+	}
+
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public EmpiLink setVersion(String theVersion) {
+		myVersion = theVersion;
+		return this;
+	}
+
+	public Double getScore() {
+		return myScore;
+	}
+
+	public EmpiLink setScore(Double theScore) {
+		myScore = theScore;
+		return this;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		EmpiLink empiLink = (EmpiLink) theO;
+
+		return new EqualsBuilder()
+			.append(myId, empiLink.myId)
+			.append(myPerson, empiLink.myPerson)
+			.append(myPersonPid, empiLink.myPersonPid)
+			.append(myTarget, empiLink.myTarget)
+			.append(myTargetPid, empiLink.myTargetPid)
+			.append(myMatchResult, empiLink.myMatchResult)
+			.append(myLinkSource, empiLink.myLinkSource)
+			.append(myCreated, empiLink.myCreated)
+			.append(myUpdated, empiLink.myUpdated)
+			.append(myVersion, empiLink.myVersion)
+			.append(myScore, empiLink.myScore)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myId)
+			.append(myPerson)
+			.append(myPersonPid)
+			.append(myTarget)
+			.append(myTargetPid)
+			.append(myMatchResult)
+			.append(myLinkSource)
+			.append(myCreated)
+			.append(myUpdated)
+			.append(myVersion)
+			.append(myScore)
+			.toHashCode();
 	}
 }

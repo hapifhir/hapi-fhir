@@ -51,6 +51,7 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 			.setMatchThreshold(NAME_THRESHOLD);
 
 		EmpiRulesJson retval = new EmpiRulesJson();
+		retval.setVersion("test version");
 		retval.addResourceSearchParam(patientBirthdayBlocking);
 		retval.addResourceSearchParam(patientIdentifierBlocking);
 		retval.addFilterSearchParam(activePatientsBlockingFilter);

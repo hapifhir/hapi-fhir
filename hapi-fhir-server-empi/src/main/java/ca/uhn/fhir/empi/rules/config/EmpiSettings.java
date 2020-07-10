@@ -107,6 +107,11 @@ public class EmpiSettings implements IEmpiSettings {
 		return myPreventMultipleEids;
 	}
 
+	@Override
+	public String getRuleVersion() {
+		return myEmpiRules.getVersion();
+	}
+
 	public EmpiSettings setPreventMultipleEids(boolean thePreventMultipleEids) {
 		myPreventMultipleEids = thePreventMultipleEids;
 		return this;

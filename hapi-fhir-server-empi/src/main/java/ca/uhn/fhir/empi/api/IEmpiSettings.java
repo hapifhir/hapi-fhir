@@ -35,4 +35,6 @@ public interface IEmpiSettings {
 	boolean isPreventEidUpdates();
 
 	boolean isPreventMultipleEids();
+
+	String getRuleVersion();
 }
