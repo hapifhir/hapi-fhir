@@ -39,7 +39,12 @@ public enum EmpiMatchResultEnum {
 	/**
 	 * Link between two Person resources indicating they may be duplicates.
 	 */
-	POSSIBLE_DUPLICATE
+	POSSIBLE_DUPLICATE,
 
+	/**
+	 * Link between Person and Target pointing to the Golden Record for that Person
+	 */
+
+	GOLDEN_RECORD
 	// Stored in database as ORDINAL.  Only add new values to bottom!
 }
