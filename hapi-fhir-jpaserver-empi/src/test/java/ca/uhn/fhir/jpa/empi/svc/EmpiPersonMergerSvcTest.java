@@ -107,7 +107,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
-		EmpiLink empiLink = new EmpiLink().setPersonPid(myToPersonPid).setTargetPid(myFromPersonPid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
+		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink().setPersonPid(myToPersonPid).setTargetPid(myFromPersonPid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
 		saveLink(empiLink);
 		assertEquals(1, myEmpiLinkDao.count());
 		mergePersons();

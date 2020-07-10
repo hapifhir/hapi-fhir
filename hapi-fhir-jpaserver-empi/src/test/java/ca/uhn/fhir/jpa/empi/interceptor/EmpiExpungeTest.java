@@ -45,7 +45,7 @@ public class EmpiExpungeTest extends BaseEmpiR4Test {
 		myTargetId = myTargetEntity.getIdDt().toVersionless();
 		myPersonEntity = (ResourceTable) myPersonDao.create(new Person()).getEntity();
 
-		EmpiLink empiLink = new EmpiLink();
+		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		empiLink.setPersonPid(myPersonEntity.getId());

@@ -47,7 +47,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		Person person2 = createPerson();
 		myPerson2Id = new StringType(person2.getIdElement().toVersionless().getValue());
 		Long person2Pid = myIdHelperService.getPidOrNull(person2);
-		EmpiLink possibleDuplicateEmpiLink = new EmpiLink().setPersonPid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
+		EmpiLink possibleDuplicateEmpiLink = myEmpiLinkDaoSvc.newEmpiLink().setPersonPid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
 		saveLink(possibleDuplicateEmpiLink);
 	}
 

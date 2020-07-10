@@ -10,7 +10,7 @@ import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.config.EmpiConsumerConfig;
@@ -360,7 +360,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		Person person = createPerson();
 		Patient patient = createPatient();
 
-		EmpiLink empiLink = new EmpiLink();
+		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		empiLink.setPersonPid(myIdHelperService.getPidOrNull(person));

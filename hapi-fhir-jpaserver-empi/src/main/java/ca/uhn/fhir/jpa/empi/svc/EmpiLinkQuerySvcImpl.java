@@ -25,7 +25,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -88,7 +88,7 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	}
 
 	private Example<EmpiLink> exampleLinkFromParameters(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
-		EmpiLink empiLink = new EmpiLink();
+		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		if (thePersonId != null) {
 			empiLink.setPersonPid(myIdHelperService.getPidOrThrowException(thePersonId));
 		}

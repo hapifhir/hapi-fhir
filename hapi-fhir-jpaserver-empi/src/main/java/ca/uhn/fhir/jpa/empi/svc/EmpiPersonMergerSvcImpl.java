@@ -27,7 +27,7 @@ import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.util.PersonHelper;
-import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -76,7 +76,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	}
 
 	private void addMergeLink(Long theFromPersonPid, Long theToPersonPid) {
-		EmpiLink empiLink = new EmpiLink()
+		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink()
 			.setPersonPid(theFromPersonPid)
 			.setTargetPid(theToPersonPid)
 			.setMatchResult(EmpiMatchResultEnum.MATCH)

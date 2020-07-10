@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.dao.empi;
 
 /*-
  * #%L
@@ -50,6 +50,8 @@ public class EmpiLinkDaoSvc {
 	@Autowired
 	private IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
+	private EmpiLinkFactory myEmpiLinkFactory;
+	@Autowired
 	private IdHelperService myIdHelperService;
 
 	@Transactional
@@ -75,7 +77,7 @@ public class EmpiLinkDaoSvc {
 		if (oExisting.isPresent()) {
 			return oExisting.get();
 		} else {
-			EmpiLink empiLink = new EmpiLink();
+			EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink();
 			empiLink.setPersonPid(thePersonPid);
 			empiLink.setTargetPid(theResourcePid);
 			return empiLink;
@@ -87,7 +89,7 @@ public class EmpiLinkDaoSvc {
 		if (theTargetPid == null || thePersonPid == null) {
 			return Optional.empty();
 		}
-		EmpiLink link = new EmpiLink();
+		EmpiLink link = myEmpiLinkFactory.newEmpiLink();
 		link.setTargetPid(theTargetPid);
 		link.setPersonPid(thePersonPid);
 		Example<EmpiLink> example = Example.of(link);
@@ -95,7 +97,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public List<EmpiLink> getEmpiLinksByTargetPidAndMatchResult(Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<EmpiLink> example = Example.of(exampleLink);
@@ -103,7 +105,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public Optional<EmpiLink> getMatchedLinkForTargetPid(Long theTargetPid) {
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		Example<EmpiLink> example = Example.of(exampleLink);
@@ -116,7 +118,7 @@ public class EmpiLinkDaoSvc {
 			return Optional.empty();
 		}
 
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setTargetPid(pid);
 		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		Example<EmpiLink> example = Example.of(exampleLink);
@@ -124,7 +126,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public Optional<EmpiLink> getEmpiLinksByPersonPidTargetPidAndMatchResult(Long thePersonPid, Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setPersonPid(thePersonPid);
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(theMatchResult);
@@ -138,7 +140,7 @@ public class EmpiLinkDaoSvc {
 	 * @return A list of EmpiLinks that hold potential duplicate persons.
 	 */
 	public List<EmpiLink> getPossibleDuplicates() {
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
@@ -149,7 +151,7 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Optional.empty();
 		}
-		EmpiLink empiLink = new EmpiLink().setTargetPid(pid);
+		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findOne(example);
 	}
@@ -178,7 +180,7 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink empiLink = new EmpiLink().setPersonPid(pid);
+		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setPersonPid(pid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findAll(example);
 	}
@@ -200,8 +202,12 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink empiLink = new EmpiLink().setTargetPid(pid);
+		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findAll(example);
+	}
+
+	public EmpiLink newEmpiLink() {
+		return myEmpiLinkFactory.newEmpiLink();
 	}
 }
