@@ -220,7 +220,8 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient2, "eid-11");
 		addExternalEID(patient2, "eid-22");
 		patient2 = updatePatientAndUpdateLinks(patient2);
-		// FIXME KHS this doesn't look right
+		// FIXME KHS is this right?
+		logAllLinks();
 		assertLinksMatchResult(MATCH, POSSIBLE_MATCH, MATCH, POSSIBLE_MATCH, POSSIBLE_DUPLICATE);
 		assertLinksNewPerson(true, false, false, false, false);
 		assertLinksMatchedByEid(false, true, true, true, true);

@@ -25,6 +25,7 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -252,42 +253,15 @@ public class EmpiLink {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		EmpiLink empiLink = (EmpiLink) theO;
-
-		return new EqualsBuilder()
-			.append(myId, empiLink.myId)
-			.append(myPerson, empiLink.myPerson)
-			.append(myPersonPid, empiLink.myPersonPid)
-			.append(myTarget, empiLink.myTarget)
-			.append(myTargetPid, empiLink.myTargetPid)
-			.append(myMatchResult, empiLink.myMatchResult)
-			.append(myLinkSource, empiLink.myLinkSource)
-			.append(myCreated, empiLink.myCreated)
-			.append(myUpdated, empiLink.myUpdated)
-			.append(myVersion, empiLink.myVersion)
-			.append(myScore, empiLink.myScore)
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myId)
-			.append(myPerson)
-			.append(myPersonPid)
-			.append(myTarget)
-			.append(myTargetPid)
-			.append(myMatchResult)
-			.append(myLinkSource)
-			.append(myCreated)
-			.append(myUpdated)
-			.append(myVersion)
-			.append(myScore)
-			.toHashCode();
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myPersonPid", myPersonPid)
+			.append("myTargetPid", myTargetPid)
+			.append("myMatchResult", myMatchResult)
+			.append("myLinkSource", myLinkSource)
+			.append("myEidMatch", myEidMatch)
+			.append("myNewPerson", myNewPerson)
+			.append("myScore", myScore)
+			.toString();
 	}
 }

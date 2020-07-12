@@ -61,13 +61,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {EmpiSubmitterConfig.class, EmpiConsumerConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
+	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
+
 	public static final String NAME_GIVEN_JANE = "Jane";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
 	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
 	protected static final String JANE_ID = "ID.JANE.123";
 	protected static final String PAUL_ID = "ID.PAUL.456";
-	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
@@ -371,5 +372,13 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected void loadEmpiSearchParameters() {
 		myEmpiSearchParameterLoader.daoUpdateEmpiSearchParameters();
 		mySearchParamRegistry.forceRefresh();
+	}
+
+	protected void logAllLinks() {
+		ourLog.info("Logging all EMPI Links:");
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		for (EmpiLink link : links) {
+			ourLog.info(link.toString());
+		}
 	}
 }
