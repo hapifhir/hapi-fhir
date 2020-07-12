@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.model;
+package ca.uhn.fhir.jpa.empi.svc.candidate;
 
 /*-
  * #%L

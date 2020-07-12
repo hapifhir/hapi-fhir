@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.svc;
+package ca.uhn.fhir.jpa.empi.svc.candidate;
 
 /*-
  * #%L
@@ -27,6 +27,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IAnyResource;

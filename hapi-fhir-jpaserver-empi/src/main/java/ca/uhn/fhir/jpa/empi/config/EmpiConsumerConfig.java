@@ -37,17 +37,20 @@ import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
-import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchCriteriaBuilderSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchCriteriaBuilderSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkQuerySvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiPersonFindingSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByEidSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByLinkSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByScoreSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +128,21 @@ public class EmpiConsumerConfig {
 	@Bean
 	EmpiPersonFindingSvc empiPersonFindingSvc() {
 		return new EmpiPersonFindingSvc();
+	}
+
+	@Bean
+	FindCandidateByEidSvc findCandidateByEidSvc() {
+		return new FindCandidateByEidSvc();
+	}
+
+	@Bean
+	FindCandidateByLinkSvc findCandidateByLinkSvc() {
+		return new FindCandidateByLinkSvc();
+	}
+
+	@Bean
+	FindCandidateByScoreSvc findCandidateByScoreSvc() {
+		return new FindCandidateByScoreSvc();
 	}
 
 	@Bean

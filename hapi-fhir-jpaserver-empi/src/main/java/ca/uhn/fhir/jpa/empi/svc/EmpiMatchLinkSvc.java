@@ -27,8 +27,9 @@ import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
-import ca.uhn.fhir.jpa.empi.model.CandidateList;
-import ca.uhn.fhir.jpa.empi.model.MatchedPersonCandidate;
+import ca.uhn.fhir.jpa.empi.svc.candidate.CandidateList;
+import ca.uhn.fhir.jpa.empi.svc.candidate.MatchedPersonCandidate;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -78,7 +79,7 @@ public class EmpiMatchLinkSvc {
 		if (candidateList.isEmpty()) {
 			handleEmpiWithNoCandidates(theResource, false, theEmpiTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
-			handleEmpiWithSingleCandidate(theResource, candidateList.getOnlyMatch(), candidateList.isEidMatch(), theEmpiTransactionContext);
+			handleEmpiWithSingleCandidate(theResource, candidateList.getOnlyMatch(), candidateList.isEid(), theEmpiTransactionContext);
 		} else {
 			handleEmpiWithMultipleCandidates(theResource, candidateList, theEmpiTransactionContext);
 		}
@@ -93,20 +94,20 @@ public class EmpiMatchLinkSvc {
 
 		if (allSamePerson) {
 			log(theEmpiTransactionContext, "EMPI received multiple match candidates, but they are all linked to the same person.");
-			handleEmpiWithSingleCandidate(theResource, firstMatch, theCandidateList.isEidMatch(), theEmpiTransactionContext);
+			handleEmpiWithSingleCandidate(theResource, firstMatch, theCandidateList.isEid(), theEmpiTransactionContext);
 		} else {
 			log(theEmpiTransactionContext, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 			//Set them all as POSSIBLE_MATCH
 			List<IAnyResource> persons = theCandidateList.stream().map((MatchedPersonCandidate matchedPersonCandidate) -> myEmpiPersonFindingSvc.getPersonFromMatchedPersonCandidate(matchedPersonCandidate)).collect(Collectors.toList());
 				persons.forEach(person -> {
-					myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, theCandidateList.isEidMatch(), false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+					myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, theCandidateList.isEid(), false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				});
 
 			//Set all Persons as POSSIBLE_DUPLICATE of the first person.
 			IAnyResource firstPerson = persons.get(0);
 			persons.subList(1, persons.size()).stream()
 				.forEach(possibleDuplicatePerson -> {
-					myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theCandidateList.isEidMatch(), false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+					myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theCandidateList.isEid(), false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				});
 		}
 	}

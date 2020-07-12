@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.MatchedTarget;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

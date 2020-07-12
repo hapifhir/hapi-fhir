@@ -100,6 +100,7 @@ public class EmpiLink {
 	@Column(name = "NEW_PERSON")
 	private Boolean myNewPerson;
 
+	// FIXME KHS set this
 	@Column(name = "SCORE")
 	private Double myScore;
 
@@ -238,6 +239,10 @@ public class EmpiLink {
 		return myEidMatch;
 	}
 
+	public boolean isEidMatch() {
+		return myEidMatch != null && myEidMatch;
+	}
+
 	public EmpiLink setEidMatch(Boolean theEidMatch) {
 		myEidMatch = theEidMatch;
 		return this;
@@ -245,6 +250,10 @@ public class EmpiLink {
 
 	public Boolean getNewPerson() {
 		return myNewPerson;
+	}
+
+	public boolean isNewPerson() {
+		return myNewPerson != null && myNewPerson;
 	}
 
 	public EmpiLink setNewPerson(Boolean theNewPerson) {
