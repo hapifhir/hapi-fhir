@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.empi.model;
 
+import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.DoubleStream;
@@ -19,6 +22,12 @@ public class CandidateList {
 
 	private CandidateList(Boolean theEidMatch) {
 		myEidMatch = theEidMatch;
+	}
+
+	public static CandidateList newCandidateListFromPersonPidAndEmpiLink(ResourcePersistentId thePersonPid, EmpiLink theEmpiLink) {
+		CandidateList candidateList = new CandidateList(theEmpiLink.getEidMatch());
+		candidateList.add(new MatchedPersonCandidate(thePersonPid, theEmpiLink.getMatchResult()));
+		return candidateList;
 	}
 
 	public boolean isEidMatch() {

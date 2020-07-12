@@ -25,8 +25,6 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -96,6 +94,10 @@ public class EmpiLink {
 
 	@Column(name = "EID_MATCH")
 	private Boolean myEidMatch;
+
+	// This link created a new person
+	@Column(name = "NEW_PERSON")
+	private Boolean myNewPerson;
 
 	@Column(name = "SCORE")
 	private Double myScore;
@@ -237,6 +239,15 @@ public class EmpiLink {
 
 	public EmpiLink setEidMatch(Boolean theEidMatch) {
 		myEidMatch = theEidMatch;
+		return this;
+	}
+
+	public Boolean getNewPerson() {
+		return myNewPerson;
+	}
+
+	public EmpiLink setNewPerson(Boolean theNewPerson) {
+		myNewPerson = theNewPerson;
 		return this;
 	}
 

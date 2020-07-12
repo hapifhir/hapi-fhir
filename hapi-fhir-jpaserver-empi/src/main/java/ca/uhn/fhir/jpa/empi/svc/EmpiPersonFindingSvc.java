@@ -115,7 +115,6 @@ public class EmpiPersonFindingSvc {
 	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
 	 */
 	private CandidateList attemptToFindPersonCandidateFromEmpiLinkTable(IAnyResource theBaseResource) {
-		CandidateList retval = CandidateList.newCandidateList();
 
 		Long targetPid = myIdHelperService.getPidOrNull(theBaseResource);
 		if (targetPid != null) {
@@ -123,10 +122,10 @@ public class EmpiPersonFindingSvc {
 			if (oLink.isPresent()) {
 				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getPersonPid());
 				ourLog.debug("Resource previously linked. Using existing link.");
-				retval.add(new MatchedPersonCandidate(personPid, oLink.get().getMatchResult()));
+			return CandidateList.newCandidateListFromPersonPidAndEmpiLink(personPid, oLink.get());
 			}
 		}
-		return retval;
+		return CandidateList.newCandidateList();
 	}
 
 	/**

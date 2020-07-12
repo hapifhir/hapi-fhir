@@ -74,7 +74,6 @@ public class EmpiMatchLinkSvc {
 	}
 
 	private EmpiTransactionContext doEmpiUpdate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
-		// FIXME KHS change this list to a class with an isEidMatch attribute
 		CandidateList candidateList = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
 		if (candidateList.isEmpty()) {
 			handleEmpiWithNoCandidates(theResource, false, theEmpiTransactionContext);
@@ -100,14 +99,14 @@ public class EmpiMatchLinkSvc {
 			//Set them all as POSSIBLE_MATCH
 			List<IAnyResource> persons = theCandidateList.stream().map((MatchedPersonCandidate matchedPersonCandidate) -> myEmpiPersonFindingSvc.getPersonFromMatchedPersonCandidate(matchedPersonCandidate)).collect(Collectors.toList());
 				persons.forEach(person -> {
-					myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, theCandidateList.isEidMatch(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+					myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchResultEnum.POSSIBLE_MATCH, theCandidateList.isEidMatch(), false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				});
 
 			//Set all Persons as POSSIBLE_DUPLICATE of the first person.
-			IAnyResource samplePerson = persons.get(0);
+			IAnyResource firstPerson = persons.get(0);
 			persons.subList(1, persons.size()).stream()
 				.forEach(possibleDuplicatePerson -> {
-					myEmpiLinkSvc.updateLink(samplePerson, possibleDuplicatePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theCandidateList.isEidMatch(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+					myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theCandidateList.isEidMatch(), false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				});
 		}
 	}
@@ -115,7 +114,7 @@ public class EmpiMatchLinkSvc {
 	private void handleEmpiWithNoCandidates(IAnyResource theResource, boolean theEidMatch, EmpiTransactionContext theEmpiTransactionContext) {
 		log(theEmpiTransactionContext, "There were no matched candidates for EMPI, creating a new Person.");
 		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
-		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, theEidMatch,EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, theEidMatch, true, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private void handleEmpiCreate(IAnyResource theResource, MatchedPersonCandidate thePersonCandidate, boolean theEidMatch, EmpiTransactionContext theEmpiTransactionContext) {
@@ -124,14 +123,14 @@ public class EmpiMatchLinkSvc {
 		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
 			log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
-			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
-			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, theEidMatch, true, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theEidMatch, false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else {
 			if (thePersonCandidate.isMatch()) {
 				myPersonHelper.handleExternalEidAddition(person, theResource, theEmpiTransactionContext);
 				myPersonHelper.updatePersonFromNewlyCreatedEmpiTarget(person, theResource, theEmpiTransactionContext);
 			}
-			myEmpiLinkSvc.updateLink(person, theResource, thePersonCandidate.getMatchResult(), theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(person, theResource, thePersonCandidate.getMatchResult(), theEidMatch, false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		}
 	}
 

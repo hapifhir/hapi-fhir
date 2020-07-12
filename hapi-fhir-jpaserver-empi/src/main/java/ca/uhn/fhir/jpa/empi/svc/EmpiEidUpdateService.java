@@ -68,7 +68,7 @@ public class EmpiEidUpdateService {
 			myPersonHelper.updatePersonFromUpdatedEmpiTarget(updateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
 				//update to patient that uses internal EIDs only.
-				myEmpiLinkSvc.updateLink(updateContext.getMatchedPerson(), theResource, theMatchedPersonCandidate.getMatchResult(), theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+				myEmpiLinkSvc.updateLink(updateContext.getMatchedPerson(), theResource, theMatchedPersonCandidate.getMatchResult(), theEidMatch, false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 			} else if (!updateContext.isHasEidsInCommon()) {
 				handleNoEidsInCommon(theResource, theMatchedPersonCandidate, theEidMatch, theEmpiTransactionContext, updateContext);
 			}
@@ -91,7 +91,7 @@ public class EmpiEidUpdateService {
 		} else {
 			myPersonHelper.handleExternalEidAddition(theUpdateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
 		}
-		myEmpiLinkSvc.updateLink(theUpdateContext.getMatchedPerson(), theResource, theMatchedPersonCandidate.getMatchResult(), theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(theUpdateContext.getMatchedPerson(), theResource, theMatchedPersonCandidate.getMatchResult(), theEidMatch, false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private void handleExternalEidOverwrite(IAnyResource thePerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
@@ -108,16 +108,16 @@ public class EmpiEidUpdateService {
 	private void createNewPersonAndFlagAsDuplicate(IAnyResource theResource, boolean theEidMatch, EmpiTransactionContext theEmpiTransactionContext, IAnyResource theOldPerson) {
 		log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
-		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
-		myEmpiLinkSvc.updateLink(newPerson, theOldPerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResultEnum.MATCH, theEidMatch, true, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(newPerson, theOldPerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theEidMatch, false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private void linkToNewPersonAndFlagAsDuplicate(IAnyResource theResource, IAnyResource theOldPerson, IAnyResource theNewPerson, boolean theEidMatch, EmpiTransactionContext theEmpiTransactionContext) {
 		log(theEmpiTransactionContext, "Changing a match link!");
 		myEmpiLinkSvc.deleteLink(theOldPerson, theResource, theEmpiTransactionContext);
-		myEmpiLinkSvc.updateLink(theNewPerson, theResource, EmpiMatchResultEnum.MATCH, theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(theNewPerson, theResource, EmpiMatchResultEnum.MATCH, theEidMatch, false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-		myEmpiLinkSvc.updateLink(theNewPerson, theOldPerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theEidMatch, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(theNewPerson, theOldPerson, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, theEidMatch, false, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {

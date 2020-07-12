@@ -56,7 +56,7 @@ public class EmpiLinkDaoSvc {
 
 	@Transactional
 	// FIXME KHS group these parameters--they're getting tossed around everywhere
-	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchResultEnum theMatchResult, Boolean theEidMatch, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
+	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchResultEnum theMatchResult, boolean theEidMatch, boolean theNewPerson, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
 		Long personPid = myIdHelperService.getPidOrNull(thePerson);
 		Long resourcePid = myIdHelperService.getPidOrNull(theTarget);
 
@@ -64,6 +64,7 @@ public class EmpiLinkDaoSvc {
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult);
 		empiLink.setEidMatch(theEidMatch);
+		empiLink.setNewPerson(theNewPerson);
 
 		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchResult);
 		theEmpiTransactionContext.addTransactionLogMessage(message);
