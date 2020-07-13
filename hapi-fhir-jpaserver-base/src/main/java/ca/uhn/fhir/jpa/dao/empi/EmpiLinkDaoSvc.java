@@ -64,8 +64,13 @@ public class EmpiLinkDaoSvc {
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchResult.getMatchResultEnum());
 		// Preserve these flags for link updates
-		empiLink.setEidMatch(theMatchResult.isEidMatch() || empiLink.isEidMatch());
-		empiLink.setNewPerson(theMatchResult.isNewPerson() || empiLink.isNewPerson());
+		empiLink.setEidMatch(theMatchResult.isEidMatch() | empiLink.isEidMatch());
+		empiLink.setNewPerson(theMatchResult.isNewPerson() | empiLink.isNewPerson());
+		if (empiLink.getScore() != null) {
+			empiLink.setScore(Math.max(theMatchResult.score, empiLink.getScore()));
+		} else {
+			empiLink.setScore(theMatchResult.score);
+		}
 
 		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchResult);
 		theEmpiTransactionContext.addTransactionLogMessage(message);

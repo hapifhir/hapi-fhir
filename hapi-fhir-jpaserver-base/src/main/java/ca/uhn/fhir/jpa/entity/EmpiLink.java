@@ -91,10 +91,11 @@ public class EmpiLink {
 	@Column(name = "VERSION", nullable = false)
 	private String myVersion;
 
+	/** This link was created as a result of an eid match **/
 	@Column(name = "EID_MATCH")
 	private Boolean myEidMatch;
 
-	// This link created a new person
+	/** This link created a new person **/
 	@Column(name = "NEW_PERSON")
 	private Boolean myNewPerson;
 

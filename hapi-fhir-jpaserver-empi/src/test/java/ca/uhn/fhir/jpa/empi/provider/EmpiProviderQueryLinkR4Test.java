@@ -47,6 +47,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		Person person2 = createPerson();
 		myPerson2Id = new StringType(person2.getIdElement().toVersionless().getValue());
 		Long person2Pid = myIdHelperService.getPidOrNull(person2);
+
 		EmpiLink possibleDuplicateEmpiLink = myEmpiLinkDaoSvc.newEmpiLink().setPersonPid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
 		saveLink(possibleDuplicateEmpiLink);
 	}
@@ -64,7 +65,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryLinkThreeMatches() {
-		// Add a second patient
+		// Add a third patient
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		IdType patientId = patient.getIdElement().toVersionless();
 		Person person = getPersonFromTarget(patient);
@@ -75,7 +76,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(2).getPart();
-		assertEmpiLink(7, part, personId.getValue(), patientId.getValue(), EmpiMatchResultEnum.MATCH, "false", "false", null);
+		assertEmpiLink(7, part, personId.getValue(), patientId.getValue(), EmpiMatchResultEnum.MATCH, "false", "false", "2");
 	}
 
 	@Test
