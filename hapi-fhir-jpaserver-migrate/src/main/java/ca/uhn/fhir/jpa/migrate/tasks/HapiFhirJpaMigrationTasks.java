@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
@@ -128,7 +129,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkgVerMod.modifyColumn("20200629.2", "DESC_UPPER").nullable().withType(ColumnTypeEnum.STRING, 200);
 
 		Builder.BuilderWithTableName empiLink = version.onTable("MPI_LINK");
-		empiLink.addColumn("20200713.1", "VERSION").nonNullable().type(ColumnTypeEnum.STRING);
+		empiLink.addColumn("20200713.1", "VERSION").nonNullable().type(ColumnTypeEnum.STRING, EmpiLink.VERSION_LENGTH);
 		empiLink.addColumn("20200713.2", "EID_MATCH").nullable().type(ColumnTypeEnum.BOOLEAN);
 		empiLink.addColumn("20200713.3", "NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
 		empiLink.addColumn("20200713.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);

@@ -48,6 +48,7 @@ import java.util.Date;
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
 })
 public class EmpiLink {
+	public static final int VERSION_LENGTH = 16;
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;
 
@@ -87,7 +88,7 @@ public class EmpiLink {
 	@Column(name = "UPDATED", nullable = false)
 	private Date myUpdated;
 
-	@Column(name = "VERSION", nullable = false)
+	@Column(name = "VERSION", nullable = false, length = VERSION_LENGTH)
 	private String myVersion;
 
 	/** This link was created as a result of an eid match **/
