@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.JobNameChangedTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -126,6 +127,40 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName pkgVerMod = version.onTable("NPM_PACKAGE_VER");
 		pkgVerMod.modifyColumn("20200629.1", "PKG_DESC").nullable().withType(ColumnTypeEnum.STRING, 200);
 		pkgVerMod.modifyColumn("20200629.2", "DESC_UPPER").nullable().withType(ColumnTypeEnum.STRING, 200);
+
+
+		//Moving of BulkExport Job package.
+		String oldBulkJobFqcn ="ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl";
+		String oldBulkJobFqcnInnerClass = oldBulkJobFqcn + "$Job";
+		String newBulkJobFqcn = "ca.uhn.fhir.jpa.bulk.svc.BulkDataExportSvcImpl$Job";
+		String newBulkJobFqcnInnerClass= newBulkJobFqcn + "$Job";
+
+		Builder.BuilderWithTableName qrtzJobDetail = version.onTable("QRTZ_JOB_DETAILS");
+		qrtzJobDetail.addTask(new JobNameChangedTask(VersionEnum.V5_1_0, "20200713.1")
+			.addNameChange(oldBulkJobFqcn, newBulkJobFqcn)
+			.setColumnName("JOB_NAME")
+		);
+		qrtzJobDetail.addTask(new JobNameChangedTask(VersionEnum.V5_1_0, "20200713.2")
+			.addNameChange(oldBulkJobFqcnInnerClass, newBulkJobFqcnInnerClass)
+			.setColumnName("JOB_CLASS_NAME")
+		);
+
+		Builder.BuilderWithTableName qrtzSimpleTriggers = version.onTable("QRTZ_SIMPLE_TRIGGERS");
+		qrtzSimpleTriggers.addTask(new JobNameChangedTask(VersionEnum.V5_1_0, "20200713.3")
+			.addNameChange(oldBulkJobFqcn, newBulkJobFqcn)
+			.setColumnName("TRIGGER_NAME")
+		);
+
+		Builder.BuilderWithTableName qrtzTriggers= version.onTable("QRTZ_TRIGGERS");
+		qrtzTriggers.addTask(new JobNameChangedTask(VersionEnum.V5_1_0, "20200713.4")
+			.addNameChange(oldBulkJobFqcn, newBulkJobFqcn)
+			.setColumnName("TRIGGER_NAME")
+		);
+
+		qrtzTriggers.addTask(new JobNameChangedTask(VersionEnum.V5_1_0, "20200713.5")
+			.addNameChange(oldBulkJobFqcn, newBulkJobFqcn)
+			.setColumnName("JOB_NAME")
+		);
 	}
 
 	protected void init510_20200610() {
