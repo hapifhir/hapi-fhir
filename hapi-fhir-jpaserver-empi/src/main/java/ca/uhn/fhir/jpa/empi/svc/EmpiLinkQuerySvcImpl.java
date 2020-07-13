@@ -82,7 +82,6 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 			if (includeResultAndSource) {
 				ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", empiLink.getMatchResult().name());
 				ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", empiLink.getLinkSource().name());
-				// FIXME KHS document
 				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", empiLink.getEidMatch());
 				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "newPerson", empiLink.getNewPerson());
 				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", empiLink.getScore());

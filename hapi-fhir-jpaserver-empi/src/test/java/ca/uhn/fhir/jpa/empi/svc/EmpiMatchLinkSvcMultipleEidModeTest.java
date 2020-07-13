@@ -182,8 +182,6 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(empiLink.getTargetPid(), is(in(duplicatePids)));
 	}
 
-	// FIXME KHS is there another eid test where the config options are different?
-
 	@Test
 	// Test Case #5
 	public void testWhenPatientEidUpdateWouldCauseALinkChangeThatDuplicatePersonIsCreatedInstead() {

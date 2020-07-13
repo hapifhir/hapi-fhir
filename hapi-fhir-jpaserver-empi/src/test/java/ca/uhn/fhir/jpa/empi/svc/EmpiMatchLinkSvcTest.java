@@ -53,8 +53,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		super.loadEmpiSearchParameters();
 	}
 
-	// FIXME KHS add tests to validate eidMatch, score, vector, newPerson values are set properly
-
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {
 		createPatientAndUpdateLinks(buildJanePatient());
