@@ -23,8 +23,6 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -103,7 +101,6 @@ public class EmpiLink {
 	@Column(name = "VECTOR")
 	private Long myVector;
 
-	// FIXME KHS set this
 	@Column(name = "SCORE")
 	private Double myScore;
 

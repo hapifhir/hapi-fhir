@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.empi.svc.candidate;
 
-import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,11 +19,6 @@ public class CandidateList {
 
 	public boolean isEmpty() {
 		return myList.isEmpty();
-	}
-
-	// FIXME KHS
-	public void add(MatchedPersonCandidate theMpc) {
-		myList.add(theMpc);
 	}
 
 	public void addAll(List<MatchedPersonCandidate> theList) { myList.addAll(theList); }

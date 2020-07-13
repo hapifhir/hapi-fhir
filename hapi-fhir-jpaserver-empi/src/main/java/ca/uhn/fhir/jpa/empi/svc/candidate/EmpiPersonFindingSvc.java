@@ -20,27 +20,14 @@ package ca.uhn.fhir.jpa.empi.svc.candidate;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.empi.api.MatchedTarget;
 import ca.uhn.fhir.empi.log.Logs;
-import ca.uhn.fhir.empi.model.CanonicalEID;
-import ca.uhn.fhir.empi.util.EIDHelper;
-import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
-import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class EmpiPersonFindingSvc {
@@ -71,7 +58,6 @@ public class EmpiPersonFindingSvc {
 	 * @return A list of {@link MatchedPersonCandidate} indicating all potential Person matches.
 	 */
 	public CandidateList findPersonCandidates(IAnyResource theResource) {
-		// FIXME KHS replace boolean with enum to handle these three types of candidates
 		CandidateList matchedPersonCandidates = myFindCandidateByEid.findCandidates(theResource);
 
 		if (matchedPersonCandidates.isEmpty()) {
