@@ -214,7 +214,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(patient2, is(samePersonAs(patient3)));
 
 		//Now lets change one of the EIDs on the second patient to one that matches our original patient.
-		//This should create a situation in which the incoming EIDs are matched to _two_ unique patients. In this case, we want to
+		//This should create a situation in which the incoming EIDs are matched to _two_ different persons. In this case, we want to
 		//set them all to possible_match, and set the two persons as possible duplicates.
 		patient2.getIdentifier().clear();
 		addExternalEID(patient2, "eid-11");

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseR4Test;
-import ca.uhn.fhir.empi.api.EmpiMatchResult;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
@@ -77,7 +77,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 		assertMatch(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourBillyJohnHenry));
 	}
 
-	private void assertMatch(EmpiMatchResultEnum theMatchEnum, EmpiMatchResult theMatchResult) {
+	private void assertMatch(EmpiMatchResultEnum theMatchEnum, EmpiMatchOutcome theMatchResult) {
 		assertEquals(theMatchEnum, theMatchResult.getMatchResultEnum());
 	}
 

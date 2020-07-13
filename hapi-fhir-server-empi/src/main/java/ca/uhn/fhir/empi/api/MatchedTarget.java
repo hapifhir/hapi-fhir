@@ -25,9 +25,9 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 public class MatchedTarget {
 
 	private final IAnyResource myTarget;
-	private final EmpiMatchResult myMatchResult;
+	private final EmpiMatchOutcome myMatchResult;
 
-	public MatchedTarget(IAnyResource theTarget, EmpiMatchResult theMatchResult) {
+	public MatchedTarget(IAnyResource theTarget, EmpiMatchOutcome theMatchResult) {
 		myTarget = theTarget;
 		myMatchResult = theMatchResult;
 	}
@@ -36,7 +36,7 @@ public class MatchedTarget {
 		return myTarget;
 	}
 
-	public EmpiMatchResult getMatchResult() {
+	public EmpiMatchOutcome getMatchResult() {
 		return myMatchResult;
 	}
 

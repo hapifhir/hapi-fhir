@@ -23,7 +23,7 @@ package ca.uhn.fhir.empi.rules.svc;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchEvaluation;
-import ca.uhn.fhir.empi.api.EmpiMatchResult;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
@@ -80,12 +80,12 @@ public class EmpiResourceMatcherSvc {
 	 *
 	 * @return an {@link EmpiMatchResultEnum} indicating the result of the comparison.
 	 */
-	public EmpiMatchResult getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
+	public EmpiMatchOutcome getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		return match(theLeftResource, theRightResource);
 	}
 
-	EmpiMatchResult match(IBaseResource theLeftResource, IBaseResource theRightResource) {
-		EmpiMatchResult matchResult = getMatchVector(theLeftResource, theRightResource);
+	EmpiMatchOutcome match(IBaseResource theLeftResource, IBaseResource theRightResource) {
+		EmpiMatchOutcome matchResult = getMatchVector(theLeftResource, theRightResource);
 		EmpiMatchResultEnum matchResultEnum = myEmpiRulesJson.getMatchResult(matchResult.vector);
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
@@ -113,7 +113,7 @@ public class EmpiResourceMatcherSvc {
 	 * 0001|0010 = 0011
 	 * The binary string is now `0011`, which when you return it as a long becomes `3`.
 	 */
-	private EmpiMatchResult getMatchVector(IBaseResource theLeftResource, IBaseResource theRightResource) {
+	private EmpiMatchOutcome getMatchVector(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long vector = 0;
 		double score = 0.0;
 		for (int i = 0; i < myFieldMatchers.size(); ++i) {
@@ -125,6 +125,6 @@ public class EmpiResourceMatcherSvc {
 			}
 			score += matchEvaluation.score;
 		}
-		return new EmpiMatchResult(vector, score);
+		return new EmpiMatchOutcome(vector, score);
 	}
 }

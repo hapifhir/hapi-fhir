@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.empi.svc;
  */
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.empi.api.EmpiMatchResult;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.log.Logs;
@@ -64,7 +64,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResult theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
 		IIdType resourceId = theTarget.getIdElement().toUnqualifiedVersionless();
 
 		if (theMatchResult.isPossibleDuplicate() && personsLinkedAsNoMatch(thePerson, theTarget)) {
@@ -177,7 +177,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchResult theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
 		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiTransactionContext);
 	}
 

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.empi;
  */
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.empi.api.EmpiMatchResult;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -57,7 +57,7 @@ public class EmpiLinkDaoSvc {
 
 	@Transactional
 	// FIXME KHS group these parameters--they're getting tossed around everywhere
-	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchResult theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
+	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
 		Long personPid = myIdHelperService.getPidOrNull(thePerson);
 		Long resourcePid = myIdHelperService.getPidOrNull(theTarget);
 

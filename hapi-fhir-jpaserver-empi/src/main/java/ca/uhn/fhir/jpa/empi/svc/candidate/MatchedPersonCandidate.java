@@ -20,34 +20,33 @@ package ca.uhn.fhir.jpa.empi.svc.candidate;
  * #L%
  */
 
-import ca.uhn.fhir.empi.api.EmpiMatchResult;
-import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 public class MatchedPersonCandidate {
 	private final ResourcePersistentId myCandidatePersonPid;
-	private final EmpiMatchResult myEmpiMatchResult;
+	private final EmpiMatchOutcome myEmpiMatchOutcome;
 
-	public MatchedPersonCandidate(ResourcePersistentId theCandidate, EmpiMatchResult theEmpiMatchResult) {
+	public MatchedPersonCandidate(ResourcePersistentId theCandidate, EmpiMatchOutcome theEmpiMatchOutcome) {
 		myCandidatePersonPid = theCandidate;
-		myEmpiMatchResult = theEmpiMatchResult;
+		myEmpiMatchOutcome = theEmpiMatchOutcome;
 	}
 
 	public MatchedPersonCandidate(ResourcePersistentId thePersonPid, EmpiLink theEmpiLink) {
 		myCandidatePersonPid = thePersonPid;
-		myEmpiMatchResult = new EmpiMatchResult(theEmpiLink.getVector(), theEmpiLink.getScore()).setMatchResultEnum(theEmpiLink.getMatchResult());
+		myEmpiMatchOutcome = new EmpiMatchOutcome(theEmpiLink.getVector(), theEmpiLink.getScore()).setMatchResultEnum(theEmpiLink.getMatchResult());
 	}
 
 	public ResourcePersistentId getCandidatePersonPid() {
 		return myCandidatePersonPid;
 	}
 
-	public EmpiMatchResult getMatchResult() {
-		return myEmpiMatchResult;
+	public EmpiMatchOutcome getMatchResult() {
+		return myEmpiMatchOutcome;
 	}
 
 	public boolean isMatch() {
-		return myEmpiMatchResult.isMatch();
+		return myEmpiMatchOutcome.isMatch();
 	}
 }

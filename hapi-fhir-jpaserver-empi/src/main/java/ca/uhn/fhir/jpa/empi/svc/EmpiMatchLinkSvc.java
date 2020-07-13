@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.empi.svc;
  */
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.empi.api.EmpiMatchResult;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -101,21 +101,21 @@ public class EmpiMatchLinkSvc {
 			List<IAnyResource> persons = new ArrayList<>();
 			for (MatchedPersonCandidate matchedPersonCandidate : theCandidateList.getCandidates()) {
 				IAnyResource person = myEmpiPersonFindingSvc.getPersonFromMatchedPersonCandidate(matchedPersonCandidate);
-				myEmpiLinkSvc.updateLink(person, theResource, matchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+				myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchOutcome.EID_POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				persons.add(person);
 			}
 
 			//Set all Persons as POSSIBLE_DUPLICATE of the last person.
 			IAnyResource firstPerson = persons.get(0);
 			persons.subList(1, persons.size())
-				.forEach(possibleDuplicatePerson -> myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, EmpiMatchResult.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext));
+				.forEach(possibleDuplicatePerson -> myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, EmpiMatchOutcome.EID_POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext));
 		}
 	}
 
 	private void handleEmpiWithNoCandidates(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		log(theEmpiTransactionContext, "There were no matched candidates for EMPI, creating a new Person.");
 		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
-		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResult.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private void handleEmpiCreate(IAnyResource theResource, MatchedPersonCandidate thePersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
@@ -124,8 +124,8 @@ public class EmpiMatchLinkSvc {
 		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
 			log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
-			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchResult.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
-			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchResult.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else {
 			if (thePersonCandidate.isMatch()) {
 				myPersonHelper.handleExternalEidAddition(person, theResource, theEmpiTransactionContext);
