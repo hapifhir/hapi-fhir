@@ -78,12 +78,10 @@ public class BulkExportJobConfig {
 		return new CreateBulkExportEntityTasklet();
 	}
 
-
 	@Bean
 	public JobParametersValidator bulkJobParameterValidator() {
 		return new BulkExportJobParameterValidator();
 	}
-
 
 	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {
@@ -94,8 +92,6 @@ public class BulkExportJobConfig {
 			.writer(resourceToFileWriter())
 			.build();
 	}
-
-
 
 	@Bean
 	@JobScope

@@ -29,15 +29,13 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private EmpiMatchLinkSvc myEmpiMatchLinkSvc;
-
-	@Autowired
 	private IChannelNamer myChannelNamer;
 
 	private MessageChannel myEmpiChannelProducer;
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private IChannelFactory myChannelFactory;
 
@@ -55,6 +53,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 		IBundleProvider search = patientDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
+
 		for (IBaseResource resource : resources) {
 			ResourceModifiedJsonMessage rmjm = new ResourceModifiedJsonMessage();
 			ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, resource, ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
@@ -62,6 +61,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 			rmjm.setPayload(resourceModifiedMessage);
 			myEmpiChannelProducer.send(rmjm);
 		}
+
 	}
 
 	private EmpiTargetType getTargetTypeOrThrowException(String theResourceType) {
