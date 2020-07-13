@@ -1,7 +1,5 @@
 package ca.uhn.fhir.empi.api;
 
-import javax.annotation.Nonnull;
-
 public class EmpiMatchEvaluation {
 	public final boolean match;
 	public final double score;

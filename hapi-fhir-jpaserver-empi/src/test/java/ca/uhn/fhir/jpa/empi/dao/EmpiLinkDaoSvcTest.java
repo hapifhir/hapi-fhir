@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.empi.dao;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
-import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
