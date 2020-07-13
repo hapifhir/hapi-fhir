@@ -87,7 +87,6 @@ public class EmpiLink {
 	@Column(name = "UPDATED", nullable = false)
 	private Date myUpdated;
 
-	// FIXME KHS migration
 	@Column(name = "VERSION", nullable = false)
 	private String myVersion;
 
