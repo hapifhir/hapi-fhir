@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc.candidate;
 
+import ca.uhn.fhir.empi.api.EmpiMatchResult;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
@@ -36,7 +37,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 				if (oFoundPerson.isPresent()) {
 					IAnyResource foundPerson = oFoundPerson.get();
 					Long pidOrNull = myIdHelperService.getPidOrNull(foundPerson);
-					MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), EmpiMatchResultEnum.MATCH);
+					MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), EmpiMatchResult.EID_MATCH);
 					ourLog.debug("Matched {} by EID {}", foundPerson.getIdElement(), eid);
 					retval.add(mpc);
 				}

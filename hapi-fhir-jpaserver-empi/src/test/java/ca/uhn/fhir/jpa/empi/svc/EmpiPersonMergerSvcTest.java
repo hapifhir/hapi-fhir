@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResult;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -39,6 +40,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public static final String FAMILY_NAME = "Chan";
 	public static final String POSTAL_CODE = "M6G 1B4";
 	private static final String BAD_GIVEN_NAME = "Bob";
+	private static final EmpiMatchResult POSSIBLE_MATCH = new EmpiMatchResult(0, 0.0).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_MATCH);
 
 	@Autowired
 	IEmpiPersonMergerSvc myEmpiPersonMergerSvc;
@@ -371,7 +373,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	private EmpiLink createEmpiLink(Person thePerson, Patient theTargetPatient) {
 		thePerson.addLink().setTarget(new Reference(theTargetPatient));
-		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, EmpiMatchResultEnum.POSSIBLE_MATCH, false, false, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 	}
 
 	private void populatePerson(Person thePerson) {

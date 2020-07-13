@@ -34,7 +34,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 			if (oLink.isPresent()) {
 				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getPersonPid());
 				ourLog.debug("Resource previously linked. Using existing link.");
-					retval.add(new MatchedPersonCandidate(personPid, oLink.get().getMatchResult()));
+					retval.add(new MatchedPersonCandidate(personPid, oLink.get()));
 			}
 		}
 		return retval;

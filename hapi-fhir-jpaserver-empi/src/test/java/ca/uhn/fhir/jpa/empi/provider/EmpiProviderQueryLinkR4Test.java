@@ -5,6 +5,7 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -59,7 +60,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertEmpiLink(4, part, myPersonId.getValue(), myPatientId.getValue(), EmpiMatchResultEnum.POSSIBLE_MATCH);
+		assertEmpiLink(7, part, myPersonId.getValue(), myPatientId.getValue(), EmpiMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
 	}
 
 	@Test
@@ -75,7 +76,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(2).getPart();
-		assertEmpiLink(4, part, personId.getValue(), patientId.getValue(), EmpiMatchResultEnum.MATCH);
+		assertEmpiLink(7, part, personId.getValue(), patientId.getValue(), EmpiMatchResultEnum.MATCH, "false", "false", null);
 	}
 
 	@Test
@@ -85,7 +86,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertEmpiLink(2, part, myPerson1Id.getValue(), myPerson2Id.getValue(), EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
+		assertEmpiLink(2, part, myPerson1Id.getValue(), myPerson2Id.getValue(), EmpiMatchResultEnum.POSSIBLE_DUPLICATE, "false", "false", null);
 	}
 
 	@Test
@@ -116,7 +117,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		}
 	}
 
-	private void assertEmpiLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, EmpiMatchResultEnum theMatchResult) {
+	private void assertEmpiLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, EmpiMatchResultEnum theMatchResult, String theEidMatch, String theNewPerson, String theScore) {
 		assertThat(thePart, hasSize(theExpectedSize));
 		assertThat(thePart.get(0).getName(), is("personId"));
 		assertThat(thePart.get(0).getValue().toString(), is(removeVersion(thePersonId)));
@@ -127,6 +128,15 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertThat(thePart.get(2).getValue().toString(), is(theMatchResult.name()));
 			assertThat(thePart.get(3).getName(), is("linkSource"));
 			assertThat(thePart.get(3).getValue().toString(), is("AUTO"));
+
+			assertThat(thePart.get(4).getName(), is("eidMatch"));
+			assertThat(thePart.get(4).getValue().primitiveValue(), is(theEidMatch));
+
+			assertThat(thePart.get(5).getName(), is("newPerson"));
+			assertThat(thePart.get(5).getValue().primitiveValue(), is(theNewPerson));
+
+			assertThat(thePart.get(6).getName(), is("score"));
+			assertThat(thePart.get(6).getValue().primitiveValue(), is(theScore));
 		}
 	}
 

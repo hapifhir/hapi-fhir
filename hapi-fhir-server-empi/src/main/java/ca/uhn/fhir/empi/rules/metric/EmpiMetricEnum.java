@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.rules.metric;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchEvaluation;
 import ca.uhn.fhir.empi.rules.metric.matcher.EmpiPersonNameMatchModeEnum;
 import ca.uhn.fhir.empi.rules.metric.matcher.HapiDateMatcher;
 import ca.uhn.fhir.empi.rules.metric.matcher.HapiStringMatcher;
@@ -77,15 +78,25 @@ public enum EmpiMetricEnum {
 		return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase, theExact);
 	}
 
-	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, @Nullable Double theThreshold) {
+	public EmpiMatchEvaluation match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, @Nullable Double theThreshold) {
 		if (isSimilarity()) {
-			return ((IEmpiFieldSimilarity) myEmpiFieldMetric).similarity(theFhirContext, theLeftBase, theRightBase, theExact) >= theThreshold;
+			return matchBySimilarity((IEmpiFieldSimilarity) myEmpiFieldMetric, theFhirContext, theLeftBase, theRightBase, theExact, theThreshold);
 		} else {
-			return ((IEmpiFieldMatcher) myEmpiFieldMetric).matches(theFhirContext, theLeftBase, theRightBase, theExact);
+			return matchByMatcher((IEmpiFieldMatcher) myEmpiFieldMetric, theFhirContext, theLeftBase, theRightBase, theExact);
 		}
 	}
 
-    public boolean isSimilarity() {
+	private EmpiMatchEvaluation matchBySimilarity(IEmpiFieldSimilarity theSimilarity, FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, Double theThreshold) {
+		double similarityResult = theSimilarity.similarity(theFhirContext, theLeftBase, theRightBase, theExact);
+		return new EmpiMatchEvaluation(similarityResult >= theThreshold, similarityResult);
+	}
+
+	private EmpiMatchEvaluation matchByMatcher(IEmpiFieldMatcher theMatcher, FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
+		boolean matcherResult = theMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact);
+		return new EmpiMatchEvaluation(matcherResult, matcherResult ? 1.0 : 0.0);
+	}
+
+	public boolean isSimilarity() {
 		return myEmpiFieldMetric instanceof IEmpiFieldSimilarity;
     }
 }

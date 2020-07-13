@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class EmpiResourceMatcherSvcR4Test extends BaseEmpiRulesR4Test {
-	public static final double NAME_DELTA = 0.0001;
 	private EmpiResourceMatcherSvc myEmpiResourceMatcherSvc;
 	private Patient myJohn;
 	private Patient myJohny;
@@ -33,7 +32,7 @@ public class EmpiResourceMatcherSvcR4Test extends BaseEmpiRulesR4Test {
 
 	@Test
 	public void testCompareFirstNameMatch() {
-		EmpiMatchResultEnum result = myEmpiResourceMatcherSvc.match(myJohn, myJohny);
+		EmpiMatchResultEnum result = myEmpiResourceMatcherSvc.match(myJohn, myJohny).getMatchResultEnum();
 		assertEquals(EmpiMatchResultEnum.POSSIBLE_MATCH, result);
 	}
 
@@ -41,19 +40,19 @@ public class EmpiResourceMatcherSvcR4Test extends BaseEmpiRulesR4Test {
 	public void testCompareBothNamesMatch() {
 		myJohn.addName().setFamily("Smith");
 		myJohny.addName().setFamily("Smith");
-		EmpiMatchResultEnum result = myEmpiResourceMatcherSvc.match(myJohn, myJohny);
+		EmpiMatchResultEnum result = myEmpiResourceMatcherSvc.match(myJohn, myJohny).getMatchResultEnum();
 		assertEquals(EmpiMatchResultEnum.MATCH, result);
 	}
 
 	@Test
 	public void testMatchResult() {
-		assertEquals(EmpiMatchResultEnum.POSSIBLE_MATCH, myEmpiResourceMatcherSvc.getMatchResult(myJohn, myJohny));
+		assertEquals(EmpiMatchResultEnum.POSSIBLE_MATCH, myEmpiResourceMatcherSvc.getMatchResult(myJohn, myJohny).getMatchResultEnum());
 		myJohn.addName().setFamily("Smith");
 		myJohny.addName().setFamily("Smith");
-		assertEquals(EmpiMatchResultEnum.MATCH, myEmpiResourceMatcherSvc.getMatchResult(myJohn, myJohny));
+		assertEquals(EmpiMatchResultEnum.MATCH, myEmpiResourceMatcherSvc.getMatchResult(myJohn, myJohny).getMatchResultEnum());
 		Patient patient3 = new Patient();
 		patient3.setId("Patient/3");
 		patient3.addName().addGiven("Henry");
-		assertEquals(EmpiMatchResultEnum.NO_MATCH, myEmpiResourceMatcherSvc.getMatchResult(myJohn, patient3));
+		assertEquals(EmpiMatchResultEnum.NO_MATCH, myEmpiResourceMatcherSvc.getMatchResult(myJohn, patient3).getMatchResultEnum());
 	}
 }

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.empi;
  */
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchResult;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -56,16 +57,16 @@ public class EmpiLinkDaoSvc {
 
 	@Transactional
 	// FIXME KHS group these parameters--they're getting tossed around everywhere
-	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchResultEnum theMatchResult, boolean theEidMatch, boolean theNewPerson, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
+	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchResult theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
 		Long personPid = myIdHelperService.getPidOrNull(thePerson);
 		Long resourcePid = myIdHelperService.getPidOrNull(theTarget);
 
 		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
 		empiLink.setLinkSource(theLinkSource);
-		empiLink.setMatchResult(theMatchResult);
+		empiLink.setMatchResult(theMatchResult.getMatchResultEnum());
 		// Preserve these flags for link updates
-		empiLink.setEidMatch(theEidMatch || empiLink.isEidMatch());
-		empiLink.setNewPerson(theNewPerson || empiLink.isNewPerson());
+		empiLink.setEidMatch(theMatchResult.isEidMatch() || empiLink.isEidMatch());
+		empiLink.setNewPerson(theMatchResult.isNewPerson() || empiLink.isNewPerson());
 
 		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchResult);
 		theEmpiTransactionContext.addTransactionLogMessage(message);

@@ -299,6 +299,20 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, value);
 	}
 
+	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
+		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theContext.getElementDefinition("boolean").newInstance();
+		value.setValue(theValue);
+
+		addPart(theContext, theParameter, theName, value);
+	}
+
+	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
+		IPrimitiveType<Double> value = (IPrimitiveType<Double>) theContext.getElementDefinition("decimal").newInstance();
+		value.setValue(theValue);
+
+		addPart(theContext, theParameter, theName, value);
+	}
+
 	public static void addPartCoding(FhirContext theContext, IBase theParameter, String theName, String theSystem, String theCode, String theDisplay) {
 		IBase coding = theContext.getElementDefinition("coding").newInstance();
 

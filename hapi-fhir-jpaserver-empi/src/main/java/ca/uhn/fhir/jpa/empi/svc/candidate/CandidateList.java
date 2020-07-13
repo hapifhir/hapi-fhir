@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -43,11 +44,11 @@ public class CandidateList {
 		return myList.stream();
 	}
 
-	public MatchedPersonCandidate getFirstMatch() {
-		return myList.get(0);
+	public List<MatchedPersonCandidate> getCandidates() {
+		return Collections.unmodifiableList(myList);
 	}
 
-	public boolean isEid() {
-		return mySource == CandidateStrategyEnum.EID;
+	public MatchedPersonCandidate getFirstMatch() {
+		return myList.get(0);
 	}
 }

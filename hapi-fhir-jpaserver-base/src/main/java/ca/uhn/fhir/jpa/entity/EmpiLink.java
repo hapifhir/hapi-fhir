@@ -100,6 +100,9 @@ public class EmpiLink {
 	@Column(name = "NEW_PERSON")
 	private Boolean myNewPerson;
 
+	@Column(name = "VECTOR")
+	private Long myVector;
+
 	// FIXME KHS set this
 	@Column(name = "SCORE")
 	private Double myScore;
@@ -223,6 +226,15 @@ public class EmpiLink {
 
 	public EmpiLink setVersion(String theVersion) {
 		myVersion = theVersion;
+		return this;
+	}
+
+	public Long getVector() {
+		return myVector;
+	}
+
+	public EmpiLink setVector(Long theVector) {
+		myVector = theVector;
 		return this;
 	}
 
