@@ -86,4 +86,7 @@ public class SubscriptionTestUtil {
 		subscriber.setEmailSender(myEmailSender);
 	}
 
+	public int getActiveSubscriptionCount() {
+		return mySubscriptionRegistry.size();
+	}
 }

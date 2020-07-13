@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -64,7 +65,6 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -83,6 +83,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
@@ -121,6 +122,8 @@ public abstract class BaseTransactionProcessor {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
+	@Autowired
+	private HapiTransactionService myHapiTransactionService;
 
 	@PostConstruct
 	public void start() {
@@ -344,9 +347,6 @@ public abstract class BaseTransactionProcessor {
 		final TransactionDetails transactionDetails = new TransactionDetails();
 		final StopWatch transactionStopWatch = new StopWatch();
 
-		final Set<IIdType> allIds = new LinkedHashSet<>();
-		final Map<IIdType, IIdType> idSubstitutions = new HashMap<>();
-		final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
 		List<IBase> requestEntries = myVersionAdapter.getEntries(theRequest);
 
 		// Do all entries have a verb?
@@ -403,13 +403,16 @@ public abstract class BaseTransactionProcessor {
 		 * heavy load with lots of concurrent transactions using all available
 		 * database connections.
 		 */
-		TransactionTemplate txManager = new TransactionTemplate(myTxManager);
-		Map<IBase, IBasePersistedResource> entriesToProcess = txManager.execute(status -> {
+		TransactionCallback<Map<IBase, IBasePersistedResource>> txCallback = status -> {
+			final Set<IIdType> allIds = new LinkedHashSet<>();
+			final Map<IIdType, IIdType> idSubstitutions = new HashMap<>();
+			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
 			Map<IBase, IBasePersistedResource> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, transactionDetails, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch);
 
 			transactionStopWatch.startTask("Commit writes to database");
 			return retVal;
-		});
+		};
+		Map<IBase, IBasePersistedResource> entriesToProcess = myHapiTransactionService.execute(theRequestDetails, txCallback);
 		transactionStopWatch.endCurrentTask();
 
 		for (Map.Entry<IBase, IBasePersistedResource> nextEntry : entriesToProcess.entrySet()) {

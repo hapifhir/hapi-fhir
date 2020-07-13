@@ -134,14 +134,16 @@ public class CreatePackageCommand extends BaseCommand {
 		}
 
 		String[] dependencies = theCommandLine.getOptionValues(DEPENDENCY_OPT);
-		for (String nextDependencyString : dependencies) {
-			int colonIdx = nextDependencyString.indexOf(":");
-			if (colonIdx == -1) {
-				throw new ParseException("Invalid dependency spec: " + nextDependencyString);
+		if (dependencies != null) {
+			for (String nextDependencyString : dependencies) {
+				int colonIdx = nextDependencyString.indexOf(":");
+				if (colonIdx == -1) {
+					throw new ParseException("Invalid dependency spec: " + nextDependencyString);
+				}
+				String depName = nextDependencyString.substring(0, colonIdx);
+				String depVersion = nextDependencyString.substring(colonIdx + 1);
+				manifestGenerator.dependency(depName, depVersion);
 			}
-			String depName = nextDependencyString.substring(0, colonIdx);
-			String depVersion = nextDependencyString.substring(colonIdx+1);
-			manifestGenerator.dependency(depName, depVersion);
 		}
 
 		myWorkDirectory = Files.createTempDir();

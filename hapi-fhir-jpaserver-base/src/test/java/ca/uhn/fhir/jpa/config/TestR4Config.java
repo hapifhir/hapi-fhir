@@ -56,6 +56,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	private Exception myLastStackTrace;
 
 
+	@Override
 	@Bean
 	public IBatchJobSubmitter batchJobSubmitter() {
 		return new BatchJobSubmitterImpl();

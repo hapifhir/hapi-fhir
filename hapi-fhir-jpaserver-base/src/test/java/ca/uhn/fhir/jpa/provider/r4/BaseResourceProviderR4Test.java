@@ -202,10 +202,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		return names;
 	}
 
-	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
-		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
-		Thread.sleep(500);
-	}
 
 	@AfterAll
 	public static void afterClassClearContextBaseResourceProviderR4Test() throws Exception {

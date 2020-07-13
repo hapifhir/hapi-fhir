@@ -508,7 +508,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 			for (int entryCount = 0; entryCount < 10; entryCount++) {
 
 				ObservationJson observationJson = new ObservationJson();
-				String identifier = String.valueOf((entryCount + patientCount * 10));
+				String identifier = String.valueOf((entryCount + patientCount * 10L));
 				observationJson.setIdentifier(identifier);
 				observationJson.setSubject(subject);
 
@@ -524,7 +524,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId2, codeJson2));
 				}
 
-				Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10 - entryCount) * 3600 * 1000));
+				Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10L - entryCount) * 3600L * 1000L));
 				observationJson.setEffectiveDtm(effectiveDtm);
 
 				assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(identifier, observationJson));

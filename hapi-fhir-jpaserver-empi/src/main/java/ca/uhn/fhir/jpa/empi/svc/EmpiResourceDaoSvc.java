@@ -74,7 +74,11 @@ public class EmpiResourceDaoSvc {
 	}
 
 	public DaoMethodOutcome updatePerson(IAnyResource thePerson) {
-		return myPersonDao.update(thePerson);
+		if (thePerson.getIdElement().hasIdPart()) {
+			return myPersonDao.update(thePerson);
+		} else {
+			return myPersonDao.create(thePerson);
+		}
 	}
 
 	public IAnyResource readPersonByPid(ResourcePersistentId thePersonPid) {

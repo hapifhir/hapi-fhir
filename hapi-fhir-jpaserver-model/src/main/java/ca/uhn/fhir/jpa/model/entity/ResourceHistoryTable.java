@@ -49,7 +49,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
-@Table(name = "HFJ_RES_VER", uniqueConstraints = {
+@Table(name = ResourceHistoryTable.HFJ_RES_VER, uniqueConstraints = {
 	@UniqueConstraint(name = ResourceHistoryTable.IDX_RESVER_ID_VER, columnNames = {"RES_ID", "RES_VER"})
 }, indexes = {
 	@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED"),
@@ -66,6 +66,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	// Don't reduce the visibility here, we reference this from Smile
 	@SuppressWarnings("WeakerAccess")
 	public static final int ENCODING_COL_LENGTH = 5;
+	public static final String HFJ_RES_VER = "HFJ_RES_VER";
 
 	private static final long serialVersionUID = 1L;
 	@Id

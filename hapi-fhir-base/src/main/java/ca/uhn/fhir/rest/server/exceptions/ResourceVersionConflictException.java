@@ -37,6 +37,9 @@ public class ResourceVersionConflictException extends BaseServerResponseExceptio
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_409_CONFLICT;
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceVersionConflictException(String error) {
 		super(STATUS_CODE, error);
 	}
