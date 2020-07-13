@@ -119,6 +119,33 @@ public class FhirTerserDstu2Test {
 
 	}
 
+	@Test
+	public void testCloneIntoResourceCopiesId() {
+		Observation obs = new Observation();
+		obs.setId("http://foo/base/Observation/_history/123");
+		obs.setValue(new StringDt("AAA"));
+
+		Observation target = new Observation();
+		ourCtx.newTerser().cloneInto(obs, target, false);
+
+		assertEquals("http://foo/base/Observation/_history/123", target.getId().getValue());
+	}
+
+
+	@Test
+	public void testCloneIntoResourceCopiesElementId() {
+		Observation obs = new Observation();
+		StringDt string = new StringDt("AAA");
+		string.setId("BBB");
+		obs.setValue(string);
+
+		Observation target = new Observation();
+		ourCtx.newTerser().cloneInto(obs, target, false);
+
+		assertEquals("BBB", ((StringDt)target.getValue()).getElementSpecificId());
+	}
+
+
 	/**
 	 * See #369
 	 */

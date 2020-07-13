@@ -157,6 +157,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
@@ -169,7 +170,6 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.info("Current interceptors:\n * {}", allInterceptors);
 
 		// Should see 1 subscription notification
-		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
@@ -181,20 +181,21 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
+		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
-		waitForQueueToDrain();
 
 		// Should see one subscription notification
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		// Delet one subscription
+		// Delete one subscription
 		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		waitForActivatedSubscriptionCount(1);
 
+		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
-		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
@@ -204,6 +205,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		CodingDt coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
+		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
 		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
@@ -218,6 +220,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		CodingDt coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
+		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
 		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 1971
+title: The create-package CLI command failed with a NPE if no package dependencies were specified. This has been corrected.

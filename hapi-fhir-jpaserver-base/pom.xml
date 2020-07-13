@@ -163,8 +163,6 @@
 			</exclusions>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>net.ttddyy</groupId>
 			<artifactId>datasource-proxy</artifactId>
@@ -734,7 +732,8 @@
 							<version>dstu2</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml
+							</targetResourceSpringBeansFile>
 							<baseResourceNames/>
 							<excludeResourceNames>
 								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
@@ -750,7 +749,8 @@
 							<version>dstu3</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu3</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml
+							</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
 							</excludeResourceNames>
@@ -765,7 +765,8 @@
 							<version>r4</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml
+							</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
 							</excludeResourceNames>
@@ -780,7 +781,8 @@
 							<version>r5</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r5</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml
+							</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 						</configuration>
 					</execution>
