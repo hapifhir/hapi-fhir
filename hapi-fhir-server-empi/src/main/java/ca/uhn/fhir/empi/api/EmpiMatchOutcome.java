@@ -1,5 +1,8 @@
 package ca.uhn.fhir.empi.api;
 
+/**
+ * This data object captures the final outcome of an EMPI match
+ */
 public final class EmpiMatchOutcome {
 	public static final EmpiMatchOutcome POSSIBLE_DUPLICATE = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
 	public static final EmpiMatchOutcome NO_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.NO_MATCH);
@@ -8,11 +11,30 @@ public final class EmpiMatchOutcome {
 	public static final EmpiMatchOutcome EID_POSSIBLE_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_MATCH).setEidMatch(true);
 	public static final EmpiMatchOutcome EID_POSSIBLE_DUPLICATE = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setEidMatch(true);
 
+	/**
+	 * A bitmap that indicates which rules matched
+	 */
 	public final Long vector;
+
+	/**
+	 * The sum of all scores for all rules evaluated.  Similarity rules add the similarity score (between 0.0 and 1.0) whereas
+	 * matcher rules add either a 0.0 or 1.0.
+	 */
 	public final Double score;
 
+	/**
+	 * Did the EMPI match operation result in creating a new Person resource?
+	 */
 	private boolean myNewPerson;
+
+	/**
+	 * Did the EMPI match occur as a result of EIDs matching?
+	 */
 	private boolean myEidMatch;
+
+	/**
+	 * Based on the EMPI Rules, what was the final match result?
+	 */
 	private EmpiMatchResultEnum myMatchResultEnum;
 
 	public EmpiMatchOutcome(Long theVector, Double theScore) {
