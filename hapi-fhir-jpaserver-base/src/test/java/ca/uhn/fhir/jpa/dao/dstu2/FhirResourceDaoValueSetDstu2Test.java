@@ -38,8 +38,8 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemBad() {
-		UriDt valueSetIdentifier = null;
+	public void testValidateCodeOperationByCodeAndSystemBadCode() {
+		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdDt id = null;
 		CodeDt code = new CodeDt("8450-9-XXX");
 		UriDt system = new UriDt("http://loinc.org");
@@ -51,8 +51,21 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testValidateCodeOperationByCodeAndSystemBadSystem() {
+		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		IdDt id = null;
+		CodeDt code = new CodeDt("8450-9-XXX");
+		UriDt system = new UriDt("http://zzz");
+		StringDt display = null;
+		CodingDt coding = null;
+		CodeableConceptDt codeableConcept = null;
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertFalse(result.isOk());
+	}
+
+	@Test
 	public void testValidateCodeOperationByCodeAndSystemGood() {
-		UriDt valueSetIdentifier = null;
+		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdDt id = null;
 		CodeDt code = new CodeDt("8450-9");
 		UriDt system = new UriDt("http://loinc.org");
@@ -88,7 +101,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
+		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 

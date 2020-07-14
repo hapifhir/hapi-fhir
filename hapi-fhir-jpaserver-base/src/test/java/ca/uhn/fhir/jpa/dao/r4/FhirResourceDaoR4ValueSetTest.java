@@ -104,7 +104,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
+		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 

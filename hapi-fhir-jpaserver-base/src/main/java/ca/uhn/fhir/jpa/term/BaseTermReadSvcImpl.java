@@ -670,7 +670,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 								nextSystem = system;
 							}
 
-							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), nextSystem, next.getCode());
+							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode());
 							if (lookup != null && lookup.isFound()) {
 								addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, nextSystem, next.getCode(), lookup.getCodeDisplay());
 								foundCount++;
@@ -1281,6 +1281,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					}
 				}
 			}
+		} else {
+			return null;
 		}
 
 		for (TermValueSetConcept concept : concepts) {
@@ -1690,7 +1692,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			throw new InvalidRequestException("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
 		}
 
-		ValidationSupportContext validationContext = new ValidationSupportContext(myValidationSupport);
+		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
 		ConceptValidationOptions validationOptions = new ConceptValidationOptions();
 		return validateCode(validationContext, validationOptions, theSystem, theCode, theDisplay, valueSetUrl);
 	}

@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -137,13 +139,27 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Nullable
 	@Override
 	protected Coding toCanonicalCoding(@Nullable IBaseDatatype theCoding) {
-		throw new UnsupportedOperationException();
+		Coding retVal = null;
+		if (theCoding != null) {
+			CodingDt coding = (CodingDt) theCoding;
+			retVal = new Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
+		}
+		return retVal;
 	}
 
 	@Nullable
 	@Override
 	protected CodeableConcept toCanonicalCodeableConcept(@Nullable IBaseDatatype theCodeableConcept) {
-		throw new UnsupportedOperationException();
+		CodeableConcept outcome = null;
+		if (theCodeableConcept != null) {
+			outcome = new CodeableConcept();
+			CodeableConceptDt cc = (CodeableConceptDt) theCodeableConcept;
+			outcome.setText(cc.getText());
+			for (CodingDt next : cc.getCoding()) {
+				outcome.addCoding(toCanonicalCoding(next));
+			}
+		}
+		return outcome;
 	}
 
 	@Override

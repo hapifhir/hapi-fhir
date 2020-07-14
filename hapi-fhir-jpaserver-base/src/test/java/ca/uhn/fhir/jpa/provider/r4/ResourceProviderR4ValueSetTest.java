@@ -10,9 +10,9 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -54,6 +54,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.not;
@@ -61,7 +62,6 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -98,11 +98,11 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	private void persistCodeSystem(CodeSystem theCodeSystem) {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-					myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-				}
-			});
+			@Override
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
+				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+			}
+		});
 		myCodeSystemDao.readEntity(myExtensionalCsId, null).getId();
 	}
 
@@ -671,8 +671,8 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.named("$expand")
 			.withNoParameters(Parameters.class)
 			.returnResourceType(ValueSet.class)
-				.execute();
-		ourLog.info("Expanded: {}",myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+			.execute();
+		ourLog.info("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 
 		// Update the CodeSystem URL and Codes
@@ -696,10 +696,9 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.withNoParameters(Parameters.class)
 			.returnResourceType(ValueSet.class)
 			.execute();
-		ourLog.info("Expanded: {}",myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.info("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 	}
-
 
 
 	/**
@@ -796,7 +795,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	private void validateTermValueSetNotExpanded(String theValueSetName) {
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -814,7 +813,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	private void validateTermValueSetExpandedAndChildren(String theValueSetName, CodeSystem theCodeSystem) {
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -966,6 +965,24 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testValidateCodeOperationNoValueSetProvided() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+
+		try {
+			myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+				.andParameter("system", new UriType("http://acme.org"))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testValidateCodeAgainstBuiltInSystem() {
 		Parameters respParam = myClient
 			.operation()
@@ -1070,7 +1087,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 

@@ -50,7 +50,7 @@ class InMemoryTerminologyServerValidationSupportTest {
 		assertTrue(outcome.isOk());
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
-		assertFalse(outcome.isOk());
+		assertNull(outcome);
 
 	}
 
