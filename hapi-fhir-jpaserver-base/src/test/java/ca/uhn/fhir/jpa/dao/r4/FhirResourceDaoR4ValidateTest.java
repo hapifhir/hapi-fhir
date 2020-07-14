@@ -36,9 +36,11 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -49,11 +51,13 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterEach;
@@ -73,6 +77,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -94,6 +99,105 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private PlatformTransactionManager myTransactionManager;
 	@Autowired
 	private ValidationSettings myValidationSettings;
+
+	@Test
+	public void testValidateCodeInValueSetWithUnknownCodeSystem() {
+		myValidationSupport.fetchCodeSystem("http://not-exist"); // preload DefaultProfileValidationSupport
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs
+			.getCompose()
+			.addInclude()
+			.setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")));
+		myValueSetDao.create(vs);
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		sd.setType("Observation");
+		sd.setUrl("http://sd");
+		sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+		sd.getDifferential()
+			.addElement()
+			.setPath("Observation.value[x]")
+			.addType(new ElementDefinition.TypeRefComponent(new UriType("Quantity")))
+			.setBinding(new ElementDefinition.ElementDefinitionBindingComponent().setStrength(Enumerations.BindingStrength.REQUIRED).setValueSet("http://vs"))
+			.setId("Observation.value[x]");
+		myStructureDefinitionDao.create(sd);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://sd");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().setText("hello");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals("Could not confirm that the codes provided are in the value set http://vs, and a code from this value set is required", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+
+	}
+
+	@Test
+	public void testGenerateSnapshotOnStructureDefinitionWithNoBase() {
+
+		// No base populated here, which isn't valid
+		StructureDefinition sd = new StructureDefinition();
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		sd.setUrl("http://sd");
+		sd.getDifferential()
+			.addElement()
+			.setPath("Observation.value[x]")
+			.addType(new ElementDefinition.TypeRefComponent(new UriType("string")))
+			.setId("Observation.value[x]");
+
+		try {
+			myStructureDefinitionDao.generateSnapshot(sd, null, null, null);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertEquals("StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
+		}
+
+		myStructureDefinitionDao.create(sd);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://sd");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().setText("hello");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		try {
+			myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertEquals("StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
+		}
+	}
 
 	/**
 	 * Use a valueset that explicitly brings in some UCUM codes

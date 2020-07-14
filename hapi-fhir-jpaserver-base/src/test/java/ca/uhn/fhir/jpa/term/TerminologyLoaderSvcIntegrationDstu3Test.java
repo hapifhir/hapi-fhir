@@ -2,10 +2,8 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -16,7 +14,6 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -30,12 +27,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
@@ -229,9 +226,9 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Found code", result.getMessage());
 	}
 
@@ -241,9 +238,9 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
-		assertFalse(result.isResult());
+		assertFalse(result.isOk());
 		assertEquals("Code not found", result.getMessage());
 	}
 

@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
@@ -1799,7 +1798,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		IFhirResourceDaoValueSet.ValidateCodeResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
@@ -1809,23 +1808,23 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		assertNull(result);
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
@@ -1833,7 +1832,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -1852,7 +1851,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		IFhirResourceDaoValueSet.ValidateCodeResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
 
@@ -1863,23 +1862,23 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		assertNull(result);
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
@@ -1887,7 +1886,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
-		assertTrue(result.isResult());
+		assertTrue(result.isOk());
 		assertEquals("Validation succeeded", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}

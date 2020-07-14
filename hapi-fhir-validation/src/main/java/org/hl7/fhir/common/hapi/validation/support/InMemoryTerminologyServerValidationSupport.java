@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -452,6 +454,32 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								addCodes(system, codesList, nextCodeList, wantCodes);
 								ableToHandleCode = true;
 							}
+						} else if (theComposeListIsInclude) {
+
+							/*
+							 * If we're doing an expansion specifically looking for a single code, that means we're validating that code.
+							 * In the case where we have a ValueSet that explicitly enumerates a collection of codes
+							 * (via ValueSet.compose.include.code) in a code system that is unknown we'll assume the code is valid
+							 * even iof we can't find the CodeSystem. This is a compromise obviously, since it would be ideal for
+							 * CodeSystems to always be known, but realistically there are always going to be CodeSystems that
+							 * can't be supplied because of copyright issues, or because they are grammar based. Allowing a VS to
+							 * enumerate a set of good codes for them is a nice compromise there.
+							 */
+							for (org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent next : theComposeList) {
+								if (Objects.equals(next.getSystem(), theWantSystem)) {
+									Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent> matchingEnumeratedConcept = next.getConcept().stream().filter(t -> Objects.equals(t.getCode(), theWantCode)).findFirst();
+									if (matchingEnumeratedConcept.isPresent()) {
+										CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
+											.addConcept()
+											.setCode(theWantCode)
+											.setDisplay(matchingEnumeratedConcept.get().getDisplay());
+										List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
+										addCodes(system, codesList, nextCodeList, wantCodes);
+										ableToHandleCode = true;break;
+									}
+								}
+							}
+
 						}
 					}
 

@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -73,6 +72,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
+import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -81,6 +81,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -105,10 +106,14 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -653,7 +658,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						includedConcepts = theIncludeOrExclude
 							.getConcept()
 							.stream()
-							.map(t->new VersionIndependentConcept(theIncludeOrExclude.getSystem(), t.getCode()))
+							.map(t -> new VersionIndependentConcept(theIncludeOrExclude.getSystem(), t.getCode()))
 							.collect(Collectors.toList());
 					}
 
@@ -1249,7 +1254,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return true;
 	}
 
-	protected IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInPreExpandedValueSet(
+	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
 		ValidationOptions theValidationOptions,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
@@ -1280,15 +1285,30 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		for (TermValueSetConcept concept : concepts) {
 			if (isNotBlank(theDisplay) && theDisplay.equals(concept.getDisplay())) {
-				return new IFhirResourceDaoValueSet.ValidateCodeResult(true, "Validation succeeded", concept.getDisplay());
+				return new IValidationSupport.CodeValidationResult()
+					.setCode(concept.getCode())
+					.setDisplay(concept.getDisplay());
 			}
 		}
 
 		if (!concepts.isEmpty()) {
-			return new IFhirResourceDaoValueSet.ValidateCodeResult(true, "Validation succeeded", concepts.get(0).getDisplay());
+			return new IValidationSupport.CodeValidationResult()
+				.setCode(concepts.get(0).getCode())
+				.setDisplay(concepts.get(0).getDisplay());
 		}
 
-		return null;
+		return createFailureCodeValidationResult(theSystem, theCode);
+	}
+
+	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode) {
+		String append = "";
+		return createFailureCodeValidationResult(theSystem, theCode, append);
+	}
+
+	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode, String theAppend) {
+		return new CodeValidationResult()
+			.setSeverity(IssueSeverity.ERROR)
+			.setMessage("Unknown code {" + theSystem + "}" + theCode + theAppend);
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {
@@ -1639,6 +1659,40 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				});
 			}
 		}
+	}
+
+	@Override
+	public CodeValidationResult validateCode(IIdType theValueSetId, String theValueSetUrl, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+
+		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
+		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
+
+		Coding coding = toCanonicalCoding(theCoding);
+		boolean haveCoding = coding != null && coding.isEmpty() == false;
+
+		boolean haveCode = theCode != null && theCode.isEmpty() == false;
+
+		if (!haveCodeableConcept && !haveCoding && !haveCode) {
+			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
+		}
+		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
+			throw new InvalidRequestException("$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
+		}
+
+		boolean haveIdentifierParam = isNotBlank(theValueSetUrl);
+		String valueSetUrl;
+		if (theValueSetId != null) {
+			IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId);
+			valueSetUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet);
+		} else if (haveIdentifierParam) {
+			valueSetUrl = theValueSetUrl;
+		} else {
+			throw new InvalidRequestException("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
+		}
+
+		ValidationSupportContext validationContext = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions validationOptions = new ConceptValidationOptions();
+		return validateCode(validationContext, validationOptions, theSystem, theCode, theDisplay, valueSetUrl);
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
@@ -2002,7 +2056,31 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return null;
 	}
 
-	Optional<VersionIndependentConcept> validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
+
+	@CoverageIgnore
+	@Override
+	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+
+		if (isNotBlank(theValueSetUrl)) {
+			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode);
+		}
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		Optional<VersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> new VersionIndependentConcept(theCodeSystem, c.getCode())));
+
+		if (codeOpt != null && codeOpt.isPresent()) {
+			VersionIndependentConcept code = codeOpt.get();
+			return new CodeValidationResult()
+				.setCode(code.getCode())
+				.setDisplay(code.getDisplay());
+		}
+
+		return createFailureCodeValidationResult(theCodeSystem, theCode);
+	}
+
+
+	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
 		IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
 
 		// If we don't have a PID, this came from some source other than the JPA
@@ -2011,24 +2089,20 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
 			if (pid != null) {
 				if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-					IFhirResourceDaoValueSet.ValidateCodeResult outcome = validateCodeIsInPreExpandedValueSet(new ValidationOptions(), valueSet, theCodeSystem, theCode, null, null, null);
-					if (outcome != null && outcome.isResult()) {
-						return Optional.of(new VersionIndependentConcept(theCodeSystem, theCode));
-					}
+					return validateCodeIsInPreExpandedValueSet(new ValidationOptions(), valueSet, theCodeSystem, theCode, null, null, null);
 				}
 			}
 		}
 
-		ValueSet canonicalValueSet = toCanonicalValueSet(valueSet);
-		VersionIndependentConcept wantConcept = new VersionIndependentConcept(theCodeSystem, theCode);
-		ValueSetExpansionOptions expansionOptions = new ValueSetExpansionOptions()
-			.setFailOnMissingCodeSystem(false);
+		CodeValidationResult retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, null, valueSet);
 
-		List<VersionIndependentConcept> expansionOutcome = expandValueSetAndReturnVersionIndependentConcepts(expansionOptions, canonicalValueSet, wantConcept);
-		return expansionOutcome
-			.stream()
-			.filter(t -> (theValidationOptions.isInferSystem() || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
-			.findFirst();
+		if (retVal == null) {
+			String append = " - Unable to expand ValueSet[" + CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet) + "]";
+			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, append);
+		}
+
+		return retVal;
+
 	}
 
 	@Override
@@ -2152,6 +2226,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		return false;
 	}
+
+	@Nullable
+	protected abstract Coding toCanonicalCoding(@Nullable IBaseDatatype theCoding);
+
+	@Nullable
+	protected abstract CodeableConcept toCanonicalCodeableConcept(@Nullable IBaseDatatype theCodeableConcept);
 
 	public static class Job implements HapiJob {
 		@Autowired
