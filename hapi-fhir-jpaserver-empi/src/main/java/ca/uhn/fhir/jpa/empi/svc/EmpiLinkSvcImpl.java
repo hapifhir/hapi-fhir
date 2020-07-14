@@ -64,17 +64,17 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
 		IIdType resourceId = theTarget.getIdElement().toUnqualifiedVersionless();
 
-		if (theMatchResult.isPossibleDuplicate() && personsLinkedAsNoMatch(thePerson, theTarget)) {
+		if (theMatchOutcome.isPossibleDuplicate() && personsLinkedAsNoMatch(thePerson, theTarget)) {
 			log(theEmpiTransactionContext, thePerson.getIdElement().toUnqualifiedVersionless() +
 				" is linked as NO_MATCH with " +
 				theTarget.getIdElement().toUnqualifiedVersionless() +
 				" not linking as POSSIBLE_DUPLICATE.");
 			return;
 		}
-		EmpiMatchResultEnum matchResultEnum = theMatchResult.getMatchResultEnum();
+		EmpiMatchResultEnum matchResultEnum = theMatchOutcome.getMatchResultEnum();
 		validateRequestIsLegal(thePerson, theTarget, matchResultEnum, theLinkSource);
 		switch (matchResultEnum) {
 			case MATCH:
@@ -91,7 +91,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 				break;
 		}
 		myEmpiResourceDaoSvc.updatePerson(thePerson);
-		createOrUpdateLinkEntity(thePerson, theTarget, theMatchResult, theLinkSource, theEmpiTransactionContext);
+		createOrUpdateLinkEntity(thePerson, theTarget, theMatchOutcome, theLinkSource, theEmpiTransactionContext);
 	}
 
 	private boolean personsLinkedAsNoMatch(IAnyResource thePerson, IAnyResource theTarget) {
@@ -177,8 +177,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchResult, theLinkSource, theEmpiTransactionContext);
+	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchOutcome, theLinkSource, theEmpiTransactionContext);
 	}
 
 	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {

@@ -37,9 +37,9 @@ public class EmpiPersonFindingSvc {
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 
 	@Autowired
-	private FindCandidateByEidSvc myFindCandidateByEid;
+	private FindCandidateByEidSvc myFindCandidateByEidSvc;
 	@Autowired
-	private FindCandidateByLinkSvc myFindCandidateByLink;
+	private FindCandidateByLinkSvc myFindCandidateByLinkSvc;
 	@Autowired
 	private FindCandidateByScoreSvc myFindCandidateByScoreSvc;
 
@@ -58,10 +58,10 @@ public class EmpiPersonFindingSvc {
 	 * @return A list of {@link MatchedPersonCandidate} indicating all potential Person matches.
 	 */
 	public CandidateList findPersonCandidates(IAnyResource theResource) {
-		CandidateList matchedPersonCandidates = myFindCandidateByEid.findCandidates(theResource);
+		CandidateList matchedPersonCandidates = myFindCandidateByEidSvc.findCandidates(theResource);
 
 		if (matchedPersonCandidates.isEmpty()) {
-			matchedPersonCandidates = myFindCandidateByLink.findCandidates(theResource);
+			matchedPersonCandidates = myFindCandidateByLinkSvc.findCandidates(theResource);
 		}
 		if (matchedPersonCandidates.isEmpty()) {
 			//OK, so we have not found any links in the EmpiLink table with us as a target. Next, let's find possible Patient/Practitioner

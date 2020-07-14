@@ -56,23 +56,23 @@ public class EmpiLinkDaoSvc {
 	private IdHelperService myIdHelperService;
 
 	@Transactional
-	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
+	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
 		Long personPid = myIdHelperService.getPidOrNull(thePerson);
 		Long resourcePid = myIdHelperService.getPidOrNull(theTarget);
 
 		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
 		empiLink.setLinkSource(theLinkSource);
-		empiLink.setMatchResult(theMatchResult.getMatchResultEnum());
+		empiLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
 		// Preserve these flags for link updates
-		empiLink.setEidMatch(theMatchResult.isEidMatch() | empiLink.isEidMatch());
-		empiLink.setNewPerson(theMatchResult.isNewPerson() | empiLink.isNewPerson());
+		empiLink.setEidMatch(theMatchOutcome.isEidMatch() | empiLink.isEidMatch());
+		empiLink.setNewPerson(theMatchOutcome.isNewPerson() | empiLink.isNewPerson());
 		if (empiLink.getScore() != null) {
-			empiLink.setScore(Math.max(theMatchResult.score, empiLink.getScore()));
+			empiLink.setScore(Math.max(theMatchOutcome.score, empiLink.getScore()));
 		} else {
-			empiLink.setScore(theMatchResult.score);
+			empiLink.setScore(theMatchOutcome.score);
 		}
 
-		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchResult);
+		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
 		theEmpiTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(empiLink);
