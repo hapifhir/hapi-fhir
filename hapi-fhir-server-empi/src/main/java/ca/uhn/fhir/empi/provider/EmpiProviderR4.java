@@ -166,9 +166,11 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return (Parameters) myEmpiLinkUpdaterSvc.notDuplicatePerson(person, target, createEmpiContext(theRequestDetails));
 	}
 
-	//TODO accept a search string, parse it to make search parameters, and then submit those as the search.
 	@Operation(name = ProviderConstants.EMPI_BATCH_RUN, idempotent = true)
-	public void batchRunEmpi(@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_TARGET_TYPE, max=1) StringType theTargetType, ServletRequestDetails theRequestDetails) {
+	public void batchRunEmpi(@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_TARGET_TYPE, max=1) StringType theTargetType,
+									 @OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_TARGET_TYPE, max=1) StringType theQueryString,
+									 ServletRequestDetails theRequestDetails) {
+
 		if (theTargetType == null) {
 			myEmpiBatchSvc.runEmpiOnAllTargets();
 		} else {
