@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,31 +42,6 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> exten
 
 	void purgeCaches();
 
-	ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept, RequestDetails theRequestDetails);
-
-	class ValidateCodeResult {
-		private String myDisplay;
-		private String myMessage;
-		private boolean myResult;
-
-		public ValidateCodeResult(boolean theResult, String theMessage, String theDisplay) {
-			super();
-			myResult = theResult;
-			myMessage = theMessage;
-			myDisplay = theDisplay;
-		}
-
-		public String getDisplay() {
-			return myDisplay;
-		}
-
-		public String getMessage() {
-			return myMessage;
-		}
-
-		public boolean isResult() {
-			return myResult;
-		}
-	}
+	IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept, RequestDetails theRequestDetails);
 
 }

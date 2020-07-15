@@ -20,6 +20,8 @@ package ca.uhn.fhir.context.support;
  * #L%
  */
 
+import org.thymeleaf.util.Validate;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +31,7 @@ public class ValidationSupportContext {
 	private final Set<String> myCurrentlyGeneratingSnapshots = new HashSet<>();
 
 	public ValidationSupportContext(IValidationSupport theRootValidationSupport) {
+		Validate.notNull(theRootValidationSupport, "theRootValidationSupport musty not be null");
 		myRootValidationSupport = theRootValidationSupport;
 	}
 

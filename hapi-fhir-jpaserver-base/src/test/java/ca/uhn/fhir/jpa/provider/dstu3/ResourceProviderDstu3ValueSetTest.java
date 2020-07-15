@@ -749,6 +749,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.named("validate-code")
 			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
 			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -780,11 +781,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertEquals("result", respParam.getParameter().get(0).getName());
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertEquals("message", respParam.getParameter().get(1).getName());
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), Matchers.containsStringIgnoringCase("succeeded"));
-
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 	}
 
 	/**
@@ -810,11 +808,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertEquals("result", respParam.getParameter().get(0).getName());
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertEquals("message", respParam.getParameter().get(1).getName());
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), Matchers.containsStringIgnoringCase("succeeded"));
-
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 	}
 
 	@AfterEach
