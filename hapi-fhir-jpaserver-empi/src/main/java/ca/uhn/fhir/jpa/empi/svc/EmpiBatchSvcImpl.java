@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiBatchService;
+import ca.uhn.fhir.empi.api.IEmpiQueueSubmitterSvc;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.EmpiTargetType;
@@ -10,7 +11,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -41,7 +41,11 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	private EmpiSearchParamSvc myEmpiSearchParamSvc;
 
 	@Autowired
+	private IEmpiQueueSubmitterSvc myEmpiQueueSubmitterSvc;
+
+	@Autowired
 	private IChannelFactory myChannelFactory;
+	private static final int queueAddingPageSize = 100;
 
 
 	@Override
@@ -55,16 +59,16 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 		getTargetTypeOrThrowException(theTargetType);
 		SearchParameterMap spMap = getSearchParameterMapFromCriteria(theTargetType, theCriteria);
 		IFhirResourceDao patientDao = myDaoRegistry.getResourceDao(theTargetType);
-		IBundleProvider search = patientDao.search(spMap.setLoadSynchronous(true));
-		List<IBaseResource> resources = search.getResources(0, search.size());
+		IBundleProvider search = patientDao.search(spMap);
 
-
-		for (IBaseResource resource : resources) {
-			ResourceModifiedJsonMessage rmjm = new ResourceModifiedJsonMessage();
-			ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, resource, ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
-			resourceModifiedMessage.setOperationType(ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
-			rmjm.setPayload(resourceModifiedMessage);
-			myEmpiChannelProducer.send(rmjm);
+		int lowIndex = 0;
+		List<IBaseResource> resources = search.getResources(lowIndex, lowIndex + queueAddingPageSize);
+		while(!resources.isEmpty()) {
+			for (IBaseResource resource : resources) {
+				myEmpiQueueSubmitterSvc.manuallySubmitResourceToEmpi(resource);
+			}
+			lowIndex += queueAddingPageSize;
+			resources = search.getResources(lowIndex, lowIndex + queueAddingPageSize);
 		}
 	}
 

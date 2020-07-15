@@ -58,14 +58,14 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 	public void testEmpiBatchOnPatientType() throws Exception {
 
 		for (int i =0; i < 10; i++) {
-			createPractitioner(buildPractitionerWithNameAndId("test", "id"));
+			createPatient(buildPatientWithNameAndId("test", "id"));
 		}
 
 		assertLinkCount(0);
 		afterEmpiLatch.setExpectedCount(10);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnAllTargets(null);
+		myEmpiBatchSvc.runEmpiOnTargetType("Patient", null);
 
 		afterEmpiLatch.awaitExpected();
 		assertLinkCount(10);
