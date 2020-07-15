@@ -64,7 +64,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemGood() {
+	public void testValidateCodeOperationByIdentifierCodeInCsButNotInVs() {
 		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdDt id = null;
 		CodeDt code = new CodeDt("8450-9");
@@ -73,8 +73,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure--expiration", result.getDisplay());
+		assertFalse(result.isOk());
 	}
 
 	@Test

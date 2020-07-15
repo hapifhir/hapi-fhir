@@ -93,7 +93,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(ValidationSupportContext theValidationSupportContext, IBaseResource theValueSetToExpand, @Nullable String theWantSystem, @Nullable String theWantCode) {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
-		switch (myCtx.getVersion().getVersion()) {
+		switch (theValueSetToExpand.getStructureFhirVersionEnum()) {
 			case DSTU2: {
 				expansionR5 = expandValueSetDstu2(theValidationSupportContext, (ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand, theWantSystem, theWantCode);
 				break;

@@ -1695,9 +1695,25 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
 		ConceptValidationOptions validationOptions = new ConceptValidationOptions();
 
-		if (haveCodeableConcept)
+		String code = theCode;
+		String system = theSystem;
+		String display = theDisplay;
 
-		return validateCode(validationContext, validationOptions, theSystem, theCode, theDisplay, valueSetUrl);
+		if (haveCodeableConcept) {
+			for (int i =0; i < codeableConcept.getCoding().size(); i++) {
+				Coding nextCoding = codeableConcept.getCoding().get(i);
+				CodeValidationResult nextValidation = validateCode(validationContext, validationOptions, nextCoding.getSystem(), nextCoding.getCode(), nextCoding.getDisplay(), valueSetUrl);
+				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
+					return nextValidation;
+				}
+			}
+		} else if (haveCoding) {
+			system = coding.getSystem();
+			code = coding.getCode();
+			display = coding.getDisplay();
+		}
+
+		return validateCode(validationContext, validationOptions, system, code, display, valueSetUrl);
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
