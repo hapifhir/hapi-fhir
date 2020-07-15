@@ -4,10 +4,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 
@@ -44,7 +48,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		afterEmpiLatch.setExpectedCount(20);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnAllTargets();
+		myEmpiBatchSvc.runEmpiOnAllTargets(null);
 
 		afterEmpiLatch.awaitExpected();
 		assertLinkCount(20);
@@ -61,7 +65,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		afterEmpiLatch.setExpectedCount(10);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnAllTargets();
+		myEmpiBatchSvc.runEmpiOnAllTargets(null);
 
 		afterEmpiLatch.awaitExpected();
 		assertLinkCount(10);
@@ -78,10 +82,23 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		afterEmpiLatch.setExpectedCount(10);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnAllTargets();
+		myEmpiBatchSvc.runEmpiOnAllTargets(null);
 
 		afterEmpiLatch.awaitExpected();
 		assertLinkCount(10);
+	}
+
+	@Test
+	public void testEmpiOnTargetTypeWithCriteria() throws InterruptedException {
+
+		createPatient(buildPatientWithNameIdAndBirthday("gary", "gary_id", new Date()));
+		createPatient(buildPatientWithNameIdAndBirthday("john", "john_id", DateUtils.addDays(new Date(), -300)));
+		assertLinkCount(0);
+
+
+		afterEmpiLatch.setExpectedCount(1);
+		myEmpiBatchSvc.runEmpiOnAllTargets(new StringType("Patient?name=gary"));
+		afterEmpiLatch.awaitExpected();
 	}
 
 

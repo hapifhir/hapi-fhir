@@ -23,7 +23,7 @@ public class EmpiHelperR4 extends BaseEmpiHelper {
 	}
 	public OutcomeAndLogMessageWrapper batchWithLatch(int expectedRuns) throws InterruptedException {
 		myAfterEmpiLatch.setExpectedCount(expectedRuns);
-		myEmpiProviderR4.batchRunEmpi(null, null);
+		myEmpiProviderR4.batchRunEmpi(null, null, null);
 		myAfterEmpiLatch.awaitExpected();
 		return new OutcomeAndLogMessageWrapper(null, null);
 	}

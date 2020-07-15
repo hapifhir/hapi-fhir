@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 
@@ -37,20 +38,24 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	private FhirContext myFhirContext;
 
 	@Autowired
+	private EmpiSearchParamSvc myEmpiSearchParamSvc;
+
+	@Autowired
 	private IChannelFactory myChannelFactory;
 
 
 	@Override
-	public void runEmpiOnAllTargets() {
-		runEmpiOnTargetType("Patient");
-		runEmpiOnTargetType("Practitioner");
+	public void runEmpiOnAllTargets(StringType theCriteria) {
+		runEmpiOnTargetType("Patient", theCriteria);
+		runEmpiOnTargetType("Practitioner", theCriteria);
 	}
 
 	@Override
-	public void runEmpiOnTargetType(String theTargetType) {
+	public void runEmpiOnTargetType(String theTargetType, StringType theCriteria) {
 		getTargetTypeOrThrowException(theTargetType);
+		SearchParameterMap spMap = getSearchParameterMapFromCriteria(theTargetType, theCriteria);
 		IFhirResourceDao patientDao = myDaoRegistry.getResourceDao(theTargetType);
-		IBundleProvider search = patientDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		IBundleProvider search = patientDao.search(spMap.setLoadSynchronous(true));
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
 
@@ -61,7 +66,16 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 			rmjm.setPayload(resourceModifiedMessage);
 			myEmpiChannelProducer.send(rmjm);
 		}
+	}
 
+	private SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, StringType theCriteria) {
+		SearchParameterMap spMap;
+		if (theCriteria != null) {
+			spMap = myEmpiSearchParamSvc.mapFromCriteria(theTargetType, theCriteria.getValueNotNull());
+		} else {
+			spMap = new SearchParameterMap();
+		}
+		return spMap;
 	}
 
 	private EmpiTargetType getTargetTypeOrThrowException(String theResourceType) {
