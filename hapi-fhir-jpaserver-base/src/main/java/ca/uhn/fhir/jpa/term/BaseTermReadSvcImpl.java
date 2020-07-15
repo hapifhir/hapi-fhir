@@ -1664,7 +1664,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IIdType theValueSetId, String theValueSetUrl, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+	public CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetUrl, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 
 		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
 		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
@@ -1693,16 +1693,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
-		ConceptValidationOptions validationOptions = new ConceptValidationOptions();
 
 		String code = theCode;
 		String system = theSystem;
 		String display = theDisplay;
 
 		if (haveCodeableConcept) {
-			for (int i =0; i < codeableConcept.getCoding().size(); i++) {
+			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
-				CodeValidationResult nextValidation = validateCode(validationContext, validationOptions, nextCoding.getSystem(), nextCoding.getCode(), nextCoding.getDisplay(), valueSetUrl);
+				CodeValidationResult nextValidation = validateCode(validationContext, theOptions, nextCoding.getSystem(), nextCoding.getCode(), nextCoding.getDisplay(), valueSetUrl);
 				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
 					return nextValidation;
 				}
@@ -1713,7 +1712,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			display = coding.getDisplay();
 		}
 
-		return validateCode(validationContext, validationOptions, system, code, display, valueSetUrl);
+		return validateCode(validationContext, theOptions, system, code, display, valueSetUrl);
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
@@ -2092,9 +2091,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
-			return new CodeValidationResult()
-				.setCode(code.getCode())
-				.setDisplay(code.getDisplay());
+			if (!theOptions.isValidateDisplay() || (isNotBlank(code.getDisplay()) && code.getDisplay().equals(theDisplay))) {
+				return new CodeValidationResult()
+					.setCode(code.getCode())
+					.setDisplay(code.getDisplay());
+			} else {
+				return createFailureCodeValidationResult(theCodeSystem, theCode, " - Concept Display \"" + code.getDisplay() + "\" does not match expected \"" + code.getDisplay() + "\"").setDisplay(code.getDisplay());
+			}
 		}
 
 		return createFailureCodeValidationResult(theCodeSystem, theCode);

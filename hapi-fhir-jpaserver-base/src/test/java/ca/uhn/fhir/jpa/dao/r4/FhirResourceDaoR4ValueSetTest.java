@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -54,7 +55,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemBad() {
+	public void testValidateCodeOperationNoValueSet() {
 		UriType valueSetIdentifier = null;
 		IdType id = null;
 		CodeType code = new CodeType("8450-9-XXX");
@@ -62,22 +63,12 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
-	}
-
-	@Test
-	public void testValidateCodeOperationByCodeAndSystemGood() {
-		UriType valueSetIdentifier = null;
-		IdType id = null;
-		CodeType code = new CodeType("8450-9");
-		UriType system = new UriType("http://acme.org");
-		StringType display = null;
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure--expiration", result.getDisplay());
+		try {
+			myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
 	}
 
 	@Test
@@ -104,8 +95,9 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
+		assertFalse(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertEquals("Systolic blood pressure at First encounter", result.getMessage());
 	}
 
 	@Test

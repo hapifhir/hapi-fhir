@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.api;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
@@ -104,12 +105,15 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	void preExpandDeferredValueSetsToTerminologyTables();
 
-	CodeValidationResult validateCode(IIdType theValueSetId, String theValueSetUrl, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+	/**
+	 * Version independent
+	 */
+	CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetUrl, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
 
 	/**
 	 * Version independent
 	 */
-	IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(ValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+	CodeValidationResult validateCodeIsInPreExpandedValueSet(ValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
 
 	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
 
