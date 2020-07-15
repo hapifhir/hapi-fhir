@@ -75,7 +75,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
 
 		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			Patient p = new Patient();
 			p.setId("ABC");
 			p.setActive(true);
@@ -130,7 +130,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		mySearchParamRegistry.forceRefresh();
 
 		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			Patient p = new Patient();
 			p.setGender(Enumerations.AdministrativeGender.MALE);
 			p.addIdentifier().setValue("VAL" + i);
@@ -185,7 +185,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		});
 
 		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			// Submit an update
 			Patient p = new Patient();
 			p.setId(patientId);
@@ -224,7 +224,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
 
 		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			Patient p = new Patient();
 			p.setId("ABC");
 			p.setActive(true);
@@ -260,7 +260,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testNoRetryInterceptor() {
 		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			Patient p = new Patient();
 			p.setId("ABC");
 			p.setActive(true);
@@ -300,7 +300,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
 
 		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			Patient p = new Patient();
 			p.setId("ABC");
 			p.setActive(true);
@@ -345,7 +345,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 
 			Parameters patch = new Parameters();
 			Parameters.ParametersParameterComponent operation = patch.addParameter();
@@ -382,7 +382,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(pId);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals("11", patient.getMeta().getVersionId());
+		assertEquals("6", patient.getMeta().getVersionId());
 
 	}
 
@@ -400,7 +400,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
 
 		List<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 
 			Patient p = new Patient();
 			p.setId("ABC");
