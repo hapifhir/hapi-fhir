@@ -499,7 +499,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequestDetails) {
 		validateDeleteEnabled();
 
-		return doDeleteByUrl(theUrl, deleteConflicts, theRequestDetails);
+		return myTransactionService.execute(theRequestDetails, tx -> doDeleteByUrl(theUrl, deleteConflicts, theRequestDetails));
 	}
 
 	@Nonnull

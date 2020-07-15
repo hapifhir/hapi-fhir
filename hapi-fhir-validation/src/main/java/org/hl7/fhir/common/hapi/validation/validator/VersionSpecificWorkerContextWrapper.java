@@ -471,8 +471,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCode(myValidationSupportContext, convertConceptValidationOptions(theOptions), system, code, display, null);
-		return convertValidationResult(result);
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
+
+		return doValidation(null, validationOptions, system, code, display);
 	}
 
 	@Override
@@ -487,8 +488,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions), theSystem, theCode, display, convertedVs);
-		return convertValidationResult(result);
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
+
+		return doValidation(convertedVs, validationOptions, theSystem, theCode, display);
 	}
 
 	@Override
@@ -502,12 +504,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions).setInferSystem(true), null, code, null, convertedVs);
-		return convertValidationResult(result);
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions).setInferSystem(true);
+
+		return doValidation(convertedVs, validationOptions, null, code, null);
 	}
 
 	@Override
-	public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.Coding code, org.hl7.fhir.r5.model.ValueSet theValueSet) {
+	public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.Coding theCoding, org.hl7.fhir.r5.model.ValueSet theValueSet) {
 		IBaseResource convertedVs = null;
 
 		try {
@@ -518,7 +521,22 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions), code.getSystem(), code.getCode(), code.getDisplay(), convertedVs);
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
+		String system = theCoding.getSystem();
+		String code = theCoding.getCode();
+		String display = theCoding.getDisplay();
+
+		return doValidation(convertedVs, validationOptions, system, code, display);
+	}
+
+	@Nonnull
+	private ValidationResult doValidation(IBaseResource theValueSet, ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
+		IValidationSupport.CodeValidationResult result;
+		if (theValueSet != null) {
+			result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
+		} else {
+			result = myValidationSupportContext.getRootValidationSupport().validateCode(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
+		}
 		return convertValidationResult(result);
 	}
 
