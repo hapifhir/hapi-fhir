@@ -132,7 +132,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		if (expansion == null) {
 			return null;
 		}
-		return validateCodeInExpandedValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, expansion);
+		return validateCodeInExpandedValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, expansion);
 	}
 
 
@@ -180,11 +180,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		IBaseResource expansion = valueSetExpansionOutcome.getValueSet();
 
-		return validateCodeInExpandedValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, expansion);
+		return validateCodeInExpandedValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, expansion);
 
 	}
 
-	private CodeValidationResult validateCodeInExpandedValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, IBaseResource theExpansion) {
+	private CodeValidationResult validateCodeInExpandedValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, IBaseResource theExpansion) {
 		assert theExpansion != null;
 
 		boolean caseSensitive = true;
@@ -275,11 +275,20 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 			if (codeMatches) {
 				if (theOptions.isInferSystem() || nextExpansionCode.getSystem().equals(theCodeSystem)) {
-					return new CodeValidationResult()
-						.setCode(theCode)
-						.setDisplay(nextExpansionCode.getDisplay())
-						.setCodeSystemName(codeSystemName)
-						.setCodeSystemVersion(codeSystemVersion);
+					if (!theOptions.isValidateDisplay() || (isBlank(nextExpansionCode.getDisplay()) || isBlank(theDisplay) || nextExpansionCode.getDisplay().equals(theDisplay))) {
+						return new CodeValidationResult()
+							.setCode(theCode)
+							.setDisplay(nextExpansionCode.getDisplay())
+							.setCodeSystemName(codeSystemName)
+							.setCodeSystemVersion(codeSystemVersion);
+					} else {
+						return new CodeValidationResult()
+							.setSeverity(IssueSeverity.ERROR)
+							.setDisplay(nextExpansionCode.getDisplay())
+							.setMessage("Concept Display \"" + theDisplay + "\" does not match expected \"" + nextExpansionCode.getDisplay() + "\"")
+							.setCodeSystemName(codeSystemName)
+							.setCodeSystemVersion(codeSystemVersion);
+					}
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -85,7 +86,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	}
 
 	@Override
-	public CodeValidationResult validateCodeIsInPreExpandedValueSet(ValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+	public CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = toCanonicalValueSet(valueSet);
@@ -101,7 +102,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 			}
 		}
 
-		return super.validateCodeIsInPreExpandedValueSet(new TerminologyServiceOptions(), valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
+		return super.validateCodeIsInPreExpandedValueSet(theOptions, valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
 	}
 
 	@Override

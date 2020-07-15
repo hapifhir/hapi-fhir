@@ -189,33 +189,6 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemBad() {
-		UriType valueSetIdentifier = null;
-		IdType id = null;
-		CodeType code = new CodeType("8450-9-XXX");
-		UriType system = new UriType("http://acme.org");
-		StringType display = null;
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
-	}
-
-	@Test
-	public void testValidateCodeOperationByCodeAndSystemGood() {
-		UriType valueSetIdentifier = null;
-		IdType id = null;
-		CodeType code = new CodeType("8450-9");
-		UriType system = new UriType("http://acme.org");
-		StringType display = null;
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure--expiration", result.getDisplay());
-	}
-
-	@Test
 	public void testValidateCodeOperationByIdentifierAndCodeAndSystem() {
 		UriType valueSetIdentifier = new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdType id = null;

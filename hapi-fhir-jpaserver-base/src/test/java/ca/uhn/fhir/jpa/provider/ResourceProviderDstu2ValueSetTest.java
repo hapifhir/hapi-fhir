@@ -56,22 +56,6 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemType() {
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("validate-code")
-			.withParameter(Parameters.class, "code", new CodeDt("8450-9"))
-			.andParameter("system", new UriDt("http://loinc.org"))
-			.execute();
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-		
-		assertEquals(new BooleanDt(true), respParam.getParameter().get(0).getValue());
-	}
-
-	@Test
 	public void testLookupOperationByCodeAndSystem() {
 		Parameters respParam = ourClient
 			.operation()

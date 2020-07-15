@@ -42,8 +42,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
-	ValidationOptions optsNoGuess = new ValidationOptions();
-	ValidationOptions optsGuess = new ValidationOptions().guessSystem();
+	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
+	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
 	private IIdType myConceptMapId;
 
 	private void createAndPersistConceptMap() {

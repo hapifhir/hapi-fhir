@@ -174,6 +174,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -1255,7 +1256,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
-		ValidationOptions theValidationOptions,
+		ConceptValidationOptions theValidationOptions,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
@@ -1263,7 +1264,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
-			if (theValidationOptions.isGuessSystem()) {
+			if (theValidationOptions.isInferSystem()) {
 				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getIdAsLong(), theCode));
 			} else if (isNotBlank(theSystem)) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
@@ -1285,12 +1286,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 
-		for (TermValueSetConcept concept : concepts) {
-			if (isNotBlank(theDisplay) && theDisplay.equals(concept.getDisplay())) {
-				return new IValidationSupport.CodeValidationResult()
-					.setCode(concept.getCode())
-					.setDisplay(concept.getDisplay());
+		if (theValidationOptions.isValidateDisplay()) {
+			for (TermValueSetConcept concept : concepts) {
+				if (isBlank(theDisplay) || isBlank(concept.getDisplay()) || theDisplay.equals(concept.getDisplay())) {
+					return new IValidationSupport.CodeValidationResult()
+						.setCode(concept.getCode())
+						.setDisplay(concept.getDisplay());
+				}
 			}
+
+			return createFailureCodeValidationResult(theSystem, theCode,  " - Concept Display \"" + theDisplay + "\" does not match expected \"" + concepts.get(0).getDisplay() + "\"").setDisplay(concepts.get(0).getDisplay());
 		}
 
 		if (!concepts.isEmpty()) {
@@ -2091,7 +2096,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
-			if (!theOptions.isValidateDisplay() || (isNotBlank(code.getDisplay()) && code.getDisplay().equals(theDisplay))) {
+			if (!theOptions.isValidateDisplay() || (isNotBlank(code.getDisplay()) && isNotBlank(theDisplay) && code.getDisplay().equals(theDisplay))) {
 				return new CodeValidationResult()
 					.setCode(code.getCode())
 					.setDisplay(code.getDisplay());
@@ -2113,7 +2118,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
 			if (pid != null) {
 				if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-					return validateCodeIsInPreExpandedValueSet(new ValidationOptions(), valueSet, theCodeSystem, theCode, null, null, null);
+					return validateCodeIsInPreExpandedValueSet(theValidationOptions, valueSet, theCodeSystem, theCode, null, null, null);
 				}
 			}
 		}

@@ -11,6 +11,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.AfterEach;
@@ -226,7 +227,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertTrue(result.isOk());
 		assertEquals("Found code", result.getMessage());
@@ -238,7 +239,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
 		assertEquals("Code not found", result.getMessage());

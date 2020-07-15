@@ -1219,9 +1219,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstanceOnType() throws IOException {
 		createLocalCsAndVs();
+		createLocalVsWithIncludeConcept();
 
 		String url = ourServerBase +
-			"/ValueSet/$validate-code?system=" +
+			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
 
@@ -1297,12 +1298,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals("result", respParam.getParameter().get(0).getName());
 			assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-			assertEquals("message", respParam.getParameter().get(1).getName());
-			assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
-
-			assertEquals("display", respParam.getParameter().get(2).getName());
-			assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+			assertEquals("display", respParam.getParameter().get(1).getName());
+			assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		}
+
 		// Good code and system, but not in specified valueset
 		{
 			Parameters respParam = myClient
