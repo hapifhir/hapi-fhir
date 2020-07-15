@@ -93,12 +93,14 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 
 		createPatient(buildPatientWithNameIdAndBirthday("gary", "gary_id", new Date()));
 		createPatient(buildPatientWithNameIdAndBirthday("john", "john_id", DateUtils.addDays(new Date(), -300)));
+
 		assertLinkCount(0);
-
-
 		afterEmpiLatch.setExpectedCount(1);
+
 		myEmpiBatchSvc.runEmpiOnAllTargets(new StringType("Patient?name=gary"));
+
 		afterEmpiLatch.awaitExpected();
+		assertLinkCount(1);
 	}
 
 
