@@ -505,6 +505,64 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 
+
+
+	@Test
+	public void testValidateValueSet() {
+		String input = "{\n" +
+			"  \"resourceType\": \"ValueSet\",\n" +
+			"  \"meta\": {\n" +
+			"    \"profile\": [\n" +
+			"      \"https://foo\"\n" +
+			"    ]\n" +
+			"  },\n" +
+			"  \"text\": {\n" +
+			"    \"status\": \"generated\",\n" +
+			"    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"></div>\"\n" +
+			"  },\n" +
+			"  \"url\": \"https://foo/bb\",\n" +
+			"  \"name\": \"BBBehaviourType\",\n" +
+			"  \"title\": \"BBBehaviour\",\n" +
+			"  \"status\": \"draft\",\n" +
+			"  \"version\": \"20190731\",\n" +
+			"  \"experimental\": false,\n" +
+			"  \"description\": \"alcohol habits.\",\n" +
+			"  \"publisher\": \"BB\",\n" +
+			"  \"immutable\": false,\n" +
+			"  \"compose\": {\n" +
+			"    \"include\": [\n" +
+			"      {\n" +
+			"        \"system\": \"https://bb\",\n" +
+			"        \"concept\": [\n" +
+			"          {\n" +
+			"            \"code\": \"123\",\n" +
+			"            \"display\": \"Current drinker\"\n" +
+			"          },\n" +
+			"          {\n" +
+			"            \"code\": \"456\",\n" +
+			"            \"display\": \"Ex-drinker\"\n" +
+			"          },\n" +
+			"          {\n" +
+			"            \"code\": \"789\",\n" +
+			"            \"display\": \"Lifetime non-drinker (finding)\"\n" +
+			"          }\n" +
+			"        ]\n" +
+			"      }\n" +
+			"    ]\n" +
+			"  }\n" +
+			"}";
+
+		ValueSet vs = myFhirCtx.newJsonParser().parseResource(ValueSet.class, input);
+		OperationOutcome oo = validateAndReturnOutcome(vs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+
+		assertEquals("The code 123 is not valid in the system https://bb", oo.getIssue().get(0).getDiagnostics());
+	}
+
+
+
+
+
 	/**
 	 * Per: https://chat.fhir.org/#narrow/stream/179166-implementers/topic/Handling.20incomplete.20CodeSystems
 	 * <p>
