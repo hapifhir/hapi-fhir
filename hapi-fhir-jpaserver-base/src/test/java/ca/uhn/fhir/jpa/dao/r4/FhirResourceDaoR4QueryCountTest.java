@@ -441,7 +441,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference("Patient/P");
-		myObservationDao.update(obs);
+		myObservationDao.create(obs);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
@@ -482,7 +482,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference("Patient/P");
-		myObservationDao.update(obs);
+		myObservationDao.create(obs);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);

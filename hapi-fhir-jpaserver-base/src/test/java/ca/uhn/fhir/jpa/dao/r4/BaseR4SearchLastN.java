@@ -163,7 +163,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	}
 
 	private Date calculateObservationDateFromOffset(Integer theTimeOffset, Integer theObservationIndex) {
-		int milliSecondsPerHour = 3600 * 1000;
+		long milliSecondsPerHour = 3600L * 1000L;
 		// Generate a Date by subtracting a calculated number of hours from the static observationDate property.
 		return new Date(observationDate.getTimeInMillis() - (milliSecondsPerHour * (theTimeOffset + theObservationIndex)));
 	}

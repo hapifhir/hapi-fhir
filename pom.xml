@@ -907,6 +907,11 @@
 				<version>1.7</version>
 			</dependency>
 			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjweaver</artifactId>
+				<version>1.9.5</version>
+			</dependency>
+			<dependency>
 				<groupId>org.hl7.fhir.testcases</groupId>
 				<artifactId>fhir-test-cases</artifactId>
 				<version>1.1.14</version>

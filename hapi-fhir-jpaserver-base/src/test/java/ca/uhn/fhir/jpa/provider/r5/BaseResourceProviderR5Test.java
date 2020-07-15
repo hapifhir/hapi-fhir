@@ -205,23 +205,6 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 		return names;
 	}
 
-	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
-		for (int i = 0; ; i++) {
-			if (i == 10) {
-				fail("Failed to init subscriptions");
-			}
-			try {
-				mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
-				break;
-			} catch (ResourceVersionConflictException e) {
-				Thread.sleep(250);
-			}
-		}
-
-		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
-		Thread.sleep(500);
-	}
-
 	@AfterAll
 	public static void afterClassClearContextBaseResourceProviderR5Test() throws Exception {
 		JettyUtil.closeServer(ourServer);
