@@ -128,15 +128,21 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkgVerMod.modifyColumn("20200629.1", "PKG_DESC").nullable().withType(ColumnTypeEnum.STRING, 200);
 		pkgVerMod.modifyColumn("20200629.2", "DESC_UPPER").nullable().withType(ColumnTypeEnum.STRING, 200);
 
+		init510_20200706_to_20200714();
+
 		Builder.BuilderWithTableName empiLink = version.onTable("MPI_LINK");
-		empiLink.addColumn("20200713.1", "VERSION").nonNullable().type(ColumnTypeEnum.STRING, EmpiLink.VERSION_LENGTH);
-		empiLink.addColumn("20200713.2", "EID_MATCH").nullable().type(ColumnTypeEnum.BOOLEAN);
-		empiLink.addColumn("20200713.3", "NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
-		empiLink.addColumn("20200713.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("20200713.5", "SCORE").nullable().type(ColumnTypeEnum.FLOAT);
+		empiLink.addColumn("20200715.1", "VERSION").nonNullable().type(ColumnTypeEnum.STRING, EmpiLink.VERSION_LENGTH);
+		empiLink.addColumn("20200715.2", "EID_MATCH").nullable().type(ColumnTypeEnum.BOOLEAN);
+		empiLink.addColumn("20200715.3", "NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
+		empiLink.addColumn("20200715.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("20200715.5", "SCORE").nullable().type(ColumnTypeEnum.FLOAT);
 	}
 
 	protected void init510_20200610() {
+	}
+
+	protected void init510_20200706_to_20200714() {
+
 	}
 
 	private void init501() { //20200514 - present

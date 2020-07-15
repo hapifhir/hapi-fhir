@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.empi.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
+import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDeleteSvc;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiSubmitterInterceptorLoader;
 import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import org.springframework.context.annotation.Bean;
@@ -43,5 +44,10 @@ public class EmpiSubmitterConfig {
 	@Bean
 	EmpiRuleValidator empiRuleValidator(FhirContext theFhirContext) {
 		return new EmpiRuleValidator(theFhirContext, empiSearchParamSvc());
+	}
+
+	@Bean
+	EmpiLinkDeleteSvc empiLinkDeleteSvc() {
+		return new EmpiLinkDeleteSvc();
 	}
 }

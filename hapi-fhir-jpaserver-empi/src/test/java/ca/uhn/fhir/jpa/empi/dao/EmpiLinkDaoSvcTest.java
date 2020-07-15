@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.empi.dao;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
-import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.util.TestUtil;

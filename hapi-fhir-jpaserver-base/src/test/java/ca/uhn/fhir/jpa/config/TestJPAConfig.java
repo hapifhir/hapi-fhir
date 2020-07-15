@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.empi.api.IEmpiSettings;
-import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -39,12 +37,6 @@ public class TestJPAConfig {
 	@Bean
 	public ModelConfig modelConfig() {
 		return daoConfig().getModelConfig();
-	}
-
-	@Bean
-	public IEmpiSettings empiSettings() {
-		// null validator for test
-		return new EmpiSettings(rules -> {});
 	}
 
 	/*

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.matcher;
 
-import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

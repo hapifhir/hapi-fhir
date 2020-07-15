@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.empi;
+package ca.uhn.fhir.jpa.empi.dao;
 
 /*-
  * #%L
@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +43,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public class EmpiLinkDaoSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
@@ -168,20 +166,6 @@ public class EmpiLinkDaoSvc {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteLink(EmpiLink theEmpiLink) {
 		myEmpiLinkDao.delete(theEmpiLink);
-	}
-
-	/**
-	 * Delete all EmpiLink records with any reference to this resource.  (Used by Expunge.)
-	 * @param theResource
-	 * @return the number of records deleted
-	 */
-	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
-		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
-		int removed =  myEmpiLinkDao.deleteWithAnyReferenceToPid(pid);
-		if (removed > 0) {
-			ourLog.info("Removed {} EMPI links with references to {}", removed, theResource.getIdElement().toVersionless());
-		}
-		return removed;
 	}
 
 	public List<EmpiLink> findEmpiLinksByPersonId(IBaseResource thePersonResource) {

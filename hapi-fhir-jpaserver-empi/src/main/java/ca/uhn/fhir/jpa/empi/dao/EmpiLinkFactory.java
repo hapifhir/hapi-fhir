@@ -1,14 +1,16 @@
-package ca.uhn.fhir.jpa.dao.empi;
+package ca.uhn.fhir.jpa.empi.dao;
 
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class EmpiLinkFactory {
+	private final IEmpiSettings myEmpiSettings;
+
 	@Autowired
-	IEmpiSettings myEmpiSettings;
+	public EmpiLinkFactory(IEmpiSettings theEmpiSettings) {
+		myEmpiSettings = theEmpiSettings;
+	}
 
 	public EmpiLink newEmpiLink() {
 		return new EmpiLink(myEmpiSettings.getRuleVersion());

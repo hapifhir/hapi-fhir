@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.svc.candidate;
 
-import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 

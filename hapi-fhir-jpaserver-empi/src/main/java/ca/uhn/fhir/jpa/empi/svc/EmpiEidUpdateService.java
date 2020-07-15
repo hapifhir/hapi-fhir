@@ -29,7 +29,7 @@ import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
-import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.MatchedPersonCandidate;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
