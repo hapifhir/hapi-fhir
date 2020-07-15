@@ -1504,6 +1504,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return;
 		}
 
+		if (source == null && theConceptMap.hasSourceCanonicalType()) {
+			source = theConceptMap.getSourceCanonicalType().getValueAsString();
+		}
+		if (target == null && theConceptMap.hasTargetCanonicalType()) {
+			target = theConceptMap.getTargetCanonicalType().getValueAsString();
+		}
+
 		/*
 		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
 		 */
@@ -1531,17 +1538,28 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
 				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
-					if (isBlank(group.getSource())) {
+
+					String groupSource = group.getSource();
+					if (isBlank(groupSource)) {
+						groupSource = source;
+					}
+					if (isBlank(groupSource)) {
 						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
 					}
-					if (isBlank(group.getTarget())) {
+
+					String groupTarget = group.getTarget();
+					if (isBlank(groupTarget)) {
+						groupTarget = target;
+					}
+					if (isBlank(groupTarget)) {
 						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
 					}
+
 					termConceptMapGroup = new TermConceptMapGroup();
 					termConceptMapGroup.setConceptMap(termConceptMap);
-					termConceptMapGroup.setSource(group.getSource());
+					termConceptMapGroup.setSource(groupSource);
 					termConceptMapGroup.setSourceVersion(group.getSourceVersion());
-					termConceptMapGroup.setTarget(group.getTarget());
+					termConceptMapGroup.setTarget(groupTarget);
 					termConceptMapGroup.setTargetVersion(group.getTargetVersion());
 					myConceptMapGroupDao.save(termConceptMapGroup);
 

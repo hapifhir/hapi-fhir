@@ -127,7 +127,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+			.logQueryBySlf4j(level)
+			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())
