@@ -67,7 +67,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -97,7 +97,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertFalse(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Systolic blood pressure at First encounter", result.getMessage());
+		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\"", result.getMessage());
 	}
 
 	@Test

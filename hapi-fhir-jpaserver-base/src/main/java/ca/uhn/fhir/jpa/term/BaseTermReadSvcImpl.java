@@ -2088,7 +2088,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		invokeRunnableForUnitTest();
 
 		if (isNotBlank(theValueSetUrl)) {
-			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode);
+			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode, theDisplay);
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
@@ -2110,7 +2110,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
-	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode) {
+	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
 		IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
 
 		// If we don't have a PID, this came from some source other than the JPA
@@ -2126,7 +2126,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		CodeValidationResult retVal = null;
 		if (valueSet != null) {
-			retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, null, valueSet);
+			retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, valueSet);
 		} else {
 			String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
 			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, append);

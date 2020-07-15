@@ -100,8 +100,9 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
+		assertFalse(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\"", result.getMessage());
 	}
 
 	@Test
