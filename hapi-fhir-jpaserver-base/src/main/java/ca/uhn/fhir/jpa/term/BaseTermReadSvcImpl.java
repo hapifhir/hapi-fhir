@@ -1694,6 +1694,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
 		ConceptValidationOptions validationOptions = new ConceptValidationOptions();
+
+		if (haveCodeableConcept)
+
 		return validateCode(validationContext, validationOptions, theSystem, theCode, theDisplay, valueSetUrl);
 	}
 
