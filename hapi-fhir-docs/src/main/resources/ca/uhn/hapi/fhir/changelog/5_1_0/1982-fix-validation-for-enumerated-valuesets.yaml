@@ -1,0 +1,7 @@
+---
+type: add
+issue: 1982
+title: The validator will now accept codes that are defined in a ValueSet where the valueset contains an enumeration of
+   codes, and the CodeSystem URL refers to an unknown CodeSystem. This allows successful validation of ValueSets in several
+   IGs that rely on the existence of grammar based systems.
+

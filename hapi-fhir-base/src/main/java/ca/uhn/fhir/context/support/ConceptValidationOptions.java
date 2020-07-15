@@ -25,6 +25,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ConceptValidationOptions {
 
+	private boolean myValidateDisplay;
+	private boolean myInferSystem;
+
 	public boolean isInferSystem() {
 		return myInferSystem;
 	}
@@ -34,12 +37,19 @@ public class ConceptValidationOptions {
 		return this;
 	}
 
-	private boolean myInferSystem;
-
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("inferSystem", myInferSystem)
 			.toString();
+	}
+
+	public boolean isValidateDisplay() {
+		return myValidateDisplay;
+	}
+
+	public ConceptValidationOptions setValidateDisplay(boolean theValidateDisplay) {
+		myValidateDisplay = theValidateDisplay;
+		return this;
 	}
 }

@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.Validate;
@@ -17,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Simple validation support module that handles profile snapshot generation.
@@ -75,9 +78,14 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			}
 			theValidationSupportContext.getCurrentlyGeneratingSnapshots().add(inputUrl);
 
-			IBaseResource base = theValidationSupportContext.getRootValidationSupport().fetchStructureDefinition(inputCanonical.getBaseDefinition());
+			String baseDefinition = inputCanonical.getBaseDefinition();
+			if (isBlank(baseDefinition)) {
+				throw new PreconditionFailedException("StructureDefinition[id=" + inputCanonical.getIdElement().getId() + ", url=" + inputCanonical.getUrl() + "] has no base");
+			}
+
+			IBaseResource base = theValidationSupportContext.getRootValidationSupport().fetchStructureDefinition(baseDefinition);
 			if (base == null) {
-				throw new PreconditionFailedException("Unknown base definition: " + inputCanonical.getBaseDefinition());
+				throw new PreconditionFailedException("Unknown base definition: " + baseDefinition);
 			}
 
 			org.hl7.fhir.r5.model.StructureDefinition baseCanonical = (org.hl7.fhir.r5.model.StructureDefinition) converter.toCanonical(base);
@@ -112,6 +120,8 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 			return theInput;
 
+		} catch (BaseServerResponseException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new InternalErrorException("Failed to generate snapshot", e);
 		} finally {
