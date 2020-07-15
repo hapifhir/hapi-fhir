@@ -953,7 +953,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 		Parameters respParam = myClient
 			.operation()
-			.onType(ValueSet.class)
+			.onInstance(myExtensionalVsId)
 			.named("validate-code")
 			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
 			.andParameter("system", new UriType("http://acme.org"))
@@ -979,7 +979,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -1033,7 +1033,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			ourLog.info("Response: {}", response);
 		}
 
-		HttpGet validateCodeGet = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?code=ChildAA&_pretty=true");
+		HttpGet validateCodeGet = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
 		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
 			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", response);
@@ -1041,7 +1041,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			assertEquals(true, output.getParameterBool("result"));
 		}
 
-		HttpGet validateCodeGet2 = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?code=FOO&_pretty=true");
+		HttpGet validateCodeGet2 = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
 		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
 			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", response);

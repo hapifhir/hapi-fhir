@@ -45,7 +45,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("validate-code")
-			.withParameter(Parameters.class, "code", new CodeDt("8495-4"))
+			.withParameter(Parameters.class, "code", new CodeDt("11378-7"))
 			.andParameter("system", new UriDt("http://loinc.org"))
 			.execute();
 

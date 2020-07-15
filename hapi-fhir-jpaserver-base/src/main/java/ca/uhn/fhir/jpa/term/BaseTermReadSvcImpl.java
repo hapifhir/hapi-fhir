@@ -1286,7 +1286,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 
-		if (theValidationOptions.isValidateDisplay()) {
+		if (theValidationOptions.isValidateDisplay() && concepts.size() > 0) {
 			for (TermValueSetConcept concept : concepts) {
 				if (isBlank(theDisplay) || isBlank(concept.getDisplay()) || theDisplay.equals(concept.getDisplay())) {
 					return new IValidationSupport.CodeValidationResult()
@@ -2085,6 +2085,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@CoverageIgnore
 	@Override
 	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		invokeRunnableForUnitTest();
 
 		if (isNotBlank(theValueSetUrl)) {
 			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode);
@@ -2123,10 +2124,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 		}
 
-		CodeValidationResult retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, null, valueSet);
+		CodeValidationResult retVal = null;
+		if (valueSet != null) {
+			retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, null, valueSet);
+		} else {
+			String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
+			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, append);
+		}
 
 		if (retVal == null) {
-			String append = " - Unable to expand ValueSet[" + CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet) + "]";
+			String append = " - Unable to expand ValueSet[" + theValueSetUrl + "]";
 			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, append);
 		}
 

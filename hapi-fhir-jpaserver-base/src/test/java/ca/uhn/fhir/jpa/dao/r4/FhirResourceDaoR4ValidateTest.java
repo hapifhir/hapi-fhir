@@ -9,7 +9,10 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcLoincTest;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
@@ -637,16 +640,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://example.com/codesystem");
 		obs.getCode().getCodingFirstRep().setCode("foo-foo");
 		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
-		try {
-			outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
-			ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-			fail();
-		} catch (PreconditionFailedException e) {
-			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-			assertEquals("None of the codes provided are in the value set http://example.com/valueset (http://example.com/valueset), and a code from this value set is required) (codes = http://example.com/codesystem#foo-foo)", oo.getIssueFirstRep().getDiagnostics());
-			assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
-		}
+		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
+		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo'", outcome.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, outcome.getIssueFirstRep().getSeverity());
 
 		// Correct codesystem, Code in codesystem
 		obs.getCode().getCodingFirstRep().setSystem("http://example.com/codesystem");
@@ -1544,6 +1541,22 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		assertEquals(2, expansion.getExpansion().getContains().size());
 	}
+
+
+	@Test
+	public void testKnownCodeSystemUnknownValueSetUri() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(ITermLoaderSvc.LOINC_URI);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("10013-1");
+		myCodeSystemDao.create(cs);
+
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+
+		assertFalse(result.isOk());
+		assertEquals("Unknown code {http://loinc.org}10013-1 - Unable to locate ValueSet[http://fooVs]", result.getMessage());
+	}
+
 
 
 }

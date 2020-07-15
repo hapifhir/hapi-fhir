@@ -226,11 +226,13 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertTrue(result.isOk());
-		assertEquals("Found code", result.getMessage());
+		assertEquals("R' wave amplitude in lead I", result.getDisplay());
 	}
 
 	@Test
@@ -238,11 +240,13 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
-		assertEquals("Code not found", result.getMessage());
+		assertEquals("Unknown code {http://loinc.org}10013-1-9999999999 - Unable to expand ValueSet[http://loinc.org/vs]", result.getMessage());
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {
