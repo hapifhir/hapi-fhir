@@ -168,7 +168,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 	@Operation(name = ProviderConstants.EMPI_BATCH_RUN, idempotent = true)
 	public void batchRunEmpi(@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_TARGET_TYPE, max=1) StringType theTargetType,
-									 @OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_TARGET_TYPE, max=1) StringType theCriteria,
+									 @OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_CRITERIA, max=1) StringType theCriteria,
 									 ServletRequestDetails theRequestDetails) {
 
 		if (theTargetType == null) {
