@@ -6,7 +6,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.GraphQL;
-import ca.uhn.fhir.rest.annotation.GraphQLQuery;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -858,7 +858,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	public static class GraphQLProvider {
 		@GraphQL
-		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
+		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQuery) {
 			return "{\"foo\":\"bar\"}";
 		}
 	}

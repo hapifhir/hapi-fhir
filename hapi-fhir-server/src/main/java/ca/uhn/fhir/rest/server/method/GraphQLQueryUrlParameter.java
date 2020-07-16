@@ -34,7 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-public class GraphQLQueryParameter implements IParameter {
+public class GraphQLQueryUrlParameter implements IParameter {
 
 	private Class<?> myType;
 

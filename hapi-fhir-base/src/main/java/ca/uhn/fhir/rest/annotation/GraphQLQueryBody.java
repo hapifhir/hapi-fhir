@@ -20,20 +20,23 @@ package ca.uhn.fhir.rest.annotation;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A method annotated with this annotation will be treated as a GraphQL implementation
- * method
+ * This annotation should be placed on the parameter of a
+ * {@link GraphQL @GraphQL} annotated method. The given
+ * parameter will be populated with the specific graphQL
+ * query being requested.
+ *
+ * <p>
+ *    This parameter should be of type {@link String}
+ * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= ElementType.METHOD)
-public @interface GraphQL {
-	RequestTypeEnum type() default RequestTypeEnum.GET;
+@Target(ElementType.PARAMETER)
+public @interface GraphQLQueryBody {
+	// ignore
 }
