@@ -85,7 +85,7 @@ public class EmpiResourceMatcherSvc {
 	}
 
 	EmpiMatchOutcome match(IBaseResource theLeftResource, IBaseResource theRightResource) {
-		EmpiMatchOutcome matchResult = getMatchVector(theLeftResource, theRightResource);
+		EmpiMatchOutcome matchResult = getMatchOutcome(theLeftResource, theRightResource);
 		EmpiMatchResultEnum matchResultEnum = myEmpiRulesJson.getMatchResult(matchResult.vector);
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
@@ -113,7 +113,7 @@ public class EmpiResourceMatcherSvc {
 	 * 0001|0010 = 0011
 	 * The binary string is now `0011`, which when you return it as a long becomes `3`.
 	 */
-	private EmpiMatchOutcome getMatchVector(IBaseResource theLeftResource, IBaseResource theRightResource) {
+	private EmpiMatchOutcome getMatchOutcome(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long vector = 0;
 		double score = 0.0;
 		for (int i = 0; i < myFieldMatchers.size(); ++i) {

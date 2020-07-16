@@ -1,7 +1,6 @@
 package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.BaseR4Test;
-import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
@@ -10,8 +9,6 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomResourceMatcherR4Test extends BaseR4Test {
 
@@ -55,6 +52,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	public void testExactNameFirstAndLast() {
 		EmpiResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(EmpiMetricEnum.NAME_FIRST_AND_LAST, true));
 		assertMatch(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
+		assertMatchResult(EmpiMatchResultEnum.MATCH, 1L, 1.0, false, false, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
 		assertMatch(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJohn));
 		assertMatch(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJOHN));
 		assertMatch(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHENRY));
@@ -75,10 +73,6 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 		assertMatch(EmpiMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnSmith));
 		assertMatch(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnBillyHenry));
 		assertMatch(EmpiMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourBillyJohnHenry));
-	}
-
-	private void assertMatch(EmpiMatchResultEnum theMatchEnum, EmpiMatchOutcome theMatchResult) {
-		assertEquals(theMatchEnum, theMatchResult.getMatchResultEnum());
 	}
 
 	private EmpiRulesJson buildNameRules(EmpiMetricEnum theExactNameAnyOrder, boolean theExact) {
