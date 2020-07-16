@@ -66,6 +66,7 @@ public class Constants {
 	public static final String CT_HTML = "text/html";
 	public static final String CT_HTML_WITH_UTF8 = "text/html" + CHARSET_UTF8_CTSUFFIX;
 	public static final String CT_JSON = "application/json";
+	public static final String CT_GRAPHQL = "application/graphql";
 	public static final String CT_JSON_PATCH = "application/json-patch+json";
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";

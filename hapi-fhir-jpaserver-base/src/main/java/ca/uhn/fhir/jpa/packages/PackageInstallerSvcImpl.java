@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -258,13 +259,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return Collections.EMPTY_LIST;
 		}
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		for (String file : pkg.getFolders().get("package").listFiles()) {
-			if (file.contains(type)) {
+		List<String> filesForType = pkg.getFolders().get("package").getTypes().get(type);
+		if (filesForType != null) {
+			for (String file : filesForType) {
 				try {
 					byte[] content = pkg.getFolders().get("package").fetchFile(file);
 					resources.add(fhirContext.newJsonParser().parseResource(new String(content)));
 				} catch (IOException e) {
-					ourLog.error("Cannot install resource of type {}: Could not fetch file {}", type, file);
+					throw new InternalErrorException("Cannot install resource of type "+type+": Could not fetch file "+ file, e);
 				}
 			}
 		}

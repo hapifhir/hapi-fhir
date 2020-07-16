@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -49,13 +48,13 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetFilterComponent;
 import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
+import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateCodeOptions;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -243,108 +242,11 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
-														IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding,
-														CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
+	public IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
+																					IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding,
+																					CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
 
-		List<IIdType> valueSetIds = Collections.emptyList();
-
-		boolean haveCodeableConcept = theCodeableConcept != null && theCodeableConcept.getCoding().size() > 0;
-		boolean haveCoding = theCoding != null && !theCoding.isEmpty();
-		boolean haveCode = theCode != null && !theCode.isEmpty();
-
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
-		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException("$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
-		}
-
-		boolean haveIdentifierParam = theValueSetIdentifier != null && !theValueSetIdentifier.isEmpty();
-		ValueSet vs = null;
-		boolean isBuiltInValueSet = false;
-		if (theId != null) {
-			vs = read(theId, theRequestDetails);
-		} else if (haveIdentifierParam) {
-			vs = (ValueSet) myDefaultProfileValidationSupport.fetchValueSet(theValueSetIdentifier.getValue());
-			if (vs == null) {
-				vs = (ValueSet) myValidationSupport.fetchValueSet(theValueSetIdentifier.getValue());
-				if (vs == null) {
-					throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
-				}
-			} else {
-				isBuiltInValueSet = true;
-			}
-		} else {
-			if (theCode == null || theCode.isEmpty()) {
-				throw new InvalidRequestException("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
-			}
-			// String code = theCode.getValue();
-			// String system = toStringOrNull(theSystem);
-			IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
-			if (result.isFound()) {
-				ValidateCodeResult retVal = new ValidateCodeResult(true, "Found code", result.getCodeDisplay());
-				return retVal;
-			}
-		}
-
-		if (vs != null) {
-			ValidateCodeResult result;
-			if (myDaoConfig.isPreExpandValueSets() && !isBuiltInValueSet && myTerminologySvc.isValueSetPreExpandedForCodeValidation(vs)) {
-				result = myTerminologySvc.validateCodeIsInPreExpandedValueSet(new ValidationOptions(), vs, toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
-			} else {
-				ValueSet expansion = doExpand(vs);
-				List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
-				result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
-			}
-			if (result != null) {
-				if (theDisplay != null && isNotBlank(theDisplay.getValue()) && isNotBlank(result.getDisplay())) {
-					if (!theDisplay.getValue().equals(result.getDisplay())) {
-						return new ValidateCodeResult(false, "Display for code does not match", result.getDisplay());
-					}
-				}
-				return result;
-			}
-		}
-
-		return new ValidateCodeResult(false, "Code not found", null);
-
-	}
-
-	private String toStringOrNull(IPrimitiveType<String> thePrimitive) {
-		return thePrimitive != null ? thePrimitive.getValue() : null;
-	}
-
-	private ValidateCodeResult validateCodeIsInContains(List<ValueSetExpansionContainsComponent> contains, String theSystem, String theCode,
-																		 Coding theCoding, CodeableConcept theCodeableConcept) {
-		for (ValueSetExpansionContainsComponent nextCode : contains) {
-			ValidateCodeResult result = validateCodeIsInContains(nextCode.getContains(), theSystem, theCode, theCoding, theCodeableConcept);
-			if (result != null) {
-				return result;
-			}
-
-			String system = nextCode.getSystem();
-			String code = nextCode.getCode();
-
-			if (isNotBlank(theCode)) {
-				if (theCode.equals(code) && (isBlank(theSystem) || theSystem.equals(system))) {
-					return new ValidateCodeResult(true, "Validation succeeded", nextCode.getDisplay());
-				}
-			} else if (theCoding != null) {
-				if (StringUtils.equals(system, theCoding.getSystem()) && StringUtils.equals(code, theCoding.getCode())) {
-					return new ValidateCodeResult(true, "Validation succeeded", nextCode.getDisplay());
-				}
-			} else {
-				for (Coding next : theCodeableConcept.getCoding()) {
-					if (StringUtils.equals(system, next.getSystem()) && StringUtils.equals(code, next.getCode())) {
-						return new ValidateCodeResult(true, "Validation succeeded", nextCode.getDisplay());
-					}
-				}
-			}
-
-		}
-
-		return null;
+		return myTerminologySvc.validateCode(vsValidateCodeOptions(), theId, toStringOrNull(theValueSetIdentifier), toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
 	}
 
 	@Override

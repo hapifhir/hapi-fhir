@@ -57,6 +57,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateCodeOptions;
+import static ca.uhn.fhir.jpa.util.LogicUtil.multiXor;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -291,102 +293,14 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		// nothing
 	}
 
-	private String toStringOrNull(IPrimitiveType<String> thePrimitive) {
+	public static String toStringOrNull(IPrimitiveType<String> thePrimitive) {
 		return thePrimitive != null ? thePrimitive.getValue() : null;
 	}
 
 	@Override
-	public ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
+	public IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
 			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequest) {
-		List<IIdType> valueSetIds;
-
-		boolean haveCodeableConcept = theCodeableConcept != null && theCodeableConcept.getCoding().size() > 0;
-		boolean haveCoding = theCoding != null && theCoding.isEmpty() == false;
-		boolean haveCode = theCode != null && theCode.isEmpty() == false;
-
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
-		}
-		if (!multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException("$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
-		}
-
-		boolean haveIdentifierParam = theValueSetIdentifier != null && theValueSetIdentifier.isEmpty() == false;
-		if (theId != null) {
-			valueSetIds = Collections.singletonList(theId);
-		} else if (haveIdentifierParam) {
-			Set<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(ValueSet.SP_IDENTIFIER, new TokenParam(null, theValueSetIdentifier.getValue())), theRequest);
-			valueSetIds = new ArrayList<>();
-			for (ResourcePersistentId next : ids) {
-				IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "ValueSet", next);
-				valueSetIds.add(id);
-			}
-		} else {
-			if (theCode == null || theCode.isEmpty()) {
-				throw new InvalidRequestException("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
-			}
-			String code = theCode.getValue();
-			String system = toStringOrNull(theSystem);
-			valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system, theRequest);
-		}
-
-		for (IIdType nextId : valueSetIds) {
-			ValueSet expansion = expand(nextId, null, theRequest);
-			List<ExpansionContains> contains = expansion.getExpansion().getContains();
-			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
-			if (result != null) {
-				if (theDisplay != null && isNotBlank(theDisplay.getValue()) && isNotBlank(result.getDisplay())) {
-					if (!theDisplay.getValue().equals(result.getDisplay())) {
-						return new ValidateCodeResult(false, "Display for code does not match", result.getDisplay());
-					}
-				}
-				return result;
-			}
-		}
-
-		return new ValidateCodeResult(false, "Code not found", null);
-	}
-
-	private ValidateCodeResult validateCodeIsInContains(List<ExpansionContains> contains, String theSystem, String theCode, CodingDt theCoding,
-			CodeableConceptDt theCodeableConcept) {
-		for (ExpansionContains nextCode : contains) {
-			ValidateCodeResult result = validateCodeIsInContains(nextCode.getContains(), theSystem, theCode, theCoding, theCodeableConcept);
-			if (result != null) {
-				return result;
-			}
-
-			String system = nextCode.getSystem();
-			String code = nextCode.getCode();
-
-			if (isNotBlank(theCode)) {
-				if (theCode.equals(code) && (isBlank(theSystem) || theSystem.equals(system))) {
-					return new ValidateCodeResult(true, "Validation succeeded", nextCode.getDisplay());
-				}
-			} else if (theCoding != null) {
-				if (StringUtils.equals(system, theCoding.getSystem()) && StringUtils.equals(code, theCoding.getCode())) {
-					return new ValidateCodeResult(true, "Validation succeeded", nextCode.getDisplay());
-				}
-			} else {
-				for (CodingDt next : theCodeableConcept.getCoding()) {
-					if (StringUtils.equals(system, next.getSystem()) && StringUtils.equals(code, next.getCode())) {
-						return new ValidateCodeResult(true, "Validation succeeded", nextCode.getDisplay());
-					}
-				}
-			}
-
-		}
-
-		return null;
-	}
-
-	private static boolean multiXor(boolean... theValues) {
-		int count = 0;
-		for (int i = 0; i < theValues.length; i++) {
-			if (theValues[i]) {
-				count++;
-			}
-		}
-		return count == 1;
+		return myTerminologySvc.validateCode(vsValidateCodeOptions(), theId, toStringOrNull(theValueSetIdentifier), toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
 	}
 
 }

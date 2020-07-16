@@ -297,7 +297,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					}
 					myPackageVersionResourceDao.save(resourceEntity);
 
-					String msg = "Indexing Resource[" + dirName + '/' + nextFile + "] with URL: " + defaultString(url) + "|" + defaultString(version);
+					String resType = packageContext.getResourceType(resource);
+					String msg = "Indexing " + resType + " Resource[" + dirName + '/' + nextFile + "] with URL: " + defaultString(url) + "|" + defaultString(version);
 					getProcessingMessages(npmPackage).add(msg);
 					ourLog.info("Package[{}#{}] " + msg, thePackageId, packageVersionId);
 				}

@@ -590,19 +590,27 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testDeleteFailsIfIncomingLinks() {
 		String methodName = "testDeleteFailsIfIncomingLinks";
+		SearchParameterMap map;
+		List<IIdType> found;
+
 		Organization org = new Organization();
 		org.setName(methodName);
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		map = SearchParameterMap.newSynchronous();
+		map.add("_id", new StringParam(orgId.getIdPart()));
+		map.addRevInclude(new Include("*"));
+		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+		assertThat(found, contains(orgId));
 
 		Patient patient = new Patient();
 		patient.addName().addFamily(methodName);
 		patient.getManagingOrganization().setReference(orgId);
 		IIdType patId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		SearchParameterMap map = new SearchParameterMap();
 		map.add("_id", new StringParam(orgId.getIdPart()));
 		map.addRevInclude(new Include("*"));
-		List<IIdType> found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
 		assertThat(found, contains(orgId, patId));
 
 		try {
@@ -613,9 +621,21 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		}
 
+		map = SearchParameterMap.newSynchronous();
+		map.add("_id", new StringParam(orgId.getIdPart()));
+		map.addRevInclude(new Include("*"));
+		ourLog.info("***** About to perform search");
+		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+
+		runInTransaction(()->{
+			ourLog.info("Resources:\n * {}", myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		assertThat(found.toString(), found, contains(orgId, patId));
+
 		myPatientDao.delete(patId, mySrd);
 
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add("_id", new StringParam(orgId.getIdPart()));
 		map.addRevInclude(new Include("*"));
 		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
@@ -623,7 +643,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		myOrganizationDao.delete(orgId, mySrd);
 
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add("_id", new StringParam(orgId.getIdPart()));
 		map.addRevInclude(new Include("*"));
 		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));

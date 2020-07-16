@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
+package ca.uhn.fhir.jpa.api.model;
 
 /*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR JPA API
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,23 +20,30 @@ package ca.uhn.fhir.rest.annotation;
  * #L%
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.apache.commons.lang3.Validate;
 
 /**
- * This annotation should be placed on the parameter of a
- * {@link GraphQL @GraphQL} annotated method. The given
- * parameter will be populated with the specific graphQL
- * query being requested.
- *
- * <p>
- *    This parameter should be of type {@link String}
- * </p>
+ * @since 5.1.0
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface GraphQLQuery {
-	// ignore
+public class ResourceVersionConflictResolutionStrategy {
+
+	private int myMaxRetries;
+	private boolean myRetry;
+
+	public int getMaxRetries() {
+		return myMaxRetries;
+	}
+
+	public void setMaxRetries(int theMaxRetries) {
+		Validate.isTrue(theMaxRetries >= 0, "theRetryUpToMillis must not be negative");
+		myMaxRetries = theMaxRetries;
+	}
+
+	public boolean isRetry() {
+		return myRetry;
+	}
+
+	public void setRetry(boolean theRetry) {
+		myRetry = theRetry;
+	}
 }

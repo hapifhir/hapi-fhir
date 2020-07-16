@@ -103,10 +103,26 @@ Cache-Control: no-store, max-results=20
 
 * [This page](https://www.openhealthhub.org/t/hapi-terminology-server-uk-snomed-ct-import/592) has information on loading national editions (UK specifically) of SNOMED CT files into the database.
 
+
+<a name="cascading-deletes"/>
+
 # Cascading Deletes
 
-An interceptor called `CascadingDeleteInterceptor` may be registered against the Server. When this interceptor is enabled, cascading deletes may be performed using either of the following:
+An interceptor called `CascadingDeleteInterceptor` may be registered against the server. When this interceptor is enabled, cascading deletes may be performed using either of the following:
 
 * The request may include the following parameter: `_cascade=delete`
 * The request may include the following header: `X-Cascade: delete`
 
+<a name="retry-on-version-conflict"/>
+
+# Version Conflicts
+
+If a server is serving multiple concurrent requests against the same resource, a [ResourceVersionConflictException](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/server/exceptions/ResourceVersionConflictException.html) may be thrown (resulting in an **HTTP 409 Version Conflict** being returned to the client). For example, if two client requests attempt to update the same resource at the exact same time, this exception will be thrown for one of the requests. This exception is not a bug in the server itself, but instead is a defense against client updates accidentally being lost because of concurrency issues. When this occurs, it is important to consider what the root cause might be, since concurrent writes against the same resource are often indicative of a deeper application design issue.
+
+An interceptor called `UserRequestRetryVersionConflictsInterceptor` may be registered against the server. When this interceptor is enabled, requests may include an optional header requesting for the server to try to avoid returning an error due to concurrent writes. The server will then try to avoid version conflict errors by automatically retrying requests that would have otherwise failed due to a version conflict.
+
+With this interceptor in place, the following header can be added to individual HTTP requests to instruct the server to avoid version conflict errors:
+
+```http
+X-Retry-On-Version-Conflict: retry; max-retries=100
+```    

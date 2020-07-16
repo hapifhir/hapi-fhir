@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.api.model.TranslationResult;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -1041,6 +1042,49 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			}
 		});
 	}
+
+	/**
+	 * Some US core ConceptMaps use this style, e.g:
+	 *
+	 * http://hl7.org/fhir/us/core/ConceptMap/ndc-cvx
+	 */
+	@Test
+	public void testUploadConceptMapWithOnlyCanonicalSourceAtConceptMapLevel() {
+
+		ConceptMap cm = new ConceptMap();
+		cm.setUrl("http://foo");
+		cm.setSource(new CanonicalType("http://source"));
+		cm.setTarget(new CanonicalType("http://target"));
+		cm.addGroup().addElement().setCode("source1").addTarget().setCode("target1").setEquivalence(ConceptMapEquivalence.EQUAL);
+		myConceptMapDao.create(cm);
+
+		runInTransaction(()->{
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem("http://source")
+				.setCode("source1");
+			translationRequest.setTarget(new UriType("http://target"));
+
+			ourLog.info("*** About to translate");
+			TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+			ourLog.info("*** Done translating");
+
+			assertTrue(translationResult.getResult().booleanValue());
+			assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+
+			assertEquals(1, translationResult.getMatches().size());
+
+			TranslationMatch translationMatch = translationResult.getMatches().get(0);
+			assertEquals("equal", translationMatch.getEquivalence().getCode());
+			Coding concept = translationMatch.getConcept();
+			assertEquals("target1", concept.getCode());
+			assertEquals(null, concept.getDisplay());
+			assertEquals("http://target", concept.getSystem());
+		});
+
+
+	}
+
 
 
 	@Test

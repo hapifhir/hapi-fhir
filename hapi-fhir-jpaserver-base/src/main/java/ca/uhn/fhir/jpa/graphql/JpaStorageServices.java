@@ -25,15 +25,24 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.NumberOrListParam;
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.SpecialOrListParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -56,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
 
@@ -111,42 +121,63 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 				throw new InvalidRequestException(msg);
 			}
 
-			for (Value nextValue : nextArgument.getValues()) {
-				String value = nextValue.getValue();
+			IQueryParameterOr<?> queryParam;
 
-				IQueryParameterType param = null;
-				switch (searchParam.getParamType()) {
-					case NUMBER:
-						param = new NumberParam(value);
-						break;
-					case DATE:
-						param = new DateParam(value);
-						break;
-					case STRING:
-						param = new StringParam(value);
-						break;
-					case TOKEN:
-						param = new TokenParam(null, value);
-						break;
-					case REFERENCE:
-						param = new ReferenceParam(value);
-						break;
-					case COMPOSITE:
-						throw new InvalidRequestException("Composite parameters are not yet supported in GraphQL");
-					case QUANTITY:
-						param = new QuantityParam(value);
-						break;
-					case SPECIAL:
-						param = new SpecialParam().setValue(value);
-						break;
-					case URI:
-						break;
-					case HAS:
-						break;
-				}
-
-				params.add(searchParamName, param);
+			switch (searchParam.getParamType()) {
+				case NUMBER:
+					NumberOrListParam numberOrListParam = new NumberOrListParam();
+					for (Value value: nextArgument.getValues()) {
+						numberOrListParam.addOr(new NumberParam(value.getValue()));
+					}
+					queryParam = numberOrListParam;
+					break;
+				case DATE:
+					DateOrListParam dateOrListParam = new DateOrListParam();
+					for (Value value: nextArgument.getValues()) {
+						dateOrListParam.addOr(new DateParam(value.getValue()));
+					}
+					queryParam = dateOrListParam;
+					break;
+				case STRING:
+					StringOrListParam stringOrListParam = new StringOrListParam();
+					for (Value value: nextArgument.getValues()) {
+						stringOrListParam.addOr(new StringParam(value.getValue()));
+					}
+					queryParam = stringOrListParam;
+					break;
+				case TOKEN:
+					TokenOrListParam tokenOrListParam = new TokenOrListParam();
+					for (Value value: nextArgument.getValues()) {
+						tokenOrListParam.addOr(new TokenParam(value.getValue()));
+					}
+					queryParam = tokenOrListParam;
+					break;
+				case REFERENCE:
+					ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+					for (Value value: nextArgument.getValues()) {
+						referenceOrListParam.addOr(new ReferenceParam(value.getValue()));
+					}
+					queryParam = referenceOrListParam;
+					break;
+				case QUANTITY:
+					QuantityOrListParam quantityOrListParam = new QuantityOrListParam();
+					for (Value value: nextArgument.getValues()) {
+						quantityOrListParam.addOr(new QuantityParam(value.getValue()));
+					}
+					queryParam = quantityOrListParam;
+					break;
+				case SPECIAL:
+					SpecialOrListParam specialOrListParam = new SpecialOrListParam();
+					for (Value value: nextArgument.getValues()) {
+						specialOrListParam.addOr(new SpecialParam().setValue(value.getValue()));
+					}
+					queryParam = specialOrListParam;
+					break;
+				default:
+					throw new InvalidRequestException(String.format("%s parameters are not yet supported in GraphQL", searchParam.getParamType()));
 			}
+
+			params.add(searchParamName, queryParam);
 		}
 
 		RequestDetails requestDetails = (RequestDetails) theAppInfo;

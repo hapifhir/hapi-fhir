@@ -352,7 +352,7 @@ public class FhirInstanceValidatorDstu3Test {
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 			assertEquals(1, all.size());
 			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
-			assertEquals("Validation failed for \"urn:iso:std:iso:3166#QQ\"", all.get(0).getMessage());
+			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ' for \"urn:iso:std:iso:3166#QQ\"", all.get(0).getMessage());
 		}
 	}
 

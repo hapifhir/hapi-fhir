@@ -2,12 +2,14 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.GraphQL;
-import ca.uhn.fhir.rest.annotation.GraphQLQuery;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -15,6 +17,8 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -114,6 +118,62 @@ public class GraphQLR4RawTest {
 
 	}
 
+
+	@Test
+	public void testGraphPostContentTypeJson() throws Exception {
+		ourNextRetVal = "{\"foo\"}";
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$graphql");
+		StringEntity entity = new StringEntity("{\"query\": \"{name{family,given}}\"}");
+		httpPost.setEntity(entity);
+		httpPost.setHeader("Accept", "application/json");
+		httpPost.setHeader("Content-type", "application/json");
+
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\"foo\"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertEquals("Patient/123", ourLastId.getValue());
+			assertEquals("{name{family,given}}", ourLastQuery);
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testGraphPostContentTypeGraphql() throws Exception {
+		ourNextRetVal = "{\"foo\"}";
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$graphql");
+		StringEntity entity = new StringEntity("{name{family,given}}");
+		httpPost.setEntity(entity);
+		httpPost.setHeader("Accept", "application/json");
+		httpPost.setHeader("Content-type", "application/graphql");
+
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\"foo\"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertEquals("Patient/123", ourLastId.getValue());
+			assertEquals("{name{family,given}}", ourLastQuery);
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+
 	@Test
 	public void testGraphInstanceUnknownType() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
@@ -157,9 +217,16 @@ public class GraphQLR4RawTest {
 
 	public static class MyGraphQLProvider {
 
+		@GraphQL(type=RequestTypeEnum.GET)
+		public String processGet(@IdParam IdType theId, @GraphQLQueryUrl String theQuery) {
+			ourMethodCount++;
+			ourLastId = theId;
+			ourLastQuery = theQuery;
+			return ourNextRetVal;
+		}
 
-		@GraphQL
-		public String process(@IdParam IdType theId, @GraphQLQuery String theQuery) {
+		@GraphQL(type=RequestTypeEnum.POST)
+		public String processPost(@IdParam IdType theId, @GraphQLQueryBody String theQuery) {
 			ourMethodCount++;
 			ourLastId = theId;
 			ourLastQuery = theQuery;

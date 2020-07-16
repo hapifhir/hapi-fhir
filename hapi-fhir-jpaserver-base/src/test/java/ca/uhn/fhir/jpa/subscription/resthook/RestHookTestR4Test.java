@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -250,7 +251,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Manually unregister all subscriptions
 		mySubscriptionRegistry.unregisterAllSubscriptions();
-		waitForActivatedSubscriptionCount(0);
+		assertEquals(0, mySubscriptionRegistry.size());
 
 		// Force a reload
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();

@@ -21,9 +21,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -42,7 +40,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -88,23 +85,6 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 	private void waitForQueueToDrain() throws InterruptedException {
 		mySubscriptionTestUtil.waitForQueueToDrain();
-	}
-
-	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
-		for (int i = 0; ; i++) {
-			if (i == 10) {
-				fail("Failed to init subscriptions");
-			}
-			try {
-				mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
-				break;
-			} catch (ResourceVersionConflictException e) {
-				Thread.sleep(250);
-			}
-		}
-
-		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
-		Thread.sleep(500);
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
@@ -232,8 +212,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
 
 
-		runInTransaction(()->{
-			ourLog.info("All token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("All token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		myCaptureQueriesListener.clear();

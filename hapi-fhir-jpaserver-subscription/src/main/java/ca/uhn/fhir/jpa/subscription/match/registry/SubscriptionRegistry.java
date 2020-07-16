@@ -94,7 +94,7 @@ public class SubscriptionRegistry {
 		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
-		ourLog.info("Registered active subscription {} - Have {} registered", subscriptionId, myActiveSubscriptionCache.size());
+		ourLog.info("Registered active subscription Subscription/{} - Have {} registered", subscriptionId, myActiveSubscriptionCache.size());
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
 		HookParams params = new HookParams()
@@ -110,6 +110,11 @@ public class SubscriptionRegistry {
 		if (activeSubscription != null) {
 			mySubscriptionChannelRegistry.remove(activeSubscription);
 			ourLog.info("Unregistered active subscription {} - Have {} registered", theSubscriptionId, myActiveSubscriptionCache.size());
+
+			// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED
+			HookParams params = new HookParams();
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED, params);
+
 		}
 	}
 
