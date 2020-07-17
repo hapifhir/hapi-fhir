@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.empi.svc;
  */
 
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
-import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.EmpiTargetType;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;

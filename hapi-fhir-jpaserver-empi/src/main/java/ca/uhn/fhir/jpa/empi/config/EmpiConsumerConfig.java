@@ -44,8 +44,6 @@ import ca.uhn.fhir.jpa.empi.dao.EmpiLinkFactory;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.svc.EmpiBatchSvcImpl;
-import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchCriteriaBuilderSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
 import ca.uhn.fhir.jpa.empi.svc.EmpiExpungeSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkQuerySvcImpl;
