@@ -19,8 +19,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server-empi</artifactId>
-
-
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

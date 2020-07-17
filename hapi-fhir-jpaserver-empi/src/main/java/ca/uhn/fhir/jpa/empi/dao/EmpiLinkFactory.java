@@ -32,6 +32,11 @@ public class EmpiLinkFactory {
 		myEmpiSettings = theEmpiSettings;
 	}
 
+	/**
+	 * Create a new EmpiLink, populating it with the version of the ruleset used to create it.
+	 *
+	 * @return the new {@link EmpiLink}
+	 */
 	public EmpiLink newEmpiLink() {
 		return new EmpiLink(myEmpiSettings.getRuleVersion());
 	}

@@ -144,7 +144,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myFromPerson, myTargetPatient1);
 
 		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myToPerson);
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
 		assertEquals(1, links.size());
 		assertThat(myToPerson, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToPerson.getLink().size());
@@ -155,7 +155,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToPerson, myTargetPatient1);
 
 		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myToPerson);
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
 		assertEquals(1, links.size());
 		assertThat(myToPerson, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToPerson.getLink().size());
@@ -171,7 +171,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToPerson, myTargetPatient1);
 
 		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myToPerson);
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 	}
@@ -187,7 +187,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToPerson, myTargetPatient1);
 
 		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myToPerson);
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 	}
@@ -202,7 +202,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		saveLink(toLink);
 
 		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(myToPerson);
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 	}

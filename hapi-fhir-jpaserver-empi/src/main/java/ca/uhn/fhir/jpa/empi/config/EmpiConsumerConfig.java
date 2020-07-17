@@ -88,6 +88,7 @@ public class EmpiConsumerConfig {
 	EmpiMatchLinkSvc empiMatchLinkSvc() {
 		return new EmpiMatchLinkSvc();
 	}
+
 	@Bean
 	IEmpiBatchService myEmpiBatchService() {
 		return new EmpiBatchSvcImpl();
