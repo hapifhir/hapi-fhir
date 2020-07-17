@@ -89,10 +89,27 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 	}
 
 	public static void validateSearchParam(ISearchParamRegistry theSearchParamRegistry, ISearchParamExtractor theSearchParamExtractor, String theCode, Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext, DaoConfig theDaoConfig) {
+		/*
+		 * If overriding built-in SPs is disabled on this server, make sure we aren't
+		 * doing that
+		 */
+		if (theDaoConfig.getModelConfig().isDefaultSearchParamsCanBeOverridden() == false) {
+			for (IPrimitiveType<?> nextBaseType : theBase) {
+				String nextBase = nextBaseType.getValueAsString();
+				RuntimeSearchParam existingSearchParam = theSearchParamRegistry.getActiveSearchParam(nextBase, theCode);
+				if (existingSearchParam != null && existingSearchParam.getId() == null) {
+					throw new UnprocessableEntityException("Can not override built-in search parameter " + nextBase + ":" + theCode + " because overriding is disabled on this server");
+				}
+			}
+		}
+
+		/*
+		 * Everything below is validating that the SP is actually valid. We'll only do that if the
+		 * SPO is active, so that we don't block people from uploading works-in-progress
+		 */
 		if (theStatus == null) {
 			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
 		}
-
 		if (!theStatus.name().equals("ACTIVE")) {
 			return;
 		}
@@ -153,18 +170,6 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 			}
 		} // if have expression
-
-		// If overriding built-in SPs is disabled on this server, make sure we aren't
-		// doing that
-		if (theDaoConfig.getModelConfig().isDefaultSearchParamsCanBeOverridden() == false) {
-			for (IPrimitiveType<?> nextBaseType : theBase) {
-				String nextBase = nextBaseType.getValueAsString();
-				RuntimeSearchParam existingSearchParam = theSearchParamRegistry.getActiveSearchParam(nextBase, theCode);
-				if (existingSearchParam != null && existingSearchParam.getId() == null) {
-					throw new UnprocessableEntityException("Can not override built-in search parameter " + nextBase + ":" + theCode + " because overriding is disabled on this server");
-				}
-			}
-		}
 
 	}
 
