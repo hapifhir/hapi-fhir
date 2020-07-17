@@ -67,6 +67,17 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		myPointcut = null;
 	}
 
+	public void runWithExpectedCount(int theExpectedCount, Runnable r) {
+		this.setExpectedCount(theExpectedCount);
+		r.run();
+		try {
+			this.awaitExpected();
+		} catch (InterruptedException theE) {
+			ourLog.error("InterruptedException while awaiting invocation of {}", this.myPointcut.name());
+			theE.printStackTrace();
+		}
+	}
+
 	public long getLastInvoke() {
 		return myLastInvoke.get();
 	}

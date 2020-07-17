@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.entity;
 
 public enum EmpiTargetType {
-	PATIENT("patient"),
-	PRACTITIONER("practitioner");
+	PATIENT,
+	PRACTITIONER,
+	PERSON;
 
-	EmpiTargetType(String thePractitioner) {}
+	EmpiTargetType(){}
 
 	public static EmpiTargetType valueOfCaseInsensitive(String theValue) {
 		return valueOf(EmpiTargetType.class, theValue.toUpperCase());
