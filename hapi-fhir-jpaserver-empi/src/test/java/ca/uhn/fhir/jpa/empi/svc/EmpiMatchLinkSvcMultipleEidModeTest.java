@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.EmpiConstants;
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -15,15 +16,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.MATCH;
+import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_DUPLICATE;
+import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @TestPropertySource(properties = {
@@ -43,6 +49,9 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 	public void testIncomingPatientWithEIDThatMatchesPersonWithHapiEidAddsExternalEidsToPerson() {
 		// Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinksMatchResult(MATCH);
+		assertLinksNewPerson(true);
+		assertLinksMatchedByEid(false);
 
 		Person janePerson = getPersonFromTarget(patient);
 		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
@@ -52,6 +61,9 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(janePatient, "12345");
 		addExternalEID(janePatient, "67890");
 		createPatientAndUpdateLinks(janePatient);
+		assertLinksMatchResult(MATCH, MATCH);
+		assertLinksNewPerson(true, false);
+		assertLinksMatchedByEid(false, false);
 
 		//We want to make sure the patients were linked to the same person.
 		assertThat(patient, is(samePersonAs(janePatient)));
@@ -75,6 +87,25 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(thirdIdentifier.getValue(), is(equalTo("67890")));
 	}
 
+	private void assertLinksMatchResult(EmpiMatchResultEnum... theExpectedValues) {
+		assertFields(EmpiLink::getMatchResult, theExpectedValues);
+	}
+
+	private void assertLinksNewPerson(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getNewPerson, theExpectedValues);
+	}
+
+	private void assertLinksMatchedByEid(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getEidMatch, theExpectedValues);
+	}
+
+	private <T> void assertFields(Function<EmpiLink, T> theAccessor, T... theExpectedValues) {
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		assertEquals(theExpectedValues.length, links.size());
+		for (int i = 0; i < links.size(); ++i) {
+			assertEquals(theExpectedValues[i], theAccessor.apply(links.get(i)), "Value at index " + i + " was not equal");
+		}
+	}
 
 	@Test
 	// Test Case #4
@@ -86,11 +117,17 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient1, "id_3");
 		addExternalEID(patient1, "id_4");
 		createPatientAndUpdateLinks(patient1);
+		assertLinksMatchResult(MATCH);
+		assertLinksNewPerson(true);
+		assertLinksMatchedByEid(false);
 
 		Patient patient2 = buildPaulPatient();
 		addExternalEID(patient2, "id_5");
 		addExternalEID(patient2, "id_1");
 		patient2 = createPatientAndUpdateLinks(patient2);
+		assertLinksMatchResult(MATCH, MATCH);
+		assertLinksNewPerson(true, false);
+		assertLinksMatchedByEid(false, true);
 
 		assertThat(patient1, is(samePersonAs(patient2)));
 
@@ -102,13 +139,14 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(personFromTarget.getIdentifier(), hasSize(5));
 
 		updatePatientAndUpdateLinks(patient2);
+		assertLinksMatchResult(MATCH, MATCH);
+		assertLinksNewPerson(true, false);
+		assertLinksMatchedByEid(false, true);
 
 		assertThat(patient1, is(samePersonAs(patient2)));
 
-
 		personFromTarget = getPersonFromTarget(patient2);
 		assertThat(personFromTarget.getIdentifier(), hasSize(6));
-
 	}
 
 	@Test
@@ -118,15 +156,20 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient1, "eid-1");
 		addExternalEID(patient1, "eid-11");
 		patient1 = createPatientAndUpdateLinks(patient1);
+		assertLinksMatchResult(MATCH);
+		assertLinksNewPerson(true);
+		assertLinksMatchedByEid(false);
 
 		Patient patient2 = buildJanePatient();
 		addExternalEID(patient2, "eid-2");
 		addExternalEID(patient2, "eid-22");
 		patient2 = createPatientAndUpdateLinks(patient2);
+		assertLinksMatchResult(MATCH, MATCH, POSSIBLE_DUPLICATE);
+		assertLinksNewPerson(true, true, false);
+		assertLinksMatchedByEid(false, false, false);
 
 		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
-
 
 		List<Long> duplicatePids = Stream.of(patient1, patient2)
 			.map(this::getPersonFromTarget)
@@ -146,26 +189,39 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient1, "eid-1");
 		addExternalEID(patient1, "eid-11");
 		patient1 = createPatientAndUpdateLinks(patient1);
+		assertLinksMatchResult(MATCH);
+		assertLinksNewPerson(true);
+		assertLinksMatchedByEid(false);
 
 		Patient patient2 = buildPaulPatient();
 		addExternalEID(patient2, "eid-2");
 		addExternalEID(patient2, "eid-22");
 		patient2 = createPatientAndUpdateLinks(patient2);
+		assertLinksMatchResult(MATCH, MATCH);
+		assertLinksNewPerson(true, true);
+		assertLinksMatchedByEid(false, false);
 
 		Patient patient3 = buildPaulPatient();
 		addExternalEID(patient3, "eid-22");
 		patient3 = createPatientAndUpdateLinks(patient3);
+		assertLinksMatchResult(MATCH, MATCH, MATCH);
+		assertLinksNewPerson(true, true, false);
+		assertLinksMatchedByEid(false, false, true);
 
 		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
 		assertThat(patient2, is(samePersonAs(patient3)));
 
-		//Now lets change one of the EIDs on an incoming patient to one that matches our original patient.
-		//This should create a situation in which the incoming EIDs are matched to _two_ unique patients. In this case, we want to
+		//Now lets change one of the EIDs on the second patient to one that matches our original patient.
+		//This should create a situation in which the incoming EIDs are matched to _two_ different persons. In this case, we want to
 		//set them all to possible_match, and set the two persons as possible duplicates.
 		patient2.getIdentifier().clear();
 		addExternalEID(patient2, "eid-11");
 		addExternalEID(patient2, "eid-22");
 		patient2 = updatePatientAndUpdateLinks(patient2);
+		logAllLinks();
+		assertLinksMatchResult(MATCH, POSSIBLE_MATCH, MATCH, POSSIBLE_MATCH, POSSIBLE_DUPLICATE);
+		assertLinksNewPerson(true, true, false, false, false);
+		assertLinksMatchedByEid(false, true, true, true, true);
 
 		assertThat(patient2, is(not(matchedToAPerson())));
 		assertThat(patient2, is(possibleMatchWith(patient1)));

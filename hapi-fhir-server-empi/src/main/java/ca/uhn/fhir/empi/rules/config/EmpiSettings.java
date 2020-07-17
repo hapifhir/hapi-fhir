@@ -20,6 +20,7 @@ package ca.uhn.fhir.empi.rules.config;
  * #L%
  */
 
+import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -30,7 +31,7 @@ import java.io.IOException;
 
 @Component
 public class EmpiSettings implements IEmpiSettings {
-	private final EmpiRuleValidator myEmpiRuleValidator;
+	private final IEmpiRuleValidator myEmpiRuleValidator;
 
 	private boolean myEnabled;
 	private int myConcurrentConsumers = EMPI_DEFAULT_CONCURRENT_CONSUMERS;
@@ -48,7 +49,7 @@ public class EmpiSettings implements IEmpiSettings {
 	private boolean myPreventMultipleEids;
 
 	@Autowired
-	public EmpiSettings(EmpiRuleValidator theEmpiRuleValidator) {
+	public EmpiSettings(IEmpiRuleValidator theEmpiRuleValidator) {
 		myEmpiRuleValidator = theEmpiRuleValidator;
 	}
 
@@ -105,6 +106,11 @@ public class EmpiSettings implements IEmpiSettings {
 
 	public boolean isPreventMultipleEids() {
 		return myPreventMultipleEids;
+	}
+
+	@Override
+	public String getRuleVersion() {
+		return myEmpiRules.getVersion();
 	}
 
 	public EmpiSettings setPreventMultipleEids(boolean thePreventMultipleEids) {

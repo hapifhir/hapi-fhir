@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.rules.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiMatchEvaluation;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
@@ -58,7 +59,7 @@ public class EmpiResourceFieldMatcher {
 	 * @return A boolean indicating whether they match.
 	 */
 	@SuppressWarnings("rawtypes")
-	public boolean match(IBaseResource theLeftResource, IBaseResource theRightResource) {
+	public EmpiMatchEvaluation match(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		validate(theLeftResource);
 		validate(theRightResource);
 
@@ -69,17 +70,18 @@ public class EmpiResourceFieldMatcher {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private boolean match(List<IBase> theLeftValues, List<IBase> theRightValues) {
-		boolean retval = false;
+	private EmpiMatchEvaluation match(List<IBase> theLeftValues, List<IBase> theRightValues) {
+		EmpiMatchEvaluation retval = new EmpiMatchEvaluation(false, 0.0);
 		for (IBase leftValue : theLeftValues) {
 			for (IBase rightValue : theRightValues) {
-				retval |= match(leftValue, rightValue);
+				EmpiMatchEvaluation nextMatch = match(leftValue, rightValue);
+				retval = EmpiMatchEvaluation.max(retval, nextMatch);
 			}
 		}
 		return retval;
 	}
 
-	private boolean match(IBase theLeftValue, IBase theRightValue) {
+	private EmpiMatchEvaluation match(IBase theLeftValue, IBase theRightValue) {
 		return myEmpiFieldMatchJson.getMetric().match(myFhirContext, theLeftValue, theRightValue, myEmpiFieldMatchJson.getExact(), myEmpiFieldMatchJson.getMatchThreshold());
 	}
 

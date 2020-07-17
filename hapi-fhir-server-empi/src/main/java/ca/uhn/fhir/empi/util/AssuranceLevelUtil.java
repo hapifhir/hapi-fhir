@@ -47,9 +47,9 @@ public final class AssuranceLevelUtil {
 	private static CanonicalIdentityAssuranceLevel getAssuranceFromAutoResult(EmpiMatchResultEnum theMatchResult) {
 		switch (theMatchResult) {
 			case MATCH:
-				return CanonicalIdentityAssuranceLevel.LEVEL3;
-			case POSSIBLE_MATCH:
 				return CanonicalIdentityAssuranceLevel.LEVEL2;
+			case POSSIBLE_MATCH:
+				return CanonicalIdentityAssuranceLevel.LEVEL1;
 			case POSSIBLE_DUPLICATE:
 			case NO_MATCH:
 			default:
@@ -60,7 +60,7 @@ public final class AssuranceLevelUtil {
 	private static CanonicalIdentityAssuranceLevel getAssuranceFromManualResult(EmpiMatchResultEnum theMatchResult) {
 		switch (theMatchResult) {
 			case MATCH:
-				return CanonicalIdentityAssuranceLevel.LEVEL4;
+				return CanonicalIdentityAssuranceLevel.LEVEL3;
 			case NO_MATCH:
 			case POSSIBLE_DUPLICATE:
 			case POSSIBLE_MATCH:
