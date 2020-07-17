@@ -95,6 +95,18 @@ public class NpmTestR4 extends BaseJpaR4Test {
 	}
 
 
+	// FIXME: disable
+	@Test
+	public void testInstallUsCore() {
+		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
+		jpaPackageCache.getPackageServers().clear();
+		jpaPackageCache.addPackageServer("https://packages.fhir.org");
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.us.core").setVersion("3.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(true);
+		igInstaller.install(spec);
+	}
+
+
 	@Test
 	public void testCacheDstu3Package() throws Exception {
 		byte[] bytes = loadClasspathBytes("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");

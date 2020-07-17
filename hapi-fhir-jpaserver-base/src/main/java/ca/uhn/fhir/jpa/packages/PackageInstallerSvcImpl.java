@@ -33,6 +33,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.SearchParameterUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -55,6 +57,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /**
  * @since 5.1.0
  */
@@ -73,9 +78,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	boolean enabled = true;
 	@Autowired
-	private FhirContext fhirContext;
+	private FhirContext myFhirContext;
 	@Autowired
-	private DaoRegistry daoRegistry;
+	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IValidationSupport validationSupport;
 	@Autowired
@@ -90,7 +95,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@PostConstruct
 	public void initialize() {
-		switch (fhirContext.getVersion().getVersion()) {
+		switch (myFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4:
 			case DSTU3:
@@ -100,7 +105,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default: {
-				ourLog.info("IG installation not supported for version: {}", fhirContext.getVersion().getVersion());
+				ourLog.info("IG installation not supported for version: {}", myFhirContext.getVersion().getVersion());
 				enabled = false;
 			}
 		}
@@ -159,7 +164,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		String version = npmPackage.getNpm().get("version").getAsString();
 
 		String fhirVersion = npmPackage.fhirVersion();
-		String currentFhirVersion = fhirContext.getVersion().getVersion().getFhirVersionString();
+		String currentFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
 		assertFhirVersionsAreCompatible(fhirVersion, currentFhirVersion);
 
 		List<String> installTypes;
@@ -264,9 +269,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			for (String file : filesForType) {
 				try {
 					byte[] content = pkg.getFolders().get("package").fetchFile(file);
-					resources.add(fhirContext.newJsonParser().parseResource(new String(content)));
+					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
 				} catch (IOException e) {
-					throw new InternalErrorException("Cannot install resource of type "+type+": Could not fetch file "+ file, e);
+					throw new InternalErrorException("Cannot install resource of type " + type + ": Could not fetch file " + file, e);
 				}
 			}
 		}
@@ -277,10 +282,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * Create a resource or update it, if its already existing.
 	 */
 	private void createOrUpdate(IBaseResource resource) {
-		IFhirResourceDao dao = daoRegistry.getResourceDao(resource.getClass());
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resource.getClass());
 		IBundleProvider searchResult = dao.search(createSearchParameterMapFor(resource));
 		if (searchResult.isEmpty()) {
-			dao.create(resource);
+
+			if (validForUpload(resource)) {
+				dao.create(resource);
+			}
+
 		} else {
 			IBaseResource existingResource = verifySearchResultFor(resource, searchResult);
 			if (existingResource != null) {
@@ -290,8 +299,30 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
+	boolean validForUpload(IBaseResource theResource) {
+		String resourceType = myFhirContext.getResourceType(theResource);
+		if ("SearchParameter".equals(resourceType)) {
+
+			String code = SearchParameterUtil.getCode(myFhirContext, theResource);
+			if (defaultString(code).startsWith("_")) {
+				return false;
+			}
+
+			String expression = SearchParameterUtil.getExpression(myFhirContext, theResource);
+			if (isBlank(expression)) {
+				return false;
+			}
+
+			if (SearchParameterUtil.getBaseAsStrings(myFhirContext, theResource).isEmpty()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private boolean isStructureDefinitionWithoutSnapshot(IBaseResource r) {
-		FhirTerser terser = fhirContext.newTerser();
+		FhirTerser terser = myFhirContext.newTerser();
 		return r.getClass().getSimpleName().equals("StructureDefinition") &&
 			terser.getSingleValueOrNull(r, "snapshot") == null;
 	}
@@ -319,7 +350,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private IBaseResource verifySearchResultFor(IBaseResource resource, IBundleProvider searchResult) {
-		FhirTerser terser = fhirContext.newTerser();
+		FhirTerser terser = myFhirContext.newTerser();
 		if (resource.getClass().getSimpleName().equals("NamingSystem")) {
 			if (searchResult.size() > 1) {
 				ourLog.warn("Expected 1 NamingSystem with unique ID {}, found {}. Will not attempt to update resource.",
@@ -346,7 +377,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private String extractUniqeIdFromNamingSystem(IBaseResource resource) {
-		FhirTerser terser = fhirContext.newTerser();
+		FhirTerser terser = myFhirContext.newTerser();
 		IBase uniqueIdComponent = (IBase) terser.getSingleValueOrNull(resource, "uniqueId");
 		if (uniqueIdComponent == null) {
 			throw new ImplementationGuideInstallationException("NamingSystem does not have uniqueId component.");
@@ -356,15 +387,20 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private String extractIdFromSubscription(IBaseResource resource) {
-		FhirTerser terser = fhirContext.newTerser();
+		FhirTerser terser = myFhirContext.newTerser();
 		IPrimitiveType asPrimitiveType = (IPrimitiveType) terser.getSingleValueOrNull(resource, "id");
 		return (String) asPrimitiveType.getValue();
 	}
 
 	private String extractUniqueUrlFromMetadataResouce(IBaseResource resource) {
-		FhirTerser terser = fhirContext.newTerser();
+		FhirTerser terser = myFhirContext.newTerser();
 		IPrimitiveType asPrimitiveType = (IPrimitiveType) terser.getSingleValueOrNull(resource, "url");
 		return (String) asPrimitiveType.getValue();
+	}
+
+	@VisibleForTesting
+	void setFhirContextForUnitTest(FhirContext theCtx) {
+		myFhirContext = theCtx;
 	}
 
 	private static IBaseResource getFirstResourceFrom(IBundleProvider searchResult) {
