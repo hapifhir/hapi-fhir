@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.empi.dao;
 
 /*-
  * #%L
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -32,7 +33,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,25 +43,34 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public class EmpiLinkDaoSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private IEmpiLinkDao myEmpiLinkDao;
 	@Autowired
+	private EmpiLinkFactory myEmpiLinkFactory;
+	@Autowired
 	private IdHelperService myIdHelperService;
 
 	@Transactional
-	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
+	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
 		Long personPid = myIdHelperService.getPidOrNull(thePerson);
 		Long resourcePid = myIdHelperService.getPidOrNull(theTarget);
 
 		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
 		empiLink.setLinkSource(theLinkSource);
-		empiLink.setMatchResult(theMatchResult);
+		empiLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
+		// Preserve these flags for link updates
+		empiLink.setEidMatch(theMatchOutcome.isEidMatch() | empiLink.isEidMatch());
+		empiLink.setNewPerson(theMatchOutcome.isNewPerson() | empiLink.isNewPerson());
+		if (empiLink.getScore() != null) {
+			empiLink.setScore(Math.max(theMatchOutcome.score, empiLink.getScore()));
+		} else {
+			empiLink.setScore(theMatchOutcome.score);
+		}
 
-		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchResult);
+		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
 		theEmpiTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(empiLink);
@@ -75,7 +84,7 @@ public class EmpiLinkDaoSvc {
 		if (oExisting.isPresent()) {
 			return oExisting.get();
 		} else {
-			EmpiLink empiLink = new EmpiLink();
+			EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink();
 			empiLink.setPersonPid(thePersonPid);
 			empiLink.setTargetPid(theResourcePid);
 			return empiLink;
@@ -87,7 +96,7 @@ public class EmpiLinkDaoSvc {
 		if (theTargetPid == null || thePersonPid == null) {
 			return Optional.empty();
 		}
-		EmpiLink link = new EmpiLink();
+		EmpiLink link = myEmpiLinkFactory.newEmpiLink();
 		link.setTargetPid(theTargetPid);
 		link.setPersonPid(thePersonPid);
 		Example<EmpiLink> example = Example.of(link);
@@ -95,7 +104,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public List<EmpiLink> getEmpiLinksByTargetPidAndMatchResult(Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<EmpiLink> example = Example.of(exampleLink);
@@ -103,7 +112,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public Optional<EmpiLink> getMatchedLinkForTargetPid(Long theTargetPid) {
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		Example<EmpiLink> example = Example.of(exampleLink);
@@ -116,7 +125,7 @@ public class EmpiLinkDaoSvc {
 			return Optional.empty();
 		}
 
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setTargetPid(pid);
 		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		Example<EmpiLink> example = Example.of(exampleLink);
@@ -124,7 +133,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	public Optional<EmpiLink> getEmpiLinksByPersonPidTargetPidAndMatchResult(Long thePersonPid, Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setPersonPid(thePersonPid);
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(theMatchResult);
@@ -138,7 +147,7 @@ public class EmpiLinkDaoSvc {
 	 * @return A list of EmpiLinks that hold potential duplicate persons.
 	 */
 	public List<EmpiLink> getPossibleDuplicates() {
-		EmpiLink exampleLink = new EmpiLink();
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
 		exampleLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
@@ -149,7 +158,7 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Optional.empty();
 		}
-		EmpiLink empiLink = new EmpiLink().setTargetPid(pid);
+		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findOne(example);
 	}
@@ -159,26 +168,12 @@ public class EmpiLinkDaoSvc {
 		myEmpiLinkDao.delete(theEmpiLink);
 	}
 
-	/**
-	 * Delete all EmpiLink records with any reference to this resource.  (Used by Expunge.)
-	 * @param theResource
-	 * @return the number of records deleted
-	 */
-	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
-		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
-		int removed =  myEmpiLinkDao.deleteWithAnyReferenceToPid(pid);
-		if (removed > 0) {
-			ourLog.info("Removed {} EMPI links with references to {}", removed, theResource.getIdElement().toVersionless());
-		}
-		return removed;
-	}
-
 	public List<EmpiLink> findEmpiLinksByPersonId(IBaseResource thePersonResource) {
 		Long pid = myIdHelperService.getPidOrNull(thePersonResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink empiLink = new EmpiLink().setPersonPid(pid);
+		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setPersonPid(pid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findAll(example);
 	}
@@ -200,8 +195,12 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink empiLink = new EmpiLink().setTargetPid(pid);
+		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
 		Example<EmpiLink> example = Example.of(empiLink);
 		return myEmpiLinkDao.findAll(example);
+	}
+
+	public EmpiLink newEmpiLink() {
+		return myEmpiLinkFactory.newEmpiLink();
 	}
 }

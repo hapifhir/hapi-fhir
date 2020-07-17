@@ -33,44 +33,35 @@ import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
+import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDeleteSvc;
 import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
 import ca.uhn.fhir.jpa.empi.broker.EmpiQueueConsumerLoader;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkFactory;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
-import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchCriteriaBuilderSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkQuerySvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchCriteriaBuilderSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByEidSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByLinkSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByScoreSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
-
-import javax.annotation.PostConstruct;
 
 @Configuration
 public class EmpiConsumerConfig {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
-
-	@Autowired
-	IEmpiSettings myEmpiProperties;
-	@Autowired
-	EmpiProviderLoader myEmpiProviderLoader;
-	@Autowired
-	EmpiSubscriptionLoader myEmpiSubscriptionLoader;
-	@Autowired
-	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
 
 	@Bean
 	IEmpiStorageInterceptor empiStorageInterceptor() {
@@ -128,6 +119,21 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
+	FindCandidateByEidSvc findCandidateByEidSvc() {
+		return new FindCandidateByEidSvc();
+	}
+
+	@Bean
+	FindCandidateByLinkSvc findCandidateByLinkSvc() {
+		return new FindCandidateByLinkSvc();
+	}
+
+	@Bean
+	FindCandidateByScoreSvc findCandidateByScoreSvc() {
+		return new FindCandidateByScoreSvc();
+	}
+
+	@Bean
 	EmpiProviderLoader empiProviderLoader() {
 		return new EmpiProviderLoader();
 	}
@@ -174,33 +180,27 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
+	EmpiLinkDaoSvc empiLinkDaoSvc() {
+		return new EmpiLinkDaoSvc();
+	}
+
+	@Bean
+	EmpiLinkFactory empiLinkFactory(IEmpiSettings theEmpiSettings) {
+		return new EmpiLinkFactory(theEmpiSettings);
+	}
+
+	@Bean
     IEmpiLinkUpdaterSvc manualLinkUpdaterSvc() {
 		return new EmpiLinkUpdaterSvcImpl();
 	}
 
-	@PostConstruct
-	public void registerInterceptorAndProvider() {
-		if (!myEmpiProperties.isEnabled()) {
-			return;
-		}
+	@Bean
+	EmpiLoader empiLoader() {
+		return new EmpiLoader();
 	}
 
-	@EventListener(classes = {ContextRefreshedEvent.class})
-	// This @Order is here to ensure that MatchingQueueSubscriberLoader has initialized before we initialize this.
-	// Otherwise the EMPI subscriptions won't get loaded into the SubscriptionRegistry
-	@Order
-	public void updateSubscriptions() {
-		if (!myEmpiProperties.isEnabled()) {
-			return;
-		}
-
-		myEmpiProviderLoader.loadProvider();
-		ourLog.info("EMPI provider registered");
-
-		myEmpiSubscriptionLoader.daoUpdateEmpiSubscriptions();
-		ourLog.info("EMPI subscriptions updated");
-
-		myEmpiSearchParameterLoader.daoUpdateEmpiSearchParameters();
-		ourLog.info("EMPI search parameters updated");
+	@Bean
+	EmpiLinkDeleteSvc empiLinkDeleteSvc() {
+		return new EmpiLinkDeleteSvc();
 	}
 }

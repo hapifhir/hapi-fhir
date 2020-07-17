@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +36,8 @@ import java.util.Map;
 
 @JsonDeserialize(converter = EmpiRulesJson.EmpiRulesJsonConverter.class)
 public class EmpiRulesJson implements IModelJson {
+	@JsonProperty(value = "version", required = true)
+	String myVersion;
 	@JsonProperty(value = "candidateSearchParams", required = true)
 	List<EmpiResourceSearchParamJson> myCandidateSearchParams = new ArrayList<>();
 	@JsonProperty(value = "candidateFilterSearchParams", required = true)
@@ -112,22 +115,17 @@ public class EmpiRulesJson implements IModelJson {
 		myEnterpriseEIDSystem = theEnterpriseEIDSystem;
 	}
 
-	/**
-	 * Ensure the vector map is initialized after we deserialize
-	 */
-	static class EmpiRulesJsonConverter extends StdConverter<EmpiRulesJson, EmpiRulesJson> {
+	public String getVersion() {
+		return myVersion;
+	}
 
-		/**
-		 * This empty constructor is required by Jackson
-		 */
-		public EmpiRulesJsonConverter() {
-		}
+	public EmpiRulesJson setVersion(String theVersion) {
+		myVersion = theVersion;
+		return this;
+	}
 
-		@Override
-		public EmpiRulesJson convert(EmpiRulesJson theEmpiRulesJson) {
-			theEmpiRulesJson.initialize();
-			return theEmpiRulesJson;
-		}
+	private void validate() {
+		Validate.notBlank(myVersion, "version may not be blank");
 	}
 
 	public String getSummary() {
@@ -156,5 +154,24 @@ public class EmpiRulesJson implements IModelJson {
 	@VisibleForTesting
 	VectorMatchResultMap getVectorMatchResultMapForUnitTest() {
 		return myVectorMatchResultMap;
+	}
+
+	/**
+	 * Ensure the vector map is initialized after we deserialize
+	 */
+	static class EmpiRulesJsonConverter extends StdConverter<EmpiRulesJson, EmpiRulesJson> {
+
+		/**
+		 * This empty constructor is required by Jackson
+		 */
+		public EmpiRulesJsonConverter() {
+		}
+
+		@Override
+		public EmpiRulesJson convert(EmpiRulesJson theEmpiRulesJson) {
+			theEmpiRulesJson.validate();
+			theEmpiRulesJson.initialize();
+			return theEmpiRulesJson;
+		}
 	}
 }

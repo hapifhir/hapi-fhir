@@ -50,7 +50,7 @@ public class SearchParameterTest extends BaseEmpiR4Test {
 		ourLog.info("Search result: {}", encoded);
 		List<Person.PersonLinkComponent> links = person.getLink();
 		assertEquals(2, links.size());
-		assertEquals(Person.IdentityAssuranceLevel.LEVEL3, links.get(0).getAssurance());
-		assertEquals(Person.IdentityAssuranceLevel.LEVEL2, links.get(1).getAssurance());
+		assertEquals(Person.IdentityAssuranceLevel.LEVEL2, links.get(0).getAssurance());
+		assertEquals(Person.IdentityAssuranceLevel.LEVEL1, links.get(1).getAssurance());
 	}
 }

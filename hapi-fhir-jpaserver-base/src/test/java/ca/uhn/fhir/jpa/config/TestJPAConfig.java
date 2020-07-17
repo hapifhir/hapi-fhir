@@ -24,7 +24,6 @@ import javax.persistence.EntityManagerFactory;
 	SubscriptionChannelConfig.class
 })
 public class TestJPAConfig {
-
 	@Bean
 	public DaoConfig daoConfig() {
 		return new DaoConfig();
