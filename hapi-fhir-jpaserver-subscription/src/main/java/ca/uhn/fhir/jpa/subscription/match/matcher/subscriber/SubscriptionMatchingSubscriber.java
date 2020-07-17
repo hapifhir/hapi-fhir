@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class SubscriptionMatchingSubscriber implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
+	private Logger ourLog = LoggerFactory.getLogger("ca.cdr.log.subscription_troubleshooting");
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired
@@ -77,7 +77,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	@Override
 	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
-		ourLog.trace("Handling resource modified message: {}", theMessage);
+		ourLog.debug("Handling resource modified message: {}", theMessage);
 
 		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
@@ -97,7 +97,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				break;
 			case DELETE:
 			default:
-				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
+				ourLog.debug("Not processing modified message for {}", theMsg.getOperationType());
 				// ignore anything else
 				return;
 		}
