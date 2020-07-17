@@ -68,6 +68,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	}
 
 	public void runWithExpectedCount(int theExpectedCount, Runnable r) {
+		this.clear();
 		this.setExpectedCount(theExpectedCount);
 		r.run();
 		try {

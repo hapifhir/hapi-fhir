@@ -7,6 +7,7 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +36,13 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
 		myPractitionerPerson = getPersonFromTarget(myPractitioner);
 		myPractitionerPersonId = new StringType(myPractitionerPerson.getIdElement().getValue());
-
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, afterEmpiLatch);
-		afterEmpiLatch.clear();
+	}
+
+	@AfterEach
+	public void after() {
+		super.after();
+		myInterceptorService.unregisterInterceptor(afterEmpiLatch);
 	}
 
 	@Test
@@ -54,10 +59,11 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testBatchRunOnAllPatients() throws InterruptedException {
+	public void testBatchRunOnAllPatients() {
 		assertLinkCount(2);
 		StringType patientType = new StringType("Patient");
 		StringType criteria = null;
+		myEmpiProviderR4.clearEmpiLinks(null);
 		afterEmpiLatch.runWithExpectedCount(1, () -> {
 			myEmpiProviderR4.batchRunEmpi(patientType, criteria, null);
 		});
@@ -65,7 +71,8 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testBatchRunOnInvalidType() throws InterruptedException {
+	public void testBatchRunOnInvalidType() {
+		assertLinkCount(2);
 		StringType observationType= new StringType("Observation");
 		StringType criteria = null;
 		myEmpiProviderR4.clearEmpiLinks(null);
@@ -78,7 +85,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testBatchRunOnAllTypes() throws InterruptedException {
+	public void testBatchRunOnAllTypes() {
 		assertLinkCount(2);
 		StringType patientType = new StringType("Patient");
 		StringType criteria = null;
