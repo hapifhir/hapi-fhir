@@ -194,6 +194,11 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.findAll(example);
 	}
 
+	/**
+	 * Delete all {@link EmpiLink} entities, and return all resource PIDs from the source of the relationship.
+	 *
+	 * @return A list of Long representing the related Person Pids.
+	 */
 	public List<Long> deleteAllEmpiLinksAndReturnPersonPids() {
 		List<EmpiLink> all = myEmpiLinkDao.findAll();
 		return deleteEmpiLinksAndReturnPersonPids(all);
