@@ -93,6 +93,10 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
 		}
 
+		if (!theStatus.name().equals("ACTIVE")) {
+			return;
+		}
+
 		if (ElementUtil.isEmpty(theBase) && (theType == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(theType.name()))) {
 			throw new UnprocessableEntityException("SearchParameter.base is missing");
 		}

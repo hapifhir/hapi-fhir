@@ -112,6 +112,27 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParamRegistry.forceRefresh();
 	}
 
+	/**
+	 * Draft search parameters should be ok even if they aren't completely valid
+	 */
+	@Test
+	public void testStoreDraftSearchParam_DontValidate() {
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(true);
+
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.addBase("ActivityDefinition");
+		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("FOO FOO FOO");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(Enumerations.PublicationStatus.DRAFT);
+
+		// Ensure that no exceptions are thrown
+		mySearchParameterDao.create(fooSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+	}
+
 
 	@Test
 	public void testBundleComposition() {
