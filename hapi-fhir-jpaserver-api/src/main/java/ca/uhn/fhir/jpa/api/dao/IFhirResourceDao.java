@@ -116,6 +116,10 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
+
+	ExpungeOutcome runBatchEmpi(IIdType theIIdType, RequestDetails theRequest, String theCriteria);
+
+
 	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
 	Class<T> getResourceType();

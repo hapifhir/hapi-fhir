@@ -22,6 +22,11 @@ package ca.uhn.fhir.empi.api;
 
 public interface IEmpiExpungeSvc {
 
+	/**
+	 * Given a resource type, delete the underlying empi links, and their related person objects.
+	 *
+	 * @param theResourceType The type of resources
+	 */
 	void expungeEmpiLinks(String theResourceType);
 
 	void expungeEmpiLinks();

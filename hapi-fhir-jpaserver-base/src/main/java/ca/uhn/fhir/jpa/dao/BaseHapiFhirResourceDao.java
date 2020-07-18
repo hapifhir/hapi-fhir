@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.empi.api.IEmpiBatchService;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -35,7 +36,6 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -78,6 +78,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -89,6 +90,7 @@ import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -132,8 +134,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired(required = false)
-	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
@@ -144,16 +144,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IEmpiBatchService myEmpiBatchService;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	@Autowired
+	private HapiTransactionService myTransactionService;
+	@Autowired(required = false)
+	protected IFulltextSearchSvc mySearchDao;
 
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
 	private Class<T> myResourceType;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private HapiTransactionService myTransactionService;
 
 	@Override
 	@Transactional
@@ -669,6 +671,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.NEVER)
+	public ExpungeOutcome runBatchEmpi(IIdType theId, RequestDetails theRequest, String theCriteria) {
+		if (getResourceName() != null && theId != null) {
+			validateThereIsNoCriteria(theCriteria);
+			myEmpiBatchService.runEmpiOnTarget(theId, getResourceName());
+		} else if (getResourceName() != null){
+			myEmpiBatchService.runEmpiOnTargetType(getResourceName(), theCriteria);
+		} else {
+			myEmpiBatchService.runEmpiOnAllTargets(theCriteria);
+		}
+
+		return null;
+	}
+
+	private void validateThereIsNoCriteria(String theCriteria) {
+		if (!StringUtils.isBlank(theCriteria)) {
+			throw new InvalidRequestException("While executing " + ProviderConstants.OPERATION_EMPI_BATCH_RUN + " on a specific resource, the criteria parameter is not allowed.");
+		}
+	}
+
+	@Override
 	public ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
@@ -702,6 +725,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public String getResourceName() {
 		return myResourceName;
 	}
+
 
 	@Override
 	public Class<T> getResourceType() {

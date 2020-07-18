@@ -8,8 +8,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -28,13 +29,13 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	private static final int queueAddingPageSize = 100;
 
 	@Override
-	public void runEmpiOnAllTargets(StringType theCriteria) {
+	public void runEmpiOnAllTargets(String theCriteria) {
 		runEmpiOnTargetType("Patient", theCriteria);
 		runEmpiOnTargetType("Practitioner", theCriteria);
 	}
 
 	@Override
-	public void runEmpiOnTargetType(String theTargetType, StringType theCriteria) {
+	public void runEmpiOnTargetType(String theTargetType, String theCriteria) {
 		resolveTargetTypeOrThrowException(theTargetType);
 		SearchParameterMap spMap = getSearchParameterMapFromCriteria(theTargetType, theCriteria);
 		IFhirResourceDao patientDao = myDaoRegistry.getResourceDao(theTargetType);
@@ -51,10 +52,17 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 		}
 	}
 
-	private SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, StringType theCriteria) {
+	@Override
+	public void runEmpiOnTarget(IIdType theId, String theTargetType) {
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theTargetType);
+		IBaseResource read = resourceDao.read(theId);
+		myEmpiQueueSubmitterSvc.manuallySubmitResourceToEmpi(read);
+	}
+
+	private SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, String theCriteria) {
 		SearchParameterMap spMap;
-		if (theCriteria != null) {
-			spMap = myEmpiSearchParamSvc.mapFromCriteria(theTargetType, theCriteria.getValueNotNull());
+		if (!StringUtils.isBlank(theCriteria)) {
+			spMap = myEmpiSearchParamSvc.mapFromCriteria(theTargetType, theCriteria);
 		} else {
 			spMap = new SearchParameterMap();
 		}
@@ -63,7 +71,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 
 	private void resolveTargetTypeOrThrowException(String theResourceType) {
 		if (!theResourceType.equalsIgnoreCase("Patient") && !theResourceType.equalsIgnoreCase("Practitioner")) {
-			throw new InvalidRequestException(ProviderConstants.EMPI_BATCH_RUN+ " does not support resource type: " + theResourceType);
+			throw new InvalidRequestException(ProviderConstants.OPERATION_EMPI_BATCH_RUN + " does not support resource type: " + theResourceType);
 		}
 	}
 }

@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.entity.EmpiTargetType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -265,6 +266,24 @@ public class EmpiLinkDaoSvc {
 	}
 
 	/**
+	 * Given a target type, and a resource ID, delete the target's {@link EmpiLink} entities, and return the Person Pids
+	 * that were on the source end of each relationship.
+	 *
+	 * @param theTargetType The empi target type of the resource
+	 * @param theId The particular target resource ID.
+	 *
+	 * @return A list of longs, each representing the source person of an {@link EmpiLink} that was deleted.
+	 */
+	public List<Long> deleteEmpiLinksAndReturnPersonPidsForTypeAndTarget(EmpiTargetType theTargetType, IIdType theId) {
+		EmpiLink link = new EmpiLink();
+		link.setEmpiTargetType(theTargetType);
+		link.setTargetPid(myIdHelperService.getPidOrThrowException(theId));
+		Example<EmpiLink> exampleLink = Example.of(link);
+		List<EmpiLink> allOfType = myEmpiLinkDao.findAll(exampleLink);
+		return deleteEmpiLinksAndReturnPersonPids(allOfType);
+	}
+
+	/**
 	 * Persist an EmpiLink to the database.
 	 *
 	 * @param theEmpiLink the link to save.
@@ -317,4 +336,5 @@ public class EmpiLinkDaoSvc {
 	public EmpiLink newEmpiLink() {
 		return myEmpiLinkFactory.newEmpiLink();
 	}
+
 }

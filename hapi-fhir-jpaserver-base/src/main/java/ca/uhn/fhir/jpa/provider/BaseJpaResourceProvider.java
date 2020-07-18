@@ -44,7 +44,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -75,6 +74,11 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		}
 
 		return createExpungeResponse(outcome);
+	}
+
+	protected Parameters doEmpiBatch(IIdType theIdParam, String theCriteria, RequestDetails theRequest) {
+		getDao().runBatchEmpi(theIdParam, theRequest, theCriteria);
+		return new Parameters();
 	}
 
 	public IFhirResourceDao<T> getDao() {
