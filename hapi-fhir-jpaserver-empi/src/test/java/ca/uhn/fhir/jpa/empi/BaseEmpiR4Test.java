@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiBatchService;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
@@ -99,6 +100,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
+	@Autowired
+	private IEmpiBatchService myEmpiBatchService;
 
 	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
