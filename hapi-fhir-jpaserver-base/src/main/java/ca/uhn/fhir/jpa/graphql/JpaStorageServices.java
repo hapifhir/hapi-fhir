@@ -288,7 +288,6 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		bundleFactory.addRootPropertiesToBundle(response.getUuid(), serverBase, linkSelf, linkPrev, linkNext, response.size(), BundleTypeEnum.SEARCHSET, response.getPublished());
 		bundleFactory.addResourcesToBundle(resourceList, BundleTypeEnum.SEARCHSET, serverBase, null, null);
 
-		ourLog.debug("bundle: {}", getContext().newJsonParser().encodeResourceToString(bundleFactory.getResourceBundle()));
 		return (IBaseBundle) bundleFactory.getResourceBundle();
 	}
 
