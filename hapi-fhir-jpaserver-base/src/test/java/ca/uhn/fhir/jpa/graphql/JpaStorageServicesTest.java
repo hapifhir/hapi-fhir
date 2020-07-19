@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.StringValue;
@@ -22,6 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -93,5 +95,30 @@ public class JpaStorageServicesTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals("Unknown GraphQL argument \"test\". Value GraphQL argument for this type are: [_id, _language, actor, appointment_type, based_on, date, identifier, location, part_status, patient, practitioner, reason_code, reason_reference, service_category, service_type, slot, specialty, status, supporting_info]", e.getMessage());
 		}
+	}
+
+	private void createSomePatientWithId(String id) {
+		Patient somePatient = new Patient();
+		somePatient.setId(id);
+		myPatientDao.update(somePatient);
+	}
+
+	@Test
+	public void testListResourceGraphqlArrayOfArgument() {
+		createSomePatientWithId("hapi-123");
+		createSomePatientWithId("hapi-124");
+
+		Argument argument = new Argument();
+		argument.setName("_id");
+		argument.addValue(new StringValue("hapi-123"));
+		argument.addValue(new StringValue("hapi-124"));
+
+		List<IBaseResource> result = new ArrayList<>();
+		mySvc.listResources(mySrd, "Patient", Collections.singletonList(argument), result);
+
+		assertFalse(result.isEmpty());
+
+		List<String> expectedId = Arrays.asList("hapi-123", "hapi-124");
+		assertTrue(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart())));
 	}
 }

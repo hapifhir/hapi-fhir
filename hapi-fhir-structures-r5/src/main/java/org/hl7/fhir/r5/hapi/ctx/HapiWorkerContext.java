@@ -415,6 +415,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public int getClientRetryCount() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWorkerContext setClientRetryCount(int value) {
+		throw new UnsupportedOperationException();
+	}
+
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
 		ConceptValidationOptions retVal = new ConceptValidationOptions();
 		if (theOptions.isGuessSystem()) {

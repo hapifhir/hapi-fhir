@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -180,15 +181,43 @@ public class FhirTerserR4Test {
 		assertEquals("FOO", ((StringType) exts.get(0).getValue()).getValue());
 	}
 
+	@Test
+	public void testCloneIntoExtensionWithChildExtension() {
+		Patient patient = new Patient();
+
+		Extension ext = new Extension("http://example.com", new StringType("FOO"));
+		patient.addExtension((Extension) new Extension().setUrl("http://foo").addExtension(ext));
+
+		Patient target = new Patient();
+		ourCtx.newTerser().cloneInto(patient, target, false);
+
+		List<Extension> exts = target.getExtensionsByUrl("http://foo");
+		assertEquals(1, exts.size());
+		exts = exts.get(0).getExtensionsByUrl("http://example.com");
+		assertEquals("FOO", ((StringType) exts.get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testCloneEnumeration() {
+		Patient patient = new Patient();
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+		Patient target = new Patient();
+		ourCtx.newTerser().cloneInto(patient, target, false);
+
+		assertEquals("http://hl7.org/fhir/administrative-gender", target.getGenderElement().getSystem());
+	}
 
 	@Test
 	public void testCloneIntoPrimitive() {
 		StringType source = new StringType("STR");
+		source.setId("STRING_ID");
 		MarkdownType target = new MarkdownType();
 
 		ourCtx.newTerser().cloneInto(source, target, true);
 
 		assertEquals("STR", target.getValueAsString());
+		assertEquals("STRING_ID", target.getId());
 	}
 
 
@@ -224,6 +253,35 @@ public class FhirTerserR4Test {
 		assertEquals("AAA", ((StringType) obs.getValue()).getValue());
 		assertEquals("COMMENTS", obs.getNote().get(0).getText());
 	}
+
+
+	@Test
+	public void testCloneIntoResourceCopiesId() {
+		Observation obs = new Observation();
+		obs.setId("http://foo/base/Observation/_history/123");
+		obs.setValue(new StringType("AAA"));
+		obs.addNote().setText("COMMENTS");
+
+		Observation target = new Observation();
+		ourCtx.newTerser().cloneInto(obs, target, false);
+
+		assertEquals("http://foo/base/Observation/_history/123", target.getId());
+	}
+
+
+	@Test
+	public void testCloneIntoResourceCopiesElementId() {
+		Observation obs = new Observation();
+		StringType string = new StringType("AAA");
+		string.setId("BBB");
+		obs.setValue(string);
+
+		Observation target = new Observation();
+		ourCtx.newTerser().cloneInto(obs, target, false);
+
+		assertEquals("BBB", target.getValueStringType().getId());
+	}
+
 
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDescendsIntoContained() {

@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,19 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		JettyUtil.closeServer(myServer);
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 	}
+
+
+	@Disabled("This test is super slow so don't run by default")
+	@Test
+	public void testInstallUsCore() {
+		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
+		jpaPackageCache.getPackageServers().clear();
+		jpaPackageCache.addPackageServer("https://packages.fhir.org");
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.us.core").setVersion("3.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(true);
+		igInstaller.install(spec);
+	}
+
 
 	@Test
 	public void testCacheDstu3Package() throws Exception {
@@ -199,6 +213,29 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 
 	@Test
+	public void testInstallR4PackageWithNoDescription() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/UK.Core.r4-1.1.0.tgz");
+		myFakeNpmServlet.myResponses.put("/UK.Core.r4/1.1.0", bytes);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("UK.Core.r4").setVersion("1.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		igInstaller.install(spec);
+
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
+
+		// Make sure we can fetch the package by ID and Version
+		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
+		assertEquals(null, pkg.description());
+		assertEquals("UK.Core.r4", pkg.name());
+
+		// Ensure that we loaded the contents
+		IBundleProvider searchResult = myStructureDefinitionDao.search(SearchParameterMap.newSynchronous("url", new UriParam("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient")));
+		assertEquals(1, searchResult.sizeOrThrowNpe());
+	}
+
+	@Test
 	public void testLoadPackageMetadata() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
 
@@ -243,7 +280,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
 		assertThat(outcome.getMessage(), hasItem("Marking package hl7.fhir.uv.shorthand#0.12.0 as current version"));
-		assertThat(outcome.getMessage(), hasItem("Indexing Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0"));
+		assertThat(outcome.getMessage(), hasItem("Indexing CodeSystem Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0"));
 
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		outcome = igInstaller.install(spec);

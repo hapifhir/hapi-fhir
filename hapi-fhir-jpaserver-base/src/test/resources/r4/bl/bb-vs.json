@@ -1,0 +1,42 @@
+{
+  "resourceType": "ValueSet",
+  "id": "BBDemographicAgeUnit",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>"
+  },
+  "url": "https://bb/ValueSet/BBDemographicAgeUnit",
+  "name": "BBDemographicAgeUnit",
+  "title": "Babylon Demographic Age Unit",
+  "status": "draft",
+  "version": "20190731",
+  "experimental": false,
+  "description": "Age Unit",
+  "publisher": "Babylon Partners, Ltd.",
+  "immutable": false,
+  "compose": {
+    "include": [
+      {
+        "system": "http://unitsofmeasure.org",
+        "concept": [
+          {
+            "code": "a",
+            "display": "years"
+          },
+          {
+            "code": "mo",
+            "display": "months"
+          },
+          {
+            "code": "wk",
+            "display": "weeks"
+          },
+          {
+            "code": "d",
+            "display": "days"
+          }
+        ]
+      }
+    ]
+  }
+}

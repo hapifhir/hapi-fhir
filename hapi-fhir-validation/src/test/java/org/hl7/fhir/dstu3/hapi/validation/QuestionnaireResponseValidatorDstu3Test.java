@@ -1038,6 +1038,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
+		when(myValSupport.isValueSetSupported(any(), eq("http://somevalueset"))).thenReturn(true);
+
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any(IBaseResource.class))).thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
 		QuestionnaireResponse qa;

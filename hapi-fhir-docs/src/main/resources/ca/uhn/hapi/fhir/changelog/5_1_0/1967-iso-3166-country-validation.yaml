@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1967
+title: The HAPI FHIR CommonCodeSystemsTerminologyService validation support module now
+   includes support for ISO 3166 (country codes).

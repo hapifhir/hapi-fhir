@@ -663,6 +663,10 @@
 			<name>Mark Iantorno</name>
 			<organization>Smile CDR</organization>
 		</developer>
+		<developer>
+			<id>sqshq</id>
+			<name>Alexander Lukyanchikov</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -674,7 +678,7 @@
 
 	<properties>
 
-		<fhir_core_version>5.0.7-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>5.0.9</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -711,7 +715,7 @@
 		<jaxb_runtime_version>2.3.1</jaxb_runtime_version>
 		<jersey_version>2.25.1</jersey_version>
 		<!-- 9.4.17 seems to have issues -->
-		<jetty_version>9.4.24.v20191120</jetty_version>
+		<jetty_version>9.4.30.v20200611</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<flyway_version>6.4.1</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
@@ -901,6 +905,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-csv</artifactId>
 				<version>1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjweaver</artifactId>
+				<version>1.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hl7.fhir.testcases</groupId>

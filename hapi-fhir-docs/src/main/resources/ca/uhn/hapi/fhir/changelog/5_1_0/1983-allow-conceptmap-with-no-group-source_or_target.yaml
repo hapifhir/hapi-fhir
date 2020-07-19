@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1983
+title: "ConceptMap resources were blocked from uploading into the JPA server if the ConceptMap had a source
+    and/or target URL defined at the ConceptMap level but not at the group level. This prevented some US Core
+    resources from being successfully uploaded. This has been corrected."

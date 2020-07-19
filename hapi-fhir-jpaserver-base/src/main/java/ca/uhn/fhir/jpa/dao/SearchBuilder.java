@@ -90,6 +90,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -245,6 +246,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Override
 	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
@@ -263,6 +265,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Override
 	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchRuntimeDetails.getSearchUuid(), theRequestPartitionId);
 

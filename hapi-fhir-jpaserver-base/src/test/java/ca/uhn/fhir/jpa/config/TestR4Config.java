@@ -56,6 +56,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	private Exception myLastStackTrace;
 
 
+	@Override
 	@Bean
 	public IBatchJobSubmitter batchJobSubmitter() {
 		return new BatchJobSubmitterImpl();
@@ -118,7 +119,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:testdb_r4");
-		retVal.setMaxWaitMillis(10000);
+		retVal.setMaxWaitMillis(30000);
 		retVal.setUsername("");
 		retVal.setPassword("");
 		retVal.setMaxTotal(ourMaxThreads);
@@ -126,7 +127,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+//			.logQueryBySlf4j(level)
+			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())

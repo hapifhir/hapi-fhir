@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
@@ -104,22 +105,43 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkgVer.addIndex("20200610.8", "IDX_PACKVER").unique(true).withColumns("PACKAGE_ID", "VERSION_ID");
 
 		version.addIdGenerator("20200610.9", "SEQ_NPM_PACKVERRES");
-		Builder.BuilderAddTableByColumns pkgVerRes = version.addTableByColumns("20200610.10", "NPM_PACKAGE_VER_RES", "PID");
-		pkgVerRes.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
-		pkgVerRes.addColumn("PACKVER_PID").nonNullable().type(ColumnTypeEnum.LONG);
-		pkgVerRes.addColumn("BINARY_RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
-		pkgVerRes.addColumn("FILE_DIR").nullable().type(ColumnTypeEnum.STRING, 200);
-		pkgVerRes.addColumn("FILE_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
-		pkgVerRes.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
-		pkgVerRes.addColumn("CANONICAL_URL").nullable().type(ColumnTypeEnum.STRING, 200);
-		pkgVerRes.addColumn("CANONICAL_VERSION").nullable().type(ColumnTypeEnum.STRING, 200);
-		pkgVerRes.addColumn("FHIR_VERSION_ID").nonNullable().type(ColumnTypeEnum.STRING, 10);
-		pkgVerRes.addColumn("FHIR_VERSION").nonNullable().type(ColumnTypeEnum.STRING, 10);
-		pkgVerRes.addColumn("RES_SIZE_BYTES").nonNullable().type(ColumnTypeEnum.LONG);
-		pkgVerRes.addColumn("UPDATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
-		pkgVerRes.addForeignKey("20200610.11", "FK_NPM_PACKVERRES_PACKVER").toColumn("PACKVER_PID").references("NPM_PACKAGE_VER", "PID");
-		pkgVerRes.addForeignKey("20200610.12", "FK_NPM_PKVR_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "RES_ID");
-		pkgVerRes.addIndex("20200610.13", "IDX_PACKVERRES_URL").unique(false).withColumns("CANONICAL_URL");
+		Builder.BuilderAddTableByColumns pkgVerResAdd = version.addTableByColumns("20200610.10", "NPM_PACKAGE_VER_RES", "PID");
+		pkgVerResAdd.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVerResAdd.addColumn("PACKVER_PID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVerResAdd.addColumn("BINARY_RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVerResAdd.addColumn("FILE_DIR").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVerResAdd.addColumn("FILE_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVerResAdd.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
+		pkgVerResAdd.addColumn("CANONICAL_URL").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVerResAdd.addColumn("CANONICAL_VERSION").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVerResAdd.addColumn("FHIR_VERSION_ID").nonNullable().type(ColumnTypeEnum.STRING, 10);
+		pkgVerResAdd.addColumn("FHIR_VERSION").nonNullable().type(ColumnTypeEnum.STRING, 10);
+		pkgVerResAdd.addColumn("RES_SIZE_BYTES").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVerResAdd.addColumn("UPDATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		pkgVerResAdd.addForeignKey("20200610.11", "FK_NPM_PACKVERRES_PACKVER").toColumn("PACKVER_PID").references("NPM_PACKAGE_VER", "PID");
+		pkgVerResAdd.addForeignKey("20200610.12", "FK_NPM_PKVR_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		pkgVerResAdd.addIndex("20200610.13", "IDX_PACKVERRES_URL").unique(false).withColumns("CANONICAL_URL");
+
+		init510_20200610();
+
+		Builder.BuilderWithTableName pkgVerMod = version.onTable("NPM_PACKAGE_VER");
+		pkgVerMod.modifyColumn("20200629.1", "PKG_DESC").nullable().withType(ColumnTypeEnum.STRING, 200);
+		pkgVerMod.modifyColumn("20200629.2", "DESC_UPPER").nullable().withType(ColumnTypeEnum.STRING, 200);
+
+		init510_20200706_to_20200714();
+
+		Builder.BuilderWithTableName empiLink = version.onTable("MPI_LINK");
+		empiLink.addColumn("20200715.1", "VERSION").nonNullable().type(ColumnTypeEnum.STRING, EmpiLink.VERSION_LENGTH);
+		empiLink.addColumn("20200715.2", "EID_MATCH").nullable().type(ColumnTypeEnum.BOOLEAN);
+		empiLink.addColumn("20200715.3", "NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
+		empiLink.addColumn("20200715.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("20200715.5", "SCORE").nullable().type(ColumnTypeEnum.FLOAT);
+	}
+
+	protected void init510_20200610() {
+	}
+
+	protected void init510_20200706_to_20200714() {
 
 	}
 
@@ -1131,7 +1153,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
-		version.initializeSchema("20180115.0", new SchemaInitializationProvider("HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE"));
+		version.initializeSchema("20180115.0", new SchemaInitializationProvider("HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE", true));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());

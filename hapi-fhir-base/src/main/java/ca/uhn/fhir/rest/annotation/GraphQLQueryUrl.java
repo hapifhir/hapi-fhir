@@ -16,7 +16,11 @@ package ca.uhn.fhir.rest.annotation;
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
+<<<<<<< HEAD
  * limitations under the LBoicense.
+=======
+ * limitations under the License.
+>>>>>>> 5db90d3e6edd7e238f33ea42f5bd1f8bcad37fba
  * #L%
  */
 
@@ -37,6 +41,14 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
+<<<<<<< HEAD
 public @interface GraphQLQueryUrl {
+=======
+<<<<<<< HEAD:hapi-fhir-base/src/main/java/ca/uhn/fhir/rest/annotation/GraphQLQueryBody.java
+public @interface GraphQLQueryBody {
+=======
+public @interface GraphQLQueryUrl {
+>>>>>>> 5db90d3e6edd7e238f33ea42f5bd1f8bcad37fba:hapi-fhir-base/src/main/java/ca/uhn/fhir/rest/annotation/GraphQLQueryUrl.java
+>>>>>>> 5db90d3e6edd7e238f33ea42f5bd1f8bcad37fba
 	// ignore
 }

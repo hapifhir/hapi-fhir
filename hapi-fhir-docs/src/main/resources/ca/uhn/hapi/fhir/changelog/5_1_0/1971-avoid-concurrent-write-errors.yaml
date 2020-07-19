@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1971
+title: "A new interceptor called `UserRequestRetryVersionConflictsInterceptor` has been added to the JPA server. This interceptor
+   allows clients to instruct the server to attempt to avoid returning an HTTP 409 (Version Conflict) if two concurrent client 
+   requests try to update the same resource at the same time."

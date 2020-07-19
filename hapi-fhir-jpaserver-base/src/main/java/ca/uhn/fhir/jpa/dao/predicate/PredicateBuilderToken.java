@@ -366,12 +366,12 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				break;
 		}
 
-		Predicate predicate;
-		if (values.size() == 1) {
-			predicate = myCriteriaBuilder.equal(hashField, values.get(0));
-		} else {
-			predicate = hashField.in(values);
-		}
+		/*
+		 * Note: At one point we had an IF-ELSE here that did an equals if there was only 1 value, and an IN if there
+		 * was more than 1. This caused a performance regression for some reason in Postgres though. So maybe simpler
+		 * is better..
+		 */
+		Predicate predicate = hashField.in(values);
 
 		if (theModifier == TokenParamModifier.NOT) {
 			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName));

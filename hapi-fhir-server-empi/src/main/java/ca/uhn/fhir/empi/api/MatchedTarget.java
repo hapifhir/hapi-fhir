@@ -25,9 +25,9 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 public class MatchedTarget {
 
 	private final IAnyResource myTarget;
-	private final EmpiMatchResultEnum myMatchResult;
+	private final EmpiMatchOutcome myMatchResult;
 
-	public MatchedTarget(IAnyResource theTarget, EmpiMatchResultEnum theMatchResult) {
+	public MatchedTarget(IAnyResource theTarget, EmpiMatchOutcome theMatchResult) {
 		myTarget = theTarget;
 		myMatchResult = theMatchResult;
 	}
@@ -36,15 +36,15 @@ public class MatchedTarget {
 		return myTarget;
 	}
 
-	public EmpiMatchResultEnum getMatchResult() {
+	public EmpiMatchOutcome getMatchResult() {
 		return myMatchResult;
 	}
 
 	public boolean isMatch() {
-		return myMatchResult == EmpiMatchResultEnum.MATCH;
+		return myMatchResult.isMatch();
 	}
 
 	public boolean isPossibleMatch() {
-		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_MATCH;
+		return myMatchResult.isPossibleMatch();
 	}
 }

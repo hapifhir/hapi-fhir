@@ -1,0 +1,55 @@
+{
+	"resourceType": "ValueSet",
+	"id": "2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000",
+	"meta": {
+		"profile": [
+			"http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+		]
+	},
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/resource-effectivePeriod",
+			"valuePeriod": {
+				"start": "2017-12-31T00:00:00+02:00"
+			}
+		}
+	],
+	"url": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000",
+	"identifier": [
+		{
+			"use": "official",
+			"system": "http://art-decor.org/ns/oids/vs",
+			"value": "2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1"
+		}
+	],
+	"version": "2017-12-31T00:00:00",
+	"name": "LandGBACodelijst",
+	"title": "LandGBACodelijst",
+	"status": "active",
+	"experimental": false,
+	"publisher": "Registratie aan de bron",
+	"contact": [
+		{
+			"name": "Registratie aan de bron",
+			"telecom": [
+				{
+					"system": "url",
+					"value": "https://www.registratieaandebron.nl"
+				},
+				{
+					"system": "url",
+					"value": "https://zibs.nl"
+				}
+			]
+		}
+	],
+	"description": "GBA Tabel 34 (Landentabel) - Alle waarden",
+	"immutable": false,
+	"compose": {
+		"include": [
+			{
+				"system": "urn:oid:2.16.840.1.113883.2.4.4.16.34"
+			}
+		]
+	}
+}

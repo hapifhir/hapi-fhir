@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -39,6 +40,8 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -142,19 +145,25 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>) getDao();
-			IFhirResourceDaoValueSet.ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
-			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("result").setValue(new BooleanDt(result.isResult()));
-			if (isNotBlank(result.getMessage())) {
-				retVal.addParameter().setName("message").setValue(new StringDt(result.getMessage()));
-			}
-			if (isNotBlank(result.getDisplay())) {
-				retVal.addParameter().setName("display").setValue(new StringDt(result.getDisplay()));
-			}
-			return retVal;
+			IValidationSupport.CodeValidationResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			return (Parameters) toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult) {
+		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
+
+		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
+		if (isNotBlank(theResult.getMessage())) {
+			ParametersUtil.addParameterToParametersString(theContext, retVal, "message", theResult.getMessage());
+		}
+		if (isNotBlank(theResult.getDisplay())) {
+			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", theResult.getDisplay());
+		}
+
+		return retVal;
 	}
 
 	private static boolean moreThanOneTrue(boolean... theBooleans) {

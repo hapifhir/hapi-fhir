@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_EMPI_MANAGED;
@@ -237,7 +239,48 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		}
 
 		setPreventMultipleEids(false);
+	}
 
+	@Test
+	public void testInterceptorHandlesNonEmpiResources() {
+		setPreventEidUpdates(true);
+
+		//Create some arbitrary resource.
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.addBase("Bundle");
+		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Bundle.entry[0].resource.as(Composition).encounter");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+		myEmpiHelper.doCreateResource(fooSp, true);
+		fooSp.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
+		myEmpiHelper.doUpdateResource(fooSp, true);
+	}
+
+	@Test
+	public void testPatientsWithNoEIDCanBeUpdated() throws InterruptedException {
+		setPreventEidUpdates(true);
+		Patient p = new Patient();
+		EmpiHelperR4.OutcomeAndLogMessageWrapper wrapper = myEmpiHelper.createWithLatch(p);
+
+		p.setId(wrapper.getDaoMethodOutcome().getId());
+		p.setBirthDate(new Date());
+		myEmpiHelper.updateWithLatch(p);
+		setPreventEidUpdates(false);
+	}
+
+	@Test
+	public void testPatientsCanHaveEIDAddedInStrictMode() throws InterruptedException {
+		setPreventEidUpdates(true);
+		Patient p = new Patient();
+		EmpiHelperR4.OutcomeAndLogMessageWrapper messageWrapper = myEmpiHelper.createWithLatch(p);
+		p.setId(messageWrapper.getDaoMethodOutcome().getId());
+		addExternalEID(p, "external eid");
+		myEmpiHelper.updateWithLatch(p);
+		setPreventEidUpdates(false);
 	}
 
 	private void setPreventEidUpdates(boolean thePrevent) {

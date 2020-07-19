@@ -447,8 +447,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
-	@Autowired
-	protected SubscriptionRegistry mySubscriptionRegistry;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
