@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.empi.api.IEmpiBatchService;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
@@ -15,6 +16,7 @@ import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -70,6 +72,26 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	@Bean
 	public BulkExportDaoSvc bulkExportDaoSvc() {
 		return new BulkExportDaoSvc();
+	}
+
+	@Bean
+	public IEmpiBatchService myEmpiBatchService() {
+		return new IEmpiBatchService() {
+			@Override
+			public void runEmpiOnAllTargets(String theCriteria) {
+				return;
+			}
+
+			@Override
+			public void runEmpiOnTargetType(String theTargetType, String theCriteria) {
+				return;
+			}
+
+			@Override
+			public void runEmpiOnTarget(IIdType theId, String theTargetType) {
+				return;
+			}
+		};
 	}
 
 	@Bean

@@ -26,7 +26,6 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected StringType myPersonId;
 	protected StringType myVersionlessPersonId;
 
-
 	@Override
 	@BeforeEach
 	public void before() {

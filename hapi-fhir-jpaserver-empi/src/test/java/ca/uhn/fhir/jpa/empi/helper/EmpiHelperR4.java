@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.empi.helper;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.provider.EmpiProviderR4;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -15,17 +14,8 @@ public class EmpiHelperR4 extends BaseEmpiHelper {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private EmpiProviderR4 myEmpiProviderR4;
-
 	public OutcomeAndLogMessageWrapper createWithLatch(IBaseResource theResource) throws InterruptedException {
 		return createWithLatch(theResource, true);
-	}
-	public OutcomeAndLogMessageWrapper batchWithLatch(int expectedRuns) throws InterruptedException {
-		myAfterEmpiLatch.setExpectedCount(expectedRuns);
-		myEmpiProviderR4.batchRunEmpi(null, null, null);
-		myAfterEmpiLatch.awaitExpected();
-		return new OutcomeAndLogMessageWrapper(null, null);
 	}
 
 	public OutcomeAndLogMessageWrapper createWithLatch(IBaseResource theBaseResource, boolean isExternalHttpRequest) throws InterruptedException {

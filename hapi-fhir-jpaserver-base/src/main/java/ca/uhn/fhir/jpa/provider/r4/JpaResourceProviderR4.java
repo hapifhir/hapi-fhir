@@ -115,19 +115,23 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatch(
 		@IdParam IIdType theIdParam,
 		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
+		//TODO actually return submitted count
 		return super.doEmpiBatch(theIdParam, theCriteria.getValue(), theRequest);
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatch(
 		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
+		//TODO actually return submitted count
 		return super.doEmpiBatch(null, theCriteria.getValue(), theRequest);
 	}
 
