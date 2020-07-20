@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.EmpiConstants;
-import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,7 +27,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @TestPropertySource(properties = {
@@ -85,26 +82,6 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		Identifier thirdIdentifier = identifier.get(2);
 		assertThat(thirdIdentifier.getSystem(), is(equalTo(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())));
 		assertThat(thirdIdentifier.getValue(), is(equalTo("67890")));
-	}
-
-	private void assertLinksMatchResult(EmpiMatchResultEnum... theExpectedValues) {
-		assertFields(EmpiLink::getMatchResult, theExpectedValues);
-	}
-
-	private void assertLinksNewPerson(Boolean... theExpectedValues) {
-		assertFields(EmpiLink::getNewPerson, theExpectedValues);
-	}
-
-	private void assertLinksMatchedByEid(Boolean... theExpectedValues) {
-		assertFields(EmpiLink::getEidMatch, theExpectedValues);
-	}
-
-	private <T> void assertFields(Function<EmpiLink, T> theAccessor, T... theExpectedValues) {
-		List<EmpiLink> links = myEmpiLinkDao.findAll();
-		assertEquals(theExpectedValues.length, links.size());
-		for (int i = 0; i < links.size(); ++i) {
-			assertEquals(theExpectedValues[i], theAccessor.apply(links.get(i)), "Value at index " + i + " was not equal");
-		}
 	}
 
 	@Test

@@ -28,8 +28,7 @@ public final class EmpiMatchOutcome {
 	public static final EmpiMatchOutcome NO_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.NO_MATCH);
 	public static final EmpiMatchOutcome NEW_PERSON_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.MATCH).setNewPerson(true);
 	public static final EmpiMatchOutcome EID_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.MATCH).setEidMatch(true);
-	public static final EmpiMatchOutcome EID_POSSIBLE_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_MATCH).setEidMatch(true);
-	public static final EmpiMatchOutcome EID_POSSIBLE_DUPLICATE = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setEidMatch(true);
+	public static final EmpiMatchOutcome POSSIBLE_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_MATCH);
 
 	/**
 	 * A bitmap that indicates which rules matched
