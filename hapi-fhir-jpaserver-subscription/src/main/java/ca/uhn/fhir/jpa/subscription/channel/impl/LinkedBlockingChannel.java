@@ -52,4 +52,9 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	public String getName() {
 		return myName;
 	}
+
+	@Override
+	public void destroy() {
+		// nothing
+	}
 }
