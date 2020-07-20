@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -61,8 +62,11 @@ public class MatchingQueueSubscriberLoader {
 
 	@SuppressWarnings("unused")
 	@PreDestroy
-	public void stop() {
+	public void stop() throws Exception {
 		if (myMatchingChannel != null) {
+			if (myMatchingChannel instanceof DisposableBean) {
+				((DisposableBean) myMatchingChannel).destroy();
+			}
 			myMatchingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
 			myMatchingChannel.unsubscribe(mySubscriptionActivatingSubscriber);
 			myMatchingChannel.unsubscribe(mySubscriptionRegisteringSubscriber);

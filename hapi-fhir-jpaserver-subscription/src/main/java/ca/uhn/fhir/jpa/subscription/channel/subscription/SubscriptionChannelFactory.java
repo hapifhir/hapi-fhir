@@ -36,6 +36,8 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 
+import java.util.Set;
+
 public class SubscriptionChannelFactory {
 	private final IChannelFactory myChannelFactory;
 
@@ -108,9 +110,11 @@ public class SubscriptionChannelFactory {
 	public static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements IChannelReceiver, DisposableBean {
 
 		private final IChannelReceiver myWrappedChannel;
+		private final MessageHandler myHandler;
 
 		public BroadcastingSubscribableChannelWrapper(IChannelReceiver theChannel) {
-			theChannel.subscribe(message -> send(message));
+			myHandler = message -> send(message);
+			theChannel.subscribe(myHandler);
 			myWrappedChannel = theChannel;
 		}
 
@@ -120,7 +124,9 @@ public class SubscriptionChannelFactory {
 
 		@Override
 		protected boolean sendInternal(Message<?> theMessage, long timeout) {
-			for (MessageHandler next : getSubscribers()) {
+			Set<MessageHandler> subscribers = getSubscribers();
+			Validate.isTrue(subscribers.size() > 0, "Channel has zero subscribers");
+			for (MessageHandler next : subscribers) {
 				next.handleMessage(theMessage);
 			}
 			return true;
@@ -131,6 +137,7 @@ public class SubscriptionChannelFactory {
 			if (myWrappedChannel instanceof DisposableBean) {
 				((DisposableBean) myWrappedChannel).destroy();
 			}
+			myWrappedChannel.unsubscribe(myHandler);
 		}
 
 		@Override
