@@ -20,13 +20,13 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.Message;
@@ -87,6 +87,10 @@ public class SubscriptionChannelFactory {
 
 	public int getMatchingChannelConcurrentConsumers() {
 		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
+	}
+
+	public IChannelFactory getChannelFactory() {
+		return myQueueChannelFactory;
 	}
 
 	public static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements IChannelReceiver, DisposableBean {

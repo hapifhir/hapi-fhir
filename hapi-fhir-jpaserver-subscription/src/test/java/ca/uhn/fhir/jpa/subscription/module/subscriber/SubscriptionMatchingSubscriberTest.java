@@ -69,9 +69,11 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
+		mySubscriptionAfterDelivery.setExpectedCount(1);
 		ourObservationListener.setExpectedCount(0);
 		sendObservation(code, "SNOMED-CT");
 		ourObservationListener.clear();
+		mySubscriptionAfterDelivery.awaitExpected();
 
 		assertEquals(0, ourContentTypes.size());
 	}

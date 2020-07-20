@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.SubscribableChannel;
 
 import javax.annotation.PreDestroy;
 
@@ -44,7 +44,7 @@ public class MatchingQueueSubscriberLoader {
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 
-	protected SubscribableChannel myMatchingChannel;
+	protected IChannelReceiver myMatchingChannel;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void handleContextRefreshEvent() {
@@ -61,8 +61,10 @@ public class MatchingQueueSubscriberLoader {
 
 	@SuppressWarnings("unused")
 	@PreDestroy
-	public void stop() {
+	public void stop() throws Exception {
 		if (myMatchingChannel != null) {
+			ourLog.info("Destroying matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			myMatchingChannel.destroy();
 			myMatchingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
 			myMatchingChannel.unsubscribe(mySubscriptionActivatingSubscriber);
 			myMatchingChannel.unsubscribe(mySubscriptionRegisteringSubscriber);

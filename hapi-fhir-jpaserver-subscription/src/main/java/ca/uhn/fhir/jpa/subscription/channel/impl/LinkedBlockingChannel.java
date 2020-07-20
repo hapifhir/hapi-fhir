@@ -45,4 +45,9 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 			removeInterceptor(0);
 		}
 	}
+
+	@Override
+	public void destroy() {
+		// nothing
+	}
 }
