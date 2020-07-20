@@ -29,14 +29,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import org.apache.commons.lang3.Validate;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.support.AbstractSubscribableChannel;
-import org.springframework.messaging.support.ChannelInterceptor;
-
-import java.util.Set;
 
 public class SubscriptionChannelFactory {
 	private final IChannelFactory myChannelFactory;
@@ -107,49 +99,4 @@ public class SubscriptionChannelFactory {
 		return myChannelFactory;
 	}
 
-	public static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements IChannelReceiver, DisposableBean {
-
-		private final IChannelReceiver myWrappedChannel;
-		private final MessageHandler myHandler;
-
-		public BroadcastingSubscribableChannelWrapper(IChannelReceiver theChannel) {
-			myHandler = message -> send(message);
-			theChannel.subscribe(myHandler);
-			myWrappedChannel = theChannel;
-		}
-
-		public SubscribableChannel getWrappedChannel() {
-			return myWrappedChannel;
-		}
-
-		@Override
-		protected boolean sendInternal(Message<?> theMessage, long timeout) {
-			Set<MessageHandler> subscribers = getSubscribers();
-			Validate.isTrue(subscribers.size() > 0, "Channel has zero subscribers");
-			for (MessageHandler next : subscribers) {
-				next.handleMessage(theMessage);
-			}
-			return true;
-		}
-
-		@Override
-		public void destroy() throws Exception {
-			if (myWrappedChannel instanceof DisposableBean) {
-				((DisposableBean) myWrappedChannel).destroy();
-			}
-			myWrappedChannel.unsubscribe(myHandler);
-		}
-
-		@Override
-		public void addInterceptor(ChannelInterceptor interceptor) {
-			super.addInterceptor(interceptor);
-			myWrappedChannel.addInterceptor(interceptor);
-		}
-
-
-		@Override
-		public String getName() {
-			return myWrappedChannel.getName();
-		}
-	}
 }
