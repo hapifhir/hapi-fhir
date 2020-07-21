@@ -1067,9 +1067,19 @@ class ParserState<T> {
 						 * At some point it would be good to write code which can present a view
 						 * of one type backed by another type and use that.
 						 */
+						FhirTerser t = myContext.newTerser();
+
+						// Clean up the cached resources
+						myGlobalResources.remove(myInstance);
+						myGlobalReferences.removeAll(t.getAllPopulatedChildElementsOfType(myInstance, IBaseReference.class));
+
 						IParser parser = myContext.newJsonParser();
 						String asString = parser.encodeResourceToString(myInstance);
 						myInstance = parser.parseResource(wantedProfileType, asString);
+
+						// Add newly created instance
+						myGlobalResources.add(myInstance);
+						myGlobalReferences.addAll(t.getAllPopulatedChildElementsOfType(myInstance, IBaseReference.class));
 					}
 				}
 			}

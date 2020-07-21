@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +93,18 @@ public class NpmTestR4 extends BaseJpaR4Test {
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+	}
+
+
+	@Disabled("This test is super slow so don't run by default")
+	@Test
+	public void testInstallUsCore() {
+		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
+		jpaPackageCache.getPackageServers().clear();
+		jpaPackageCache.addPackageServer("https://packages.fhir.org");
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.us.core").setVersion("3.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(true);
+		igInstaller.install(spec);
 	}
 
 

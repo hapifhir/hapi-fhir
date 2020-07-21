@@ -29,12 +29,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import org.apache.commons.lang3.Validate;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.support.AbstractSubscribableChannel;
-import org.springframework.messaging.support.ChannelInterceptor;
 
 public class SubscriptionChannelFactory {
 	private final IChannelFactory myChannelFactory;
@@ -105,44 +99,4 @@ public class SubscriptionChannelFactory {
 		return myChannelFactory;
 	}
 
-	public static class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements IChannelReceiver, DisposableBean {
-
-		private final IChannelReceiver myWrappedChannel;
-
-		public BroadcastingSubscribableChannelWrapper(IChannelReceiver theChannel) {
-			theChannel.subscribe(message -> send(message));
-			myWrappedChannel = theChannel;
-		}
-
-		public SubscribableChannel getWrappedChannel() {
-			return myWrappedChannel;
-		}
-
-		@Override
-		protected boolean sendInternal(Message<?> theMessage, long timeout) {
-			for (MessageHandler next : getSubscribers()) {
-				next.handleMessage(theMessage);
-			}
-			return true;
-		}
-
-		@Override
-		public void destroy() throws Exception {
-			if (myWrappedChannel instanceof DisposableBean) {
-				((DisposableBean) myWrappedChannel).destroy();
-			}
-		}
-
-		@Override
-		public void addInterceptor(ChannelInterceptor interceptor) {
-			super.addInterceptor(interceptor);
-			myWrappedChannel.addInterceptor(interceptor);
-		}
-
-
-		@Override
-		public String getName() {
-			return myWrappedChannel.getName();
-		}
-	}
 }

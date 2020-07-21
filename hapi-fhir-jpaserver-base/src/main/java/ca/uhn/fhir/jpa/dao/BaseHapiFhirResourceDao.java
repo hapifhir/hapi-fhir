@@ -89,6 +89,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -122,7 +123,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
@@ -759,8 +763,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange()) {
-			if (isNotBlank(theExpression) && theExpression.contains(".")) {
-				final String resourceType = theExpression.substring(0, theExpression.indexOf('.'));
+
+			String expression = defaultString(theExpression);
+
+			Set<String> typesToMark = myDaoRegistry
+				.getRegisteredDaoTypes()
+				.stream()
+				.filter(t -> WordUtils.containsAllWords(expression, t))
+				.collect(Collectors.toSet());
+
+			for (String resourceType : typesToMark) {
 				ourLog.debug("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
@@ -772,6 +784,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				ourLog.debug("Marked resources of type {} for reindexing", resourceType);
 			}
+
 		}
 
 		mySearchParamRegistry.requestRefresh();

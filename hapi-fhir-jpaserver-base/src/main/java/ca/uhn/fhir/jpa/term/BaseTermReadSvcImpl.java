@@ -1605,6 +1605,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 							if (element.hasTarget()) {
 								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
 								for (ConceptMap.TargetElementComponent elementTarget : element.getTarget()) {
+									if (isBlank(elementTarget.getCode())) {
+										continue;
+									}
 									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
 									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
 									termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
