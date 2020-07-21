@@ -26,5 +26,9 @@ public enum CandidateStrategyEnum {
 	/** Find Person candidates based on a link already existing for the target resource */
 	LINK,
 	/** Find Person candidates based on other targets that match the incoming target using the EMPI Matching rules */
-	SCORE
+	SCORE;
+
+    public boolean isEidMatch() {
+    	return this == EID;
+    }
 }

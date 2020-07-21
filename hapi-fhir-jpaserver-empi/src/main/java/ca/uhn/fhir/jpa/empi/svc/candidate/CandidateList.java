@@ -26,15 +26,15 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class CandidateList {
-	private final CandidateStrategyEnum mySource;
+	private final CandidateStrategyEnum myStrategy;
 	private final List<MatchedPersonCandidate> myList = new ArrayList<>();
 
-	public CandidateList(CandidateStrategyEnum theSource) {
-		mySource = theSource;
+	public CandidateList(CandidateStrategyEnum theStrategy) {
+		myStrategy = theStrategy;
 	}
 
-	public CandidateStrategyEnum getSource() {
-		return mySource;
+	public CandidateStrategyEnum getStrategy() {
+		return myStrategy;
 	}
 
 	public boolean isEmpty() {
@@ -63,4 +63,8 @@ public class CandidateList {
 	public MatchedPersonCandidate getFirstMatch() {
 		return myList.get(0);
 	}
+
+    public boolean isEidMatch() {
+		return myStrategy.isEidMatch();
+    }
 }

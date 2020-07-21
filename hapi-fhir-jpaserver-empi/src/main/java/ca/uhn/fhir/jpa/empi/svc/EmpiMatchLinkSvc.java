@@ -101,14 +101,20 @@ public class EmpiMatchLinkSvc {
 			List<IAnyResource> persons = new ArrayList<>();
 			for (MatchedPersonCandidate matchedPersonCandidate : theCandidateList.getCandidates()) {
 				IAnyResource person = myEmpiPersonFindingSvc.getPersonFromMatchedPersonCandidate(matchedPersonCandidate);
-				myEmpiLinkSvc.updateLink(person, theResource, EmpiMatchOutcome.EID_POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+				EmpiMatchOutcome outcome = EmpiMatchOutcome.POSSIBLE_MATCH;
+				outcome.setEidMatch(theCandidateList.isEidMatch());
+				myEmpiLinkSvc.updateLink(person, theResource, outcome, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 				persons.add(person);
 			}
 
 			//Set all Persons as POSSIBLE_DUPLICATE of the last person.
 			IAnyResource firstPerson = persons.get(0);
 			persons.subList(1, persons.size())
-				.forEach(possibleDuplicatePerson -> myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, EmpiMatchOutcome.EID_POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext));
+				.forEach(possibleDuplicatePerson -> {
+					EmpiMatchOutcome outcome = EmpiMatchOutcome.POSSIBLE_DUPLICATE;
+					outcome.setEidMatch(theCandidateList.isEidMatch());
+					myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, outcome, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+				});
 		}
 	}
 
