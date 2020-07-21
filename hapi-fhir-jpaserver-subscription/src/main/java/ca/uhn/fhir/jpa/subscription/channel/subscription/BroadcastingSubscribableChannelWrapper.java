@@ -66,10 +66,4 @@ public class BroadcastingSubscribableChannelWrapper extends AbstractSubscribable
         super.addInterceptor(interceptor);
         myWrappedChannel.addInterceptor(interceptor);
     }
-
-
-    @Override
-    public String getName() {
-        return myWrappedChannel.getName();
-    }
 }
