@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -282,20 +283,24 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * Create a resource or update it, if its already existing.
 	 */
 	private void createOrUpdate(IBaseResource resource) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resource.getClass());
-		IBundleProvider searchResult = dao.search(createSearchParameterMapFor(resource));
-		if (searchResult.isEmpty()) {
+		try {
+			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resource.getClass());
+			IBundleProvider searchResult = dao.search(createSearchParameterMapFor(resource));
+			if (searchResult.isEmpty()) {
 
-			if (validForUpload(resource)) {
-				dao.create(resource);
-			}
+				if (validForUpload(resource)) {
+					dao.create(resource);
+				}
 
-		} else {
-			IBaseResource existingResource = verifySearchResultFor(resource, searchResult);
-			if (existingResource != null) {
-				resource.setId(existingResource.getIdElement().getValue());
-				dao.update(resource);
+			} else {
+				IBaseResource existingResource = verifySearchResultFor(resource, searchResult);
+				if (existingResource != null) {
+					resource.setId(existingResource.getIdElement().getValue());
+					dao.update(resource);
+				}
 			}
+		} catch (BaseServerResponseException e) {
+			ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(resource), resource.getIdElement().getValue(), e.toString());
 		}
 	}
 
