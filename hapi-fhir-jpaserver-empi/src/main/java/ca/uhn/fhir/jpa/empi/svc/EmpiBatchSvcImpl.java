@@ -47,8 +47,8 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	@Transactional
 	public int runEmpiOnAllTargetTypes(String theCriteria) {
 		int submittedCount = 0;
-		submittedCount += runEmpiOnTargetType("Patient", theCriteria);
-		submittedCount += runEmpiOnTargetType("Practitioner", theCriteria);
+		submittedCount += runEmpiOnPatientType(theCriteria);
+		submittedCount += runEmpiOnPractitionerType(theCriteria);
 		return submittedCount;
 	}
 
@@ -69,7 +69,6 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 			while (query.hasNext()) {
 				pidsToSubmit.add(query.next());
 				if (pidsToSubmit.size() == QUEUE_ADDING_PAGE_SIZE || !query.hasNext()) {
-					//TODO GGG ask ken how this works.
 					total = loadResourcesAndSubmitToEmpi(total, mySearchBuilder, pidsToSubmit, resourceToBeSubmitted);
 					resourceToBeSubmitted.clear();
 				}
@@ -81,6 +80,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	}
 
 	private int loadResourcesAndSubmitToEmpi(int theTotal, ISearchBuilder theMySearchBuilder, Collection<ResourcePersistentId> thePidsToSubmit, List<IBaseResource> theResourceToBeSubmitted) {
+		//TODO GGG ask ken how this works. specifically includePids?
 		theMySearchBuilder.loadResourcesByPid(thePidsToSubmit, thePidsToSubmit, theResourceToBeSubmitted, false, null);
 		theResourceToBeSubmitted
 			.forEach(resource -> myEmpiQueueSubmitterSvc.manuallySubmitResourceToEmpi(resource));
@@ -113,13 +113,13 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	@Override
 	@Transactional
 	public int runEmpiOnTargetPractitioner(IIdType theId) {
-		return runEmpiOnTarget(theId, "practitioner");
+		return runEmpiOnTarget(theId, "Practitioner");
 	}
 
 	@Override
 	@Transactional
 	public int runEmpiOnTargetPatient(IIdType theId) {
-		return runEmpiOnTarget(theId, "patient");
+		return runEmpiOnTarget(theId, "Patient");
 	}
 
 	private SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, String theCriteria) {

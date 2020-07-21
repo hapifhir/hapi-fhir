@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.empi.provider;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
@@ -54,6 +56,23 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPractitionerType(criteria, null));
 		assertLinkCount(1);
 	}
+	@Test
+	public void testBatchRunOnSpecificPractitioner() {
+		assertLinkCount(2);
+		myEmpiProviderR4.clearEmpiLinks(null);
+		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPractitionerInstance(myPractitioner.getIdElement(), null));
+		assertLinkCount(1);
+	}
+
+	@Test
+	public void testBatchRunOnNonExistentSpecificPractitioner() {
+		assertLinkCount(2);
+		myEmpiProviderR4.clearEmpiLinks(null);
+		try {
+			myEmpiProviderR4.empiBatchPractitionerInstance(new IdType("Practitioner/999"), null);
+			fail();
+		} catch (ResourceNotFoundException e){}
+	}
 
 	@Test
 	public void testBatchRunOnAllPatients() {
@@ -62,6 +81,24 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 		myEmpiProviderR4.clearEmpiLinks(null);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPatientType(criteria, null));
 		assertLinkCount(1);
+	}
+
+	@Test
+	public void testBatchRunOnSpecificPatient() {
+		assertLinkCount(2);
+		myEmpiProviderR4.clearEmpiLinks(null);
+		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPatientInstance(myPatient.getIdElement(), null));
+		assertLinkCount(1);
+	}
+
+	@Test
+	public void testBatchRunOnNonExistentSpecificPatient() {
+		assertLinkCount(2);
+		myEmpiProviderR4.clearEmpiLinks(null);
+		try {
+			myEmpiProviderR4.empiBatchPatientInstance(new IdType("Patient/999"), null);
+			fail();
+		} catch (ResourceNotFoundException e){}
 	}
 
 	@Test
