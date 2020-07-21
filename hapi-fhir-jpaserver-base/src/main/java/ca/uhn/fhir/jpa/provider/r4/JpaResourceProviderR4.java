@@ -37,7 +37,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -45,7 +44,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -114,26 +112,7 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
-	})
-	public Parameters empiBatch(
-		@IdParam IIdType theIdParam,
-		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
-		RequestDetails theRequest) {
-		//TODO actually return submitted count
-		return super.doEmpiBatch(theIdParam, theCriteria.getValue(), theRequest);
-	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
-	})
-	public Parameters empiBatch(
-		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
-		RequestDetails theRequest) {
-		//TODO actually return submitted count
-		return super.doEmpiBatch(null, theCriteria.getValue(), theRequest);
-	}
 
 	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)

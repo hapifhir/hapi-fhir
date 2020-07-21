@@ -41,75 +41,51 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
 	@AfterEach
 	public void after() {
-		super.after();
 		myInterceptorService.unregisterInterceptor(afterEmpiLatch);
+		super.after();
 	}
 
 	@Test
 	public void testBatchRunOnAllPractitioners() {
 		assertLinkCount(2);
-		StringType practitionerType = new StringType("Practitioner");
 		StringType criteria = null;
 		myEmpiProviderR4.clearEmpiLinks(null);
 
-		afterEmpiLatch.runWithExpectedCount(1, () -> {
-			myEmpiProviderR4.batchRunEmpi(practitionerType, criteria, null);
-		});
+		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPractitionerType(criteria, null));
 		assertLinkCount(1);
 	}
 
 	@Test
 	public void testBatchRunOnAllPatients() {
 		assertLinkCount(2);
-		StringType patientType = new StringType("Patient");
 		StringType criteria = null;
 		myEmpiProviderR4.clearEmpiLinks(null);
-		afterEmpiLatch.runWithExpectedCount(1, () -> {
-			myEmpiProviderR4.batchRunEmpi(patientType, criteria, null);
-		});
+		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPatientType(criteria, null));
 		assertLinkCount(1);
-	}
-
-	@Test
-	public void testBatchRunOnInvalidType() {
-		assertLinkCount(2);
-		StringType observationType= new StringType("Observation");
-		StringType criteria = null;
-		myEmpiProviderR4.clearEmpiLinks(null);
-		try {
-			myEmpiProviderR4.batchRunEmpi(observationType, criteria, null);
-			fail();
-		} catch(InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("$empi-batch-run does not support resource type: Observation")));
-		}
 	}
 
 	@Test
 	public void testBatchRunOnAllTypes() {
 		assertLinkCount(2);
-		StringType patientType = new StringType("Patient");
-		StringType criteria = null;
+		StringType criteria = new StringType("");
 		myEmpiProviderR4.clearEmpiLinks(null);
-
-		afterEmpiLatch.runWithExpectedCount(1, () -> {
-			myEmpiProviderR4.batchRunEmpi(patientType, criteria, null);
+		afterEmpiLatch.runWithExpectedCount(2, () -> {
+			myEmpiProviderR4.empiBatchOnAllTargets(criteria, null);
 		});
-
-		assertLinkCount(1);
+		assertLinkCount(2);
 	}
 
 	@Test
 	public void testBatchRunOnAllTypesWithInvalidCriteria() {
 		assertLinkCount(2);
-		StringType criteria = new StringType("Patient?death-date=2020-06-01");
-		StringType targetType = new StringType("Practitioner");
+		StringType criteria = new StringType("death-date=2020-06-01");
 		myEmpiProviderR4.clearEmpiLinks(null);
 
 		try {
-			myEmpiProviderR4.batchRunEmpi(targetType, criteria, null);
+			myEmpiProviderR4.empiBatchPractitionerType(criteria, null);
 			fail();
 		} catch(InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("Failed to parse match URL[Patient?death-date=2020-06-01] - Resource type Practitioner does not have a parameter with name: death-date")));
+			assertThat(e.getMessage(), is(equalTo("Failed to parse match URL[death-date=2020-06-01] - Resource type Practitioner does not have a parameter with name: death-date")));
 		}
 	}
 }

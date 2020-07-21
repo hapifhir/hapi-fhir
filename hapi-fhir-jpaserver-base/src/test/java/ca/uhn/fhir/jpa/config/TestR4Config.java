@@ -75,26 +75,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Bean
-	public IEmpiBatchService myEmpiBatchService() {
-		return new IEmpiBatchService() {
-			@Override
-			public void runEmpiOnAllTargets(String theCriteria) {
-				return;
-			}
-
-			@Override
-			public void runEmpiOnTargetType(String theTargetType, String theCriteria) {
-				return;
-			}
-
-			@Override
-			public void runEmpiOnTarget(IIdType theId, String theTargetType) {
-				return;
-			}
-		};
-	}
-
-	@Bean
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 

@@ -76,10 +76,6 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		return createExpungeResponse(outcome);
 	}
 
-	protected Parameters doEmpiBatch(IIdType theIdParam, String theCriteria, RequestDetails theRequest) {
-		getDao().runBatchEmpi(theIdParam, theRequest, theCriteria);
-		return new Parameters();
-	}
 
 	public IFhirResourceDao<T> getDao() {
 		return myDao;

@@ -49,7 +49,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		afterEmpiLatch.setExpectedCount(20);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnAllTargets(null);
+		myEmpiBatchSvc.runEmpiOnAllTargetTypes(null);
 
 		afterEmpiLatch.awaitExpected();
 		assertLinkCount(20);
@@ -83,7 +83,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		afterEmpiLatch.setExpectedCount(10);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnAllTargets(null);
+		myEmpiBatchSvc.runEmpiOnAllTargetTypes(null);
 
 		afterEmpiLatch.awaitExpected();
 		assertLinkCount(10);
@@ -97,7 +97,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 		afterEmpiLatch.setExpectedCount(1);
 
-		myEmpiBatchSvc.runEmpiOnAllTargets("Patient?name=gary");
+		myEmpiBatchSvc.runEmpiOnAllTargetTypes("Patient?name=gary");
 
 		afterEmpiLatch.awaitExpected();
 		assertLinkCount(1);

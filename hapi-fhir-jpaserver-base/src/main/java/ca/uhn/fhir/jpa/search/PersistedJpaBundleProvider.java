@@ -221,6 +221,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return template.execute(theStatus -> toResourceList(sb, pidsSubList));
 	}
 
+
 	/**
 	 * Returns false if the entity can't be found
 	 */

@@ -29,6 +29,7 @@ import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -36,13 +37,16 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.validation.IResourceLoader;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 
@@ -166,16 +170,77 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return (Parameters) myEmpiLinkUpdaterSvc.notDuplicatePerson(person, target, createEmpiContext(theRequestDetails));
 	}
 
-	/** TODO remove this, once we get it working in the BaseResourceProvider **/
-	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = true)
-	public void batchRunEmpi(@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_TARGET_TYPE, max=1) StringType theTargetType,
-									 @OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_CRITERIA, max=1) StringType theCriteria,
-									 ServletRequestDetails theRequestDetails) {
+	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= IntegerType.class)
+	})
+	public Parameters empiBatchOnAllTargets(
+		@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
+		ServletRequestDetails theRequestDetails) {
+		String criteria = convertCriteriaToString(theCriteria);
+		int submittedCount  = myEmpiBatchSvc.runEmpiOnAllTargetTypes(criteria);
+		return buildEmpiOutParametersWithCount(submittedCount);
+	}
 
-		if (theTargetType == null) {
-			myEmpiBatchSvc.runEmpiOnAllTargets(theCriteria.getValue());
-		} else {
-			myEmpiBatchSvc.runEmpiOnTargetType(theTargetType.toString(), theCriteria.getValue());
+	private String convertCriteriaToString(StringType theCriteria) {
+		return theCriteria == null ? null : theCriteria.getValueAsString();
+	}
+
+	private void validateCriteriaIsPresent(StringType theCriteria){
+		if (theCriteria == null ||  StringUtils.isBlank(theCriteria.getValue())) {
+			throw new InvalidRequestException("While executing " + ProviderConstants.OPERATION_EMPI_BATCH_RUN + " on a type or the server root, resource, the criteria parameter is mandatory.");
 		}
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Patient.class, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+	})
+	public Parameters empiBatchPatientInstance(
+		@IdParam IIdType theIdParam,
+		RequestDetails theRequest) {
+		int submittedCount = myEmpiBatchSvc.runEmpiOnTargetPatient(theIdParam);
+		return buildEmpiOutParametersWithCount(submittedCount);
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Patient.class, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+	})
+	public Parameters empiBatchPatientType(
+		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
+		RequestDetails theRequest) {
+		String criteria = convertCriteriaToString(theCriteria);
+		int submittedCount = myEmpiBatchSvc.runEmpiOnPatientType(criteria);
+		return buildEmpiOutParametersWithCount(submittedCount);
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Practitioner.class, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+	})
+	public Parameters empiBatchPractitionerInstance(
+		@IdParam IIdType theIdParam,
+		RequestDetails theRequest) {
+		int submittedCount = myEmpiBatchSvc.runEmpiOnTargetPractitioner(theIdParam);
+		return buildEmpiOutParametersWithCount(submittedCount);
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Practitioner.class, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+	})
+	public Parameters empiBatchPractitionerType(
+		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
+		RequestDetails theRequest) {
+		String criteria = convertCriteriaToString(theCriteria);
+		int submittedCount = myEmpiBatchSvc.runEmpiOnPractitionerType(criteria);
+		return buildEmpiOutParametersWithCount(submittedCount);
+	}
+
+	/**
+	 * Helper function to build the out-parameters for all batch EMPI operations.
+	 */
+	private Parameters buildEmpiOutParametersWithCount(int theCount) {
+		Parameters parameters = new Parameters();
+		parameters.addParameter()
+			.setName(ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT)
+			.setValue(new IntegerType(theCount));
+		return parameters;
 	}
 }
