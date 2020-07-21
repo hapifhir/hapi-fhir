@@ -211,6 +211,25 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		});
 	}
 
+	@Test
+	public void testInstallR4Package_Twice() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
+
+		PackageInstallOutcomeJson outcome;
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		outcome = igInstaller.install(spec);
+		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+
+		igInstaller.install(spec);
+		outcome = igInstaller.install(spec);
+		assertEquals(null, outcome.getResourcesInstalled().get("CodeSystem"));
+	}
+
+
 
 	@Test
 	public void testInstallR4PackageWithNoDescription() throws Exception {
