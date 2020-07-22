@@ -110,7 +110,6 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 		return resourcesToSubmit.size();
 	}
 
-
 	@Override
 	@Transactional
 	public long runEmpiOnPractitionerType(String theCriteria) {
