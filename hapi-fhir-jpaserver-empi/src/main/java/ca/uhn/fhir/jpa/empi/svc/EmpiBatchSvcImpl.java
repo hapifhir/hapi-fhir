@@ -47,7 +47,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	@Override
 	@Transactional
 	public long runEmpiOnAllTargetTypes(String theCriteria) {
-		int submittedCount = 0;
+		long submittedCount = 0;
 		submittedCount += runEmpiOnPatientType(theCriteria);
 		submittedCount += runEmpiOnPractitionerType(theCriteria);
 		return submittedCount;
