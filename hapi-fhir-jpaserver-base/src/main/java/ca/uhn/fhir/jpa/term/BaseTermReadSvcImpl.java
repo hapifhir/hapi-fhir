@@ -1669,7 +1669,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).get();
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
-				expandValueSet(null, valueSet, new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao));
+
+				ourLog.info("Pre-expanding ValueSet[{}] - URL: {}", valueSet.getId(), valueSet.getUrl());
+				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
+				expandValueSet(null, valueSet, accumulator);
 
 				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
