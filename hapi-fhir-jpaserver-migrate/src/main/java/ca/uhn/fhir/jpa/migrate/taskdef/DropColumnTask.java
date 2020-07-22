@@ -53,7 +53,8 @@ public class DropColumnTask extends BaseTableColumnTask {
 			return;
 		}
 
-		if(getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || getDriverType().equals(DriverTypeEnum.MARIADB_10_1)) {
+		if(getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || getDriverType().equals(DriverTypeEnum.MARIADB_10_1)
+		 || getDriverType().equals(DriverTypeEnum.MSSQL_2012)) {
 			// Some DBs such as MYSQL and Maria DB require that foreign keys depending on the column be dropped before the column itself is dropped.
 			logInfo(ourLog, "Dropping any foreign keys on table {} depending on column {}", getTableName(), getColumnName());
 			Set<String> foreignKeys = JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), getColumnName(), getTableName());
