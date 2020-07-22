@@ -138,7 +138,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		empiLink.addColumn("20200715.5", "SCORE").nullable().type(ColumnTypeEnum.FLOAT);
 
 		//EMPI Target Type
-		empiLink.addColumn("20200717.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("20200717.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING);
 	}
 
 	protected void init510_20200610() {
