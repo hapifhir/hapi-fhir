@@ -23,6 +23,11 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -30,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +51,10 @@ public class EmpiSearchParamSvc implements ISearchParamRetriever {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	public SearchParameterMap mapFromCriteria(String theResourceType, String theResourceCriteria) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);
@@ -80,4 +90,9 @@ public class EmpiSearchParamSvc implements ISearchParamRetriever {
 		}
 		return spMap;
     }
+
+    public ISearchBuilder generateSearchBuilderForType(String theTargetType) {
+		 IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theTargetType);
+		 return mySearchBuilderFactory.newSearchBuilder(resourceDao, theTargetType, resourceDao.getResourceType());
+	 }
 }

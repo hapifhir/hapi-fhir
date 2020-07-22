@@ -39,9 +39,6 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 	@Autowired
 	private IEmpiChannelSubmitterSvc myEmpiQueueSubmitterSvc;
 
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
-
 	private static final int BUFFER_SIZE = 100;
 
 	@Override
@@ -59,7 +56,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchService {
 		resolveTargetTypeOrThrowException(theTargetType);
 		SearchParameterMap spMap = myEmpiSearchParamSvc.getSearchParameterMapFromCriteria(theTargetType, theCriteria);
 		spMap.setLoadSynchronousUpTo(BUFFER_SIZE);
-		ISearchBuilder searchBuilder = mySearchBuilderFactory.newSearchBuilder(myDaoRegistry.getResourceDao(theTargetType), theTargetType, Patient.class);
+		ISearchBuilder searchBuilder = myEmpiSearchParamSvc.generateSearchBuilderForType(theTargetType);
 		return submitAllMatchingResourcesToEmpiChannel(spMap, searchBuilder);
 	}
 
