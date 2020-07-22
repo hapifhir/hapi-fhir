@@ -60,7 +60,6 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearPatientLinks() {
 		assertLinkCount(2);
-
 		Person read = myPersonDao.read(new IdDt(myPersonId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
 		myEmpiProviderR4.clearEmpiLinks(new StringType("patient"));
@@ -75,6 +74,8 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearPractitionerLinks() {
 		assertLinkCount(2);
+		Person read = myPersonDao.read(new IdDt(myPractitionerPersonId.getValueAsString()).toVersionless());
+		assertThat(read, is(notNullValue()));
 		myEmpiProviderR4.clearEmpiLinks(new StringType("practitioner"));
 		assertNoPractitionerLinksExist();
 		try {

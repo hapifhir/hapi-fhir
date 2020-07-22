@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
 import ca.uhn.fhir.empi.api.IEmpiBatchService;
-import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
+import ca.uhn.fhir.empi.api.IEmpiResetSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
@@ -25,7 +25,7 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 	@Autowired
 	private IResourceLoader myResourceLoader;
 	@Autowired
-	private IEmpiExpungeSvc myEmpiExpungeSvc;
+	private IEmpiResetSvc myEmpiExpungeSvc;
 	@Autowired
 	private IEmpiBatchService myEmpiBatchSvc;
 

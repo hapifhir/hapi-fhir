@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,4 +61,23 @@ public class EmpiSearchParamSvc implements ISearchParamRetriever {
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
 		return mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 	}
+
+	/**
+	 * Given a target type, and a criteria string of the shape name=x&birthDate=y, generate a {@link SearchParameterMap}
+	 * that represents this query.
+	 *
+	 * @param theTargetType the resource type to execute the search on
+	 * @param theCriteria the string search criteria.
+	 *
+	 * @return the generated SearchParameterMap, or an empty one if there is no criteria.
+	 */
+	public SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, String theCriteria) {
+		SearchParameterMap spMap;
+		if (!StringUtils.isBlank(theCriteria)) {
+			spMap = mapFromCriteria(theTargetType, theCriteria);
+		} else {
+			spMap = new SearchParameterMap();
+		}
+		return spMap;
+    }
 }

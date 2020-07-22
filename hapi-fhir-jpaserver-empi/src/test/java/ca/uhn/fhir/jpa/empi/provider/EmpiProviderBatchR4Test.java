@@ -49,7 +49,6 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testBatchRunOnAllPractitioners() {
-		assertLinkCount(2);
 		StringType criteria = null;
 		myEmpiProviderR4.clearEmpiLinks(null);
 
@@ -58,7 +57,6 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 	@Test
 	public void testBatchRunOnSpecificPractitioner() {
-		assertLinkCount(2);
 		myEmpiProviderR4.clearEmpiLinks(null);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPractitionerInstance(myPractitioner.getIdElement(), null));
 		assertLinkCount(1);
@@ -66,7 +64,6 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testBatchRunOnNonExistentSpecificPractitioner() {
-		assertLinkCount(2);
 		myEmpiProviderR4.clearEmpiLinks(null);
 		try {
 			myEmpiProviderR4.empiBatchPractitionerInstance(new IdType("Practitioner/999"), null);

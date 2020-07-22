@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
+import ca.uhn.fhir.empi.api.IEmpiResetSvc;
+import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.entity.EmpiTargetType;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.slf4j.Logger;
@@ -37,8 +37,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This class is in charge of Clearing out existing EMPI links, as well as deleting all persons related to those EMPI Links.
  *
  */
-public class EmpiExpungeSvcImpl implements IEmpiExpungeSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(EmpiExpungeSvcImpl.class);
+public class EmpiResetSvcImpl implements IEmpiResetSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(EmpiResetSvcImpl.class);
 
 	@Autowired
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
@@ -48,24 +48,23 @@ public class EmpiExpungeSvcImpl implements IEmpiExpungeSvc {
 
 
 	@Override
-	public void expungeEmpiLinks(String theResourceType) {
-		EmpiTargetType targetType = getTargetTypeOrThrowException(theResourceType);
-		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(targetType);
+	public void expungeAllEmpiLinksOfTargetType(String theResourceType) {
+		throwExceptionIfInvalidTargetType(theResourceType);
+		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(theResourceType);
 		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
 	}
 
-	private EmpiTargetType getTargetTypeOrThrowException(String theResourceType) {
-		if (theResourceType.equalsIgnoreCase("Patient")) {
-			return EmpiTargetType.PATIENT;
-		} else if(theResourceType.equalsIgnoreCase("Practitioner")) {
-			return EmpiTargetType.PRACTITIONER;
-		} else {
+	private void throwExceptionIfInvalidTargetType(String theResourceType) {
+		if (!EmpiUtil.supportedTargetType(theResourceType)) {
 			throw new InvalidRequestException(ProviderConstants.EMPI_CLEAR + " does not support resource type: " + theResourceType);
 		}
 	}
 
+	/**
+	 * TODO GGG this operation likely won't scale very well. Consider adding slicing
+	 */
 	@Override
-	public void expungeEmpiLinks() {
+	public void expungeAllEmpiLinks() {
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
 		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
 	}

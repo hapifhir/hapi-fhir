@@ -102,7 +102,6 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 				throw e;
 			}
 		}
-
 	}
 
 	@Override

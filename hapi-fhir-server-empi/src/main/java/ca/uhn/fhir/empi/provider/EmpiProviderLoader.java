@@ -23,7 +23,7 @@ package ca.uhn.fhir.empi.provider;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiBatchService;
-import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
+import ca.uhn.fhir.empi.api.IEmpiResetSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
@@ -50,7 +50,7 @@ public class EmpiProviderLoader {
 	@Autowired
 	private IResourceLoader myResourceLoader;
 	@Autowired
-	private IEmpiExpungeSvc myEmpiExpungeSvc;
+	private IEmpiResetSvc myEmpiExpungeSvc;
 	@Autowired
 	private IEmpiBatchService myEmpiBatchSvc;
 

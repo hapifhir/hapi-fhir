@@ -29,7 +29,6 @@ import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.jpa.entity.EmpiTargetType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -69,7 +68,7 @@ public class EmpiLinkDaoSvc {
 		// Preserve these flags for link updates
 		empiLink.setEidMatch(theMatchOutcome.isEidMatch() | empiLink.isEidMatch());
 		empiLink.setNewPerson(theMatchOutcome.isNewPerson() | empiLink.isNewPerson());
-		empiLink.setEmpiTargetType(determineTargetType(theTarget));
+		empiLink.setEmpiTargetType(myFhirContext.getResourceType(theTarget));
 		if (empiLink.getScore() != null) {
 			empiLink.setScore(Math.max(theMatchOutcome.score, empiLink.getScore()));
 		} else {
@@ -82,12 +81,6 @@ public class EmpiLinkDaoSvc {
 		save(empiLink);
 		return empiLink;
 	}
-
-	private EmpiTargetType determineTargetType(IBaseResource theTarget) {
-		String resourceType = myFhirContext.getResourceType(theTarget);
-		return EmpiTargetType.valueOfCaseInsensitive(resourceType);
-	}
-
 
 	@Nonnull
 	public EmpiLink getOrCreateEmpiLinkByPersonPidAndTargetPid(Long thePersonPid, Long theResourcePid) {
@@ -115,7 +108,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	/**
-	 * Given a Target Pid, and a match result, return all links which match these criteria.
+	 * Given a Target Pid, and a match result, return all links that match these criteria.
 	 *
 	 * @param theTargetPid the target of the relationship.
 	 * @param theMatchResult the Match Result of the relationship
@@ -250,14 +243,14 @@ public class EmpiLinkDaoSvc {
 	}
 
 	/**
-	 * Given a valid {@link EmpiTargetType}, delete all {@link EmpiLink} entities for that type, and get the Pids
+	 * Given a valid {@link String}, delete all {@link EmpiLink} entities for that type, and get the Pids
 	 * for the Person resources which were the sources of the links.
 	 *
 	 * @param theTargetType the type of relationship you would like to delete.
 	 *
 	 * @return A list of longs representing the Pids of the Person resources used as the sources of the relationships that were deleted.
 	 */
-	public List<Long> deleteAllEmpiLinksOfTypeAndReturnPersonPids(EmpiTargetType theTargetType) {
+	public List<Long> deleteAllEmpiLinksOfTypeAndReturnPersonPids(String theTargetType) {
 		EmpiLink link = new EmpiLink();
 		link.setEmpiTargetType(theTargetType);
 		Example<EmpiLink> exampleLink = Example.of(link);
@@ -274,7 +267,7 @@ public class EmpiLinkDaoSvc {
 	 *
 	 * @return A list of longs, each representing the source person of an {@link EmpiLink} that was deleted.
 	 */
-	public List<Long> deleteEmpiLinksAndReturnPersonPidsForTypeAndTarget(EmpiTargetType theTargetType, IIdType theId) {
+	public List<Long> deleteEmpiLinksAndReturnPersonPidsForTypeAndTarget(String theTargetType, IIdType theId) {
 		EmpiLink link = new EmpiLink();
 		link.setEmpiTargetType(theTargetType);
 		link.setTargetPid(myIdHelperService.getPidOrThrowException(theId));

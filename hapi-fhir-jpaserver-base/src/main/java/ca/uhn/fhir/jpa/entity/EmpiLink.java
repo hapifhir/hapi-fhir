@@ -89,7 +89,7 @@ public class EmpiLink {
 	private Date myUpdated;
 
 	@Column(name = "VERSION", nullable = false, length = VERSION_LENGTH)
-	private String myVersion;
+	private java.lang.String myVersion;
 
 	/** This link was created as a result of an eid match **/
 	@Column(name = "EID_MATCH")
@@ -107,12 +107,12 @@ public class EmpiLink {
 
 	public EmpiLink() {}
 
-	public EmpiLink(String theVersion) {
+	public EmpiLink(java.lang.String theVersion) {
 		myVersion = theVersion;
 	}
 
-	@Column(name = "TARGET_TYPE", nullable = true)
-	private EmpiTargetType myEmpiTargetType;
+	@Column(name = "TARGET_TYPE", nullable = true, length = 40)
+	private String myEmpiTargetType;
 
 	public Long getId() {
 		return myId;
@@ -221,11 +221,11 @@ public class EmpiLink {
 		return this;
 	}
 
-	public String getVersion() {
+	public java.lang.String getVersion() {
 		return myVersion;
 	}
 
-	public EmpiLink setVersion(String theVersion) {
+	public EmpiLink setVersion(java.lang.String theVersion) {
 		myVersion = theVersion;
 		return this;
 	}
@@ -275,7 +275,7 @@ public class EmpiLink {
 	}
 
 	@Override
-	public String toString() {
+	public java.lang.String toString() {
 		return new ToStringBuilder(this)
 			.append("myPersonPid", myPersonPid)
 			.append("myTargetPid", myTargetPid)
@@ -288,11 +288,11 @@ public class EmpiLink {
 			.toString();
 	}
 
-	public EmpiTargetType getEmpiTargetType() {
+	public String getEmpiTargetType() {
 		return myEmpiTargetType;
 	}
 
-	public void setEmpiTargetType(EmpiTargetType theEmpiTargetType) {
+	public void setEmpiTargetType(String theEmpiTargetType) {
 		myEmpiTargetType = theEmpiTargetType;
 	}
 }

@@ -46,12 +46,10 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		}
 
 		assertLinkCount(0);
-		afterEmpiLatch.setExpectedCount(20);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnAllTargetTypes(null);
+		afterEmpiLatch.runWithExpectedCount(20, () -> myEmpiBatchSvc.runEmpiOnAllTargetTypes(null));
 
-		afterEmpiLatch.awaitExpected();
 		assertLinkCount(20);
 	}
 
@@ -63,12 +61,10 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		}
 
 		assertLinkCount(0);
-		afterEmpiLatch.setExpectedCount(10);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnTargetType("Patient", null);
+		afterEmpiLatch.runWithExpectedCount(10, () -> myEmpiBatchSvc.runEmpiOnTargetType("Patient", null));
 
-		afterEmpiLatch.awaitExpected();
 		assertLinkCount(10);
 	}
 
@@ -80,12 +76,10 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		}
 
 		assertLinkCount(0);
-		afterEmpiLatch.setExpectedCount(10);
 
 		//SUT
-		myEmpiBatchSvc.runEmpiOnAllTargetTypes(null);
+		afterEmpiLatch.runWithExpectedCount(10, () -> myEmpiBatchSvc.runEmpiOnAllTargetTypes(null));
 
-		afterEmpiLatch.awaitExpected();
 		assertLinkCount(10);
 	}
 
@@ -95,11 +89,10 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		createPatient(buildPatientWithNameIdAndBirthday("john", "john_id", DateUtils.addDays(new Date(), -300)));
 
 		assertLinkCount(0);
-		afterEmpiLatch.setExpectedCount(1);
 
-		myEmpiBatchSvc.runEmpiOnAllTargetTypes("Patient?name=gary");
+		//SUT
+		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiBatchSvc.runEmpiOnAllTargetTypes("Patient?name=gary"));
 
-		afterEmpiLatch.awaitExpected();
 		assertLinkCount(1);
 	}
 }

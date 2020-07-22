@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiBatchService;
-import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
+import ca.uhn.fhir.empi.api.IEmpiResetSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
@@ -54,7 +54,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	private final IEmpiPersonMergerSvc myPersonMergerSvc;
 	private final IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
 	private final IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
-	private final IEmpiExpungeSvc myEmpiExpungeSvc;
+	private final IEmpiResetSvc myEmpiExpungeSvc;
 	private final IEmpiBatchService myEmpiBatchService;
 
 	/**
@@ -63,7 +63,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderDstu3(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader, IEmpiExpungeSvc theEmpiExpungeSvc, IEmpiBatchService theEmpiBatchSvc) {
+	public EmpiProviderDstu3(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader, IEmpiResetSvc theEmpiExpungeSvc, IEmpiBatchService theEmpiBatchSvc) {
 		super(theFhirContext, theResourceLoader);
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 		myPersonMergerSvc = thePersonMergerSvc;
