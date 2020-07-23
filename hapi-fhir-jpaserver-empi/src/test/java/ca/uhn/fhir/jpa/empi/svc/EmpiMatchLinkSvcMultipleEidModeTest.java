@@ -143,7 +143,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		patient2 = createPatientAndUpdateLinks(patient2);
 		assertLinksMatchResult(MATCH, MATCH, POSSIBLE_DUPLICATE);
 		assertLinksNewPerson(true, true, false);
-		assertLinksMatchedByEid(false, false, false);
+		assertLinksMatchedByEid(false, false, true);
 
 		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
