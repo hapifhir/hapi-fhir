@@ -46,12 +46,12 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	@Autowired
 	private IResourceExpungeService myResourceExpungeService;
 
-
 	@Override
-	public void expungeAllEmpiLinksOfTargetType(String theResourceType) {
+	public long expungeAllEmpiLinksOfTargetType(String theResourceType) {
 		throwExceptionIfInvalidTargetType(theResourceType);
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(theResourceType);
 		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
+		return longs.size();
 	}
 
 	private void throwExceptionIfInvalidTargetType(String theResourceType) {
@@ -64,9 +64,10 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	 * TODO GGG this operation likely won't scale very well. Consider adding slicing
 	 */
 	@Override
-	public void expungeAllEmpiLinks() {
+	public long expungeAllEmpiLinks() {
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
 		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
+		return longs.size();
 	}
 }
 

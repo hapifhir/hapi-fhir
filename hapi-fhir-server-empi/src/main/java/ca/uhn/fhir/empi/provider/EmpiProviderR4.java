@@ -130,12 +130,16 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 	@Operation(name = ProviderConstants.EMPI_CLEAR)
 	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType) {
+		long resetCount;
 		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
-			myEmpiExpungeSvc.expungeAllEmpiLinks();
+			resetCount = myEmpiExpungeSvc.expungeAllEmpiLinks();
 		} else {
-			myEmpiExpungeSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull());
+			resetCount = myEmpiExpungeSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull());
 		}
-		return new Parameters();
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName(ProviderConstants.OPERATION_EMPI_CLEAR_OUT_PARAM_RESET_COUNT)
+			.setValue(new DecimalType(resetCount));
+		return parameters;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_QUERY_LINKS, idempotent = true)

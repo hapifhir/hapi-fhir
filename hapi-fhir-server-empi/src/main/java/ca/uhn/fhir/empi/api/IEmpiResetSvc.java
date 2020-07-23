@@ -23,12 +23,19 @@ package ca.uhn.fhir.empi.api;
 public interface IEmpiResetSvc {
 
 	/**
-	 * Given a resource type, delete the underlying empi links, and their related person objects.
+	 * Given a resource type, delete the underlying EMPI links, and their related person objects.
 	 *
 	 * @param theResourceType The type of resources
+	 *
+	 * @return the count of deleted EMPI links
 	 */
-	void expungeAllEmpiLinksOfTargetType(String theResourceType);
+	long expungeAllEmpiLinksOfTargetType(String theResourceType);
 
-
-	void expungeAllEmpiLinks();
+	/**
+	 * Delete all EMPI links, and their related Person objects.
+	 *
+	 *
+	 * @return the count of deleted EMPI links
+	 */
+	long expungeAllEmpiLinks();
 }

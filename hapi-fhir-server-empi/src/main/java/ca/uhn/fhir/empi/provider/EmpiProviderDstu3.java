@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.validation.IResourceLoader;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.InstantType;
@@ -172,6 +173,20 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 
 	private String convertCriteriaToString(StringType theCriteria) {
 		return theCriteria == null ? null : theCriteria.getValueAsString();
+	}
+
+	@Operation(name = ProviderConstants.EMPI_CLEAR)
+	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) org.hl7.fhir.r4.model.StringType theTargetType) {
+		long resetCount;
+		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
+			resetCount = myEmpiExpungeSvc.expungeAllEmpiLinks();
+		} else {
+			resetCount = myEmpiExpungeSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull());
+		}
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName(ProviderConstants.OPERATION_EMPI_CLEAR_OUT_PARAM_RESET_COUNT)
+			.setValue(new DecimalType(resetCount));
+		return parameters;
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Patient.class, returnParameters = {
