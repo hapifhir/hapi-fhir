@@ -387,7 +387,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		IBundleProvider bundle = myPersonDao.search(new SearchParameterMap());
 		assertEquals(1, bundle.size());
-		Person person = (Person) bundle.getResources(0, 0);
+		Person person = (Person) bundle.getResources(0, 1).get(0);
 		assertEquals(Person.IdentityAssuranceLevel.LEVEL2, person.getLink().get(0).getAssurance());
 		assertEquals(Person.IdentityAssuranceLevel.LEVEL1, person.getLink().get(1).getAssurance());
 		assertEquals(Person.IdentityAssuranceLevel.LEVEL1, person.getLink().get(2).getAssurance());
