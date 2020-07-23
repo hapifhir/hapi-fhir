@@ -1,18 +1,7 @@
 {
 	"version": "1",
 	"candidateSearchParams": [
-		{
-			"resourceType": "Patient",
-			"searchParams": ["birthdate"]
-		},
-		{
-			"resourceType": "*",
-			"searchParams": ["identifier"]
-		},
-		{
-			"resourceType": "Patient",
-			"searchParams": ["general-practitioner"]
-		}
+
 	],
 	"candidateFilterSearchParams": [
 		{
