@@ -58,7 +58,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	private final IEmpiPersonMergerSvc myPersonMergerSvc;
 	private final IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
 	private final IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
-	private final IEmpiResetSvc myEmpiExpungeSvc;
+	private final IEmpiResetSvc myEmpiResetSvc;
 	private final IEmpiBatchService myEmpiBatchSvc;
 
 	/**
@@ -67,13 +67,13 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderDstu3(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader, IEmpiResetSvc theEmpiExpungeSvc, IEmpiBatchService theEmpiBatchSvc) {
+	public EmpiProviderDstu3(FhirContext theFhirContext, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiPersonMergerSvc thePersonMergerSvc, IEmpiLinkUpdaterSvc theEmpiLinkUpdaterSvc, IEmpiLinkQuerySvc theEmpiLinkQuerySvc, IResourceLoader theResourceLoader, IEmpiResetSvc theEmpiResetSvc, IEmpiBatchService theEmpiBatchSvc) {
 		super(theFhirContext, theResourceLoader);
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 		myPersonMergerSvc = thePersonMergerSvc;
 		myEmpiLinkUpdaterSvc = theEmpiLinkUpdaterSvc;
 		myEmpiLinkQuerySvc = theEmpiLinkQuerySvc;
-		myEmpiExpungeSvc = theEmpiExpungeSvc;
+		myEmpiResetSvc = theEmpiResetSvc;
 		myEmpiBatchSvc = theEmpiBatchSvc;
 	}
 
@@ -175,13 +175,15 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		return theCriteria == null ? null : theCriteria.getValueAsString();
 	}
 
-	@Operation(name = ProviderConstants.EMPI_CLEAR)
-	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) org.hl7.fhir.r4.model.StringType theTargetType) {
+	@Operation(name = ProviderConstants.EMPI_CLEAR, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
+	})
+	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType) {
 		long resetCount;
 		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
-			resetCount = myEmpiExpungeSvc.expungeAllEmpiLinks();
+			resetCount = myEmpiResetSvc.expungeAllEmpiLinks();
 		} else {
-			resetCount = myEmpiExpungeSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull());
+			resetCount = myEmpiResetSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull());
 		}
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName(ProviderConstants.OPERATION_EMPI_CLEAR_OUT_PARAM_RESET_COUNT)

@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * This class is in charge of Clearing out existing EMPI links, as well as deleting all persons related to those EMPI Links.
@@ -66,6 +67,9 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	@Override
 	public long expungeAllEmpiLinks() {
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
+		longs = longs.stream()
+			.distinct().collect(Collectors.toList());
+		myResourceExpungeService.expungeHistoricalVersionsOfIds(null, longs, new AtomicInteger(longs.size()));
 		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
 		return longs.size();
 	}

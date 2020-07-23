@@ -128,7 +128,9 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return (Person) myEmpiLinkUpdaterSvc.updateLink(person, target, matchResult, createEmpiContext(theRequestDetails));
 	}
 
-	@Operation(name = ProviderConstants.EMPI_CLEAR)
+	@Operation(name = ProviderConstants.EMPI_CLEAR, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type=DecimalType.class)
+	})
 	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType) {
 		long resetCount;
 		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {

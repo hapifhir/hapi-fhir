@@ -70,6 +70,17 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		} catch (ResourceNotFoundException e) {}
 
 	}
+	@Test
+	public void testPersonsWithMultipleHistoricalVersionsCanBeDeleted() {
+		createPatientAndUpdateLinks(buildJanePatient());
+		createPatientAndUpdateLinks(buildJanePatient());
+		createPatientAndUpdateLinks(buildJanePatient());
+		createPatientAndUpdateLinks(buildJanePatient());
+		createPatientAndUpdateLinks(buildJanePatient());
+
+		myEmpiProviderR4.clearEmpiLinks(null);
+		assertNoPatientLinksExist();
+	}
 
 	@Test
 	public void testClearPractitionerLinks() {
