@@ -1649,6 +1649,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 
 		while (true) {
+			StopWatch sw = new StopWatch();
 			TermValueSet valueSetToExpand = txTemplate.execute(t -> {
 				Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
 				if (!optionalTermValueSet.isPresent()) {
@@ -1670,7 +1671,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
 
-				ourLog.info("Pre-expanding ValueSet[{}] - URL: {}", valueSet.getId(), valueSet.getUrl());
 				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
 				expandValueSet(null, valueSet, accumulator);
 
@@ -1680,6 +1680,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					myValueSetDao.saveAndFlush(valueSetToExpand);
 					return null;
 				});
+
+				ourLog.info("Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}", valueSet.getId(), valueSet.getUrl(), accumulator.getConceptsSaved(), sw.toString());
 
 			} catch (Exception e) {
 				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);
