@@ -116,6 +116,8 @@ public class DropIndexTask extends BaseTableTask {
 					break;
 				case DERBY_EMBEDDED:
 				case ORACLE_12C:
+					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
+					break;
 				case MSSQL_2012:
 					sql.add("drop index " + theIndexName + " on " + theTableName);
 					break;
