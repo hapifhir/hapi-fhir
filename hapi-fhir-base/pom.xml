@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -127,35 +128,13 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					<dumpOnExit>true</dumpOnExit>
-				</configuration>
-				<executions>
-					<execution>
-						<id>default-prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!--required when using servers-->
+							<!--required when using servers -->
 							ca.uhn.fhir.rest.api.server;resolution:=optional,
 							ca.uhn.fhir.model.api;resolution:=optional,
 							*
@@ -163,37 +142,63 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<inherited>true</inherited>
-				<executions>
-					<execution>
-						<id>standard</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>downstream</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>create-metadata</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/generated-sources/properties</outputDirectory>
-							<outputName>ca/uhn/fhir/hapi-fhir-base-build.properties</outputName>
-							<revisionPropertyName>hapifhir.buildnumber</revisionPropertyName>
-							<timestampPropertyName>hapifhir.timestamp</timestampPropertyName>
-							<timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SXXX</timestampFormat>
-							<versionPropertyName>hapifhir.version</versionPropertyName>
-							<revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<configuration>
+						<dumpOnExit>true</dumpOnExit>
+					</configuration>
+					<executions>
+						<execution>
+							<id>default-prepare-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<configuration>
+						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>buildnumber-maven-plugin</artifactId>
+					<inherited>true</inherited>
+					<executions>
+						<execution>
+							<id>standard</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>create</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>downstream</id>
+							<phase>initialize</phase>
+							<goals>
+								<goal>create-metadata</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>${project.build.directory}/generated-sources/properties</outputDirectory>
+								<outputName>ca/uhn/fhir/hapi-fhir-base-build.properties</outputName>
+								<revisionPropertyName>hapifhir.buildnumber</revisionPropertyName>
+								<timestampPropertyName>hapifhir.timestamp</timestampPropertyName>
+								<timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SXXX</timestampFormat>
+								<versionPropertyName>hapifhir.version</versionPropertyName>
+								<revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
