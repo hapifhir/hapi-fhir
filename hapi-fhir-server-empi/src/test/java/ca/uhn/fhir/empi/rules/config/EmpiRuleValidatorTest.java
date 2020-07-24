@@ -77,16 +77,6 @@ public class EmpiRuleValidatorTest extends BaseR4Test {
 	}
 
 	@Test
-	public void testMatcherEmptyCandidateSearchParams() throws IOException {
-		try {
-			setEmpiRuleJson("bad-rules-missing-candidate-search-params.json");
-			fail();
-		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("Error in candidateSearchParams: Patient does not have a search parameter called 'foo'"));
-		}
-	}
-
-	@Test
 	public void testMatcherBadFilter() throws IOException {
 		try {
 			setEmpiRuleJson("bad-rules-bad-filter.json");
