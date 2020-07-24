@@ -81,7 +81,7 @@ public class EmpiCandidateSearchSvc {
 
 		//If there are zero EmpiResourceSearchParamJson, we end up only making a single search, otherwise we
 		//must perform one search per EmpiResourceSearchParamJson.
-		if (candidateSearchParams == null || candidateSearchParams.isEmpty()) {
+		if (candidateSearchParams.isEmpty()) {
 			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null);
 		} else {
 			for (EmpiResourceSearchParamJson resourceSearchParam : candidateSearchParams) {

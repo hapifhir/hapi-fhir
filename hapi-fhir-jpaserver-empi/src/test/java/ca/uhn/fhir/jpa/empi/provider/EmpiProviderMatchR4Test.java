@@ -18,7 +18,20 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 	}
 
 	@Test
-	public void testMatch() {
+	public void testMatch() throws Exception {
+		Patient jane = buildJanePatient();
+		jane.setActive(true);
+		Patient createdJane = createPatient(jane);
+		Patient newJane = buildJanePatient();
+
+		Bundle result = myEmpiProviderR4.match(newJane);
+		assertEquals(1, result.getEntry().size());
+		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
+	}
+
+	@Test
+	public void testMatchWithEmptySearchParamCandidates() throws Exception {
+		setEmpiRuleJson("empi/empty-candidate-search-params.json");
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
 		Patient createdJane = createPatient(jane);

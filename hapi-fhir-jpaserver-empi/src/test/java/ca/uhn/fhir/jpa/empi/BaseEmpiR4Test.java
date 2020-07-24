@@ -50,6 +50,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -105,7 +106,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		myEmpiLinkDao.deleteAll();
 		assertEquals(0, myEmpiLinkDao.count());
 		super.after();

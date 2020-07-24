@@ -14,6 +14,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,7 +31,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		myExpungeEverythingService.expungeEverythingByType(EmpiLink.class);
 		super.after();
 	}

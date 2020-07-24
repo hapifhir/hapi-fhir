@@ -56,7 +56,6 @@ public class EmpiCandidateSearchCriteriaBuilderSvc {
 					criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
 				}
 			});
-
 			if (criteria.isEmpty()) {
 				//TODO GGG/KHS, re-evaluate whether we should early drop here.
 				return Optional.empty();

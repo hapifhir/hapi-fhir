@@ -1,0 +1,34 @@
+{
+	"version": "1",
+	"candidateSearchParams": [],
+	"candidateFilterSearchParams": [
+		{
+			"resourceType": "*",
+			"searchParam": "active",
+			"fixedValue": "true"
+		}
+	],
+	"matchFields": [
+		{
+			"name": "cosine-given-name",
+			"resourceType": "*",
+			"resourcePath": "name.given",
+			"metric": "COSINE",
+			"matchThreshold": 0.8,
+			"exact": true
+		},
+		{
+			"name": "jaro-last-name",
+			"resourceType": "*",
+			"resourcePath": "name.family",
+			"metric": "JARO_WINKLER",
+			"matchThreshold": 0.8,
+			"exact": true
+		}
+	],
+	"matchResultMap": {
+		"cosine-given-name" : "POSSIBLE_MATCH",
+		"cosine-given-name,jaro-last-name" : "MATCH"
+	},
+	"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
+}
