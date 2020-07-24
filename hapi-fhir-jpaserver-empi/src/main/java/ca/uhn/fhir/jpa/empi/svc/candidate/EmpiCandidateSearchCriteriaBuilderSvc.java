@@ -57,17 +57,8 @@ public class EmpiCandidateSearchCriteriaBuilderSvc {
 				}
 			});
 
-			//TODO GGG/KHS, here's a question: What scenario would be actually want to return this empty optional.
-			//In the case where the resource being matched doesnt have any of the values that the EmpiResourceSearchParamJson wants?
-			//e.g. if i have a patient with name 'gary', but no birthdate, and i have a search param saying
-			//		{
-			//			"resourceType": "Patient",
-			//			"searchParams": ["birthdate"]
-			//		},
-			// do I actually want it to return Zero candidates? if so, this following conditional is valid. However
-			// What if I still want to match that person? Will they be unmatchable since they have no birthdate?
-
 			if (criteria.isEmpty()) {
+				//TODO GGG/KHS, re-evaluate whether we should early drop here.
 				return Optional.empty();
 			}
 		}
