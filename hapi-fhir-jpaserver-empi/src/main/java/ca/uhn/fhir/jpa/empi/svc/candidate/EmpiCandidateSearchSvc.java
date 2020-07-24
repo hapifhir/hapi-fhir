@@ -80,13 +80,18 @@ public class EmpiCandidateSearchSvc {
 
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
 
-		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiConfig.getEmpiRules().getCandidateSearchParams()) {
+		List<EmpiResourceSearchParamJson> candidateSearchParams = myEmpiConfig.getEmpiRules().getCandidateSearchParams();
+		if (candidateSearchParams == null || candidateSearchParams.isEmpty()) {
+			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null);
+		} else {
+			for (EmpiResourceSearchParamJson resourceSearchParam : candidateSearchParams) {
 
-			if (!isSearchParamForResource(theResourceType, resourceSearchParam)) {
-				continue;
+				if (!isSearchParamForResource(theResourceType, resourceSearchParam)) {
+					continue;
+				}
+
+				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam);
 			}
-
-			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam);
 		}
 		//Obviously we don't want to consider the freshly added resource as a potential candidate.
 		//Sometimes, we are running this function on a resource that has not yet been persisted,
