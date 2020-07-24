@@ -16,8 +16,8 @@ To add the HAPI library via Gradle, you should add the [hapi-fhir-android](https
 
 ```groovy
 dependencies {
-    compile "ca.uhn.hapi.fhir:hapi-fhir-android:3.1.0-SNAPSHOT"
-    compile "ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:3.1.0-SNAPSHOT"
+    implementation "ca.uhn.hapi.fhir:hapi-fhir-android:3.1.0-SNAPSHOT"
+    implementation "ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:3.1.0-SNAPSHOT"
 }
 ```
 

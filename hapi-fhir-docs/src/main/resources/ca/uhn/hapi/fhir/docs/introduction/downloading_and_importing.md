@@ -48,9 +48,9 @@ Note that if you wish to perform validation, you may also want to include the "v
 If you are using Gradle, you may use the following dependencies. Note that if you are doing Android development, you may want to use our [Android build](/docs/android/client.html) instead.
 
 ```groovy
-compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${project.version}'
-compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${project.version}'
-compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${project.version}'
+implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:${project.version}'
+implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${project.version}'
+implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${project.version}'
 ```
 
 <a name="snapshot"/>
