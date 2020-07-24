@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,10 +44,10 @@ public class EmpiCandidateSearchCriteriaBuilderSvc {
 	 * Patient?active=true&name.given=Gary,Grant&name.family=Graham
 	 */
 	@Nonnull
-	public Optional<String> buildResourceQueryString(String theResourceType, IAnyResource theResource, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam) {
+	public Optional<String> buildResourceQueryString(String theResourceType, IAnyResource theResource, List<String> theFilterCriteria, @Nullable EmpiResourceSearchParamJson resourceSearchParam) {
 		List<String> criteria = new ArrayList<>();
 
-		//If there is no candidateSearchParams, then we want to just use the filters.
+		// If there are candidate search params, then make use of them, otherwise, search with only the filters.
 		if (resourceSearchParam != null) {
 			resourceSearchParam.iterator().forEachRemaining(searchParam -> {
 				//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
@@ -55,6 +56,20 @@ public class EmpiCandidateSearchCriteriaBuilderSvc {
 					criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
 				}
 			});
+
+			//TODO GGG/KHS, here's a question: What scenario would be actually want to return this empty optional.
+			//In the case where the resource being matched doesnt have any of the values that the EmpiResourceSearchParamJson wants?
+			//e.g. if i have a patient with name 'gary', but no birthdate, and i have a search param saying
+			//		{
+			//			"resourceType": "Patient",
+			//			"searchParams": ["birthdate"]
+			//		},
+			// do I actually want it to return Zero candidates? if so, this following conditional is valid. However
+			// What if I still want to match that person? Will they be unmatchable since they have no birthdate?
+
+			if (criteria.isEmpty()) {
+				return Optional.empty();
+			}
 		}
 
 		criteria.addAll(theFilterCriteria);
