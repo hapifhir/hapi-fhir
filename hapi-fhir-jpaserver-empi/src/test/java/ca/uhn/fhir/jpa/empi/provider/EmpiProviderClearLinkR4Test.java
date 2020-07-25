@@ -4,8 +4,10 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,6 +79,24 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
+
+		myEmpiProviderR4.clearEmpiLinks(null);
+		assertNoPatientLinksExist();
+	}
+
+	@Test
+	public void testPersonWithLinksToOtherPersonsCanBeDeleted() {
+		createPatientAndUpdateLinks(buildJanePatient());
+		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildPaulPatient());
+
+		Person personFromTarget = getPersonFromTarget(patientAndUpdateLinks);
+		Person personFromTarget2 = getPersonFromTarget(patientAndUpdateLinks1);
+		Person.PersonLinkComponent plc = new Person.PersonLinkComponent();
+		plc.setAssurance(Person.IdentityAssuranceLevel.LEVEL2);
+		plc.setTarget(new Reference(personFromTarget2.getIdElement().toUnqualifiedVersionless()));
+		personFromTarget.getLink().add(plc);
+		myPersonDao.update(personFromTarget);
 
 		myEmpiProviderR4.clearEmpiLinks(null);
 		assertNoPatientLinksExist();
