@@ -28,11 +28,16 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class DropIndexTask extends BaseTableTask {
@@ -54,6 +59,52 @@ public class DropIndexTask extends BaseTableTask {
 
 	@Override
 	public void doExecute() throws SQLException {
+		/*
+		 * Derby and H2 both behave a bit weirdly if you create a unique constraint
+		 * using the @UniqueConstraint annotation in hibernate - They will create a
+		 * constraint with that name, but will then create a shadow index with a different
+		 * name, and it's that different name that gets reported when you query for the
+		 * list of indexes.
+		 *
+		 * For example, on H2 if you create a constraint named "IDX_FOO", the system
+		 * will create an index named "IDX_FOO_INDEX_A" and a constraint named "IDX_FOO".
+		 *
+		 * The following is a solution that uses appropriate native queries to detect
+		 * on the given platforms whether an index name actually corresponds to a
+		 * constraint, and delete that constraint.
+		 */
+
+		@Language("SQL") String findConstraintSql;
+		@Language("SQL") String dropConstraintSql;
+		if (getDriverType() == DriverTypeEnum.H2_EMBEDDED) {
+			findConstraintSql = "SELECT DISTINCT INDEX_NAME FROM INFORMATION_SCHEMA.INDEXES WHERE constraint_name = ? AND table_name = ?";
+			dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + myIndexName;
+		} else if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED) {
+			findConstraintSql = "SELECT c.constraintname FROM sys.sysconstraints c, sys.systables t WHERE c.tableid = t.tableid AND c.constraintname = ? AND t.tablename = ?";
+			dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + myIndexName;
+		} else {
+			findConstraintSql = null;
+			dropConstraintSql = null;
+		}
+
+		if (findConstraintSql != null) {
+			DataSource dataSource = Objects.requireNonNull(getConnectionProperties().getDataSource());
+			Boolean handled = getConnectionProperties().getTxTemplate().execute(t -> {
+				JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+				RowMapperResultSetExtractor<String> resultSetExtractor = new RowMapperResultSetExtractor<>(new SingleColumnRowMapper<>(String.class));
+				List<String> outcome = jdbcTemplate.query(findConstraintSql, new Object[]{myIndexName, getTableName()}, resultSetExtractor);
+				assert outcome != null;
+				if (outcome.size() > 0) {
+					executeSql(getTableName(), dropConstraintSql);
+					return true;
+				}
+				return false;
+			});
+			if (Boolean.TRUE.equals(handled)) {
+				return;
+			}
+		}
+
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 
 		if (!indexNames.contains(myIndexName)) {
