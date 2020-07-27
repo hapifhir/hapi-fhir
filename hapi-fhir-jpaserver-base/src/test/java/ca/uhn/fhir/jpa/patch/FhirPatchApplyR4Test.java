@@ -7,11 +7,15 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.stream.Collectors;
@@ -21,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FhirPatchApplyR4Test {
 
 	private static final FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatchApplyR4Test.class);
 
 	@Test
 	public void testInvalidOperation() {
@@ -163,6 +168,98 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, patch);
 
 		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
+
+	}
+
+	/**
+	 * See #1999
+	 */
+	@Test
+	public void testInsertToNonZeroIndex() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Questionnaire patient = new Questionnaire();
+		Questionnaire.QuestionnaireItemComponent item = patient.addItem();
+		item.setLinkId("1");
+		item.addCode().setSystem("https://smilecdr.com/fhir/document-type").setCode("CLINICAL");
+		item.setText("Test item");
+
+		Parameters.ParametersParameterComponent operation;
+		Parameters patch = new Parameters();
+		operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("insert"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Questionnaire.item"));
+		operation
+			.addPart()
+			.setName("index")
+			.setValue(new IntegerType(1));
+		operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("insert"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Questionnaire.item[1].linkId"));
+		operation
+			.addPart()
+			.setName("index")
+			.setValue(new IntegerType(0));
+		operation
+			.addPart()
+			.setName("value")
+			.setValue(new StringType("2"));
+		operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("insert"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Questionnaire.item[1].code"));
+		operation
+			.addPart()
+			.setName("index")
+			.setValue(new IntegerType(0));
+		operation
+			.addPart()
+			.setName("value")
+			.setValue(new Coding("http://smilecdr.com/fhir/document-type", "ADMIN", null));
+		operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("insert"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Questionnaire.item[1].text"));
+		operation
+			.addPart()
+			.setName("index")
+			.setValue(new IntegerType(0));
+		operation
+			.addPart()
+			.setName("value")
+			.setValue(new StringType("Test Item 2"));
+
+		svc.apply(patient, patch);
+
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals("{\"resourceType\":\"Questionnaire\",\"item\":[{\"linkId\":\"1\",\"code\":[{\"system\":\"https://smilecdr.com/fhir/document-type\",\"code\":\"CLINICAL\"}],\"text\":\"Test item\"},{\"linkId\":\"2\",\"code\":[{\"system\":\"http://smilecdr.com/fhir/document-type\",\"code\":\"ADMIN\"}],\"text\":\"Test Item 2\"}]}", ourCtx.newJsonParser().encodeResourceToString(patient));
+
 
 	}
 

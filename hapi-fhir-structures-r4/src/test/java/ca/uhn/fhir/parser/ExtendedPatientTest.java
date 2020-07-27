@@ -45,8 +45,8 @@ public class ExtendedPatientTest {
 
 		Bundle parsedBundle = p.parseResource(Bundle.class, encoded);
 
-		ExtendedPatient parsedHomer = (ExtendedPatient)parsedBundle.getEntry().get(0).getResource();
-		ExtendedPatient parsedMarge = (ExtendedPatient)parsedBundle.getEntry().get(1).getResource();
+		ExtendedPatient parsedHomer = (ExtendedPatient) parsedBundle.getEntry().get(0).getResource();
+		ExtendedPatient parsedMarge = (ExtendedPatient) parsedBundle.getEntry().get(1).getResource();
 
 		IBaseResource referencedHomer = parsedMarge.getLinkFirstRep().getOther().getResource();
 		assertNotNull(referencedHomer);

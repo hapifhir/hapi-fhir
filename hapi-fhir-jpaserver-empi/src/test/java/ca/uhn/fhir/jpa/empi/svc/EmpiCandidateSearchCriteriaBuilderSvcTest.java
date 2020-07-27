@@ -9,11 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,5 +68,22 @@ public class EmpiCandidateSearchCriteriaBuilderSvcTest extends BaseEmpiR4Test {
 		Optional<String> result = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertTrue(result.isPresent());
 		assertEquals(result.get(), "Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345");
+	}
+
+	@Test
+	public void testOmittingCandidateSearchParamsIsAllowed() {
+		Patient patient = new Patient();
+		Optional<String> result = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), null);
+		assertThat(result.isPresent(), is(true));
+		assertThat(result.get(), is(equalTo("Patient?")));
+	}
+
+	@Test
+	public void testEmptyCandidateSearchParamsWorksInConjunctionWithFilterParams() {
+		Patient patient = new Patient();
+		List<String> filterParams = Collections.singletonList("active=true");
+		Optional<String> result = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, filterParams, null);
+		assertThat(result.isPresent(), is(true));
+		assertThat(result.get(), is(equalTo("Patient?active=true")));
 	}
 }

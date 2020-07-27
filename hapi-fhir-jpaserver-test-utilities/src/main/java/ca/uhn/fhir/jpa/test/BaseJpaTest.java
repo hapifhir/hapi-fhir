@@ -40,6 +40,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
 @TestPropertySource(properties = {
@@ -71,7 +72,7 @@ public abstract class BaseJpaTest {
 	MemoryCacheService myMemoryCacheService;
 
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		ourLog.info("\n  ---  @After  ---");
 		myExpungeEverythingService.expungeEverything(null);
 		myMemoryCacheService.invalidateAllCaches();

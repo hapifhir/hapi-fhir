@@ -1,6 +1,6 @@
 # Instance Validator
 
-HAPI provides a built-in and configurable mechanism for validating resources using . This mechanism is called the *Instance Validator*.
+HAPI provides a built-in and configurable mechanism for validating resources using FHIR's own conformance resources (StructureDefinition, ValueSet, CodeSystem, etc.). This mechanism is called the *Instance Validator*.
 
 The resource validator is an extendible and modular system, and you can configure it in a number of ways in order to get the specific type of validation you want to achieve.
 

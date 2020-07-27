@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -82,7 +83,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(myEmpiStorageInterceptor);
 		super.after();
 	}

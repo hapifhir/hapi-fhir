@@ -51,10 +51,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -109,7 +111,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		myEmpiLinkDao.deleteAll();
 		assertEquals(0, myEmpiLinkDao.count());
 		super.after();
@@ -399,4 +401,25 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 			ourLog.info(link.toString());
 		}
 	}
+
+	protected void assertLinksMatchResult(EmpiMatchResultEnum... theExpectedValues) {
+		assertFields(EmpiLink::getMatchResult, theExpectedValues);
+	}
+
+	protected void assertLinksNewPerson(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getNewPerson, theExpectedValues);
+	}
+
+	protected void assertLinksMatchedByEid(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getEidMatch, theExpectedValues);
+	}
+
+	private <T> void assertFields(Function<EmpiLink, T> theAccessor, T... theExpectedValues) {
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		assertEquals(theExpectedValues.length, links.size());
+		for (int i = 0; i < links.size(); ++i) {
+			assertEquals(theExpectedValues[i], theAccessor.apply(links.get(i)), "Value at index " + i + " was not equal");
+		}
+	}
+
 }
