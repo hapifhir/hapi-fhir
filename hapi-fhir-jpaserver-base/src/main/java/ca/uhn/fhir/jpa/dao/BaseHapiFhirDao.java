@@ -919,7 +919,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (resourceEncoding != ResourceEncodingEnum.DEL) {
 
 			LenientErrorHandler errorHandler = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
-			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler);
+			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler, theEntity.getId());
 
 			try {
 				retVal = parser.parseResource(resourceType, resourceText);
