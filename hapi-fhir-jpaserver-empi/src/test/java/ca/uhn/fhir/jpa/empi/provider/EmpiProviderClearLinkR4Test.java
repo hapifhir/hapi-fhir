@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Patient;
@@ -92,14 +94,46 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		Person personFromTarget = getPersonFromTarget(patientAndUpdateLinks);
 		Person personFromTarget2 = getPersonFromTarget(patientAndUpdateLinks1);
-		Person.PersonLinkComponent plc = new Person.PersonLinkComponent();
-		plc.setAssurance(Person.IdentityAssuranceLevel.LEVEL2);
-		plc.setTarget(new Reference(personFromTarget2.getIdElement().toUnqualifiedVersionless()));
-		personFromTarget.getLink().add(plc);
-		myPersonDao.update(personFromTarget);
+		linkPersons(personFromTarget, personFromTarget2);
 
+		//SUT
 		myEmpiProviderR4.clearEmpiLinks(null);
+
 		assertNoPatientLinksExist();
+		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		assertThat(search.size(), is(equalTo(0)));
+	}
+
+	@Test
+	public void testPersonsWithCircularReferenceCanBeCleared() {
+		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildPaulPatient());
+		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
+		Patient patientAndUpdateLinks2 = createPatientAndUpdateLinks(buildFrankPatient());
+
+		Person personFromTarget = getPersonFromTarget(patientAndUpdateLinks);
+		Person personFromTarget1 = getPersonFromTarget(patientAndUpdateLinks1);
+		Person personFromTarget2 = getPersonFromTarget(patientAndUpdateLinks2);
+
+		// A -> B -> C -> A linkages.
+		linkPersons(personFromTarget, personFromTarget1);
+		linkPersons(personFromTarget1, personFromTarget2);
+		linkPersons(personFromTarget2, personFromTarget);
+
+		//SUT
+		myEmpiProviderR4.clearEmpiLinks(null);
+
+		assertNoPatientLinksExist();
+		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		assertThat(search.size(), is(equalTo(0)));
+
+	}
+
+	private void linkPersons(Person theSourcePerson, Person theTargetPerson) {
+		Person.PersonLinkComponent plc1 = new Person.PersonLinkComponent();
+		plc1.setAssurance(Person.IdentityAssuranceLevel.LEVEL2);
+		plc1.setTarget(new Reference(theTargetPerson.getIdElement().toUnqualifiedVersionless()));
+		theSourcePerson.getLink().add(plc1);
+		myPersonDao.update(theSourcePerson);
 	}
 
 	@Test

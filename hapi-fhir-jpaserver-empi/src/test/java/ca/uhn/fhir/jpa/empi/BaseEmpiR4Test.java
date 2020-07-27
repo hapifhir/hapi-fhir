@@ -73,6 +73,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
+	private static final String NAME_GIVEN_FRANK = "Frank";
+	protected static final String FRANK_ID = "ID.FRANK.789";
 
 	@Autowired
 	protected FhirContext myFhirContext;
@@ -242,6 +244,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Patient buildPaulPatient() {
 		return buildPatientWithNameAndId(NAME_GIVEN_PAUL, PAUL_ID);
+	}
+
+	@Nonnull
+	protected Patient buildFrankPatient() {
+		return buildPatientWithNameAndId(NAME_GIVEN_FRANK, FRANK_ID);
 	}
 
 	@Nonnull

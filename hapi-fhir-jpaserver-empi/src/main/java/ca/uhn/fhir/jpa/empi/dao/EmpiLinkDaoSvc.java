@@ -231,6 +231,7 @@ public class EmpiLinkDaoSvc {
 	 *
 	 * @return A list of Long representing the related Person Pids.
 	 */
+	@Transactional
 	public List<Long> deleteAllEmpiLinksAndReturnPersonPids() {
 		List<EmpiLink> all = myEmpiLinkDao.findAll();
 		return deleteEmpiLinksAndReturnPersonPids(all);
