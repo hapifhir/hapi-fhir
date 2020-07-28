@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -42,7 +44,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(afterEmpiLatch);
 		super.after();
 	}

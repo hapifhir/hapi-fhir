@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
@@ -41,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * This class is in charge of Clearing out existing EMPI links, as well as deleting all persons related to those EMPI Links.
@@ -52,13 +50,8 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 
 	@Autowired
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
-
 	@Autowired
 	private IResourceExpungeService myResourceExpungeService;
-
-	@Autowired
-	private IResourceTableDao myResourceTable;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -67,10 +60,33 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	@Override
 	public long expungeAllEmpiLinksOfTargetType(String theResourceType) {
 		throwExceptionIfInvalidTargetType(theResourceType);
-
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(theResourceType);
-		myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
+		deleteResourcesAndHandleConflicts(longs);
+		expungeHistoricalAndCurrentVersiondsOfIds(longs);
 		return longs.size();
+	}
+
+	/**
+	 * Function which will delete all resources by their PIDs, and also delete any resources that were undeletable due to
+	 * VersionConflictException
+	 * @param theLongs
+	 */
+	private void deleteResourcesAndHandleConflicts(List<Long> theLongs) {
+		DeleteConflictList
+			deleteConflictList = new DeleteConflictList();
+		myTransactionService.execute(null, tx -> {
+			theLongs.stream().forEach(pid -> deleteCascade(pid, deleteConflictList));
+			return null;
+		});
+
+		IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
+		while (!deleteConflictList.isEmpty()) {
+			myTransactionService.execute(null, tx -> {
+				deleteConflictBatch(deleteConflictList, personDao);
+				return null;
+			});
+
+		}
 	}
 
 	private void throwExceptionIfInvalidTargetType(String theResourceType) {
@@ -85,28 +101,17 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	@Override
 	public long expungeAllEmpiLinks() {
 		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
-		longs = longs.stream()
-			.distinct().collect(Collectors.toList());
-
-		DeleteConflictList dlc = new DeleteConflictList();
-		List<Long> finalLongs = longs;
-		myTransactionService.execute(null, tx -> {
-			finalLongs.stream().forEach(pid -> {
-				deleteCascade(pid, dlc);
-			});
-			return null;
-		});
-
-		IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
-		while (!dlc.isEmpty()) {
-			myTransactionService.execute(null, tx -> {
-				deleteConflictBatch(dlc, personDao);
-				return null;
-			});
-		}
-		myResourceExpungeService.expungeHistoricalVersionsOfIds(null, longs, new AtomicInteger(longs.size()));
-		//myResourceExpungeService.expungeCurrentVersionOfResources(null, longs, new AtomicInteger(longs.size()));
+		deleteResourcesAndHandleConflicts(longs);
+		expungeHistoricalAndCurrentVersiondsOfIds(longs);
 		return longs.size();
+	}
+
+	/**
+	 * Use the expunge service to expunge all historical and current versions of the resources associated to the PIDs.
+	 */
+	private void expungeHistoricalAndCurrentVersiondsOfIds(List<Long> theLongs) {
+		myResourceExpungeService.expungeHistoricalVersionsOfIds(null, theLongs, new AtomicInteger(Integer.MAX_VALUE - 1));
+		myResourceExpungeService.expungeCurrentVersionOfResources(null, theLongs, new AtomicInteger(Integer.MAX_VALUE - 1));
 	}
 
 	private void deleteConflictBatch(DeleteConflictList theDcl, IFhirResourceDao<IBaseResource> theDao) {
@@ -120,10 +125,10 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 		theDcl.addAll(newBatch);
 	}
 
-	private void deleteCascade(Long pid, DeleteConflictList theDcl) {
+	private void deleteCascade(Long pid, DeleteConflictList theDeleteConflictList) {
 		ourLog.debug("About to cascade delete: " + pid);
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao("Person");
-			resourceDao.delete(new IdType("Person/" + pid), theDcl, null, null);
+			resourceDao.delete(new IdType("Person/" + pid), theDeleteConflictList, null, null);
 	}
 }
 

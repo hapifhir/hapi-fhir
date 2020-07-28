@@ -66,7 +66,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Person read = myPersonDao.read(new IdDt(myPersonId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myEmpiProviderR4.clearEmpiLinks(new StringType("patient"));
+		myEmpiProviderR4.clearEmpiLinks(new StringType("Patient"));
 		assertNoPatientLinksExist();
 		try {
 			myPersonDao.read(new IdDt(myPersonId.getValueAsString()).toVersionless());
@@ -141,7 +141,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Person read = myPersonDao.read(new IdDt(myPractitionerPersonId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myEmpiProviderR4.clearEmpiLinks(new StringType("practitioner"));
+		myEmpiProviderR4.clearEmpiLinks(new StringType("Practitioner"));
 		assertNoPractitionerLinksExist();
 		try {
 			myPersonDao.read(new IdDt(myPractitionerPersonId.getValueAsString()).toVersionless());
@@ -152,10 +152,10 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearInvalidTargetType() {
 		try {
-			myEmpiProviderR4.clearEmpiLinks(new StringType("observation"));
+			myEmpiProviderR4.clearEmpiLinks(new StringType("Observation"));
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("$empi-clear does not support resource type: observation")));
+			assertThat(e.getMessage(), is(equalTo("$empi-clear does not support resource type: Observation")));
 		}
 	}
 

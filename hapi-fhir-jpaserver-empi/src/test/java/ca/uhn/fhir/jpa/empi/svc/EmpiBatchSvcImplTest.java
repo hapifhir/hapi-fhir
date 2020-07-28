@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Date;
 
 class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
@@ -28,7 +29,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, afterEmpiLatch);
 	}
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(afterEmpiLatch);
 		afterEmpiLatch.clear();
 		super.after();
