@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
@@ -44,6 +45,25 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(54, output.getSnapshot().getElement().size());
+	}
+
+
+	/**
+	 * Make sure that if one SD extends another SD, and the parent SD hasn't been snapshotted itself, the child can
+	 * be snapshotted.
+	 */
+	@Test
+	public void testGenerateSnapshotChained() throws IOException {
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/StructureDefinition-kfdrc-patient.json");
+		myStructureDefinitionDao.update(sd);
+
+		StructureDefinition sd2 = loadResourceFromClasspath(StructureDefinition.class, "/r4/StructureDefinition-kfdrc-patient-no-phi.json");
+		myStructureDefinitionDao.update(sd2);
+
+		StructureDefinition snapshotted = myStructureDefinitionDao.generateSnapshot(sd2, null, null, null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshotted));
+
+		assertTrue(snapshotted.getSnapshot().getElement().size() > 0);
 	}
 
 

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2005
+title: When generating a snapshot for a StructureDefinition that extends another non-base StructureDefinition, if the parent
+   SD did not have a snapshot itself, the child snapshot would be empty. This has been corrected.
