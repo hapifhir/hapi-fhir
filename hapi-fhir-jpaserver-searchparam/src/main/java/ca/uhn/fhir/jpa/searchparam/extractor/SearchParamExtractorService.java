@@ -187,7 +187,7 @@ public class SearchParamExtractorService {
 
 		theEntity.setHasLinks(theParams.myLinks.size() > 0);
 
-		ourLog.info("LOGJA Done checking refs");
+		ourLog.info("LOGJA Done checking refs - Found links: {}", theParams.myLinks);
 	}
 
 	private void extractResourceLinks(@NotNull RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, TransactionDetails theTransactionDetails, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
@@ -209,9 +209,11 @@ public class SearchParamExtractorService {
 
 		boolean canonical = thePathAndRef.isCanonical();
 		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId) || canonical) {
+			ourLog.info("LOGJA Path is a logical reference: {} -- Canonical: {}", nextId, canonical);
 			String value = nextId.getValue();
 			ResourceLink resourceLink = ResourceLink.forLogicalReference(thePathAndRef.getPath(), theEntity, value, transactionDate);
 			if (theParams.myLinks.add(resourceLink)) {
+				ourLog.info("LOGJA Indexing remote resource reference URL: {}", nextId);
 				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 			}
 			return;
@@ -225,6 +227,7 @@ public class SearchParamExtractorService {
 				throw new InvalidRequestException(msg);
 			} else {
 				ourLog.debug(msg);
+				ourLog.debug("LOGJA: {}", msg);
 				return;
 			}
 		}
@@ -237,12 +240,14 @@ public class SearchParamExtractorService {
 				throw new InvalidRequestException(msg);
 			} else {
 				ourLog.debug(msg);
+				ourLog.info("LOGJA: {}", msg);
 				return;
 			}
 		}
 
 		if (theRuntimeSearchParam.hasTargets()) {
 			if (!theRuntimeSearchParam.getTargets().contains(typeString)) {
+				ourLog.info("LOGJA: Did not find {} in targets: {}", typeString, theRuntimeSearchParam.getTargets());
 				return;
 			}
 		}
@@ -255,6 +260,7 @@ public class SearchParamExtractorService {
 				ResourceLink resourceLink = ResourceLink.forAbsoluteReference(thePathAndRef.getPath(), theEntity, nextId, transactionDate);
 				if (theParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
+					ourLog.info("LOGJA: Indexing remote resource reference URL: {}", nextId);
 				}
 				return;
 			}
@@ -268,6 +274,7 @@ public class SearchParamExtractorService {
 				throw new InvalidRequestException(msg);
 			} else {
 				ourLog.debug(msg);
+				ourLog.info("LOGJA: {}", msg);
 				return;
 			}
 		}
@@ -283,6 +290,7 @@ public class SearchParamExtractorService {
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
 			resourceLink = ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, typeString, resolvedTargetId.getIdAsLong(), nextId.getIdPart(), transactionDate);
+			ourLog.info("LOGJA: Created link: {}", resourceLink);
 
 		} else if (theFailOnInvalidReference) {
 
@@ -311,6 +319,7 @@ public class SearchParamExtractorService {
 			target = new ResourceTable();
 			target.setResourceType(typeString);
 			resourceLink = ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, typeString, null, nextId.getIdPart(), transactionDate);
+			ourLog.info("LOGJA: Local reference: {}", resourceLink);
 
 		}
 

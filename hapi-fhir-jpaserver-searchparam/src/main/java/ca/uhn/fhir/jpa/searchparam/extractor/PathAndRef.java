@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 
 public class PathAndRef {
@@ -28,6 +30,16 @@ public class PathAndRef {
 	private final IBaseReference myRef;
 	private final String mySearchParamName;
 	private final boolean myCanonical;
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("path", myPath)
+			.append("ref", myRef)
+			.append("searchParamName", mySearchParamName)
+			.append("canonical", myCanonical)
+			.toString();
+	}
 
 	/**
 	 * Constructor

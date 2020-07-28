@@ -788,7 +788,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
-		ourLog.info("LOGJA Processing search params: {}", searchParams);
 
 		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
