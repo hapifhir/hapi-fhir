@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -241,29 +242,32 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 
 		Patient p = new Patient();
-		p.setId("P");
 		p.setActive(true);
-		myPatientDao.update(p);
+		Long pId = myPatientDao.create(p).getId().toUnqualifiedVersionless().getIdPartAsLong();
 
 		EpisodeOfCare eoc = new EpisodeOfCare();
-		eoc.setId("EOC");
 		eoc.setStatus(EpisodeOfCare.EpisodeOfCareStatus.ACTIVE);
-		myEpisodeOfCareDao.update(eoc);
+		Long eocId = myEpisodeOfCareDao.create(eoc).getId().toUnqualifiedVersionless().getIdPartAsLong();
 
 		CarePlan cp = new CarePlan();
-		cp.setId("CP");
 		cp.setStatus(CarePlan.CarePlanStatus.ACTIVE);
-//		cp.setSubject(new Reference("Patient/P"));
-		cp.addSupportingInfo().setReference("http://foo/Patient/123");
-		myCarePlanDao.update(cp);
+		Long cpId = myCarePlanDao.create(cp).getId().toUnqualifiedVersionless().getIdPartAsLong();
+
+		runInTransaction(()->{
+			ResourceTable cpTable = myResourceTableDao.getOne(cpId);
+			myResourceLinkDao.save(ResourceLink.forLocalReference("CarePlan.supportingInfo", cpTable, "EpisodeOfCare", eocId, null, new Date()));
+			myResourceLinkDao.save(ResourceLink.forLocalReference("CarePlan.subject", cpTable, "Patient", pId, null, new Date()));
+			cpTable.setHasLinks(true);
+			myResourceTableDao.save(cpTable);
+		});
 
 		cp = new CarePlan();
-		cp.setId("CP");
-//		cp.setSubject(new Reference("Patient/P"));
-//		cp.addSupportingInfo().setReference("http://foo/Patient/123");
+		cp.setId("" + cpId);
+		cp.setSubject(new Reference("Patient/" + pId));
+		cp.addSupportingInfo().setReference("http://foo/Patient/FOO");
 		cp.setStatus(CarePlan.CarePlanStatus.ACTIVE);
 		EpisodeOfCare tmpEoc = new EpisodeOfCare();
-		tmpEoc.setId("EOC");
+		tmpEoc.setId("" + eocId);
 		cp.setContext(new Reference(tmpEoc));
 
 		ourLog.info("*** ABOUT TO UPDATE");

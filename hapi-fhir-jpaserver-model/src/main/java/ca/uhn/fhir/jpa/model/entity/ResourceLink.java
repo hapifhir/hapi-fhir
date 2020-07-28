@@ -225,11 +225,22 @@ public class ResourceLink extends BaseResourceIndex {
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append("ResourceLink[");
+		if (myId != null) {
+			b.append("pid=").append(myId).append(", ");
+		}
 		b.append("path=").append(mySourcePath);
-		b.append(", src=").append(mySourceResourcePid);
-		b.append(", target=").append(myTargetResourcePid);
-		b.append(", targetType=").append(myTargetResourceType);
-		b.append(", targetUrl=").append(myTargetResourceUrl);
+		if (mySourceResourcePid != null) {
+			b.append(", src=").append(mySourceResourcePid);
+		}
+		if (myTargetResourcePid != null) {
+			b.append(", target=").append(myTargetResourcePid);
+		}
+		if (myTargetResourceType != null) {
+			b.append(", targetType=").append(myTargetResourceType);
+		}
+		if (myTargetResourceUrl != null) {
+			b.append(", targetUrl=").append(myTargetResourceUrl);
+		}
 
 		b.append("]");
 		return b.toString();

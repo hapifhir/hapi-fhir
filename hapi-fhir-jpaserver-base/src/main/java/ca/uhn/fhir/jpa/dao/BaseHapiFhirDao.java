@@ -986,7 +986,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Starting entity update");
 
-		ourLog.info("LOGJA Starting entity update for {} with index {}", theResource, thePerformIndexing);
+		ourLog.info("LOGJA Starting entity update for {} with index {}", theResource.getIdElement(), thePerformIndexing);
 
 		ResourceTable entity = (ResourceTable) theEntity;
 
@@ -1032,10 +1032,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			existingParams = new ResourceIndexedSearchParams(entity);
 			entity.setDeleted(null);
 
+			ourLog.info("LOGJA Found existing links in DB: {}", existingParams.myLinks);
+
 			if (thePerformIndexing) {
 
 				newParams = new ResourceIndexedSearchParams();
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest);
+
+				ourLog.info("LOGJA Will replace old: {}", existingParams.myLinks);
+				ourLog.info("LOGJA Will replace new: {}", newParams.myLinks);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, entity, true);
 				if (changed.isChanged()) {

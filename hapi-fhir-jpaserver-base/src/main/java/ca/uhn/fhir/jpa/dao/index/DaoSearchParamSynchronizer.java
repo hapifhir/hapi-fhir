@@ -54,7 +54,7 @@ public class DaoSearchParamSynchronizer {
 	public AddRemoveCount synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
-		ourLog.info("LOGJA Synchronizing links:\nOld: {}\nNew: {}", existingParams, theParams);
+		ourLog.info("LOGJA Synchronizing links - Old: {}         -------- New: {}", existingParams.myLinks, theParams.myLinks);
 
 		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams);
 		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams);

@@ -116,15 +116,17 @@ public class SearchParamWithInlineReferencesExtractor {
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 		 */
-		ourLog.info("LOGJA Checking existing links");
+		ourLog.info("LOGJA Checking existing links - Old set: {}", theParams.myLinks);
 		for (Iterator<ResourceLink> existingLinkIter = theExistingParams.getResourceLinks().iterator(); existingLinkIter.hasNext(); ) {
 			ResourceLink nextExisting = existingLinkIter.next();
+			ourLog.info("Checking if we can replace existing link {}", nextExisting);
 			if (theParams.myLinks.remove(nextExisting)) {
 				ourLog.info("LOGJA Replacing existing link {}", nextExisting);
 				existingLinkIter.remove();
 				theParams.myLinks.add(nextExisting);
 			}
 		}
+		ourLog.info("LOGJA Done checking existing links - New set: {}", theParams.myLinks);
 
 		/*
 		 * Handle composites
