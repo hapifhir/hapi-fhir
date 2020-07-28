@@ -239,7 +239,7 @@ public class EmpiLinkDaoSvc {
 
 	private List<Long> deleteEmpiLinksAndReturnPersonPids(List<EmpiLink> theLinks) {
 		List<Long> collect = theLinks.stream().map(EmpiLink::getPersonPid).distinct().collect(Collectors.toList());
-		theLinks.forEach(empiLink -> myEmpiLinkDao.delete(empiLink));
+		myEmpiLinkDao.deleteAll(theLinks);
 		return collect;
 	}
 

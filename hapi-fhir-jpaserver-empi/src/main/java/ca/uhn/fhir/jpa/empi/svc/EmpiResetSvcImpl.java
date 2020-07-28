@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -37,7 +36,10 @@ import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,7 +57,9 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private HapiTransactionService myTransactionService;
+	private PlatformTransactionManager myTransactionManager;
+
+	private TransactionTemplate myTxTemplate;
 
 	@Override
 	public long expungeAllEmpiLinksOfTargetType(String theResourceType) {
@@ -74,14 +78,14 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	private void deleteResourcesAndHandleConflicts(List<Long> theLongs) {
 		DeleteConflictList
 			deleteConflictList = new DeleteConflictList();
-		myTransactionService.execute(null, tx -> {
+		myTxTemplate.execute(tx -> {
 			theLongs.stream().forEach(pid -> deleteCascade(pid, deleteConflictList));
 			return null;
 		});
 
 		IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
 		while (!deleteConflictList.isEmpty()) {
-			myTransactionService.execute(null, tx -> {
+			myTxTemplate.execute(tx -> {
 				deleteConflictBatch(deleteConflictList, personDao);
 				return null;
 			});
@@ -93,6 +97,12 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 		if (!EmpiUtil.supportedTargetType(theResourceType)) {
 			throw new InvalidRequestException(ProviderConstants.EMPI_CLEAR + " does not support resource type: " + theResourceType);
 		}
+	}
+
+	@PostConstruct
+	public void start() {
+		myTxTemplate = new TransactionTemplate(myTransactionManager);
+
 	}
 
 	/**
@@ -128,7 +138,8 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	private void deleteCascade(Long pid, DeleteConflictList theDeleteConflictList) {
 		ourLog.debug("About to cascade delete: " + pid);
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao("Person");
-			resourceDao.delete(new IdType("Person/" + pid), theDeleteConflictList, null, null);
+		myTxTemplate.executeWithoutResult((tx) -> resourceDao.delete(new IdType("Person/" + pid), theDeleteConflictList, null, null));
+
 	}
 }
 

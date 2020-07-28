@@ -50,17 +50,17 @@ public class EmpiProviderLoader {
 	@Autowired
 	private IResourceLoader myResourceLoader;
 	@Autowired
-	private IEmpiResetSvc myEmpiExpungeSvc;
+	private IEmpiResetSvc myEmpiResetSvc;
 	@Autowired
 	private IEmpiBatchService myEmpiBatchSvc;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiExpungeSvc, myEmpiBatchSvc));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiResetSvc, myEmpiBatchSvc));
 				break;
 			case R4:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiExpungeSvc, myEmpiBatchSvc));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiResetSvc, myEmpiBatchSvc));
 				break;
 			default:
 				throw new ConfigurationException("EMPI not supported for FHIR version " + myFhirContext.getVersion().getVersion());
