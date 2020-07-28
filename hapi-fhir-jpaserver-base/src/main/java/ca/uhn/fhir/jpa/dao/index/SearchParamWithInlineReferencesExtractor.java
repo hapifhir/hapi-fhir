@@ -106,6 +106,8 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, true);
 
+		ourLog.info("LOGJA Done extracting search params");
+
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
 			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
@@ -114,10 +116,11 @@ public class SearchParamWithInlineReferencesExtractor {
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 		 */
+		ourLog.info("LOGJA Checking existing links");
 		for (Iterator<ResourceLink> existingLinkIter = theExistingParams.getResourceLinks().iterator(); existingLinkIter.hasNext(); ) {
 			ResourceLink nextExisting = existingLinkIter.next();
 			if (theParams.myLinks.remove(nextExisting)) {
-				ourLog.info("Replacing existing link {}", nextExisting);
+				ourLog.info("LOGJA Replacing existing link {}", nextExisting);
 				existingLinkIter.remove();
 				theParams.myLinks.add(nextExisting);
 			}
@@ -127,6 +130,8 @@ public class SearchParamWithInlineReferencesExtractor {
 		 * Handle composites
 		 */
 		extractCompositeStringUniques(theEntity, theParams);
+
+		ourLog.info("LOGJA Done populating link list");
 	}
 
 	private void extractCompositeStringUniques(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {

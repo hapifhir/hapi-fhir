@@ -177,14 +177,17 @@ public class SearchParamExtractorService {
 		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource);
 		SearchParamExtractorService.handleWarnings(theRequest, myInterceptorBroadcaster, refs);
 
-		ourLog.info("Extracted refs: {}", refs);
+		ourLog.info("LOGJA Extracted refs: {}", refs);
 
 		for (PathAndRef nextPathAndRef : refs) {
+			ourLog.info("LOGJA Checking ref: {}", nextPathAndRef);
 			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(resourceName, nextPathAndRef.getSearchParamName());
 			extractResourceLinks(theRequestPartitionId, theParams, theEntity, theTransactionDetails, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);
 		}
 
 		theEntity.setHasLinks(theParams.myLinks.size() > 0);
+
+		ourLog.info("LOGJA Done checking refs");
 	}
 
 	private void extractResourceLinks(@NotNull RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, TransactionDetails theTransactionDetails, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {

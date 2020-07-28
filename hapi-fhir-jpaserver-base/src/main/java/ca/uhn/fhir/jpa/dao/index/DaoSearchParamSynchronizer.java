@@ -54,7 +54,7 @@ public class DaoSearchParamSynchronizer {
 	public AddRemoveCount synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
-		ourLog.info("*** Synchronizing links:\nOld: {}\nNew: {}", existingParams, theParams);
+		ourLog.info("LOGJA Synchronizing links:\nOld: {}\nNew: {}", existingParams, theParams);
 
 		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams);
 		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams);
@@ -82,12 +82,12 @@ public class DaoSearchParamSynchronizer {
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
 
 		for (T next : paramsToRemove) {
-			ourLog.info("*** Removing param: {}", next);
+			ourLog.info("LOGJA Removing param: {}", next);
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
 		}
 		for (T next : paramsToAdd) {
-			ourLog.info("*** Adding param: {}", next);
+			ourLog.info("LOGJA Adding param: {}", next);
 			myEntityManager.merge(next);
 		}
 

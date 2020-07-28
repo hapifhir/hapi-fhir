@@ -986,7 +986,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Starting entity update");
 
-		ourLog.info("*** Starting entity update for {} with index {}", theResource, thePerformIndexing);
+		ourLog.info("LOGJA Starting entity update for {} with index {}", theResource, thePerformIndexing);
 
 		ResourceTable entity = (ResourceTable) theEntity;
 
@@ -1039,6 +1039,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				changed = populateResourceIntoEntity(theRequest, theResource, entity, true);
 				if (changed.isChanged()) {
+					ourLog.info("LOGJA Resource has changed");
+
 					entity.setUpdated(theTransactionDetails.getTransactionDate());
 					if (theResource instanceof IResource) {
 						entity.setLanguage(((IResource) theResource).getLanguage().getValue());
@@ -1062,6 +1064,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (!changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
+			ourLog.info("LOGJA Resource has not changed");
 			ourLog.debug("Resource {} has not changed", entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				updateResourceMetadata(entity, theResource);
@@ -1077,6 +1080,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		/*
 		 * Save the resource itself
 		 */
+		ourLog.info("LOGJA Saving resource entity");
 		if (entity.getId() == null) {
 			myEntityManager.persist(entity);
 
@@ -1101,6 +1105,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * Create history entry
 		 */
 		if (theCreateNewHistoryEntry) {
+			ourLog.info("LOGJA Creating ihstory");
 			final ResourceHistoryTable historyEntry = entity.toHistory();
 			historyEntry.setEncoding(changed.getEncoding());
 			historyEntry.setResource(changed.getResource());
@@ -1188,6 +1193,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * Indexing
 		 */
 		if (thePerformIndexing) {
+			ourLog.info("LOGJA Starting indexing");
+
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(entity.getId());
 			} else {
@@ -1211,6 +1218,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				// Synchronize composite params
 				mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, entity, existingParams);
 			}
+		} else {
+			ourLog.info("LOGJA Not indexing");
 		}
 
 		if (theResource != null) {

@@ -139,6 +139,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myEncounterDaoDstu3")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
+	@Autowired
+	@Qualifier("myEpisodeOfCareDaoDstu3")
+	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 	// @PersistenceContext()
 	@Autowired
 	protected EntityManager myEntityManager;
