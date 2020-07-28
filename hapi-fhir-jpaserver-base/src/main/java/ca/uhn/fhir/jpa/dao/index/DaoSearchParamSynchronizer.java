@@ -27,6 +27,8 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,7 @@ import java.util.List;
 
 @Service
 public class DaoSearchParamSynchronizer {
+	private static final Logger ourLog = LoggerFactory.getLogger(DaoSearchParamSynchronizer.class);
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
@@ -50,6 +53,8 @@ public class DaoSearchParamSynchronizer {
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
+
+		ourLog.info("*** Synchronizing links:\nOld: {}\nNew: {}", existingParams, theParams);
 
 		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams);
 		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams);
@@ -77,10 +82,12 @@ public class DaoSearchParamSynchronizer {
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
 
 		for (T next : paramsToRemove) {
+			ourLog.info("*** Removing param: {}", next);
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
 		}
 		for (T next : paramsToAdd) {
+			ourLog.info("*** Adding param: {}", next);
 			myEntityManager.merge(next);
 		}
 

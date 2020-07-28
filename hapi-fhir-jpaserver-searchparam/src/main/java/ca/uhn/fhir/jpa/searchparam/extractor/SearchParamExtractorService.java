@@ -177,6 +177,8 @@ public class SearchParamExtractorService {
 		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource);
 		SearchParamExtractorService.handleWarnings(theRequest, myInterceptorBroadcaster, refs);
 
+		ourLog.info("Extracted refs: {}", refs);
+
 		for (PathAndRef nextPathAndRef : refs) {
 			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(resourceName, nextPathAndRef.getSearchParamName());
 			extractResourceLinks(theRequestPartitionId, theParams, theEntity, theTransactionDetails, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);

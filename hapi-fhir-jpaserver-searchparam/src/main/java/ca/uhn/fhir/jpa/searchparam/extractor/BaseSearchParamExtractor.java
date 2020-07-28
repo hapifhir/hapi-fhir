@@ -788,6 +788,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		ourLog.info("Processing search params: {}", searchParams);
+
 		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;
@@ -808,6 +810,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		for (String nextPath : splitPaths) {
 			nextPath = trim(nextPath);
 			for (IBase nextObject : extractValues(nextPath, theResource)) {
+				ourLog.info("Processing value {} for search param {}", nextObject, theSearchParameterDef.getName());
+
 				if (nextObject != null) {
 					String typeName = toRootTypeName(nextObject);
 					if (!myIgnoredForSearchDatatypes.contains(typeName)) {

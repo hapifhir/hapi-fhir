@@ -986,6 +986,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Starting entity update");
 
+		ourLog.info("*** Starting entity update for {} with index {}", theResource, thePerformIndexing);
+
 		ResourceTable entity = (ResourceTable) theEntity;
 
 		/*

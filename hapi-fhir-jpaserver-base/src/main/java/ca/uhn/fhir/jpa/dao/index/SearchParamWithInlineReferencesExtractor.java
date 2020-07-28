@@ -117,6 +117,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		for (Iterator<ResourceLink> existingLinkIter = theExistingParams.getResourceLinks().iterator(); existingLinkIter.hasNext(); ) {
 			ResourceLink nextExisting = existingLinkIter.next();
 			if (theParams.myLinks.remove(nextExisting)) {
+				ourLog.info("Replacing existing link {}", nextExisting);
 				existingLinkIter.remove();
 				theParams.myLinks.add(nextExisting);
 			}
