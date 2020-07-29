@@ -51,11 +51,10 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiPersonDeletingSvcImpl;
+import ca.uhn.fhir.jpa.empi.svc.EmpiPersonDeletingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResetSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
-import ca.uhn.fhir.jpa.empi.svc.IEmpiPersonDeletingSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
@@ -182,13 +181,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	IEmpiResetSvc empiResetSvc(EmpiLinkDaoSvc theEmpiLinkDaoSvc, IEmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl ) {
+	IEmpiResetSvc empiResetSvc(EmpiLinkDaoSvc theEmpiLinkDaoSvc, EmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl ) {
 		return new EmpiResetSvcImpl(theEmpiLinkDaoSvc, theEmpiPersonDeletingSvcImpl);
-	}
-
-	@Bean
-	IEmpiPersonDeletingSvc empiPersonDeletingSvc() {
-		return new EmpiPersonDeletingSvcImpl();
 	}
 
 	@Bean

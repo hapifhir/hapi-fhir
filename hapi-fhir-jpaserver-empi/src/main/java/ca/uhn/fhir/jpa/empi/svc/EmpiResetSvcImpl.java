@@ -39,10 +39,10 @@ public class EmpiResetSvcImpl implements IEmpiResetSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiResetSvcImpl.class);
 
 	final EmpiLinkDaoSvc myEmpiLinkDaoSvc;
-	final IEmpiPersonDeletingSvc myEmpiPersonDeletingSvcImpl;
+	final EmpiPersonDeletingSvc myEmpiPersonDeletingSvcImpl;
 
 	@Autowired
-	public EmpiResetSvcImpl(EmpiLinkDaoSvc theEmpiLinkDaoSvc, IEmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl) {
+	public EmpiResetSvcImpl(EmpiLinkDaoSvc theEmpiLinkDaoSvc, EmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl) {
 		myEmpiLinkDaoSvc = theEmpiLinkDaoSvc;
 		myEmpiPersonDeletingSvcImpl = theEmpiPersonDeletingSvcImpl;
 	}

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDeleteSvc;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiSubmitterInterceptorLoader;
+import ca.uhn.fhir.jpa.empi.svc.EmpiPersonDeletingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,5 +50,10 @@ public class EmpiSubmitterConfig {
 	@Bean
 	EmpiLinkDeleteSvc empiLinkDeleteSvc() {
 		return new EmpiLinkDeleteSvc();
+	}
+
+	@Bean
+	EmpiPersonDeletingSvc empiPersonDeletingSvc() {
+		return new EmpiPersonDeletingSvc();
 	}
 }

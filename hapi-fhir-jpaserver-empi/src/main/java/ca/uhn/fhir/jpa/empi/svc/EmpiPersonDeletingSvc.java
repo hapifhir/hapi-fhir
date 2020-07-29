@@ -12,50 +12,42 @@ import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
-public class EmpiPersonDeletingSvcImpl implements IEmpiPersonDeletingSvc {
-	private static final Logger ourLog = getLogger(EmpiPersonDeletingSvcImpl.class);
+public class EmpiPersonDeletingSvc {
+	private static final Logger ourLog = getLogger(EmpiPersonDeletingSvc.class);
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private ExpungeService myExpungeService;
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-
 
 	/**
 	 * Function which will delete all resources by their PIDs, and also delete any resources that were undeletable due to
 	 * VersionConflictException
+	 *
 	 * @param theLongs
 	 */
-	@Override
+	@Transactional
 	public void deleteResourcesAndHandleConflicts(List<Long> theLongs) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		txTemplate.execute((tx) ->{
-			DeleteConflictList
-				deleteConflictList = new DeleteConflictList();
-			theLongs.stream().forEach(pid -> deleteCascade(pid, deleteConflictList));
+		DeleteConflictList
+			deleteConflictList = new DeleteConflictList();
+		theLongs.stream().forEach(pid -> deleteCascade(pid, deleteConflictList));
 
-			IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
-			while (!deleteConflictList.isEmpty()) {
-				deleteConflictBatch(deleteConflictList, personDao);
-			}
-			return null;
-		});
+		IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
+		while (!deleteConflictList.isEmpty()) {
+			deleteConflictBatch(deleteConflictList, personDao);
+		}
 	}
 
 	/**
 	 * Use the expunge service to expunge all historical and current versions of the resources associated to the PIDs.
 	 */
-	@Override
 	public void expungeHistoricalAndCurrentVersionsOfIds(List<Long> theLongs) {
 		ExpungeOptions options = new ExpungeOptions();
 		options.setExpungeDeletedResources(true);
@@ -76,7 +68,7 @@ public class EmpiPersonDeletingSvcImpl implements IEmpiPersonDeletingSvc {
 
 	private void deleteConflictBatch(DeleteConflictList theDcl, IFhirResourceDao<IBaseResource> theDao) {
 		DeleteConflictList newBatch = new DeleteConflictList();
-		for (DeleteConflict next: theDcl) {
+		for (DeleteConflict next : theDcl) {
 			IdDt nextSource = next.getSourceId();
 			ourLog.info("Have delete conflict {} - Cascading delete", next);
 			theDao.delete(nextSource.toVersionless(), newBatch, null, null);
