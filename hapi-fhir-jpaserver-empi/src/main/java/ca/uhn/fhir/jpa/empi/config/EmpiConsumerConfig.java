@@ -180,7 +180,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-    IEmpiResetSvc empiExpungeSvc() {
+    IEmpiResetSvc empiResetSvc() {
 		return new EmpiResetSvcImpl();
 	}
 
