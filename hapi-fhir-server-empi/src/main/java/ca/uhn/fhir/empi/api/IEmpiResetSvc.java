@@ -37,5 +37,5 @@ public interface IEmpiResetSvc {
 	 *
 	 * @return the count of deleted EMPI links
 	 */
-	long expungeAllEmpiLinks();
+	long removeAllEmpiLinks();
 }

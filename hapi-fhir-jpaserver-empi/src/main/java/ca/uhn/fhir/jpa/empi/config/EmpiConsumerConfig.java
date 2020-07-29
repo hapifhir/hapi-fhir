@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.empi.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiBatchService;
-import ca.uhn.fhir.empi.api.IEmpiResetSvc;
+import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
-import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
+import ca.uhn.fhir.empi.api.IEmpiResetSvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
@@ -44,16 +44,18 @@ import ca.uhn.fhir.jpa.empi.dao.EmpiLinkFactory;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.svc.EmpiBatchSvcImpl;
+import ca.uhn.fhir.jpa.empi.svc.EmpiChannelSubmitterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
-import ca.uhn.fhir.jpa.empi.svc.EmpiResetSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkQuerySvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiPersonDeletingSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
-import ca.uhn.fhir.jpa.empi.svc.EmpiChannelSubmitterSvcImpl;
+import ca.uhn.fhir.jpa.empi.svc.EmpiResetSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
+import ca.uhn.fhir.jpa.empi.svc.IEmpiPersonDeletingSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
@@ -180,8 +182,13 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-    IEmpiResetSvc empiResetSvc() {
-		return new EmpiResetSvcImpl();
+	IEmpiResetSvc empiResetSvc(EmpiLinkDaoSvc theEmpiLinkDaoSvc, IEmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl ) {
+		return new EmpiResetSvcImpl(theEmpiLinkDaoSvc, theEmpiPersonDeletingSvcImpl);
+	}
+
+	@Bean
+	IEmpiPersonDeletingSvc empiPersonDeletingSvc() {
+		return new EmpiPersonDeletingSvcImpl();
 	}
 
 	@Bean

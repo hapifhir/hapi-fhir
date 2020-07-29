@@ -67,7 +67,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-class ResourceExpungeService implements IResourceExpungeService {
+public class ResourceExpungeService implements IResourceExpungeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceExpungeService.class);
 
 	@Autowired

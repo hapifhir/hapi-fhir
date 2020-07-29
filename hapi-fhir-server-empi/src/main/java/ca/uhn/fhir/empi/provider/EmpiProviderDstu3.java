@@ -181,7 +181,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType) {
 		long resetCount;
 		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
-			resetCount = myEmpiResetSvc.expungeAllEmpiLinks();
+			resetCount = myEmpiResetSvc.removeAllEmpiLinks();
 		} else {
 			resetCount = myEmpiResetSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull());
 		}
