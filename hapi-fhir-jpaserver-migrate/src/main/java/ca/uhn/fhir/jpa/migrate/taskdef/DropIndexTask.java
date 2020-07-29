@@ -74,35 +74,21 @@ public class DropIndexTask extends BaseTableTask {
 		 * constraint, and delete that constraint.
 		 */
 
-		@Language("SQL") String findConstraintSql;
-		@Language("SQL") String dropConstraintSql;
 		if (getDriverType() == DriverTypeEnum.H2_EMBEDDED) {
-			findConstraintSql = "SELECT DISTINCT INDEX_NAME FROM INFORMATION_SCHEMA.INDEXES WHERE constraint_name = ? AND table_name = ?";
-			dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + myIndexName;
+			@Language("SQL") String findConstraintSql = "SELECT DISTINCT constraint_name FROM INFORMATION_SCHEMA.INDEXES WHERE constraint_name = ? AND table_name = ?";
+			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
+			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		} else if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED) {
-			findConstraintSql = "SELECT c.constraintname FROM sys.sysconstraints c, sys.systables t WHERE c.tableid = t.tableid AND c.constraintname = ? AND t.tablename = ?";
-			dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + myIndexName;
-		} else {
-			findConstraintSql = null;
-			dropConstraintSql = null;
-		}
+			@Language("SQL") String findConstraintSql = "SELECT c.constraintname FROM sys.sysconstraints c, sys.systables t WHERE c.tableid = t.tableid AND c.constraintname = ? AND t.tablename = ?";
+			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
+			findAndDropConstraint(findConstraintSql, dropConstraintSql);
+		} else if (getDriverType() == DriverTypeEnum.ORACLE_12C) {
+			@Language("SQL") String findConstraintSql = "SELECT DISTINCT constraint_name FROM user_cons_columns WHERE constraint_name = ? AND table_name = ?";
+			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
+			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 
-		if (findConstraintSql != null) {
-			DataSource dataSource = Objects.requireNonNull(getConnectionProperties().getDataSource());
-			Boolean handled = getConnectionProperties().getTxTemplate().execute(t -> {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-				RowMapperResultSetExtractor<String> resultSetExtractor = new RowMapperResultSetExtractor<>(new SingleColumnRowMapper<>(String.class));
-				List<String> outcome = jdbcTemplate.query(findConstraintSql, new Object[]{myIndexName, getTableName()}, resultSetExtractor);
-				assert outcome != null;
-				if (outcome.size() > 0) {
-					executeSql(getTableName(), dropConstraintSql);
-					return true;
-				}
-				return false;
-			});
-			if (Boolean.TRUE.equals(handled)) {
-				return;
-			}
+			findConstraintSql = "SELECT DISTINCT constraint_name FROM all_constraints WHERE index_name = ? AND table_name = ?";
+			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		}
 
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
@@ -122,6 +108,20 @@ public class DropIndexTask extends BaseTableTask {
 		for (@Language("SQL") String sql : sqls) {
 			executeSql(getTableName(), sql);
 		}
+	}
+
+	public void findAndDropConstraint(String theFindConstraintSql, String theDropConstraintSql) {
+		DataSource dataSource = Objects.requireNonNull(getConnectionProperties().getDataSource());
+		getConnectionProperties().getTxTemplate().executeWithoutResult(t -> {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+			RowMapperResultSetExtractor<String> resultSetExtractor = new RowMapperResultSetExtractor<>(new SingleColumnRowMapper<>(String.class));
+			List<String> outcome = jdbcTemplate.query(theFindConstraintSql, new Object[]{myIndexName, getTableName()}, resultSetExtractor);
+			assert outcome != null;
+			for (String next : outcome) {
+				String sql = theDropConstraintSql.replace("?", next);
+				executeSql(getTableName(), sql);
+			}
+		});
 	}
 
 	public DropIndexTask setIndexName(String theIndexName) {
@@ -166,8 +166,10 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("drop index " + theIndexName);
 					break;
 				case DERBY_EMBEDDED:
-				case ORACLE_12C:
 					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
+					break;
+				case ORACLE_12C:
+					sql.add("drop index " + theIndexName);
 					break;
 				case MSSQL_2012:
 					sql.add("drop index " + theIndexName + " on " + theTableName);

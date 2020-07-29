@@ -181,10 +181,17 @@ public class Builder {
 			return task;
 		}
 
+		/**
+		 * @deprecated Do not rename indexes - It is too hard to figure out what happened if something goes wrong
+		 */
+		@Deprecated
 		public void renameIndex(String theVersion, String theOldIndexName, String theNewIndexName) {
 			renameIndexOptional(false, theVersion, theOldIndexName, theNewIndexName);
 		}
 
+		/**
+		 * @deprecated Do not rename indexes - It is too hard to figure out what happened if something goes wrong
+		 */
 		public void renameIndexStub(String theVersion, String theOldIndexName, String theNewIndexName) {
 			renameIndexOptional(true, theVersion, theOldIndexName, theNewIndexName);
 		}
