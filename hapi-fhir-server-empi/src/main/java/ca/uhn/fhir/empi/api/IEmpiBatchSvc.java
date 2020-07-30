@@ -22,7 +22,7 @@ package ca.uhn.fhir.empi.api;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
-public interface IEmpiBatchService {
+public interface IEmpiBatchSvc {
 
 	/**
 	 * Submit all eligible resources for EMPI processing.

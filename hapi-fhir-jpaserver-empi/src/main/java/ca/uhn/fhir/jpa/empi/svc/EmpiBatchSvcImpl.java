@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.empi.api.IEmpiBatchService;
+import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
 import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class EmpiBatchSvcImpl implements IEmpiBatchService {
+public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;

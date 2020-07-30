@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.empi.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.IEmpiBatchService;
+import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
 import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDeleteSvc;
@@ -71,7 +71,7 @@ public class EmpiSubmitterConfig {
 	}
 
 	@Bean
-	IEmpiBatchService myEmpiBatchService() {
+	IEmpiBatchSvc empiBatchService() {
 		return new EmpiBatchSvcImpl();
 	}
 }

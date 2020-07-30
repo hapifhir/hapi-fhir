@@ -38,8 +38,6 @@ import static ca.uhn.fhir.empi.api.IEmpiSettings.EMPI_CHANNEL_NAME;
  * This class is responsible for manual submissions of {@link IAnyResource} resources onto the Empi Queue.
  */
 public class EmpiChannelSubmitterSvcImpl implements IEmpiChannelSubmitterSvc {
-	private IChannelNamer myChannelNamer;
-
 	private MessageChannel myEmpiChannelProducer;
 
 	private FhirContext myFhirContext;
@@ -57,7 +55,6 @@ public class EmpiChannelSubmitterSvcImpl implements IEmpiChannelSubmitterSvc {
 
 	@Autowired
 	public EmpiChannelSubmitterSvcImpl(IChannelNamer theChannelNamer, FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
-		myChannelNamer = theChannelNamer;
 		myFhirContext = theFhirContext;
 		myChannelFactory = theIChannelFactory;
 	}
