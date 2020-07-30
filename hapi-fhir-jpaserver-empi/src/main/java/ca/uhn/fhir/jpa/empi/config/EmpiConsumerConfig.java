@@ -199,7 +199,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-    IEmpiLinkUpdaterSvc manualLinkUpdaterSvc() {
+	IEmpiLinkUpdaterSvc manualLinkUpdaterSvc() {
 		return new EmpiLinkUpdaterSvcImpl();
 	}
 

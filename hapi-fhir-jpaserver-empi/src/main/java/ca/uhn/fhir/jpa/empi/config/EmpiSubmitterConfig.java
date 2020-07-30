@@ -66,7 +66,7 @@ public class EmpiSubmitterConfig {
 
 	@Bean
 	@Lazy
-	IEmpiChannelSubmitterSvc empiQueueSubmitterSvc(IChannelNamer theChannelNamer, FhirContext theFhirContext, IChannelFactory theChannelFactory) {
+	IEmpiChannelSubmitterSvc empiChannelSubmitterSvc(IChannelNamer theChannelNamer, FhirContext theFhirContext, IChannelFactory theChannelFactory) {
 		return new EmpiChannelSubmitterSvcImpl(theChannelNamer, theFhirContext, theChannelFactory);
 	}
 
