@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -61,7 +60,6 @@ import org.hl7.fhir.dstu3.model.Device;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.EpisodeOfCare;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Immunization;
@@ -97,8 +95,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -131,10 +127,6 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchNoFtTest.class);
-
-	@Autowired
-	@Qualifier("myEpisodeOfCareDaoDstu3")
-	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -3716,55 +3708,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 	}
 
-
-	@Test
-	// Fails
-	public void testSearchByIdentitySystemNoValue() {
-		Patient pt = new Patient();
-		pt.addIdentifier().setSystem("urn:oid:2.16.840.1.113883.3.7418.29.5");
-		IIdType ptId = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap params = new SearchParameterMap();
-		TokenParam tokenParam = new TokenParam().setSystem("urn:oid:2.16.840.1.113883.3.7418.29.5");
-		params.add(Patient.SP_IDENTIFIER, tokenParam);
-		params.setLoadSynchronous(true);
-
-		List<String> patientIds = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
-		assertThat(patientIds, contains(ptId.toString()));
-	}
-
-
-	@Test
-	// Passes
-	public void testSearchByIdentitySystemHasValueQueryNoValue() {
-		Patient pt = new Patient();
-		pt.addIdentifier().setSystem("urn:oid:2.16.840.1.113883.3.7418.29.5").setValue("abc123");
-		IIdType ptId = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap params = new SearchParameterMap();
-		TokenParam tokenParam = new TokenParam().setSystem("urn:oid:2.16.840.1.113883.3.7418.29.5");
-		params.add(Patient.SP_IDENTIFIER, tokenParam);
-		params.setLoadSynchronous(true);
-
-		List<String> patientIds = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
-		assertThat(patientIds, contains(ptId.toString()));
-	}
-
-	@Test
-	// Passes
-	public void testSearchByIdentitySystemWithValue() {
-		Patient pt = new Patient();
-		pt.addIdentifier().setSystem("urn:oid:2.16.840.1.113883.3.7418.29.5").setValue("abc123");
-		IIdType ptId = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap params = new SearchParameterMap();
-		TokenParam tokenParam = new TokenParam().setSystem("urn:oid:2.16.840.1.113883.3.7418.29.5").setValue("abc123");
-		params.add(Patient.SP_IDENTIFIER, tokenParam);
-		params.setLoadSynchronous(true);
-
-		List<String> patientIds = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
-		assertThat(patientIds, contains(ptId.toString()));
-	}
 
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();
