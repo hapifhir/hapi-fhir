@@ -64,8 +64,7 @@ public class EmpiChannelSubmitterSvcImpl implements IEmpiChannelSubmitterSvc {
 
 	private void init() {
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
-		String channelName = myChannelNamer.getChannelName(EMPI_CHANNEL_NAME, channelSettings);
-		myEmpiChannelProducer= myChannelFactory.getOrCreateProducer(channelName, ResourceModifiedJsonMessage.class, channelSettings);
+		myEmpiChannelProducer= myChannelFactory.getOrCreateProducer(EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}
 
 	private MessageChannel getEmpiChannelProducer() {
