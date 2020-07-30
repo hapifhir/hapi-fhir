@@ -447,3 +447,70 @@ This might result in a response such as the following:
   ]
 }
 ```
+
+## Clearing EMPI Links
+
+The `$empi-clear` operation is used to batch-delete EMPI links and related persons from the database. This operation is meant to 
+be used during the rules-tuning phase of the EMPI implementation so that you can quickly test your ruleset.
+It permits the user to essentially "start fresh" without too much fuss. 
+
+After the operation is complete, all targeted EMPI links will be removed from the system, and the Person resources which were involves in those links will be deleted and expunged 
+from the server. 
+
+This operation takes a single optional Parameter.
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>resourceType</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The target Resource type you would like to clear. Currently limited to Patient/Practitioner. If omitted, will operate over all links.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+### Example
+
+Use an HTTP POST to the following URL to invoke this operation:
+
+```url
+http://example.com/$empi-clear
+```
+
+The following request body could be used:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "resourceType",
+    "valueString": "Patient"
+  } ]
+}
+```
+
+This operation returns the number of EMPI links that were cleared. The following is a sample response: 
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "reset",
+    "valueDecimal": 5
+  } ]
+}
+```
+
+
+

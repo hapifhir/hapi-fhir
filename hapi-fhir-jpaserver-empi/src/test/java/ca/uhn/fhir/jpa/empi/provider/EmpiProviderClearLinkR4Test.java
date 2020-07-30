@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -120,8 +121,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkPersons(personFromTarget2, personFromTarget);
 
 		//SUT
-		myEmpiProviderR4.clearEmpiLinks(null);
-
+		Parameters parameters = myEmpiProviderR4.clearEmpiLinks(null);
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		assertThat(search.size(), is(equalTo(0)));
