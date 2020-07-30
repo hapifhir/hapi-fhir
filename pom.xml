@@ -717,7 +717,7 @@
 		<!-- 9.4.17 seems to have issues -->
 		<jetty_version>9.4.30.v20200611</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
-		<flyway_version>6.4.1</flyway_version>
+		<flyway_version>6.5.3</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
 		<hibernate_version>5.4.14.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
