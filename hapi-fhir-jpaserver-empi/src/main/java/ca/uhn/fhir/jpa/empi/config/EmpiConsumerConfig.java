@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.empi.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
@@ -42,7 +41,6 @@ import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkFactory;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
-import ca.uhn.fhir.jpa.empi.svc.EmpiChannelSubmitterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiEidUpdateService;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkQuerySvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
@@ -59,13 +57,10 @@ import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByEidSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByScoreSvc;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class EmpiConsumerConfig {
@@ -91,11 +86,6 @@ public class EmpiConsumerConfig {
 		return new EmpiMatchLinkSvc();
 	}
 
-	@Bean
-	@Lazy
-	IEmpiChannelSubmitterSvc empiQueueSubmitterSvc(IChannelNamer theChannelNamer, FhirContext theFhirContext, IChannelFactory theChannelFactory) {
-		return new EmpiChannelSubmitterSvcImpl(theChannelNamer, theFhirContext, theChannelFactory);
-	}
 
 	@Bean
 	EmpiEidUpdateService eidUpdateService() {
