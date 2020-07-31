@@ -518,10 +518,9 @@ The `$empi-batch-run` operation is used to batch-process patients and practition
 run EMPI processing over Resources when they are updated or created, but this is not the only context in which you would want to 
 execute EMPI processing against resources. In the rules-tuning phase of your setup, you may use `$empi-batch-run` to quickly apply EMPI rules across multiple Resources.
 
-After the operation is complete, all targeted EMPI links will be removed from the system, and the Person resources which were involves in those links will be deleted and expunged 
-from the server. 
+After the operation is complete, all resources which matched the criteria will have been processed EMPI and will now have at least one EMPI link attached to them. 
 
-This operation takes a single optional Parameter.
+This operation takes a single optional Parameter when used at the Resource of Server level.
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -534,11 +533,11 @@ This operation takes a single optional Parameter.
     </thead>
     <tbody>
         <tr>
-            <td>resourceType</td>
+            <td>criteria</td>
             <td>String</td>
             <td>0..1</td>
             <td>
-                The target Resource type you would like to clear. Currently limited to Patient/Practitioner. If omitted, will operate over all links.
+            The search critiera used to filter resources.
             </td>
         </tr>
     </tbody>
@@ -546,10 +545,13 @@ This operation takes a single optional Parameter.
 
 ### Example
 
-Use an HTTP POST to the following URL to invoke this operation:
+This operation can be executed at the Server level, Resource level, or Instance level.
+Use an HTTP POST to the following URL to invoke this operation with criteria:
 
 ```url
-http://example.com/$empi-clear
+http://example.com/$empi-batch-run
+http://example.com/Patient/$empi-batch-run
+http://example.com/Practitioner/$empi-batch-run
 ```
 
 The following request body could be used:
@@ -558,23 +560,31 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "resourceType",
-    "valueString": "Patient"
+    "criteria": "",
+    "valueString": "birthDate=2020-07-28"
   } ]
 }
 ```
-
-This operation returns the number of EMPI links that were cleared. The following is a sample response: 
+This operation returns the number of resources that were submitted for EMPI processing. The following is a sample response:
 
 ```json
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "reset",
+    "name": "submitted",
     "valueDecimal": 5
   } ]
 }
 ```
+
+This operation can also be done at the Instance level. When this is the case, the operations accepts no parameters. 
+The following are examples of Instance level POSTs, which require no parameters.
+
+```url
+http://example.com/Patient/123/$empi-batch-run
+http://example.com/Practitioner/456/$empi-batch-run
+```
+
 
 
 
