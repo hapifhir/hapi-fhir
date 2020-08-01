@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiChannelSubmitterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonDeletingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -66,8 +65,8 @@ public class EmpiSubmitterConfig {
 
 	@Bean
 	@Lazy
-	IEmpiChannelSubmitterSvc empiChannelSubmitterSvc(IChannelNamer theChannelNamer, FhirContext theFhirContext, IChannelFactory theChannelFactory) {
-		return new EmpiChannelSubmitterSvcImpl(theChannelNamer, theFhirContext, theChannelFactory);
+	IEmpiChannelSubmitterSvc empiChannelSubmitterSvc(FhirContext theFhirContext, IChannelFactory theChannelFactory) {
+		return new EmpiChannelSubmitterSvcImpl(theFhirContext, theChannelFactory);
 	}
 
 	@Bean

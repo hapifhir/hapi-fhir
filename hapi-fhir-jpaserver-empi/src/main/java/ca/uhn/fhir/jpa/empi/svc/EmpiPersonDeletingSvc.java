@@ -65,9 +65,12 @@ public class EmpiPersonDeletingSvc {
 
 		IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
 		int batchCount = 0;
-		while (!deleteConflictList.isEmpty() && batchCount < MAXIMUM_DELETE_ATTEMPTS) {
+		while (!deleteConflictList.isEmpty()) {
 			deleteConflictBatch(deleteConflictList, personDao);
 			batchCount += 1;
+			if (batchCount > MAXIMUM_DELETE_ATTEMPTS) {
+				throw new IllegalStateException("Person deletion seems to have entered an infinite loop. Aborting");
+			}
 		}
 	}
 
