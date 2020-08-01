@@ -41,6 +41,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Service
 public class EmpiPersonDeletingSvc {
 	private static final Logger ourLog = getLogger(EmpiPersonDeletingSvc.class);
+	/**
+	 * This is here for the case of possible infinite loops. Technically batch conflict deletion should handle this, but this is an escape hatch.
+	 */
+	private static final int MAXIMUM_DELETE_ATTEMPTS = 100000;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -60,8 +64,10 @@ public class EmpiPersonDeletingSvc {
 		theLongs.stream().forEach(pid -> deleteCascade(pid, deleteConflictList));
 
 		IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
-		while (!deleteConflictList.isEmpty()) {
+		int batchCount = 0;
+		while (!deleteConflictList.isEmpty() && batchCount < MAXIMUM_DELETE_ATTEMPTS) {
 			deleteConflictBatch(deleteConflictList, personDao);
+			batchCount += 1;
 		}
 	}
 
