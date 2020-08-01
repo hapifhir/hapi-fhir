@@ -81,16 +81,12 @@ public class EmpiPersonDeletingSvc {
 		ExpungeOptions options = new ExpungeOptions();
 		options.setExpungeDeletedResources(true);
 		options.setExpungeOldVersions(true);
-		//myResourceExpungeService.expungeHistoricalVersionsOfIds(null, theLongs, new AtomicInteger(Integer.MAX_VALUE - 1));
-		theLongs.stream()
-			.forEach(personId -> {
-				myExpungeService.expunge("Person", personId, null, options, null);
-			});
-		//myResourceExpungeService.expungeCurrentVersionOfResources(null, theLongs, new AtomicInteger(Integer.MAX_VALUE - 1));
+		theLongs
+			.forEach(personId -> myExpungeService.expunge("Person", personId, null, options, null));
 	}
 
 	private void deleteCascade(Long pid, DeleteConflictList theDeleteConflictList) {
-		ourLog.debug("About to cascade delete: " + pid);
+		ourLog.debug("About to cascade delete: {}", pid);
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao("Person");
 		resourceDao.delete(new IdType("Person/" + pid), theDeleteConflictList, null, null);
 	}
