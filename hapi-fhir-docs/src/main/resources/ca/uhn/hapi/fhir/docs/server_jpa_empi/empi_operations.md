@@ -518,7 +518,7 @@ Call the `$empi-batch-run` operation to batch-process patients and practitioners
 An important thing to note is that this operation only submits the resources for processing. Actual EMPI processing is run asynchronously, and depending on the size 
 of the affected bundle of resources, may take some time to complete.
 
-After the operation is complete, all resources which matched the criteria will have been processed EMPI and will now have at least one EMPI link attached to them. 
+After the operation is complete, all resources that matched the criteria will now have at least one EMPI link attached to them. 
 
 This operation takes a single optional Parameter when used at the Resource of Server level.
 
@@ -584,5 +584,4 @@ The following are examples of Instance level POSTs, which require no parameters.
 http://example.com/Patient/123/$empi-batch-run
 http://example.com/Practitioner/456/$empi-batch-run
 ```
-
 
