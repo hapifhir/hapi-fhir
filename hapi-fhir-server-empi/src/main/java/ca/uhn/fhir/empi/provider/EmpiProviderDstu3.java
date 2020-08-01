@@ -186,7 +186,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 			resetCount = myEmpiResetSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull());
 		}
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName(ProviderConstants.OPERATION_EMPI_CLEAR_OUT_PARAM_RESET_COUNT)
+		parameters.addParameter().setName(ProviderConstants.OPERATION_EMPI_CLEAR_OUT_PARAM_DELETED_COUNT)
 			.setValue(new DecimalType(resetCount));
 		return parameters;
 	}
