@@ -514,13 +514,11 @@ This operation returns the number of EMPI links that were cleared. The following
 
 ## Batch-creating EMPI Links
 
-The `$empi-batch-run` operation is used to batch-process patients and practitioners. In normal operation, an interceptor will 
-run EMPI processing over Resources when they are updated or created, but this is not the only context in which you would want to 
-execute EMPI processing against resources. In the rules-tuning phase of your setup, you may use `$empi-batch-run` to quickly apply EMPI rules across multiple Resources.
+Call the `$empi-batch-run` operation to batch-process patients and practitioners. In the rules-tuning phase of your setup, you can use `$empi-batch-run` to apply EMPI rules across multiple Resources.
 An important thing to note is that this operation only submits the resources for processing. Actual EMPI processing is run asynchronously, and depending on the size 
 of the affected bundle of resources, may take some time to complete.
 
-After the operation is complete, all resources which matched the criteria will have been processed EMPI and will now have at least one EMPI link attached to them. 
+After the operation is complete, all resources that matched the criteria will now have at least one EMPI link attached to them. 
 
 This operation takes a single optional criteria parameter unless it is called on a specific instance.
 
@@ -586,6 +584,4 @@ The following are examples of Instance level POSTs, which require no parameters.
 http://example.com/Patient/123/$empi-batch-run
 http://example.com/Practitioner/456/$empi-batch-run
 ```
-
-
 
