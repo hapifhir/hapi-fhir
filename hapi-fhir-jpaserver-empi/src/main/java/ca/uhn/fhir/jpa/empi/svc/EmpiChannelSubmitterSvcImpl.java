@@ -34,7 +34,7 @@ import org.springframework.messaging.MessageChannel;
 import static ca.uhn.fhir.empi.api.IEmpiSettings.EMPI_CHANNEL_NAME;
 
 /**
- * This class is responsible for manual submissions of {@link IAnyResource} resources onto the Empi Queue.
+ * This class is responsible for manual submissions of {@link IAnyResource} resources onto the Empi Channel.
  */
 public class EmpiChannelSubmitterSvcImpl implements IEmpiChannelSubmitterSvc {
 	private MessageChannel myEmpiChannelProducer;

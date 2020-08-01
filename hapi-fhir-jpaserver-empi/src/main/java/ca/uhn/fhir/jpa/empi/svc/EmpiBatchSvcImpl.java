@@ -55,7 +55,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 	private EmpiSearchParamSvc myEmpiSearchParamSvc;
 
 	@Autowired
-	private IEmpiChannelSubmitterSvc myEmpiQueueSubmitterSvc;
+	private IEmpiChannelSubmitterSvc myEmpiChannelSubmitterSvc;
 
 	private static final int BUFFER_SIZE = 100;
 
@@ -121,7 +121,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 		List<IBaseResource> resourcesToSubmit = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePidsToSubmit, Collections.emptyList(), resourcesToSubmit, false, null);
 		resourcesToSubmit
-			.forEach(resource -> myEmpiQueueSubmitterSvc.submitResourceToEmpiChannel(resource));
+			.forEach(resource -> myEmpiChannelSubmitterSvc.submitResourceToEmpiChannel(resource));
 		return resourcesToSubmit.size();
 	}
 
@@ -143,7 +143,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 		resolveTargetTypeOrThrowException(theId.getResourceType());
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		IBaseResource read = resourceDao.read(theId);
-		myEmpiQueueSubmitterSvc.submitResourceToEmpiChannel(read);
+		myEmpiChannelSubmitterSvc.submitResourceToEmpiChannel(read);
 		return 1;
 	}
 
