@@ -452,7 +452,7 @@ This might result in a response such as the following:
 
 The `$empi-clear` operation is used to batch-delete EMPI links and related persons from the database. This operation is meant to 
 be used during the rules-tuning phase of the EMPI implementation so that you can quickly test your ruleset.
-It permits the user to essentially "start fresh" without too much fuss. 
+It permits the user to reset the state of their EMPI system without manual deletion of all related links and Persons. 
 
 After the operation is complete, all targeted EMPI links will be removed from the system, and the Person resources which were involves in those links will be deleted and expunged 
 from the server. 
