@@ -82,7 +82,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
-
+		assertLinkCount(5);
 		myEmpiProviderR4.clearEmpiLinks(null);
 		assertNoPatientLinksExist();
 	}
