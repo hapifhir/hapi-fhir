@@ -95,10 +95,10 @@ public class EmpiPersonDeletingSvc {
 		DeleteConflictList newBatch = new DeleteConflictList();
 		for (DeleteConflict next : theDcl) {
 			IdDt nextSource = next.getSourceId();
-			ourLog.info("Have delete conflict {} - Cascading delete", next);
+			ourLog.info("Have delete conflict {} - Cascading delete", nextSource);
 			theDao.delete(nextSource.toVersionless(), newBatch, null, null);
 		}
-		theDcl.removeIf(x -> true);
+		theDcl.removeAll();
 		theDcl.addAll(newBatch);
 	}
 }
