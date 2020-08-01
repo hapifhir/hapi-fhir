@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -54,7 +53,7 @@ public class EmpiChannelSubmitterSvcImpl implements IEmpiChannelSubmitterSvc {
 	}
 
 	@Autowired
-	public EmpiChannelSubmitterSvcImpl(IChannelNamer theChannelNamer, FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
+	public EmpiChannelSubmitterSvcImpl(FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
 		myFhirContext = theFhirContext;
 		myChannelFactory = theIChannelFactory;
 	}
