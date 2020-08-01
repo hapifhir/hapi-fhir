@@ -50,7 +50,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testBatchRunOnAllPractitioners() {
+	public void testBatchRunOnAllPractitioners() throws InterruptedException {
 		StringType criteria = null;
 		myEmpiProviderR4.clearEmpiLinks(null);
 
@@ -58,7 +58,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 		assertLinkCount(1);
 	}
 	@Test
-	public void testBatchRunOnSpecificPractitioner() {
+	public void testBatchRunOnSpecificPractitioner() throws InterruptedException {
 		myEmpiProviderR4.clearEmpiLinks(null);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPractitionerInstance(myPractitioner.getIdElement(), null));
 		assertLinkCount(1);
@@ -74,7 +74,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testBatchRunOnAllPatients() {
+	public void testBatchRunOnAllPatients() throws InterruptedException {
 		assertLinkCount(2);
 		StringType criteria = null;
 		myEmpiProviderR4.clearEmpiLinks(null);
@@ -83,7 +83,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testBatchRunOnSpecificPatient() {
+	public void testBatchRunOnSpecificPatient() throws InterruptedException {
 		assertLinkCount(2);
 		myEmpiProviderR4.clearEmpiLinks(null);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPatientInstance(myPatient.getIdElement(), null));
@@ -101,7 +101,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testBatchRunOnAllTypes() {
+	public void testBatchRunOnAllTypes() throws InterruptedException {
 		assertLinkCount(2);
 		StringType criteria = new StringType("");
 		myEmpiProviderR4.clearEmpiLinks(null);

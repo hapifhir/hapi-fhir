@@ -86,7 +86,6 @@ public class EmpiConsumerConfig {
 		return new EmpiMatchLinkSvc();
 	}
 
-
 	@Bean
 	EmpiEidUpdateService eidUpdateService() {
 		return new EmpiEidUpdateService();
