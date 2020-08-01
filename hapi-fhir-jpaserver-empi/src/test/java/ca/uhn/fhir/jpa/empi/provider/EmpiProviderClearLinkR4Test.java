@@ -159,12 +159,6 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		}
 	}
 
-
-	@Nonnull
-	protected EmpiLink getOnlyPractitionerLink() {
-		return myEmpiLinkDaoSvc.findEmpiLinkByTarget(myPractitioner).get();
-	}
-
 	@Nonnull
 	protected List<EmpiLink> getPractitionerLinks() {
 		return myEmpiLinkDaoSvc.findEmpiLinksByTarget(myPractitioner);

@@ -25,8 +25,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public interface IEmpiChannelSubmitterSvc {
 
 	/**
-	 * TODO GGG write javadoc
-	 * @param theResource
+	 * Given an IBaseResource, submit it to the EMPI channel for processing.
+	 *
+	 * @param theResource the {@link IBaseResource} that should have EMPI processing applied to it.
 	 */
 	void submitResourceToEmpiChannel(IBaseResource theResource);
 }
