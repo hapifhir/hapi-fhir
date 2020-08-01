@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -35,7 +34,6 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -83,10 +81,10 @@ public class EmpiSearchParamSvc implements ISearchParamRetriever {
 	 */
 	public SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, String theCriteria) {
 		SearchParameterMap spMap;
-		if (!StringUtils.isBlank(theCriteria)) {
-			spMap = mapFromCriteria(theTargetType, theCriteria);
-		} else {
+		if (StringUtils.isBlank(theCriteria)) {
 			spMap = new SearchParameterMap();
+		} else {
+			spMap = mapFromCriteria(theTargetType, theCriteria);
 		}
 		return spMap;
     }
