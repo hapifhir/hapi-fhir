@@ -84,7 +84,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 		try (IResultIterator query = theSearchBuilder.createQuery(theSpMap, searchRuntimeDetails, null, RequestPartitionId.defaultPartition())) {
 			Collection<ResourcePersistentId> pidBatch;
 			do {
-				pidBatch = getPidBatch(query);
+				pidBatch = query.getNextResultBatch(BUFFER_SIZE);
 				total += loadPidsAndSubmitToEmpiChannel(theSearchBuilder, pidBatch);
 			} while (query.hasNext());
 		} catch (IOException theE) {
