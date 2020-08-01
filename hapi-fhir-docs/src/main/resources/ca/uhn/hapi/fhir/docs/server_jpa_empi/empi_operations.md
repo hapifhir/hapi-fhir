@@ -522,7 +522,7 @@ of the affected bundle of resources, may take some time to complete.
 
 After the operation is complete, all resources which matched the criteria will have been processed EMPI and will now have at least one EMPI link attached to them. 
 
-This operation takes a single optional Parameter when used at the Resource of Server level.
+This operation takes a single optional criteria parameter unless it is called on a specific instance.
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -548,7 +548,7 @@ This operation takes a single optional Parameter when used at the Resource of Se
 ### Example
 
 This operation can be executed at the Server level, Resource level, or Instance level.
-Use an HTTP POST to the following URL to invoke this operation with criteria:
+Use an HTTP POST to the following URL to invoke this operation with matching criteria:
 
 ```url
 http://example.com/$empi-batch-run
