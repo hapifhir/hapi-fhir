@@ -89,7 +89,7 @@ public class EmpiLink {
 	private Date myUpdated;
 
 	@Column(name = "VERSION", nullable = false, length = VERSION_LENGTH)
-	private java.lang.String myVersion;
+	private String myVersion;
 
 	/** This link was created as a result of an eid match **/
 	@Column(name = "EID_MATCH")
@@ -107,7 +107,7 @@ public class EmpiLink {
 
 	public EmpiLink() {}
 
-	public EmpiLink(java.lang.String theVersion) {
+	public EmpiLink(String theVersion) {
 		myVersion = theVersion;
 	}
 
@@ -221,11 +221,11 @@ public class EmpiLink {
 		return this;
 	}
 
-	public java.lang.String getVersion() {
+	public String getVersion() {
 		return myVersion;
 	}
 
-	public EmpiLink setVersion(java.lang.String theVersion) {
+	public EmpiLink setVersion(String theVersion) {
 		myVersion = theVersion;
 		return this;
 	}
@@ -275,7 +275,7 @@ public class EmpiLink {
 	}
 
 	@Override
-	public java.lang.String toString() {
+	public String toString() {
 		return new ToStringBuilder(this)
 			.append("myPersonPid", myPersonPid)
 			.append("myTargetPid", myTargetPid)
