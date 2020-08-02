@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
@@ -81,10 +82,13 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
-		createPatientAndUpdateLinks(buildJanePatient());
-		assertLinkCount(5);
+		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
+		Person person = getPersonFromTarget(patientAndUpdateLinks);
+		assertThat(person, is(notNullValue()));
 		myEmpiProviderR4.clearEmpiLinks(null);
 		assertNoPatientLinksExist();
+		person = getPersonFromTarget(patientAndUpdateLinks);
+		assertThat(person, is(nullValue()));
 	}
 
 	@Test
