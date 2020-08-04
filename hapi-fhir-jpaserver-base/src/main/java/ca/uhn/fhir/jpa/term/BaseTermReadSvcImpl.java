@@ -1605,6 +1605,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 							if (element.hasTarget()) {
 								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
 								for (ConceptMap.TargetElementComponent elementTarget : element.getTarget()) {
+									if (isBlank(elementTarget.getCode())) {
+										continue;
+									}
 									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
 									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
 									termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
@@ -1646,6 +1649,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 
 		while (true) {
+			StopWatch sw = new StopWatch();
 			TermValueSet valueSetToExpand = txTemplate.execute(t -> {
 				Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
 				if (!optionalTermValueSet.isPresent()) {
@@ -1666,7 +1670,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).get();
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
-				expandValueSet(null, valueSet, new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao));
+
+				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
+				expandValueSet(null, valueSet, accumulator);
 
 				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
@@ -1674,6 +1680,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					myValueSetDao.saveAndFlush(valueSetToExpand);
 					return null;
 				});
+
+				ourLog.info("Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}", valueSet.getId(), valueSet.getUrl(), accumulator.getConceptsSaved(), sw.toString());
 
 			} catch (Exception e) {
 				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);

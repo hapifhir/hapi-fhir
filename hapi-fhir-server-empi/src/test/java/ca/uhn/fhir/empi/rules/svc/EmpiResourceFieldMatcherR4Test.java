@@ -36,7 +36,7 @@ public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		assertFalse(myComparator.match(patient, myJohny));
+		assertFalse(myComparator.match(patient, myJohny).match);
 	}
 
 	@Test
@@ -77,6 +77,6 @@ public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
 
 	@Test
 	public void testMatch() {
-		assertTrue(myComparator.match(myJohn, myJohny));
+		assertTrue(myComparator.match(myJohn, myJohny).match);
 	}
 }

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -24,12 +25,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -39,6 +41,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public static final String FAMILY_NAME = "Chan";
 	public static final String POSTAL_CODE = "M6G 1B4";
 	private static final String BAD_GIVEN_NAME = "Bob";
+	private static final EmpiMatchOutcome POSSIBLE_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_MATCH);
 
 	@Autowired
 	IEmpiPersonMergerSvc myEmpiPersonMergerSvc;
@@ -80,7 +83,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(myEmpiStorageInterceptor);
 		super.after();
 	}
@@ -107,7 +110,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
-		EmpiLink empiLink = new EmpiLink().setPersonPid(myToPersonPid).setTargetPid(myFromPersonPid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
+		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink().setPersonPid(myToPersonPid).setTargetPid(myFromPersonPid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
 		saveLink(empiLink);
 		assertEquals(1, myEmpiLinkDao.count());
 		mergePersons();
@@ -371,7 +374,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	private EmpiLink createEmpiLink(Person thePerson, Patient theTargetPatient) {
 		thePerson.addLink().setTarget(new Reference(theTargetPatient));
-		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, EmpiMatchResultEnum.POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		return myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theTargetPatient, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 	}
 
 	private void populatePerson(Person thePerson) {

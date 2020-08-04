@@ -26,7 +26,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @ApiModel("Represents an NPM package installation response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -36,6 +38,9 @@ public class PackageInstallOutcomeJson {
 	@JsonProperty("messages")
 	private List<String> myMessage;
 
+	@JsonProperty("resourcesInstalled")
+	private Map<String, Integer> myResourcesInstalled;
+
 	public List<String> getMessage() {
 		if (myMessage == null) {
 			myMessage = new ArrayList<>();
@@ -43,4 +48,19 @@ public class PackageInstallOutcomeJson {
 		return myMessage;
 	}
 
+	public Map<String, Integer> getResourcesInstalled() {
+		if (myResourcesInstalled == null) {
+			myResourcesInstalled = new HashMap<>();
+		}
+		return myResourcesInstalled;
+	}
+
+	public void incrementResourcesInstalled(String theResourceType) {
+		Integer existing = getResourcesInstalled().get(theResourceType);
+		if (existing == null) {
+			getResourcesInstalled().put(theResourceType, 1);
+		} else {
+			getResourcesInstalled().put(theResourceType, existing + 1);
+		}
+	}
 }

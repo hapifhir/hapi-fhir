@@ -34,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -295,6 +296,20 @@ public class ParametersUtil {
 	public static void addPartString(FhirContext theContext, IBase theParameter, String theName, String theValue) {
 		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("string").newInstance();
 		value.setValue(theValue);
+
+		addPart(theContext, theParameter, theName, value);
+	}
+
+	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
+		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theContext.getElementDefinition("boolean").newInstance();
+		value.setValue(theValue);
+
+		addPart(theContext, theParameter, theName, value);
+	}
+
+	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
+		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>) theContext.getElementDefinition("decimal").newInstance();
+		value.setValue(theValue == null ? null : new BigDecimal(theValue));
 
 		addPart(theContext, theParameter, theName, value);
 	}

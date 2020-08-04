@@ -10,13 +10,13 @@ import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.config.EmpiConsumerConfig;
 import ca.uhn.fhir.jpa.empi.config.EmpiSearchParameterLoader;
 import ca.uhn.fhir.jpa.empi.config.EmpiSubmitterConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.matcher.IsLinkedTo;
 import ca.uhn.fhir.jpa.empi.matcher.IsMatchedToAPerson;
 import ca.uhn.fhir.jpa.empi.matcher.IsPossibleDuplicateOf;
@@ -50,10 +50,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -61,13 +63,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {EmpiSubmitterConfig.class, EmpiConsumerConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
+	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
+
 	public static final String NAME_GIVEN_JANE = "Jane";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
 	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
 	protected static final String JANE_ID = "ID.JANE.123";
 	protected static final String PAUL_ID = "ID.PAUL.456";
-	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
@@ -103,7 +106,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws IOException {
 		myEmpiLinkDao.deleteAll();
 		assertEquals(0, myEmpiLinkDao.count());
 		super.after();
@@ -360,7 +363,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		Person person = createPerson();
 		Patient patient = createPatient();
 
-		EmpiLink empiLink = new EmpiLink();
+		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		empiLink.setPersonPid(myIdHelperService.getPidOrNull(person));
@@ -372,4 +375,33 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		myEmpiSearchParameterLoader.daoUpdateEmpiSearchParameters();
 		mySearchParamRegistry.forceRefresh();
 	}
+
+	protected void logAllLinks() {
+		ourLog.info("Logging all EMPI Links:");
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		for (EmpiLink link : links) {
+			ourLog.info(link.toString());
+		}
+	}
+
+	protected void assertLinksMatchResult(EmpiMatchResultEnum... theExpectedValues) {
+		assertFields(EmpiLink::getMatchResult, theExpectedValues);
+	}
+
+	protected void assertLinksNewPerson(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getNewPerson, theExpectedValues);
+	}
+
+	protected void assertLinksMatchedByEid(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getEidMatch, theExpectedValues);
+	}
+
+	private <T> void assertFields(Function<EmpiLink, T> theAccessor, T... theExpectedValues) {
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		assertEquals(theExpectedValues.length, links.size());
+		for (int i = 0; i < links.size(); ++i) {
+			assertEquals(theExpectedValues[i], theAccessor.apply(links.get(i)), "Value at index " + i + " was not equal");
+		}
+	}
+
 }

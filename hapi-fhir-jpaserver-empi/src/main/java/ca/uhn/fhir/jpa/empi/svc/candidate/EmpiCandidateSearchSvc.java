@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.svc;
+package ca.uhn.fhir.jpa.empi.svc.candidate;
 
 /*-
  * #%L
@@ -27,6 +27,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -74,18 +75,23 @@ public class EmpiCandidateSearchSvc {
 	 */
 	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource) {
 		Map<Long, IAnyResource> matchedPidsToResources = new HashMap<>();
-
 		List<EmpiFilterSearchParamJson> filterSearchParams = myEmpiConfig.getEmpiRules().getCandidateFilterSearchParams();
-
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
+		List<EmpiResourceSearchParamJson> candidateSearchParams = myEmpiConfig.getEmpiRules().getCandidateSearchParams();
 
-		for (EmpiResourceSearchParamJson resourceSearchParam : myEmpiConfig.getEmpiRules().getCandidateSearchParams()) {
+		//If there are zero EmpiResourceSearchParamJson, we end up only making a single search, otherwise we
+		//must perform one search per EmpiResourceSearchParamJson.
+		if (candidateSearchParams.isEmpty()) {
+			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null);
+		} else {
+			for (EmpiResourceSearchParamJson resourceSearchParam : candidateSearchParams) {
 
-			if (!isSearchParamForResource(theResourceType, resourceSearchParam)) {
-				continue;
+				if (!isSearchParamForResource(theResourceType, resourceSearchParam)) {
+					continue;
+				}
+
+				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam);
 			}
-
-			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam);
 		}
 		//Obviously we don't want to consider the freshly added resource as a potential candidate.
 		//Sometimes, we are running this function on a resource that has not yet been persisted,

@@ -34,7 +34,7 @@ public interface IEmpiLinkSvc {
 	 * @param theLinkSource             MANUAL or AUTO: what caused the link.
 	 * @param theEmpiTransactionContext
 	 */
-	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
+	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
 
 	/**
 	 * Replace Person.link values from what they should be based on EmpiLink values

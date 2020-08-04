@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * #L%
  */
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.InterceptableChannel;
 
-public interface IChannelReceiver extends SubscribableChannel, InterceptableChannel {
+public interface IChannelReceiver extends SubscribableChannel, InterceptableChannel, DisposableBean {
     String getName();
 }

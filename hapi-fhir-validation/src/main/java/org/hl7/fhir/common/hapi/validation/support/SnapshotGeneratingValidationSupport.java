@@ -12,6 +12,7 @@ import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContex
 import org.hl7.fhir.common.hapi.validation.validator.VersionTypeConverterDstu3;
 import org.hl7.fhir.common.hapi.validation.validator.VersionTypeConverterR4;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.conformance.ProfileUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
@@ -90,10 +91,17 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 			org.hl7.fhir.r5.model.StructureDefinition baseCanonical = (org.hl7.fhir.r5.model.StructureDefinition) converter.toCanonical(base);
 
+			if (baseCanonical.getSnapshot().getElement().isEmpty()) {
+				// If the base definition also doesn't have a snapshot, generate that first
+				theValidationSupportContext.getRootValidationSupport().generateSnapshot(theValidationSupportContext, base, null, null, null);
+				baseCanonical = (org.hl7.fhir.r5.model.StructureDefinition) converter.toCanonical(base);
+			}
+
 			ArrayList<ValidationMessage> messages = new ArrayList<>();
 			org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(myCtx);
 			IWorkerContext context = new VersionSpecificWorkerContextWrapper(theValidationSupportContext, converter);
-			new org.hl7.fhir.r5.conformance.ProfileUtilities(context, messages, profileKnowledgeProvider).generateSnapshot(baseCanonical, inputCanonical, theUrl, theWebUrl, theProfileName);
+			ProfileUtilities profileUtilities = new ProfileUtilities(context, messages, profileKnowledgeProvider);
+			profileUtilities.generateSnapshot(baseCanonical, inputCanonical, theUrl, theWebUrl, theProfileName);
 
 			switch (theInput.getStructureFhirVersionEnum()) {
 				case DSTU3:

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.empi.svc;
+package ca.uhn.fhir.jpa.empi.svc.candidate;
 
 /*-
  * #%L
@@ -21,11 +21,13 @@ package ca.uhn.fhir.jpa.empi.svc;
  */
 
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
+import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,19 +44,24 @@ public class EmpiCandidateSearchCriteriaBuilderSvc {
 	 * Patient?active=true&name.given=Gary,Grant&name.family=Graham
 	 */
 	@Nonnull
-	public Optional<String> buildResourceQueryString(String theResourceType, IAnyResource theResource, List<String> theFilterCriteria, EmpiResourceSearchParamJson resourceSearchParam) {
+	public Optional<String> buildResourceQueryString(String theResourceType, IAnyResource theResource, List<String> theFilterCriteria, @Nullable EmpiResourceSearchParamJson resourceSearchParam) {
 		List<String> criteria = new ArrayList<>();
 
-		resourceSearchParam.iterator().forEachRemaining(searchParam -> {
-			//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
-			List<String> valuesFromResourceForSearchParam = myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
-			if (!valuesFromResourceForSearchParam.isEmpty()) {
-				criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
+		// If there are candidate search params, then make use of them, otherwise, search with only the filters.
+		if (resourceSearchParam != null) {
+			resourceSearchParam.iterator().forEachRemaining(searchParam -> {
+				//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
+				List<String> valuesFromResourceForSearchParam = myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
+				if (!valuesFromResourceForSearchParam.isEmpty()) {
+					criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
+				}
+			});
+			if (criteria.isEmpty()) {
+				//TODO GGG/KHS, re-evaluate whether we should early drop here.
+				return Optional.empty();
 			}
-		});
-		if (criteria.isEmpty()) {
-			return Optional.empty();
 		}
+
 		criteria.addAll(theFilterCriteria);
 		return Optional.of(theResourceType + "?" +  String.join("&", criteria));
 	}

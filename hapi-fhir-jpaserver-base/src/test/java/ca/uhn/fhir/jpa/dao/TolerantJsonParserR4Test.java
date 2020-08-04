@@ -25,7 +25,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -41,7 +41,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -57,7 +57,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -73,7 +73,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		try {
 			parser.parseResource(Observation.class, input);
 		} catch (DataFormatException e) {

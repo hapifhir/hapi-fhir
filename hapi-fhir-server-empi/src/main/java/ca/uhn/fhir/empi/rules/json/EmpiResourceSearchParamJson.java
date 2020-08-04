@@ -46,14 +46,18 @@ public class EmpiResourceSearchParamJson implements IModelJson, Iterable<String>
 	}
 
 	public Iterator<String> iterator() {
-		return mySearchParams.iterator();
+		return getSearchParams().iterator();
 	}
 
 	public EmpiResourceSearchParamJson addSearchParam(String theSearchParam) {
+		getSearchParams().add(theSearchParam);
+		return this;
+	}
+
+	private List<String> getSearchParams() {
 		if (mySearchParams == null) {
 			mySearchParams = new ArrayList<>();
 		}
-		mySearchParams.add(theSearchParam);
-		return this;
+		return mySearchParams;
 	}
 }

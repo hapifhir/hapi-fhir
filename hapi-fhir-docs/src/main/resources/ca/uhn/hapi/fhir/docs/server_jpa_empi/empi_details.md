@@ -52,10 +52,10 @@ Below are some simplifying principles HAPI EMPI enforces to reduce complexity an
 1. HAPI EMPI stores these extra link details in a table called `MPI_LINK`.
 
 1. Each record in the `MPI_LINK` table corresponds to a `link.target` entry on a Person resource unless it is a NO_MATCH record.  HAPI EMPI uses the following convention for the Person.link.assurance level:
-    1. Level 1: not used
-    1. Level 2: POSSIBLE_MATCH
-    1. Level 3: AUTO MATCH
-    1. Level 4: MANUAL MATCH
+    1. Level 1: POSSIBLE_MATCH
+    1. Level 2: AUTO MATCH
+    1. Level 3: MANUAL MATCH
+    1. Level 4: GOLDEN RECORD
 
 ### Possible rule match outcomes:
 
@@ -67,6 +67,7 @@ When a new Patient resource is compared with all other resources of that type in
 
 * CASE 3: The MATCH Patient resources link to more than one Person -> Mark all links as POSSIBLE_MATCH.  All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.  These duplicates are manually reviewed later and either merged or marked as NO_MATCH and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICATE is the only link type that can have a Person as both the source and target of the link.
 
+* CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, new POSSIBLE_MATCH links are created and await manual assignment to either NO_MATCH or MATCH.
 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, empi-link records are created with POSSIBLE_MATCH outcome and await manual assignment to either NO_MATCH or MATCH.  Person resources are not changed. Each Person returned is set as a possible duplicate. e.g. if Persons [a,b,c] are returned, then `a` is a POSSIBLE_DUPLICATE of `b`, and `a` is a POSSIBLE_DUPLICATE of `c`.
 
 # HAPI EMPI Technical Details

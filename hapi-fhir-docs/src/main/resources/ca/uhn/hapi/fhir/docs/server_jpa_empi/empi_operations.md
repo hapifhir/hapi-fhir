@@ -92,6 +92,15 @@ This operation returns a `Parameters` resource that looks like the following:
     }, {
       "name": "linkSource",
       "valueString": "AUTO"
+    }, {
+      "name": "eidMatch",
+      "valueBoolean": false
+    }, {
+      "name": "newPerson",
+      "valueBoolean": false
+    }, {
+      "name": "score",
+      "valueDecimal": 1.8
     } ]
   } ]
 }

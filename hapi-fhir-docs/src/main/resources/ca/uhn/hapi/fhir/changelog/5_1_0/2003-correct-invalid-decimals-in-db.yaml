@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 2003
+title: "In HAPI FHIR 4.2.0 and before, due to the lenient Gson parser it was possible to store data in the JPA server
+  that contained invalid decimal numbers with no leading digits, e.g. `.123` and `-.123`. When we moved to Jackson as a JSON
+  parser, these values could no longer be parsed due to Jackson's more strict (and correct) interpretation of the JSON
+  specification. Unfortunately this led to data previously stored in the database being unusable. A fix has been implemented that
+  automatically adds a leading zero to any decimals that were previously saved in invalid state. New data will still be blocked from
+  being added if it contains invalid JSON numbers."
