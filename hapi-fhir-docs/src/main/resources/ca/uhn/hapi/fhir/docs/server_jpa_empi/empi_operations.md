@@ -514,7 +514,7 @@ This operation returns the number of EMPI links that were cleared. The following
 
 ## Batch-creating EMPI Links
 
-Call the `$empi-batch-run` operation to batch-process patients and practitioners. In the rules-tuning phase of your setup, you can use `$empi-batch-run` to apply EMPI rules across multiple Resources.
+Call the `$empi-submit` operation to submit patients and practitioners for EMPI processing. In the rules-tuning phase of your setup, you can use `$empi-submit` to apply EMPI rules across multiple Resources.
 An important thing to note is that this operation only submits the resources for processing. Actual EMPI processing is run asynchronously, and depending on the size 
 of the affected bundle of resources, may take some time to complete.
 
@@ -549,9 +549,9 @@ This operation can be executed at the Server level, Resource level, or Instance 
 Use an HTTP POST to the following URL to invoke this operation with matching criteria:
 
 ```url
-http://example.com/$empi-batch-run
-http://example.com/Patient/$empi-batch-run
-http://example.com/Practitioner/$empi-batch-run
+http://example.com/$empi-submit
+http://example.com/Patient/$empi-submit
+http://example.com/Practitioner/$empi-submit
 ```
 
 The following request body could be used:
@@ -581,7 +581,7 @@ This operation can also be done at the Instance level. When this is the case, th
 The following are examples of Instance level POSTs, which require no parameters.
 
 ```url
-http://example.com/Patient/123/$empi-batch-run
-http://example.com/Practitioner/456/$empi-batch-run
+http://example.com/Patient/123/$empi-submit
+http://example.com/Practitioner/456/$empi-submit
 ```
 

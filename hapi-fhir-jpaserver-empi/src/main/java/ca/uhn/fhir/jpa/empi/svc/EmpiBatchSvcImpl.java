@@ -94,21 +94,6 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 	}
 
 	/**
-	 * Given an iterator, get a batch of max size BUFFER_SIZE.
-	 *
-	 * @param theQuery the iterator.
-	 *
-	 * @return a collection of ResourcePersistentId entities.
-	 */
-	public Collection<ResourcePersistentId> getPidBatch(IResultIterator theQuery) {
-		Collection<ResourcePersistentId> batch = new ArrayList<>();
-		while (theQuery.hasNext() && batch.size() <= BUFFER_SIZE) {
-			batch.add(theQuery.next());
-		}
-		return batch;
-	}
-
-	/**
 	 * Given a collection of ResourcePersistentId objects, and a search builder, load the IBaseResources and submit them to
 	 * the EMPI channel for processing.
 	 *
