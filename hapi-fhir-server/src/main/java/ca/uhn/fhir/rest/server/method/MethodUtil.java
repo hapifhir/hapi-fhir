@@ -197,7 +197,8 @@ public class MethodUtil {
 							throw new ConfigurationException(b.toString());
 						}
 						boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
-						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode, methodIsOperation);
+						boolean methodIsPatch = theMethod.getAnnotation(Patch.class) != null;
+						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode, methodIsOperation, methodIsPatch);
 					} else if (nextAnnotation instanceof IdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {
@@ -212,8 +213,10 @@ public class MethodUtil {
 						((AtParameter) param).setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
-					} else if (nextAnnotation instanceof GraphQLQuery) {
-						param = new GraphQLQueryParameter();
+					} else if (nextAnnotation instanceof GraphQLQueryUrl) {
+						param = new GraphQLQueryUrlParameter();
+					} else if (nextAnnotation instanceof GraphQLQueryBody) {
+						param = new GraphQLQueryBodyParameter();
 					} else if (nextAnnotation instanceof Sort) {
 						param = new SortParameter(theContext);
 					} else if (nextAnnotation instanceof TransactionParam) {

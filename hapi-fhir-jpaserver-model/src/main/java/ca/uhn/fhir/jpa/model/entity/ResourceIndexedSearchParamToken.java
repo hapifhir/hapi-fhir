@@ -40,7 +40,6 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -54,9 +53,13 @@ import static org.apache.commons.lang3.StringUtils.trim;
 	 * IDX_SP_TOKEN
 	 * IDX_SP_TOKEN_UNQUAL
 	 */
+
+	// TODO PERF Recommend to drop this index:
 	@Index(name = "IDX_SP_TOKEN_HASH", columnList = "HASH_IDENTITY"),
 	@Index(name = "IDX_SP_TOKEN_HASH_S", columnList = "HASH_SYS"),
 	@Index(name = "IDX_SP_TOKEN_HASH_SV", columnList = "HASH_SYS_AND_VALUE"),
+	// TODO PERF change this to:
+	//	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE,RES_ID"),
 	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE"),
 
 	@Index(name = "IDX_SP_TOKEN_UPDATED", columnList = "SP_UPDATED"),
@@ -229,6 +232,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getHashValue());
 		b.append(getHashSystem());
 		b.append(getHashSystemAndValue());
+
 		return b.toHashCode();
 	}
 

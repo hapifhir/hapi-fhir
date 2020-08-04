@@ -1,14 +1,12 @@
 package ca.uhn.fhir.rest.api;
 
-import static org.junit.Assert.assertEquals;
+import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.util.TestUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QualifiedParamListTest {
 
@@ -37,7 +35,7 @@ public class QualifiedParamListTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

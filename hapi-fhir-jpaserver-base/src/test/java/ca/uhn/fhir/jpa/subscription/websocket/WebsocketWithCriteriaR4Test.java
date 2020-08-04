@@ -9,10 +9,10 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -20,11 +20,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
-@Ignore
+@Disabled
 public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaR4Test.class);
@@ -35,13 +35,13 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 	private SocketImplementation mySocketImplementation;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 	}
 	
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		
@@ -50,7 +50,7 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 		 */
 		
 		Patient patient = FhirR4Util.getPatient();
-		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
 
 		/* 
@@ -67,7 +67,7 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 		channel.setPayload("application/json");
 		subscription.setChannel(channel);
 
-		methodOutcome = ourClient.create().resource(subscription).execute();
+		methodOutcome = myClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
 		
 		/*
@@ -87,7 +87,7 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Connected to WS: {}", session.isOpen());
 	}
 
-	@After
+	@AfterEach
 	public void afterCloseWebsocket() throws Exception {
 		ourLog.info("Shutting down websocket client");
 		myWebSocketClient.stop();
@@ -106,7 +106,7 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 		observation.setSubject(reference);
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 
@@ -130,7 +130,7 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 		observation.setSubject(reference);
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 

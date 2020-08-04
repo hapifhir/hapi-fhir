@@ -37,15 +37,15 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.annotations.VisibleForTesting;
+import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.search.spatial.impl.Point;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -81,8 +81,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
-	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 
+	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 	private static final Pattern SPLIT_R4 = Pattern.compile("\\|");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 	@Autowired
@@ -95,6 +95,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private ModelConfig myModelConfig;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
 	private Set<String> myIgnoredForSearchDatatypes;
 	private BaseRuntimeChildDefinition myQuantityValueValueChild;
 	private BaseRuntimeChildDefinition myQuantitySystemValueChild;
@@ -157,17 +158,30 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource) {
-		IExtractor<PathAndRef> extractor = (params, searchParam, value, path) -> {
-			if (value instanceof IBaseResource) {
+		IExtractor<PathAndRef> extractor = createReferenceExtractor();
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
+	}
+
+	private IExtractor<PathAndRef> createReferenceExtractor() {
+		return new ResourceLinkExtractor();
+	}
+
+	private class ResourceLinkExtractor implements IExtractor<PathAndRef> {
+
+		private PathAndRef myPathAndRef = null;
+
+		@Override
+		public void extract(SearchParamSet<PathAndRef> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath) {
+			if (theValue instanceof IBaseResource) {
 				return;
 			}
 
-			String nextType = toRootTypeName(value);
+			String nextType = toRootTypeName(theValue);
 			switch (nextType) {
 				case "uri":
 				case "canonical":
-					String typeName = toTypeName(value);
-					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) value;
+					String typeName = toTypeName(theValue);
+					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) theValue;
 					IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
 					fakeReference.setReference(valuePrimitive.getValueAsString());
 
@@ -183,23 +197,23 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						 */
 						IIdType parsed = fakeReference.getReferenceElement();
 						if (parsed.hasIdPart() && parsed.hasResourceType() && !parsed.isAbsolute()) {
-							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference, false);
-							params.add(ref);
+							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, false);
+							theParams.add(myPathAndRef);
 							break;
 						}
 
 						if (parsed.isAbsolute()) {
-							PathAndRef ref = new PathAndRef(searchParam.getName(), path, fakeReference, true);
-							params.add(ref);
+							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
+							theParams.add(myPathAndRef);
 							break;
 						}
 					}
 
-					params.addWarning("Ignoring canonical reference (indexing canonical is not yet supported)");
+					theParams.addWarning("Ignoring canonical reference (indexing canonical is not yet supported)");
 					break;
 				case "reference":
 				case "Reference":
-					IBaseReference valueRef = (IBaseReference) value;
+					IBaseReference valueRef = (IBaseReference) theValue;
 
 					IIdType nextId = valueRef.getReferenceElement();
 					if (nextId.isEmpty() && valueRef.getResource() != null) {
@@ -213,18 +227,88 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						return;
 					}
 
-					PathAndRef ref = new PathAndRef(searchParam.getName(), path, valueRef, false);
-					params.add(ref);
+					myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, valueRef, false);
+					theParams.add(myPathAndRef);
 					break;
 				default:
-					addUnexpectedDatatypeWarning(params, searchParam, value);
+					addUnexpectedDatatypeWarning(theParams, theSearchParam, theValue);
 					break;
 			}
-		};
+		}
 
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
+		public PathAndRef get(IBase theValue, String thePath) {
+			extract(new SearchParamSet<>(),
+				new RuntimeSearchParam(null, null, "Reference", null, null, null, null, null, null, null),
+				theValue, thePath);
+			return myPathAndRef;
+		}
 	}
 
+	@Override
+	public PathAndRef extractReferenceLinkFromResource(IBase theValue, String thePath) {
+		ResourceLinkExtractor extractor = new ResourceLinkExtractor();
+		return extractor.get(theValue, thePath);
+	}
+
+	@Override
+	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
+		IExtractor extractor;
+		switch (theSearchParam.getParamType()) {
+			case DATE:
+				extractor = createDateExtractor(theResource);
+				break;
+			case STRING:
+				extractor = createStringExtractor(theResource);
+				break;
+			case TOKEN:
+				extractor = createTokenExtractor(theResource);
+				break;
+			case NUMBER:
+				extractor = createNumberExtractor(theResource);
+				break;
+			case REFERENCE:
+				extractor = createReferenceExtractor();
+				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
+			case QUANTITY:
+				extractor = createQuantityExtractor(theResource);
+				break;
+			case URI:
+				extractor = createUriExtractor(theResource);
+				break;
+			case SPECIAL:
+				extractor = createSpecialExtractor(theResource.getIdElement().getResourceType());
+				break;
+			case COMPOSITE:
+			default:
+				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
+		}
+		return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
+	}
+
+	private List<String> extractReferenceParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<PathAndRef> theExtractor) {
+		SearchParamSet<PathAndRef> params = new SearchParamSet<>();
+		extractSearchParam(theSearchParam, theResource, theExtractor, params);
+		return refsToStringList(params);
+	}
+
+	private List<String> refsToStringList(SearchParamSet<PathAndRef> theParams) {
+		return theParams.stream()
+			.map(PathAndRef::getRef)
+			.map(ref -> ref.getReferenceElement().toUnqualifiedVersionless().getValue())
+			.collect(Collectors.toList());
+	}
+
+	private <T extends BaseResourceIndexedSearchParam> List<String> extractParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<T> theExtractor) {
+		SearchParamSet<T> params = new SearchParamSet<>();
+		extractSearchParam(theSearchParam, theResource, theExtractor, params);
+		return toStringList(params);
+	}
+
+	private <T extends BaseResourceIndexedSearchParam> List<String> toStringList(SearchParamSet<T> theParams) {
+		return theParams.stream()
+			.map(param -> param.toQueryParameterType().getValueAsQueryToken(myContext))
+			.collect(Collectors.toList());
+	}
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
@@ -263,16 +347,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource) {
-
 		String resourceTypeName = toRootTypeName(theResource);
+		IExtractor<BaseResourceIndexedSearchParam> extractor = createSpecialExtractor(resourceTypeName);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL);
+	}
 
-		IExtractor<BaseResourceIndexedSearchParam> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<BaseResourceIndexedSearchParam> createSpecialExtractor(String theResourceTypeName) {
+		return (params, searchParam, value, path) -> {
 			if ("Location.position".equals(path)) {
-				addCoords_Position(resourceTypeName, params, searchParam, value);
+				addCoords_Position(theResourceTypeName, params, searchParam, value);
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL);
 	}
 
 
@@ -282,7 +367,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamUri> extractor = (params, searchParam, value, path) -> {
+		IExtractor<ResourceIndexedSearchParamUri> extractor = createUriExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamUri> createUriExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -298,43 +388,145 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamDate> extractor = (params, searchParam, value, path) -> {
-			String nextType = toRootTypeName(value);
-			String resourceType = toRootTypeName(theResource);
+		IExtractor<ResourceIndexedSearchParamDate> extractor = createDateExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamDate> createDateExtractor(IBaseResource theResource) {
+		return new DateExtractor(theResource);
+	}
+
+	private class DateExtractor implements IExtractor<ResourceIndexedSearchParamDate> {
+
+		String myResourceType;
+		ResourceIndexedSearchParamDate myIndexedSearchParamDate = null;
+
+		public DateExtractor(IBaseResource theResource) {
+			myResourceType = toRootTypeName(theResource);
+		}
+
+		public DateExtractor(String theResourceType) {
+			myResourceType = theResourceType;
+		}
+
+		@Override
+		public void extract(SearchParamSet theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath) {
+			String nextType = toRootTypeName(theValue);
 			switch (nextType) {
 				case "date":
 				case "dateTime":
 				case "instant":
-					addDateTimeTypes(resourceType, params, searchParam, value);
+					addDateTimeTypes(myResourceType, theParams, theSearchParam, theValue);
 					break;
 				case "Period":
-					addDate_Period(resourceType, params, searchParam, value);
+					addDate_Period(myResourceType, theParams, theSearchParam, theValue);
 					break;
 				case "Timing":
-					addDate_Timing(resourceType, params, searchParam, value);
+					addDate_Timing(myResourceType, theParams, theSearchParam, theValue);
 					break;
 				case "string":
 					// CarePlan.activitydate can be a string - ignored for now
 					break;
 				default:
-					addUnexpectedDatatypeWarning(params, searchParam, value);
+					addUnexpectedDatatypeWarning(theParams, theSearchParam, theValue);
 					break;
-			}
-		};
 
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE);
+			}
+		}
+
+		private void addDate_Period(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+			Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
+			String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
+			Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
+			String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
+
+			if (start != null || end != null) {
+
+				if (start == null) {
+					start = myModelConfig.getPeriodIndexStartOfTime().getValue();
+					startAsString = myModelConfig.getPeriodIndexStartOfTime().getValueAsString();
+				}
+				if (end == null) {
+					end = myModelConfig.getPeriodIndexEndOfTime().getValue();
+					endAsString = myModelConfig.getPeriodIndexEndOfTime().getValueAsString();
+				}
+
+				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
+				theParams.add(myIndexedSearchParamDate);
+			}
+		}
+
+		private void addDate_Timing(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+			List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
+
+			TreeSet<Date> dates = new TreeSet<>();
+			String firstValue = null;
+			String finalValue = null;
+			for (IPrimitiveType<Date> nextEvent : values) {
+				if (nextEvent.getValue() != null) {
+					dates.add(nextEvent.getValue());
+					if (firstValue == null) {
+						firstValue = nextEvent.getValueAsString();
+					}
+					finalValue = nextEvent.getValueAsString();
+				}
+			}
+
+			Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
+			if (repeat.isPresent()) {
+				Optional<IBase> bounds = myTimingRepeatBoundsValueChild.getAccessor().getFirstValueOrNull(repeat.get());
+				if (bounds.isPresent()) {
+					String boundsType = toRootTypeName(bounds.get());
+					if ("Period".equals(boundsType)) {
+						Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
+						Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
+						dates.add(start);
+						dates.add(end);
+					}
+				}
+			}
+
+			if (!dates.isEmpty()) {
+				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), dates.first(), firstValue, dates.last(), finalValue, firstValue);
+				theParams.add(myIndexedSearchParamDate);
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		private void addDateTimeTypes(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+			IPrimitiveType<Date> nextBaseDateTime = (IPrimitiveType<Date>) theValue;
+			if (nextBaseDateTime.getValue() != null) {
+				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValueAsString());
+				theParams.add(myIndexedSearchParamDate);
+			}
+		}
+
+		public ResourceIndexedSearchParamDate get(IBase theValue, String thePath) {
+			extract(new SearchParamSet<>(),
+				new RuntimeSearchParam(null, null, "date", null, null, null, null, null, null, null),
+				theValue, thePath);
+			return myIndexedSearchParamDate;
+		}
+	}
+
+	@Override
+	public Date extractDateFromResource(IBase theValue, String thePath) {
+		DateExtractor extractor = new DateExtractor("DateType");
+		return extractor.get(theValue, thePath).getValueHigh();
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
+		IExtractor<ResourceIndexedSearchParamNumber> extractor = createNumberExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER);
+	}
 
-		IExtractor<ResourceIndexedSearchParamNumber> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<ResourceIndexedSearchParamNumber> createNumberExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -357,14 +549,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER);
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
+		IExtractor<ResourceIndexedSearchParamQuantity> extractor = createQuantityExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
+	}
 
-		IExtractor<ResourceIndexedSearchParamQuantity> extractor = (params, searchParam, value, path) -> {
+	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				return;
 			}
@@ -386,13 +580,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamString> extractor = (params, searchParam, value, path) -> {
+		IExtractor<ResourceIndexedSearchParamString> extractor = createStringExtractor(theResource);
+
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING);
+	}
+
+	private IExtractor<ResourceIndexedSearchParamString> createStringExtractor(IBaseResource theResource) {
+		return (params, searchParam, value, path) -> {
 			String resourceType = toRootTypeName(theResource);
 
 			if (value instanceof IPrimitiveType) {
@@ -424,14 +622,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		};
-
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING);
 	}
 
 	/**
 	 * Override parent because we're using FHIRPath here
 	 */
-	private List<IBase> extractValues(String thePaths, IBaseResource theResource) {
+	@Override
+	public List<IBase> extractValues(String thePaths, IBaseResource theResource) {
 		List<IBase> values = new ArrayList<>();
 		if (isNotBlank(thePaths)) {
 			String[] nextPathsSplit = split(thePaths);
@@ -549,27 +746,70 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addToken_CodeableConcept(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		List<IBase> codings = myCodeableConceptCodingValueChild.getAccessor().getValues(theValue);
+		List<IBase> codings = getCodingsFromCodeableConcept(theValue);
 		for (IBase nextCoding : codings) {
 			addToken_Coding(theResourceType, theParams, theSearchParam, nextCoding);
 		}
 
 		if (shouldIndexTextComponentOfToken(theSearchParam)) {
-			String text = extractValueAsString(myCodeableConceptTextValueChild, theValue);
+			String text = getDisplayTextFromCodeableConcept(theValue);
 			if (isNotBlank(text)) {
 				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 			}
 		}
 	}
 
+	@Override
+	public List<IBase> getCodingsFromCodeableConcept(IBase theValue) {
+		String nextType = BaseSearchParamExtractor.this.toRootTypeName(theValue);
+		if ("CodeableConcept".equals(nextType)) {
+			return myCodeableConceptCodingValueChild.getAccessor().getValues(theValue);
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public String getDisplayTextFromCodeableConcept(IBase theValue) {
+		String nextType = BaseSearchParamExtractor.this.toRootTypeName(theValue);
+		if ("CodeableConcept".equals(nextType)) {
+			return extractValueAsString(myCodeableConceptTextValueChild, theValue);
+		} else {
+			return null;
+		}
+	}
+
 	private void addToken_Coding(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		String system = extractValueAsString(myCodingSystemValueChild, theValue);
-		String code = extractValueAsString(myCodingCodeValueChild, theValue);
-		createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, code);
+		ResourceIndexedSearchParamToken resourceIndexedSearchParamToken = createSearchParamForCoding(theResourceType, theSearchParam, theValue);
+		if (resourceIndexedSearchParamToken != null) {
+			theParams.add(resourceIndexedSearchParamToken);
+		}
 
 		if (shouldIndexTextComponentOfToken(theSearchParam)) {
-			String text = extractValueAsString(myCodingDisplayValueChild, theValue);
+			String text = getDisplayTextForCoding(theValue);
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		}
+	}
+
+	@Override
+	public ResourceIndexedSearchParamToken createSearchParamForCoding(String theResourceType, RuntimeSearchParam theSearchParam, IBase theValue) {
+		String nextType = BaseSearchParamExtractor.this.toRootTypeName(theValue);
+		if ("Coding".equals(nextType)) {
+			String system = extractValueAsString(myCodingSystemValueChild, theValue);
+			String code = extractValueAsString(myCodingCodeValueChild, theValue);
+			return createTokenIndexIfNotBlank(theResourceType, theSearchParam, system, code);
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public String getDisplayTextForCoding(IBase theValue) {
+		String nextType = BaseSearchParamExtractor.this.toRootTypeName(theValue);
+		if ("Coding".equals(nextType)) {
+			return extractValueAsString(myCodingDisplayValueChild, theValue);
+		} else {
+			return null;
 		}
 	}
 
@@ -600,6 +840,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
 
 		if (start != null || end != null) {
+
+			if (start == null) {
+				start = myModelConfig.getPeriodIndexStartOfTime().getValue();
+				startAsString = myModelConfig.getPeriodIndexStartOfTime().getValueAsString();
+			}
+			if (end == null) {
+				end = myModelConfig.getPeriodIndexEndOfTime().getValue();
+				endAsString = myModelConfig.getPeriodIndexEndOfTime().getValueAsString();
+			}
+
 			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
 			theParams.add(nextEntity);
 		}
@@ -723,12 +973,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		for (String next : families) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
-
 		List<String> givens = extractValuesAsStrings(myHumanNameGivenValueChild, theValue);
 		for (String next : givens) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
-
 	}
 
 	private void addString_Quantity(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -818,24 +1066,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	private String toRootTypeName(IBase nextObject) {
+	@Override
+	public String toRootTypeName(IBase nextObject) {
 		BaseRuntimeElementDefinition<?> elementDefinition = getContext().getElementDefinition(nextObject.getClass());
 		BaseRuntimeElementDefinition<?> rootParentDefinition = elementDefinition.getRootParentDefinition();
 		return rootParentDefinition.getName();
 	}
 
-	private String toTypeName(IBase nextObject) {
+	@Override
+	public String toTypeName(IBase nextObject) {
 		BaseRuntimeElementDefinition<?> elementDefinition = getContext().getElementDefinition(nextObject.getClass());
 		return elementDefinition.getName();
-	}
-
-	@SuppressWarnings("unchecked")
-	private void addDateTimeTypes(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		IPrimitiveType<Date> nextBaseDateTime = (IPrimitiveType<Date>) theValue;
-		if (nextBaseDateTime.getValue() != null) {
-			ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValueAsString());
-			theParams.add(param);
-		}
 	}
 
 	private void addUri_Uri(String theResourceType, Set<ResourceIndexedSearchParamUri> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -856,12 +1097,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			String searchParamName = theSearchParam.getName();
-			String valueNormalized = StringNormalizer.normalizeString(value);
-			if (valueNormalized.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-				valueNormalized = valueNormalized.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+			String valueNormalized = StringUtil.normalizeStringForSearchIndexing(value);
+			String valueEncoded = theSearchParam.encode(valueNormalized);
+
+			if (valueEncoded.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+				valueEncoded = valueEncoded.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 			}
 
-			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getModelConfig(), theResourceType, searchParamName, valueNormalized, value);
+			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getModelConfig(), theResourceType, searchParamName, valueEncoded, value);
 
 			Set params = theParams;
 			params.add(nextEntity);
@@ -869,8 +1112,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void createTokenIndexIfNotBlank(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
+		ResourceIndexedSearchParamToken nextEntity = createTokenIndexIfNotBlank(theResourceType, theSearchParam, theSystem, theValue);
+		if (nextEntity != null) {
+			theParams.add(nextEntity);
+		}
+	}
+
+	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
 		String system = theSystem;
 		String value = theValue;
+		ResourceIndexedSearchParamToken nextEntity = null;
 		if (isNotBlank(system) || isNotBlank(value)) {
 			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
 				system = system.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
@@ -879,10 +1130,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				value = value.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
 			}
 
-			ResourceIndexedSearchParamToken nextEntity;
 			nextEntity = new ResourceIndexedSearchParamToken(myPartitionSettings, theResourceType, theSearchParam.getName(), system, value);
-			theParams.add(nextEntity);
 		}
+
+		return nextEntity;
 	}
 
 	@Override
@@ -1124,7 +1375,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
-		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
+		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
 			.map(IBaseExtension::getValue)
 			.map(val -> (IPrimitiveType<?>) val)
 			.map(IPrimitiveType::getValueAsString)
@@ -1153,7 +1404,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<?>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValueAsString())
+			.map(IPrimitiveType::getValueAsString)
 			.orElse(null);
 	}
 
@@ -1161,7 +1412,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<Date>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValue())
+			.map(IPrimitiveType::getValue)
 			.orElse(null);
 	}
 
@@ -1169,7 +1420,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<BigDecimal>>getFirstValueOrNull(theElement)
-			.map(t -> t.getValue())
+			.map(IPrimitiveType::getValue)
 			.orElse(null);
 	}
 
@@ -1186,8 +1437,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.getValues(theValue)
 			.stream()
 			.map(t -> (IPrimitiveType) t)
-			.map(t -> t.getValueAsString())
-			.filter(t -> isNotBlank(t))
+			.map(IPrimitiveType::getValueAsString)
+			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toList());
 	}
 

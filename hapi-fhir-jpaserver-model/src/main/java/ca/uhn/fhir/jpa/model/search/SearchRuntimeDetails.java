@@ -37,6 +37,7 @@ public class SearchRuntimeDetails {
 	private boolean myLoadSynchronous;
 	private String myQueryString;
 	private SearchStatusEnum mySearchStatus;
+	private int myFoundIndexMatchesCount;
 	public SearchRuntimeDetails(RequestDetails theRequestDetails, String theSearchUuid) {
 		myRequestDetails = theRequestDetails;
 		mySearchUuid = theSearchUuid;
@@ -65,6 +66,14 @@ public class SearchRuntimeDetails {
 
 	public void setFoundMatchesCount(int theFoundMatchesCount) {
 		myFoundMatchesCount = theFoundMatchesCount;
+	}
+
+	public int getFoundIndexMatchesCount() {
+		return myFoundIndexMatchesCount;
+	}
+
+	public void setFoundIndexMatchesCount(int theFoundIndexMatchesCount) {
+		myFoundIndexMatchesCount = theFoundIndexMatchesCount;
 	}
 
 	public boolean getLoadSynchronous() {

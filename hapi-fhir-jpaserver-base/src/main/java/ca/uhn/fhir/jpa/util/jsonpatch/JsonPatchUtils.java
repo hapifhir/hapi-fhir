@@ -69,7 +69,7 @@ public class JsonPatchUtils {
 				retVal = fhirJsonParser.parseResource(clazz, postPatchedContent);
 			} catch (DataFormatException e) {
 				String resourceId = theResourceToUpdate.getIdElement().toUnqualifiedVersionless().getValue();
-				String resourceType = theCtx.getResourceDefinition(theResourceToUpdate).getName();
+				String resourceType = theCtx.getResourceType(theResourceToUpdate);
 				resourceId = defaultString(resourceId, resourceType);
 				String msg = theCtx.getLocalizer().getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
 				throw new InvalidRequestException(msg);

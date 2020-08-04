@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,6 +51,8 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 	private String myPayload;
 	@JsonProperty("payloadId")
 	private String myPayloadId;
+	@JsonProperty("parentTransactionGuid")
+	private String myParentTransactionGuid;
 	@JsonIgnore
 	private transient IBaseResource myPayloadDecoded;
 
@@ -66,6 +69,13 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		setOperationType(theOperationType);
 		if (theOperationType != OperationTypeEnum.DELETE) {
 			setNewPayload(theFhirContext, theResource);
+		}
+	}
+
+	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+		this(theFhirContext, theNewResource, theOperationType);
+		if (theRequest != null) {
+			setParentTransactionGuid(theRequest.getTransactionGuid());
 		}
 	}
 
@@ -116,6 +126,14 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		}
 	}
 
+	public String getParentTransactionGuid() {
+		return myParentTransactionGuid;
+	}
+
+	public void setParentTransactionGuid(String theParentTransactionGuid) {
+		myParentTransactionGuid = theParentTransactionGuid;
+	}
+
 	private void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
 		/*
 		 * References with placeholders would be invalid by the time we get here, and
@@ -142,7 +160,6 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		UPDATE,
 		DELETE,
 		MANUALLY_TRIGGERED
-
 	}
 
 	private static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {

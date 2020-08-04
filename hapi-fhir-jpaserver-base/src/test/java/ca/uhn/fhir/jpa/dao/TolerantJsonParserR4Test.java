@@ -1,18 +1,19 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TolerantJsonParserR4Test {
 
-	private FhirContext myFhirContext = FhirContext.forR4();
+	private FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Test
 	public void testParseInvalidNumeric_LeadingDecimal() {
@@ -24,7 +25,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -40,7 +41,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -56,7 +57,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -72,7 +73,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler());
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		try {
 			parser.parseResource(Observation.class, input);
 		} catch (DataFormatException e) {

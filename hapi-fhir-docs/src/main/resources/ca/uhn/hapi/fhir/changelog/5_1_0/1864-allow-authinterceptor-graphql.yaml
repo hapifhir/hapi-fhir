@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1864
+title: "AuthorizationInterceptor can now fully secure GraphQL operations in the JPA server, meaning that
+   it is possible to use compartment and type rules to restrict the specific data that is available through
+   the GraphQL interface."

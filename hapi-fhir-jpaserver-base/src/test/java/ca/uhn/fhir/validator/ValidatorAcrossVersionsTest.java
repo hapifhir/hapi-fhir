@@ -1,10 +1,11 @@
 package ca.uhn.fhir.validator;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -20,14 +21,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 public class ValidatorAcrossVersionsTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidatorAcrossVersionsTest.class);
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@Test
 	public void testWrongContextVersion() {
-		FhirContext ctxDstu2 = FhirContext.forDstu2();
+		FhirContext ctxDstu2 = FhirContext.forCached(FhirVersionEnum.DSTU2);
 		try {
 			ctxDstu2.getResourceDefinition(org.hl7.fhir.dstu3.model.Patient.class);
 			fail();
@@ -41,7 +37,7 @@ public class ValidatorAcrossVersionsTest {
 	@Test
 	public void testValidateProfileOnDstu2Resource() {
 
-		FhirContext ctxDstu2 = FhirContext.forDstu2();
+		FhirContext ctxDstu2 = FhirContext.forCached(FhirVersionEnum.DSTU2);
 		FhirValidator val = ctxDstu2.newValidator();
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);

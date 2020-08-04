@@ -2,32 +2,34 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
-import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderRule;
-import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
+import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CaptureResourceSourceFromHeaderInterceptorTest {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
-	@ClassRule
-	public static RestfulServerRule ourServerRule = new RestfulServerRule(ourCtx);
+	@RegisterExtension
+	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
 	private CaptureResourceSourceFromHeaderInterceptor myInterceptor;
-	@Rule
-	public HashMapResourceProviderRule<Patient> myPatientProviderRule = new HashMapResourceProviderRule<>(ourServerRule, Patient.class);
+	@RegisterExtension
+	public HashMapResourceProviderExtension<Patient> myPatientProviderRule = new HashMapResourceProviderExtension<>(ourServerRule, Patient.class);
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptor = new CaptureResourceSourceFromHeaderInterceptor(ourCtx);
 		ourServerRule.getRestfulServer().registerInterceptor(myInterceptor);
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		ourServerRule.getRestfulServer().unregisterInterceptor(myInterceptor);
 	}

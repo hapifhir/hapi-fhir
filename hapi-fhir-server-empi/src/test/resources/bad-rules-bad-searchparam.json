@@ -1,0 +1,10 @@
+{
+	"version": "1",
+	"candidateSearchParams" : [{
+		"resourceType" : "Patient",
+		"searchParams" : ["foo"]
+	}],
+	"candidateFilterSearchParams" : [],
+	"matchFields" : [],
+	"matchResultMap" : {}
+}

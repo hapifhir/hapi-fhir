@@ -1,8 +1,10 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -67,6 +69,11 @@ public class CommonConfig {
 		retVal.setMessageFormat("${requestVerb} ${servletPath} -\n${requestBodyFhir}");
 		retVal.setLogExceptions(false);
 		return retVal;
+	}
+
+	@Bean
+	public PartitionSettings partitionSettings() {
+		return new PartitionSettings();
 	}
 
 	public static boolean isLocalTestMode() {

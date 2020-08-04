@@ -162,7 +162,7 @@
 			<scope>test</scope>
 		</dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<reporting>
 		<plugins>

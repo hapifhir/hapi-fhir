@@ -48,6 +48,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private int myConceptsSaved;
 	private int myDesignationsSaved;
 	private int myConceptsExcluded;
+	private int myCount;
 
 	public ValueSetConceptAccumulator(@Nonnull TermValueSet theTermValueSet, @Nonnull ITermValueSetDao theValueSetDao, @Nonnull ITermValueSetConceptDao theValueSetConceptDao, @Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
 		myTermValueSet = theTermValueSet;
@@ -171,7 +172,11 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		return true;
 	}
 
-	// TODO: DM 2019-07-16 - We may need TermValueSetConceptProperty, similar to TermConceptProperty.
+    public int getConceptsSaved() {
+		return myConceptsSaved;
+    }
+
+    // TODO: DM 2019-07-16 - We may need TermValueSetConceptProperty, similar to TermConceptProperty.
 	// TODO: DM 2019-07-16 - If so, we should also populate TermValueSetConceptProperty entities here.
 	// TODO: DM 2019-07-30 - Expansions don't include the properties themselves; they may be needed to facilitate filters and parameterized expansions.
 }

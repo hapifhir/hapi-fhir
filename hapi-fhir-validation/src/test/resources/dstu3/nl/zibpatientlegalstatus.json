@@ -1,0 +1,82 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "zib-patient-legalstatus",
+  "url": "http://nictiz.nl/fhir/StructureDefinition/zib-patient-legalstatus",
+  "version": "1.0.0",
+  "name": "zib patient legalstatus",
+  "title": "Patient LegalSatus",
+  "status": "active",
+  "publisher": "Nictiz",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "The legal situation that applies to the patient during treatment/procedures.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "kind": "resource",
+  "abstract": false,
+  "contextType": "resource",
+  "context": [
+    "Patient",
+    "Procedure"
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "legalStatus",
+        "definition": "The legal situation that applies to the patient during the intervention. The code of the legal status is based on the Vektis/AZR code list COD232-VEKT Legal Status.",
+        "comment": "The concept LegalStatus of the Zib FreedomRestrictingMeasures plays an importand role in the context of mental healthcare (GGZ). This concept will become an independent Zib with the next release of Zibs (2018 release).  \r\n\r\nThe LegalStatus concept and associated valueset will be split in two concepts: legalstatus and representative. These concept are currently captured in one valueset. It is possible to have a legalstatus AND a representative. Therefore, we allow this extension to have a cardinality of 0..2.",
+        "max": "2"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://nictiz.nl/fhir/StructureDefinition/zib-patient-legalstatus"
+      },
+      {
+        "id": "Extension.value[x]:valueCodeableConcept",
+        "path": "Extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "code": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "303186005",
+            "display": "Legal status of patient (observable entity)"
+          }
+        ],
+        "short": "LegalStatus",
+        "definition": "The legal situation that applies to the patient during the intervention. The code of the legal status is based on the Vektis/AZR code list COD232-VEKT Legal Status.",
+        "alias": [
+          "JuridischeStatus"
+        ],
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "description": "LegalStatusCodelist",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.14.3.2--20171231000000",
+            "display": "JuridischeStatusCodelijst"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.demo;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,10 +10,10 @@ import java.util.List;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -35,7 +35,7 @@ public class ExampleServerIT {
 	private static String ourServerBase;
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCreateAndRead() throws IOException {
 		ourLog.info("Base URL is: http://localhost:" + ourPort + "/baseDstu2");
 		String methodName = "testCreateResourceConditional";
@@ -50,12 +50,12 @@ public class ExampleServerIT {
 		assertEquals(famNames, pt2.getName().get(0).getFamily());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		/*
 		 * This runs under maven, and I'm not sure how else to figure out the target directory from code..

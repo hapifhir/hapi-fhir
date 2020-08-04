@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -32,35 +33,35 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.DatatypeUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.SearchParameter;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamRegistryImpl implements ISearchParamRegistry {
 
@@ -76,8 +77,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	private FhirContext myFhirContext;
 	@Autowired
 	private ISchedulerService mySchedulerService;
+	@Autowired
+	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
+	private IPhoneticEncoder myPhoneticEncoder;
+
 	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
 	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
@@ -175,6 +180,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 						uniqueSearchParams.add(nextCandidateCasted);
 					}
 				}
+
+				setPhoneticEncoder(nextCandidate);
 			}
 
 		}
@@ -228,19 +235,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 		myActiveParamNamesToUniqueSearchParams = activeParamNamesToUniqueSearchParams;
 	}
 
-	@VisibleForTesting
-	void setFhirContextForUnitTest(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
-
 	@PostConstruct
 	public void postConstruct() {
 		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
-	}
-
-	@VisibleForTesting
-	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
-		mySearchParamProvider = theSearchParamProvider;
 	}
 
 	public int doRefresh(long theRefreshInterval) {
@@ -248,11 +245,14 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 			StopWatch sw = new StopWatch();
 
 			Map<String, Map<String, RuntimeSearchParam>> searchParams = new HashMap<>();
-			for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : getBuiltInSearchParams().entrySet()) {
+			Set<Map.Entry<String, Map<String, RuntimeSearchParam>>> builtInSps = getBuiltInSearchParams().entrySet();
+			for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : builtInSps) {
 				for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
 					String nextResourceName = nextBuiltInEntry.getKey();
 					getSearchParamMap(searchParams, nextResourceName).put(nextParam.getName(), nextParam);
 				}
+
+				ourLog.trace("Have {} built-in SPs for: {}", nextBuiltInEntry.getValue().size(), nextBuiltInEntry.getKey());
 			}
 
 			SearchParameterMap params = new SearchParameterMap();
@@ -277,7 +277,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 					continue;
 				}
 
-				RuntimeSearchParam runtimeSp = canonicalizeSearchParameter(nextSp);
+				RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(nextSp);
 				if (runtimeSp == null) {
 					continue;
 				}
@@ -332,361 +332,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 		} else {
 			return 0;
 		}
-	}
-
-	protected RuntimeSearchParam canonicalizeSearchParameter(IBaseResource theSearchParameter) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case DSTU2:
-				return canonicalizeSearchParameterDstu2((ca.uhn.fhir.model.dstu2.resource.SearchParameter) theSearchParameter);
-			case DSTU3:
-				return canonicalizeSearchParameterDstu3((org.hl7.fhir.dstu3.model.SearchParameter) theSearchParameter);
-			case R4:
-				return canonicalizeSearchParameterR4((org.hl7.fhir.r4.model.SearchParameter) theSearchParameter);
-			case DSTU2_HL7ORG:
-			case DSTU2_1:
-				// Non-supported - these won't happen so just fall through
-			case R5:
-			default:
-				return canonicalizeSearchParameterR5((org.hl7.fhir.r5.model.SearchParameter) theSearchParameter);
-		}
-	}
-
-	private RuntimeSearchParam canonicalizeSearchParameterDstu2(ca.uhn.fhir.model.dstu2.resource.SearchParameter theNextSp) {
-		String name = theNextSp.getCode();
-		String description = theNextSp.getDescription();
-		String path = theNextSp.getXpath();
-		RestSearchParameterTypeEnum paramType = null;
-		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
-		switch (theNextSp.getTypeElement().getValueAsEnum()) {
-			case COMPOSITE:
-				paramType = RestSearchParameterTypeEnum.COMPOSITE;
-				break;
-			case DATE_DATETIME:
-				paramType = RestSearchParameterTypeEnum.DATE;
-				break;
-			case NUMBER:
-				paramType = RestSearchParameterTypeEnum.NUMBER;
-				break;
-			case QUANTITY:
-				paramType = RestSearchParameterTypeEnum.QUANTITY;
-				break;
-			case REFERENCE:
-				paramType = RestSearchParameterTypeEnum.REFERENCE;
-				break;
-			case STRING:
-				paramType = RestSearchParameterTypeEnum.STRING;
-				break;
-			case TOKEN:
-				paramType = RestSearchParameterTypeEnum.TOKEN;
-				break;
-			case URI:
-				paramType = RestSearchParameterTypeEnum.URI;
-				break;
-		}
-		if (theNextSp.getStatus() != null) {
-			switch (theNextSp.getStatusElement().getValueAsEnum()) {
-				case ACTIVE:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
-					break;
-				case DRAFT:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
-					break;
-				case RETIRED:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
-					break;
-			}
-		}
-		Set<String> providesMembershipInCompartments = Collections.emptySet();
-		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
-
-		if (isBlank(name) || isBlank(path)) {
-			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
-				return null;
-			}
-		}
-
-		IIdType id = theNextSp.getIdElement();
-		String uri = "";
-		boolean unique = false;
-
-		List<ExtensionDt> uniqueExts = theNextSp.getUndeclaredExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
-		if (uniqueExts.size() > 0) {
-			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
-			if (uniqueExtsValuePrimitive != null) {
-				if ("true".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
-					unique = true;
-				}
-			}
-		}
-
-		List<JpaRuntimeSearchParam.Component> components = Collections.emptyList();
-		Collection<? extends IPrimitiveType<String>> base = Collections.singletonList(theNextSp.getBaseElement());
-		JpaRuntimeSearchParam retVal = new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
-		extractExtensions(theNextSp, retVal);
-		return retVal;
-	}
-
-	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
-		String name = theNextSp.getCode();
-		String description = theNextSp.getDescription();
-		String path = theNextSp.getExpression();
-		RestSearchParameterTypeEnum paramType = null;
-		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
-		switch (theNextSp.getType()) {
-			case COMPOSITE:
-				paramType = RestSearchParameterTypeEnum.COMPOSITE;
-				break;
-			case DATE:
-				paramType = RestSearchParameterTypeEnum.DATE;
-				break;
-			case NUMBER:
-				paramType = RestSearchParameterTypeEnum.NUMBER;
-				break;
-			case QUANTITY:
-				paramType = RestSearchParameterTypeEnum.QUANTITY;
-				break;
-			case REFERENCE:
-				paramType = RestSearchParameterTypeEnum.REFERENCE;
-				break;
-			case STRING:
-				paramType = RestSearchParameterTypeEnum.STRING;
-				break;
-			case TOKEN:
-				paramType = RestSearchParameterTypeEnum.TOKEN;
-				break;
-			case URI:
-				paramType = RestSearchParameterTypeEnum.URI;
-				break;
-			case NULL:
-				break;
-		}
-		if (theNextSp.getStatus() != null) {
-			switch (theNextSp.getStatus()) {
-				case ACTIVE:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
-					break;
-				case DRAFT:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
-					break;
-				case RETIRED:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
-					break;
-				case UNKNOWN:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
-					break;
-				case NULL:
-					break;
-			}
-		}
-		Set<String> providesMembershipInCompartments = Collections.emptySet();
-		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
-
-		if (isBlank(name) || isBlank(path) || paramType == null) {
-			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
-				return null;
-			}
-		}
-
-		IIdType id = theNextSp.getIdElement();
-		String uri = "";
-		boolean unique = false;
-
-		List<Extension> uniqueExts = theNextSp.getExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
-		if (uniqueExts.size() > 0) {
-			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
-			if (uniqueExtsValuePrimitive != null) {
-				if ("true".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
-					unique = true;
-				}
-			}
-		}
-
-		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
-		for (SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), next.getDefinition()));
-		}
-
-		JpaRuntimeSearchParam retVal = new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
-		extractExtensions(theNextSp, retVal);
-		return retVal;
-	}
-
-	private RuntimeSearchParam canonicalizeSearchParameterR4(org.hl7.fhir.r4.model.SearchParameter theNextSp) {
-		String name = theNextSp.getCode();
-		String description = theNextSp.getDescription();
-		String path = theNextSp.getExpression();
-		RestSearchParameterTypeEnum paramType = null;
-		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
-		switch (theNextSp.getType()) {
-			case COMPOSITE:
-				paramType = RestSearchParameterTypeEnum.COMPOSITE;
-				break;
-			case DATE:
-				paramType = RestSearchParameterTypeEnum.DATE;
-				break;
-			case NUMBER:
-				paramType = RestSearchParameterTypeEnum.NUMBER;
-				break;
-			case QUANTITY:
-				paramType = RestSearchParameterTypeEnum.QUANTITY;
-				break;
-			case REFERENCE:
-				paramType = RestSearchParameterTypeEnum.REFERENCE;
-				break;
-			case STRING:
-				paramType = RestSearchParameterTypeEnum.STRING;
-				break;
-			case TOKEN:
-				paramType = RestSearchParameterTypeEnum.TOKEN;
-				break;
-			case URI:
-				paramType = RestSearchParameterTypeEnum.URI;
-				break;
-			case SPECIAL:
-				paramType = RestSearchParameterTypeEnum.SPECIAL;
-				break;
-			case NULL:
-				break;
-		}
-		if (theNextSp.getStatus() != null) {
-			switch (theNextSp.getStatus()) {
-				case ACTIVE:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
-					break;
-				case DRAFT:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
-					break;
-				case RETIRED:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
-					break;
-				case UNKNOWN:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
-					break;
-				case NULL:
-					break;
-			}
-		}
-		Set<String> providesMembershipInCompartments = Collections.emptySet();
-		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
-
-		if (isBlank(name) || isBlank(path) || paramType == null) {
-			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
-				return null;
-			}
-		}
-
-		IIdType id = theNextSp.getIdElement();
-		String uri = "";
-		boolean unique = false;
-
-		List<org.hl7.fhir.r4.model.Extension> uniqueExts = theNextSp.getExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
-		if (uniqueExts.size() > 0) {
-			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
-			if (uniqueExtsValuePrimitive != null) {
-				if ("true".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
-					unique = true;
-				}
-			}
-		}
-
-		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
-		for (org.hl7.fhir.r4.model.SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), new Reference(next.getDefinition())));
-		}
-
-		JpaRuntimeSearchParam retVal = new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
-		extractExtensions(theNextSp, retVal);
-		return retVal;
-
-	}
-
-
-	private RuntimeSearchParam canonicalizeSearchParameterR5(org.hl7.fhir.r5.model.SearchParameter theNextSp) {
-		String name = theNextSp.getCode();
-		String description = theNextSp.getDescription();
-		String path = theNextSp.getExpression();
-		RestSearchParameterTypeEnum paramType = null;
-		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
-		switch (theNextSp.getType()) {
-			case COMPOSITE:
-				paramType = RestSearchParameterTypeEnum.COMPOSITE;
-				break;
-			case DATE:
-				paramType = RestSearchParameterTypeEnum.DATE;
-				break;
-			case NUMBER:
-				paramType = RestSearchParameterTypeEnum.NUMBER;
-				break;
-			case QUANTITY:
-				paramType = RestSearchParameterTypeEnum.QUANTITY;
-				break;
-			case REFERENCE:
-				paramType = RestSearchParameterTypeEnum.REFERENCE;
-				break;
-			case STRING:
-				paramType = RestSearchParameterTypeEnum.STRING;
-				break;
-			case TOKEN:
-				paramType = RestSearchParameterTypeEnum.TOKEN;
-				break;
-			case URI:
-				paramType = RestSearchParameterTypeEnum.URI;
-				break;
-			case SPECIAL:
-				paramType = RestSearchParameterTypeEnum.SPECIAL;
-				break;
-			case NULL:
-				break;
-		}
-		if (theNextSp.getStatus() != null) {
-			switch (theNextSp.getStatus()) {
-				case ACTIVE:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
-					break;
-				case DRAFT:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
-					break;
-				case RETIRED:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
-					break;
-				case UNKNOWN:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
-					break;
-				case NULL:
-					break;
-			}
-		}
-		Set<String> providesMembershipInCompartments = Collections.emptySet();
-		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
-
-		if (isBlank(name) || isBlank(path) || paramType == null) {
-			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
-				return null;
-			}
-		}
-
-		IIdType id = theNextSp.getIdElement();
-		String uri = "";
-		boolean unique = false;
-
-		List<org.hl7.fhir.r5.model.Extension> uniqueExts = theNextSp.getExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
-		if (uniqueExts.size() > 0) {
-			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
-			if (uniqueExtsValuePrimitive != null) {
-				if ("true".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
-					unique = true;
-				}
-			}
-		}
-
-		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
-		for (org.hl7.fhir.r5.model.SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), new org.hl7.fhir.r5.model.Reference(next.getDefinition())));
-		}
-
-		JpaRuntimeSearchParam retVal = new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
-		extractExtensions(theNextSp, retVal);
-		return retVal;
 	}
 
 
@@ -757,30 +402,10 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 		return Collections.unmodifiableMap(myActiveSearchParams);
 	}
 
-	@VisibleForTesting
-	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
-		mySchedulerService = theSchedulerService;
-	}
-
-	/**
-	 * Extracts any extensions from the resource and populates an extension field in the
-	 */
-	protected void extractExtensions(IBaseResource theSearchParamResource, JpaRuntimeSearchParam theRuntimeSearchParam) {
-		if (theSearchParamResource instanceof IBaseHasExtensions) {
-			List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) theSearchParamResource).getExtension();
-			for (IBaseExtension<?, ?> next : extensions) {
-				String nextUrl = next.getUrl();
-				if (isNotBlank(nextUrl)) {
-					theRuntimeSearchParam.addExtension(nextUrl, next);
-				}
-			}
-		}
-	}
-
 	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {
 		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
 
-		Set<String> resourceNames = theFhirContext.getResourceNames();
+		Set<String> resourceNames = theFhirContext.getResourceTypes();
 
 		for (String resourceName : resourceNames) {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
@@ -793,5 +418,32 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 			}
 		}
 		return Collections.unmodifiableMap(resourceNameToSearchParams);
+	}
+
+	/**
+	 * All SearchParameters with the name "phonetic" encode the normalized index value using this phonetic encoder.
+	 *
+	 * @since 5.1.0
+	 */
+
+	public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
+		myPhoneticEncoder = thePhoneticEncoder;
+
+		if (myActiveSearchParams == null) {
+			return;
+		}
+		for (Map<String, RuntimeSearchParam> activeUniqueSearchParams : myActiveSearchParams.values()) {
+			for (RuntimeSearchParam searchParam : activeUniqueSearchParams.values()) {
+				setPhoneticEncoder(searchParam);
+			}
+		}
+	}
+
+	private void setPhoneticEncoder(RuntimeSearchParam searchParam) {
+		if ("phonetic".equals(searchParam.getName())) {
+			ourLog.debug("Setting search param {} on {} phonetic encoder to {}",
+				searchParam.getName(), searchParam.getPath(), myPhoneticEncoder == null ? "null" : myPhoneticEncoder.name());
+			searchParam.setPhoneticEncoder(myPhoneticEncoder);
+		}
 	}
 }

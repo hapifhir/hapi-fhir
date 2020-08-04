@@ -1,0 +1,736 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-careplan",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-careplan",
+  "version": "1.0.0",
+  "name": "nl-core-careplan",
+  "title": "nl-core-careplan",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "A nl-core base CarePlan profile, that references to all relating Dutch Health and Care Information models or HCIM (Dutch: Zorginformatiebouwsteen or ZIB) profiles.  This profile is not based on a HCIM, beceause no HCIM exists for a CarePlan concept.",
+  "purpose": "Multiple HCIM are better interperted in a coherent set then by them selfs. These are the HCIMs NursingIntervention, TreatmentObjective, and TreatmentOutcome. They consistute a CarePlan, hence the reason to create a CarePlan profile.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-nursingintervention-v3.2-2018EN",
+      "uri": "https://zibs.nl/wiki/NursingIntervention-v3.2(2018EN)",
+      "name": "HCIM NursingIntervention-v3.2(2018EN)",
+      "comment": "HCIM release 2018 is because it does not have the redundant container 'NursingProcedure'."
+    },
+    {
+      "identity": "hcim-outcomeofcare-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/OutcomeOfCare-v3.1(2017EN)",
+      "name": "HCIM OutcomeOfCare-v3.1 (2017EN)"
+    },
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "CarePlan",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CarePlan",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "CarePlan.identifier",
+        "path": "CarePlan.identifier",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.subject",
+        "path": "CarePlan.subject",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/Group"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.11",
+            "comment": "Subject"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.context",
+        "path": "CarePlan.context",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-Encounter"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-episodeofcare"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.period",
+        "path": "CarePlan.period",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.14",
+            "comment": "DateTime"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.author",
+        "path": "CarePlan.author",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-relatedperson"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-careteam"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.author.extension",
+        "path": "CarePlan.author.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "CarePlan.author.extension:practitionerRole",
+        "path": "CarePlan.author.extension",
+        "sliceName": "practitionerRole",
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.goal",
+        "path": "CarePlan.goal",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-TreatmentObjective"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.14",
+            "comment": "TreatmentObjective"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity",
+        "path": "CarePlan.activity",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "pattern",
+              "path": "detail.category"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention",
+        "path": "CarePlan.activity",
+        "sliceName": "nursingIntervention",
+        "constraint": [
+          {
+            "key": "hicm-outcomeofcare-1",
+            "severity": "error",
+            "human": "Provide a HealthcareResult text or a reference, not both",
+            "expression": "outcomeCodeableConcept.empty() or outcomeReference.empty()"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-outcomeofcare-v3.2-2018EN",
+            "map": "NL-CM:13.4.4",
+            "comment": "Intervention"
+          },
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.1",
+            "comment": "NursingIntervention"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.extension",
+        "path": "CarePlan.activity.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.extension:comment",
+        "path": "CarePlan.activity.extension",
+        "sliceName": "comment",
+        "definition": "Comment on the nursing intervention.",
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/Comment"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.extension:comment.valueString:valueString",
+        "path": "CarePlan.activity.extension.valueString",
+        "sliceName": "valueString",
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.5"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.outcomeCodeableConcept",
+        "path": "CarePlan.activity.outcomeCodeableConcept",
+        "max": "1"
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.outcomeCodeableConcept.text",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-translatable",
+            "valueBoolean": true
+          }
+        ],
+        "path": "CarePlan.activity.outcomeCodeableConcept.text",
+        "short": "HealthcareResult",
+        "definition": "The textual account of the healthcare result. If HealthcareResult cannot be entered as a measurement value or functional/mental status, it can be described as free text in the healthcare result.",
+        "alias": [
+          "Zorgresultaat"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-outcomeofcare-v3.1-2017EN",
+            "map": "NL-CM:13.4.5",
+            "comment": "HealthcareResult"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.outcomeReference",
+        "path": "CarePlan.activity.outcomeReference",
+        "short": "MeasurementValue / HealthCondition",
+        "definition": "Measurements in which an observation, carried out with a (measuring) tool if possible, is translated to a relevant unit or a description of the patient’s health condition in the form of a functional and/or mental status.",
+        "alias": [
+          "Meetwaarde",
+          "Gezondheidstoestand"
+        ],
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-GeneralMeasurement"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-FunctionalOrMentalStatus"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-outcomeofcare-v3.1-2017EN",
+            "map": "NL-CM:13.4.2",
+            "comment": "MeasurementValue"
+          },
+          {
+            "identity": "hcim-outcomeofcare-v3.1-2017EN",
+            "map": "NL-CM:13.4.3",
+            "comment": "HealthCondition"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.reference",
+        "path": "CarePlan.activity.reference",
+        "definition": "The details of the proposed activity represented in a specific resource.\r\nUsed for example to provide the details of the health professional who requested the nursing intervention. If desired, only the requester’s specialty can be entered.",
+        "comment": "Requester information should be captured and exchanged in the resource ProcedureRequest referenced by activity.referenc. Requester is the healthcare provider and/or organization where or by whom the NursingInterverntion was requested. There are a few required elements in ProcedureRequest\r\n                 - ProcedureRequest.status (use fixed value \"active\", unless you know what the actual value is)\r\n                 - ProcedureRequest.intent (use fixed value \"order\", unless you know what the actual value is)\r\n                 - ProcedureRequest.code (use extension http://hl7.org/fhir/STU3/extension-iso21090-nullflavor.html met valueCode UNK, unless you know what the actual value is)\r\n                 - ProcedureRequest.subject (equal to Observation.subject)\r\n                 - ProcedureRequest.requester.agent (contains the requesting HealthProfessional)",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/Appointment"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/CommunicationRequest"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/DeviceRequest"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/MedicationRequest"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/NutritionOrder"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/Task"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-ProcedureRequest"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/ReferralRequest"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/VisionPrescription"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/RequestGroup"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.8",
+            "comment": "Requester"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.extension",
+        "path": "CarePlan.activity.detail.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.extension:medicalDevice",
+        "path": "CarePlan.activity.detail.extension",
+        "sliceName": "medicalDevice",
+        "short": "MedicalDevice",
+        "definition": "Description of the materials used for the nursing procedure, such as bandages.",
+        "alias": [
+          "MedischHulpmiddel"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/extension-medicaldevice"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.extension:medicalDevice.valueReference:valueReference",
+        "path": "CarePlan.activity.detail.extension.valueReference",
+        "sliceName": "valueReference",
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.13",
+            "comment": "MedicalDevice"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.category",
+        "path": "CarePlan.activity.detail.category",
+        "short": "Nursing procedure",
+        "definition": "High-level categorization of the type of activity in a care plan. This slice defines a nursing procedure conform the HCIM NursingIntervention.",
+        "min": 1,
+        "patternCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "9632001"
+            }
+          ]
+        }
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.code",
+        "path": "CarePlan.activity.detail.code",
+        "short": "Intervention",
+        "definition": "A nursing intervention is a treatment carried out by a nurse based on an expert opinion and clinical knowledge for the benefit of the person requesting healthcare. The intervention is targeted towards a certain problem (diagnosis) and has a predetermined healthcare result.",
+        "alias": [
+          "Interventie"
+        ],
+        "min": 1,
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.2",
+            "comment": "Intervention"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.code.coding",
+        "path": "CarePlan.activity.detail.code.coding",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.code.coding:interventionNICCodelist",
+        "path": "CarePlan.activity.detail.code.coding",
+        "sliceName": "interventionNICCodelist",
+        "short": "interventionNICCodelist",
+        "max": "1",
+        "binding": {
+          "strength": "extensible",
+          "description": "NIC - All Values",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.14.2.2--20171231000000"
+          }
+        }
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.code.coding:interventionNICCodelist.system",
+        "path": "CarePlan.activity.detail.code.coding.system",
+        "min": 1
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.code.coding:interventionNICCodelist.code",
+        "path": "CarePlan.activity.detail.code.coding.code",
+        "min": 1
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.code.coding:interventionSnomedCodelist",
+        "path": "CarePlan.activity.detail.code.coding",
+        "sliceName": "interventionSnomedCodelist",
+        "short": "interventionSnomedCodelist",
+        "max": "1",
+        "binding": {
+          "strength": "extensible",
+          "description": "SNOMED CT - SNOMED CT: &lt;&lt;71388002 | procedure |",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.14.2.4--20171231000000"
+          }
+        }
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.code.coding:interventionSnomedCodelist.system",
+        "path": "CarePlan.activity.detail.code.coding.system",
+        "min": 1
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.code.coding:interventionSnomedCodelist.code",
+        "path": "CarePlan.activity.detail.code.coding.code",
+        "min": 1
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.reasonReference",
+        "path": "CarePlan.activity.detail.reasonReference",
+        "short": "Indication",
+        "definition": "The nursing-related problem (indication) providing cause for the intervention.",
+        "alias": [
+          "Indicatie"
+        ],
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-Problem"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.6",
+            "comment": "Indication"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.goal",
+        "path": "CarePlan.activity.detail.goal",
+        "short": "TreatmentObjective",
+        "definition": "The description of the treatment goal that the intervention decision is based on.",
+        "alias": [
+          "Behandeldoel"
+        ],
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-TreatmentObjective"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.14",
+            "comment": "TreatmentObjective"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.scheduled[x]:scheduledTiming",
+        "path": "CarePlan.activity.detail.scheduledTiming",
+        "sliceName": "scheduledTiming",
+        "type": [
+          {
+            "code": "Timing"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod",
+        "path": "CarePlan.activity.detail.scheduledTiming.repeat.boundsPeriod",
+        "sliceName": "boundsPeriod",
+        "type": [
+          {
+            "code": "Period"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.start",
+        "path": "CarePlan.activity.detail.scheduledTiming.repeat.boundsPeriod.start",
+        "short": "ProcedureStartDateTime",
+        "definition": "The start date (and if possible start time) of the procedure. The concept offers the option to indicate the start of the period of a series of repeating procedures.",
+        "alias": [
+          "ActieStartDatumTijd"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.11",
+            "comment": "ProcedureStartDateTime"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.scheduled[x]:scheduledTiming.repeat.bounds[x]:boundsPeriod.end",
+        "path": "CarePlan.activity.detail.scheduledTiming.repeat.boundsPeriod.end",
+        "short": "ProcedureEndDateTime",
+        "definition": "The end date (and if possible end time) of the procedure. The concept offers the option to indicate the end of the period of a series of repeating procedures.",
+        "alias": [
+          "ActieEindDatumTijd"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.12",
+            "comment": "ProcedureEndDateTime"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.scheduled[x]:scheduledTiming.repeat.frequency",
+        "path": "CarePlan.activity.detail.scheduledTiming.repeat.frequency",
+        "short": "Frequency",
+        "definition": "The frequency describes how often and in which period certain procedures are carried out, e.g. 3x a day.",
+        "alias": [
+          "Frequentie"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.4",
+            "comment": "Frequency"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.scheduled[x]:scheduledTiming.repeat.period",
+        "path": "CarePlan.activity.detail.scheduledTiming.repeat.period",
+        "short": "Interval",
+        "definition": "\"Interval indicates the time between planned procedures.\nWhen entering an interval, the focus is on the time between the consecutive procedures, such as in the treatment of a wound, for example. The exact times are of lesser importance.\"",
+        "alias": [
+          "Interval"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.3",
+            "comment": "Interval"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.location",
+        "path": "CarePlan.activity.detail.location",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-location"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.performer",
+        "path": "CarePlan.activity.detail.performer",
+        "short": "Performer",
+        "definition": "The person carrying out the nursing procedure. Can be the health professional, caregiver or the patient.",
+        "alias": [
+          "Uitvoerder",
+          "Zorgverlener",
+          "Verzorger",
+          "Patient"
+        ],
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-relatedperson"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-careteam"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.15",
+            "comment": "Performer"
+          },
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.7",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.16",
+            "comment": "Caregiver"
+          },
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.17",
+            "comment": "Patient"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.performer.extension",
+        "path": "CarePlan.activity.detail.performer.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.performer.extension:practitionerRole",
+        "path": "CarePlan.activity.detail.performer.extension",
+        "sliceName": "practitionerRole",
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      },
+      {
+        "id": "CarePlan.activity:nursingIntervention.detail.description",
+        "path": "CarePlan.activity.detail.description",
+        "short": "Instruction",
+        "definition": "Instructions for performing the nursing action. This is particularly at issue when the action is performed by the patient himself or by a caregiver.",
+        "mapping": [
+          {
+            "identity": "hcim-nursingintervention-v3.2-2018EN",
+            "map": "NL-CM:14.2.18",
+            "comment": "Instruction"
+          }
+        ]
+      }
+    ]
+  }
+}

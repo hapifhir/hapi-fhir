@@ -1,24 +1,26 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4StructureDefinitionTest.class);
 
-	@After
+	@AfterEach
 	public final void after() {
 	}
 
@@ -34,7 +36,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		ValidationSupportChain chain = new ValidationSupportChain(defaultSupport, snapshotGenerator);
 
 		// Generate the snapshot
-		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(chain, differential, "http://foo", null, "THE BEST PROFILE");
+		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(new ValidationSupportContext(chain), differential, "http://foo", null, "THE BEST PROFILE");
 
 		String url = "http://foo";
 		String webUrl = null;
@@ -42,13 +44,28 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(differential, url, webUrl, name);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(51, output.getSnapshot().getElement().size());
+		assertEquals(54, output.getSnapshot().getElement().size());
 	}
 
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+	/**
+	 * Make sure that if one SD extends another SD, and the parent SD hasn't been snapshotted itself, the child can
+	 * be snapshotted.
+	 */
+	@Test
+	public void testGenerateSnapshotChained() throws IOException {
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/StructureDefinition-kfdrc-patient.json");
+		myStructureDefinitionDao.update(sd);
+
+		StructureDefinition sd2 = loadResourceFromClasspath(StructureDefinition.class, "/r4/StructureDefinition-kfdrc-patient-no-phi.json");
+		myStructureDefinitionDao.update(sd2);
+
+		StructureDefinition snapshotted = myStructureDefinitionDao.generateSnapshot(sd2, null, null, null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshotted));
+
+		assertTrue(snapshotted.getSnapshot().getElement().size() > 0);
 	}
+
+
 
 }

@@ -1,15 +1,14 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import javax.xml.stream.FactoryConfigurationError;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class XmlUtilTest {
 
@@ -35,7 +34,7 @@ public class XmlUtilTest {
 		}
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		XmlUtil.setThrowExceptionForUnitTest(null);
 	}
@@ -55,7 +54,7 @@ public class XmlUtilTest {
 		XmlUtil.createXmlStreamWriter(new StringWriter());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

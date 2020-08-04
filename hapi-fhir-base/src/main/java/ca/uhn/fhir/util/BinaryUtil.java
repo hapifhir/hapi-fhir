@@ -20,8 +20,15 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
 
@@ -84,4 +91,22 @@ public class BinaryUtil {
 		reference.setReference(theSecurityContext);
 	}
 
+	public static void setData(FhirContext theCtx, IBaseBinary theBinary, byte[] theBytes, String theContentType) {
+		getOrCreateData(theCtx, theBinary).setValue(theBytes);
+
+		String elementName = "contentType";
+		BaseRuntimeChildDefinition entryChild = AttachmentUtil.getChild(theCtx, theBinary, elementName);
+		List<IBase> entries = entryChild.getAccessor().getValues(theBinary);
+		IPrimitiveType<String> contentTypeElement = entries
+			.stream()
+			.map(t -> (IPrimitiveType<String>) t)
+			.findFirst()
+			.orElseGet(() -> {
+				IPrimitiveType<String> stringType = AttachmentUtil.newPrimitive(theCtx, "code", null);
+				entryChild.getMutator().setValue(theBinary, stringType);
+				return stringType;
+			});
+		contentTypeElement.setValue(theContentType);
+
+	}
 }

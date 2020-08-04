@@ -21,12 +21,26 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory;
+import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.ValueSet.*;
-import org.junit.*;
+import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,8 +48,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("Duplicates")
 public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
@@ -45,14 +64,14 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyTest.class);
 
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
 		myCachingValidationSupport.invalidateCaches();
@@ -266,7 +285,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			List<TermConcept> concepts = myTermConceptDao.findAll();
 			for (TermConcept next : concepts) {
-				assertTrue(new InstantType(new Date(next.getUpdated().getTime())) + " <= " + new InstantType(new Date(start)), next.getUpdated().getTime() > start);
+				assertTrue(next.getUpdated().getTime() > start, new InstantType(new Date(next.getUpdated().getTime())) + " <= " + new InstantType(new Date(start)));
 			}
 		});
 	}
@@ -566,7 +585,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testExpandWithNoResultsInLocalValueSet1() {
 		createLocalCsAndVs();
 
@@ -602,7 +621,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	// TODO: get this working
-	@Ignore
+	@Disabled
 	@Test
 	public void testExpandWithOpEquals() {
 
@@ -817,7 +836,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	 * Can't currently abort costly
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testRefuseCostlyExpansionFhirCodesystem() {
 		createLocalCsAndVs();
 		myDaoConfig.setMaximumExpansionSize(1);
@@ -1252,7 +1271,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	 * Todo: not yet implemented
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearchCodeNotInBuiltInValueSet() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
 		ai1.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active");
@@ -1295,9 +1314,5 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		return retVal;
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

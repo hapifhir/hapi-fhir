@@ -114,7 +114,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public HashMapResourceProvider(FhirContext theFhirContext, Class<T> theResourceType) {
 		myFhirContext = theFhirContext;
 		myResourceType = theResourceType;
-		myResourceName = myFhirContext.getResourceDefinition(theResourceType).getName();
+		myResourceName = myFhirContext.getResourceType(theResourceType);
 		clear();
 	}
 

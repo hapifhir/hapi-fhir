@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1911
+title: "Support for FHIR NPM Packages has been added to the JPA server. This new functionality allows packages to
+   be installed to special tables within the FHIR JPA schema, and conformance resources used for validation."

@@ -14,7 +14,7 @@ There are a several implementations of the [IValidationSupport](/hapi-fhir/apido
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.java)
 
-This module can be used to combine multiple implementations together so that for every request, each support class instance in the chain is tried in sequence. Note that nearly all methods in the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html) interface are permitted to return `null` if they are not able to service a particular method call. So for example, if a call to the [`validateCode`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html#validateCode(ca.uhn.fhir.context.support.IValidationSupport,ca.uhn.fhir.context.support.ConceptValidationOptions,java.lang.String,java.lang.String,java.lang.String,java.lang.String)) method is made, the validator will try each module in the chain until one of them returns a non-null response.
+This module can be used to combine multiple implementations together so that for every request, each support class instance in the chain is tried in sequence. Note that nearly all methods in the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html) interface are permitted to return `null` if they are not able to service a particular method call. So for example, if a call to the [`validateCode`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html#validateCode(ca.uhn.fhir.context.support.ValidationSupportContext,ca.uhn.fhir.context.support.ConceptValidationOptions,java.lang.String,java.lang.String,java.lang.String,java.lang.String)) method is made, the validator will try each module in the chain until one of them returns a non-null response.
 
 # DefaultProfileValidationSupport
 
@@ -99,6 +99,15 @@ The following table lists vocabulary that is validated by this module:
             </td>
         </tr>
         <tr>
+            <td>Countries (ISO 3166)</td>
+            <td>
+                CodeSystem: <a href="urn:iso:std:iso:3166">urn:iso:std:iso:3166</a>
+            </td>
+            <td>
+                Codes are validated against a built-in list of valid ISO 3166 codes. Both Alpha-2 (two character) and Alpha-3 (three character) variants are supported.
+            </td>
+        </tr>
+        <tr>
             <td>Unified Codes for Units of Measure (UCUM)</td>
             <td>
                 ValueSet: <code><a href="http://hl7.org/fhir/ValueSet/ucum-units">(...)/ValueSet/ucum-units</a></code>
@@ -118,6 +127,12 @@ The following table lists vocabulary that is validated by this module:
 
 This module validates codes using a remote FHIR-based terminology server.
 
+This module will invoke the following operations on the remote terminology server:
+
+* **GET [base]/CodeSystem?url=[url]** &ndash; Tests whether a given CodeSystem is supported on the server 
+* **GET [base]/ValueSet?url=[url]** &ndash; Tests whether a given ValueSet is supported on the server 
+* **POST [base]/CodeSystem/$validate-code** &ndash; Validate codes in fields where no specific ValueSet is bound 
+* **POST [base]/ValueSet/$validate-code** &ndash; Validate codes in fields where a specific ValueSet is bound 
 
 # Recipes
 

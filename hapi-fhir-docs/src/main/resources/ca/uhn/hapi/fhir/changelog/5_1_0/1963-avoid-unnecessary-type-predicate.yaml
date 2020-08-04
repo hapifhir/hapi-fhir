@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 1963
+title: "When performing a search in the JPA server using a chained search parameter, an unnecessary resource type predicate
+   was previously added to the generated SQL and has now been removed. This should improve performance on some queries."

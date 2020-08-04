@@ -2,25 +2,24 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HookInterceptorR4Test.class);
 
 //	@Override
-//	@After
+//	@AfterEach
 //	public void after( ) throws Exception {
 //		super.after();
 //
@@ -36,12 +35,12 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		Patient p = new Patient();
 		p.getNameFirstRep().setFamily("OLDFAMILY");
-		MethodOutcome outcome = ourClient.create().resource(p).execute();
+		MethodOutcome outcome = myClient.create().resource(p).execute();
 
 		// Response reflects change, stored resource also does
 		Patient responsePatient = (Patient) outcome.getResource();
 		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
-		responsePatient = ourClient.read().resource(Patient.class).withId(outcome.getId()).execute();
+		responsePatient = myClient.read().resource(Patient.class).withId(outcome.getId()).execute();
 		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
 
 	}
@@ -55,12 +54,12 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		Patient p = new Patient();
 		p.getNameFirstRep().setFamily("OLDFAMILY");
-		MethodOutcome outcome = ourClient.create().resource(p).execute();
+		MethodOutcome outcome = myClient.create().resource(p).execute();
 
 		// Response reflects change, stored resource does not
 		Patient responsePatient = (Patient) outcome.getResource();
 		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
-		responsePatient = ourClient.read().resource(Patient.class).withId(outcome.getId()).execute();
+		responsePatient = myClient.read().resource(Patient.class).withId(outcome.getId()).execute();
 		assertEquals("OLDFAMILY", responsePatient.getNameFirstRep().getFamily());
 
 	}
@@ -71,10 +70,10 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, (thePointcut, t) -> {
 			IAnyResource resource = (IAnyResource) t.get(IBaseResource.class, 0);
 			Long resourcePid = (Long) resource.getUserData("RESOURCE_PID");
-			assertNotNull("Expecting RESOURCE_PID to be set on resource user data.", resourcePid);
+			assertNotNull(resourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
 			pid.set(resourcePid);
 		});
-		ourClient.create().resource(new Patient()).execute();
+		myClient.create().resource(new Patient()).execute();
 		assertTrue(pid.get() > 0);
 	}
 
@@ -86,19 +85,19 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 			IAnyResource oldResource = (IAnyResource) t.get(IBaseResource.class, 0);
 			Long oldResourcePid = (Long) oldResource.getUserData("RESOURCE_PID");
-			assertNotNull("Expecting RESOURCE_PID to be set on resource user data.", oldResourcePid);
+			assertNotNull(oldResourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
 			oldPid.set(oldResourcePid);
 
 			IAnyResource newResource = (IAnyResource) t.get(IBaseResource.class, 1);
 			Long newResourcePid = (Long) newResource.getUserData("RESOURCE_PID");
-			assertNotNull("Expecting RESOURCE_PID to be set on resource user data.", newResourcePid);
+			assertNotNull(newResourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
 			newPid.set(newResourcePid);
 		});
 		Patient patient = new Patient();
-		IIdType id = ourClient.create().resource(patient).execute().getId();
+		IIdType id = myClient.create().resource(patient).execute().getId();
 		patient.setId(id);
 		patient.getNameFirstRep().setFamily("SOMECHANGE");
-		ourClient.update().resource(patient).execute();
+		myClient.update().resource(patient).execute();
 		assertTrue(oldPid.get() > 0);
 		assertTrue(newPid.get() > 0);
 	}
@@ -107,7 +106,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	public void testOP_PRESTORAGE_RESOURCE_UPDATED_ModifyResource() {
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = ourClient.create().resource(p).execute().getId();
+		IIdType id = myClient.create().resource(p).execute().getId();
 
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, (thePointcut, t) -> {
 			Patient contents = (Patient) t.get(IBaseResource.class, 1);
@@ -117,12 +116,12 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		p = new Patient();
 		p.setId(id);
 		p.getNameFirstRep().setFamily("OLDFAMILY");
-		MethodOutcome outcome = ourClient.update().resource(p).execute();
+		MethodOutcome outcome = myClient.update().resource(p).execute();
 
 		// Response reflects change, stored resource also does
 		Patient responsePatient = (Patient) outcome.getResource();
 		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
-		responsePatient = ourClient.read().resource(Patient.class).withId(outcome.getId()).execute();
+		responsePatient = myClient.read().resource(Patient.class).withId(outcome.getId()).execute();
 		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
 
 	}
@@ -131,7 +130,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	public void testOP_PRECOMMIT_RESOURCE_UPDATED_ModifyResource() {
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = ourClient.create().resource(p).execute().getId();
+		IIdType id = myClient.create().resource(p).execute().getId();
 
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, (thePointcut, t) -> {
 			Patient contents = (Patient) t.get(IBaseResource.class, 1);
@@ -141,20 +140,16 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		p = new Patient();
 		p.setId(id);
 		p.getNameFirstRep().setFamily("OLDFAMILY");
-		MethodOutcome outcome = ourClient.update().resource(p).execute();
+		MethodOutcome outcome = myClient.update().resource(p).execute();
 
 		// Response reflects change, stored resource does not
 		Patient responsePatient = (Patient) outcome.getResource();
 		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
-		responsePatient = ourClient.read().resource(Patient.class).withId(outcome.getId()).execute();
+		responsePatient = myClient.read().resource(Patient.class).withId(outcome.getId()).execute();
 		assertEquals("OLDFAMILY", responsePatient.getNameFirstRep().getFamily());
 
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 
 }

@@ -2,9 +2,10 @@ package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -12,33 +13,36 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictServiceR4Test.class);
 
-	private DeleteConflictInterceptor myDeleteInterceptor = new DeleteConflictInterceptor();
+	@Autowired
+	DaoConfig myDaoConfig;
+
+	private final DeleteConflictInterceptor myDeleteInterceptor = new DeleteConflictInterceptor();
 	private int myInterceptorDeleteCount;
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterInterceptor() {
 		myInterceptorRegistry.registerInterceptor(myDeleteInterceptor);
 		myInterceptorDeleteCount = 0;
 		myDeleteInterceptor.clear();
 	}
 
-	@After
+	@AfterEach
 	public void afterUnregisterInterceptor() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
@@ -134,6 +138,48 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDeleteHookDeletesLargeNumberOfConflicts() {
+
+		Organization organization = new Organization();
+		organization.setName("FOO");
+		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
+
+		// Create 12 conflicts.
+		for (int j=0; j < 12 ; j++) {
+			Patient patient = new Patient();
+			patient.setManagingOrganization(new Reference(organizationId));
+			myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		DeleteConflictService.setMaxRetryAttempts(3);
+		myDaoConfig.setMaximumDeleteConflictQueryCount(5);
+		myDeleteInterceptor.deleteConflictFunction = this::deleteConflictsFixedRetryCount;
+		try {
+			myOrganizationDao.delete(organizationId);
+			// Needs a fourth and final pass to ensure that all conflicts are now gone.
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertEquals(DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
+		}
+
+		// Try again with Maximum conflict count set to 6.
+		myDeleteInterceptor.myCallCount=0;
+		myInterceptorDeleteCount = 0;
+		myDaoConfig.setMaximumDeleteConflictQueryCount(6);
+
+		try {
+			myOrganizationDao.delete(organizationId);
+		} catch (ResourceVersionConflictException e) {
+			fail();
+		}
+
+		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
+		assertEquals(3, myDeleteInterceptor.myCallCount);
+		assertEquals(12, myInterceptorDeleteCount);
+
+	}
+
+	@Test
 	public void testBadInterceptorNoInfiniteLoop() {
 		Organization organization = new Organization();
 		organization.setName("FOO");
@@ -141,7 +187,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 
 		Patient patient = new Patient();
 		patient.setManagingOrganization(new Reference(organizationId));
-		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		// Always returning true is bad behaviour.  Our infinite loop checker should halt it
 		myDeleteInterceptor.deleteConflictFunction = t -> new DeleteConflictOutcome().setShouldRetryCount(Integer.MAX_VALUE);
@@ -150,7 +196,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			myOrganizationDao.delete(organizationId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals("Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
+			assertEquals(DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
 		assertEquals(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS, myDeleteInterceptor.myCallCount);
 	}
@@ -185,9 +231,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	private DeleteConflictOutcome deleteConflicts(DeleteConflictList theList) {
-		Iterator<DeleteConflict> iterator = theList.iterator();
-		while (iterator.hasNext()) {
-			DeleteConflict next = iterator.next();
+		for (DeleteConflict next : theList) {
 			IdDt source = next.getSourceId();
 			if ("Patient".equals(source.getResourceType())) {
 				ourLog.info("Deleting {}", source);
@@ -196,6 +240,18 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			}
 		}
 		return new DeleteConflictOutcome().setShouldRetryCount(myInterceptorDeleteCount);
+	}
+
+	private DeleteConflictOutcome deleteConflictsFixedRetryCount(DeleteConflictList theList) {
+		for (DeleteConflict next : theList) {
+			IdDt source = next.getSourceId();
+			if ("Patient".equals(source.getResourceType())) {
+				ourLog.info("Deleting {}", source);
+				myPatientDao.delete(source, theList, null, null);
+				++myInterceptorDeleteCount;
+			}
+		}
+		return new DeleteConflictOutcome().setShouldRetryCount(DeleteConflictService.MAX_RETRY_ATTEMPTS);
 	}
 
 	private static class DeleteConflictInterceptor {

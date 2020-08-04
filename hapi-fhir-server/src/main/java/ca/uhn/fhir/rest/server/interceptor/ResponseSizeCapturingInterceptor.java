@@ -57,7 +57,7 @@ public class ResponseSizeCapturingInterceptor {
 	public static final String RESPONSE_RESULT_KEY = ResponseSizeCapturingInterceptor.class.getName() + "_RESPONSE_RESULT_KEY";
 
 	private static final String COUNTING_WRITER_KEY = ResponseSizeCapturingInterceptor.class.getName() + "_COUNTING_WRITER_KEY";
-	private List<Consumer<Result>> myConsumers = new ArrayList<>();
+	private final List<Consumer<Result>> myConsumers = new ArrayList<>();
 
 	@Hook(Pointcut.SERVER_OUTGOING_WRITER_CREATED)
 	public Writer capture(RequestDetails theRequestDetails, Writer theWriter) {

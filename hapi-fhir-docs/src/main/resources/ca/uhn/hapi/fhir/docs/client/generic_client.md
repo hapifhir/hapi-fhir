@@ -209,6 +209,22 @@ FHIR also specifies a type of update called "conditional updates", where instead
 
 **See Also:** See the description of [Update ETags](#update_etags) below for information on specifying a matching version in the client request.
 
+# Patch - Instance
+
+The PATCH operation can be used to modify a resource in place by supplying a delta
+
+The following example shows how to perform a patch using a [FHIR Patch](http://hl7.org/fhir/fhirpatch.html)
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|patchFhir}}
+```
+
+The following example shows how to perform a patch using a [JSON Patch](https://tools.ietf.org/html/rfc6902.)
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|patchJson}}
+```
+
 # History - Server/Type/Instance
 
 To retrieve the version history of all resources, or all resources of a given type, or of a specific instance of a resource, you call the [`history()`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/client/api/IGenericClient.html#history()) method.

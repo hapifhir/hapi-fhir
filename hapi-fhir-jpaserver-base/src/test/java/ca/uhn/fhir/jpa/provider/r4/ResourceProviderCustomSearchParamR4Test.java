@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -17,23 +17,29 @@ import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Appointment;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -44,14 +50,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
 
@@ -59,13 +64,14 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 	}
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
@@ -73,7 +79,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
@@ -105,7 +111,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		sp.setTitle("Foo Param");
 
 		try {
-			ourClient.create().resource(sp).execute();
+			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid", e.getMessage());
@@ -116,7 +122,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void testConformanceOverrideAllowed() {
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
-		CapabilityStatement conformance = ourClient
+		CapabilityStatement conformance = myClient
 			.fetchConformance()
 			.ofType(CapabilityStatement.class)
 			.execute();
@@ -168,7 +174,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			}
 		});
 
-		conformance = ourClient
+		conformance = myClient
 			.fetchConformance()
 			.ofType(CapabilityStatement.class)
 			.execute();
@@ -274,7 +280,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
-		ourClient
+		myClient
 			.create()
 			.resource(eyeColourSp)
 			.execute();
@@ -293,7 +299,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
-		Bundle bundle = ourClient
+		Bundle bundle = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(new TokenClientParam("eyecolour").exactly().code("blue"))
@@ -340,7 +346,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		List<String> foundResources;
 		Bundle result;
 
-		result = ourClient
+		result = myClient
 			.search()
 			.forResource(Observation.class)
 			.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))
@@ -380,7 +386,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		List<String> foundResources;
 		Bundle result;
 
-		result = ourClient
+		result = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(new TokenClientParam("foo").exactly().code("male"))
@@ -436,13 +442,13 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			do {
 
 				if (bundle == null) {
-					bundle = ourClient
+					bundle = myClient
 						.search()
 						.byUrl(ourServerBase + "/Patient?identifier=FOO")
 						.returnBundle(Bundle.class)
 						.execute();
 				} else {
-					bundle = ourClient
+					bundle = myClient
 						.loadPage()
 						.next(bundle)
 						.execute();
@@ -456,15 +462,15 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			String queries = " * " + myCaptureQueriesListener
 				.getSelectQueries()
 				.stream()
-				.map(t->t.getSql(true, false))
+				.map(t -> t.getSql(true, false))
 				.collect(Collectors.joining("\n * "));
 
 			ourLog.info("Found: {}", found);
 
 			runInTransaction(() -> {
 
-				List currentResults = myEntityManager.createNativeQuery("select distinct resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_ left outer join HFJ_SPIDX_STRING myparamsst1_ on resourceta0_.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'")					.getResultList();
-				List currentResources = myEntityManager.createNativeQuery("select resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_")					.getResultList();
+				List currentResults = myEntityManager.createNativeQuery("select distinct resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_ left outer join HFJ_SPIDX_STRING myparamsst1_ on resourceta0_.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'").getResultList();
+				List currentResources = myEntityManager.createNativeQuery("select resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_").getResultList();
 
 				List<Search> searches = mySearchEntityDao.findAll();
 				assertEquals(1, searches.size());
@@ -477,21 +483,21 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 					search.toString() +
 					"\nQueries :\n" + queries;
 
-				for (Long next :ids) {
+				for (Long next : ids) {
 					if (!actualIds.contains(next)) {
 						List<ResourceIndexedSearchParamString> indexes = myResourceIndexedSearchParamStringDao
 							.findAll()
 							.stream()
-							.filter(t->t.getResourcePid().equals(next))
+							.filter(t -> t.getResourcePid().equals(next))
 							.collect(Collectors.toList());
-						message += "\n\nResource " + next + " has prefixes:\n * " + indexes.stream().map(t->t.toString()).collect(Collectors.joining("\n * "));
+						message += "\n\nResource " + next + " has prefixes:\n * " + indexes.stream().map(t -> t.toString()).collect(Collectors.joining("\n * "));
 						break;
 					}
 				}
 
-				assertEquals(message, 200, search.getNumFound());
-				assertEquals(message, 200, search.getTotalCount().intValue());
-				assertEquals(message, SearchStatusEnum.FINISHED, search.getStatus());
+				assertEquals(200, search.getNumFound(), message);
+				assertEquals(200, search.getTotalCount().intValue(), message);
+				assertEquals(SearchStatusEnum.FINISHED, search.getStatus(), message);
 			});
 
 			assertEquals(200, foundCount);
@@ -501,9 +507,5 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	}
 
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

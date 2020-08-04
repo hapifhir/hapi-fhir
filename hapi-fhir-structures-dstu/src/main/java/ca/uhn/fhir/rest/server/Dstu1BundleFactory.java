@@ -120,7 +120,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 
 							IdDt id = nextRes.getId();
 							if (id.hasResourceType() == false) {
-								String resName = myContext.getResourceDefinition(nextRes).getName();
+								String resName = myContext.getResourceName(nextRes);
 								id = id.withResourceType(resName);
 							}
 
@@ -316,7 +316,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 
 							IIdType id = nextRefRes.getIdElement();
 							if (id.hasResourceType() == false) {
-								String resName = myContext.getResourceDefinition(nextRefRes).getName();
+								String resName = myContext.getResourceName(nextRefRes);
 								id = id.withResourceType(resName);
 							}
 

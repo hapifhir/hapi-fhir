@@ -3,7 +3,7 @@ package ca.uhn.fhir.parser;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;

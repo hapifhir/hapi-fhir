@@ -7,8 +7,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomTypeR4Test;
 import ca.uhn.fhir.parser.CustomTypeR4Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -36,12 +36,21 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.EpisodeOfCare;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -51,7 +60,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -60,16 +68,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 public class GenericClientR4Test extends BaseGenericClientR4Test {
@@ -251,7 +258,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(Patient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals("foo=bar", capt.getAllValues().get(0).getFirstHeader("Cookie").getValue());
@@ -442,7 +449,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(CustomTypeR4Test.MyCustomPatient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals(1, resp.getEntry().size());
@@ -685,7 +692,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		Bundle outcome = client
 			.history()
-			.onServer().andReturnBundle(Bundle.class)
+			.onServer().returnBundle(Bundle.class)
 			.at(new DateRangeParam().setLowerBound("2011").setUpperBound("2018"))
 			.execute();
 
@@ -2289,7 +2296,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		client.fetchConformance().ofType(CapabilityStatement.class).execute();
+		client.capabilities().ofType(CapabilityStatement.class).execute();
 		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 	}
@@ -2314,7 +2321,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		Bundle resp = client
 			.history()
 			.onType(Patient.class)
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 
 	}

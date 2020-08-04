@@ -29,10 +29,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class LinkedBlockingChannel extends ExecutorSubscribableChannel implements IChannelProducer, IChannelReceiver {
 
+	private final String myName;
 	private final BlockingQueue<?> myQueue;
 
-	public LinkedBlockingChannel(ThreadPoolExecutor theExecutor, BlockingQueue<?> theQueue) {
+	public LinkedBlockingChannel(String theName, ThreadPoolExecutor theExecutor, BlockingQueue<?> theQueue) {
 		super(theExecutor);
+		myName = theName;
 		myQueue = theQueue;
 	}
 
@@ -44,5 +46,15 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 		while (getInterceptors().size() > 0) {
 			removeInterceptor(0);
 		}
+	}
+
+	@Override
+	public String getName() {
+		return myName;
+	}
+
+	@Override
+	public void destroy() {
+		// nothing
 	}
 }

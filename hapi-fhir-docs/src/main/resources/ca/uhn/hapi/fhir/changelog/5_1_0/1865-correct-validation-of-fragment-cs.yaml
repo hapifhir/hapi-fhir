@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1865
+title: "The validator will now correctly issue a warning instead of an error if a code can't be found when validating a
+   code in a CodeSystem where the content mode (CodeSystem.content) has a value of *fragment*."

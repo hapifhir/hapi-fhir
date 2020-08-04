@@ -6,15 +6,16 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -25,9 +26,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ClientHeadersR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientHeadersR4Test.class);
@@ -39,7 +40,7 @@ public class ClientHeadersR4Test {
 	private static String ourMethod;
 	private IGenericClient myClient;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourHeaders = null;
 		ourMethod = null;
@@ -126,7 +127,7 @@ public class ClientHeadersR4Test {
 		assertEquals("application/fhir+json; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeCreateClient() {
 		myClient = ourCtx.newRestfulGenericClient(ourServerBase);
 	}
@@ -164,13 +165,13 @@ public class ClientHeadersR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forR4();
 

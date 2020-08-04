@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1984
+title: "Two new operations have been added for EMPI: `$empi-clear` and `$empi-submit`. `$empi-clear` will delete EMPI links,
+and related Person objects. `$empi-submit` will submit all matching resources for EMPI processing."

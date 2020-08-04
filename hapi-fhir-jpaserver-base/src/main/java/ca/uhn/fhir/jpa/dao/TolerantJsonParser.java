@@ -20,26 +20,42 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.util.IModelVisitor2;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 class TolerantJsonParser extends JsonParser {
 
-	TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
+	private static final Logger ourLog = LoggerFactory.getLogger(TolerantJsonParser.class);
+	private final FhirContext myContext;
+	private final Long myResourcePid;
+
+	/**
+	 * Constructor
+	 *
+	 * @param theResourcePid The ID of the resource that will be parsed with this parser. It would be ok to change the
+	 *                       datatype for this param if we ever need to since it's only used for logging.
+	 */
+	TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler, Long theResourcePid) {
 		super(theContext, theParserErrorHandler);
+		myContext = theContext;
+		myResourcePid = theResourcePid;
 	}
 
 	@Override
@@ -71,11 +87,28 @@ class TolerantJsonParser extends JsonParser {
 				JsonObject object = gson.fromJson(theMessageString, JsonObject.class);
 				String corrected = gson.toJson(object);
 
-				return super.parseResource(theResourceType, corrected);
+				T parsed = super.parseResource(theResourceType, corrected);
+
+				myContext.newTerser().visit(parsed, new IModelVisitor2() {
+					@Override
+					public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+
+						BaseRuntimeElementDefinition<?> def = theElementDefinitionPath.get(theElementDefinitionPath.size() - 1);
+						if (def.getName().equals("decimal")) {
+							IPrimitiveType<BigDecimal> decimal = (IPrimitiveType<BigDecimal>) theElement;
+							String newPlainString = decimal.getValue().toPlainString();
+							ourLog.warn("Correcting invalid previously saved decimal number for Resource[pid={}] - Was {} and now is {}", myResourcePid, decimal.getValueAsString(), newPlainString);
+							decimal.setValueAsString(newPlainString);
+						}
+
+						return true;
+					}
+				});
+
+				return parsed;
 			}
 
 			throw e;
 		}
 	}
-
 }

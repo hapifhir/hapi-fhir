@@ -108,7 +108,7 @@ public class RunServerCommand extends BaseCommand {
 			ContextHolder.setDisableReferentialIntegrity(true);
 		}
 
-		 ContextHolder.setDatabaseUrl(theCommandLine.getOptionValue("u"));
+		ContextHolder.setDatabaseUrl(theCommandLine.getOptionValue("u"));
 
 		String reuseSearchResults = theCommandLine.getOptionValue(OPTION_REUSE_SEARCH_RESULTS_MILLIS);
 		if (reuseSearchResults != null) {

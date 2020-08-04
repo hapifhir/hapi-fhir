@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -306,7 +307,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 					List<IBaseResource> resources = parseBundle(reader);
 					for (IBaseResource next : resources) {
 
-						String nextType = getFhirContext().getResourceDefinition(next).getName();
+						String nextType = getFhirContext().getResourceType(next);
 						if ("StructureDefinition".equals(nextType)) {
 
 							String url = getConformanceResourceUrl(next);
@@ -327,13 +328,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	private String getConformanceResourceUrl(IBaseResource theResource) {
-		String urlValueString = null;
-		Optional<IBase> urlValue = getFhirContext().getResourceDefinition(theResource).getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
-		if (urlValue.isPresent()) {
-			IPrimitiveType<?> urlValueType = (IPrimitiveType<?>) urlValue.get();
-			urlValueString = urlValueType.getValueAsString();
-		}
-		return urlValueString;
+		return getConformanceResourceUrl(getFhirContext(), theResource);
 	}
 
 	private List<IBaseResource> parseBundle(InputStreamReader theReader) {
@@ -344,6 +339,17 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		} else {
 			return Collections.singletonList(parsedObject);
 		}
+	}
+
+	@Nullable
+	public static String getConformanceResourceUrl(FhirContext theFhirContext, IBaseResource theResource) {
+		String urlValueString = null;
+		Optional<IBase> urlValue = theFhirContext.getResourceDefinition(theResource).getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
+		if (urlValue.isPresent()) {
+			IPrimitiveType<?> urlValueType = (IPrimitiveType<?>) urlValue.get();
+			urlValueString = urlValueType.getValueAsString();
+		}
+		return urlValueString;
 	}
 
 	static <T extends IBaseResource> List<T> toList(Map<String, IBaseResource> theMap) {

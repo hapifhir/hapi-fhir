@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -46,6 +47,8 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	private IValidationSupport myDefaultProfileValidationSupport;
 	@Autowired
 	private ITermReadSvc myTerminologyService;
+	@Autowired
+	private NpmJpaValidationSupport myNpmJpaValidationSupport;
 
 	public JpaValidationSupportChain(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -63,12 +66,13 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PostConstruct
 	public void postConstruct() {
-		addValidationSupport((IValidationSupport) new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
-		addValidationSupport((IValidationSupport) myTerminologyService);
-		addValidationSupport((IValidationSupport) new SnapshotGeneratingValidationSupport(myFhirContext));
-		addValidationSupport((IValidationSupport) new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		addValidationSupport(myTerminologyService);
+		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
+		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		addValidationSupport(myNpmJpaValidationSupport);
+		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 	}
 
 }

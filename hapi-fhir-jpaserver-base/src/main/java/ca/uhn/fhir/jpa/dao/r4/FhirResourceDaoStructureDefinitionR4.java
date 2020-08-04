@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.apache.commons.lang3.Validate;
@@ -34,7 +35,7 @@ public class FhirResourceDaoStructureDefinitionR4 extends BaseHapiFhirResourceDa
 
 	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theName) {
-		StructureDefinition output = (StructureDefinition) myValidationSupport.generateSnapshot(myValidationSupport, theInput, theUrl, theWebUrl, theName);
+		StructureDefinition output = (StructureDefinition) myValidationSupport.generateSnapshot(new ValidationSupportContext(myValidationSupport), theInput, theUrl, theWebUrl, theName);
 		Validate.notNull(output);
 		return output;
 	}

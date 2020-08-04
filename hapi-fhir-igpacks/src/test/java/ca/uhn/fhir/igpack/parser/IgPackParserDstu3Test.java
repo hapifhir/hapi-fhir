@@ -5,12 +5,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class IgPackParserDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(IgPackParserDstu3Test.class);

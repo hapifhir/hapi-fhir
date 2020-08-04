@@ -10,31 +10,32 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.text.RandomStringGenerator;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
-	@After
+	@AfterEach
 	public final void after() {
 		when(mySrd.getRequestId()).thenReturn(null);
 		myDaoConfig.setStoreMetaSourceInformation(new DaoConfig().getStoreMetaSourceInformation());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
 	}
@@ -45,12 +46,12 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 		when(mySrd.getRequestId()).thenReturn(requestId);
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt1 = new Patient();
-		pt1.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:1"));
+		pt1.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt1.setActive(true);
 		IIdType pt1id = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
@@ -61,7 +62,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
 		pt0 = (Patient) result.getResources(0, 1).get(0);
-		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
+		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
 
 		// Search by request ID
 		params = new SearchParameterMap();
@@ -86,17 +87,17 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 		when(mySrd.getRequestId()).thenReturn(requestId);
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt1 = new Patient();
-		pt1.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:1"));
+		pt1.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt1.setActive(true);
 		IIdType pt1id = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
-		pt2.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:2"));
+		pt2.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:2"));
 		pt2.setActive(true);
 		myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
@@ -117,17 +118,17 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 		when(mySrd.getRequestId()).thenReturn(requestId);
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt1 = new Patient();
-		pt1.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:1"));
+		pt1.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt1.setActive(true);
 		IIdType pt1id = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
-		pt2.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:2"));
+		pt2.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:2"));
 		pt2.setActive(true);
 		myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
@@ -147,7 +148,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		when(mySrd.getRequestId()).thenReturn(requestId);
 
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
@@ -165,19 +166,19 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 	public void testSourceNotPreservedAcrossUpdate() {
 
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals("urn:source:0", pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
+		assertEquals("urn:source:0", pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
 
 		pt0.getMeta().getExtension().clear();
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
+		assertEquals(null, pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
 
 	}
 
@@ -187,19 +188,19 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		when(mySrd.getRequestId()).thenReturn("0000000000000000");
 
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals(null, pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
+		assertEquals(null, pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
 
-		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:1"));
+		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
+		assertEquals(null, pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
 
 		// Search without source param
 		SearchParameterMap params = new SearchParameterMap();
@@ -217,11 +218,6 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(e.getMessage(), "The _source parameter is disabled on this server");
 		}
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {

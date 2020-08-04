@@ -1,27 +1,31 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.*;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.junit.*;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.*;
 
-import com.google.common.base.Charsets;
-
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.BeforeEach;
 
 @SuppressWarnings("Duplicates")
 public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
@@ -35,13 +39,13 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	private String myWrongPatId;
 	private String myWrongEnc1;
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -51,6 +55,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Override
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
@@ -59,41 +64,41 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		
 		Organization org = new Organization();
 		org.setName("an org");
-		orgId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
+		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
 		ourLog.info("OrgId: {}", orgId);
 
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setReference(orgId);
-		patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		patId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient2 = new Patient();
 		patient2.getManagingOrganization().setReference(orgId);
-		myWrongPatId = ourClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
+		myWrongPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(EncounterStatus.CANCELLED);
 		enc1.getSubject().setReference(patId);
 		enc1.getServiceProvider().setReference(orgId);
-		encId1 = ourClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
+		encId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(EncounterStatus.ARRIVED);
 		enc2.getSubject().setReference(patId);
 		enc2.getServiceProvider().setReference(orgId);
-		encId2 = ourClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
+		encId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter wrongEnc1 = new Encounter();
 		wrongEnc1.setStatus(EncounterStatus.ARRIVED);
 		wrongEnc1.getSubject().setReference(myWrongPatId);
 		wrongEnc1.getServiceProvider().setReference(orgId);
-		myWrongEnc1 = ourClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
+		myWrongEnc1 = myClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
 
-		myObsIds = new ArrayList<String>();
+		myObsIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
 			obs.setStatus(ObservationStatus.FINAL);
-			String obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			String obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
 			myObsIds.add(obsId);
 		}
 
@@ -200,11 +205,6 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		}
 		
 		return bundle;
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

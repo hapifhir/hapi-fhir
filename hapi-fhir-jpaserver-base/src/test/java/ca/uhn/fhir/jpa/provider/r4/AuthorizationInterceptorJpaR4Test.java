@@ -15,9 +15,12 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleTester;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -33,28 +36,33 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorJpaR4Test.class);
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
@@ -68,11 +76,11 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void testBlockUpdatingPatientUserDoesnNotHaveAccessTo() {
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
-		final IIdType pid1 = ourClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();
+		final IIdType pid1 = myClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
 		pt2.setActive(false);
-		final IIdType pid2 = ourClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
+		final IIdType pid2 = myClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
 
 		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -87,7 +95,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Observation obs = new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setSubject(new Reference(pid1));
-		IIdType oid = ourClient.create().resource(obs).execute().getId().toUnqualified();
+		IIdType oid = myClient.create().resource(obs).execute().getId().toUnqualified();
 
 		ourRestServer.getInterceptorService().unregisterInterceptor(authInterceptor);
 		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -110,7 +118,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		obs.setSubject(new Reference(pid2));
 
 		try {
-			ourClient.update().resource(obs).execute();
+			myClient.update().resource(obs).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -124,7 +132,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		final MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+		final MethodOutcome output1 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -140,7 +148,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.setId(output1.getId().toUnqualifiedVersionless());
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		MethodOutcome output2 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+		MethodOutcome output2 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
 
@@ -148,7 +156,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
-			ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
+			myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
@@ -159,7 +167,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
-			ourClient.update().resource(patient).execute();
+			myClient.update().resource(patient).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
@@ -181,8 +189,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 								return patient
 									.getIdentifier()
 									.stream()
-									.filter(t-> "http://uhn.ca/mrns".equals(t.getSystem()))
-									.anyMatch(t-> "100".equals(t.getValue()));
+									.filter(t -> "http://uhn.ca/mrns".equals(t.getSystem()))
+									.anyMatch(t -> "100".equals(t.getValue()));
 							}
 							return false;
 						}
@@ -206,12 +214,12 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.getRequest()
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setIfNoneExist("Patient?identifier=http://uhn.ca/mrns|100");
-			Bundle response = ourClient.transaction().withBundle(request).execute();
+			Bundle response = myClient.transaction().withBundle(request).execute();
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 			// Subsequent calls also shouldn't fail
-			ourClient.transaction().withBundle(request).execute();
-			ourClient.transaction().withBundle(request).execute();
+			myClient.transaction().withBundle(request).execute();
+			myClient.transaction().withBundle(request).execute();
 		}
 
 		// Create a patient with wrong identifier (blocked)
@@ -229,7 +237,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.setIfNoneExist("Patient?identifier=http://uhn.ca/mrns|101");
 
 			try {
-				ourClient.transaction().withBundle(request).execute();
+				myClient.transaction().withBundle(request).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
 				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
@@ -250,7 +258,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.setIfNoneExist("Organization?name=FOO");
 
 			try {
-				ourClient.transaction().withBundle(request).execute();
+				myClient.transaction().withBundle(request).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
 				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
@@ -266,7 +274,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		IIdType id = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute().getId().toUnqualifiedVersionless();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -284,7 +292,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		SimpleRequestHeaderInterceptor interceptor = new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA");
 		try {
-			ourClient.registerInterceptor(interceptor);
+			myClient.registerInterceptor(interceptor);
 
 			Bundle bundle;
 			Bundle responseBundle;
@@ -293,7 +301,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
 			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(id.getValue());
-			responseBundle = ourClient.transaction().withBundle(bundle).execute();
+			responseBundle = myClient.transaction().withBundle(bundle).execute();
 			patient = (Patient) responseBundle.getEntry().get(0).getResource();
 			assertEquals("Tester", patient.getNameFirstRep().getFamily());
 
@@ -301,13 +309,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
 			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient?");
-			responseBundle = ourClient.transaction().withBundle(bundle).execute();
+			responseBundle = myClient.transaction().withBundle(bundle).execute();
 			responseBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
 			patient = (Patient) responseBundle.getEntry().get(0).getResource();
 			assertEquals("Tester", patient.getNameFirstRep().getFamily());
 
 		} finally {
-			ourClient.unregisterInterceptor(interceptor);
+			myClient.unregisterInterceptor(interceptor);
 		}
 
 	}
@@ -318,16 +326,16 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setSubject(new Reference(patientId));
-		IIdType observationId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+		IIdType observationId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
 		obs2.setStatus(ObservationStatus.FINAL);
-		IIdType observationId2 = ourClient.create().resource(obs2).execute().getId().toUnqualifiedVersionless();
+		IIdType observationId2 = myClient.create().resource(obs2).execute().getId().toUnqualifiedVersionless();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -342,12 +350,12 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Observation response;
 
 		// Read (no masking)
-		response = ourClient.read().resource(Observation.class).withId(observationId).execute();
+		response = myClient.read().resource(Observation.class).withId(observationId).execute();
 		assertEquals(ObservationStatus.FINAL, response.getStatus());
 		assertEquals(patientId.getValue(), response.getSubject().getReference());
 
 		// Read (with _elements masking)
-		response = ourClient
+		response = myClient
 			.read()
 			.resource(Observation.class)
 			.withId(observationId)
@@ -358,7 +366,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		// Read a non-allowed observation
 		try {
-			ourClient.read().resource(Observation.class).withId(observationId2).execute();
+			myClient.read().resource(Observation.class).withId(observationId2).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -376,17 +384,17 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.setId("Patient/A");
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		IIdType id = ourClient.update().resource(patient).execute().getId();
+		IIdType id = myClient.update().resource(patient).execute().getId();
 
 		Observation obs = new Observation();
 		obs.setId("Observation/B");
 		obs.getSubject().setReference("Patient/A");
-		ourClient.update().resource(obs).execute();
+		myClient.update().resource(obs).execute();
 
 		obs = new Observation();
 		obs.setId("Observation/C");
 		obs.setStatus(ObservationStatus.FINAL);
-		ourClient.update().resource(obs).execute();
+		myClient.update().resource(obs).execute();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -399,17 +407,17 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		ourClient.delete().resourceById(new IdType("Observation/B")).execute();
+		myClient.delete().resourceById(new IdType("Observation/B")).execute();
 
 		try {
-			ourClient.read().resource(Observation.class).withId("Observation/B").execute();
+			myClient.read().resource(Observation.class).withId("Observation/B").execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		try {
-			ourClient.delete().resourceById(new IdType("Observation/C")).execute();
+			myClient.delete().resourceById(new IdType("Observation/C")).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -425,16 +433,16 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		final IIdType id = ourClient.create().resource(patient).execute().getId();
+		final IIdType id = myClient.create().resource(patient).execute().getId();
 
 		Observation obsInCompartment = new Observation();
 		obsInCompartment.setStatus(ObservationStatus.FINAL);
 		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
-		IIdType obsInCompartmentId = ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+		IIdType obsInCompartmentId = myClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
 
 		Observation obsNotInCompartment = new Observation();
 		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
-		IIdType obsNotInCompartmentId = ourClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
+		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -447,10 +455,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		ourClient.delete().resourceById(obsInCompartmentId.toUnqualifiedVersionless()).execute();
+		myClient.delete().resourceById(obsInCompartmentId.toUnqualifiedVersionless()).execute();
 
 		try {
-			ourClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
+			myClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -463,16 +471,16 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		final IIdType id = ourClient.create().resource(patient).execute().getId();
+		final IIdType id = myClient.create().resource(patient).execute().getId();
 
 		Observation obsInCompartment = new Observation();
 		obsInCompartment.setStatus(ObservationStatus.FINAL);
 		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
-		IIdType obsInCompartmentId = ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+		IIdType obsInCompartmentId = myClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
 
 		Observation obsNotInCompartment = new Observation();
 		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
-		IIdType obsNotInCompartmentId = ourClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
+		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -490,13 +498,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsInCompartmentId.toUnqualifiedVersionless().getValue());
-		ourClient.transaction().withBundle(bundle).execute();
+		myClient.transaction().withBundle(bundle).execute();
 
 		try {
 			bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
 			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsNotInCompartmentId.toUnqualifiedVersionless().getValue());
-			ourClient.transaction().withBundle(bundle).execute();
+			myClient.transaction().withBundle(bundle).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -522,16 +530,16 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		IIdType id = ourClient.create().resource(patient).execute().getId();
+		IIdType id = myClient.create().resource(patient).execute().getId();
 
 		try {
-			ourClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
+			myClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
 
-		patient = ourClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
+		patient = myClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
 		assertEquals(id.getValue(), patient.getId());
 	}
 
@@ -545,12 +553,12 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 			patient.addName().setFamily("Tester").addGiven("Raghad");
-			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			final IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 			Observation obs = new Observation();
 			obs.setStatus(ObservationStatus.FINAL);
 			obs.getSubject().setReferenceElement(patientId);
-			ourClient.create().resource(obs).execute();
+			myClient.create().resource(obs).execute();
 
 			// Allow any deletes, but don't allow cascade
 			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -563,7 +571,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			});
 
 			try {
-				ourClient
+				myClient
 					.delete()
 					.resourceById(patientId)
 					.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
@@ -589,12 +597,12 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 			patient.addName().setFamily("Tester").addGiven("Raghad");
-			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			final IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 			Observation obs = new Observation();
 			obs.setStatus(ObservationStatus.FINAL);
 			obs.getSubject().setReferenceElement(patientId);
-			ourClient.create().resource(obs).execute();
+			myClient.create().resource(obs).execute();
 
 			// Allow any deletes, but don't allow cascade
 			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -607,7 +615,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				}
 			});
 
-			ourClient
+			myClient
 				.delete()
 				.resourceById(patientId)
 				.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
@@ -628,12 +636,12 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 			patient.addName().setFamily("Tester").addGiven("Raghad");
-			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			final IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 			Observation obs = new Observation();
 			obs.setStatus(ObservationStatus.FINAL);
 			obs.getSubject().setReferenceElement(patientId);
-			ourClient.create().resource(obs).execute();
+			myClient.create().resource(obs).execute();
 
 			// Allow any deletes, but don't allow cascade
 			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -648,7 +656,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			});
 
 			try {
-				ourClient
+				myClient
 					.delete()
 					.resourceById(patientId)
 					.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
@@ -730,6 +738,123 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	}
 
+
+	@Test
+	public void testDiffOperation_AllowedByType_Instance() {
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("A"), withActiveFalse());
+		createObservation(withId("B"), withStatus("final"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onAnyInstance().andAllowAllResponses().andThen()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onServer().andAllowAllResponses().andThen()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Parameters diff;
+
+		diff = myClient.operation().onInstance("Patient/A").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+		assertEquals(1, diff.getParameter().size());
+
+		diff = myClient.operation().onInstanceVersion(new IdType("Patient/A/_history/2")).named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+		assertEquals(1, diff.getParameter().size());
+
+		try {
+			myClient.operation().onInstance("Observation/B").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+
+	}
+
+	@Test
+	public void testDiffOperation_AllowedByType_Server() {
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveFalse());
+		createObservation(withId("C"), withStatus("final"));
+		createObservation(withId("D"), withStatus("amended"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onAnyInstance().andAllowAllResponses().andThen()
+					.allow().operation().named(ProviderConstants.DIFF_OPERATION_NAME).onServer().andAllowAllResponses().andThen()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Parameters diff;
+
+		diff = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.DIFF_OPERATION_NAME)
+			.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Patient/A"))
+			.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Patient/B"))
+			.execute();
+		assertEquals(2, diff.getParameter().size());
+
+		try {
+			myClient
+				.operation()
+				.onServer()
+				.named(ProviderConstants.DIFF_OPERATION_NAME)
+				.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Observation/C"))
+				.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Observation/D"))
+				.execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+
+	}
+
+
+	@Test
+	public void testGraphQL_AllowedByType_Instance() throws IOException {
+		createPatient(withId("A"), withFamily("MY_FAMILY"));
+		createPatient(withId("B"), withFamily("MY_FAMILY"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().graphQL().any().andThen()
+					.allow().read().instance("Patient/A").andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		String query = "{name{family,given}}";
+
+		httpGet = new HttpGet(ourServerBase + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, containsString("MY_FAMILY"));
+		}
+
+		httpGet = new HttpGet(ourServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(403, response.getStatusLine().getStatusCode());
+		}
+
+	}
+
+
 	/**
 	 * See #762
 	 */
@@ -763,7 +888,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		o.getSubject().setResource(p);
 		request.addEntry().setResource(o).getRequest().setMethod(Bundle.HTTPVerb.POST);
 
-		Bundle resp = ourClient.transaction().withBundle(request).execute();
+		Bundle resp = myClient.transaction().withBundle(request).execute();
 		assertEquals(2, resp.getEntry().size());
 
 
@@ -800,7 +925,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.setMethod(Bundle.HTTPVerb.POST);
 
 		// return=minimal - should succeed
-		Bundle resp = ourClient
+		Bundle resp = myClient
 			.transaction()
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
@@ -809,7 +934,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertNull(resp.getEntry().get(0).getResource());
 
 		// return=OperationOutcome - should succeed
-		resp = ourClient
+		resp = myClient
 			.transaction()
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
@@ -819,7 +944,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		// return=Representation - should fail
 		try {
-			ourClient
+			myClient
 				.transaction()
 				.withBundle(bundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
@@ -912,7 +1037,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.setMethod(Bundle.HTTPVerb.POST);
 
 
-		Bundle resp = ourClient
+		Bundle resp = myClient
 			.transaction()
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
@@ -925,21 +1050,21 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void testPatchWithinCompartment() {
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
-		final IIdType pid1 = ourClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();
+		final IIdType pid1 = myClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs1 = new Observation();
 		obs1.setStatus(ObservationStatus.FINAL);
 		obs1.setSubject(new Reference(pid1));
-		IIdType oid1 = ourClient.create().resource(obs1).execute().getId().toUnqualified();
+		IIdType oid1 = myClient.create().resource(obs1).execute().getId().toUnqualified();
 
 		Patient pt2 = new Patient();
 		pt2.setActive(false);
-		final IIdType pid2 = ourClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
+		final IIdType pid2 = myClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
 		obs2.setStatus(ObservationStatus.FINAL);
 		obs2.setSubject(new Reference(pid2));
-		IIdType oid2 = ourClient.create().resource(obs2).execute().getId().toUnqualified();
+		IIdType oid2 = myClient.create().resource(obs2).execute().getId().toUnqualified();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -957,18 +1082,18 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			"     ]";
 
 		// Allowed
-		ourClient.patch().withBody(patchBody).withId(oid1).execute();
-		obs1 = ourClient.read().resource(Observation.class).withId(oid1.toUnqualifiedVersionless()).execute();
+		myClient.patch().withBody(patchBody).withId(oid1).execute();
+		obs1 = myClient.read().resource(Observation.class).withId(oid1.toUnqualifiedVersionless()).execute();
 		assertEquals(ObservationStatus.AMENDED, obs1.getStatus());
 
 		// Denied
 		try {
-			ourClient.patch().withBody(patchBody).withId(oid2).execute();
+			myClient.patch().withBody(patchBody).withId(oid2).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
-		obs2 = ourClient.read().resource(Observation.class).withId(oid2.toUnqualifiedVersionless()).execute();
+		obs2 = myClient.read().resource(Observation.class).withId(oid2.toUnqualifiedVersionless()).execute();
 		assertEquals(ObservationStatus.FINAL, obs2.getStatus());
 	}
 
@@ -978,14 +1103,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testReadingObservationAccessRight() {
 		Practitioner practitioner1 = new Practitioner();
-		final IIdType practitionerId1 = ourClient.create().resource(practitioner1).execute().getId().toUnqualifiedVersionless();
+		final IIdType practitionerId1 = myClient.create().resource(practitioner1).execute().getId().toUnqualifiedVersionless();
 
 		Practitioner practitioner2 = new Practitioner();
-		final IIdType practitionerId2 = ourClient.create().resource(practitioner2).execute().getId().toUnqualifiedVersionless();
+		final IIdType practitionerId2 = myClient.create().resource(practitioner2).execute().getId().toUnqualifiedVersionless();
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		final IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -1011,28 +1136,24 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		obs1.setStatus(ObservationStatus.FINAL);
 		obs1.setPerformer(
 			Arrays.asList(new Reference(practitionerId1), new Reference(practitionerId2)));
-		IIdType oid1 = ourClient.create().resource(obs1).execute().getId().toUnqualified();
+		IIdType oid1 = myClient.create().resource(obs1).execute().getId().toUnqualified();
 
 		// Observation with practitioner1 and practitioner1 as the Performer -> should have the read access
-		ourClient.read().resource(Observation.class).withId(oid1).execute();
+		myClient.read().resource(Observation.class).withId(oid1).execute();
 
 		Observation obs2 = new Observation();
 		obs2.setStatus(ObservationStatus.FINAL);
 		obs2.setSubject(new Reference(patientId));
-		IIdType oid2 = ourClient.create().resource(obs2).execute().getId().toUnqualified();
+		IIdType oid2 = myClient.create().resource(obs2).execute().getId().toUnqualified();
 
 		// Observation with patient as the subject -> read access should be blocked
 		try {
-			ourClient.read().resource(Observation.class).withId(oid2).execute();
+			myClient.read().resource(Observation.class).withId(oid2).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

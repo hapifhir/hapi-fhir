@@ -1,0 +1,1150 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-patient",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient",
+  "version": "2.1.7",
+  "name": "nl-core-patient",
+  "title": "nl-core-patient",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "A Patient resource as defined by the Dutch Health and Care Information models or HCIM (Dutch: Zorginformatiebouwsteen or ZIB) Patient, with additions from the HCIMs Nationality, MaritalStatus, ContactPerson, LanguageProficiency, HealthProfessional and HealthcareProvider (HCIM releases 2015, 2016 and 2017)",
+  "purpose": "Patient. Tracking a patient is the center of the healthcare process. Names and addresses are also in compliance with HL7 V3 Basic Components.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-patient-v2.0.1-2015EN",
+      "uri": "https://zibs.nl/wiki/Patient-v2.0.1(2015EN)",
+      "name": "HCIM Patient-v2.0.1(2015EN)"
+    },
+    {
+      "identity": "hcim-maritalstatus-v1.2.1-2015EN",
+      "uri": "https://zibs.nl/wiki/MaritalStatus-v1.2.1(2015EN)",
+      "name": "HCIM MaritalStatus-v1.2.1(2015EN)"
+    },
+    {
+      "identity": "hcim-contactperson-v1.2-2015EN",
+      "uri": "https://zibs.nl/wiki/ContactPerson-v1.2(2015EN)",
+      "name": "HCIM ContactPerson-v1.2(2015EN)"
+    },
+    {
+      "identity": "hcim-healthcareprovider-v1.2-2015EN",
+      "uri": "https://zibs.nl/wiki/HealthcareProvider-v1.2(2015EN)",
+      "name": "HCIM HealthcareProvider-v1.2(2015EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v1.2.1(2015EN)",
+      "name": "HCIM HealthProfessional-v1.2.1(2015EN)"
+    },
+    {
+      "identity": "hcim-nationality-v2.0-2015EN",
+      "uri": "https://zibs.nl/wiki/Nationality-v2.0(2015EN)",
+      "name": "HCIM Nationality-v2.0(2015EN)"
+    },
+    {
+      "identity": "hcim-payer-v1.2-2015EN",
+      "uri": "https://zibs.nl/wiki/Payer-v1.2(2015EN)",
+      "name": "HCIM Payer-v1.2(2015EN)"
+    },
+    {
+      "identity": "hcim-patient-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.0(2016EN)",
+      "name": "HCIM Patient-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-maritalstatus-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/MaritalStatus-v3.0(2016EN)",
+      "name": "HCIM MaritalStatus-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-contactperson-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/ContactPerson-v3.0(2016EN)",
+      "name": "HCIM ContactPerson-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-healthcareprovider-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/HealthcareProvider-v3.0(2016EN)",
+      "name": "HCIM HealthcareProvider-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v3.0(2016EN)",
+      "name": "HCIM HealthProfessional-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-nationality-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Nationality-v3.0(2016EN)",
+      "name": "HCIM Nationality-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-payer-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Payer-v3.0(2016EN)",
+      "name": "HCIM Payer-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-patient-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.1(2017EN)",
+      "name": "HCIM Patient-v3.1(2017EN)"
+    },
+    {
+      "identity": "hcim-maritalstatus-v3.0-2017EN",
+      "uri": "https://zibs.nl/wiki/MaritalStatus-v3.0(2017EN)",
+      "name": "HCIM MaritalStatus-v3.0(2017EN)"
+    },
+    {
+      "identity": "hcim-contactperson-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/ContactPerson-v3.1(2017EN)",
+      "name": "HCIM ContactPerson-v3.1(2017EN)"
+    },
+    {
+      "identity": "hcim-healthcareprovider-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/HealthcareProvider-v3.1(2017EN)",
+      "name": "HCIM HealthcareProvider-v3.1(2017EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v3.1(2017EN)",
+      "name": "HCIM HealthProfessional-v3.1(2017EN)"
+    },
+    {
+      "identity": "hcim-nationality-v3.0-2017EN",
+      "uri": "https://zibs.nl/wiki/Nationality-v3.0(2017EN)",
+      "name": "HCIM Nationality-v3.0(2017EN)"
+    },
+    {
+      "identity": "hcim-payer-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/Payer-v3.1(2017EN)",
+      "name": "HCIM Payer-v3.1(2017EN)"
+    },
+    {
+      "identity": "hcim-contactinformation-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/ContactInformation-v1.0(2017EN)",
+      "name": "HCIM ContactInformation-v1.0(2017EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs."
+    },
+    {
+      "identity": "hcim-languageproficiency-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/LanguageProficiency-v3.1(2017EN)",
+      "name": "HCIM LanguageProficiency-v3.1(2017EN)"
+    },
+    {
+      "identity": "hcim-freedomrestrictingmeasures-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/FreedomRestrictingMeasures-v3.1(2017EN)",
+      "name": "HCIM FreedomRestrictingMeasures-v3.1(2017EN)",
+      "comment": "Concerns only LegalStatus concept. This will become an independent information model as of release 2018 of the HCIMs."
+    },
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Patient",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Patient",
+        "path": "Patient",
+        "short": "Patient",
+        "alias": [
+          "Patiënt"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.1",
+            "comment": "Patient"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.1",
+            "comment": "Patient"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.1",
+            "comment": "Patient"
+          },
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.2",
+            "comment": "PayerPerson"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.2",
+            "comment": "PayerPerson"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.2",
+            "comment": "PayerPerson"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.3",
+            "comment": "PatientAsInformationSource::Patient"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.8",
+            "comment": "PatientAsAuthor::Patient"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.12",
+            "comment": "Patient"
+          }
+        ]
+      },
+      {
+        "id": "Patient.extension",
+        "path": "Patient.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Patient.extension:preferredPharmacy",
+        "path": "Patient.extension",
+        "sliceName": "preferredPharmacy",
+        "short": "References a patient's preferered pharmacy",
+        "alias": [
+          "Verwijst naar de voorkeursapotheek van de patiënt"
+        ],
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-preferred-pharmacy"
+          }
+        ]
+      },
+      {
+        "id": "Patient.extension:nationality",
+        "path": "Patient.extension",
+        "sliceName": "nationality",
+        "alias": [
+          "Nationaliteit"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://hl7.org/fhir/StructureDefinition/patient-nationality"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-nationality-v2.0-2015EN",
+            "map": "NL-CM:7.6.3",
+            "comment": "Nationality"
+          },
+          {
+            "identity": "hcim-nationality-v3.0-2016EN",
+            "map": "NL-CM:7.6.3",
+            "comment": "Nationality"
+          },
+          {
+            "identity": "hcim-nationality-v3.0-2017EN",
+            "map": "NL-CM:7.6.3",
+            "comment": "Nationality"
+          }
+        ]
+      },
+      {
+        "id": "Patient.extension:nationality.extension:code",
+        "path": "Patient.extension.extension",
+        "sliceName": "code"
+      },
+      {
+        "id": "Patient.extension:nationality.extension:code.valueCodeableConcept:valueCodeableConcept",
+        "path": "Patient.extension.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "Indicates the country of citizenship.",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.7.6.3--20171231000000",
+            "display": "NationaliteitCodelijst"
+          }
+        }
+      },
+      {
+        "id": "Patient.extension:nationality.extension:period",
+        "path": "Patient.extension.extension",
+        "sliceName": "period"
+      },
+      {
+        "id": "Patient.extension:nationality.extension:period.valuePeriod:valuePeriod",
+        "path": "Patient.extension.extension.valuePeriod",
+        "sliceName": "valuePeriod"
+      },
+      {
+        "id": "Patient.extension:legalStatus",
+        "path": "Patient.extension",
+        "sliceName": "legalStatus",
+        "comment": "The concept LegalStatus of the HCIM FreedomRestrictingMeasures plays an importand role in the context of mental healthcare (GGZ). This concept will become an independent HCIM with the next release of HCIM (2018 release).  \r\n\r\nThe LegalStatus concept and associated valueset will be split in two: legalstatus and guardianship. These concept are currently captured in one valueset. It is possible to have a legalstatus AND a representative. Therefore, we allow this extension to have a cardinality of 0..2.",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/zib-patient-legalstatus"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-freedomrestrictingmeasures-v3.1-2017EN",
+            "map": "NL-CM:14.3.2",
+            "comment": "LegalStatus"
+          }
+        ]
+      },
+      {
+        "id": "Patient.extension:legalStatus.valueCodeableConcept:valueCodeableConcept",
+        "path": "Patient.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "min": 1,
+        "binding": {
+          "strength": "extensible"
+        }
+      },
+      {
+        "id": "Patient.extension:legalStatus.valueCodeableConcept:valueCodeableConcept.coding",
+        "path": "Patient.extension.valueCodeableConcept.coding",
+        "min": 1
+      },
+      {
+        "id": "Patient.extension:legalStatus.valueCodeableConcept:valueCodeableConcept.coding.system",
+        "path": "Patient.extension.valueCodeableConcept.coding.system",
+        "min": 1
+      },
+      {
+        "id": "Patient.extension:legalStatus.valueCodeableConcept:valueCodeableConcept.coding.code",
+        "path": "Patient.extension.valueCodeableConcept.coding.code",
+        "min": 1
+      },
+      {
+        "id": "Patient.identifier",
+        "path": "Patient.identifier",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        },
+        "short": "PatientIdentificationNumber",
+        "definition": "The Burgerservicenummer or BSN, as one of the possible patient identification numbers, should at least be sent unless there is a reason not to. Reasons for not sending the burgerservicenummer include but are not limited to, research and apps without a contract for processing data (Dutch: bewerkingsovereenkomst).",
+        "alias": [
+          "Identificatienummer"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.7",
+            "comment": "PatientIdentificationNumber"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.7",
+            "comment": "PatientIdentificationNumber"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.7",
+            "comment": "PatientIdentificationNumber"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "Patient.identifier:BSN",
+        "path": "Patient.identifier",
+        "sliceName": "BSN",
+        "short": "BSN",
+        "alias": [
+          "BSN"
+        ],
+        "max": "1"
+      },
+      {
+        "id": "Patient.identifier:BSN.system",
+        "path": "Patient.identifier.system",
+        "min": 1,
+        "fixedUri": "http://fhir.nl/fhir/NamingSystem/bsn"
+      },
+      {
+        "id": "Patient.identifier:BSN.value",
+        "path": "Patient.identifier.value",
+        "short": "BSN (Burgerservicenummer (Dutch person identification number))",
+        "definition": "Burgerservicenummer is the Dutch person identification number which is also allowed for use in healthcare.",
+        "comment": "The official format according to the 'Logisch Ontwerp BSN 1.4.pdf' is N8..9 and SHALL conform to an 11-proof algorithm. In order to check if the number is 11-proof the number, if N8, SHALL be prefixed with a leading zero. The expected format in FHIR is N9 with leading zero applied to any N8 bsn.",
+        "alias": [
+          "BSN"
+        ],
+        "min": 1,
+        "example": [
+          {
+            "label": "Example of a burgerservicenummer",
+            "valueString": "123456782"
+          }
+        ]
+      },
+      {
+        "id": "Patient.active",
+        "path": "Patient.active",
+        "definition": "This field determines the status of the 'patient' record in the context of the organization that owns the record. Note that the record is not the medical record, but rather the actual patient 'resource'. Obviously when the patient 'resource' is not active, then by extension his medical record might also be inactive. Patient.active='false' may be used discourage use of the record, but that it is kept beause there is (medical) data attached to it. Another use case is a patient moving to a different GP practice. Patient.active would be 'false' in the system of the previous GP."
+      },
+      {
+        "id": "Patient.name",
+        "path": "Patient.name",
+        "short": "NameInformation",
+        "alias": [
+          "Naamgegevens"
+        ],
+        "type": [
+          {
+            "code": "HumanName",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-humanname"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.6",
+            "comment": "NameInformation"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.6",
+            "comment": "NameInformation"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.6",
+            "comment": "NameInformation"
+          },
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.5",
+            "comment": "PayerName"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.5",
+            "comment": "PayerName"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.5",
+            "comment": "PayerName"
+          }
+        ]
+      },
+      {
+        "id": "Patient.telecom",
+        "path": "Patient.telecom",
+        "short": "ContactInformation",
+        "definition": "A contact detail for the individual. Note that there is no support for multiple use values like 'mobile business'.",
+        "alias": [
+          "Contactgegevens"
+        ],
+        "type": [
+          {
+            "code": "ContactPoint",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-contactpoint"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.12",
+            "comment": "TelephoneEmail::ContactInformation"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.12",
+            "comment": "TelephoneEmail::ContactInformation"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.12",
+            "comment": "ContactInformation"
+          }
+        ]
+      },
+      {
+        "id": "Patient.gender",
+        "path": "Patient.gender",
+        "short": "Gender",
+        "alias": [
+          "Geslacht"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.9",
+            "comment": "Gender. Use FHIR Core ConceptMap for HCIM mapping: http://nictiz.nl/fhir/ConceptMap/GeslachtCodelijst-to-administrative-gender"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.9",
+            "comment": "Gender. Use FHIR Core ConceptMap for HCIM mapping: http://nictiz.nl/fhir/ConceptMap/GeslachtCodelijst-to-administrative-gender"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.9",
+            "comment": "Gender. Use FHIR Core ConceptMap for HCIM mapping: http://nictiz.nl/fhir/ConceptMap/GeslachtCodelijst-to-AdministrativeGender"
+          }
+        ]
+      },
+      {
+        "id": "Patient.gender.extension",
+        "path": "Patient.gender.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Patient.gender.extension:GeslachtCodelijst",
+        "path": "Patient.gender.extension",
+        "sliceName": "GeslachtCodelijst",
+        "short": "Gender",
+        "definition": "Patient’s administrative gender.",
+        "alias": [
+          "Geslacht"
+        ],
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ]
+      },
+      {
+        "id": "Patient.gender.extension:GeslachtCodelijst.valueCodeableConcept:valueCodeableConcept",
+        "path": "Patient.gender.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "GeslachtCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.0.1.1--20171231000000",
+            "display": "GeslachtCodelijst"
+          }
+        }
+      },
+      {
+        "id": "Patient.birthDate",
+        "path": "Patient.birthDate",
+        "short": "Patients date of birth. The date of birth is mandatory for a patient. An incomplete date, e.g. only year or only year + month, is permitted.",
+        "alias": [
+          "Geboortedatum"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.10",
+            "comment": "DateOfBirth"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.10",
+            "comment": "DateOfBirth"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.10",
+            "comment": "DateOfBirth"
+          }
+        ]
+      },
+      {
+        "id": "Patient.deceased[x]",
+        "path": "Patient.deceased[x]",
+        "short": "DeathIndicator/DateOfDeath",
+        "alias": [
+          "Overlijdensindicator/DatumOverlijden"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.32",
+            "comment": "DeathIndicator"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.32",
+            "comment": "DeathIndicator"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.32",
+            "comment": "DeathIndicator"
+          },
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.33",
+            "comment": "DateOfDeath"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.33",
+            "comment": "DateOfDeath"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.33",
+            "comment": "DateOfDeath"
+          }
+        ]
+      },
+      {
+        "id": "Patient.address",
+        "path": "Patient.address",
+        "short": "AddressInformation",
+        "alias": [
+          "Adresgegevens"
+        ],
+        "type": [
+          {
+            "code": "Address",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-address"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.4",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.4",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.4",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.17",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.17",
+            "comment": "Address"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.17",
+            "comment": "AddressInformation"
+          }
+        ]
+      },
+      {
+        "id": "Patient.maritalStatus",
+        "path": "Patient.maritalStatus",
+        "short": "MaritalStatus",
+        "definition": "This field contains a patient's most recent marital (civil) status. A person’s marital status according to the terms and definition in the Dutch civil code.",
+        "alias": [
+          "BurgerlijkeStaat"
+        ],
+        "binding": {
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.7.9.1--20171231000000",
+            "display": "BurgerlijkeStaatCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-maritalstatus-v1.2.1-2015EN",
+            "map": "NL-CM:7.9.2",
+            "comment": "MaritalStatus"
+          },
+          {
+            "identity": "hcim-maritalstatus-v3.0-2016EN",
+            "map": "NL-CM:7.9.2",
+            "comment": "MaritalStatus"
+          },
+          {
+            "identity": "hcim-maritalstatus-v3.0-2017EN",
+            "map": "NL-CM:7.9.2",
+            "comment": "MaritalStatus"
+          }
+        ]
+      },
+      {
+        "id": "Patient.multipleBirth[x]",
+        "path": "Patient.multipleBirth[x]",
+        "short": "MultipleBirthIndicator",
+        "alias": [
+          "Meerlingindicator"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-patient-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.31",
+            "comment": "MultipleBirthIndicator"
+          },
+          {
+            "identity": "hcim-patient-v3.0-2016EN",
+            "map": "NL-CM:0.1.31",
+            "comment": "MultipleBirthIndicator"
+          },
+          {
+            "identity": "hcim-patient-v3.1-2017EN",
+            "map": "NL-CM:0.1.31",
+            "comment": "MultipleBirthIndicator"
+          }
+        ]
+      },
+      {
+        "id": "Patient.contact",
+        "path": "Patient.contact",
+        "short": "ContactPerson",
+        "definition": "Contacts are related persons in some way, but not all related persons are contacts. The HCIM ContactPerson is designed to deal with both related persons and contacts. An HCIM ContactPerson who is a contact, is expected to have an NL-CM:3.1.2 Role primary contact ('Eerste relatie/contactpersoon') or secondary contact ('Tweede relatie/contactpersoon'). See Patient.contact.relationship in slice 'role'.",
+        "alias": [
+          "Contactpersoon"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactperson-v1.2-2015EN",
+            "map": "NL-CM:3.1.1",
+            "comment": "Contact"
+          },
+          {
+            "identity": "hcim-contactperson-v3.0-2016EN",
+            "map": "NL-CM:3.1.1",
+            "comment": "Contact"
+          },
+          {
+            "identity": "hcim-contactperson-v3.1-2017EN",
+            "map": "NL-CM:3.1.1",
+            "comment": "Contact"
+          }
+        ]
+      },
+      {
+        "id": "Patient.contact.relationship",
+        "path": "Patient.contact.relationship",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "coding.system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Patient.contact.relationship:relationship",
+        "path": "Patient.contact.relationship",
+        "sliceName": "relationship",
+        "short": "Relationship",
+        "alias": [
+          "Relatie"
+        ],
+        "binding": {
+          "strength": "extensible",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.3.1.1--20171231000000",
+            "display": "RelatieCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-contactperson-v1.2-2015EN",
+            "map": "NL-CM:3.1.3",
+            "comment": "Relationship"
+          },
+          {
+            "identity": "hcim-contactperson-v3.0-2016EN",
+            "map": "NL-CM:3.1.3",
+            "comment": "Relationship"
+          },
+          {
+            "identity": "hcim-contactperson-v3.1-2017EN",
+            "map": "NL-CM:3.1.3",
+            "comment": "Relationship"
+          }
+        ]
+      },
+      {
+        "id": "Patient.contact.relationship:role",
+        "path": "Patient.contact.relationship",
+        "sliceName": "role",
+        "short": "Role",
+        "definition": "Expectation is to have at least one of primary contact ('Eerste relatie/contactpersoon') or secondary contact ('Tweede relatie/contactpersoon')",
+        "alias": [
+          "Rol"
+        ],
+        "binding": {
+          "strength": "extensible",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.3.1.2--20171231000000",
+            "display": "RolCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-contactperson-v1.2-2015EN",
+            "map": "NL-CM:3.1.2",
+            "comment": "Role"
+          },
+          {
+            "identity": "hcim-contactperson-v3.0-2016EN",
+            "map": "NL-CM:3.1.2",
+            "comment": "Role"
+          },
+          {
+            "identity": "hcim-contactperson-v3.1-2017EN",
+            "map": "NL-CM:3.1.2",
+            "comment": "Role"
+          }
+        ]
+      },
+      {
+        "id": "Patient.contact.name",
+        "path": "Patient.contact.name",
+        "short": "NameInformation",
+        "alias": [
+          "Naamgegevens"
+        ],
+        "type": [
+          {
+            "code": "HumanName",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-humanname"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactperson-v1.2-2015EN",
+            "map": "NL-CM:3.1.4",
+            "comment": "NameInformation"
+          },
+          {
+            "identity": "hcim-contactperson-v3.0-2016EN",
+            "map": "NL-CM:3.1.4",
+            "comment": "NameInformation"
+          },
+          {
+            "identity": "hcim-contactperson-v3.1-2017EN",
+            "map": "NL-CM:3.1.4",
+            "comment": "NameInformation"
+          }
+        ]
+      },
+      {
+        "id": "Patient.contact.telecom",
+        "path": "Patient.contact.telecom",
+        "short": "ContactInformation",
+        "comment": "Telecommunication data details (phone/email) is physically modeled in the HCIM Patient, which is why the telecommunication mappings appear to be coming from the HCIM Patient instead of the HCIM ContactPerson",
+        "alias": [
+          "Contactgegevens"
+        ],
+        "type": [
+          {
+            "code": "ContactPoint",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-contactpoint"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactperson-v1.2-2015EN",
+            "map": "NL-CM:3.1.6",
+            "comment": "TelephoneEmail::ContactInformation"
+          },
+          {
+            "identity": "hcim-contactperson-v3.0-2016EN",
+            "map": "NL-CM:3.1.6",
+            "comment": "TelephoneEmail::ContactInformation"
+          },
+          {
+            "identity": "hcim-contactperson-v3.1-2017EN",
+            "map": "NL-CM:3.1.6",
+            "comment": "ContactInformation"
+          }
+        ]
+      },
+      {
+        "id": "Patient.contact.address",
+        "path": "Patient.contact.address",
+        "short": "AddressInformation",
+        "alias": [
+          "Adresgegevens"
+        ],
+        "type": [
+          {
+            "code": "Address",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-address"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactperson-v1.2-2015EN",
+            "map": "NL-CM:3.1.5",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-contactperson-v3.0-2016EN",
+            "map": "NL-CM:3.1.5",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-contactperson-v3.1-2017EN",
+            "map": "NL-CM:3.1.5",
+            "comment": "AddressInformation"
+          }
+        ]
+      },
+      {
+        "id": "Patient.communication",
+        "path": "Patient.communication",
+        "alias": [
+          "Taalvaardigheid"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-languageproficiency-v3.1-2017EN",
+            "map": "NL-CM:7.12.1",
+            "comment": "LanguageProficiency"
+          }
+        ]
+      },
+      {
+        "id": "Patient.communication.extension",
+        "path": "Patient.communication.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Patient.communication.extension:languageProficiency",
+        "path": "Patient.communication.extension",
+        "sliceName": "languageProficiency",
+        "comment": "The HCIM concepts LanguageControlListening, LanguageControlReading, LanguageControlSpeaking are captuperd using a mocked offical HL7 core extension from the R4 FHIR specification. Each of these three concepts is encoded as a copy of the extension, typed using the code in the type slice according to the following mapping:\r\n* LanguaneControlListening maps to code 'RSP' (Received spoken)\r\n* LanguageControlReading maps to code 'RWR' (Received written)\r\n* LanguageControlSpeaking maps to code 'ESP' (Expressed spoken)",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/patient-proficiency"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-languageproficiency-v3.1-2017EN",
+            "map": "NL-CM:7.12.6",
+            "comment": "LanguageControlListening"
+          },
+          {
+            "identity": "hcim-languageproficiency-v3.1-2017EN",
+            "map": "NL-CM:7.12.7",
+            "comment": "LanguageControlSpeaking"
+          },
+          {
+            "identity": "hcim-languageproficiency-v3.1-2017EN",
+            "map": "NL-CM:7.12.8",
+            "comment": "LanguageControlReading"
+          }
+        ]
+      },
+      {
+        "id": "Patient.communication.extension:languageProficiency.extension:type",
+        "path": "Patient.communication.extension.extension",
+        "sliceName": "type"
+      },
+      {
+        "id": "Patient.communication.extension:languageProficiency.extension:type.valueCoding:valueCoding",
+        "path": "Patient.communication.extension.extension.valueCoding",
+        "sliceName": "valueCoding",
+        "binding": {
+          "strength": "extensible"
+        }
+      },
+      {
+        "id": "Patient.communication.extension:languageProficiency.extension:level",
+        "path": "Patient.communication.extension.extension",
+        "sliceName": "level"
+      },
+      {
+        "id": "Patient.communication.extension:languageProficiency.extension:level.valueCoding:valueCoding",
+        "path": "Patient.communication.extension.extension.valueCoding",
+        "sliceName": "valueCoding",
+        "binding": {
+          "strength": "extensible"
+        }
+      },
+      {
+        "id": "Patient.communication.extension:comment",
+        "path": "Patient.communication.extension",
+        "sliceName": "comment",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/Comment"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-languageproficiency-v3.1-2017EN",
+            "map": "NL-CM:7.12.5",
+            "comment": "Comment"
+          }
+        ]
+      },
+      {
+        "id": "Patient.communication.language",
+        "path": "Patient.communication.language",
+        "short": "CommunicationLanguage",
+        "definition": "The language of communication. \r\n\r\nThe ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.",
+        "comment": "The FHIR valueset http://hl7.org/fhir/valueset-languages.html is used instead of the ZIB valueset  CommunicationLanguageCodelist. The FHIR valueset uses the codesystem urn:ietf:bcp:47 which includes the ISO-639-2 alpha codesystem used by the ZIB valueset.",
+        "alias": [
+          "CommunicatieTaal"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-languageproficiency-v3.1-2017EN",
+            "map": "NL-CM:7.12.3",
+            "comment": "CommunicationLanguage"
+          }
+        ]
+      },
+      {
+        "id": "Patient.generalPractitioner",
+        "path": "Patient.generalPractitioner",
+        "short": "GeneralPractitioner",
+        "alias": [
+          "Huisarts"
+        ],
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v1.2-2015EN",
+            "map": "NL-CM:17.2.1",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.0-2016EN",
+            "map": "NL-CM:17.2.1",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1-2017EN",
+            "map": "NL-CM:17.2.1",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.1",
+            "comment": "HealthProfessional"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.1",
+            "comment": "HealthProfessional"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.1-2017EN",
+            "map": "NL-CM:17.1.1",
+            "comment": "HealthProfessional"
+          }
+        ]
+      },
+      {
+        "id": "Patient.generalPractitioner.extension",
+        "path": "Patient.generalPractitioner.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Patient.generalPractitioner.extension:practitionerRole",
+        "path": "Patient.generalPractitioner.extension",
+        "sliceName": "practitionerRole",
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+---
+type: remove
+issue: 1855
+title: "A very old feature that is not believed to be used anywhere has been removed: The ServerProfileProvider is
+   a special resource provider that was automatically registered to HAPI FHIR REST servers, and served up StructureDefinitions
+   that were registered to the FhirContext. Registering custom StructureDefinitions against the FhirContext for exposure through
+   the REST API (as what was then the /Profile endpoint) was planned to be a common feature during the DSTU1 lifecycle but
+   did not turn out to be a useful approach. This feature was mostly forgotten about until the logic for selecting resource
+   provider handler methods was revamped and the old mechanism suddenly became the default resource provider for StructureDefinition
+   resources in the JPA server. We don't expect any negative impact by this change, please post in our mailing list if you
+   disagree."

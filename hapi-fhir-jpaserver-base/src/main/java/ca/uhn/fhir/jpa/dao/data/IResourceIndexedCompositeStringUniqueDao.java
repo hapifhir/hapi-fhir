@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -34,4 +35,8 @@ public interface IResourceIndexedCompositeStringUniqueDao extends JpaRepository<
 
 	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myResourceId = :resId")
 	List<ResourceIndexedCompositeStringUnique> findAllForResourceIdForUnitTest(@Param("resId") Long theResourceId);
+
+	@Modifying
+	@Query("delete from ResourceIndexedCompositeStringUnique t WHERE t.myResourceId = :resid")
+	void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

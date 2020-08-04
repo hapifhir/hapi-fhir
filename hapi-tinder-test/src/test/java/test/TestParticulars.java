@@ -1,6 +1,6 @@
 package test;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.test.realstructs.resource.ListResource;
 import ca.uhn.test.realstructs.resource.AuditEvent.ObjectElement;

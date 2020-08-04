@@ -2,14 +2,14 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 public abstract class BaseSubscriptionRegistryTest extends BaseSubscriptionDstu3Test {
 	public static final String SUBSCRIPTION_ID = "1";
 	public static final String ORIG_CRITERIA = "Patient?";
 	public static final String NEW_CRITERIA = "Observation?";
 
-	@After
+	@AfterEach
 	public void clearRegistryAfter() {
 		super.clearRegistry();
 	}

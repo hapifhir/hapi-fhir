@@ -24,7 +24,10 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Objects;
+
 public abstract class BaseTableTask extends BaseTask {
+	protected final ColumnTypeToDriverTypeToSqlType myColumnTypeToDriverTypeToSqlType = new ColumnTypeToDriverTypeToSqlType();
 	private String myTableName;
 
 
@@ -52,6 +55,17 @@ public abstract class BaseTableTask extends BaseTask {
 	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		BaseTableTask otherObject = (BaseTableTask) theOtherObject;
 		theBuilder.append(myTableName, otherObject.myTableName);
+	}
+
+	protected String getSqlType(ColumnTypeEnum theColumnType, Long theColumnLength) {
+		String retVal = myColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType().get(theColumnType).get(getDriverType());
+		Objects.requireNonNull(retVal);
+
+		if (theColumnType == ColumnTypeEnum.STRING) {
+			retVal = retVal.replace("?", Long.toString(theColumnLength));
+		}
+
+		return retVal;
 	}
 
 	@Override

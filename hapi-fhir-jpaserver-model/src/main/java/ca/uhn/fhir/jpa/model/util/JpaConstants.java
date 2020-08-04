@@ -162,61 +162,10 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
 	/**
-	 * <p>
-	 * This extension should be of type <code>string</code> and should be
-	 * placed on the <code>Subscription.channel</code> element
-	 * </p>
+	 * Operation name for the "$lastn" operation
 	 */
-	public static final String EXT_SUBSCRIPTION_SUBJECT_TEMPLATE = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-subject-template";
-	/**
-	 * This extension URL indicates whether a REST HOOK delivery should
-	 * include the version ID when delivering.
-	 * <p>
-	 * This extension should be of type <code>boolean</code> and should be
-	 * placed on the <code>Subscription.channel</code> element.
-	 * </p>
-	 */
-	public static final String EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-strip-version-ids";
-	/**
-	 * This extension URL indicates whether a REST HOOK delivery should
-	 * reload the resource and deliver the latest version always. This
-	 * could be useful for example if a resource which triggers a
-	 * subscription gets updated many times in short succession and there
-	 * is no value in delivering the older versions.
-	 * <p>
-	 * Note that if the resource is now deleted, this may cause
-	 * the delivery to be cancelled altogether.
-	 * </p>
-	 *
-	 * <p>
-	 * This extension should be of type <code>boolean</code> and should be
-	 * placed on the <code>Subscription.channel</code> element.
-	 * </p>
-	 */
-	public static final String EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-deliver-latest-version";
-	/**
-	 * Indicate which strategy will be used to match this subscription
-	 */
-	public static final String EXT_SUBSCRIPTION_MATCHING_STRATEGY = "http://hapifhir.io/fhir/StructureDefinition/subscription-matching-strategy";
-	/**
-	 * <p>
-	 * This extension should be of type <code>string</code> and should be
-	 * placed on the <code>Subscription.channel</code> element
-	 * </p>
-	 */
-	public static final String EXT_SUBSCRIPTION_EMAIL_FROM = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-from";
-	/**
-	 * Extension ID for external binary references
-	 */
-	public static final String EXT_EXTERNALIZED_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
-	/**
-	 * Placed in system-generated extensions
-	 */
-	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
-	/**
-	 * Message added to expansion valueset
-	 */
-	public static final String EXT_VALUESET_EXPANSION_MESSAGE = "http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message";
+	public static final String OPERATION_LASTN = "$lastn";
+
 	/**
 	 * Parameter for the $export operation
 	 */
@@ -237,11 +186,15 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
+	/**
+	 * URL for extension on a SearchParameter indicating that text values should not be indexed
+	 */
+	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
 
 	/**
-	 * Extension URL for extension on a SearchParameter indicating that text values should not be indexed
+	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
 	 */
-	public static final String EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-token-suppress-text-index";
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
 
 	/**
 	 * Non-instantiable

@@ -14,7 +14,7 @@ import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -40,7 +40,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		ourLog.info("** AFTER **");
 		super.after();
@@ -53,7 +53,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -147,12 +147,12 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() {
 		ourTestSmtp.stop();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);

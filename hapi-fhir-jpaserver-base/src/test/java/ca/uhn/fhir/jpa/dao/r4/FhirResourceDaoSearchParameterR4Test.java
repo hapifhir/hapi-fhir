@@ -1,26 +1,27 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirResourceDaoSearchParameterR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoSearchParameterR4Test.class);
@@ -29,9 +30,9 @@ public class FhirResourceDaoSearchParameterR4Test {
 	@Mock
 	private ApplicationContext myApplicationContext;
 
-	@Before
+	@BeforeEach
 	public void before() {
-		myCtx = FhirContext.forR4();
+		myCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 		myDao = new FhirResourceDaoSearchParameterR4();
 		myDao.setContext(myCtx);
@@ -43,7 +44,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 	@Test
 	public void testValidateAllBuiltInSearchParams() {
 
-		for (String nextResource : myCtx.getResourceNames()) {
+		for (String nextResource : myCtx.getResourceTypes()) {
 			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextResource);
 			for (RuntimeSearchParam nextp : nextResDef.getSearchParams()) {
 				if (nextp.getName().equals("_id")) {

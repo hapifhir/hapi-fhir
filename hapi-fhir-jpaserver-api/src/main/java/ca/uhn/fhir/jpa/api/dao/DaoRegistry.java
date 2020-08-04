@@ -23,8 +23,6 @@ package ca.uhn.fhir.jpa.api.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
@@ -35,7 +33,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
@@ -76,7 +81,6 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
 		myAppCtx = theApplicationContext;
 	}
-
 	public IFhirSystemDao getSystemDao() {
 		IFhirSystemDao retVal = mySystemDao;
 		if (retVal == null) {
@@ -118,7 +122,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 
 	@Nullable
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(Class<T> theResourceType) {
-		String resourceName = myContext.getResourceDefinition(theResourceType).getName();
+		String resourceName = myContext.getResourceType(theResourceType);
 		try {
 			return (IFhirResourceDao<T>) getResourceDao(resourceName);
 		} catch (InvalidRequestException e) {
@@ -184,10 +188,10 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 			List<String> supportedResourceNames = myResourceNameToResourceDao
 				.keySet()
 				.stream()
-				.map(t -> myContext.getResourceDefinition(t).getName())
+				.map(t -> myContext.getResourceType(t))
 				.sorted()
 				.collect(Collectors.toList());
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceDefinition(theClass).getName() + " - Can handle: " + supportedResourceNames);
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
 		}
 		return retVal;
 	}

@@ -4,14 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReferenceParamTest {
 
@@ -113,7 +113,7 @@ public class ReferenceParamTest {
 	 * TODO: is this an error?
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testMismatchedTypeAndValueType() {
 
 		ReferenceParam rp = new ReferenceParam();
@@ -298,7 +298,7 @@ public class ReferenceParamTest {
 		assertEquals("cm", rp.toQuantityParam(ourCtx).getUnits());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

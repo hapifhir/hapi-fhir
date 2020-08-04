@@ -75,6 +75,10 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_MANAGEMENT_WAIT_TIMEOUT, Long.toString(myIndexManagementWaitTimeoutMillis));
 		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REQUIRED_INDEX_STATUS, myRequiredIndexStatus.getElasticsearchString());
 
+		// Need the mapping to be dynamic because of terminology indexes.
+		theProperties.put("hibernate.search.default.elasticsearch.dynamic_mapping", "true");
+
+
 		// Only for unit tests
 		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REFRESH_AFTER_WRITE, Boolean.toString(myDebugRefreshAfterWrite));
 		theProperties.put("hibernate.search." + ElasticsearchEnvironment.LOG_JSON_PRETTY_PRINTING, Boolean.toString(myDebugPrettyPrintJsonLog));

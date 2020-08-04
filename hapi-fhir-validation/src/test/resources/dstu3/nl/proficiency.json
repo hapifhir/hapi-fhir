@@ -1,0 +1,137 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "patient-proficiency",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://nictiz.nl/fhir/StructureDefinition/patient-proficiency",
+  "version": "2.0.1",
+  "name": "proficiency",
+  "title": "proficiency",
+  "status": "active",
+  "publisher": "HL7",
+  "description": "Proficiency level of the communication.\r\nExtension is mocked from the offical HL7 core extension in R4 FHIR build specification at 12-09-2018.",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    }
+  ],
+  "kind": "complex-type",
+  "abstract": false,
+  "contextType": "resource",
+  "context": [
+    "Patient.communication"
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Proficiency level of the communication",
+        "definition": "Proficiency level of the communication."
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Extension.extension:type",
+        "path": "Extension.extension",
+        "sliceName": "type",
+        "short": "The proficiency type of the communication",
+        "definition": "What type of communication for the proficiency (spoken, written, etc.).",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:type.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "type"
+      },
+      {
+        "id": "Extension.extension:type.value[x]:valueCoding",
+        "path": "Extension.extension.valueCoding",
+        "sliceName": "valueCoding",
+        "min": 1,
+        "type": [
+          {
+            "code": "Coding"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "description": "The proficiency type for the communication.",
+          "valueSetReference": {
+            "reference": "http://hl7.org/fhir/ValueSet/v3-LanguageAbilityMode",
+            "display": "TaalvaardigheidBegrijpenCodelijst"
+          }
+        }
+      },
+      {
+        "id": "Extension.extension:level",
+        "path": "Extension.extension",
+        "sliceName": "level",
+        "short": "The proficiency level of the communication",
+        "definition": "How well the patient can communicate this communication (good, poor, etc.).",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:level.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "level"
+      },
+      {
+        "id": "Extension.extension:level.value[x]:valueCoding",
+        "path": "Extension.extension.valueCoding",
+        "sliceName": "valueCoding",
+        "min": 1,
+        "type": [
+          {
+            "code": "Coding"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "description": "The proficiency level for the communication.",
+          "valueSetReference": {
+            "reference": "http://hl7.org/fhir/ValueSet/v3-LanguageAbilityProficiency",
+            "display": "TaalvaardigheidBegrijpenCodelijst"
+          }
+        }
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://nictiz.nl/fhir/StructureDefinition/patient-proficiency"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "max": "0"
+      }
+    ]
+  }
+}

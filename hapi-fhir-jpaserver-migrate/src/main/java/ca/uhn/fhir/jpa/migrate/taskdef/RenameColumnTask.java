@@ -20,7 +20,10 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -29,6 +32,7 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 
 public class RenameColumnTask extends BaseTableTask {
@@ -38,6 +42,8 @@ public class RenameColumnTask extends BaseTableTask {
 	private String myNewName;
 	private boolean myIsOkayIfNeitherColumnExists;
 	private boolean myDeleteTargetColumnFirstIfBothExist;
+
+	private boolean mySimulateMySQLForTest = false;
 
 	public RenameColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -77,8 +83,22 @@ public class RenameColumnTask extends BaseTableTask {
 					jdbcTemplate.setMaxRows(1);
 					return jdbcTemplate.query(sql, new ColumnMapRowMapper()).size();
 				});
-				if (rowsWithData > 0) {
+				if (rowsWithData != null && rowsWithData > 0) {
 					throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
+				}
+
+				if (getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || mySimulateMySQLForTest) {
+					// Some DBs such as MYSQL require that foreign keys depending on the column be explicitly dropped before the column itself is dropped.
+					logInfo(ourLog, "Table {} has columns {} and {} - Going to drop any foreign keys depending on column {} before renaming", getTableName(), myOldName, myNewName, myNewName);
+					Set<String> foreignKeys = JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), myNewName, getTableName());
+					if(foreignKeys != null) {
+						for (String foreignKey:foreignKeys) {
+							List<String> dropFkSqls = DropForeignKeyTask.generateSql(getTableName(), foreignKey, getDriverType());
+							for(String dropFkSql : dropFkSqls) {
+								executeSql(getTableName(), dropFkSql);
+							}
+						}
+					}
 				}
 
 				logInfo(ourLog, "Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
@@ -97,23 +117,39 @@ public class RenameColumnTask extends BaseTableTask {
 			return;
 		}
 
-		String sql = "";
+		String existingType;
+		String notNull;
+		try {
+			JdbcUtils.ColumnType existingColumnType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), myOldName);
+			existingType = getSqlType(existingColumnType.getColumnTypeEnum(), existingColumnType.getLength());
+			notNull = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), myOldName) ? " null " : " not null";
+		} catch (SQLException e) {
+			throw new InternalErrorException(e);
+		}
+		String sql = buildRenameColumnSqlStatement(existingType, notNull);
+
+		logInfo(ourLog, "Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);
+		executeSql(getTableName(), sql);
+
+	}
+
+	String buildRenameColumnSqlStatement(String theExistingType, String theExistingNotNull) {
+		String sql;
 		switch (getDriverType()) {
 			case DERBY_EMBEDDED:
 				sql = "RENAME COLUMN " + getTableName() + "." + myOldName + " TO " + myNewName;
 				break;
-			case MARIADB_10_1:
 			case MYSQL_5_7:
-				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN " + myOldName + " TO " + myNewName;
+			case MARIADB_10_1:
+				// Quote the column names as "SYSTEM" is a reserved word in MySQL
+				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN `" + myOldName + "` `" + myNewName + "` " + theExistingType + " " + theExistingNotNull;
 				break;
 			case POSTGRES_9_4:
+			case ORACLE_12C:
 				sql = "ALTER TABLE " + getTableName() + " RENAME COLUMN " + myOldName + " TO " + myNewName;
 				break;
 			case MSSQL_2012:
 				sql = "sp_rename '" + getTableName() + "." + myOldName + "', '" + myNewName + "', 'COLUMN'";
-				break;
-			case ORACLE_12C:
-				sql = "ALTER TABLE " + getTableName() + " RENAME COLUMN " + myOldName + " TO " + myNewName;
 				break;
 			case H2_EMBEDDED:
 				sql = "ALTER TABLE " + getTableName() + " ALTER COLUMN " + myOldName + " RENAME TO " + myNewName;
@@ -121,10 +157,7 @@ public class RenameColumnTask extends BaseTableTask {
 			default:
 				throw new IllegalStateException();
 		}
-
-		logInfo(ourLog, "Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);
-		executeSql(getTableName(), sql);
-
+		return sql;
 	}
 
 	public boolean isOkayIfNeitherColumnExists() {
@@ -140,5 +173,10 @@ public class RenameColumnTask extends BaseTableTask {
 		super.generateHashCode(theBuilder);
 		theBuilder.append(myOldName);
 		theBuilder.append(myNewName);
+	}
+
+	@VisibleForTesting
+	void setSimulateMySQLForTest(boolean theSimulateMySQLForTest) {
+		mySimulateMySQLForTest = theSimulateMySQLForTest;
 	}
 }

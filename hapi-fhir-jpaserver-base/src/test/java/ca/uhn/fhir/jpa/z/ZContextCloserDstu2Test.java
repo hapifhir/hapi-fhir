@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.z;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.annotation.DirtiesContext;
 
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;

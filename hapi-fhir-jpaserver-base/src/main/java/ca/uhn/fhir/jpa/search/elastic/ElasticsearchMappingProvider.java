@@ -51,7 +51,7 @@ public class ElasticsearchMappingProvider implements ElasticsearchAnalysisDefini
 
 		builder.analyzer("standardAnalyzer").withTokenizer("standard").withTokenFilters("lowercase");
 
-		builder.analyzer("exactAnalyzer").withTokenizer("standard");
+		builder.analyzer("exactAnalyzer").withTokenizer("keyword");
 
 		builder.analyzer("conceptParentPidsAnalyzer").withTokenizer("whitespace");
 

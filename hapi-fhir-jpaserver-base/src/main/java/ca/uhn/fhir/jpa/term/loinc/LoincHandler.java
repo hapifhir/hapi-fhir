@@ -86,44 +86,9 @@ public class LoincHandler implements IRecordHandler {
 							concept.addPropertyString(nextPropertyName, nextPropertyValue);
 							break;
 						case CODING:
-							// TODO: handle "Ser/Plas^Donor"
-							String propertyValue = nextPropertyValue;
-							if (nextPropertyName.equals("COMPONENT")) {
-								if (propertyValue.contains("^")) {
-									propertyValue = propertyValue.substring(0, propertyValue.indexOf("^"));
-								} else if (propertyValue.contains("/")) {
-									propertyValue = propertyValue.substring(0, propertyValue.indexOf("/"));
-								}
-							}
-
-							PartTypeAndPartName key = new PartTypeAndPartName(nextPropertyName, propertyValue);
-							String partNumber = myPartTypeAndPartNameToPartNumber.get(key);
-
-							if (partNumber == null && nextPropertyName.equals("TIME_ASPCT")) {
-								key = new PartTypeAndPartName("TIME", nextPropertyValue);
-								partNumber = myPartTypeAndPartNameToPartNumber.get(key);
-							}
-							if (partNumber == null && nextPropertyName.equals("METHOD_TYP")) {
-								key = new PartTypeAndPartName("METHOD", nextPropertyValue);
-								partNumber = myPartTypeAndPartNameToPartNumber.get(key);
-							}
-							if (partNumber == null && nextPropertyName.equals("SCALE_TYP")) {
-								key = new PartTypeAndPartName("SCALE", nextPropertyValue);
-								partNumber = myPartTypeAndPartNameToPartNumber.get(key);
-							}
-
-							if (partNumber == null && nextPropertyName.equals("SYSTEM") && nextPropertyValue.startsWith("^")) {
-								continue;
-							}
-
-							if (isNotBlank(partNumber)) {
-								concept.addPropertyCoding(nextPropertyName, ITermLoaderSvc.LOINC_URI, partNumber, nextPropertyValue);
-							} else {
-								String msg = "Unable to find part code with TYPE[" + key.getPartType() + "] and NAME[" + nextPropertyValue + "] (using name " + propertyValue + ")";
-								ourLog.warn(msg);
-//								throw new InternalErrorException(msg);
-							}
+							// These are handles by the LOINC PartLink file
 							break;
+
 						case DECIMAL:
 						case CODE:
 						case INTEGER:

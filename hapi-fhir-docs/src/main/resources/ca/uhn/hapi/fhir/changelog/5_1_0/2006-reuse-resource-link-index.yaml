@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2006
+title: "When updating a resource with links that change, to reduce database operations, hapi-fhir reuses link index records.
+    However, all the columns were being properly updated except for the source path column which was accidentally missed and
+    continued to hold the previous value.  This resulted in mismatched source paths and values.  This has been corrected."

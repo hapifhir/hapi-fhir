@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1854
+title: "When using a SearchParameter with uniqueness enabled, the `$expunge` operation sometimes failed to expunge resources with
+   a database constraint error. This has been fixed."

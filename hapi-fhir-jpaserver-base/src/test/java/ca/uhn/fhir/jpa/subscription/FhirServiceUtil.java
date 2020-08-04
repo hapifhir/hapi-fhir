@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -15,12 +16,12 @@ public class FhirServiceUtil {
     public static final String REST_HOOK_ENDPOINT = "http://localhost:10080/rest-hook";
 
     public static IGenericClient getFhirDstu3Client() {
-        FhirContext ctx = FhirContext.forDstu3();
+        FhirContext ctx = FhirContext.forCached(FhirVersionEnum.DSTU3);
         return ctx.newRestfulGenericClient(FHIR_DSTU3_URL);
     }
 
     public static IGenericClient getFhirDstu2Client() {
-        FhirContext ctx = FhirContext.forDstu2();
+        FhirContext ctx = FhirContext.forCached(FhirVersionEnum.DSTU2);
         return ctx.newRestfulGenericClient(FHIR_DSTU2_URL);
     }
 

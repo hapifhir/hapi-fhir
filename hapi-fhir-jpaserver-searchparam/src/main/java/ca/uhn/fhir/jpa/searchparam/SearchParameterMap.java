@@ -61,6 +61,8 @@ public class SearchParameterMap implements Serializable {
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
 	private QuantityParam myNearDistanceParam;
+	private boolean myLastN;
+	private Integer myLastNMax;
 
 	/**
 	 * Constructor
@@ -157,8 +159,9 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-	public void addRevInclude(Include theInclude) {
+	public SearchParameterMap addRevInclude(Include theInclude) {
 		getRevIncludes().add(theInclude);
+		return this;
 	}
 
 	private void addUrlIncludeParams(StringBuilder b, String paramName, Set<Include> theList) {
@@ -266,8 +269,9 @@ public class SearchParameterMap implements Serializable {
 		return mySort;
 	}
 
-	public void setSort(SortSpec theSort) {
+	public SearchParameterMap setSort(SortSpec theSort) {
 		mySort = theSort;
+		return this;
 	}
 
 	/**
@@ -302,6 +306,42 @@ public class SearchParameterMap implements Serializable {
 		myLoadSynchronous = theLoadSynchronous;
 		return this;
 	}
+
+	/**
+	 * If set, tells the server to use an Elasticsearch query to generate a list of
+	 * Resource IDs for the LastN operation
+	 */
+	public boolean isLastN() {
+		return myLastN;
+	}
+
+	/**
+	 * If set, tells the server to use an Elasticsearch query to generate a list of
+	 * Resource IDs for the LastN operation
+	 */
+	public SearchParameterMap setLastN(boolean theLastN) {
+		myLastN = theLastN;
+		return this;
+	}
+
+
+	/**
+	 * If set, tells the server the maximum number of observations to return for each
+	 * observation code in the result set of a lastn operation
+	 */
+	public Integer getLastNMax() {
+		return myLastNMax;
+	}
+
+	/**
+	 * If set, tells the server the maximum number of observations to return for each
+	 * observation code in the result set of a lastn operation
+	 */
+	public SearchParameterMap setLastNMax(Integer theLastNMax) {
+		myLastNMax = theLastNMax;
+		return this;
+	}
+
 
 	/**
 	 * This method creates a URL query string representation of the parameters in this

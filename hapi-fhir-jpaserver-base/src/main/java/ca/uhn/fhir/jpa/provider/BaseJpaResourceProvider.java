@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -74,6 +75,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 
 		return createExpungeResponse(outcome);
 	}
+
 
 	public IFhirResourceDao<T> getDao() {
 		return myDao;
@@ -122,10 +124,10 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Patch
-	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl,  RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
+	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType, @ResourceParam IBaseParameters theRequestBody) {
 		startRequest(theRequest);
 		try {
-			return myDao.patch(theId, theConditionalUrl, thePatchType, theBody, theRequestDetails);
+			return myDao.patch(theId, theConditionalUrl, thePatchType, theBody, theRequestBody, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

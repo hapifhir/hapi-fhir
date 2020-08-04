@@ -28,27 +28,30 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,7 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -84,29 +87,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService {
+	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
+	private static final String RESOURCE_PID = "RESOURCE_PID";
 
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-	@Autowired(required = true)
+	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private FhirContext myFhirCtx;
-
-	private Cache<String, Long> myPersistentIdCache;
-	private Cache<String, IResourceLookup> myResourceLookupCache;
-	private Cache<Long, Optional<String>> myForcedIdCache;
-
-	@PostConstruct
-	public void start() {
-		myPersistentIdCache = newCache();
-		myResourceLookupCache = newCache();
-		myForcedIdCache = newCache();
-	}
-
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.deleteByPid(forcedId.getId());
@@ -130,6 +123,9 @@ public class IdHelperService {
 		return matches.iterator().next();
 	}
 
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
+
 	/**
 	 * Given a resource type and ID, determines the internal persistent ID for the resource.
 	 *
@@ -137,13 +133,15 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
+		Validate.notNull(theId, "theId must not be null");
+
 		Long retVal;
 		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
 				retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, theId);
 			} else {
 				String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + theResourceType + "/" + theId;
-				retVal = myPersistentIdCache.get(key, t -> resolveResourceIdentity(theRequestPartitionId, theResourceType, theId));
+				retVal = myMemoryCacheService.get(MemoryCacheService.CacheEnum.PERSISTENT_ID, key, t -> resolveResourceIdentity(theRequestPartitionId, theResourceType, theId));
 			}
 
 		} else {
@@ -193,7 +191,7 @@ public class IdHelperService {
 				for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
 					String nextId = idIterator.next();
 					String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + nextResourceType + "/" + nextId;
-					Long nextCachedPid = myPersistentIdCache.getIfPresent(key);
+					Long nextCachedPid = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.PERSISTENT_ID, key);
 					if (nextCachedPid != null) {
 						idIterator.remove();
 						retVal.add(new ResourcePersistentId(nextCachedPid));
@@ -218,7 +216,7 @@ public class IdHelperService {
 						retVal.add(new ResourcePersistentId(pid));
 
 						String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + nextResourceType + "/" + forcedId;
-						myPersistentIdCache.put(key, pid);
+						myMemoryCacheService.put(MemoryCacheService.CacheEnum.PERSISTENT_ID, key, pid);
 					}
 				}
 
@@ -247,7 +245,7 @@ public class IdHelperService {
 
 
 	public Optional<String> translatePidIdToForcedId(ResourcePersistentId theId) {
-		return myForcedIdCache.get(theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(t -> t.getForcedId()));
+		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.FORCED_ID, theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(t -> t.getForcedId()));
 	}
 
 	private ListMultimap<String, String> organizeIdsByResourceType(Collection<IIdType> theIds) {
@@ -321,7 +319,7 @@ public class IdHelperService {
 				for (Iterator<String> forcedIdIterator = nextIds.iterator(); forcedIdIterator.hasNext(); ) {
 					String nextForcedId = forcedIdIterator.next();
 					String nextKey = nextResourceType + "/" + nextForcedId;
-					IResourceLookup cachedLookup = myResourceLookupCache.getIfPresent(nextKey);
+					IResourceLookup cachedLookup = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
 					if (cachedLookup != null) {
 						forcedIdIterator.remove();
 						retVal.add(cachedLookup);
@@ -353,7 +351,7 @@ public class IdHelperService {
 
 					if (!myDaoConfig.isDeleteEnabled()) {
 						String key = resourceType + "/" + forcedId;
-						myResourceLookupCache.put(key, lookup);
+						myMemoryCacheService.put(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, key, lookup);
 					}
 				}
 			}
@@ -369,7 +367,7 @@ public class IdHelperService {
 			for (Iterator<Long> forcedIdIterator = thePidsToResolve.iterator(); forcedIdIterator.hasNext(); ) {
 				Long nextPid = forcedIdIterator.next();
 				String nextKey = Long.toString(nextPid);
-				IResourceLookup cachedLookup = myResourceLookupCache.getIfPresent(nextKey);
+				IResourceLookup cachedLookup = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
 				if (cachedLookup != null) {
 					forcedIdIterator.remove();
 					theTarget.add(cachedLookup);
@@ -395,30 +393,16 @@ public class IdHelperService {
 					theTarget.add(t);
 					if (!myDaoConfig.isDeleteEnabled()) {
 						String nextKey = Long.toString(t.getResourceId());
-						myResourceLookupCache.put(nextKey, t);
+						myMemoryCacheService.put(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, t);
 					}
 				});
 
 		}
 	}
 
-	public void clearCache() {
-		myPersistentIdCache.invalidateAll();
-		myResourceLookupCache.invalidateAll();
-		myForcedIdCache.invalidateAll();
-	}
-
-	private <T, V> @NonNull Cache<T, V> newCache() {
-		return Caffeine
-			.newBuilder()
-			.maximumSize(10000)
-			.expireAfterWrite(10, TimeUnit.MINUTES)
-			.build();
-	}
-
 	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
 
-		Map<Long, Optional<String>> retVal = new HashMap<>(myForcedIdCache.getAllPresent(thePids));
+		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.FORCED_ID, thePids));
 
 		List<Long> remainingPids = thePids
 			.stream()
@@ -432,7 +416,7 @@ public class IdHelperService {
 				Long nextResourcePid = forcedId.getResourceId();
 				Optional<String> nextForcedId = Optional.of(forcedId.getForcedId());
 				retVal.put(nextResourcePid, nextForcedId);
-				myForcedIdCache.put(nextResourcePid, nextForcedId);
+				myMemoryCacheService.put(MemoryCacheService.CacheEnum.FORCED_ID, nextResourcePid, nextForcedId);
 			}
 		});
 
@@ -442,7 +426,7 @@ public class IdHelperService {
 			.collect(Collectors.toList());
 		for (Long nextResourcePid : remainingPids) {
 			retVal.put(nextResourcePid, Optional.empty());
-			myForcedIdCache.put(nextResourcePid, Optional.empty());
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.FORCED_ID, nextResourcePid, Optional.empty());
 		}
 
 		return retVal;
@@ -460,4 +444,48 @@ public class IdHelperService {
 	public static boolean isValidPid(String theIdPart) {
 		return StringUtils.isNumeric(theIdPart);
 	}
+
+	@Nullable
+	public Long getPidOrNull(IBaseResource theResource) {
+		IAnyResource anyResource = (IAnyResource) theResource;
+		Long retVal = (Long) anyResource.getUserData(RESOURCE_PID);
+		if (retVal == null) {
+			IIdType id = theResource.getIdElement();
+			try {
+				retVal = this.resolveResourcePersistentIds(null, id.getResourceType(), id.getIdPart()).getIdAsLong();
+			} catch (ResourceNotFoundException e) {
+				return null;
+			}
+		}
+		return retVal;
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IIdType theId) {
+		return getPidOrThrowException(theId, null);
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IAnyResource theResource) {
+		return (Long) theResource.getUserData(RESOURCE_PID);
+	}
+
+	@Nonnull
+	public Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
+		List<IIdType> ids = Collections.singletonList(theId);
+		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
+		return resourcePersistentIds.get(0).getIdAsLong();
+	}
+
+	public Map<Long, IIdType> getPidToIdMap(Collection<IIdType> theIds, RequestDetails theRequestDetails) {
+		return theIds.stream().collect(Collectors.toMap(this::getPidOrThrowException, Function.identity()));
+	}
+
+    public IIdType resourceIdFromPidOrThrowException(Long thePid) {
+		 Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
+		 if (!optionalResource.isPresent()) {
+		 	throw new ResourceNotFoundException("Requested resource not found");
+		 }
+		 return optionalResource.get().getIdDt().toVersionless();
+    }
 }

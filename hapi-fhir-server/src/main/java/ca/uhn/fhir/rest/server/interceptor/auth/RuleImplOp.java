@@ -240,7 +240,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						// so just let it through for now..
 						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 					}
-					if (theInputResource== null && myClassifierCompartmentOwners != null && myClassifierCompartmentOwners.size() > 0) {
+					if (theInputResource == null && myClassifierCompartmentOwners != null && myClassifierCompartmentOwners.size() > 0) {
 						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 					}
 
@@ -252,6 +252,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				break;
 			case GRAPHQL:
 				if (theOperation == RestOperationTypeEnum.GRAPHQL_REQUEST) {
+
+					// Make sure that the requestor actually has sufficient access to see the given resource
+					if (isResourceAccess(thePointcut)) {
+						return null;
+					}
+
 					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 				} else {
 					return null;
@@ -276,8 +282,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 							UrlUtil.UrlParts parts = UrlUtil.parseUrl(nextPart.getUrl());
 
-								inputResourceId = theRequestDetails.getFhirContext().getVersion().newIdType();
-								inputResourceId.setParts(null, parts.getResourceType(), parts.getResourceId(), null);
+							inputResourceId = theRequestDetails.getFhirContext().getVersion().newIdType();
+							inputResourceId.setParts(null, parts.getResourceType(), parts.getResourceId(), null);
 						}
 
 						RestOperationTypeEnum operation;
@@ -294,7 +300,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							operation = RestOperationTypeEnum.DELETE;
 						} else if (nextPart.getRequestType() == RequestTypeEnum.PATCH) {
 							operation = RestOperationTypeEnum.PATCH;
-						} else if (nextPart.getRequestType() == null && theRequestDetails.getServer().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3 && BundleUtil.isDstu3TransactionPatch(nextPart.getResource())) {
+						} else if (nextPart.getRequestType() == null && theRequestDetails.getServer().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3 && BundleUtil.isDstu3TransactionPatch(theRequestDetails.getFhirContext(), nextPart.getResource())) {
 							// This is a workaround for the fact that there is no PATCH verb in DSTU3's bundle entry verb type ValueSet.
 							// See BundleUtil#isDstu3TransactionPatch
 							operation = RestOperationTypeEnum.PATCH;
@@ -411,7 +417,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case TYPES:
 				if (appliesToResource != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-						String type = theRequestDetails.getFhirContext().getResourceDefinition(appliesToResource).getName();
+						String type = theRequestDetails.getFhirContext().getResourceType(appliesToResource);
 						if (myAppliesToTypes.contains(type) == false) {
 							return null;
 						}
@@ -511,7 +517,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 											return verdict;
 										}
 									}
-								} else if (getMode() == PolicyEnum.ALLOW){
+								} else if (getMode() == PolicyEnum.ALLOW) {
 									return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 								}
 								break;
@@ -555,7 +561,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 	private boolean requestAppliesToTransaction(FhirContext theContext, RuleOpEnum theOp, IBaseResource theInputResource) {
-		if (!"Bundle".equals(theContext.getResourceDefinition(theInputResource).getName())) {
+		if (!"Bundle".equals(theContext.getResourceType(theInputResource))) {
 			return false;
 		}
 

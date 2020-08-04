@@ -1,0 +1,326 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-practitioner",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner",
+  "version": "2.0.2",
+  "name": "nl-core-practitioner",
+  "title": "nl-core-practitioner",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Functional requirements taken from Health and Care Information models (Zorginformatiebouwsteen) HealthProfessional v3.2 (release 2017). Names and addresses are also in compliance with HL7 V3 Basic Components.",
+  "purpose": "The purpose of this information model is documenting the identity of people providing healthcare. For health professionals, information must be sufficiently complete for reference and auditing: if known, the name is mandatory. If an identification number is given such as a UZI or AGB number, the name and number have to match.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v1.2.1(2015EN)",
+      "name": "HCIM HealthProfessional-v1.2.1(2015EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v3.0(2016EN)",
+      "name": "HCIM HealthProfessional-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v3.2-2017EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v3.2(2017EN)",
+      "name": "HCIM HealthProfessional-v3.2(2017EN)"
+    },
+    {
+      "identity": "hcim-contactinformation-v2.0.1-2015EN",
+      "uri": "https://zibs.nl/wiki/Patient-v2.0.1(2015EN)",
+      "name": "HCIM Patient-v2.0.1(2015EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-contactinformation-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.0(2016EN)",
+      "name": "HCIM Patient-v3.0(2016EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-contactinformation-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/ContactInformation-v1.0(2017EN)",
+      "name": "HCIM ContactInformation-v1.0(2017EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs."
+    },
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Practitioner",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Practitioner",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Practitioner",
+        "path": "Practitioner",
+        "short": "HealthcareProvider",
+        "alias": [
+          "Zorgverlener"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.1",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.1",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.1",
+            "comment": "HealthProfessional"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.4",
+            "comment": "HealthProfessional"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.9",
+            "comment": "HealthProfessionalAsAuthor::HealthProfessional"
+          }
+        ]
+      },
+      {
+        "id": "Practitioner.identifier",
+        "path": "Practitioner.identifier",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        },
+        "short": "HealthProfessionalIdentificationNumber",
+        "definition": "The healthcare provider identification number is a number that uniquely identifies the healthcare provider.  \r\n\r\nThe following numbers are used in the Netherlands:  \r\n1. UZI Health Professionals. Identification of health professionals (people) in the Dutch healthcare industry. \r\n2. VEKTIS AGB-Z. Identifies health professionals and healthcare organizations \r\n3. BIG-ID. The ID of the health professional listed in the BIG Register.  \r\n\r\nThis information is not readily available for foreign health professionals.",
+        "alias": [
+          "ZorgverlenerIdentificatieNummer"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.2",
+            "comment": "HealthcareProviderIdentificationNumber"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.2",
+            "comment": "HealthcareProviderIdentificationNumber"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.2",
+            "comment": "HealthProfessionalIdentificationNumber"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "Practitioner.identifier:UZI",
+        "path": "Practitioner.identifier",
+        "sliceName": "UZI",
+        "short": "UZI",
+        "definition": "Unieke Zorgverlener Identificatie (Dutch physician identification number)",
+        "alias": [
+          "UZI"
+        ],
+        "max": "1"
+      },
+      {
+        "id": "Practitioner.identifier:UZI.system",
+        "path": "Practitioner.identifier.system",
+        "min": 1,
+        "fixedUri": "http://fhir.nl/fhir/NamingSystem/uzi-nr-pers"
+      },
+      {
+        "id": "Practitioner.identifier:UZI.value",
+        "path": "Practitioner.identifier.value",
+        "min": 1,
+        "example": [
+          {
+            "label": "Example",
+            "valueString": "01011234"
+          }
+        ]
+      },
+      {
+        "id": "Practitioner.identifier:AGB",
+        "path": "Practitioner.identifier",
+        "sliceName": "AGB",
+        "short": "AGB",
+        "alias": [
+          "AGB"
+        ],
+        "max": "1"
+      },
+      {
+        "id": "Practitioner.identifier:AGB.system",
+        "path": "Practitioner.identifier.system",
+        "min": 1,
+        "fixedUri": "http://fhir.nl/fhir/NamingSystem/agb-z"
+      },
+      {
+        "id": "Practitioner.identifier:AGB.value",
+        "path": "Practitioner.identifier.value",
+        "min": 1,
+        "example": [
+          {
+            "label": "Example",
+            "valueString": "123456"
+          }
+        ]
+      },
+      {
+        "id": "Practitioner.identifier:BIG",
+        "path": "Practitioner.identifier",
+        "sliceName": "BIG",
+        "short": "BIG",
+        "alias": [
+          "BIG"
+        ],
+        "max": "1"
+      },
+      {
+        "id": "Practitioner.identifier:BIG.system",
+        "path": "Practitioner.identifier.system",
+        "min": 1,
+        "fixedUri": "http://fhir.nl/fhir/NamingSystem/big"
+      },
+      {
+        "id": "Practitioner.identifier:BIG.value",
+        "path": "Practitioner.identifier.value",
+        "min": 1,
+        "example": [
+          {
+            "label": "Example",
+            "valueString": "12345678"
+          }
+        ]
+      },
+      {
+        "id": "Practitioner.name",
+        "path": "Practitioner.name",
+        "short": "NameInformation",
+        "definition": "Health professional’s full name. If a health professional identification number is entered, it will be the name as listed in UZI, AGB or by the healthcare center.",
+        "alias": [
+          "ZorgverlenerNaam"
+        ],
+        "type": [
+          {
+            "code": "HumanName",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-humanname"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.3",
+            "comment": "HealthcareProviderName"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.3",
+            "comment": "HealthcareProviderName"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.3",
+            "comment": "NameInformation"
+          }
+        ]
+      },
+      {
+        "id": "Practitioner.telecom",
+        "path": "Practitioner.telecom",
+        "short": "ContactInformation",
+        "alias": [
+          "Contactgegevens"
+        ],
+        "type": [
+          {
+            "code": "ContactPoint",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-contactpoint"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.8",
+            "comment": "TelephoneE-mail"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.8",
+            "comment": "TelephoneE-mail"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.8",
+            "comment": "ContactInformation"
+          }
+        ]
+      },
+      {
+        "id": "Practitioner.address",
+        "path": "Practitioner.address",
+        "short": "AddressInformation",
+        "alias": [
+          "Adresgegevens"
+        ],
+        "type": [
+          {
+            "code": "Address",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-address"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.7",
+            "comment": "Address"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.7",
+            "comment": "Address"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.7",
+            "comment": "AddressInformation"
+          }
+        ]
+      }
+    ]
+  }
+}

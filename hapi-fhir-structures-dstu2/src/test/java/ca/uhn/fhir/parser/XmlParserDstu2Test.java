@@ -1,37 +1,11 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.collection.IsEmptyCollection;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
-import org.mockito.internal.stubbing.answers.ThrowsException;
-import org.xmlunit.builder.DiffBuilder;
-import org.xmlunit.builder.Input;
-import org.xmlunit.diff.*;
-
-import com.google.common.collect.Sets;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -41,17 +15,70 @@ import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.model.dstu2.valueset.*;
-import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.MarkdownDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Sets;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.internal.stubbing.answers.ThrowsException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.ComparisonControllers;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class XmlParserDstu2Test {
-	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2Test.class);
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 
-	@Before
+	@BeforeEach
 	public void before() {
 		if (ourCtx == null) {
 			ourCtx = FhirContext.forDstu2();
@@ -105,10 +132,10 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseXmlExtensionWithoutUrl() {
 		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"        <extension>\n" + 
-			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
-			"        </extension>\n" + 
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"        <extension>\n" +
+			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" +
+			"        </extension>\n" +
 			"</Patient>";
 		//@formatter:on
 
@@ -136,10 +163,10 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseXmlModifierExtensionWithoutUrl() {
 		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"        <modifierExtension>\n" + 
-			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
-			"        </modifierExtension>\n" + 
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"        <modifierExtension>\n" +
+			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" +
+			"        </modifierExtension>\n" +
 			"</Patient>";
 		//@formatter:on
 
@@ -181,13 +208,18 @@ public class XmlParserDstu2Test {
 		assertEquals("#3", performer.getId().getValue());
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testContainedResourceWithNoId() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
+		try {
+			String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
 
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+			IParser parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [49,11]]: Resource has contained child resource with no ID", e.getMessage());
+		}
 	}
 
 	@Test
@@ -240,13 +272,18 @@ public class XmlParserDstu2Test {
 		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseWithInvalidLocalRef() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
+		try {
+			String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
 
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+			IParser parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [47,7]]: Resource has invalid reference: #1", e.getMessage());
+		}
 	}
 
 	@Test()
@@ -261,24 +298,24 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
-		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-			"   <meta/>\n" + 
-			"   <base value=\"http://localhost:52788\"/>\n" + 
-			"   <total value=\"1\"/>\n" + 
-			"   <link>\n" + 
-			"      <relation value=\"self\"/>\n" + 
-			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
-			"   </link>\n" + 
-			"   <entry>\n" + 
-			"      <resource>\n" + 
-			"         <Binary xmlns=\"http://hl7.org/fhir\">\n" + 
-			"            <id value=\"1\"/>\n" + 
-			"            <meta/>\n" + 
-			"            <contentType value=\"text/plain\"/>\n" + 
-			"            <content value=\"AQIDBA==\"/>\n" + 
-			"         </Binary>\n" + 
-			"      </resource>\n" + 
-			"   </entry>\n" + 
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <meta/>\n" +
+			"   <base value=\"http://localhost:52788\"/>\n" +
+			"   <total value=\"1\"/>\n" +
+			"   <link>\n" +
+			"      <relation value=\"self\"/>\n" +
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" +
+			"   </link>\n" +
+			"   <entry>\n" +
+			"      <resource>\n" +
+			"         <Binary xmlns=\"http://hl7.org/fhir\">\n" +
+			"            <id value=\"1\"/>\n" +
+			"            <meta/>\n" +
+			"            <contentType value=\"text/plain\"/>\n" +
+			"            <content value=\"AQIDBA==\"/>\n" +
+			"         </Binary>\n" +
+			"      </resource>\n" +
+			"   </entry>\n" +
 			"</Bundle>";
 		//@formatter:on
 
@@ -286,17 +323,17 @@ public class XmlParserDstu2Test {
 		assertEquals(1, b.getEntry().size());
 
 		Binary bin = (Binary) b.getEntry().get(0).getResource();
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+		assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
 
 	}
 
 	@Test
 	public void testChoiceTypeWithProfiledType() {
 		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"        <extension url=\"http://example.com\">\n" + 
-			"          <valueMarkdown value=\"THIS IS MARKDOWN\"/>\n" + 
-			"        </extension>\n" + 
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"        <extension url=\"http://example.com\">\n" +
+			"          <valueMarkdown value=\"THIS IS MARKDOWN\"/>\n" +
+			"        </extension>\n" +
 			"</Patient>";
 		//@formatter:on
 
@@ -419,7 +456,7 @@ public class XmlParserDstu2Test {
 		assertThat(encoded, stringContainsInOrder(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<managingOrganization>",
-			"<reference value=\"Organization/orgid\"/>", 
+			"<reference value=\"Organization/orgid\"/>",
 			"</managingOrganization>"
 		));
 		//@formatter:on
@@ -522,24 +559,24 @@ public class XmlParserDstu2Test {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output,stringContainsInOrder(
+		assertThat(output, stringContainsInOrder(
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
-				"<meta>",
-				"<profile value=\"http://custom_DiagnosticReport\"/>",
-				"</meta>",
-				"<contained>",
-					"<Observation xmlns=\"http://hl7.org/fhir\">",
-						"<id value=\"1\"/>",
-						"<meta>",
-							"<profile value=\"http://custom_Observation\"/>",
-						"</meta>",
-						"<status value=\"final\"/>",
-					"</Observation>",
-				"</contained>",
-				"<status value=\"final\"/>",
-				"<result>",
-					"<reference value=\"#1\"/>",
-				"</result>",
+			"<meta>",
+			"<profile value=\"http://custom_DiagnosticReport\"/>",
+			"</meta>",
+			"<contained>",
+			"<Observation xmlns=\"http://hl7.org/fhir\">",
+			"<id value=\"1\"/>",
+			"<meta>",
+			"<profile value=\"http://custom_Observation\"/>",
+			"</meta>",
+			"<status value=\"final\"/>",
+			"</Observation>",
+			"</contained>",
+			"<status value=\"final\"/>",
+			"<result>",
+			"<reference value=\"#1\"/>",
+			"</result>",
 			"</DiagnosticReport>"));
 		//@formatter:on
 
@@ -567,7 +604,7 @@ public class XmlParserDstu2Test {
 		ourCtx.setDefaultTypeForProfile(CustomDiagnosticReportDstu2.PROFILE, CustomDiagnosticReportDstu2.class);
 
 		//@formatter:off
-		String input = 
+		String input =
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">" +
 				"<meta>" +
 				"<profile value=\"" + CustomDiagnosticReportDstu2.PROFILE + "\"/>" +
@@ -575,7 +612,7 @@ public class XmlParserDstu2Test {
 				"<profile value=\"http://custom_DiagnosticReport3\"/>" +
 				"</meta>" +
 				"<status value=\"final\"/>" +
-			"</DiagnosticReport>";
+				"</DiagnosticReport>";
 		//@formatter:on
 
 		IParser parser = ourCtx.newXmlParser();
@@ -606,18 +643,18 @@ public class XmlParserDstu2Test {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output,stringContainsInOrder(
+		assertThat(output, stringContainsInOrder(
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
-				"<contained>",
-					"<Observation xmlns=\"http://hl7.org/fhir\">",
-						"<id value=\"1\"/>",
-						"<status value=\"final\"/>",
-					"</Observation>",
-				"</contained>",
-				"<status value=\"final\"/>",
-				"<result>",
-					"<reference value=\"#1\"/>",
-				"</result>",
+			"<contained>",
+			"<Observation xmlns=\"http://hl7.org/fhir\">",
+			"<id value=\"1\"/>",
+			"<status value=\"final\"/>",
+			"</Observation>",
+			"</contained>",
+			"<status value=\"final\"/>",
+			"<result>",
+			"<reference value=\"#1\"/>",
+			"</result>",
 			"</DiagnosticReport>"));
 		//@formatter:on
 
@@ -725,10 +762,10 @@ public class XmlParserDstu2Test {
 		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
 		assertThat(enc, containsString("<modifierExtension url=\"http://example.com/extensions#modext\"><valueDate value=\"1995-01-02\"/></modifierExtension>"));
 		assertThat(enc, containsString(
-				"<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
+			"<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
 		assertThat(enc, containsString(
-				"<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
+			"<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
 
 		/*
 		 * Now parse this back
@@ -782,16 +819,16 @@ public class XmlParserDstu2Test {
 		ourLog.info(out);
 
 		//@formatter:off
-		assertThat(out, stringContainsInOrder("<identifier>", 
-				"<type>",
-				"<coding>",
-				"<system value=\"http://hl7.org/fhir/v2/0203\"/>", 
-				"<code value=\"MR\"/>", 
-				"</coding>", 
-				"</type>",
-				"<system value=\"SYS\"/>", 
-				"<value value=\"VAL\"/>", 
-				"</identifier>"));
+		assertThat(out, stringContainsInOrder("<identifier>",
+			"<type>",
+			"<coding>",
+			"<system value=\"http://hl7.org/fhir/v2/0203\"/>",
+			"<code value=\"MR\"/>",
+			"</coding>",
+			"</type>",
+			"<system value=\"SYS\"/>",
+			"<value value=\"VAL\"/>",
+			"</identifier>"));
 		//@formatter:on
 
 		patient = ourCtx.newXmlParser().parseResource(Patient.class, out);
@@ -819,7 +856,7 @@ public class XmlParserDstu2Test {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
+		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
 			"<profile value=\"http://foo/Profile1\"/>",
 			"<profile value=\"http://foo/Profile2\"/>",
@@ -836,7 +873,7 @@ public class XmlParserDstu2Test {
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
-			"</name>", 
+			"</name>",
 			"</Patient>"));
 		//@formatter:on
 
@@ -871,7 +908,7 @@ public class XmlParserDstu2Test {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
+		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
 			"<tag>",
 			"<system value=\"scheme1\"/>",
@@ -886,7 +923,7 @@ public class XmlParserDstu2Test {
 			"</meta>",
 			"<name>",
 			"<family value=\"FAMILY\"/>",
-			"</name>", 
+			"</name>",
 			"</Patient>"));
 		//@formatter:on
 
@@ -976,7 +1013,7 @@ public class XmlParserDstu2Test {
 
 	/**
 	 * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
-	 * 
+	 * <p>
 	 * Disabled because we reverted this change after a conversation with Grahame
 	 */
 	@Test
@@ -1007,26 +1044,26 @@ public class XmlParserDstu2Test {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
-			"<meta>", 
-			"<security>", 
-			"<system value=\"SYSTEM1\"/>", 
-			"<version value=\"VERSION1\"/>", 
-			"<code value=\"CODE1\"/>", 
-			"<display value=\"DISPLAY1\"/>", 
-			"<userSelected value=\"true\"/>", 
-			"</security>", 
-			"<security>", 
-			"<system value=\"SYSTEM2\"/>", 
-			"<version value=\"VERSION2\"/>", 
-			"<code value=\"CODE2\"/>", 
-			"<display value=\"DISPLAY2\"/>", 
-			"<userSelected value=\"false\"/>", 
+		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">",
+			"<meta>",
+			"<security>",
+			"<system value=\"SYSTEM1\"/>",
+			"<version value=\"VERSION1\"/>",
+			"<code value=\"CODE1\"/>",
+			"<display value=\"DISPLAY1\"/>",
+			"<userSelected value=\"true\"/>",
 			"</security>",
-			"</meta>", 
-			"<name>", 
-			"<family value=\"FAMILY\"/>", 
-			"</name>", 
+			"<security>",
+			"<system value=\"SYSTEM2\"/>",
+			"<version value=\"VERSION2\"/>",
+			"<code value=\"CODE2\"/>",
+			"<display value=\"DISPLAY2\"/>",
+			"<userSelected value=\"false\"/>",
+			"</security>",
+			"</meta>",
+			"<name>",
+			"<family value=\"FAMILY\"/>",
+			"</name>",
 			"</Patient>"));
 		//@formatter:on
 
@@ -1128,7 +1165,7 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeBinaryWithNoContentType() {
 		Binary b = new Binary();
-		b.setContent(new byte[] { 1, 2, 3, 4 });
+		b.setContent(new byte[]{1, 2, 3, 4});
 
 		String output = ourCtx.newXmlParser().encodeResourceToString(b);
 		ourLog.info(output);
@@ -1215,9 +1252,9 @@ public class XmlParserDstu2Test {
 
 		// @formatter:on
 		assertThat(encoded,
-				stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
-						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+			stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
+				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
+				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
 		//@formatter:off
 
 	}
@@ -1227,11 +1264,11 @@ public class XmlParserDstu2Test {
 	 */
 	@Test
 	public void testEncodeContainedResourcesAutomatic() {
-		
+
 		MedicationOrder medicationPrescript = new MedicationOrder();
 		String nameDisp = "MedRef";
 		CodeableConceptDt codeDt = new CodeableConceptDt("urn:sys", "code1");
-		
+
 		// Adding medication to Contained.
 		Medication medResource = new Medication();
 		// No ID set
@@ -1243,16 +1280,16 @@ public class XmlParserDstu2Test {
 		// Resource reference set, but no ID
 		medRefDt.setResource(medResource);
 		medicationPrescript.setMedication(medRefDt);
-		
+
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 		String encoded = p.encodeResourceToString(medicationPrescript);
 		ourLog.info(encoded);
-		
+
 		//@formatter:on
 		assertThat(encoded,
-				stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
-						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+			stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
+				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>",
+				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
 		//@formatter:off
 	}
 
@@ -1261,9 +1298,9 @@ public class XmlParserDstu2Test {
 	 */
 	@Test
 	public void testEncodeContainedResourcesManualContainUsingNonLocalId() {
-		
+
 		MedicationOrder medicationPrescript = new MedicationOrder();
-		
+
 		String medId = "123";
 		CodeableConceptDt codeDt = new CodeableConceptDt("urn:sys", "code1");
 
@@ -1281,16 +1318,16 @@ public class XmlParserDstu2Test {
 		ResourceReferenceDt medRefDt = new ResourceReferenceDt("#" + medId);
 		medRefDt.setDisplay("MedRef");
 		medicationPrescript.setMedication(medRefDt);
-		
+
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 		String encoded = p.encodeResourceToString(medicationPrescript);
 		ourLog.info(encoded);
-		
+
 		//@formatter:on
 		assertThat(encoded,
-				stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
-						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+			stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
+				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
+				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
 		//@formatter:off
 
 	}
@@ -1313,10 +1350,10 @@ public class XmlParserDstu2Test {
 
 		String encoded = parser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		
+
 		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
 		assertThat(encoded, not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
-		
+
 		assertThat(encoded, not(containsString("FOOBAR")));
 		assertThat(encoded, (containsString("BARFOO")));
 
@@ -1327,13 +1364,13 @@ public class XmlParserDstu2Test {
 	 */
 	@Test
 	public void testEncodeDivWithPreNonPrettyPrint() {
-		
+
 		Patient p = new Patient();
 		p.getText().setDiv("<div>\n\n<p>A P TAG</p><p><pre>line1\nline2\nline3  <b>BOLD</b></pre></p></div>");
-		
+
 		String output = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(p);
 		ourLog.info(output);
-		
+
 		//@formatter:off
 		assertThat(output, stringContainsInOrder(
 			"<text><div",
@@ -1512,21 +1549,21 @@ public class XmlParserDstu2Test {
 
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<contained>", 
-					"<Condition xmlns=\"http://hl7.org/fhir\">", 
-						"<id value=\"1\"/>", 
-						"<bodySite>", 
-							"<text value=\"BODY SITE\"/>", 
-						"</bodySite>", 
-					"</Condition>", 
-				"</contained>", 
-				"<extension url=\"testCondition\">", 
-					"<valueReference>", 
-						"<reference value=\"#1\"/>", 
-					"</valueReference>", 
-				"</extension>", 
-				"<birthDate value=\"2016-04-17\"/>", 
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
+			"<contained>",
+			"<Condition xmlns=\"http://hl7.org/fhir\">",
+			"<id value=\"1\"/>",
+			"<bodySite>",
+			"<text value=\"BODY SITE\"/>",
+			"</bodySite>",
+			"</Condition>",
+			"</contained>",
+			"<extension url=\"testCondition\">",
+			"<valueReference>",
+			"<reference value=\"#1\"/>",
+			"</valueReference>",
+			"</extension>",
+			"<birthDate value=\"2016-04-17\"/>",
 			"</Patient>"
 		));
 		//@formatter:on
@@ -1912,10 +1949,10 @@ public class XmlParserDstu2Test {
 		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
 		assertThat(enc, containsString(
-				"<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
+			"<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
 		assertThat(enc, containsString(
-				"<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
+			"<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
 	}
 
 	@Test
@@ -2002,33 +2039,33 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseAndEncodeComments() throws IOException {
 		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-				"  <id value=\"pat1\"/>\n" + 
-				"  <text>\n" + 
-				"    <status value=\"generated\"/>\n" + 
-				"    <div xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
-				"\n" + 
-				"      <p>Patient Donald DUCK @ Acme Healthcare, Inc. MR = 654321</p>\n" + 
-				"\n" + 
-				"    </div>\n" + 
-				"  </text>\n" + 
-				"  <!--identifier comment 1-->\n" +
-				"  <!--identifier comment 2-->\n" +
-				"  <identifier>\n" + 
-				"    <!--use comment 1-->\n" +
-				"    <!--use comment 2-->\n" +
-				"    <use value=\"usual\"/>\n" + 
-				"    <type>\n" + 
-				"      <coding>\n" + 
-				"        <system value=\"http://hl7.org/fhir/v2/0203\"/>\n" + 
-				"        <code value=\"MR\"/>\n" + 
-				"      </coding>\n" + 
-				"    </type>\n" + 
-				"    <system value=\"urn:oid:0.1.2.3.4.5.6.7\"/>\n" + 
-				"    <value value=\"654321\"/>\n" + 
-				"  </identifier>\n" + 
-				"  <active value=\"true\"/>" +
-				"</Patient>";
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"  <id value=\"pat1\"/>\n" +
+			"  <text>\n" +
+			"    <status value=\"generated\"/>\n" +
+			"    <div xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+			"\n" +
+			"      <p>Patient Donald DUCK @ Acme Healthcare, Inc. MR = 654321</p>\n" +
+			"\n" +
+			"    </div>\n" +
+			"  </text>\n" +
+			"  <!--identifier comment 1-->\n" +
+			"  <!--identifier comment 2-->\n" +
+			"  <identifier>\n" +
+			"    <!--use comment 1-->\n" +
+			"    <!--use comment 2-->\n" +
+			"    <use value=\"usual\"/>\n" +
+			"    <type>\n" +
+			"      <coding>\n" +
+			"        <system value=\"http://hl7.org/fhir/v2/0203\"/>\n" +
+			"        <code value=\"MR\"/>\n" +
+			"      </coding>\n" +
+			"    </type>\n" +
+			"    <system value=\"urn:oid:0.1.2.3.4.5.6.7\"/>\n" +
+			"    <value value=\"654321\"/>\n" +
+			"  </identifier>\n" +
+			"  <active value=\"true\"/>" +
+			"</Patient>";
 		//@formatter:off
 
 		Patient res = ourCtx.newXmlParser().parseResource(Patient.class, input);
@@ -2036,66 +2073,66 @@ public class XmlParserDstu2Test {
 		assertEquals("Patient/pat1", res.getId().getValue());
 		assertEquals("654321", res.getIdentifier().get(0).getValue());
 		assertEquals(true, res.getActive());
-		
+
 		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), contains("identifier comment 1", "identifier comment 2"));
 		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), contains("use comment 1", "use comment 2"));
-		
+
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
-		
+
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
-				"\"identifier\": [", 
-				"{",
-				"\"fhir_comments\":",
-				"[",
-				"\"identifier comment 1\"",
-				",",
-				"\"identifier comment 2\"",
-				"]",
-				"\"use\": \"usual\",", 
-				"\"_use\": {", 
-				"\"fhir_comments\":",
-				"[",
-				"\"use comment 1\"",
-				",",
-				"\"use comment 2\"",
-				"]",
-				"},",
-				"\"type\"" 
+			"\"identifier\": [",
+			"{",
+			"\"fhir_comments\":",
+			"[",
+			"\"identifier comment 1\"",
+			",",
+			"\"identifier comment 2\"",
+			"]",
+			"\"use\": \"usual\",",
+			"\"_use\": {",
+			"\"fhir_comments\":",
+			"[",
+			"\"use comment 1\"",
+			",",
+			"\"use comment 2\"",
+			"]",
+			"},",
+			"\"type\""
 		));
 		//@formatter:off
-		
+
 		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
-		
+
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
-				"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<id value=\"pat1\"/>", 
-				"<text>", 
-				"<status value=\"generated\"/>", 
-				"<div xmlns=\"http://www.w3.org/1999/xhtml\"> ", 
-				"<p>Patient Donald DUCK @ Acme Healthcare, Inc. MR = 654321</p> ", 
-				"</div>", 
-				"</text>",
-				"<!--identifier comment 1-->",
-				"<!--identifier comment 2-->", 
-				"<identifier>",
-				"<!--use comment 1-->",
-				"<!--use comment 2-->", 
-				"<use value=\"usual\"/>", 
-				"<type>", 
-				"<coding>", 
-				"<system value=\"http://hl7.org/fhir/v2/0203\"/>", 
-				"<code value=\"MR\"/>", 
-				"</coding>", 
-				"</type>", 
-				"<system value=\"urn:oid:0.1.2.3.4.5.6.7\"/>", 
-				"<value value=\"654321\"/>", 
-				"</identifier>", 
-				"<active value=\"true\"/>", 
-				"</Patient>" 
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
+			"<id value=\"pat1\"/>",
+			"<text>",
+			"<status value=\"generated\"/>",
+			"<div xmlns=\"http://www.w3.org/1999/xhtml\"> ",
+			"<p>Patient Donald DUCK @ Acme Healthcare, Inc. MR = 654321</p> ",
+			"</div>",
+			"</text>",
+			"<!--identifier comment 1-->",
+			"<!--identifier comment 2-->",
+			"<identifier>",
+			"<!--use comment 1-->",
+			"<!--use comment 2-->",
+			"<use value=\"usual\"/>",
+			"<type>",
+			"<coding>",
+			"<system value=\"http://hl7.org/fhir/v2/0203\"/>",
+			"<code value=\"MR\"/>",
+			"</coding>",
+			"</type>",
+			"<system value=\"urn:oid:0.1.2.3.4.5.6.7\"/>",
+			"<value value=\"654321\"/>",
+			"</identifier>",
+			"<active value=\"true\"/>",
+			"</Patient>"
 		));
 		//@formatter:off
 
@@ -2104,138 +2141,138 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseAndEncodeExtensionOnResourceReference() {
 		//@formatter:off
-		String input = 
-				"<DataElement>" + 
-					"<id value=\"gender\"/>"+ 
-					"<contained>"+ 
-						"<ValueSet>"+ 
-						"<id value=\"2179414\"/>"+ 
-						"<url value=\"2179414\"/>"+ 
-						"<version value=\"1.0\"/>"+ 
-						"<status value=\"active\"/>"+ 
-						"<description value=\"All codes representing the gender of a person.\"/>"+ 
-						"<compose>"+ 
-						"<include>"+ 
-						"<system value=\"http://ncit.nci.nih.gov\"/>"+ 
-						"<concept>"+ 
-						"<code value=\"C17998\"/>"+ 
-						"<display value=\"Unknown\"/>"+ 
-						"</concept>"+ 
-						"<concept>"+ 
-						"<code value=\"C20197\"/>"+ 
-						"<display value=\"Male\"/>"+ 
-						"</concept>"+ 
-						"<concept>"+ 
-						"<code value=\"C16576\"/>"+ 
-						"<display value=\"Female\"/>"+ 
-						"</concept>"+ 
-						"<concept>"+ 
-						"<code value=\"C38046\"/>"+ 
-						"<display value=\"Not specified\"/>"+ 
-						"</concept>"+ 
-						"</include>"+ 
-						"</compose>"+ 
-						"</ValueSet>"+ 
-					"</contained>"+ 
-					"<contained>"+ 
-					"<ValueSet>"+ 
-						"<id value=\"2179414-permitted\"/>"+ 
-						"<status value=\"active\"/>"+ 
-						"<codeSystem>"+ 
-							"<system value=\"http://example.org/fhir/2179414\"/>"+ 
-							"<caseSensitive value=\"true\"/>"+ 
-							"<concept>"+ 
-							"<code value=\"0\"/>"+ 
-							"</concept>"+ 
-							"<concept>"+ 
-							"<code value=\"1\"/>"+ 
-							"</concept>"+ 
-							"<concept>"+ 
-							"<code value=\"2\"/>"+ 
-							"</concept>"+ 
-							"<concept>"+ 
-							"<code value=\"3\"/>"+ 
-							"</concept>"+ 
-						"</codeSystem>"+ 
-						"</ValueSet>"+ 
-					"</contained>"+ 
-					"<contained>"+ 
-						"<ConceptMap>"+ 
-						"<id value=\"2179414-cm\"/>"+ 
-						"<status value=\"active\"/>"+ 
-						"<sourceReference>"+ 
-						"<reference value=\"#2179414\"/>"+ 
-						"</sourceReference>"+ 
-						"<targetReference>"+ 
-						"<reference value=\"#2179414-permitted\"/>"+ 
-						"</targetReference>"+ 
-						"<element>"+ 
-						"<code value=\"C17998\"/>"+ 
-						"<target>"+ 
-						"<code value=\"0\"/>"+ 
-						"<equivalence value=\"equal\"/>"+ 
-						"</target>"+ 
-						"</element>"+ 
-						"<element>"+ 
-						"<code value=\"C20197\"/>"+ 
-						"<target>"+ 
-						"<code value=\"1\"/>"+ 
-						"<equivalence value=\"equal\"/>"+ 
-						"</target>"+ 
-						"</element>"+ 
-						"<element>"+ 
-						"<code value=\"C16576\"/>"+ 
-						"<target>"+ 
-						"<code value=\"2\"/>"+ 
-						"<equivalence value=\"equal\"/>"+ 
-						"</target>"+ 
-						"</element>"+ 
-						"<element>"+ 
-						"<code value=\"C38046\"/>"+ 
-						"<target>"+ 
-						"<code value=\"3\"/>"+ 
-						"<equivalence value=\"equal\"/>"+ 
-						"</target>"+ 
-						"</element>"+ 
-					"</ConceptMap>"+ 
-					"</contained>"+ 
-					"<identifier>"+ 
-						"<value value=\"2179650\"/>"+ 
-					"</identifier>"+ 
-					"<version value=\"1.0\"/>"+ 
-					"<name value=\"Gender Code\"/>"+ 
-					"<status value=\"active\"/>"+ 
-					"<publisher value=\"DCP\"/>"+ 
-					"<element>"+ 
-						"<extension url=\"http://hl7.org/fhir/StructureDefinition/minLength\">"+ 
-							"<valueInteger value=\"1\"/>"+ 
-						"</extension>"+ 
-						"<extension url=\"http://hl7.org/fhir/StructureDefinition/elementdefinition-question\">"+ 
-							"<valueString value=\"Gender\"/>"+ 
-						"</extension>"+ 
-						"<path value=\"Gender\"/>"+ 
-						"<definition value=\"The code representing the gender of a person.\"/>"+ 
-						"<type>"+ 
-						"<code value=\"CodeableConcept\"/>"+ 
-						"</type>"+ 
-						"<maxLength value=\"13\"/>"+ 
-						"<binding>"+ 
-							"<strength value=\"required\"/>"+ 
-							"<valueSetReference>"+ 
-								"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset\">"+ 
-									"<valueReference>"+ 
-										"<reference value=\"#2179414-permitted\"/>"+ 
-									"</valueReference>"+ 
-								"</extension>"+ 
-								"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap\">"+ 
-									"<valueReference>"+ 
-										"<reference value=\"#2179414-cm\"/>"+ 
-									"</valueReference>"+ 
-								"</extension>"+ 
-								"<reference value=\"#2179414\"/>"+ 
-							"</valueSetReference>"+ 
-						"</binding>"+ 
-					"</element>"+ 
+		String input =
+			"<DataElement>" +
+				"<id value=\"gender\"/>" +
+				"<contained>" +
+				"<ValueSet>" +
+				"<id value=\"2179414\"/>" +
+				"<url value=\"2179414\"/>" +
+				"<version value=\"1.0\"/>" +
+				"<status value=\"active\"/>" +
+				"<description value=\"All codes representing the gender of a person.\"/>" +
+				"<compose>" +
+				"<include>" +
+				"<system value=\"http://ncit.nci.nih.gov\"/>" +
+				"<concept>" +
+				"<code value=\"C17998\"/>" +
+				"<display value=\"Unknown\"/>" +
+				"</concept>" +
+				"<concept>" +
+				"<code value=\"C20197\"/>" +
+				"<display value=\"Male\"/>" +
+				"</concept>" +
+				"<concept>" +
+				"<code value=\"C16576\"/>" +
+				"<display value=\"Female\"/>" +
+				"</concept>" +
+				"<concept>" +
+				"<code value=\"C38046\"/>" +
+				"<display value=\"Not specified\"/>" +
+				"</concept>" +
+				"</include>" +
+				"</compose>" +
+				"</ValueSet>" +
+				"</contained>" +
+				"<contained>" +
+				"<ValueSet>" +
+				"<id value=\"2179414-permitted\"/>" +
+				"<status value=\"active\"/>" +
+				"<codeSystem>" +
+				"<system value=\"http://example.org/fhir/2179414\"/>" +
+				"<caseSensitive value=\"true\"/>" +
+				"<concept>" +
+				"<code value=\"0\"/>" +
+				"</concept>" +
+				"<concept>" +
+				"<code value=\"1\"/>" +
+				"</concept>" +
+				"<concept>" +
+				"<code value=\"2\"/>" +
+				"</concept>" +
+				"<concept>" +
+				"<code value=\"3\"/>" +
+				"</concept>" +
+				"</codeSystem>" +
+				"</ValueSet>" +
+				"</contained>" +
+				"<contained>" +
+				"<ConceptMap>" +
+				"<id value=\"2179414-cm\"/>" +
+				"<status value=\"active\"/>" +
+				"<sourceReference>" +
+				"<reference value=\"#2179414\"/>" +
+				"</sourceReference>" +
+				"<targetReference>" +
+				"<reference value=\"#2179414-permitted\"/>" +
+				"</targetReference>" +
+				"<element>" +
+				"<code value=\"C17998\"/>" +
+				"<target>" +
+				"<code value=\"0\"/>" +
+				"<equivalence value=\"equal\"/>" +
+				"</target>" +
+				"</element>" +
+				"<element>" +
+				"<code value=\"C20197\"/>" +
+				"<target>" +
+				"<code value=\"1\"/>" +
+				"<equivalence value=\"equal\"/>" +
+				"</target>" +
+				"</element>" +
+				"<element>" +
+				"<code value=\"C16576\"/>" +
+				"<target>" +
+				"<code value=\"2\"/>" +
+				"<equivalence value=\"equal\"/>" +
+				"</target>" +
+				"</element>" +
+				"<element>" +
+				"<code value=\"C38046\"/>" +
+				"<target>" +
+				"<code value=\"3\"/>" +
+				"<equivalence value=\"equal\"/>" +
+				"</target>" +
+				"</element>" +
+				"</ConceptMap>" +
+				"</contained>" +
+				"<identifier>" +
+				"<value value=\"2179650\"/>" +
+				"</identifier>" +
+				"<version value=\"1.0\"/>" +
+				"<name value=\"Gender Code\"/>" +
+				"<status value=\"active\"/>" +
+				"<publisher value=\"DCP\"/>" +
+				"<element>" +
+				"<extension url=\"http://hl7.org/fhir/StructureDefinition/minLength\">" +
+				"<valueInteger value=\"1\"/>" +
+				"</extension>" +
+				"<extension url=\"http://hl7.org/fhir/StructureDefinition/elementdefinition-question\">" +
+				"<valueString value=\"Gender\"/>" +
+				"</extension>" +
+				"<path value=\"Gender\"/>" +
+				"<definition value=\"The code representing the gender of a person.\"/>" +
+				"<type>" +
+				"<code value=\"CodeableConcept\"/>" +
+				"</type>" +
+				"<maxLength value=\"13\"/>" +
+				"<binding>" +
+				"<strength value=\"required\"/>" +
+				"<valueSetReference>" +
+				"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset\">" +
+				"<valueReference>" +
+				"<reference value=\"#2179414-permitted\"/>" +
+				"</valueReference>" +
+				"</extension>" +
+				"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap\">" +
+				"<valueReference>" +
+				"<reference value=\"#2179414-cm\"/>" +
+				"</valueReference>" +
+				"</extension>" +
+				"<reference value=\"#2179414\"/>" +
+				"</valueSetReference>" +
+				"</binding>" +
+				"</element>" +
 				"</DataElement>";
 		//@formatter:on
 		DataElement de = ourCtx.newXmlParser().parseResource(DataElement.class, input);
@@ -2272,14 +2309,14 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseAndEncodeNestedExtensions() {
 		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"   <birthDate value=\"2005-03-04\">\n" + 
-			"      <extension url=\"http://my.fancy.extension.url\">\n" + 
-			"         <extension url=\"http://my.fancy.extension.url\">\n" + 
-			"            <valueString value=\"myNestedValue\"/>\n" + 
-			"         </extension>\n" + 
-			"      </extension>\n" + 
-			"   </birthDate>\n" + 
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <birthDate value=\"2005-03-04\">\n" +
+			"      <extension url=\"http://my.fancy.extension.url\">\n" +
+			"         <extension url=\"http://my.fancy.extension.url\">\n" +
+			"            <valueString value=\"myNestedValue\"/>\n" +
+			"         </extension>\n" +
+			"      </extension>\n" +
+			"   </birthDate>\n" +
 			"</Patient>";
 		//@formatter:on
 
@@ -2302,14 +2339,14 @@ public class XmlParserDstu2Test {
 
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<birthDate value=\"2005-03-04\">",
-			"<extension url=\"http://my.fancy.extension.url\">", 
-			"<extension url=\"http://my.fancy.extension.url\">", 
+			"<extension url=\"http://my.fancy.extension.url\">",
+			"<extension url=\"http://my.fancy.extension.url\">",
 			"<valueString value=\"myNestedValue\"/>",
 			"</extension>",
-			"</extension>", 
-			"</birthDate>", 
+			"</extension>",
+			"</birthDate>",
 			"</Patient>"));
 		//@formatter:on
 
@@ -2318,17 +2355,17 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseBundleNewWithPlaceholderIds() {
 		//@formatter:off
-		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-				"    <id value=\"ringholm1430996763590912\"/>\n" + 
-				"    <entry>\n" +
-				"        <fullUrl value=\"urn:oid:0.1.2.3\"/>\n" +
-				"        <resource>\n" + 
-				"            <Provenance>\n" + 
-				"                <id value=\"0.1.2.3\"/>\n" + 
-				"            </Provenance>\n" + 
-				"        </resource>\n" + 
-				"    </entry>\n" + 
-				"</Bundle>\n";
+		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"    <id value=\"ringholm1430996763590912\"/>\n" +
+			"    <entry>\n" +
+			"        <fullUrl value=\"urn:oid:0.1.2.3\"/>\n" +
+			"        <resource>\n" +
+			"            <Provenance>\n" +
+			"                <id value=\"0.1.2.3\"/>\n" +
+			"            </Provenance>\n" +
+			"        </resource>\n" +
+			"    </entry>\n" +
+			"</Bundle>\n";
 		//@formatter:on		
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
@@ -2339,17 +2376,17 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseBundleNewWithPlaceholderIdsInBase1() {
 		//@formatter:off
-		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-				"    <id value=\"ringholm1430996763590912\"/>\n" + 
-				"    <entry>\n" +
-				"        <fullUrl value=\"urn:oid:0.1.2.3\"/>\n" +
-				"        <resource>\n" + 
-				"            <Provenance>\n" + 
-				"                <id value=\"0.1.2.3\"/>\n" + 
-				"            </Provenance>\n" + 
-				"        </resource>\n" + 
-				"    </entry>\n" + 
-				"</Bundle>\n";
+		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"    <id value=\"ringholm1430996763590912\"/>\n" +
+			"    <entry>\n" +
+			"        <fullUrl value=\"urn:oid:0.1.2.3\"/>\n" +
+			"        <resource>\n" +
+			"            <Provenance>\n" +
+			"                <id value=\"0.1.2.3\"/>\n" +
+			"            </Provenance>\n" +
+			"        </resource>\n" +
+			"    </entry>\n" +
+			"</Bundle>\n";
 		//@formatter:on		
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
@@ -2359,34 +2396,34 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseBundleNewWithPlaceholderIdsInBase2() {
 		//@formatter:off
-		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-				"    <id value=\"ringholm1430996763590912\"/>\n" + 
-				"    <entry>\n" +
-				"        <fullUrl value=\"urn:uuid:0.1.2.3\"/>\n" +
-				"        <resource>\n" + 
-				"            <Provenance>\n" + 
-				"                <id value=\"0.1.2.3\"/>\n" + 
-				"            </Provenance>\n" + 
-				"        </resource>\n" + 
-				"    </entry>\n" + 
-				"</Bundle>\n";
+		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"    <id value=\"ringholm1430996763590912\"/>\n" +
+			"    <entry>\n" +
+			"        <fullUrl value=\"urn:uuid:0.1.2.3\"/>\n" +
+			"        <resource>\n" +
+			"            <Provenance>\n" +
+			"                <id value=\"0.1.2.3\"/>\n" +
+			"            </Provenance>\n" +
+			"        </resource>\n" +
+			"    </entry>\n" +
+			"</Bundle>\n";
 		//@formatter:on		
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
 		assertEquals("urn:uuid:0.1.2.3", parsed.getEntry().get(0).getResource().getId().getValue());
 
 		//@formatter:off
-		input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-				"    <id value=\"ringholm1430996763590912\"/>\n" + 
-				"    <entry>\n" +
-				"        <fullUrl value=\"urn:uuid:0.1.2.3\"/>\n" +
-				"        <resource>\n" + 
-				"            <Provenance>\n" + 
-				"                <id value=\"0.1.2.3\"/>\n" + 
-				"            </Provenance>\n" + 
-				"        </resource>\n" + 
-				"    </entry>\n" + 
-				"</Bundle>\n";
+		input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"    <id value=\"ringholm1430996763590912\"/>\n" +
+			"    <entry>\n" +
+			"        <fullUrl value=\"urn:uuid:0.1.2.3\"/>\n" +
+			"        <resource>\n" +
+			"            <Provenance>\n" +
+			"                <id value=\"0.1.2.3\"/>\n" +
+			"            </Provenance>\n" +
+			"        </resource>\n" +
+			"    </entry>\n" +
+			"</Bundle>\n";
 		//@formatter:on		
 
 		parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
@@ -2397,29 +2434,29 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseBundleOldStyleWithUnknownLinks() throws Exception {
 		//@formatter:off
-		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-			"   <base value=\"http://foo/fhirBase1\"/>\n" + 
-			"   <total value=\"1\"/>\n" + 
-			"   <link>\n" + 
-			"      <relation value=\"foo\"/>\n" + 
-			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
-			"   </link>\n" + 
-			"   <entry>\n" + 
-			"   <link>\n" + 
-			"      <relation value=\"bar\"/>\n" + 
-			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
-			"   </link>\n" + 
-			"      <resource>\n" + 
-			"         <Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"            <id value=\"1\"/>\n" + 
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <base value=\"http://foo/fhirBase1\"/>\n" +
+			"   <total value=\"1\"/>\n" +
+			"   <link>\n" +
+			"      <relation value=\"foo\"/>\n" +
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" +
+			"   </link>\n" +
+			"   <entry>\n" +
+			"   <link>\n" +
+			"      <relation value=\"bar\"/>\n" +
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" +
+			"   </link>\n" +
+			"      <resource>\n" +
+			"         <Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"            <id value=\"1\"/>\n" +
 			"            <meta>\n" +
 			"               <versionId value=\"2\"/>\n" +
 			"               <lastUpdated value=\"2001-02-22T11:22:33-05:00\"/>\n" +
-			"            </meta>\n" + 
-			"            <birthDate value=\"2012-01-02\"/>\n" + 
-			"         </Patient>\n" + 
-			"      </resource>\n" + 
-			"   </entry>\n" + 
+			"            </meta>\n" +
+			"            <birthDate value=\"2012-01-02\"/>\n" +
+			"         </Patient>\n" +
+			"      </resource>\n" +
+			"   </entry>\n" +
 			"</Bundle>";
 		//@formatter:on
 
@@ -2455,10 +2492,10 @@ public class XmlParserDstu2Test {
 	public void testParseBundleWithResourceId() {
 		//@formatter:off
 		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">"
-				+ "<entry><fullUrl value=\"http://localhost:58402/fhir/context/Patient/1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"3\"/><lastUpdated value=\"2015-09-11T23:35:43.273-04:00\"/></meta><name><family value=\"testHistoryWithDeletedResource\"/></name></Patient></resource></entry>"
-				+ "<entry><fullUrl value=\"http://localhost:58402/fhir/context/Patient/1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"2\"/><lastUpdated value=\"2015-09-11T23:35:42.849-04:00\"/></meta><name><family value=\"testHistoryWithDeletedResource\"/></name></Patient></resource></entry>"
-				+ "<entry><fullUrl value=\"http://localhost:58402/fhir/context/Patient/1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-09-11T23:35:42.295-04:00\"/></meta><name><family value=\"testHistoryWithDeletedResource\"/></name></Patient></resource></entry>"
-				+ "</Bundle>\n";
+			+ "<entry><fullUrl value=\"http://localhost:58402/fhir/context/Patient/1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"3\"/><lastUpdated value=\"2015-09-11T23:35:43.273-04:00\"/></meta><name><family value=\"testHistoryWithDeletedResource\"/></name></Patient></resource></entry>"
+			+ "<entry><fullUrl value=\"http://localhost:58402/fhir/context/Patient/1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"2\"/><lastUpdated value=\"2015-09-11T23:35:42.849-04:00\"/></meta><name><family value=\"testHistoryWithDeletedResource\"/></name></Patient></resource></entry>"
+			+ "<entry><fullUrl value=\"http://localhost:58402/fhir/context/Patient/1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-09-11T23:35:42.295-04:00\"/></meta><name><family value=\"testHistoryWithDeletedResource\"/></name></Patient></resource></entry>"
+			+ "</Bundle>\n";
 		//@formatter:on
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
@@ -2494,7 +2531,7 @@ public class XmlParserDstu2Test {
 			"<id value=\"1\"/>",
 			"</contained>",
 			"<reference value=\"#1\"/>"
-			));
+		));
 		//@formatter:on
 
 		o = parser.parseResource(Observation.class, enc);
@@ -2510,7 +2547,7 @@ public class XmlParserDstu2Test {
 	 */
 	@Test
 	public void testParseContainedBinaryResource() {
-		byte[] bin = new byte[] { 0, 1, 2, 3, 4 };
+		byte[] bin = new byte[]{0, 1, 2, 3, 4};
 		final Binary binary = new Binary();
 		binary.setContentType("PatientConsent").setContent(bin);
 		// binary.setId(UUID.randomUUID().toString());
@@ -2538,17 +2575,20 @@ public class XmlParserDstu2Test {
 	/**
 	 * See #366
 	 */
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseInvalidBoolean() {
-		//@formatter:off
-		String resource = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"   <active value=\"1\"/>\n" + 
-			"</Patient>";
-		//@formatter:on
+		try {
+			String resource = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+				"   <active value=\"1\"/>\n" +
+				"</Patient>";
 
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		parser.parseResource(resource);
+			IParser parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(resource);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+		}
 	}
 
 	@Test
@@ -2570,13 +2610,13 @@ public class XmlParserDstu2Test {
 		// This was changed from 0.5 to 1.0.0
 
 		//@formatter:off
-		String out = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-				"   <identifier>\n" + 
-				"      <type value=\"MRN\"/>\n" + 
-				"      <system value=\"SYS\"/>\n" + 
-				"      <value value=\"VAL\"/>\n" + 
-				"   </identifier>\n" + 
-				"</Patient>";
+		String out = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <identifier>\n" +
+			"      <type value=\"MRN\"/>\n" +
+			"      <system value=\"SYS\"/>\n" +
+			"      <value value=\"VAL\"/>\n" +
+			"   </identifier>\n" +
+			"</Patient>";
 		//@formatter:on
 
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
@@ -2596,29 +2636,29 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseMetadata() throws Exception {
 		//@formatter:off
-		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-			"   <total value=\"1\"/>\n" + 
-			"   <link>\n" + 
-			"      <relation value=\"base\"/>\n" + 
-			"      <url value=\"http://foo/fhirBase1\"/>\n" + 
-			"   </link>\n" + 
-			"   <link>\n" + 
-			"      <relation value=\"self\"/>\n" + 
-			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
-			"   </link>\n" + 
-			"   <entry>\n" + 
-			"      <fullUrl value=\"http://foo/fhirBase2/Patient/1/_history/2\"/>\n" + 
-			"      <resource>\n" + 
-			"         <Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"            <id value=\"1\"/>\n" + 
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <total value=\"1\"/>\n" +
+			"   <link>\n" +
+			"      <relation value=\"base\"/>\n" +
+			"      <url value=\"http://foo/fhirBase1\"/>\n" +
+			"   </link>\n" +
+			"   <link>\n" +
+			"      <relation value=\"self\"/>\n" +
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" +
+			"   </link>\n" +
+			"   <entry>\n" +
+			"      <fullUrl value=\"http://foo/fhirBase2/Patient/1/_history/2\"/>\n" +
+			"      <resource>\n" +
+			"         <Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"            <id value=\"1\"/>\n" +
 			"            <meta>\n" +
 			"               <versionId value=\"2\"/>\n" +
 			"               <lastUpdated value=\"2001-02-22T11:22:33-05:00\"/>\n" +
-			"            </meta>\n" + 
-			"            <birthDate value=\"2012-01-02\"/>\n" + 
-			"         </Patient>\n" + 
-			"      </resource>\n" + 
-			"   </entry>\n" + 
+			"            </meta>\n" +
+			"            <birthDate value=\"2012-01-02\"/>\n" +
+			"         </Patient>\n" +
+			"      </resource>\n" +
+			"   </entry>\n" +
 			"</Bundle>";
 		//@formatter:on
 
@@ -2640,9 +2680,9 @@ public class XmlParserDstu2Test {
 		toBundle.getLinkOrCreate("self").setUrl("http://localhost:52788/Binary?_pretty=true");
 
 		toBundle
-				.addEntry()
-				.setResource(pt)
-				.setFullUrl("http://foo/fhirBase2/Patient/1/_history/2");
+			.addEntry()
+			.setResource(pt)
+			.setFullUrl("http://foo/fhirBase2/Patient/1/_history/2");
 
 		String reEncoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(toBundle);
 
@@ -2654,19 +2694,19 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseMetaUpdatedDate() {
 		//@formatter:off
-		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-				"   <id value=\"e2ee823b-ee4d-472d-b79d-495c23f16b99\"/>\n" + 
-				"   <meta>\n" + 
-				"      <lastUpdated value=\"2015-06-22T15:48:57.554-04:00\"/>\n" + 
-				"   </meta>\n" + 
-				"   <type value=\"searchset\"/>\n" + 
-				"   <base value=\"http://localhost:58109/fhir/context\"/>\n" + 
-				"   <total value=\"0\"/>\n" + 
-				"   <link>\n" + 
-				"      <relation value=\"self\"/>\n" + 
-				"      <url value=\"http://localhost:58109/fhir/context/Patient?_pretty=true\"/>\n" + 
-				"   </link>\n" + 
-				"</Bundle>";
+		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <id value=\"e2ee823b-ee4d-472d-b79d-495c23f16b99\"/>\n" +
+			"   <meta>\n" +
+			"      <lastUpdated value=\"2015-06-22T15:48:57.554-04:00\"/>\n" +
+			"   </meta>\n" +
+			"   <type value=\"searchset\"/>\n" +
+			"   <base value=\"http://localhost:58109/fhir/context\"/>\n" +
+			"   <total value=\"0\"/>\n" +
+			"   <link>\n" +
+			"      <relation value=\"self\"/>\n" +
+			"      <url value=\"http://localhost:58109/fhir/context/Patient?_pretty=true\"/>\n" +
+			"   </link>\n" +
+			"</Bundle>";
 		//@formatter:on
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
 
@@ -2679,13 +2719,13 @@ public class XmlParserDstu2Test {
 	public void testParseNarrative() throws Exception {
 		//@formatter:off
 		String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";
-		String htmlNs = htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">"); 
-		String res= "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-				"   <id value=\"1333\"/>\n" + 
-				"   <text>\n" + 
-				"      " + htmlNs + "\n" +
-				"   </text>\n" + 
-				"</Patient>";
+		String htmlNs = htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">");
+		String res = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <id value=\"1333\"/>\n" +
+			"   <text>\n" +
+			"      " + htmlNs + "\n" +
+			"   </text>\n" +
+			"</Patient>";
 		//@formatter:on
 
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
@@ -2695,15 +2735,15 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseNestedExtensionsInvalid() {
 		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" +
 			"   <birthDate value=\"2005-03-04\">\n" +
-			"      <extension url=\"http://my.fancy.extension.url\">\n" + 
+			"      <extension url=\"http://my.fancy.extension.url\">\n" +
 			"         <valueString value=\"myvalue\"/>\n" +
-			"         <extension url=\"http://my.fancy.extension.url\">\n" + 
-			"            <valueString value=\"myNestedValue\"/>\n" + 
-			"         </extension>\n" + 
-			"      </extension>\n" + 
-			"   </birthDate>\n" + 
+			"         <extension url=\"http://my.fancy.extension.url\">\n" +
+			"            <valueString value=\"myNestedValue\"/>\n" +
+			"         </extension>\n" +
+			"      </extension>\n" +
+			"   </birthDate>\n" +
 			"</Patient>";
 		//@formatter:on
 
@@ -2789,7 +2829,7 @@ public class XmlParserDstu2Test {
 
 		// Check no NPE if base server not configure
 		newPatient = ourCtx.newXmlParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertNull("myName", newPatient.getPetName().getValue());
+		assertNull(newPatient.getPetName().getValue());
 		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 	}
 
@@ -2844,27 +2884,15 @@ public class XmlParserDstu2Test {
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<ExtensionDt> extlst = fhirPat.getUndeclaredExtensionsByUrl("x1");
-		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((ResourceReferenceDt) extlst.get(0).getValue()).getReference().getValue());
-	}
-  
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
-	public static void main(String[] args) {
-		IGenericClient c = ourCtx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
-		// c.registerInterceptor(new LoggingInterceptor(true));
-		c.read().resource("Patient").withId("324").execute();
+		assertEquals(1, extlst.size());
+		assertEquals(refVal, ((ResourceReferenceDt) extlst.get(0).getValue()).getReference().getValue());
 	}
 
 	@ResourceDef(name = "Condition", profile = "http://hl7.org/fhir/profiles/custom-condition", id = "custom-condition")
 	public static class CustomCondition extends Condition {
 		private static final long serialVersionUID = 1L;
 
-		@Child(name = "abatement", min = 0, max = 1, order = Child.REPLACE_PARENT, type = { DateTimeDt.class }, summary = true)
+		@Child(name = "abatement", min = 0, max = 1, order = Child.REPLACE_PARENT, type = {DateTimeDt.class}, summary = true)
 		private DateTimeDt myAbatement;
 
 		public DateTimeDt getOurAbatement() {
@@ -2894,17 +2922,28 @@ public class XmlParserDstu2Test {
 		}
 	}
 
+	@AfterAll
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	public static void main(String[] args) {
+		IGenericClient c = ourCtx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
+		// c.registerInterceptor(new LoggingInterceptor(true));
+		c.read().resource("Patient").withId("324").execute();
+	}
+
 	public static void compareXml(String content, String reEncoded) {
 		Diff d = DiffBuilder.compare(Input.fromString(content))
-				.withTest(Input.fromString(reEncoded))
-				.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
-				.checkForSimilar()
-				.ignoreWhitespace()
-				.ignoreComments()
-				.withComparisonController(ComparisonControllers.Default)
-				.build();
+			.withTest(Input.fromString(reEncoded))
+			.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+			.checkForSimilar()
+			.ignoreWhitespace()
+			.ignoreComments()
+			.withComparisonController(ComparisonControllers.Default)
+			.build();
 
-		assertTrue(d.toString(), !d.hasDifferences());
+		assertTrue(!d.hasDifferences(), d.toString());
 	}
 
 }

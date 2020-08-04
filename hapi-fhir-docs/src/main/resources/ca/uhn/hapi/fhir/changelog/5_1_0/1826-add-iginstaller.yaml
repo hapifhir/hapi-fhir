@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1826
+title: "A new service has been added to the JPA server that fetches FHIR Implementation Guide NPM
+   packages and installs the contained conformance resources into the JPA repository. Thanks to 
+   Martin Zacho Grønhøj for the pull request!"

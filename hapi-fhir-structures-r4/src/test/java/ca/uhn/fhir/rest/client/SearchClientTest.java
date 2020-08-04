@@ -26,9 +26,9 @@ import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
@@ -38,7 +38,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,7 +53,7 @@ public class SearchClientTest {
 	private HttpClient ourHttpClient;
 	private HttpResponse ourHttpResponse;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forR4();
 
@@ -90,7 +93,7 @@ public class SearchClientTest {
 		assertNotNull(encounter.getSubject().getReference());
 		HttpUriRequest value = capt.getValue();
 
-		assertTrue("Expected request of type POST on long params list", value instanceof HttpPost);
+		assertTrue(value instanceof HttpPost, "Expected request of type POST on long params list");
 		HttpPost post = (HttpPost) value;
 		String body = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info(body);
@@ -109,7 +112,7 @@ public class SearchClientTest {
 		assertNotNull(encounter.getSubject().getReference());
 		value = capt.getAllValues().get(1);
 
-		assertTrue("Expected request of type POST on long params list", value instanceof HttpPost);
+		assertTrue(value instanceof HttpPost, "Expected request of type POST on long params list");
 		post = (HttpPost) value;
 		body = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info(body);
@@ -161,7 +164,7 @@ public class SearchClientTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

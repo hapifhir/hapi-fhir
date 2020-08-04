@@ -21,9 +21,12 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  */
 
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -45,28 +48,33 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactory.class);
 	private Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
+	private final IChannelNamer myChannelNamer;
 
-	/**
-	 * Constructor
-	 */
-	public LinkedBlockingChannelFactory() {
-		super();
+	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
+		myChannelNamer = theChannelNamer;
 	}
 
 	@Override
-	public IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig) {
-		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
+	public IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings) {
+		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
 	@Override
-	public IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theConfig) {
-		return getOrCreateChannel(theChannelName, theConfig.getConcurrentConsumers());
+	public IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings) {
+		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
-	private LinkedBlockingChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers) {
-		return myChannels.computeIfAbsent(theChannelName, t -> {
+	@Override
+	public IChannelNamer getChannelNamer() {
+		return myChannelNamer;
+	}
 
-			String threadNamingPattern = theChannelName + "-%d";
+	private LinkedBlockingChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers, IChannelSettings theChannelSettings) {
+		final String channelName = myChannelNamer.getChannelName(theChannelName, theChannelSettings);
+
+		return myChannels.computeIfAbsent(channelName, t -> {
+
+			String threadNamingPattern = channelName + "-%d";
 
 			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 				.namingPattern(threadNamingPattern)
@@ -95,7 +103,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 				queue,
 				threadFactory,
 				rejectedExecutionHandler);
-			return new LinkedBlockingChannel(executor, queue);
+			return new LinkedBlockingChannel(channelName, executor, queue);
 
 		});
 	}

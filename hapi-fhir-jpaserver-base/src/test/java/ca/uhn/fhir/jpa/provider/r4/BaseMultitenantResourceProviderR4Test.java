@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.ProviderConstants;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
@@ -12,6 +11,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -19,8 +19,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 	protected AuthorizationInterceptor myAuthorizationInterceptor;
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -55,18 +55,18 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		ourRestServer.setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 
 		myCapturingInterceptor = new CapturingInterceptor();
-		ourClient.getInterceptorService().registerInterceptor(myCapturingInterceptor);
+		myClient.getInterceptorService().registerInterceptor(myCapturingInterceptor);
 
 		myTenantClientInterceptor = new UrlTenantSelectionInterceptor();
-		ourClient.getInterceptorService().registerInterceptor(myTenantClientInterceptor);
+		myClient.getInterceptorService().registerInterceptor(myTenantClientInterceptor);
 
-		ourClient.getInterceptorService().registerInterceptor(new LoggingInterceptor());
+		myClient.getInterceptorService().registerInterceptor(new LoggingInterceptor());
 
 		createTenants();
 	}
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -78,7 +78,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		ourRestServer.unregisterProvider(myPartitionManagementProvider);
 		ourRestServer.setTenantIdentificationStrategy(null);
 
-		ourClient.getInterceptorService().unregisterAllInterceptors();
+		myClient.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 	private void createTenants() {
 		myTenantClientInterceptor.setTenantId(DEFAULT_PERSISTED_PARTITION_NAME);
 
-		ourClient
+		myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
@@ -98,7 +98,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_A))
 			.execute();
 
-		ourClient
+		myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
@@ -125,12 +125,12 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
-		return ourClient.create().resource(theResource).execute().getId();
+		return myClient.create().resource(theResource).execute().getId();
 	}
 
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
-		return ourClient.update().resource(theResource).execute().getId();
+		return myClient.update().resource(theResource).execute().getId();
 	}
 
 	@Override

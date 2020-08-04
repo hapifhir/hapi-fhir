@@ -110,7 +110,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 	}
 
 	private IHapiScheduler createScheduler(boolean theClustered) throws SchedulerException {
-		if (!isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests()) {
+		if (isSchedulingDisabled()) {
 			ourLog.info("Scheduling is disabled on this server");
 			return new HapiNullScheduler();
 		}
@@ -124,6 +124,10 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		}
 		retval.init();
 		return retval;
+	}
+
+	private boolean isSchedulingDisabled() {
+		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 
 	protected abstract IHapiScheduler getLocalHapiScheduler();
@@ -193,6 +197,9 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 	}
 
 	private void scheduleJob(String theInstanceName, IHapiScheduler theScheduler, long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+		if (isSchedulingDisabled()) {
+			return;
+		}
 		ourLog.info("Scheduling {} job {} with interval {}", theInstanceName, theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
 		if (theJobDefinition.getGroup() == null) {
 			theJobDefinition.setGroup(myDefaultGroup);

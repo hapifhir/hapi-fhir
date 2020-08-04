@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -92,8 +93,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
-	 *
-	 * @param theRequestDetails TODO
 	 */
 	DaoMethodOutcome delete(IIdType theResource, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
@@ -153,7 +152,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
+	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails);
 
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
@@ -164,7 +163,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Read a resource by its internal PID
 	 */
-	IBaseResource readByPid(ResourcePersistentId thePid);
+	T readByPid(ResourcePersistentId thePid);
 
 	/**
 	 * @param theId
@@ -203,6 +202,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 
+	/**
+	 * Search for IDs for processing a match URLs, etc.
+	 */
 	Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
 
 	/**

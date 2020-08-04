@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 public interface IResourceTagDao extends JpaRepository<ResourceTag, Long> {
 	@Query("" + 
 			   "SELECT t FROM ResourceTag t " + 
-			   "INNER JOIN TagDefinition td ON (td.myId = t.myTagId) " + 
+			   "INNER JOIN FETCH t.myTag td " +
 			   "WHERE t.myResourceId in (:pids)")
 	Collection<ResourceTag> findByResourceIds(@Param("pids") Collection<Long> pids);
 

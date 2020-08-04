@@ -66,6 +66,10 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
 	public abstract ChildTypeEnum getChildType();
 
+	public List<BaseRuntimeChildDefinition> getChildren() {
+		return Collections.emptyList();
+	}
+
 	@SuppressWarnings("unchecked")
 	private Constructor<T> getConstructor(@Nullable Object theArgument) {
 
@@ -223,6 +227,10 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		 * defers the dealing process
 		 */
 
+	}
+
+	public BaseRuntimeChildDefinition getChildByName(String theChildName) {
+		return null;
 	}
 
 	public enum ChildTypeEnum {

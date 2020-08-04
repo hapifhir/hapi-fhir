@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
@@ -69,9 +69,11 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
+		mySubscriptionAfterDelivery.setExpectedCount(1);
 		ourObservationListener.setExpectedCount(0);
 		sendObservation(code, "SNOMED-CT");
 		ourObservationListener.clear();
+		mySubscriptionAfterDelivery.awaitExpected();
 
 		assertEquals(0, ourContentTypes.size());
 	}

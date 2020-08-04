@@ -12,8 +12,8 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.TestUtil;
 import junit.framework.TestCase;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletException;
 
@@ -112,7 +112,7 @@ public class ServerProvidedResourceScannerTest extends TestCase {
     }
 
 
- 	@AfterClass
+ 	@AfterAll
  	public static void afterClassClearContext() {
  		TestUtil.clearAllStaticFieldsForUnitTest();
  	}

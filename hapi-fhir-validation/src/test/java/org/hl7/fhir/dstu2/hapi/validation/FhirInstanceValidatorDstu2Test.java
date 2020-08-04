@@ -18,26 +18,26 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu2.model.DateType;
 import org.hl7.fhir.dstu2.model.Observation;
 import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu2.model.StringType;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirInstanceValidatorDstu2Test {
 
@@ -46,7 +46,7 @@ public class FhirInstanceValidatorDstu2Test {
 	private static FhirInstanceValidator ourValidator;
 	private static FhirContext ourCtxHl7OrgDstu2 = FhirContext.forDstu2Hl7Org();
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(ourCtxDstu2);
 		IValidationSupport validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, new InMemoryTerminologyServerValidationSupport(ourCtxDstu2));
@@ -173,7 +173,7 @@ public class FhirInstanceValidatorDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParametersWithParameterNoValue() {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource");
@@ -192,7 +192,7 @@ public class FhirInstanceValidatorDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testParametersWithParameterTwoValues() {
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
@@ -258,7 +258,7 @@ public class FhirInstanceValidatorDstu2Test {
 	
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 1867
+title: "Initial implementation of lastn operation that uses an Elasticsearch v6 server to index observations."

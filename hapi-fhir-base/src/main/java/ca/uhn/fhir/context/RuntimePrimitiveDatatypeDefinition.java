@@ -23,10 +23,14 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -38,6 +42,8 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 	private BaseRuntimeElementDefinition<?> myProfileOf;
 	private Class<? extends IBaseDatatype> myProfileOfType;
 	private boolean mySpecialization;
+	private List<BaseRuntimeChildDefinition> myChildren;
+	private RuntimeChildExt myRuntimeChildExt;
 
 	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass, boolean theStandardType) {
 		super(theDef.name(), theImplementingClass, theStandardType);
@@ -54,6 +60,19 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 		}
 
 		determineNativeType(theImplementingClass);
+	}
+
+	@Override
+	public List<BaseRuntimeChildDefinition> getChildren() {
+		return myChildren;
+	}
+
+	@Override
+	public BaseRuntimeChildDefinition getChildByName(String theChildName) {
+		if ("extension".equals(theChildName)) {
+			return myRuntimeChildExt;
+		}
+		return null;
 	}
 
 	private void determineNativeType(Class<? extends IPrimitiveType<?>> theImplementingClass) {
@@ -126,6 +145,14 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 				throw new ConfigurationException(b.toString());
 			}
 		}
+
+		myRuntimeChildExt = new RuntimeChildExt();
+		myRuntimeChildExt.sealAndInitialize(theContext, theClassToElementDefinitions);
+
+		myChildren = new ArrayList<>();
+		myChildren.addAll(super.getChildren());
+		myChildren.add(myRuntimeChildExt);
+		myChildren = Collections.unmodifiableList(myChildren);
 	}
 
 }

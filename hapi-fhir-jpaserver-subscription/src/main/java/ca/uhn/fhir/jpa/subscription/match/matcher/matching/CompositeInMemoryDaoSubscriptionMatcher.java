@@ -47,7 +47,6 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 		if (myDaoConfig.isEnableInMemorySubscriptionMatching()) {
 			result = myInMemorySubscriptionMatcher.match(theSubscription, theMsg);
 			if (result.supported()) {
-				// TODO KHS test
 				result.setInMemory(true);
 			} else {
 				ourLog.info("Criteria {} for Subscription {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher", theSubscription.getCriteriaString(), theSubscription.getIdElementString(), result.getUnsupportedReason());

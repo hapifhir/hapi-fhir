@@ -127,6 +127,10 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 		return myList.size();
 	}
 
+	public void removeAll() {
+		this.removeIf(x -> true);
+	}
+
 	@Override
 	public String toString() {
 		return myList.toString();

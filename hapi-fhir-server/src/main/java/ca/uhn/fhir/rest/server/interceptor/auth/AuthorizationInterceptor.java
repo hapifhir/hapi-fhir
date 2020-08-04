@@ -120,8 +120,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
-			ourLog.trace("Rule being applied - {}",
-				nextRule);
+			ourLog.trace("Rule being applied - {}", nextRule);
 			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this, flags, thePointcut);
 			if (verdict != null) {
 				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
@@ -209,7 +208,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				return OperationExamineDirection.NONE;
 
 			case GRAPHQL_REQUEST:
-				return OperationExamineDirection.IN;
+				return OperationExamineDirection.BOTH;
 
 			default:
 				// Should not happen

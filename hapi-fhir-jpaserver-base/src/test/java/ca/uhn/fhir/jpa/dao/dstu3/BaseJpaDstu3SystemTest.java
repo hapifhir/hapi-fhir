@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.rp.dstu3.PatientResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -20,14 +20,8 @@ public abstract class BaseJpaDstu3SystemTest extends BaseJpaDstu3Test {
 	protected ServletRequestDetails mySrd;
 	private RestfulServer myServer;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@SuppressWarnings("unchecked")
-	@Before
+	@BeforeEach
 	public void before() throws ServletException {
 		mySrd = mock(ServletRequestDetails.class);
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mock(IInterceptorBroadcaster.class));

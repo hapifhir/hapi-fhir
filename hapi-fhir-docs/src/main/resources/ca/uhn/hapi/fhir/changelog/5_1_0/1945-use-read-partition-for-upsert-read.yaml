@@ -1,0 +1,7 @@
+---
+type: change
+issue: 1945
+title: "When performing a JPA 'upsert' (a PUT to an ID that may or may not already exist) on a partitioned system,
+   the partition interceptor will now be called once to determine the READ partition in order to find the candidate
+   resource to update, and possibly a second time to determine the CREATE partition if a new row is actually being
+   created. Previously only the CREATE partition was checked and used to perform the initial read."

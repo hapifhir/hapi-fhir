@@ -3,9 +3,9 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.test.utilities.HttpClientRule;
-import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderRule;
-import ca.uhn.fhir.test.utilities.server.RestfulServerRule;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -14,43 +14,43 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirPathFilterInterceptorTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirPathFilterInterceptorTest.class);
-	@ClassRule
-	public static HttpClientRule ourClientRule = new HttpClientRule();
 	private static FhirContext ourCtx = FhirContext.forR4();
-	@ClassRule
-	public static RestfulServerRule ourServerRule = new RestfulServerRule(ourCtx);
-	@ClassRule
-	public static HashMapResourceProviderRule<Patient> ourProviderRule = new HashMapResourceProviderRule<>(ourServerRule, Patient.class);
+	@RegisterExtension
+	public HttpClientExtension myHttpClientExtension = new HttpClientExtension();
+	@RegisterExtension
+	public RestfulServerExtension myServerExtension = new RestfulServerExtension(ourCtx);
+	@RegisterExtension
+	public HashMapResourceProviderExtension<Patient> myProviderExtension = new HashMapResourceProviderExtension<>(myServerExtension, Patient.class);
 	private IGenericClient myClient;
 	private String myBaseUrl;
 	private CloseableHttpClient myHttpClient;
 	private IIdType myPatientId;
 
-	@Before
+	@BeforeEach
 	public void before() {
-		ourProviderRule.clear();
-		ourServerRule.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
-		ourServerRule.getRestfulServer().getInterceptorService().registerInterceptor(new FhirPathFilterInterceptor());
+		myProviderExtension.clear();
+		myServerExtension.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
+		myServerExtension.getRestfulServer().getInterceptorService().registerInterceptor(new FhirPathFilterInterceptor());
 
-		myClient = ourServerRule.getFhirClient();
-		myBaseUrl = "http://localhost:" + ourServerRule.getPort();
-		myHttpClient = ourClientRule.getClient();
+		myClient = myServerExtension.getFhirClient();
+		myBaseUrl = "http://localhost:" + myServerExtension.getPort();
+		myHttpClient = myHttpClientExtension.getClient();
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class FhirPathFilterInterceptorTest {
 
 	@Test
 	public void testUnfilteredResponse_WithResponseHighlightingInterceptor() throws IOException {
-		ourServerRule.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
+		myServerExtension.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
 		createPatient();
 
 		HttpGet request = new HttpGet(myPatientId.getValue() + "?_format=" + Constants.FORMATS_HTML_JSON);
@@ -144,7 +144,7 @@ public class FhirPathFilterInterceptorTest {
 
 	@Test
 	public void testFilteredResponse_WithResponseHighlightingInterceptor() throws IOException {
-		ourServerRule.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
+		myServerExtension.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
 		createPatient();
 
 		HttpGet request = new HttpGet(myPatientId + "?_fhirpath=Patient.identifier&_format=" + Constants.FORMATS_HTML_JSON);

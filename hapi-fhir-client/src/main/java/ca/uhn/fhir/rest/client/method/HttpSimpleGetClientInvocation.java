@@ -20,15 +20,15 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+
+import java.util.List;
+import java.util.Map;
 
 public class HttpSimpleGetClientInvocation extends BaseHttpClientInvocation {
 

@@ -20,8 +20,18 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IMutator;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
+import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
@@ -45,7 +55,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
@@ -1042,9 +1067,19 @@ class ParserState<T> {
 						 * At some point it would be good to write code which can present a view
 						 * of one type backed by another type and use that.
 						 */
+						FhirTerser t = myContext.newTerser();
+
+						// Clean up the cached resources
+						myGlobalResources.remove(myInstance);
+						myGlobalReferences.removeAll(t.getAllPopulatedChildElementsOfType(myInstance, IBaseReference.class));
+
 						IParser parser = myContext.newJsonParser();
 						String asString = parser.encodeResourceToString(myInstance);
 						myInstance = parser.parseResource(wantedProfileType, asString);
+
+						// Add newly created instance
+						myGlobalResources.add(myInstance);
+						myGlobalReferences.addAll(t.getAllPopulatedChildElementsOfType(myInstance, IBaseReference.class));
 					}
 				}
 			}
@@ -1055,7 +1090,7 @@ class ParserState<T> {
 		}
 
 		private void stitchBundleCrossReferences() {
-			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
+			final boolean bundle = "Bundle".equals(myContext.getResourceType(myInstance));
 			if (bundle) {
 
 				FhirTerser t = myContext.newTerser();
@@ -1078,7 +1113,7 @@ class ParserState<T> {
 				for (IBaseResource next : myGlobalResources) {
 					IIdType id = next.getIdElement();
 					if (id != null && !id.isEmpty()) {
-						String resName = myContext.getResourceDefinition(next).getName();
+						String resName = myContext.getResourceType(next);
 						IIdType idType = id.withResourceType(resName).toUnqualifiedVersionless();
 						idToResource.put(idType.getValueAsString(), next);
 					}
@@ -1172,7 +1207,7 @@ class ParserState<T> {
 
 			IResource nextResource = (IResource) getCurrentElement();
 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
-			String resourceName = myContext.getResourceDefinition(nextResource).getName();
+			String resourceName = myContext.getResourceType(nextResource);
 			String bundleIdPart = nextResource.getId().getIdPart();
 			if (isNotBlank(bundleIdPart)) {
 				// if (isNotBlank(entryBaseUrl)) {
@@ -1221,7 +1256,7 @@ class ParserState<T> {
 
 			if (getCurrentElement() instanceof IDomainResource) {
 				IDomainResource elem = (IDomainResource) getCurrentElement();
-				String resourceName = myContext.getResourceDefinition(elem).getName();
+				String resourceName = myContext.getResourceType(elem);
 				String versionId = elem.getMeta().getVersionId();
 				if (StringUtils.isBlank(elem.getIdElement().getIdPart())) {
 					// Resource has no ID

@@ -1,19 +1,26 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.validator.ProfileKnowledgeWorkerR5;
-import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.VersionTypeConverterDstu3;
+import org.hl7.fhir.common.hapi.validation.validator.VersionTypeConverterR4;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.conformance.ProfileUtilities;
+import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Simple validation support module that handles profile snapshot generation.
@@ -26,6 +33,7 @@ import java.util.ArrayList;
  * </ul>
  */
 public class SnapshotGeneratingValidationSupport implements IValidationSupport {
+	private static final Logger ourLog = LoggerFactory.getLogger(SnapshotGeneratingValidationSupport.class);
 	private final FhirContext myCtx;
 
 	/**
@@ -36,59 +44,99 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		myCtx = theCtx;
 	}
 
-
 	@Override
-	public IBaseResource generateSnapshot(IValidationSupport theValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+	public IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 
-		assert theInput.getStructureFhirVersionEnum() == myCtx.getVersion().getVersion();
-		switch (theInput.getStructureFhirVersionEnum()) {
-			case DSTU3: {
-				org.hl7.fhir.dstu3.model.StructureDefinition input = (org.hl7.fhir.dstu3.model.StructureDefinition) theInput;
-				org.hl7.fhir.dstu3.context.IWorkerContext context = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(myCtx, theValidationSupport);
-				org.hl7.fhir.dstu3.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new MyProfileKnowledgeWorkerDstu3();
-				ArrayList<ValidationMessage> messages = new ArrayList<>();
-				org.hl7.fhir.dstu3.model.StructureDefinition base = (org.hl7.fhir.dstu3.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(input.getBaseDefinition());
-				if (base == null) {
-					throw new PreconditionFailedException("Unknown base definition: " + input.getBaseDefinition());
-				}
-				new org.hl7.fhir.dstu3.conformance.ProfileUtilities(context, messages, profileKnowledgeProvider).generateSnapshot(base, input, theUrl, theProfileName);
-				break;
-			}
-			case R4: {
-				org.hl7.fhir.r4.model.StructureDefinition input = (org.hl7.fhir.r4.model.StructureDefinition) theInput;
-				org.hl7.fhir.r4.context.IWorkerContext context = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(myCtx, theValidationSupport);
-				org.hl7.fhir.r4.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new MyProfileKnowledgeWorkerR4();
-				ArrayList<ValidationMessage> messages = new ArrayList<>();
-				org.hl7.fhir.r4.model.StructureDefinition base = (org.hl7.fhir.r4.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(input.getBaseDefinition());
-				if (base == null) {
-					throw new PreconditionFailedException("Unknown base definition: " + input.getBaseDefinition());
-				}
-				new org.hl7.fhir.r4.conformance.ProfileUtilities(context, messages, profileKnowledgeProvider).generateSnapshot(base, input, theUrl, theWebUrl, theProfileName);
-				break;
-			}
-			case R5: {
-				org.hl7.fhir.r5.model.StructureDefinition input = (org.hl7.fhir.r5.model.StructureDefinition) theInput;
-				org.hl7.fhir.r5.context.IWorkerContext context = new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(myCtx, theValidationSupport);
-				org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(myCtx);
-				ArrayList<ValidationMessage> messages = new ArrayList<>();
-				org.hl7.fhir.r5.model.StructureDefinition base = (org.hl7.fhir.r5.model.StructureDefinition) theValidationSupport.fetchStructureDefinition(input.getBaseDefinition());
-				if (base == null) {
-					throw new PreconditionFailedException("Unknown base definition: " + input.getBaseDefinition());
-				}
-				new org.hl7.fhir.r5.conformance.ProfileUtilities(context, messages, profileKnowledgeProvider).generateSnapshot(base, input, theUrl, theWebUrl, theProfileName);
-				break;
+		String inputUrl = null;
+		try {
+			assert theInput.getStructureFhirVersionEnum() == myCtx.getVersion().getVersion();
+
+			VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter;
+			switch (theInput.getStructureFhirVersionEnum()) {
+				case DSTU3:
+					converter = new VersionTypeConverterDstu3();
+					break;
+				case R4:
+					converter = new VersionTypeConverterR4();
+					break;
+				case R5:
+					converter = VersionSpecificWorkerContextWrapper.IDENTITY_VERSION_TYPE_CONVERTER;
+					break;
+				case DSTU2:
+				case DSTU2_HL7ORG:
+				case DSTU2_1:
+				default:
+					throw new IllegalStateException("Can not generate snapshot for version: " + theInput.getStructureFhirVersionEnum());
 			}
 
-			// NOTE: Add to the class javadoc if you add to this
 
-			case DSTU2:
-			case DSTU2_HL7ORG:
-			case DSTU2_1:
-			default:
-				throw new IllegalStateException("Can not generate snapshot for version: " + theInput.getStructureFhirVersionEnum());
+			org.hl7.fhir.r5.model.StructureDefinition inputCanonical = (org.hl7.fhir.r5.model.StructureDefinition) converter.toCanonical(theInput);
+
+			inputUrl = inputCanonical.getUrl();
+			if (theValidationSupportContext.getCurrentlyGeneratingSnapshots().contains(inputUrl)) {
+				ourLog.warn("Detected circular dependency, already generating snapshot for: {}", inputUrl);
+				return theInput;
+			}
+			theValidationSupportContext.getCurrentlyGeneratingSnapshots().add(inputUrl);
+
+			String baseDefinition = inputCanonical.getBaseDefinition();
+			if (isBlank(baseDefinition)) {
+				throw new PreconditionFailedException("StructureDefinition[id=" + inputCanonical.getIdElement().getId() + ", url=" + inputCanonical.getUrl() + "] has no base");
+			}
+
+			IBaseResource base = theValidationSupportContext.getRootValidationSupport().fetchStructureDefinition(baseDefinition);
+			if (base == null) {
+				throw new PreconditionFailedException("Unknown base definition: " + baseDefinition);
+			}
+
+			org.hl7.fhir.r5.model.StructureDefinition baseCanonical = (org.hl7.fhir.r5.model.StructureDefinition) converter.toCanonical(base);
+
+			if (baseCanonical.getSnapshot().getElement().isEmpty()) {
+				// If the base definition also doesn't have a snapshot, generate that first
+				theValidationSupportContext.getRootValidationSupport().generateSnapshot(theValidationSupportContext, base, null, null, null);
+				baseCanonical = (org.hl7.fhir.r5.model.StructureDefinition) converter.toCanonical(base);
+			}
+
+			ArrayList<ValidationMessage> messages = new ArrayList<>();
+			org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(myCtx);
+			IWorkerContext context = new VersionSpecificWorkerContextWrapper(theValidationSupportContext, converter);
+			ProfileUtilities profileUtilities = new ProfileUtilities(context, messages, profileKnowledgeProvider);
+			profileUtilities.generateSnapshot(baseCanonical, inputCanonical, theUrl, theWebUrl, theProfileName);
+
+			switch (theInput.getStructureFhirVersionEnum()) {
+				case DSTU3:
+					org.hl7.fhir.dstu3.model.StructureDefinition generatedDstu3 = (org.hl7.fhir.dstu3.model.StructureDefinition) converter.fromCanonical(inputCanonical);
+					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput).getSnapshot().getElement().clear();
+					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput).getSnapshot().getElement().addAll(generatedDstu3.getSnapshot().getElement());
+					break;
+				case R4:
+					org.hl7.fhir.r4.model.StructureDefinition generatedR4 = (org.hl7.fhir.r4.model.StructureDefinition) converter.fromCanonical(inputCanonical);
+					((org.hl7.fhir.r4.model.StructureDefinition) theInput).getSnapshot().getElement().clear();
+					((org.hl7.fhir.r4.model.StructureDefinition) theInput).getSnapshot().getElement().addAll(generatedR4.getSnapshot().getElement());
+					break;
+				case R5:
+					org.hl7.fhir.r5.model.StructureDefinition generatedR5 = (org.hl7.fhir.r5.model.StructureDefinition) converter.fromCanonical(inputCanonical);
+					((org.hl7.fhir.r5.model.StructureDefinition) theInput).getSnapshot().getElement().clear();
+					((org.hl7.fhir.r5.model.StructureDefinition) theInput).getSnapshot().getElement().addAll(generatedR5.getSnapshot().getElement());
+					break;
+				case DSTU2:
+				case DSTU2_HL7ORG:
+				case DSTU2_1:
+				default:
+					throw new IllegalStateException("Can not generate snapshot for version: " + theInput.getStructureFhirVersionEnum());
+			}
+
+			return theInput;
+
+		} catch (BaseServerResponseException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new InternalErrorException("Failed to generate snapshot", e);
+		} finally {
+			if (inputUrl != null) {
+				theValidationSupportContext.getCurrentlyGeneratingSnapshots().remove(inputUrl);
+			}
 		}
-
-		return theInput;
 	}
 
 	@Override
@@ -96,99 +144,5 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		return myCtx;
 	}
 
-
-	private class MyProfileKnowledgeWorkerR4 implements org.hl7.fhir.r4.conformance.ProfileUtilities.ProfileKnowledgeProvider {
-		@Override
-		public boolean isDatatype(String typeSimple) {
-			BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(typeSimple);
-			Validate.notNull(typeSimple);
-			return (def instanceof RuntimePrimitiveDatatypeDefinition) || (def instanceof RuntimeCompositeDatatypeDefinition);
-		}
-
-		@Override
-		public boolean isResource(String typeSimple) {
-			BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(typeSimple);
-			Validate.notNull(typeSimple);
-			return def instanceof RuntimeResourceDefinition;
-		}
-
-		@Override
-		public boolean hasLinkFor(String typeSimple) {
-			return false;
-		}
-
-		@Override
-		public String getLinkFor(String corePath, String typeSimple) {
-			return null;
-		}
-
-		@Override
-		public BindingResolution resolveBinding(org.hl7.fhir.r4.model.StructureDefinition def, org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent binding, String path) throws FHIRException {
-			return null;
-		}
-
-		@Override
-		public BindingResolution resolveBinding(org.hl7.fhir.r4.model.StructureDefinition def, String url, String path) throws FHIRException {
-			return null;
-		}
-
-		@Override
-		public String getLinkForProfile(org.hl7.fhir.r4.model.StructureDefinition profile, String url) {
-			return null;
-		}
-
-		@Override
-		public boolean prependLinks() {
-			return false;
-		}
-
-		@Override
-		public String getLinkForUrl(String corePath, String url) {
-			throw new UnsupportedOperationException();
-		}
-
-	}
-
-	private class MyProfileKnowledgeWorkerDstu3 implements org.hl7.fhir.dstu3.conformance.ProfileUtilities.ProfileKnowledgeProvider {
-		@Override
-		public boolean isDatatype(String typeSimple) {
-			BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(typeSimple);
-			Validate.notNull(typeSimple);
-			return (def instanceof RuntimePrimitiveDatatypeDefinition) || (def instanceof RuntimeCompositeDatatypeDefinition);
-		}
-
-		@Override
-		public boolean isResource(String typeSimple) {
-			BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(typeSimple);
-			Validate.notNull(typeSimple);
-			return def instanceof RuntimeResourceDefinition;
-		}
-
-		@Override
-		public boolean hasLinkFor(String typeSimple) {
-			return false;
-		}
-
-		@Override
-		public String getLinkFor(String corePath, String typeSimple) {
-			return null;
-		}
-
-		@Override
-		public BindingResolution resolveBinding(org.hl7.fhir.dstu3.model.StructureDefinition theStructureDefinition, org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent theElementDefinitionBindingComponent, String theS) {
-			return null;
-		}
-
-		@Override
-		public String getLinkForProfile(org.hl7.fhir.dstu3.model.StructureDefinition theStructureDefinition, String theS) {
-			return null;
-		}
-
-		@Override
-		public boolean prependLinks() {
-			return false;
-		}
-
-	}
 
 }

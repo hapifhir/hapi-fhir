@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -15,11 +15,10 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
@@ -28,16 +27,15 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseR4Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -72,7 +70,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		qr1.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
-			ourClient.create().resource(qr1).execute();
+			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of type string"));

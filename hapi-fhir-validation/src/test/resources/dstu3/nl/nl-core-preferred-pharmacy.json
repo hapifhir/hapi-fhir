@@ -1,0 +1,55 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-preferred-pharmacy",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-preferred-pharmacy",
+  "version": "2.0.0",
+  "name": "nl core preferred pharmacy",
+  "title": "nl-core-preferred-pharmacy",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "References a patient's preferered pharmacy",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "kind": "complex-type",
+  "abstract": false,
+  "contextType": "resource",
+  "context": [
+    "Patient"
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://fhir.nl/fhir/StructureDefinition/nl-core-preferred-pharmacy"
+      },
+      {
+        "id": "Extension.value[x]:valueReference",
+        "path": "Extension.valueReference",
+        "sliceName": "valueReference",
+        "min": 1,
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -25,11 +25,14 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
@@ -40,7 +43,9 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.TransactionBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -49,6 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.MessagingException;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,12 +66,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDeliverySubscriber {
+	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
-
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	/**
 	 * Constructor
@@ -83,55 +90,82 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
+
+		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
+			operation = createDeliveryRequestTransaction(theSubscription, theClient, thePayloadResource);
+		} else if (thePayloadType != null) {
+			operation = createDeliveryRequestNormal(theMsg, theClient, thePayloadResource);
+		} else {
+			sendNotification(theMsg);
+			operation = null;
+		}
+
+		if (operation != null) {
+
+			if (thePayloadType != null) {
+				operation.encoded(thePayloadType);
+			}
+
+			String payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
+			ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+
+			try {
+				operation.execute();
+			} catch (ResourceNotFoundException e) {
+				ourLog.error("Cannot reach {} ", theMsg.getSubscription().getEndpointUrl());
+				ourLog.error("Exception: ", e);
+				throw e;
+			}
+
+		}
+	}
+
+	@Nullable
+	private IClientExecutable<?, ?> createDeliveryRequestNormal(ResourceDeliveryMessage theMsg, IGenericClient theClient, IBaseResource thePayloadResource) {
+		IClientExecutable<?, ?> operation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
-				if (thePayloadResource == null || thePayloadResource.isEmpty()) {
-					if (thePayloadType != null) {
-						operation = theClient.create().resource(thePayloadResource);
-					} else {
-						sendNotification(theMsg);
-						return;
-					}
-				} else {
-					if (thePayloadType != null) {
-						operation = theClient.update().resource(thePayloadResource);
-					} else {
-						sendNotification(theMsg);
-						return;
-					}
-				}
+				operation = theClient.update().resource(thePayloadResource);
 				break;
 			case DELETE:
 				operation = theClient.delete().resourceById(theMsg.getPayloadId(myFhirContext));
 				break;
 			default:
 				ourLog.warn("Ignoring delivery message of type: {}", theMsg.getOperationType());
-				return;
+				operation = null;
+				break;
+		}
+		return operation;
+	}
+
+	private IClientExecutable<?, ?> createDeliveryRequestTransaction(CanonicalSubscription theSubscription, IGenericClient theClient, IBaseResource thePayloadResource) {
+		IClientExecutable<?, ?> operation;
+		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
+
+		String payloadUrl = theSubscription.getPayloadSearchCriteria();
+		Map<String, String> valueMap = new HashMap<>(1);
+		valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
+		payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);
+		SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
+		payloadSearchMap.setLoadSynchronous(true);
+
+		IBundleProvider searchResults = dao.search(payloadSearchMap);
+
+		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		for (IBaseResource next : searchResults.getResources(0, searchResults.size())) {
+			builder.addUpdateEntry(next);
 		}
 
-		if (thePayloadType != null) {
-			operation.encoded(thePayloadType);
-		}
-
-		String payloadId = null;
-		if (thePayloadResource != null) {
-			payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
-		}
-		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
-
-		try {
-			operation.execute();
-		} catch (ResourceNotFoundException e) {
-			ourLog.error("Cannot reach {} ", theMsg.getSubscription().getEndpointUrl());
-			ourLog.error("Exception: ", e);
-			throw e;
-		}
+		operation = theClient.transaction().withBundle(builder.getBundle());
+		return operation;
 	}
 
 	public IBaseResource getResource(IIdType payloadId) throws ResourceGoneException {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
 		return dao.read(payloadId.toVersionless());
 	}
 
@@ -239,8 +273,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			// close connection in order to return a possible cached connection to the connection pool
 			response.close();
 		} catch (IOException e) {
-			ourLog.error("Error trying to reach " + theMsg.getSubscription().getEndpointUrl());
-			e.printStackTrace();
+			ourLog.error("Error trying to reach {}: {}", theMsg.getSubscription().getEndpointUrl(), e.toString());
 			throw new ResourceNotFoundException(e.getMessage());
 		}
 	}

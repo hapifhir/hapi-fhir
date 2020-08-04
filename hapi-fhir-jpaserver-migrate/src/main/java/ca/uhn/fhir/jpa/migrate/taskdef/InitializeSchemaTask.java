@@ -37,6 +37,7 @@ public class InitializeSchemaTask extends BaseTask {
 	public static final String DESCRIPTION_PREFIX = "Initialize schema for ";
 
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
+	private boolean myInitializedSchema;
 
 	public InitializeSchemaTask(String theProductVersion, String theSchemaVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		super(theProductVersion, theSchemaVersion);
@@ -68,7 +69,16 @@ public class InitializeSchemaTask extends BaseTask {
 			executeSql(null, nextSql);
 		}
 
+		if (mySchemaInitializationProvider.canInitializeSchema()) {
+			myInitializedSchema = true;
+		}
+
 		logInfo(ourLog, "{} schema for {} initialized successfully", driverType, mySchemaInitializationProvider.getSchemaDescription());
+	}
+
+	@Override
+	public boolean initializedSchema() {
+		return myInitializedSchema;
 	}
 
 	@Override

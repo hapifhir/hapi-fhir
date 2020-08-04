@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1850
+title: "The [FHIR Patch](https://www.hl7.org/fhir/fhirpatch.html) format is now supported for patching resources, in addition
+  to the previously supported JSON Patch and XML Patch."

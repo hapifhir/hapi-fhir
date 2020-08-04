@@ -1,0 +1,36 @@
+{
+	"resourceType": "Patient",
+	"id": "2725779",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2020-06-29T14:52:07.137+00:00",
+		"profile": [
+			"http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+		]
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody><tr><td>Address</td><td><span>NLD </span></td></tr></tbody></table></div>"
+	},
+	"address": [
+		{
+			"country": "NLD",
+			"_country": {
+				"extension": [
+					{
+						"id": "LandISOCodelijst",
+						"url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "urn:iso:std:iso:3166",
+									"code": "QQ"
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}

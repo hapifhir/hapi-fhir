@@ -331,7 +331,7 @@ public abstract class BaseMethodBinding<T> {
 		}
 
 		if (graphQL != null) {
-			return new GraphQLMethodBinding(theMethod, theContext, theProvider);
+			return new GraphQLMethodBinding(theMethod, graphQL.type(), theContext, theProvider);
 		}
 
 		Class<? extends IBaseResource> returnType;

@@ -9,9 +9,9 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.StopWatch;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+//import org.junit.jupiter.api.Disabled;
 
 public class InterceptorServiceTest {
 
@@ -121,17 +128,17 @@ public class InterceptorServiceTest {
 		svc.registerInterceptor(myInterceptorManual);
 		List<Object> globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
 		assertEquals(3, globalInterceptors.size());
-		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
-		assertTrue(globalInterceptors.get(1).getClass().toString(), globalInterceptors.get(1) instanceof MyTestInterceptorManual);
-		assertTrue(globalInterceptors.get(2).getClass().toString(), globalInterceptors.get(2) instanceof MyTestInterceptorTwo);
+		assertTrue(globalInterceptors.get(0) instanceof MyTestInterceptorOne, globalInterceptors.get(0).getClass().toString());
+		assertTrue(globalInterceptors.get(1) instanceof MyTestInterceptorManual, globalInterceptors.get(1).getClass().toString());
+		assertTrue(globalInterceptors.get(2) instanceof MyTestInterceptorTwo, globalInterceptors.get(2).getClass().toString());
 
 		// Try to register again (should have no effect
 		svc.registerInterceptor(myInterceptorManual);
 		globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
 		assertEquals(3, globalInterceptors.size());
-		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
-		assertTrue(globalInterceptors.get(1).getClass().toString(), globalInterceptors.get(1) instanceof MyTestInterceptorManual);
-		assertTrue(globalInterceptors.get(2).getClass().toString(), globalInterceptors.get(2) instanceof MyTestInterceptorTwo);
+		assertTrue(globalInterceptors.get(0) instanceof MyTestInterceptorOne, globalInterceptors.get(0).getClass().toString());
+		assertTrue(globalInterceptors.get(1) instanceof MyTestInterceptorManual, globalInterceptors.get(1).getClass().toString());
+		assertTrue(globalInterceptors.get(2) instanceof MyTestInterceptorTwo, globalInterceptors.get(2).getClass().toString());
 
 		// Make sure we have the right invokers in the right order
 		List<Object> invokers = svc.getInterceptorsWithInvokersForPointcut(Pointcut.TEST_RB);
@@ -143,8 +150,8 @@ public class InterceptorServiceTest {
 		svc.unregisterInterceptor(myInterceptorManual);
 		globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
 		assertEquals(2, globalInterceptors.size());
-		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
-		assertTrue(globalInterceptors.get(1).getClass().toString(), globalInterceptors.get(1) instanceof MyTestInterceptorTwo);
+		assertTrue(globalInterceptors.get(0) instanceof MyTestInterceptorOne, globalInterceptors.get(0).getClass().toString());
+		assertTrue(globalInterceptors.get(1) instanceof MyTestInterceptorTwo, globalInterceptors.get(1).getClass().toString());
 
 	}
 
@@ -449,7 +456,7 @@ public class InterceptorServiceTest {
 	 * </pre>
 	 */
 	@Test
-	@Ignore("Performance test - Not needed normally")
+	@Disabled("Performance test - Not needed normally")
 	public void testThreadLocalHookInterceptorMicroBenchmark() {
 		threadLocalMicroBenchmark(true, 500000);
 		threadLocalMicroBenchmark(false, 500000);
@@ -497,7 +504,7 @@ public class InterceptorServiceTest {
 		ourLog.info("ThreadLocalEnabled={} - Performed {} loops in {} - {} / loop - Outcomne: {}", theThreadlocalInvokersEnabled, theCount, sw.toString(), sw.formatMillisPerOperation(theCount), interceptor.myCount);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInvocations.clear();
 	}

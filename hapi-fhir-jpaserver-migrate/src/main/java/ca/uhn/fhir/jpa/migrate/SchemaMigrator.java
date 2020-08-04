@@ -41,6 +41,7 @@ import java.util.Properties;
 public class SchemaMigrator {
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
+	private final String mySchemaName;
 	private final DataSource myDataSource;
 	private final boolean mySkipValidation;
 	private final String myMigrationTableName;
@@ -53,7 +54,8 @@ public class SchemaMigrator {
 	/**
 	 * Constructor
 	 */
-	public SchemaMigrator(String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks) {
+	public SchemaMigrator(String theSchemaName, String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks) {
+		mySchemaName = theSchemaName;
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
@@ -105,7 +107,14 @@ public class SchemaMigrator {
 			ourLog.warn("Database running in hibernate auto-update mode.  Skipping schema migration.");
 			return;
 		}
-		newMigrator().migrate();
+		try {
+			ourLog.info("Migrating " + mySchemaName);
+			newMigrator().migrate();
+			ourLog.info(mySchemaName + " migrated successfully.");
+		} catch (Exception e) {
+			ourLog.error("Failed to migrate " + mySchemaName, e);
+			throw e;
+		}
 	}
 
 	private BaseMigrator newMigrator() {

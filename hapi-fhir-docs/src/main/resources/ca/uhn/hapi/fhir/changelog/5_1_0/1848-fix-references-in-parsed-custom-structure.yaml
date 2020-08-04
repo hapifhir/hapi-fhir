@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1848
+title: "When parsing a resource into a custom structure (e.g. a custom class extended a built-in FHIR resource class),
+   inter-resouirce references could contain invaliud java refeences to other resources. Thanks to Christian Ohr for reporting
+   and fixing!"

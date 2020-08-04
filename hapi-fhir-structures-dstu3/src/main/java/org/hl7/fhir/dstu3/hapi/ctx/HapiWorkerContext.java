@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.hapi.ctx;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -12,8 +13,17 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.ExpansionProfile;
+import org.hl7.fhir.dstu3.model.MetadataResource;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
@@ -31,7 +41,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -75,7 +84,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHierarchical) {
     ValueSet input = new ValueSet();
     input.getCompose().addInclude(theInc);
-    IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(myValidationSupport, null, input);
+    IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
     ValueSet outputValueSet = (ValueSet) output.getValueSet();
     if (outputValueSet != null) {
       return outputValueSet.getExpansion();
@@ -239,7 +248,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
     if (myValidationSupport == null) {
       return false;
     } else {
-      return myValidationSupport.isCodeSystemSupported(myValidationSupport, theSystem);
+      return myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), theSystem);
     }
   }
 
@@ -273,7 +282,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
     ValidationOptions options = new ValidationOptions();
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -305,9 +314,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
     IValidationSupport.CodeValidationResult outcome;
     ValidationOptions options = new ValidationOptions();
     if (isNotBlank(theVs.getUrl())) {
-      outcome = myValidationSupport.validateCode(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs.getUrl());
+      outcome = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
-      outcome = myValidationSupport.validateCodeInValueSet(myValidationSupport, convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs);
+      outcome = myValidationSupport.validateCodeInValueSet(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs);
     }
 
     if (outcome != null && outcome.isOk()) {

@@ -29,6 +29,12 @@
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
 			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!--

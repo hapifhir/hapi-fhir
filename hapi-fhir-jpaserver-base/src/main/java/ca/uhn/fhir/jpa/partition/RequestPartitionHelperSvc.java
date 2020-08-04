@@ -35,9 +35,11 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.transaction.Transactional;
 import java.util.HashSet;
 
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
@@ -130,7 +132,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
-			String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
+			String resourceName = myFhirContext.getResourceType(theResource);
 			validatePartition(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
 
 			return normalizeAndNotifyHooks(requestPartitionId, theRequest);

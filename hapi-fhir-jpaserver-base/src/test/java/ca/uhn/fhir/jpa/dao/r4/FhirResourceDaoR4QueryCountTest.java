@@ -3,41 +3,45 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
-import ca.uhn.fhir.jpa.util.TestUtil;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CareTeam;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
 
-	@After
+	@AfterEach
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
@@ -113,6 +117,53 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
+
+
+	@Test
+	public void testValidate() {
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("bar-1").setDisplay("Bar 1");
+		cs.addConcept().setCode("bar-2").setDisplay("Bar 2");
+		myCodeSystemDao.create(cs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+
+		Observation obs = new Observation();
+//		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+		obs.getCode().addCoding().setSystem("http://foo/cs").setCode("bar-1");
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+		// Validate once
+		myCaptureQueriesListener.clear();
+		myObservationDao.validate(obs, null, null, null, null, null, null);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		// Validate again (should rely only on caches)
+		myCaptureQueriesListener.clear();
+		myObservationDao.validate(obs, null, null, null, null, null, null);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
 
 	@Test
 	public void testVRead() {
@@ -390,7 +441,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference("Patient/P");
-		myObservationDao.update(obs);
+		myObservationDao.create(obs);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
@@ -431,7 +482,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference("Patient/P");
-		myObservationDao.update(obs);
+		myObservationDao.create(obs);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
@@ -488,12 +539,57 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	}
 
 
-	
-	
+	@Test
+	public void testSearchOnReverseInclude() {
+		Patient patient = new Patient();
+		patient.getMeta().addTag("http://system", "value1", "display");
+		patient.setId("P1");
+		patient.getNameFirstRep().setFamily("FAM1");
+		myPatientDao.update(patient);
+
+		patient = new Patient();
+		patient.setId("P2");
+		patient.getMeta().addTag("http://system", "value1", "display");
+		patient.getNameFirstRep().setFamily("FAM2");
+		myPatientDao.update(patient);
+
+		for (int i = 0; i < 3; i++) {
+			CareTeam ct = new CareTeam();
+			ct.setId("CT1-" + i);
+			ct.getMeta().addTag("http://system", "value11", "display");
+			ct.getSubject().setReference("Patient/P1");
+			myCareTeamDao.update(ct);
+
+			ct = new CareTeam();
+			ct.setId("CT2-" + i);
+			ct.getMeta().addTag("http://system", "value22", "display");
+			ct.getSubject().setReference("Patient/P2");
+			myCareTeamDao.update(ct);
+		}
+
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.addRevInclude(CareTeam.INCLUDE_SUBJECT)
+			.setSort(new SortSpec(Patient.SP_NAME));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myPatientDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(
+			"Patient/P1", "CareTeam/CT1-0", "CareTeam/CT1-1", "CareTeam/CT1-2",
+			"Patient/P2", "CareTeam/CT2-0", "CareTeam/CT2-1", "CareTeam/CT2-2"
+		));
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
 	@Test
 	public void testTransactionWithMultipleReferences() {
 		Bundle input = new Bundle();
-		
+
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
 		patient.setActive(true);
@@ -1055,9 +1151,47 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+
+	@Test
+	public void testTransactionWithMultipleProfiles() {
+		myDaoConfig.setDeleteEnabled(true);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		// Create transaction
+
+		Bundle input = new Bundle();
+		for (int i = 0; i < 5; i++) {
+			Patient patient = new Patient();
+			patient.getMeta().addProfile("http://example.com/profile");
+			patient.getMeta().addTag().setSystem("http://example.com/tags").setCode("tag-1");
+			patient.getMeta().addTag().setSystem("http://example.com/tags").setCode("tag-2");
+			input.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Patient");
+		}
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(8, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Do the same a second time
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
 	}
+
 
 }

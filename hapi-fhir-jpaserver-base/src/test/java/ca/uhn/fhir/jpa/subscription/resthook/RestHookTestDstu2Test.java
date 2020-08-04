@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
@@ -27,7 +28,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.NotNull;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -56,7 +57,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
-	@After
+	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		ourLog.info("** AFTER **");
 		for (IIdType next : mySubscriptionIds) {
@@ -74,7 +75,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		ourLog.info("Before re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
@@ -83,7 +84,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		logAllInterceptors(myInterceptorRegistry);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
@@ -156,6 +157,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
@@ -168,32 +170,32 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.info("Current interceptors:\n * {}", allInterceptors);
 
 		// Should see 1 subscription notification
-		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 
 		// Update subscription 2 to match as well
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
+		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
-		waitForQueueToDrain();
 
 		// Should see one subscription notification
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		// Delet one subscription
+		// Delete one subscription
 		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		waitForActivatedSubscriptionCount(1);
 
+		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
-		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
@@ -203,6 +205,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		CodingDt coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
+		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
 		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
@@ -217,6 +220,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		CodingDt coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
+		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
 		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
@@ -224,9 +228,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	@Test
@@ -248,7 +252,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -296,9 +300,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	@Test
@@ -319,9 +323,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		ourListenerRestServer = new RestfulServer(FhirContext.forDstu2());
+		ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.DSTU2));
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
@@ -341,7 +345,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
         ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}

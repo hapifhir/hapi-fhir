@@ -1,15 +1,15 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -26,7 +26,7 @@ public class ResourceProviderWithNoMethodsTest {
 	private Server ourServer;
 	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		ourServer.stop();
 	}
@@ -109,7 +109,7 @@ public class ResourceProviderWithNoMethodsTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

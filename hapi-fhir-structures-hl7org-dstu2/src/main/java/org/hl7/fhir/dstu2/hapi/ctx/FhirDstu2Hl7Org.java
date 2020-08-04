@@ -20,21 +20,28 @@ package org.hl7.fhir.dstu2.hapi.ctx;
  * #L%
  */
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu2.model.*;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.provider.dstu2hl7org.Dstu2Hl7OrgBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu2.model.IdType;
+import org.hl7.fhir.dstu2.model.Reference;
+import org.hl7.fhir.dstu2.model.Resource;
+import org.hl7.fhir.dstu2.model.StructureDefinition;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class FhirDstu2Hl7Org implements IFhirVersion {
 

@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcR4;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
@@ -51,6 +50,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class BaseR4Config extends BaseConfigDstu3Plus {
 
+	public static FhirContext ourFhirContext = FhirContext.forR4();
+
 	@Override
 	public FhirContext fhirContext() {
 		return fhirContextR4();
@@ -65,7 +66,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 	@Bean
 	@Primary
 	public FhirContext fhirContextR4() {
-		FhirContext retVal = FhirContext.forR4();
+		FhirContext retVal = ourFhirContext;
 
 		// Don't strip versions in some places
 		ParserOptions parserOptions = retVal.getParserOptions();

@@ -1,0 +1,72 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-relatedperson-role",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-relatedperson-role",
+  "version": "2.0.0",
+  "name": "nl core relatedperson role",
+  "title": "nl-core-relatedperson-role",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Extension to support RelatedPerson.role",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-contactperson-v1.2-2015EN",
+      "uri": "https://zibs.nl/wiki/ContactPerson-v1.2(2015EN)",
+      "name": "HCIM ContactPerson-v1.2(2015EN)"
+    }
+  ],
+  "kind": "complex-type",
+  "abstract": false,
+  "contextType": "resource",
+  "context": [
+    "RelatedPerson"
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://fhir.nl/fhir/StructureDefinition/nl-core-relatedperson-role"
+      },
+      {
+        "id": "Extension.value[x]:valueCodeableConcept",
+        "path": "Extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "short": "Role",
+        "alias": [
+          "Rol"
+        ],
+        "min": 1,
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactperson-v1.2-2015EN",
+            "map": "NL-CM:3.1.2",
+            "comment": "Role"
+          }
+        ]
+      }
+    ]
+  }
+}

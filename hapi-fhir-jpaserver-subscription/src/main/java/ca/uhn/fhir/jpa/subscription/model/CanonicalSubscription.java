@@ -34,7 +34,11 @@ import org.hl7.fhir.r4.model.Subscription;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -64,12 +68,22 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
 	private Map<String, List<String>> myChannelExtensions;
+	@JsonProperty("payloadSearchCriteria")
+	private String myPayloadSearchCriteria;
 
 	/**
 	 * Constructor
 	 */
 	public CanonicalSubscription() {
 		super();
+	}
+
+	public String getPayloadSearchCriteria() {
+		return myPayloadSearchCriteria;
+	}
+
+	public void setPayloadSearchCriteria(String thePayloadSearchCriteria) {
+		myPayloadSearchCriteria = thePayloadSearchCriteria;
 	}
 
 	/**
@@ -79,7 +93,6 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	public void addTrigger(CanonicalEventDefinition theTrigger) {
 		myTrigger = theTrigger;
 	}
-
 
 	public CanonicalSubscriptionChannelType getChannelType() {
 		return myChannelType;
@@ -136,7 +149,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	public String getChannelExtension(String theUrl) {
 		String retVal = null;
 		List<String> strings = myChannelExtensions.get(theUrl);
-		if (strings != null && strings.isEmpty()==false) {
+		if (strings != null && strings.isEmpty() == false) {
 			retVal = strings.get(0);
 		}
 		return retVal;
@@ -276,6 +289,23 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		}
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myIdElement", myIdElement)
+			.append("myStatus", myStatus)
+			.append("myCriteriaString", myCriteriaString)
+			.append("myEndpointUrl", myEndpointUrl)
+			.append("myPayloadString", myPayloadString)
+//			.append("myHeaders", myHeaders)
+			.append("myChannelType", myChannelType)
+//			.append("myTrigger", myTrigger)
+//			.append("myEmailDetails", myEmailDetails)
+//			.append("myRestHookDetails", myRestHookDetails)
+//			.append("myChannelExtensions", myChannelExtensions)
+			.toString();
+	}
+
 	public static class EmailDetails implements IModelJson {
 
 		@JsonProperty("from")
@@ -393,22 +423,5 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 			// nothing yet
 		}
 
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myIdElement", myIdElement)
-			.append("myStatus", myStatus)
-			.append("myCriteriaString", myCriteriaString)
-			.append("myEndpointUrl", myEndpointUrl)
-			.append("myPayloadString", myPayloadString)
-//			.append("myHeaders", myHeaders)
-			.append("myChannelType", myChannelType)
-//			.append("myTrigger", myTrigger)
-//			.append("myEmailDetails", myEmailDetails)
-//			.append("myRestHookDetails", myRestHookDetails)
-//			.append("myChannelExtensions", myChannelExtensions)
-			.toString();
 	}
 }

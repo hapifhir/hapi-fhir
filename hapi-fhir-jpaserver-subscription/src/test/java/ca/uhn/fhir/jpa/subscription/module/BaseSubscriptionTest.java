@@ -6,20 +6,21 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionConfig;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import org.junit.After;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	SearchParamConfig.class,
 	SubscriptionProcessorConfig.class,
@@ -37,7 +38,7 @@ public abstract class BaseSubscriptionTest {
 	@Autowired
 	MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
 
-	@After
+	@AfterEach
 	public void afterClearAnonymousLambdas() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
@@ -56,8 +57,8 @@ public abstract class BaseSubscriptionTest {
 		}
 
 		@Bean
-		public SubscriptionChannelFactory mySubscriptionChannelFactory() {
-			return new SubscriptionChannelFactory(new LinkedBlockingChannelFactory());
+		public SubscriptionChannelFactory mySubscriptionChannelFactory(IChannelNamer theChannelNamer) {
+			return new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(theChannelNamer));
 		}
 
 		@Bean
@@ -65,6 +66,10 @@ public abstract class BaseSubscriptionTest {
 			return new InterceptorService();
 		}
 
-
+		@Bean
+		// Default implementation returns the name unchanged
+		public IChannelNamer channelNamer() {
+			return (theNameComponent, theChannelSettings) -> theNameComponent;
+		}
 	}
 }

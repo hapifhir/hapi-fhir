@@ -267,12 +267,12 @@ public class BundleUtil {
 	 * <code>Bundle.entry.resource</code> is a Binary resource with a patch
 	 * payload type.
 	 */
-	public static boolean isDstu3TransactionPatch(IBaseResource thePayloadResource) {
+	public static boolean isDstu3TransactionPatch(FhirContext theContext, IBaseResource thePayloadResource) {
 		boolean isPatch = false;
 		if (thePayloadResource instanceof IBaseBinary) {
 			String contentType = ((IBaseBinary) thePayloadResource).getContentType();
 			 try {
-				 PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentType);
+				 PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(theContext, contentType);
 				 isPatch = true;
 			 } catch (InvalidRequestException e) {
 				 // ignore

@@ -1,0 +1,499 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-organization",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization",
+  "version": "2.0.3",
+  "name": "nl-core-organization",
+  "title": "nl-core-organization",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Organization, e.g. Health Provider or Insurance Company. Functional requirements taken from Health and Care Information models (Zorginformatiebouwsteen) HealthProvider v3.1.1 (release 2017) and Payer v3.1 (release 2017) via the Basic Care Data Set (Basisgegevensset Zorg 1.0). Names and addresses are also in compliance with HL7 V3 Basic Components. Every instantiation of an Organization is a top level organization or a part of an (top level) organization, e.g. Department of Radiology.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-healthcareprovider-v1.2-2015EN",
+      "uri": "https://zibs.nl/wiki/HealthcareProvider-v1.2(2015EN)",
+      "name": "HCIM HealthcareProvider-v1.2(2015EN)"
+    },
+    {
+      "identity": "hcim-healthcareprovider-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/HealthcareProvider-v3.0(2016EN)",
+      "name": "HCIM HealthcareProvider-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+      "uri": "https://zibs.nl/wiki/HealthcareProvider-v3.1.1(2017EN)",
+      "name": "HCIM HealthcareProvider-v3.1.1(2017EN)"
+    },
+    {
+      "identity": "hcim-contactinformation-v2.0.1-2015EN",
+      "uri": "https://zibs.nl/wiki/Patient-v2.0.1(2015EN)",
+      "name": "HCIM Patient-v2.0.1(2015EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-contactinformation-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.0(2016EN)",
+      "name": "HCIM Patient-v3.0(2016EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-contactinformation-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/ContactInformation-v1.0(2017EN)",
+      "name": "HCIM ContactInformation-v1.0(2017EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs."
+    },
+    {
+      "identity": "hcim-payer-v1.2-2015EN",
+      "uri": "https://zibs.nl/wiki/Payer-v1.2(2015EN)",
+      "name": "HCIM Payer-v1.2(2015EN)"
+    },
+    {
+      "identity": "hcim-payer-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Payer-v3.0(2016EN)",
+      "name": "HCIM Payer-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-payer-v3.1-2017EN",
+      "uri": "https://zibs.nl/wiki/Payer-v3.1(2017EN)",
+      "name": "HCIM Payer-v3.1(2017EN)"
+    },
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Organization",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Organization",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Organization",
+        "path": "Organization",
+        "short": "HealthcareProvider",
+        "alias": [
+          "Zorgaanbieder"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v1.2-2015EN",
+            "map": "NL-CM:17.2.1",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.0-2016EN",
+            "map": "NL-CM:17.2.1",
+            "comment": "HealthcareProvider"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.1",
+            "comment": "HealthcareProvider"
+          }
+        ]
+      },
+      {
+        "id": "Organization.identifier",
+        "path": "Organization.identifier",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        },
+        "definition": "The organization’s identification number. For Dutch healthcare providers, the URA number or the AGB number is used, if possible. For foreign or non-affiliated healthcare providers, another unique identification number can be used. This must be accompanied by the name and/or code of the issuing organization.",
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v1.2-2015EN",
+            "map": "NL-CM:17.2.2",
+            "comment": "HealthcareProviderIdentificationNumber"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.0-2016EN",
+            "map": "NL-CM:17.2.2",
+            "comment": "HealthcareProviderIdentificationNumber"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.2",
+            "comment": "HealthcareProviderIdentificationNumber"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "Organization.identifier:URA",
+        "path": "Organization.identifier",
+        "sliceName": "URA",
+        "short": "URA",
+        "alias": [
+          "URA"
+        ]
+      },
+      {
+        "id": "Organization.identifier:URA.system",
+        "path": "Organization.identifier.system",
+        "min": 1,
+        "fixedUri": "http://fhir.nl/fhir/NamingSystem/ura"
+      },
+      {
+        "id": "Organization.identifier:URA.value",
+        "path": "Organization.identifier.value",
+        "short": "URA (UZI-register abonneenummer)",
+        "alias": [
+          "URA (UZI-register abonneenummer)"
+        ],
+        "min": 1,
+        "example": [
+          {
+            "label": "Example URA",
+            "valueString": "12345678"
+          }
+        ]
+      },
+      {
+        "id": "Organization.identifier:AGB",
+        "path": "Organization.identifier",
+        "sliceName": "AGB",
+        "short": "AGB",
+        "alias": [
+          "AGB"
+        ]
+      },
+      {
+        "id": "Organization.identifier:AGB.system",
+        "path": "Organization.identifier.system",
+        "min": 1,
+        "fixedUri": "http://fhir.nl/fhir/NamingSystem/agb-z"
+      },
+      {
+        "id": "Organization.identifier:AGB.value",
+        "path": "Organization.identifier.value",
+        "short": "AGB-Z (Vektis AGB-Z zorgverlenertabel)",
+        "alias": [
+          "AGB-Z (Vektis AGB-Z zorgverlenertabel)"
+        ],
+        "min": 1
+      },
+      {
+        "id": "Organization.identifier:UZOVI",
+        "path": "Organization.identifier",
+        "sliceName": "UZOVI",
+        "short": "UZOVI",
+        "definition": "Unique healthcare insurance company identification (the UZOVI number).",
+        "alias": [
+          "UZOVI"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.7",
+            "comment": "IdentificationNumber"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.7",
+            "comment": "IdentificationNumber"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.7",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "Organization.identifier:UZOVI.system",
+        "path": "Organization.identifier.system",
+        "min": 1,
+        "fixedUri": "http://fhir.nl/fhir/NamingSystem/uzovi"
+      },
+      {
+        "id": "Organization.identifier:UZOVI.value",
+        "path": "Organization.identifier.value",
+        "short": "Unique healthcare insurance company identification (the UZOVI number)",
+        "alias": [
+          "Unieke zorgverekeraar identificatie (het UZOVI-nummer)"
+        ],
+        "min": 1
+      },
+      {
+        "id": "Organization.type",
+        "path": "Organization.type",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "coding.system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Organization.type:organizationType",
+        "path": "Organization.type",
+        "sliceName": "organizationType",
+        "short": "OrganizationType",
+        "definition": "The type of healthcare provider, such as general hospital, or nursing home. If this field is filled in and an AGB code is used for the HealthcareProviderIdentificationNumber, the type must match the type implicitly contained in the AGB code.",
+        "alias": [
+          "OrganisatieType"
+        ],
+        "binding": {
+          "strength": "extensible",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.17.2.3--20171231000000",
+            "display": "OrganisatieTypeCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v1.2-2015EN",
+            "map": "NL-CM:17.2.4",
+            "comment": "OrganizationType"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.0-2016EN",
+            "map": "NL-CM:17.2.4",
+            "comment": "OrganizationType"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.4",
+            "comment": "OrganizationType"
+          }
+        ]
+      },
+      {
+        "id": "Organization.type:departmentSpecialty",
+        "path": "Organization.type",
+        "sliceName": "departmentSpecialty",
+        "short": "DepartmentSpecialty",
+        "definition": "The specialty of the healthcare provider’s department, e.g. Cardiology. The departmental specialty can be filled in if further indication of the healthcare provider is needed. This refers to the recognized medical specialties as stated in the BIG Act.",
+        "alias": [
+          "AfdelingSpecialisme"
+        ],
+        "binding": {
+          "strength": "extensible",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.17.2.4--20171231000000",
+            "display": "AfdelingSpecialismeCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v1.2-2015EN",
+            "map": "NL-CM:17.2.7",
+            "comment": "DepartmentSpecialty"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.0-2016EN",
+            "map": "NL-CM:17.2.7",
+            "comment": "DepartmentSpecialty"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.7",
+            "comment": "DepartmentSpecialty"
+          }
+        ]
+      },
+      {
+        "id": "Organization.name",
+        "path": "Organization.name",
+        "short": "OrganizationName or DepartmentName",
+        "definition": "The full name associated with the organization, which may include information about the organization's location. Specifics of the parent organization can be found through the partOf element.",
+        "alias": [
+          "OrganisatieNaam of AfdelingNaam"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v1.2-2015EN",
+            "map": "NL-CM:17.2.3",
+            "comment": "OrganizationName"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.0-2016EN",
+            "map": "NL-CM:17.2.3",
+            "comment": "OrganizationName"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.3",
+            "comment": "OrganizationName"
+          },
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.16",
+            "comment": "OrganizationName"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.16",
+            "comment": "OrganizationName"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.16",
+            "comment": "OrganizationName"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.8",
+            "comment": "OrganizationLocation"
+          }
+        ]
+      },
+      {
+        "id": "Organization.alias",
+        "path": "Organization.alias",
+        "short": "OrganizationAlias",
+        "definition": "Other names that this Organization is known as.",
+        "alias": [
+          "OrganisatieAlias"
+        ]
+      },
+      {
+        "id": "Organization.telecom",
+        "path": "Organization.telecom",
+        "short": "ContactInformation",
+        "alias": [
+          "Contactgegevens"
+        ],
+        "type": [
+          {
+            "code": "ContactPoint",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-contactpoint"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v1.2-2015EN",
+            "map": "NL-CM:17.2.6",
+            "comment": "TelephoneE-mail"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.0-2016EN",
+            "map": "NL-CM:17.2.6",
+            "comment": "TelephoneE-mail"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.6",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-contactinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-contactinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.1",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.12",
+            "comment": "TelephoneE-mail"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.12",
+            "comment": "TelephoneE-mail"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.12",
+            "comment": "ContactInformation"
+          }
+        ]
+      },
+      {
+        "id": "Organization.address",
+        "path": "Organization.address",
+        "short": "AddressInformation",
+        "alias": [
+          "Adresgegevens"
+        ],
+        "type": [
+          {
+            "code": "Address",
+            "profile": "http://fhir.nl/fhir/StructureDefinition/nl-core-address"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-healthcareprovider-v1.2-2015EN",
+            "map": "NL-CM:17.2.5",
+            "comment": "Address"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.0-2016EN",
+            "map": "NL-CM:17.2.5",
+            "comment": "Address"
+          },
+          {
+            "identity": "hcim-healthcareprovider-v3.1.1-2017EN",
+            "map": "NL-CM:17.2.5",
+            "comment": "AddressInformation"
+          },
+          {
+            "identity": "hcim-payer-v1.2-2015EN",
+            "map": "NL-CM:1.1.17",
+            "comment": "Address"
+          },
+          {
+            "identity": "hcim-payer-v3.0-2016EN",
+            "map": "NL-CM:1.1.17",
+            "comment": "Address"
+          },
+          {
+            "identity": "hcim-payer-v3.1-2017EN",
+            "map": "NL-CM:1.1.17",
+            "comment": "AddressInformation"
+          }
+        ]
+      },
+      {
+        "id": "Organization.partOf",
+        "path": "Organization.partOf",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          }
+        ]
+      }
+    ]
+  }
+}

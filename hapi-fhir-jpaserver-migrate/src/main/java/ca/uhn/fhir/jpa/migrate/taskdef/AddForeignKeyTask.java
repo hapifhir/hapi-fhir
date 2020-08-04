@@ -78,7 +78,8 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 		switch (getDriverType()) {
 			case MARIADB_10_1:
 			case MYSQL_5_7:
-				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (" + getColumnName() + ") references " + myForeignTableName + " (" + myForeignColumnName + ")";
+				// Quote the column names as "SYSTEM" is a reserved word in MySQL
+				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (`" + getColumnName() + "`) references " + myForeignTableName + " (`" + myForeignColumnName + "`)";
 				break;
 			case POSTGRES_9_4:
 			case DERBY_EMBEDDED:
@@ -101,7 +102,6 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 				throw e;
 			}
 		}
-
 	}
 
 	@Override

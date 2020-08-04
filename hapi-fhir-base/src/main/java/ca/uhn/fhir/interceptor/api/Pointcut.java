@@ -759,6 +759,46 @@ public enum Pointcut {
 
 	/**
 	 * <b>Subscription Hook:</b>
+	 * Invoked immediately after the delivery of MESSAGE subscription.
+	 * <p>
+	 * When this hook is called, all processing is complete so this hook should not
+	 * make any changes to the parameters.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_AFTER_MESSAGE_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+
+	/**
+	 * <b>Subscription Hook:</b>
+	 * Invoked immediately before the delivery of a MESSAGE subscription.
+	 * <p>
+	 * Hooks may make changes to the delivery payload, or make changes to the
+	 * canonical subscription such as adding headers, modifying the channel
+	 * endpoint, etc.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, processing will be aborted.
+	 * </p>
+	 */
+	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+
+
+	/**
+	 * <b>Subscription Hook:</b>
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) is about to be checked for whether any subscriptions
 	 * were triggered as a result of the operation.
@@ -814,6 +854,21 @@ public enum Pointcut {
 	 */
 	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription"),
 
+	/**
+	 * <b>Subscription Hook:</b>
+	 * Invoked immediately after an active subscription is "registered". In HAPI FHIR, when
+	 * a subscription
+	 * <p>
+	 * Hooks may make changes to the canonicalized subscription and this will have an effect
+	 * on processing across this server. Note however that timing issues may occur, since the
+	 * subscription is already technically live by the time this hook is called.
+	 * </p>
+	 * No parameters are currently supported.
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED(void.class),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1244,7 +1299,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked before a resource will be created
+	 * Invoked before a resource will be deleted
 	 * <p>
 	 * Hooks will have access to the contents of the resource being deleted
 	 * but should not make any changes as storage has already occurred
@@ -1282,7 +1337,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a resource delete operation is about to fail due to referential integrity hcts.
+	 * Invoked when a resource delete operation is about to fail due to referential integrity checks. Intended for use with {@literal ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor}.
 	 * <p>
 	 * Hooks will have access to the list of resources that have references to the resource being deleted.
 	 * </p>
@@ -1523,6 +1578,59 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a transaction has been rolled back as a result of a {@link ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException},
+	 * meaning that a database constraint has been violated. This pointcut allows an interceptor to specify a resolution strategy
+	 * other than simply returning the error to the client. This interceptor will be fired after the database transaction rollback
+	 * has been completed.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy</code>. Hooks should not
+	 * throw any exception.
+	 * </p>
+	 */
+	STORAGE_VERSION_CONFLICT(
+		"ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>EMPI Hook:</b>
+	 * Invoked whenever a persisted Patient/Practitioner resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) has been matched against related resources and EMPI links have been updated.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
+	 * <li>ca.uhn.fhir.empi.model.TransactionLogMessages - This parameter is for informational messages provided by the EMPI module during EMPI procesing. .</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage", "ca.uhn.fhir.rest.server.TransactionLogMessages"),
+
+	/**
 	 * <b>Performance Tracing Hook:</b>
 	 * This hook is invoked when any informational messages generated by the
 	 * SearchCoordinator are created. It is typically used to provide logging
@@ -1719,7 +1827,7 @@ public enum Pointcut {
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
-	 * This hook is invoked when a search has failed for any reason. When this pointcut
+	 * This hook is invoked when a search has completed. When this pointcut
 	 * is invoked, a pass in the Search Coordinator has completed successfully, but
 	 * not all possible resources have been loaded yet so a future paging request
 	 * may trigger a new task that will load further resources.
@@ -1752,6 +1860,44 @@ public enum Pointcut {
 	 * </p>
 	 */
 	JPA_PERFTRACE_SEARCH_PASS_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
+
+	/**
+	 * <b>Performance Tracing Hook:</b>
+	 * This hook is invoked when a query involving an external index (e.g. Elasticsearch) has completed. When this pointcut
+	 * is invoked, an initial list of resource IDs has been generated which will be used as part of a subsequent database query.
+	 * <p>
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
@@ -1962,7 +2108,7 @@ public enum Pointcut {
 		return myParameterTypes;
 	}
 
-	private class UnknownType {
+	private static class UnknownType {
 	}
 
 	private static class ExceptionHandlingSpec {

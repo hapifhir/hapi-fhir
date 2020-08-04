@@ -1,0 +1,23 @@
+{
+	"version": "1",
+	"candidateSearchParams": [],
+	"candidateFilterSearchParams": [],
+	"matchFields": [
+		{
+			"name": "foo",
+			"resourceType": "Patient",
+			"resourcePath": "name.family",
+			"metric": "STRING",
+			"exact": true
+		},
+		{
+			"name": "foo",
+			"resourceType": "Patient",
+			"resourcePath": "name.given",
+			"metric": "STRING"
+		}
+	],
+	"matchResultMap": {
+		"foo": "POSSIBLE_MATCH"
+	}
+}

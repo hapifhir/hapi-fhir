@@ -1,26 +1,26 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
-import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Subscription;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +41,9 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -60,19 +61,23 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	private static boolean ourNextAfterRestHookDeliveryReturn;
 	private static boolean ourHitAfterRestHookDelivery;
 	private static boolean ourNextAddHeader;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+	@Autowired
+	private IInterceptorService myInterceptorRegistry;
+	@Autowired
+	private MyTestInterceptor myTestInterceptor;
 
-	@After
+	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		ourNextModifyResourceId = false;
@@ -129,7 +134,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourHeaders, hasItem("X-Foo: Bar"));
 	}
 
-
 	@Test
 	public void testAttributesAreCopiedAlongPipeline() throws Exception {
 		AttributeCarryingInterceptor interceptor = new AttributeCarryingInterceptor();
@@ -159,7 +163,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}
 	}
 
-
 	@Test
 	public void testBeforeRestHookDelivery_AbortDelivery() throws Exception {
 		ourNextBeforeRestHookDeliveryReturn = false;
@@ -175,7 +178,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourUpdatedObservations.size());
 	}
 
-
 	@Test
 	public void testDeliveryFailed() throws Exception {
 		ourNextBeforeRestHookDeliveryReturn = false;
@@ -185,7 +187,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		Subscription subscription = newSubscription("Observation?status=final", "application/fhir+json");
 		subscription.getChannel().setEndpoint("http://localhost:" + ourListenerPort + "/this/url/does/not/exist"); // this better not succeed!
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -201,11 +203,10 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		latch.await(10, TimeUnit.SECONDS);
 	}
 
-
 	protected Observation sendObservation() {
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.FINAL);
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 		observation.setId(methodOutcome.getId());
 		return observation;
 	}
@@ -248,11 +249,11 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
 
-			Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-			Assert.assertNotNull(subscriptionTemp);
+			Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
+			assertNotNull(subscriptionTemp);
 
 			subscriptionTemp.setCriteria(criteria1);
-			ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+			myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 			waitForQueueToDrain();
 
 			sendObservation(code, "SNOMED-CT");
@@ -300,12 +301,6 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			myFinishedLatch.countDown();
 		}
 	}
-
-	@Autowired
-	private IInterceptorService myInterceptorRegistry;
-
-	@Autowired
-	private MyTestInterceptor myTestInterceptor;
 
 	@Configuration
 	static class MyTestCtxConfig {

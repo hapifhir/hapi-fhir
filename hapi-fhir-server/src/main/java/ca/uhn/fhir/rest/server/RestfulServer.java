@@ -100,6 +100,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -859,11 +860,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myServerName = theServerName;
 	}
 
-	public IResourceProvider getServerProfilesProvider() {
-		IFhirVersionServer versionServer = (IFhirVersionServer) getFhirContext().getVersion().getServerVersion();
-		return versionServer.createServerProfilesProvider(this);
-	}
-
 	/**
 	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only,
 	 * but can be helpful to set with something appropriate.
@@ -925,7 +921,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				if (isIgnoreServerParsedRequestParameters()) {
 					String contentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 					if (theRequestType == RequestTypeEnum.POST && isNotBlank(contentType) && contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
-						String requestBody = new String(requestDetails.loadRequestContents(), Constants.CHARSET_UTF8);
+						String requestBody = toUtf8String(requestDetails.loadRequestContents());
 						params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
 					} else if (theRequestType == RequestTypeEnum.GET) {
 						params = UrlUtil.parseQueryString(theRequest.getQueryString());
@@ -1242,8 +1238,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				// 'true' tells registerProviders() that
 				// this call is part of initialization
 				registerProviders(providers, true);
-
-				findResourceMethods(getServerProfilesProvider());
 
 				confProvider = getServerConformanceProvider();
 				if (confProvider == null) {

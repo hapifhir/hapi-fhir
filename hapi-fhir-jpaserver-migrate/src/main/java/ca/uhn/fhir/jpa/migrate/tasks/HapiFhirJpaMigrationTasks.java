@@ -20,16 +20,23 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -61,9 +68,205 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init420(); // 20191015 - 20200217
 		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - 20200513
-		init501(); // 20200514 - present
+		init501(); // 20200514 - 20200515
+		init510(); // 20200516 - present
 	}
 
+	protected void init510() {
+		Builder version = forVersion(VersionEnum.V5_1_0);
+
+		// NPM Packages
+		version.addIdGenerator("20200610.1", "SEQ_NPM_PACK");
+		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20200610.2", "NPM_PACKAGE", "PID");
+		pkg.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkg.addColumn("PACKAGE_ID").nonNullable().type(ColumnTypeEnum.STRING, 200);
+		pkg.addColumn("CUR_VERSION_ID").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkg.addColumn("UPDATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		pkg.addColumn("PACKAGE_DESC").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkg.addIndex("20200610.3", "IDX_PACK_ID").unique(true).withColumns("PACKAGE_ID");
+
+		version.addIdGenerator("20200610.4", "SEQ_NPM_PACKVER");
+		Builder.BuilderAddTableByColumns pkgVer = version.addTableByColumns("20200610.5", "NPM_PACKAGE_VER", "PID");
+		pkgVer.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVer.addColumn("PACKAGE_ID").nonNullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVer.addColumn("VERSION_ID").nonNullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVer.addColumn("PACKAGE_PID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVer.addColumn("BINARY_RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVer.addColumn("SAVED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		pkgVer.addColumn("PKG_DESC").nonNullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVer.addColumn("DESC_UPPER").nonNullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVer.addColumn("CURRENT_VERSION").nonNullable().type(ColumnTypeEnum.BOOLEAN);
+		pkgVer.addColumn("FHIR_VERSION_ID").nonNullable().type(ColumnTypeEnum.STRING, 10);
+		pkgVer.addColumn("FHIR_VERSION").nonNullable().type(ColumnTypeEnum.STRING, 10);
+		pkgVer.addColumn("PACKAGE_SIZE_BYTES").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVer.addColumn("UPDATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		pkgVer.addForeignKey("20200610.6", "FK_NPM_PKV_PKG").toColumn("PACKAGE_PID").references("NPM_PACKAGE", "PID");
+		pkgVer.addForeignKey("20200610.7", "FK_NPM_PKV_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		pkgVer.addIndex("20200610.8", "IDX_PACKVER").unique(true).withColumns("PACKAGE_ID", "VERSION_ID");
+
+		version.addIdGenerator("20200610.9", "SEQ_NPM_PACKVERRES");
+		Builder.BuilderAddTableByColumns pkgVerResAdd = version.addTableByColumns("20200610.10", "NPM_PACKAGE_VER_RES", "PID");
+		pkgVerResAdd.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVerResAdd.addColumn("PACKVER_PID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVerResAdd.addColumn("BINARY_RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVerResAdd.addColumn("FILE_DIR").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVerResAdd.addColumn("FILE_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVerResAdd.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
+		pkgVerResAdd.addColumn("CANONICAL_URL").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVerResAdd.addColumn("CANONICAL_VERSION").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkgVerResAdd.addColumn("FHIR_VERSION_ID").nonNullable().type(ColumnTypeEnum.STRING, 10);
+		pkgVerResAdd.addColumn("FHIR_VERSION").nonNullable().type(ColumnTypeEnum.STRING, 10);
+		pkgVerResAdd.addColumn("RES_SIZE_BYTES").nonNullable().type(ColumnTypeEnum.LONG);
+		pkgVerResAdd.addColumn("UPDATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		pkgVerResAdd.addForeignKey("20200610.11", "FK_NPM_PACKVERRES_PACKVER").toColumn("PACKVER_PID").references("NPM_PACKAGE_VER", "PID");
+		pkgVerResAdd.addForeignKey("20200610.12", "FK_NPM_PKVR_RESID").toColumn("BINARY_RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		pkgVerResAdd.addIndex("20200610.13", "IDX_PACKVERRES_URL").unique(false).withColumns("CANONICAL_URL");
+
+		init510_20200610();
+
+		Builder.BuilderWithTableName pkgVerMod = version.onTable("NPM_PACKAGE_VER");
+		pkgVerMod.modifyColumn("20200629.1", "PKG_DESC").nullable().withType(ColumnTypeEnum.STRING, 200);
+		pkgVerMod.modifyColumn("20200629.2", "DESC_UPPER").nullable().withType(ColumnTypeEnum.STRING, 200);
+
+		init510_20200706_to_20200714();
+
+		Builder.BuilderWithTableName empiLink = version.onTable("MPI_LINK");
+		empiLink.addColumn("20200715.1", "VERSION").nonNullable().type(ColumnTypeEnum.STRING, EmpiLink.VERSION_LENGTH);
+		empiLink.addColumn("20200715.2", "EID_MATCH").nullable().type(ColumnTypeEnum.BOOLEAN);
+		empiLink.addColumn("20200715.3", "NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
+		empiLink.addColumn("20200715.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("20200715.5", "SCORE").nullable().type(ColumnTypeEnum.FLOAT);
+
+		init510_20200725();
+
+		//EMPI Target Type
+		empiLink.addColumn("20200727.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, EmpiLink.TARGET_TYPE_LENGTH);
+	}
+
+	protected void init510_20200725() {
+		// nothing
+	}
+
+	protected void init510_20200610() {
+		// nothing
+	}
+
+	protected void init510_20200706_to_20200714() {
+		// nothing
+	}
+
+	private void init501() { //20200514 - present
+		Builder version = forVersion(VersionEnum.V5_0_1);
+
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
+		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
+		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
+
+		// MPI_LINK
+		version.addIdGenerator("20200517.1", "SEQ_EMPI_LINK_ID");
+		Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20200517.2", "MPI_LINK", "PID");
+		empiLink.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		empiLink.addColumn("PERSON_PID").nonNullable().type(ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200517.3", "FK_EMPI_LINK_PERSON")
+			.toColumn("PERSON_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("TARGET_PID").nonNullable().type(ColumnTypeEnum.LONG);
+		empiLink
+			.addForeignKey("20200517.4", "FK_EMPI_LINK_TARGET")
+			.toColumn("TARGET_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+
+		empiLink.addColumn("MATCH_RESULT").nonNullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("LINK_SOURCE").nonNullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("CREATED").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		empiLink.addColumn("UPDATED").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+
+		empiLink.addIndex("20200517.5", "IDX_EMPI_PERSON_TGT").unique(true).withColumns("PERSON_PID", "TARGET_PID");
+
+	}
+
+	protected void init500() { // 20200218 - 20200519
+		Builder version = forVersion(VersionEnum.V5_0_0);
+
+		// Eliminate circular dependency.
+		version.onTable("HFJ_RESOURCE").dropColumn("20200218.1", "FORCED_ID_PID");
+		version.onTable("HFJ_RES_VER").dropColumn("20200218.2", "FORCED_ID_PID");
+		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		//
+
+		// Drop unused column
+		version.onTable("HFJ_RESOURCE").dropIndex("20200419.1", "IDX_RES_PROFILE");
+		version.onTable("HFJ_RESOURCE").dropColumn("20200419.2", "RES_PROFILE").failureAllowed();
+
+		// Add Partitioning
+		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200420.0", "HFJ_PARTITION", "PART_ID");
+		partition.addColumn("PART_ID").nonNullable().type(ColumnTypeEnum.INT);
+		partition.addColumn("PART_NAME").nonNullable().type(ColumnTypeEnum.STRING, 200);
+		partition.addColumn("PART_DESC").nullable().type(ColumnTypeEnum.STRING, 200);
+		partition.addIndex("20200420.1", "IDX_PART_NAME").unique(true).withColumns("PART_NAME");
+
+		// Partition columns on individual tables
+		version.onTable("HFJ_RESOURCE").addColumn("20200420.2", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_RESOURCE").addColumn("20200420.3", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_VER").addColumn("20200420.4", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_VER").addColumn("20200420.5", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.6", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.7", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.8", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.9", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_HISTORY_TAG").addColumn("20200420.10", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_HISTORY_TAG").addColumn("20200420.11", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_TAG").addColumn("20200420.12", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_TAG").addColumn("20200420.13", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_FORCED_ID").addColumn("20200420.14", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_FORCED_ID").addColumn("20200420.15", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_LINK").addColumn("20200420.16", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_LINK").addColumn("20200420.17", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_STRING").addColumn("20200420.18", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_STRING").addColumn("20200420.19", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_COORDS").addColumn("20200420.20", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_COORDS").addColumn("20200420.21", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_NUMBER").addColumn("20200420.22", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_NUMBER").addColumn("20200420.23", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_TOKEN").addColumn("20200420.24", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_TOKEN").addColumn("20200420.25", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_DATE").addColumn("20200420.26", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_DATE").addColumn("20200420.27", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_URI").addColumn("20200420.28", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_URI").addColumn("20200420.29", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_SPIDX_QUANTITY").addColumn("20200420.30", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_SPIDX_QUANTITY").addColumn("20200420.31", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.32", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.33", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.34", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.35", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200420.36", "SP_MISSING").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20200420.37", "SP_MISSING").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20200420.38", "SP_MISSING").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20200420.39", "SP_MISSING").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20200420.40", "SP_MISSING").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20200420.41", "SP_MISSING").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20200420.42", "SP_MISSING").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+
+		// Add support for integer comparisons during day-precision date search.
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.addColumn("20200501.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(ColumnTypeEnum.INT);
+		spidxDate.addColumn("20200501.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(ColumnTypeEnum.INT);
+
+		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V5_0_0, "20200501.3")
+			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))
+			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
+			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
+		);
+
+	}
 
 	/**
 	 * Partway through the 4.3.0 releaase cycle we renumbered to
@@ -124,94 +327,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.addNop("20200420.42");
 	}
 
-
-	private void init501() { //20200514 - present
-		Builder version = forVersion(VersionEnum.V5_0_1);
-
-		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
-		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
-		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
-		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
-	}
-
-	protected void init500() { // 20200218 - 20200519
-		Builder version = forVersion(VersionEnum.V5_0_0);
-
-		// Eliminate circular dependency.
-		version.onTable("HFJ_RESOURCE").dropColumn("20200218.1", "FORCED_ID_PID");
-		version.onTable("HFJ_RES_VER").dropColumn("20200218.2", "FORCED_ID_PID");
-		version.onTable("HFJ_RES_VER").addForeignKey("20200218.3", "FK_RESOURCE_HISTORY_RESOURCE").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
-		version.onTable("HFJ_RES_VER").modifyColumn("20200220.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		//
-
-		// Drop unused column
-		version.onTable("HFJ_RESOURCE").dropIndex("20200419.1", "IDX_RES_PROFILE");
-		version.onTable("HFJ_RESOURCE").dropColumn("20200419.2", "RES_PROFILE").failureAllowed();
-
-		// Add Partitioning
-		Builder.BuilderAddTableByColumns partition = version.addTableByColumns("20200420.0", "HFJ_PARTITION", "PART_ID");
-		partition.addColumn("PART_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		partition.addColumn("PART_NAME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-		partition.addColumn("PART_DESC").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-		partition.addIndex("20200420.1", "IDX_PART_NAME").unique(true).withColumns("PART_NAME");
-
-		// Partition columns on individual tables
-		version.onTable("HFJ_RESOURCE").addColumn("20200420.2", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_RESOURCE").addColumn("20200420.3", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_RES_VER").addColumn("20200420.4", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_RES_VER").addColumn("20200420.5", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.6", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.7", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.8", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addColumn("20200420.9", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_HISTORY_TAG").addColumn("20200420.10", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_HISTORY_TAG").addColumn("20200420.11", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_RES_TAG").addColumn("20200420.12", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_RES_TAG").addColumn("20200420.13", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_FORCED_ID").addColumn("20200420.14", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_FORCED_ID").addColumn("20200420.15", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_RES_LINK").addColumn("20200420.16", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_RES_LINK").addColumn("20200420.17", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_SPIDX_STRING").addColumn("20200420.18", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_SPIDX_STRING").addColumn("20200420.19", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_SPIDX_COORDS").addColumn("20200420.20", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_SPIDX_COORDS").addColumn("20200420.21", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_SPIDX_NUMBER").addColumn("20200420.22", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_SPIDX_NUMBER").addColumn("20200420.23", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_SPIDX_TOKEN").addColumn("20200420.24", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_SPIDX_TOKEN").addColumn("20200420.25", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_SPIDX_DATE").addColumn("20200420.26", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_SPIDX_DATE").addColumn("20200420.27", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_SPIDX_URI").addColumn("20200420.28", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_SPIDX_URI").addColumn("20200420.29", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_SPIDX_QUANTITY").addColumn("20200420.30", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_SPIDX_QUANTITY").addColumn("20200420.31", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.32", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_RES_VER_PROV").addColumn("20200420.33", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.34", "PARTITION_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		version.onTable("HFJ_RES_PARAM_PRESENT").addColumn("20200420.35", "PARTITION_DATE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_ONLY);
-
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20200420.36", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20200420.37", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20200420.38", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20200420.39", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20200420.40", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-		version.onTable("HFJ_SPIDX_URI").modifyColumn("20200420.41", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20200420.42", "SP_MISSING").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-
-		// Add support for integer comparisons during day-precision date search.
-		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
-		spidxDate.addColumn("20200501.1", "SP_VALUE_LOW_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		spidxDate.addColumn("20200501.2", "SP_VALUE_HIGH_DATE_ORDINAL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-
-		spidxDate.addTask(new CalculateOrdinalDatesTask(VersionEnum.V5_0_0, "20200501.3")
-			.addCalculator("SP_VALUE_LOW_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_LOW")))
-			.addCalculator("SP_VALUE_HIGH_DATE_ORDINAL", t -> ResourceIndexedSearchParamDate.calculateOrdinalValue(t.getDate("SP_VALUE_HIGH")))
-			.setColumnName("SP_VALUE_LOW_DATE_ORDINAL") //It doesn't matter which of the two we choose as they will both be null.
-		);
-
-	}
-
 	protected void init420() { // 20191015 - 20200217
 		Builder version = forVersion(VersionEnum.V4_2_0);
 
@@ -231,74 +346,74 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 * doing is setting a not-null on a column that will never be null anyway. Setting not null
 		 * fails on SQL Server because there is an index on this column... Which is dumb, but hey.
 		 */
-		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20190920.1", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190920.2", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20190920.3", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20190920.4", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20190920.5", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20190920.6", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190920.7", "RES_ID").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20190920.1", "RES_ID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190920.2", "RES_ID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20190920.3", "RES_ID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20190920.4", "RES_ID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20190920.5", "RES_ID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20190920.6", "RES_ID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190920.7", "RES_ID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
 
 		// HFJ_SEARCH
-		version.onTable("HFJ_SEARCH").addColumn("20190921.1", "EXPIRY_OR_NULL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		version.onTable("HFJ_SEARCH").addColumn("20190921.2", "NUM_BLOCKED").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		version.onTable("HFJ_SEARCH").addColumn("20190921.1", "EXPIRY_OR_NULL").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		version.onTable("HFJ_SEARCH").addColumn("20190921.2", "NUM_BLOCKED").nullable().type(ColumnTypeEnum.INT);
 
 		// HFJ_BLK_EXPORT_JOB
 		version.addIdGenerator("20190921.3", "SEQ_BLKEXJOB_PID");
 		Builder.BuilderAddTableByColumns bulkExportJob = version.addTableByColumns("20190921.4", "HFJ_BLK_EXPORT_JOB", "PID");
-		bulkExportJob.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		bulkExportJob.addColumn("JOB_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 36);
-		bulkExportJob.addColumn("JOB_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 10);
-		bulkExportJob.addColumn("CREATED_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		bulkExportJob.addColumn("STATUS_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		bulkExportJob.addColumn("EXP_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		bulkExportJob.addColumn("REQUEST").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
-		bulkExportJob.addColumn("OPTLOCK").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		bulkExportJob.addColumn("EXP_SINCE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		bulkExportJob.addColumn("STATUS_MESSAGE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		bulkExportJob.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		bulkExportJob.addColumn("JOB_ID").nonNullable().type(ColumnTypeEnum.STRING, 36);
+		bulkExportJob.addColumn("JOB_STATUS").nonNullable().type(ColumnTypeEnum.STRING, 10);
+		bulkExportJob.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		bulkExportJob.addColumn("STATUS_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		bulkExportJob.addColumn("EXP_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		bulkExportJob.addColumn("REQUEST").nonNullable().type(ColumnTypeEnum.STRING, 500);
+		bulkExportJob.addColumn("OPTLOCK").nonNullable().type(ColumnTypeEnum.INT);
+		bulkExportJob.addColumn("EXP_SINCE").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		bulkExportJob.addColumn("STATUS_MESSAGE").nullable().type(ColumnTypeEnum.STRING, 500);
 		bulkExportJob.addIndex("20190921.5", "IDX_BLKEX_EXPTIME").unique(false).withColumns("EXP_TIME");
 		bulkExportJob.addIndex("20190921.6", "IDX_BLKEX_JOB_ID").unique(true).withColumns("JOB_ID");
 
 		// HFJ_BLK_EXPORT_COLLECTION
 		version.addIdGenerator("20190921.7", "SEQ_BLKEXCOL_PID");
 		Builder.BuilderAddTableByColumns bulkExportCollection = version.addTableByColumns("20190921.8", "HFJ_BLK_EXPORT_COLLECTION", "PID");
-		bulkExportCollection.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		bulkExportCollection.addColumn("JOB_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		bulkExportCollection.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		bulkExportCollection.addColumn("JOB_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		bulkExportCollection.addForeignKey("20190921.9", "FK_BLKEXCOL_JOB").toColumn("JOB_PID").references("HFJ_BLK_EXPORT_JOB", "PID");
-		bulkExportCollection.addColumn("RES_TYPE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		bulkExportCollection.addColumn("TYPE_FILTER").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 1000);
-		bulkExportCollection.addColumn("OPTLOCK").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		bulkExportCollection.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
+		bulkExportCollection.addColumn("TYPE_FILTER").nullable().type(ColumnTypeEnum.STRING, 1000);
+		bulkExportCollection.addColumn("OPTLOCK").nonNullable().type(ColumnTypeEnum.INT);
 
 		// HFJ_BLK_EXPORT_COLFILE
 		version.addIdGenerator("20190921.10", "SEQ_BLKEXCOLFILE_PID");
 		Builder.BuilderAddTableByColumns bulkExportCollectionFile = version.addTableByColumns("20190921.11", "HFJ_BLK_EXPORT_COLFILE", "PID");
-		bulkExportCollectionFile.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		bulkExportCollectionFile.addColumn("COLLECTION_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		bulkExportCollectionFile.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		bulkExportCollectionFile.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		bulkExportCollectionFile.addColumn("COLLECTION_PID").nonNullable().type(ColumnTypeEnum.LONG);
+		bulkExportCollectionFile.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
 		bulkExportCollectionFile.addForeignKey("20190921.12", "FK_BLKEXCOLFILE_COLLECT").toColumn("COLLECTION_PID").references("HFJ_BLK_EXPORT_COLLECTION", "PID");
 
 		// HFJ_RES_VER_PROV
 		version.startSectionWithMessage("Processing bulkExportCollectionFile: HFJ_RES_VER_PROV");
 		Builder.BuilderAddTableByColumns resVerProv = version.addTableByColumns("20190921.13", "HFJ_RES_VER_PROV", "RES_VER_PID");
-		resVerProv.addColumn("RES_VER_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		resVerProv.addColumn("RES_VER_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		resVerProv
 			.addForeignKey("20190921.14", "FK_RESVERPROV_RESVER_PID")
 			.toColumn("RES_VER_PID")
 			.references("HFJ_RES_VER", "PID");
-		resVerProv.addColumn("RES_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		resVerProv.addColumn("RES_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		resVerProv
 			.addForeignKey("20190921.15", "FK_RESVERPROV_RES_PID")
 			.toColumn("RES_PID")
 			.references("HFJ_RESOURCE", "RES_ID");
-		resVerProv.addColumn("SOURCE_URI").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		resVerProv.addColumn("REQUEST_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 16);
+		resVerProv.addColumn("SOURCE_URI").nullable().type(ColumnTypeEnum.STRING, 100);
+		resVerProv.addColumn("REQUEST_ID").nullable().type(ColumnTypeEnum.STRING, 16);
 		resVerProv.addIndex("20190921.16", "IDX_RESVERPROV_SOURCEURI").unique(false).withColumns("SOURCE_URI");
 		resVerProv.addIndex("20190921.17", "IDX_RESVERPROV_REQUESTID").unique(false).withColumns("REQUEST_ID");
 
 		// TermValueSetConceptDesignation
 		version.startSectionWithMessage("Processing bulkExportCollectionFile: TRM_VALUESET_C_DESIGNATION");
 		Builder.BuilderWithTableName termValueSetConceptDesignationTable = version.onTable("TRM_VALUESET_C_DESIGNATION");
-		termValueSetConceptDesignationTable.addColumn("20190921.18", "VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptDesignationTable.addColumn("20190921.18", "VALUESET_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		termValueSetConceptDesignationTable
 			.addForeignKey("20190921.19", "FK_TRM_VSCD_VS_PID")
 			.toColumn("VALUESET_PID")
@@ -311,8 +426,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// TermValueSet
 		version.startSectionWithMessage("Processing bulkExportCollectionFile: TRM_VALUESET");
 		Builder.BuilderWithTableName termValueSetTable = version.onTable("TRM_VALUESET");
-		termValueSetTable.addColumn("20190921.22", "TOTAL_CONCEPTS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetTable.addColumn("20190921.23", "TOTAL_CONCEPT_DESIGNATIONS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("20190921.22", "TOTAL_CONCEPTS").nonNullable().type(ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("20190921.23", "TOTAL_CONCEPT_DESIGNATIONS").nonNullable().type(ColumnTypeEnum.LONG);
 		termValueSetTable
 			.dropIndex("20190921.24", "IDX_VALUESET_EXP_STATUS");
 
@@ -321,31 +436,31 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// TermValueSetConcept
 		version.startSectionWithMessage("Processing bulkExportCollectionFile: TRM_VALUESET_CONCEPT");
 		Builder.BuilderWithTableName termValueSetConceptTable = version.onTable("TRM_VALUESET_CONCEPT");
-		termValueSetConceptTable.addColumn("20190921.26", "VALUESET_ORDER").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		termValueSetConceptTable.addColumn("20190921.26", "VALUESET_ORDER").nonNullable().type(ColumnTypeEnum.INT);
 		termValueSetConceptTable
 			.addIndex("20190921.27", "IDX_VS_CONCEPT_ORDER")
 			.unique(true)
 			.withColumns("VALUESET_PID", "VALUESET_ORDER");
 
 		// Account for RESTYPE_LEN column increasing from 30 to 40
-		version.onTable("HFJ_RESOURCE").modifyColumn("20191002.1", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_RES_VER").modifyColumn("20191002.2", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_HISTORY_TAG").modifyColumn("20191002.3", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_RES_LINK").modifyColumn("20191002.4", "SOURCE_RESOURCE_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_RES_LINK").modifyColumn("20191002.5", "TARGET_RESOURCE_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
-		version.onTable("HFJ_RES_TAG").modifyColumn("20191002.6", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RESOURCE").modifyColumn("20191002.1", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_VER").modifyColumn("20191002.2", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_HISTORY_TAG").modifyColumn("20191002.3", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_LINK").modifyColumn("20191002.4", "SOURCE_RESOURCE_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_LINK").modifyColumn("20191002.5", "TARGET_RESOURCE_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_TAG").modifyColumn("20191002.6", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 40);
 
 		// TermConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_CONCEPT_DESIG");
-		version.onTable("TRM_CONCEPT_DESIG").modifyColumn("20191002.7", "VAL").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 2000);
+		version.onTable("TRM_CONCEPT_DESIG").modifyColumn("20191002.7", "VAL").nonNullable().withType(ColumnTypeEnum.STRING, 2000);
 
 		// TermValueSetConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
-		version.onTable("TRM_VALUESET_C_DESIGNATION").modifyColumn("20191002.8", "VAL").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 2000);
+		version.onTable("TRM_VALUESET_C_DESIGNATION").modifyColumn("20191002.8", "VAL").nonNullable().withType(ColumnTypeEnum.STRING, 2000);
 
 		// TermConceptProperty
 		version.startSectionWithMessage("Processing table: TRM_CONCEPT_PROPERTY");
-		version.onTable("TRM_CONCEPT_PROPERTY").addColumn("20191002.9", "PROP_VAL_LOB").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB);
+		version.onTable("TRM_CONCEPT_PROPERTY").addColumn("20191002.9", "PROP_VAL_LOB").nullable().type(ColumnTypeEnum.BLOB);
 	}
 
 	protected void init400() { // 20190401 - 20190814
@@ -353,13 +468,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// BinaryStorageEntity
 		Builder.BuilderAddTableByColumns binaryBlob = version.addTableByColumns("20190722.1", "HFJ_BINARY_STORAGE_BLOB", "BLOB_ID");
-		binaryBlob.addColumn("BLOB_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-		binaryBlob.addColumn("RESOURCE_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		binaryBlob.addColumn("BLOB_SIZE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
-		binaryBlob.addColumn("CONTENT_TYPE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		binaryBlob.addColumn("BLOB_DATA").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB);
-		binaryBlob.addColumn("PUBLISHED_DATE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		binaryBlob.addColumn("BLOB_HASH").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 128);
+		binaryBlob.addColumn("BLOB_ID").nonNullable().type(ColumnTypeEnum.STRING, 200);
+		binaryBlob.addColumn("RESOURCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		binaryBlob.addColumn("BLOB_SIZE").nullable().type(ColumnTypeEnum.INT);
+		binaryBlob.addColumn("CONTENT_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		binaryBlob.addColumn("BLOB_DATA").nonNullable().type(ColumnTypeEnum.BLOB);
+		binaryBlob.addColumn("PUBLISHED_DATE").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		binaryBlob.addColumn("BLOB_HASH").nullable().type(ColumnTypeEnum.STRING, 128);
 
 		// Interim builds used this name
 		version.onTable("TRM_VALUESET_CODE").dropThisTable("20190722.2");
@@ -369,15 +484,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.renameColumn("20190722.4", "mySourceValueSet", "SOURCE_VS", false, true)
 			.renameColumn("20190722.5", "myTargetValueSet", "TARGET_VS", false, true);
 		version.onTable("TRM_CONCEPT_MAP_GROUP")
-			.modifyColumn("20190722.6", "CONCEPT_MAP_URL").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.6", "CONCEPT_MAP_URL").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GROUP")
-			.modifyColumn("20190722.7", "SOURCE_VERSION").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.7", "SOURCE_VERSION").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GROUP")
-			.modifyColumn("20190722.8", "SOURCE_VS").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.8", "SOURCE_VS").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GROUP")
-			.modifyColumn("20190722.9", "TARGET_VERSION").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.9", "TARGET_VERSION").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GROUP")
-			.modifyColumn("20190722.10", "TARGET_VS").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.10", "TARGET_VS").nullable().withType(ColumnTypeEnum.STRING, 200);
 
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.renameColumn("20190722.11", "myConceptMapUrl", "CONCEPT_MAP_URL", false, true)
@@ -385,15 +500,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.renameColumn("20190722.13", "mySystemVersion", "SYSTEM_VERSION", false, true)
 			.renameColumn("20190722.14", "myValueSet", "VALUESET_URL", false, true);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
-			.modifyColumn("20190722.15", "CONCEPT_MAP_URL").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.15", "CONCEPT_MAP_URL").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
-			.modifyColumn("20190722.16", "SOURCE_CODE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20190722.16", "SOURCE_CODE").nonNullable().withType(ColumnTypeEnum.STRING, 500);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
-			.modifyColumn("20190722.17", "SYSTEM_URL").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.17", "SYSTEM_URL").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
-			.modifyColumn("20190722.18", "SYSTEM_VERSION").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.18", "SYSTEM_VERSION").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
-			.modifyColumn("20190722.19", "VALUESET_URL").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.19", "VALUESET_URL").nullable().withType(ColumnTypeEnum.STRING, 200);
 
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 			.renameColumn("20190722.20", "myConceptMapUrl", "CONCEPT_MAP_URL", false, true)
@@ -401,45 +516,44 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.renameColumn("20190722.22", "mySystemVersion", "SYSTEM_VERSION", false, true)
 			.renameColumn("20190722.23", "myValueSet", "VALUESET_URL", false, true);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20190722.24", "CONCEPT_MAP_URL").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.24", "CONCEPT_MAP_URL").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20190722.25", "SYSTEM_URL").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.25", "SYSTEM_URL").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20190722.26", "SYSTEM_VERSION").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.26", "SYSTEM_VERSION").nullable().withType(ColumnTypeEnum.STRING, 200);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20190722.27", "TARGET_CODE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20190722.27", "TARGET_CODE").nonNullable().withType(ColumnTypeEnum.STRING, 500);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20190722.28", "VALUESET_URL").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.modifyColumn("20190722.28", "VALUESET_URL").nullable().withType(ColumnTypeEnum.STRING, 200);
 
 		version.onTable("TRM_CONCEPT")
 			.renameColumn("20190722.29", "CODE", "CODEVAL", false, true);
-
 
 
 		// TermValueSet
 		version.startSectionWithMessage("Processing table: TRM_VALUESET");
 		version.addIdGenerator("20190722.30", "SEQ_VALUESET_PID");
 		Builder.BuilderAddTableByColumns termValueSetTable = version.addTableByColumns("20190722.31", "TRM_VALUESET", "PID");
-		termValueSetTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetTable.addColumn("URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		termValueSetTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("URL").nonNullable().type(ColumnTypeEnum.STRING, 200);
 		termValueSetTable
 			.addIndex("20190722.32", "IDX_VALUESET_URL")
 			.unique(true)
 			.withColumns("URL");
-		termValueSetTable.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 		termValueSetTable
 			.addForeignKey("20190722.33", "FK_TRMVALUESET_RES")
 			.toColumn("RES_ID")
 			.references("HFJ_RESOURCE", "RES_ID");
-		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		termValueSetTable.addColumn("NAME").nullable().type(ColumnTypeEnum.STRING, 200);
 
 		version.onTable("TRM_VALUESET")
 			.renameColumn("20190722.34", "NAME", "VSNAME", true, true);
 		version.onTable("TRM_VALUESET")
-			.modifyColumn("20190722.35", "RES_ID").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+			.modifyColumn("20190722.35", "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
 
 		Builder.BuilderWithTableName termValueSetTableChange = version.onTable("TRM_VALUESET");
-		termValueSetTableChange.addColumn("20190722.36", "EXPANSION_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 50);
+		termValueSetTableChange.addColumn("20190722.36", "EXPANSION_STATUS").nonNullable().type(ColumnTypeEnum.STRING, 50);
 		termValueSetTableChange
 			.addIndex("20190722.37", "IDX_VALUESET_EXP_STATUS")
 			.unique(false)
@@ -449,15 +563,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
 		version.addIdGenerator("20190722.38", "SEQ_VALUESET_CONCEPT_PID");
 		Builder.BuilderAddTableByColumns termValueSetConceptTable = version.addTableByColumns("20190722.39", "TRM_VALUESET_CONCEPT", "PID");
-		termValueSetConceptTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetConceptTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		termValueSetConceptTable.addColumn("VALUESET_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		termValueSetConceptTable
 			.addForeignKey("20190722.40", "FK_TRM_VALUESET_PID")
 			.toColumn("VALUESET_PID")
 			.references("TRM_VALUESET", "PID");
-		termValueSetConceptTable.addColumn("SYSTEM_URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-		termValueSetConceptTable.addColumn("CODEVAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
-		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 400);
+		termValueSetConceptTable.addColumn("SYSTEM_URL").nonNullable().type(ColumnTypeEnum.STRING, 200);
+		termValueSetConceptTable.addColumn("CODEVAL").nonNullable().type(ColumnTypeEnum.STRING, 500);
+		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(ColumnTypeEnum.STRING, 400);
 		version.onTable("TRM_VALUESET_CONCEPT")
 			.renameColumn("20190722.41", "CODE", "CODEVAL", true, true)
 			.renameColumn("20190722.42", "SYSTEM", "SYSTEM_URL", true, true);
@@ -473,17 +587,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
 		version.addIdGenerator("20190801.3", "SEQ_VALUESET_C_DSGNTN_PID");
 		Builder.BuilderAddTableByColumns termValueSetConceptDesignationTable = version.addTableByColumns("20190801.4", "TRM_VALUESET_C_DESIGNATION", "PID");
-		termValueSetConceptDesignationTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetConceptDesignationTable.addColumn("VALUESET_CONCEPT_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptDesignationTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		termValueSetConceptDesignationTable.addColumn("VALUESET_CONCEPT_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		termValueSetConceptDesignationTable
 			.addForeignKey("20190801.5", "FK_TRM_VALUESET_CONCEPT_PID")
 			.toColumn("VALUESET_CONCEPT_PID")
 			.references("TRM_VALUESET_CONCEPT", "PID");
-		termValueSetConceptDesignationTable.addColumn("LANG").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
-		termValueSetConceptDesignationTable.addColumn("USE_SYSTEM").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
-		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
-		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
-		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("LANG").nullable().type(ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("USE_SYSTEM").nullable().type(ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(ColumnTypeEnum.STRING, 500);
 
 		// This index turned out not to be needed so it is disabled
 		termValueSetConceptDesignationTable
@@ -495,49 +609,49 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// TermCodeSystemVersion
 		version.startSectionWithMessage("Processing table: TRM_CODESYSTEM_VER");
 		Builder.BuilderWithTableName termCodeSystemVersionTable = version.onTable("TRM_CODESYSTEM_VER");
-		termCodeSystemVersionTable.addColumn("20190814.1", "CS_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		termCodeSystemVersionTable.addColumn("20190814.1", "CS_DISPLAY").nullable().type(ColumnTypeEnum.STRING, 200);
 
 		// ResourceReindexJobEntry
 		version.addIdGenerator("20190814.2", "SEQ_RES_REINDEX_JOB");
 		Builder.BuilderAddTableByColumns reindex = version.addTableByColumns("20190814.3", "HFJ_RES_REINDEX_JOB", "PID");
-		reindex.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		reindex.addColumn("RES_TYPE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		reindex.addColumn("UPDATE_THRESHOLD_HIGH").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		reindex.addColumn("JOB_DELETED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
-		reindex.addColumn("UPDATE_THRESHOLD_LOW").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		reindex.addColumn("SUSPENDED_UNTIL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
-		reindex.addColumn("REINDEX_COUNT").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		reindex.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		reindex.addColumn("RES_TYPE").nullable().type(ColumnTypeEnum.STRING, 100);
+		reindex.addColumn("UPDATE_THRESHOLD_HIGH").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		reindex.addColumn("JOB_DELETED").nonNullable().type(ColumnTypeEnum.BOOLEAN);
+		reindex.addColumn("UPDATE_THRESHOLD_LOW").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		reindex.addColumn("SUSPENDED_UNTIL").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		reindex.addColumn("REINDEX_COUNT").nullable().type(ColumnTypeEnum.INT);
 
 		// Search
 		version.onTable("HFJ_SEARCH")
-			.addColumn("20190814.4", "SEARCH_DELETED").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
+			.addColumn("20190814.4", "SEARCH_DELETED").nullable().type(ColumnTypeEnum.BOOLEAN);
 		version.onTable("HFJ_SEARCH")
-			.modifyColumn("20190814.5", "SEARCH_LAST_RETURNED").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+			.modifyColumn("20190814.5", "SEARCH_LAST_RETURNED").nonNullable().withType(ColumnTypeEnum.DATE_TIMESTAMP);
 		version.onTable("HFJ_SEARCH")
-			.addColumn("20190814.6", "SEARCH_PARAM_MAP").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB);
+			.addColumn("20190814.6", "SEARCH_PARAM_MAP").nullable().type(ColumnTypeEnum.BLOB);
 		version.onTable("HFJ_SEARCH")
-			.modifyColumn("20190814.7", "SEARCH_UUID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 36);
+			.modifyColumn("20190814.7", "SEARCH_UUID").nonNullable().withType(ColumnTypeEnum.STRING, 36);
 
 		version.onTable("HFJ_SEARCH_PARM").dropThisTable("20190814.8");
 
 		// Make some columns non-nullable that were previously nullable - These are marked as failure allowed, since
 		// SQL Server won't let us change nullability on columns with indexes pointing to them
-		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190814.9", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20190814.10", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20190814.11", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_STRING").addColumn("20190814.12", "HASH_IDENTITY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190814.9", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_DATE").modifyColumn("20190814.10", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_STRING").modifyColumn("20190814.11", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_STRING").addColumn("20190814.12", "HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
 		version.onTable("HFJ_SPIDX_STRING").addIndex("20190814.13", "IDX_SP_STRING_HASH_IDENT").unique(false).withColumns("HASH_IDENTITY");
-		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190814.14", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20190814.15", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("20190814.14", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("20190814.15", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 100);
 		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190814.16", "HASH_UNITS_AND_VALPREFIX");
 		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190814.17", "HASH_VALPREFIX");
-		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20190814.18", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20190814.19", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190814.20", "RES_TYPE").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190814.21", "SP_URI").nullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 254);
-		version.onTable("TRM_CODESYSTEM").modifyColumn("20190814.22", "CODE_SYSTEM_URI").nonNullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-		version.onTable("TRM_CODESYSTEM").modifyColumn("20190814.23", "CS_NAME").nullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
-		version.onTable("TRM_CODESYSTEM_VER").modifyColumn("20190814.24", "CS_VERSION_ID").nullable().failureAllowed().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("20190814.18", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("20190814.19", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190814.20", "RES_TYPE").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 100);
+		version.onTable("HFJ_SPIDX_URI").modifyColumn("20190814.21", "SP_URI").nullable().failureAllowed().withType(ColumnTypeEnum.STRING, 254);
+		version.onTable("TRM_CODESYSTEM").modifyColumn("20190814.22", "CODE_SYSTEM_URI").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 200);
+		version.onTable("TRM_CODESYSTEM").modifyColumn("20190814.23", "CS_NAME").nullable().failureAllowed().withType(ColumnTypeEnum.STRING, 200);
+		version.onTable("TRM_CODESYSTEM_VER").modifyColumn("20190814.24", "CS_VERSION_ID").nullable().failureAllowed().withType(ColumnTypeEnum.STRING, 200);
 	}
 
 
@@ -550,7 +664,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resourceLink
 			.modifyColumn("20180929.1", "SRC_PATH")
 			.nonNullable()
-			.withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+			.withType(ColumnTypeEnum.STRING, 200);
 
 		// Search
 		Builder.BuilderWithTableName search = version.onTable("HFJ_SEARCH");
@@ -558,7 +672,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		search
 			.addColumn("20181001.1", "OPTLOCK_VERSION")
 			.nullable()
-			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+			.type(ColumnTypeEnum.INT);
 
 		version.addTableRawSql("20181104.1", "HFJ_RES_REINDEX_JOB")
 			.addSql(DriverTypeEnum.MSSQL_2012, "create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED bit not null, RES_TYPE varchar(255), SUSPENDED_UNTIL datetime2, UPDATE_THRESHOLD_HIGH datetime2 not null, UPDATE_THRESHOLD_LOW datetime2, primary key (PID))")
@@ -568,13 +682,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addSql(DriverTypeEnum.MYSQL_5_7, " create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED bit not null, RES_TYPE varchar(255), SUSPENDED_UNTIL datetime(6), UPDATE_THRESHOLD_HIGH datetime(6) not null, UPDATE_THRESHOLD_LOW datetime(6), primary key (PID))")
 			.addSql(DriverTypeEnum.ORACLE_12C, "create table HFJ_RES_REINDEX_JOB (PID number(19,0) not null, JOB_DELETED number(1,0) not null, RES_TYPE varchar2(255 char), SUSPENDED_UNTIL timestamp, UPDATE_THRESHOLD_HIGH timestamp not null, UPDATE_THRESHOLD_LOW timestamp, primary key (PID))");
 
-		version.onTable("TRM_CONCEPT_DESIG").addColumn("20181104.2", "CS_VER_PID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("TRM_CONCEPT_DESIG").addColumn("20181104.2", "CS_VER_PID").nullable().type(ColumnTypeEnum.LONG);
 		version.onTable("TRM_CONCEPT_DESIG").addForeignKey("20181104.3", "FK_CONCEPTDESIG_CSV").toColumn("CS_VER_PID").references("TRM_CODESYSTEM_VER", "PID");
 
-		version.onTable("TRM_CONCEPT_PROPERTY").addColumn("20181104.4", "CS_VER_PID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		version.onTable("TRM_CONCEPT_PROPERTY").addColumn("20181104.4", "CS_VER_PID").nullable().type(ColumnTypeEnum.LONG);
 		version.onTable("TRM_CONCEPT_PROPERTY").addForeignKey("20181104.5", "FK_CONCEPTPROP_CSV").toColumn("CS_VER_PID").references("TRM_CODESYSTEM_VER", "PID");
 
-		version.onTable("TRM_CONCEPT").addColumn("20181104.6", "PARENT_PIDS").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.CLOB);
+		version.onTable("TRM_CONCEPT").addColumn("20181104.6", "PARENT_PIDS").nullable().type(ColumnTypeEnum.CLOB);
 
 	}
 
@@ -601,7 +715,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxCoords
 			.addColumn("20180903.1", "HASH_IDENTITY")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxCoords
 				.dropIndex("20180903.2", "IDX_SP_COORDS");
@@ -622,7 +736,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxDate
 			.addColumn("20180903.6", "HASH_IDENTITY")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxDate
 				.dropIndex("20180903.7", "IDX_SP_TOKEN");
@@ -645,7 +759,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxNumber
 			.addColumn("20180903.11", "HASH_IDENTITY")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxNumber
 				.dropIndex("20180903.12", "IDX_SP_NUMBER");
@@ -666,15 +780,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxQuantity
 			.addColumn("20180903.15", "HASH_IDENTITY")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		spidxQuantity
 			.addColumn("20180903.16", "HASH_IDENTITY_SYS_UNITS")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		spidxQuantity
 			.addColumn("20180903.17", "HASH_IDENTITY_AND_UNITS")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxQuantity
 				.dropIndex("20180903.18", "IDX_SP_QUANTITY");
@@ -705,7 +819,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxString
 			.addColumn("20180903.23", "HASH_NORM_PREFIX")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxString
 				.dropIndex("20180903.24", "IDX_SP_STRING");
@@ -716,11 +830,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxString
 				.addColumn("20180903.26", "HASH_EXACT")
 				.nullable()
-				.type(AddColumnTask.ColumnTypeEnum.LONG);
+				.type(ColumnTypeEnum.LONG);
 			spidxString
-				.addIndex("20180903.27","IDX_SP_STRING_HASH_EXCT")
+				.addIndex("20180903.27", "IDX_SP_STRING_HASH_EXCT")
 				.unique(false)
-				.withColumns( "HASH_EXACT");
+				.withColumns("HASH_EXACT");
 			spidxString
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.28")
 					.setColumnName("HASH_NORM_PREFIX")
@@ -735,19 +849,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxToken
 			.addColumn("20180903.29", "HASH_IDENTITY")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		spidxToken
 			.addColumn("20180903.30", "HASH_SYS")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		spidxToken
 			.addColumn("20180903.31", "HASH_SYS_AND_VALUE")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		spidxToken
 			.addColumn("20180903.32", "HASH_VALUE")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxToken
 				.dropIndex("20180903.33", "IDX_SP_TOKEN");
@@ -758,17 +872,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.unique(false)
 				.withColumns("HASH_IDENTITY");
 			spidxToken
-				.addIndex("20180903.36","IDX_SP_TOKEN_HASH_S")
+				.addIndex("20180903.36", "IDX_SP_TOKEN_HASH_S")
 				.unique(false)
-				.withColumns( "HASH_SYS");
+				.withColumns("HASH_SYS");
 			spidxToken
 				.addIndex("20180903.37", "IDX_SP_TOKEN_HASH_SV")
 				.unique(false)
 				.withColumns("HASH_SYS_AND_VALUE");
 			spidxToken
-				.addIndex("20180903.38","IDX_SP_TOKEN_HASH_V")
+				.addIndex("20180903.38", "IDX_SP_TOKEN_HASH_V")
 				.unique(false)
-				.withColumns( "HASH_VALUE");
+				.withColumns("HASH_VALUE");
 			spidxToken
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.39")
 					.setColumnName("HASH_IDENTITY")
@@ -785,7 +899,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spidxUri
 			.addColumn("20180903.40", "HASH_IDENTITY")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxUri
 				.addIndex("20180903.41", "IDX_SP_URI_HASH_IDENTITY")
@@ -794,11 +908,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxUri
 				.addColumn("20180903.42", "HASH_URI")
 				.nullable()
-				.type(AddColumnTask.ColumnTypeEnum.LONG);
+				.type(ColumnTypeEnum.LONG);
 			spidxUri
-				.addIndex("20180903.43","IDX_SP_URI_HASH_URI")
+				.addIndex("20180903.43", "IDX_SP_URI_HASH_URI")
 				.unique(false)
-				.withColumns( "HASH_URI");
+				.withColumns("HASH_URI");
 			spidxUri
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.44")
 					.setColumnName("HASH_IDENTITY")
@@ -814,7 +928,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spp
 			.addColumn("20180903.46", "HASH_PRESENCE")
 			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		spp
 			.addIndex("20180903.47", "IDX_RESPARMPRESENT_HASHPRES")
 			.unique(false)
@@ -850,15 +964,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		trmConcept
 			.addColumn("20180903.50", "CONCEPT_UPDATED")
 			.nullable()
-			.type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
 		trmConcept
 			.addIndex("20180903.51", "IDX_CONCEPT_UPDATED")
 			.unique(false)
-			.withColumns( "CONCEPT_UPDATED");
+			.withColumns("CONCEPT_UPDATED");
 		trmConcept
 			.modifyColumn("20180903.52", "CODE")
 			.nonNullable()
-			.withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+			.withType(ColumnTypeEnum.STRING, 500);
 
 		// Concept Designation
 		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_DESIG");
@@ -995,7 +1109,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addSql(DriverTypeEnum.MSSQL_2012, "create index IDX_CNCPT_MP_GRP_ELM_TGT_CD on TRM_CONCEPT_MAP_GRP_ELM_TGT (TARGET_CODE)")
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_MAP_GRP_ELM_TGT add constraint FK_TCMGETARGET_ELEMENT foreign key (CONCEPT_MAP_GRP_ELM_PID) references TRM_CONCEPT_MAP_GRP_ELEMENT");
 
-		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").modifyColumn("20180907.7", "IDX_STRING").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").modifyColumn("20180907.7", "IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 200);
 
 
 	}
@@ -1025,11 +1139,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resourceLink
 			.addColumn("20180401.3", "CS_VERSION_ID")
 			.nullable()
-			.type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255);
+			.type(ColumnTypeEnum.STRING, 255);
 		resourceLink
 			.addColumn("20180401.4", "CODESYSTEM_PID")
 			.nullable()
-			.type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.LONG);
 		resourceLink
 			.addForeignKey("20180401.5", "FK_CODESYSVER_CS_ID")
 			.toColumn("CODESYSTEM_PID")
@@ -1041,7 +1155,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		concept
 			.addColumn("20180401.6", "CODE_SEQUENCE")
 			.nullable()
-			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+			.type(ColumnTypeEnum.INT);
 
 
 	}
@@ -1049,7 +1163,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
-		version.initializeSchema("20180115.0", new SchemaInitializationProvider("HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE"));
+		version.initializeSchema("20180115.0", new SchemaInitializationProvider("HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE", true));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());

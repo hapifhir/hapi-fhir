@@ -3,7 +3,9 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -14,30 +16,51 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Goal;
+import org.hl7.fhir.dstu3.model.ImagingStudy;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Procedure;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedPerson;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestWatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -55,18 +78,18 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -78,13 +101,8 @@ public class FhirInstanceValidatorDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static IValidationSupport myDefaultValidationSupport = ourCtx.getValidationSupport();
-	@Rule
-	public TestRule watcher = new TestWatcher() {
-		@Override
-		protected void starting(Description description) {
-			ourLog.info("Starting test: " + description.getMethodName());
-		}
-	};
+	@RegisterExtension
+	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	private FhirInstanceValidator myInstanceVal;
 	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
@@ -102,7 +120,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Before
+	@BeforeEach
 	public void before() {
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);
@@ -114,7 +132,8 @@ public class FhirInstanceValidatorDstu3Test {
 			mockSupport,
 			myDefaultValidationSupport,
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
-			new CommonCodeSystemsTerminologyService(ourCtx)));
+			new CommonCodeSystemsTerminologyService(ourCtx),
+			new SnapshotGeneratingValidationSupport(ourCtx)));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -129,7 +148,7 @@ public class FhirInstanceValidatorDstu3Test {
 				ValueSet arg = (ValueSet) theInvocation.getArgument(0, IBaseResource.class);
 				ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 				if (retVal == null) {
-					ValueSet expandedVs = (ValueSet) myDefaultValidationSupport.expandValueSet(myDefaultValidationSupport, null, arg).getValueSet();
+					ValueSet expandedVs = (ValueSet) myDefaultValidationSupport.expandValueSet(new ValidationSupportContext(myDefaultValidationSupport), null, arg).getValueSet();
 					retVal = expandedVs.getExpansion();
 				}
 				ourLog.debug("expandValueSet({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
@@ -147,6 +166,18 @@ public class FhirInstanceValidatorDstu3Test {
 				}
 				return retVal;
 			}
+		});
+//		when(mockSupport.isValueSetSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+//			@Override
+//			public Boolean answer(InvocationOnMock theInvocation) {
+//				String url = (String) theInvocation.getArguments()[1];
+//				boolean retVal = myValueSets.containsKey(url);
+//				return retVal;
+//			}
+//		});
+		when(mockSupport.fetchValueSet(any())).thenAnswer(t->{
+			String url = t.getArgument(0, String.class);
+			return myValueSets.get(url);
 		});
 		when(mockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
@@ -193,13 +224,13 @@ public class FhirInstanceValidatorDstu3Test {
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.WARNING.toCode()).setMessage("Unknown code: " + system + " / " + code);
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
 					retVal = found.map(t -> new IValidationSupport.CodeValidationResult().setCode(t.getCode())).orElse(null);
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(myDefaultValidationSupport, options, system, code, display, valueSetUrl);
+					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
 				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;
@@ -230,12 +261,14 @@ public class FhirInstanceValidatorDstu3Test {
 		when(mockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) {
-				String url = (String) theInvocation.getArguments()[1];
+				String url = (String) theInvocation.getArgument(0, String.class);
 				StructureDefinition retVal = myStructureDefinitions.get(url);
 				if (retVal == null) {
 					retVal = (StructureDefinition) myDefaultValidationSupport.fetchStructureDefinition(url);
 				}
-				ourLog.info("fetchStructureDefinition({}) : {}", new Object[]{url, retVal});
+				if (retVal == null) {
+					ourLog.info("fetchStructureDefinition({}) : {}", new Object[]{url, retVal});
+				}
 				return retVal;
 			}
 		});
@@ -243,7 +276,9 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
 				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions();
-				ourLog.debug("fetchAllStructureDefinitions()", new Object[]{});
+				retVal = new ArrayList<>(retVal);
+				retVal.addAll(myStructureDefinitions.values());
+				ourLog.info("fetchAllStructureDefinitions()", new Object[]{});
 				return retVal;
 			}
 		});
@@ -292,6 +327,36 @@ public class FhirInstanceValidatorDstu3Test {
 
 		return retVal;
 	}
+
+	@Test
+	public void testValidateWithIso3166() throws IOException {
+		loadNL();
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+
+		// Code in VS
+		{
+			Patient p = loadResource("/dstu3/nl/nl-core-patient-instance.json", Patient.class);
+			ValidationResult result = val.validateWithResult(p);
+			List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(result);
+			assertTrue(result.isSuccessful());
+			assertThat(all, empty());
+		}
+
+		// Code not in VS
+		{
+			Patient p = loadResource("/dstu3/nl/nl-core-patient-instance-invalid-country.json", Patient.class);
+			ValidationResult result = val.validateWithResult(p);
+			assertFalse(result.isSuccessful());
+			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+			assertEquals(1, all.size());
+			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
+			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ' for \"urn:iso:std:iso:3166#QQ\"", all.get(0).getMessage());
+		}
+	}
+
+
 
 	/**
 	 * See #873
@@ -557,7 +622,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	// @Ignore
+	// @Disabled
 	public void testValidateBuiltInProfiles() throws Exception {
 		org.hl7.fhir.dstu3.model.Bundle bundle;
 		String name = "profiles-resources";
@@ -588,7 +653,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 			errors = errors
 				.stream()
-				.filter(t->{
+				.filter(t -> {
 					if (t.getLocationString().contains("example")) {
 						ourLog.warn("Ignoring error in example path: {}", t);
 						return false;
@@ -596,7 +661,8 @@ public class FhirInstanceValidatorDstu3Test {
 						return true;
 					}
 				})
-				.collect(Collectors.toList());;
+				.collect(Collectors.toList());
+			;
 
 
 			assertThat("Failed to validate " + i.getFullUrl() + " - " + errors, errors, empty());
@@ -615,7 +681,7 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateBundleWithObservations() throws Exception {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
@@ -688,6 +754,59 @@ public class FhirInstanceValidatorDstu3Test {
 		assertTrue(output.isSuccessful());
 	}
 
+
+	@Test
+	public void testValidateUsingDifferentialProfile() throws IOException {
+		loadNL();
+
+		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
+		ValidationResult results = myVal.validateWithResult(resource);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome.toString(), containsString("The Coding provided is not in the value set http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000"));
+	}
+
+	private void loadNL() throws IOException {
+		loadValueSet("/dstu3/nl/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000.json");
+		loadValueSet("/dstu3/nl/LandGBACodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000.json");
+		loadValueSet("/dstu3/nl/LandISOCodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000.json");
+
+		loadStructureDefinition("/dstu3/nl/extension-code-specification.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-patient.json");
+		loadStructureDefinition("/dstu3/nl/proficiency.json");
+		loadStructureDefinition("/dstu3/nl/zibpatientlegalstatus.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-contactpoint.json");
+		loadStructureDefinition("/dstu3/nl/Zibextensioncodespecification.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-humanname.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-preferred-pharmacy.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-address.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-address-official.json");
+		loadStructureDefinition("/dstu3/nl/Comment.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-careplan.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-healthcareservice.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-organization.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-practitionerrole.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-careteam.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-location.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-person.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-relatedperson.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-episodeofcare.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-observation.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-practitioner.json");
+		loadStructureDefinition("/dstu3/nl/nl-core-relatedperson-role.json");
+		loadStructureDefinition("/dstu3/nl/PractitionerRoleReference.json");
+	}
+
+	public void loadValueSet(String theFilename) throws IOException {
+		ValueSet vs = loadResource(theFilename, ValueSet.class);
+		myValueSets.put(vs.getUrl(), vs);
+	}
+
+	public void loadStructureDefinition(String theFilename) throws IOException {
+		StructureDefinition sd = loadResource(theFilename, StructureDefinition.class);
+		myStructureDefinitions.put(sd.getUrl(), sd);
+	}
+
+
 	/**
 	 * See #739
 	 */
@@ -708,7 +827,7 @@ public class FhirInstanceValidatorDstu3Test {
 		//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 0, output.getMessages().size());
+		assertEquals(0, output.getMessages().size(), output.toString());
 	}
 
 	@Test
@@ -723,7 +842,7 @@ public class FhirInstanceValidatorDstu3Test {
 		//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(1, output.getMessages().size(), output.toString());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("Patient", output.getMessages().get(0).getLocationString());
@@ -772,7 +891,7 @@ public class FhirInstanceValidatorDstu3Test {
 		 */
 
 		ValidationResult output = myVal.validateWithResult(encoded);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(1, output.getMessages().size(), output.toString());
 
 		assertEquals("Unknown extension http://hl7.org/fhir/v3/ethnicity", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.INFORMATION, output.getMessages().get(0).getSeverity());
@@ -806,7 +925,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		myInstanceVal.setAnyExtensionsAllowed(false);
 		ValidationResult output = myVal.validateWithResult(encoded);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(1, output.getMessages().size(), output.toString());
 
 		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
@@ -819,7 +938,7 @@ public class FhirInstanceValidatorDstu3Test {
 		// @formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 0, output.getMessages().size());
+		assertEquals(0, output.getMessages().size(), output.toString());
 	}
 
 	@Test
@@ -830,7 +949,7 @@ public class FhirInstanceValidatorDstu3Test {
 		//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(1, output.getMessages().size(), output.toString());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
@@ -843,7 +962,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output.toOperationOutcome()));
-		assertEquals(output.toString(), 3, output.getMessages().size());
+		assertEquals(3, output.getMessages().size(), output.toString());
 		assertThat(output.getMessages().get(0).getMessage(), containsString("Element must have some content"));
 		assertThat(output.getMessages().get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
 	}
@@ -875,7 +994,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(output.toString(), 1, res.size());
+		assertEquals(1, res.size(), output.toString());
 		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
@@ -964,8 +1083,8 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
-		assertThat(errors.toString(), containsString("warning"));
-		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertEquals("Unknown code for \"http://loinc.org#12345\"", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -987,7 +1106,6 @@ public class FhirInstanceValidatorDstu3Test {
 		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString("Element 'Observation.context': max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString(""));
 	}
 
 	@Test
@@ -1062,7 +1180,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 0, errors.size());
+		assertEquals(0, errors.size(), errors.toString());
 
 	}
 
@@ -1079,7 +1197,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Unknown code: http://acme.org / 9988877", errors.get(0).getMessage());
+		assertEquals("Unknown code for \"http://acme.org#9988877\"", errors.get(0).getMessage());
 
 	}
 
@@ -1095,7 +1213,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 0, errors.size());
+		assertEquals(0, errors.size(), errors.toString());
 	}
 
 	@Test
@@ -1115,7 +1233,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Unknown code: http://loinc.org / 1234", errors.get(0).getMessage());
+		assertEquals("Unknown code for \"http://loinc.org#1234\"", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1130,7 +1248,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		assertEquals(errors.toString(), 0, errors.size());
+		assertEquals(0, errors.size(), errors.toString());
 	}
 
 	@Test
@@ -1161,14 +1279,14 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateStructureDefinition() throws IOException {
 		String input = loadResource("/sdc-questionnaire.profile.xml");
 
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 
-		assertEquals(output.toString(), 3, output.getMessages().size());
+		assertEquals(3, output.getMessages().size(), output.toString());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 	}
@@ -1198,7 +1316,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport = null;
 		ourCtx = null;

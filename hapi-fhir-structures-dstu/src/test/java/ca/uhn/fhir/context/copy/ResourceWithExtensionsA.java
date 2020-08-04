@@ -2,7 +2,7 @@ package ca.uhn.fhir.context.copy;
 
 import java.util.List;
 
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IElement;
@@ -215,7 +215,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

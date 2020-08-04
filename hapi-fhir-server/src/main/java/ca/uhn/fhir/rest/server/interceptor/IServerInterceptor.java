@@ -311,7 +311,7 @@ public interface IServerInterceptor {
 		}
 
 		public ActionRequestDetails(RequestDetails theRequestDetails, FhirContext theContext, IBaseResource theResource) {
-			this(theRequestDetails, theContext, theContext.getResourceDefinition(theResource).getName(), theResource.getIdElement());
+			this(theRequestDetails, theContext, theContext.getResourceType(theResource), theResource.getIdElement());
 			myResource = theResource;
 		}
 
@@ -327,7 +327,7 @@ public interface IServerInterceptor {
 		}
 
 		public ActionRequestDetails(RequestDetails theRequestDetails, IBaseResource theResource) {
-			this(theRequestDetails, theRequestDetails.getServer().getFhirContext().getResourceDefinition(theResource).getName(), theResource.getIdElement());
+			this(theRequestDetails, theRequestDetails.getServer().getFhirContext().getResourceType(theResource), theResource.getIdElement());
 			myResource = theResource;
 		}
 

@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 1899
+title: "When submitting a transaction bundle containing a large number of resources being written, where the
+   resources had tags or profile definitions, a number of redundant database calls have been optimized out. This should
+   significantly improve performance for these scenarios."

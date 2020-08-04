@@ -1,0 +1,242 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-careteam",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-careteam",
+  "version": "2.0.1",
+  "name": "nl-core-careteam",
+  "title": "nl-core-careteam",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "A nl-core base CareTeam profile, that references to all relating Dutch Health and Care Information models or HCIM (Dutch: Zorginformatiebouwsteen or ZIB) profiles.  This profile is not based on a ZIB, beceause no ZIB exists for the CareTeam concept.",
+  "purpose": "The MedMij GGZ use case has a direct need voor exchanging careteam information with the patient.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v1.2.1(2015EN)",
+      "name": "HCIM HealthProfessional-v1.2.1(2015EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v3.0(2016EN)",
+      "name": "HCIM HealthProfessional-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-healthprofessional-v3.2-2017EN",
+      "uri": "https://zibs.nl/wiki/HealthProfessional-v3.2(2017EN)",
+      "name": "HCIM HealthProfessional-v3.2(2017EN)"
+    },
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "CareTeam",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/CareTeam",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "CareTeam.identifier",
+        "path": "CareTeam.identifier",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.subject",
+        "path": "CareTeam.subject",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/Group"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.11",
+            "comment": "Subject"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.context",
+        "path": "CareTeam.context",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-Encounter"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-episodeofcare"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.period",
+        "path": "CareTeam.period",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.14",
+            "comment": "DateTime"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.participant.role.coding",
+        "path": "CareTeam.participant.role.coding",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "CareTeam.participant.role.coding:healthProfessionalRole",
+        "path": "CareTeam.participant.role.coding",
+        "sliceName": "healthProfessionalRole",
+        "short": "HealthProfessionalRole",
+        "definition": "The role the healthcare provider fulfils in the healthcare process. For healthcare providers, this could be for example main practitioner, referrer or general practitioner.",
+        "alias": [
+          "ZorgverlenerRol"
+        ],
+        "binding": {
+          "strength": "extensible",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.17.1.5--20171231000000",
+            "display": "ZorgverlenerRolCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-healthprofessional-v1.2.1-2015EN",
+            "map": "NL-CM:17.1.5",
+            "comment": "HealthcareProviderRole"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.0-2016EN",
+            "map": "NL-CM:17.1.5",
+            "comment": "HealthcareProviderRole"
+          },
+          {
+            "identity": "hcim-healthprofessional-v3.2-2017EN",
+            "map": "NL-CM:17.1.5",
+            "comment": "HealthProfessionalRole"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.participant.member",
+        "path": "CareTeam.participant.member",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-relatedperson"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/CareTeam"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.participant.member.extension",
+        "path": "CareTeam.participant.member.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "CareTeam.participant.member.extension:practitionerRole",
+        "path": "CareTeam.participant.member.extension",
+        "sliceName": "practitionerRole",
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.participant.onBehalfOf",
+        "path": "CareTeam.participant.onBehalfOf",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.reasonReference",
+        "path": "CareTeam.reasonReference",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-Problem"
+          }
+        ]
+      },
+      {
+        "id": "CareTeam.managingOrganization",
+        "path": "CareTeam.managingOrganization",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          }
+        ]
+      }
+    ]
+  }
+}

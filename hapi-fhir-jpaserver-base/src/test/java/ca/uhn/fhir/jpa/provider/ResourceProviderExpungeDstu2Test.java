@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
@@ -11,13 +11,13 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2Test {
 	private IIdType myOneVersionPatientId;
@@ -27,7 +27,7 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 	private IIdType myTwoVersionObservationId;
 	private IIdType myDeletedObservationId;
 
-	@After
+	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 	}
@@ -55,7 +55,7 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 	}
 
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -104,7 +104,7 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeEnableExpunge() {
 		myDaoConfig.setExpungeEnabled(true);
 	}
@@ -288,9 +288,5 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 		assertGone(myDeletedObservationId);
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

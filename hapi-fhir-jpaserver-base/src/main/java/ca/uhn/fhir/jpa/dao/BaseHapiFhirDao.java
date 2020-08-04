@@ -47,7 +47,6 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
@@ -59,6 +58,7 @@ import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -76,12 +76,15 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -91,6 +94,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -110,8 +114,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -233,6 +239,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Autowired
 	private IPartitionLookupSvc myPartitionLookupSvc;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
@@ -393,37 +401,45 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
+	/**
+	 * <code>null</code> will only be returned if the scheme and tag are both blank
+	 */
 	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		if (isBlank(theScheme) && isBlank(theTerm) && isBlank(theLabel)) {
 			return null;
 		}
 
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
-		Root<TagDefinition> from = cq.from(TagDefinition.class);
+		Pair<String, String> key = Pair.of(theScheme, theTerm);
+		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.TAG_DEFINITION, key, k -> {
 
-		if (isNotBlank(theScheme)) {
-			cq.where(
-				builder.and(
-					builder.equal(from.get("myTagType"), theTagType),
-					builder.equal(from.get("mySystem"), theScheme),
-					builder.equal(from.get("myCode"), theTerm)));
-		} else {
-			cq.where(
-				builder.and(
-					builder.equal(from.get("myTagType"), theTagType),
-					builder.isNull(from.get("mySystem")),
-					builder.equal(from.get("myCode"), theTerm)));
-		}
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
+			Root<TagDefinition> from = cq.from(TagDefinition.class);
 
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
-		try {
-			return q.getSingleResult();
-		} catch (NoResultException e) {
-			TagDefinition retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-			myEntityManager.persist(retVal);
-			return retVal;
-		}
+			if (isNotBlank(theScheme)) {
+				cq.where(
+					builder.and(
+						builder.equal(from.get("myTagType"), theTagType),
+						builder.equal(from.get("mySystem"), theScheme),
+						builder.equal(from.get("myCode"), theTerm)));
+			} else {
+				cq.where(
+					builder.and(
+						builder.equal(from.get("myTagType"), theTagType),
+						builder.isNull(from.get("mySystem")),
+						builder.equal(from.get("myCode"), theTerm)));
+			}
+
+			TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
+			try {
+				return q.getSingleResult();
+			} catch (NoResultException e) {
+				TagDefinition retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+				myEntityManager.persist(retVal);
+				return retVal;
+			}
+
+		});
 	}
 
 	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive) {
@@ -903,7 +919,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (resourceEncoding != ResourceEncodingEnum.DEL) {
 
 			LenientErrorHandler errorHandler = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
-			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler);
+			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler, theEntity.getId());
 
 			try {
 				retVal = parser.parseResource(resourceType, resourceText);
@@ -964,11 +980,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
-		return myContext.getResourceDefinition(theResourceType).getName();
+		return myContext.getResourceType(theResourceType);
 	}
 
 	String toResourceName(IBaseResource theResource) {
-		return myContext.getResourceDefinition(theResource).getName();
+		return myContext.getResourceType(theResource);
 	}
 
 	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
@@ -997,7 +1013,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					validateResourceForStorage((T) theResource, entity);
 				}
 			}
-			String resourceType = myContext.getResourceDefinition(theResource).getName();
+			String resourceType = myContext.getResourceType(theResource);
 			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
 				throw new UnprocessableEntityException(
 					"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
@@ -1118,7 +1134,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					source = ((IBaseHasExtensions) theResource.getMeta())
 						.getExtension()
 						.stream()
-						.filter(t -> Constants.EXT_META_SOURCE.equals(t.getUrl()))
+						.filter(t -> HapiExtensions.EXT_META_SOURCE.equals(t.getUrl()))
 						.filter(t -> t.getValue() instanceof IPrimitiveType)
 						.map(t -> ((IPrimitiveType<?>) t.getValue()).getValueAsString())
 						.findFirst()
@@ -1221,9 +1237,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Override
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
-													IBasePersistedResource theEntity2, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
+													IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
 
-		ResourceTable entity = (ResourceTable) theEntity2;
+		ResourceTable entity = (ResourceTable) theEntity;
 
 		// We'll update the resource ID with the correct version later but for
 		// now at least set it to something useful for the interceptors
@@ -1346,7 +1362,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						allowAny = true;
 						break;
 					}
-					validTypes.add(getContext().getResourceDefinition(nextValidType).getName());
+					validTypes.add(getContext().getResourceType(nextValidType));
 				}
 
 				if (allowAny) {
@@ -1417,7 +1433,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
 
-		String resName = getContext().getResourceDefinition(theResource).getName();
+		String resName = getContext().getResourceType(theResource);
 		validateChildReferences(theResource, resName);
 
 		validateMetaCount(totalMetaCount);

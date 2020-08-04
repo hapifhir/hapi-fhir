@@ -4,8 +4,8 @@ import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
@@ -83,6 +83,7 @@ public class DaoConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 
 	/**
 	 * Child Configurations
@@ -154,6 +155,10 @@ public class DaoConfig {
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	/**
+	 * update setter javadoc if default changes
+	 */
+	private Integer myMaximumDeleteConflictQueryCount = DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT;
+	/**
 	 * Do not change default of {@code true}!
 	 *
 	 * @since 4.1.0
@@ -188,6 +193,39 @@ public class DaoConfig {
 	 */
 	private boolean myDeleteEnabled = true;
 
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
+	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
+	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
+	 *
+	 * @since 5.1.0
+	 */
+	public boolean isLastNEnabled() {
+		return myLastNEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
+	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
+	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
+	 *
+	 * @since 5.1.0
+	 */
+	public void setLastNEnabled(boolean theLastNEnabled) {
+		myLastNEnabled = theLastNEnabled;
+	}
+
+	/**
+	 * @since 5.1.0
+	 */
+	private boolean myLastNEnabled = false;
+
+	/**
+	 * @since 5.1.0
+	 */
+	private boolean myPreloadBlobFromInputStream = false;
 
 	/**
 	 * Constructor
@@ -1379,7 +1417,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link SearchParamConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link HapiExtensions#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1390,7 +1428,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link SearchParamConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link HapiExtensions#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -2021,4 +2059,71 @@ public class DaoConfig {
 		 */
 		ANY
 	}
+
+	/**
+	 * <p>
+	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 60}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public Integer getMaximumDeleteConflictQueryCount() {
+		return myMaximumDeleteConflictQueryCount;
+	}
+
+	/**
+	 * <p>
+	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 60}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public void setMaximumDeleteConflictQueryCount(Integer theMaximumDeleteConflictQueryCount) {
+		myMaximumDeleteConflictQueryCount = theMaximumDeleteConflictQueryCount;
+	}
+
+	/**
+	 * <p>
+	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
+	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
+	 * in advance.
+	 * </p>
+	 * <p>
+	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public boolean isPreloadBlobFromInputStream() {
+		return myPreloadBlobFromInputStream;
+	}
+
+	/**
+	 * <p>
+	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
+	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
+	 * in advance.
+	 * </p>
+	 * <p>
+	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
+		myPreloadBlobFromInputStream = thePreloadBlobFromInputStream;
+	}
+
 }

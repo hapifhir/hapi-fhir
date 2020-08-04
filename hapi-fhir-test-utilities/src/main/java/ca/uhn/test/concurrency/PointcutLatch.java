@@ -24,6 +24,7 @@ package ca.uhn.test.concurrency;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -64,6 +65,12 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public PointcutLatch(String theName) {
 		this.myName = theName;
 		myPointcut = null;
+	}
+
+	public void runWithExpectedCount(int theExpectedCount, Runnable r) throws InterruptedException {
+		this.setExpectedCount(theExpectedCount);
+		r.run();
+		this.awaitExpected();
 	}
 
 	public long getLastInvoke() {
@@ -222,6 +229,19 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public Object getLatchInvocationParameter() {
 		return getLatchInvocationParameter(myCalledWith.get());
 	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getLatchInvocationParameterOfType(Class<T> theType) {
+		List<HookParams> hookParamsList = myCalledWith.get();
+		Validate.notNull(hookParamsList);
+		Validate.isTrue(hookParamsList.size() == 1, "Expected Pointcut to be invoked 1 time");
+		HookParams hookParams = hookParamsList.get(0);
+		ListMultimap<Class<?>, Object> paramsForType = hookParams.getParamsForType();
+		List<Object> objects = paramsForType.get(theType);
+		Validate.isTrue(objects.size() == 1);
+		return (T) objects.get(0);
+	}
+
 
 	private class PointcutLatchException extends IllegalStateException {
 		private static final long serialVersionUID = 1372636272233536829L;

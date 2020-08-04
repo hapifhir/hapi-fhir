@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1850
+title: "A new operation has been added to the JPA server called `$diff`. This operation can generate a FHIR Patch diff showing
+   the changes between two versions of a resource, or even two separate resources. See [Diff](/hapi-fhir/docs/server_jpa/diff.html)
+   for more information."

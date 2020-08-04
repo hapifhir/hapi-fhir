@@ -10,15 +10,17 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SuppressWarnings({"unchecked", "Duplicates"})
+@SuppressWarnings({"Duplicates"})
 public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithInterceptorR4Test.class);
 
@@ -66,7 +68,7 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 			String query = list.get(0).getSql(true, false);
 			ourLog.info("Query: {}", query);
 
-			assertThat(query, containsString("HASH_SYS_AND_VALUE='3788488238034018567'"));
+			assertThat(query, containsString("HASH_SYS_AND_VALUE in ('3788488238034018567')"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -74,9 +76,5 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 	}
 
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

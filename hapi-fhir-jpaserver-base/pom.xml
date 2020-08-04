@@ -1,4 +1,5 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -14,29 +15,29 @@
 	<name>HAPI FHIR JPA Server</name>
 
 	<dependencies>
-<!--
-		<dependency>
-			<groupId>com.fasterxml.jackson.jaxrs</groupId>
-			<artifactId>jackson-jaxrs-json-provider</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-hibernate4</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
+		<!--
+				<dependency>
+					<groupId>com.fasterxml.jackson.jaxrs</groupId>
+					<artifactId>jackson-jaxrs-json-provider</artifactId>
+					<version>${jackson.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>com.fasterxml.jackson.datatype</groupId>
+					<artifactId>jackson-datatype-hibernate4</artifactId>
+					<version>${jackson.version}</version>
+				</dependency>
 
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.5</version>
-		</dependency>
--->
+				<dependency>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-lang3</artifactId>
+					<version>3.5</version>
+				</dependency>
+		-->
 
 		<dependency>
 			<groupId>org.codehaus.woodstox</groupId>
 			<artifactId>woodstox-core-asl</artifactId>
-     </dependency>
+		</dependency>
 
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
@@ -72,6 +73,11 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server-empi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -139,6 +145,23 @@
 			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-elasticsearch-6</artifactId>
+			<version>${project.version}</version>
+			<classifier>shaded6</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<dependency>
 			<groupId>net.ttddyy</groupId>
@@ -168,6 +191,10 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
 		</dependency>
 
 		<dependency>
@@ -210,28 +237,23 @@
 
 		<!-- Patch Dependencies -->
 		<dependency>
-           	<groupId>io.dogote</groupId>
-           	<artifactId>json-patch</artifactId>
-        </dependency>
+			<groupId>io.dogote</groupId>
+			<artifactId>json-patch</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
 		</dependency>
 
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
-		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> <version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> 
-			</exclusion> <exclusion> <artifactId>commons-discovery</artifactId> <groupId>commons-discovery</groupId> </exclusion> <exclusion> <artifactId>commons-codec</artifactId> <groupId>commons-codec</groupId> 
-			</exclusion> <exclusion> <artifactId>commons-logging</artifactId> <groupId>commons-logging</groupId> </exclusion> <exclusion> <artifactId>xpp3</artifactId> <groupId>xpp3</groupId> </exclusion> <exclusion> 
-			<artifactId>junit</artifactId> <groupId>junit</groupId> </exclusion> <exclusion> <artifactId>jdom</artifactId> <groupId>org.jdom</groupId> </exclusion> <exclusion> <artifactId>gson</artifactId> <groupId>com.google.code.gson</groupId> 
-			</exclusion> </exclusions> </dependency> -->
 
 		<!-- 
 		For some reason JavaDoc crashed during site generation unless we have this dependency
 		-->
 		<dependency>
-		    <groupId>javax.interceptor</groupId>
-		    <artifactId>javax.interceptor-api</artifactId>
-		    <scope>provided</scope>
+			<groupId>javax.interceptor</groupId>
+			<artifactId>javax.interceptor-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!--
@@ -256,7 +278,6 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.199</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -271,22 +292,11 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.hamcrest</groupId>
-					<artifactId>hamcrest-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-test-utilities</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
 		<!--
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
@@ -294,7 +304,7 @@
 			<scope>test</scope>
 		</dependency>
 		 -->
-		 
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -381,8 +391,8 @@
 					<artifactId>javax.activation-api</artifactId>
 				</exclusion>
 				<!--<exclusion>-->
-					<!--<groupId>org.jboss.spec.javax.transaction</groupId>-->
-					<!--<artifactId>jboss-transaction-api_1.2_spec</artifactId>-->
+				<!--<groupId>org.jboss.spec.javax.transaction</groupId>-->
+				<!--<artifactId>jboss-transaction-api_1.2_spec</artifactId>-->
 				<!--</exclusion>-->
 			</exclusions>
 		</dependency>
@@ -550,6 +560,10 @@
 					<groupId>com.sun.mail</groupId>
 					<artifactId>javax.mail</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -562,6 +576,11 @@
 			<artifactId>embedded-elasticsearch</artifactId>
 			<version>2.10.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hl7.fhir.testcases</groupId>
+			<artifactId>fhir-test-cases</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
@@ -572,19 +591,21 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-testlib</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
-			<version>16.0.3</version>
-			<scope>compile</scope>
 		</dependency>
-
-    </dependencies>
+	</dependencies>
 
 
 	<properties>
-		<skip-hib4>false</skip-hib4>
 		<jackson.version>2.7.1</jackson.version>
 	</properties>
 
@@ -601,6 +622,28 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.22.2</version>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<forkCount>1</forkCount>
+					<reuseForks>false</reuseForks>
+					<runOrder>alphabetical</runOrder>
+					<includes>
+						<include>**/*IT.java</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>de.jpdigital</groupId>
 				<artifactId>hibernate54-ddl-maven-plugin</artifactId>
@@ -639,14 +682,14 @@
 						<version>${jaxb_runtime_version}</version>
 					</dependency>
 					<!--<dependency>-->
-						<!--<groupId>com.sun.xml.bind</groupId>-->
-						<!--<artifactId>jaxb-core</artifactId>-->
-						<!--<version>${jaxb_core_version}</version>-->
+					<!--<groupId>com.sun.xml.bind</groupId>-->
+					<!--<artifactId>jaxb-core</artifactId>-->
+					<!--<version>${jaxb_core_version}</version>-->
 					<!--</dependency>-->
 					<!--<dependency>-->
-						<!--<groupId>com.sun.xml.bind</groupId>-->
-						<!--<artifactId>jaxb-impl</artifactId>-->
-						<!--<version>${jaxb_core_version}</version>-->
+					<!--<groupId>com.sun.xml.bind</groupId>-->
+					<!--<artifactId>jaxb-impl</artifactId>-->
+					<!--<version>${jaxb_core_version}</version>-->
 					<!--</dependency>-->
 				</dependencies>
 			</plugin>
@@ -670,7 +713,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError -XX:+CrashOnOutOfMemoryError</argLine>
+					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 					<forkCount>0.6C</forkCount>
 					<excludes>*StressTest*</excludes>
 				</configuration>
@@ -689,7 +732,8 @@
 							<version>dstu2</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml
+							</targetResourceSpringBeansFile>
 							<baseResourceNames/>
 							<excludeResourceNames>
 								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
@@ -705,7 +749,8 @@
 							<version>dstu3</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu3</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml
+							</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
 							</excludeResourceNames>
@@ -720,7 +765,8 @@
 							<version>r4</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml
+							</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
 							</excludeResourceNames>
@@ -735,7 +781,8 @@
 							<version>r5</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r5</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml
+							</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 						</configuration>
 					</execution>
@@ -805,12 +852,6 @@
 
 	<profiles>
 		<profile>
-			<id>JENKINS</id>
-			<properties>
-				<skip-hib4>true</skip-hib4>
-			</properties>
-		</profile>
-		<profile>
 			<id>NOPARALLEL</id>
 			<build>
 				<plugins>
@@ -822,6 +863,21 @@
 							<excludes>
 								<exclude>**/stresstest/*</exclude>
 							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<forkCount>1</forkCount>
+							<runOrder>alphabetical</runOrder>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -858,6 +914,6 @@
 				</plugins>
 			</build>
 		</profile>
-</profiles>
+	</profiles>
 
 </project>

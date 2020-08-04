@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -51,7 +51,7 @@ interface IBinaryTarget {
 		return getTarget()
 			.getExtension()
 			.stream()
-			.filter(t -> JpaConstants.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
+			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
 			.filter(t -> t.getValue() instanceof IPrimitiveType)
 			.map(t -> (IPrimitiveType<String>) t.getValue())
 			.map(t -> t.getValue())

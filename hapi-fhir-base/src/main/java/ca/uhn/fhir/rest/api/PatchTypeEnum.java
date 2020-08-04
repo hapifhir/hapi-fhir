@@ -20,9 +20,17 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
+
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Parameter type for methods annotated with {@link Patch}
@@ -30,8 +38,11 @@ import ca.uhn.fhir.util.UrlUtil;
 public enum PatchTypeEnum {
 
 	JSON_PATCH(Constants.CT_JSON_PATCH),
-	XML_PATCH(Constants.CT_XML_PATCH);
+	XML_PATCH(Constants.CT_XML_PATCH),
+	FHIR_PATCH_JSON(Constants.CT_FHIR_JSON_NEW),
+	FHIR_PATCH_XML(Constants.CT_FHIR_XML_NEW);
 
+	private static volatile Map<String, PatchTypeEnum> ourContentTypeToPatchType;
 	private final String myContentType;
 
 	PatchTypeEnum(String theContentType) {
@@ -42,19 +53,36 @@ public enum PatchTypeEnum {
 		return myContentType;
 	}
 
-	public static PatchTypeEnum forContentTypeOrThrowInvalidRequestException(String theContentType) {
-		String contentType = theContentType;
+	@Nonnull
+	public static PatchTypeEnum forContentTypeOrThrowInvalidRequestException(FhirContext theContext, String theContentType) {
+		String contentType = defaultString(theContentType);
 		int semiColonIdx = contentType.indexOf(';');
 		if (semiColonIdx != -1) {
 			contentType = theContentType.substring(0, semiColonIdx);
 		}
 		contentType = contentType.trim();
-		if (Constants.CT_JSON_PATCH.equals(contentType)) {
-			return JSON_PATCH;
-		} else if (Constants.CT_XML_PATCH.equals(contentType)) {
-			return XML_PATCH;
-		} else {
-			throw new InvalidRequestException("Invalid Content-Type for PATCH operation: " + UrlUtil.sanitizeUrlPart(theContentType));
+
+
+		Map<String, PatchTypeEnum> map = ourContentTypeToPatchType;
+		if (map == null) {
+			map = new HashMap<>();
+			for (PatchTypeEnum next : values()) {
+				map.put(next.getContentType(), next);
+			}
+			ourContentTypeToPatchType = map;
 		}
+
+		PatchTypeEnum retVal = map.get(contentType);
+		if (retVal == null) {
+			if (isBlank(contentType)) {
+				String msg = theContext.getLocalizer().getMessage(PatchTypeEnum.class, "missingPatchContentType");
+				throw new InvalidRequestException(msg);
+			}
+
+			String msg = theContext.getLocalizer().getMessageSanitized(PatchTypeEnum.class, "invalidPatchContentType", contentType);
+			throw new InvalidRequestException(msg);
+		}
+
+		return retVal;
 	}
 }

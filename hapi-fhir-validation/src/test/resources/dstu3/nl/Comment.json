@@ -1,0 +1,73 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "Comment",
+  "url": "http://nictiz.nl/fhir/StructureDefinition/Comment",
+  "version": "1.0.1",
+  "name": "Comment",
+  "title": "Comment",
+  "status": "active",
+  "publisher": "Nictiz",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Many Dutch Health and Care Information models (Dutch: Zorginformatiebouwsteen or Zib) have a comment concept. This concept can not be mapped to all the Zib's respective FHIR resources. This extension provides a generic method to extend profiles with a comment element.",
+  "purpose": "Need to extend some FHIR resources with an additional unstructured comment value.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "kind": "complex-type",
+  "abstract": false,
+  "contextType": "resource",
+  "context": [
+    "*"
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Comment",
+        "alias": [
+          "Toelichting"
+        ]
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://nictiz.nl/fhir/StructureDefinition/Comment"
+      },
+      {
+        "id": "Extension.value[x]:valueString",
+        "path": "Extension.valueString",
+        "sliceName": "valueString",
+        "code": [
+          {
+            "system": "http://loinc.org",
+            "code": "48767-8",
+            "display": "Annotation comment [Interpretation] Narrative"
+          }
+        ],
+        "short": "Comment",
+        "alias": [
+          "Toelichting"
+        ],
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      }
+    ]
+  }
+}

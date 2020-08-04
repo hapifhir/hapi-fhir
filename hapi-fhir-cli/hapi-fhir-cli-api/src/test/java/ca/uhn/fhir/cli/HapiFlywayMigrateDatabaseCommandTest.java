@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HapiFlywayMigrateDatabaseCommandTest {
 
@@ -37,7 +37,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		System.setProperty("test", "true");
 	}
 
-	// TODO INTERMITTENT This just failed for me on CI with a BadSqlGrammarException
 	@Test
 	public void testMigrateFrom340() throws IOException, SQLException {
 

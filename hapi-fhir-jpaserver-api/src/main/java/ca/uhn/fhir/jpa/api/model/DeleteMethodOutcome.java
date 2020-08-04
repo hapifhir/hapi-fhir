@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.api.model;
  * #L%
  */
 
-import java.util.List;
-
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+
+import java.util.List;
 
 /**
  * This class is a replacement for {@link DaoMethodOutcome} for delete operations,

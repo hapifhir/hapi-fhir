@@ -1,0 +1,2994 @@
+{
+	"abstract": false,
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+	"date": "2019-12-10",
+	"derivation": "constraint",
+	"differential": {
+		"element": [
+			{
+				"binding": {
+					"strength": "required",
+					"valueSet": "https://bb/ValueSet/BBDemographicAgeUnit"
+				},
+				"id": "Observation.value[x]",
+				"min": 1,
+				"path": "Observation.value[x]",
+				"type": [
+					{
+						"code": "Quantity"
+					}
+				]
+			}
+		]
+	},
+	"fhirVersion": "4.0.0",
+	"id": "BBDemographicAge",
+	"kind": "resource",
+	"name": "BBDemographicAge",
+	"resourceType": "StructureDefinition",
+	"snapshot": {
+		"element": [
+			{
+				"alias": [
+					"Measurement",
+					"Results",
+					"Tests",
+					"Vital Signs"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation"
+				},
+				"comment": "Used for simple observations such as device measurements, laboratory atomic results, vital signs, height, weight, smoking status, comments, etc.  Other resources are used to provide context for observations such as laboratory reports, etc.",
+				"constraint": [
+					{
+						"expression": "contained.contained.empty()",
+						"human": "If the resource is contained in another resource, it SHALL NOT contain nested Resources",
+						"key": "dom-2",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+						"xpath": "not(parent::f:contained and f:contained)"
+					},
+					{
+						"expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
+						"human": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource",
+						"key": "dom-3",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+						"xpath": "not(exists(for $id in f:contained/*/f:id/@value return $contained[not(parent::*/descendant::f:reference/@value=concat('#', $contained/*/id/@value) or descendant::f:reference[@value='#'])]))"
+					},
+					{
+						"expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
+						"human": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated",
+						"key": "dom-4",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+						"xpath": "not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))"
+					},
+					{
+						"expression": "contained.meta.security.empty()",
+						"human": "If a resource is contained in another resource, it SHALL NOT have a security label",
+						"key": "dom-5",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+						"xpath": "not(exists(f:contained/*/f:meta/f:security))"
+					},
+					{
+						"expression": "text.`div`.exists()",
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice",
+								"valueBoolean": true
+							},
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice-explanation",
+								"valueMarkdown": "When a resource has no narrative, only systems that fully understand the data can display the resource to a human safely. Including a human readable representation in the resource makes for a much more robust eco-system and cheaper handling of resources by intermediary systems. Some ecosystems restrict distribution of resources to only those systems that do fully understand the resources, and as a consequence implementers may believe that the narrative is superfluous. However experience shows that such eco-systems often open up to new participants over time."
+							}
+						],
+						"human": "A resource should have narrative for robust management",
+						"key": "dom-6",
+						"severity": "warning",
+						"source": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+						"xpath": "exists(f:text/h:div)"
+					},
+					{
+						"expression": "dataAbsentReason.empty() or value.empty()",
+						"human": "dataAbsentReason SHALL only be present if Observation.value[x] is not present",
+						"key": "obs-6",
+						"severity": "error",
+						"xpath": "not(exists(f:dataAbsentReason)) or (not(exists(*[starts-with(local-name(.), 'value')])))"
+					},
+					{
+						"expression": "value.empty() or component.code.where(coding.intersect(%resource.code.coding).exists()).empty()",
+						"human": "If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present",
+						"key": "obs-7",
+						"severity": "error",
+						"xpath": "not(f:*[starts-with(local-name(.), 'value')] and (for $coding in f:code/f:coding return f:component/f:code/f:coding[f:code/@value=$coding/f:code/@value] [f:system/@value=$coding/f:system/@value]))"
+					}
+				],
+				"definition": "Measurements and simple assertions made about a patient, device or other subject.",
+				"id": "Observation",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "Entity. Role, or Act"
+					},
+					{
+						"identity": "rim",
+						"map": "Observation[classCode=OBS, moodCode=EVN]"
+					},
+					{
+						"identity": "rim",
+						"map": "Observation[classCode=OBS, moodCode=EVN]"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 363787002 |Observable entity|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 363787002 |Observable entity|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation",
+				"short": "Measurements and simple assertions"
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Resource.id"
+				},
+				"comment": "The only time that a resource does not have an id is when it is being submitted to the server using a create operation.",
+				"definition": "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.",
+				"id": "Observation.id",
+				"isModifier": false,
+				"isSummary": true,
+				"max": "1",
+				"min": 0,
+				"path": "Observation.id",
+				"short": "Logical id of this artifact",
+				"type": [
+					{
+						"code": "string",
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+								"valueUrl": "string"
+							}
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Resource.meta"
+				},
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.",
+				"id": "Observation.meta",
+				"isModifier": false,
+				"isSummary": true,
+				"max": "1",
+				"min": 0,
+				"path": "Observation.meta",
+				"short": "Metadata about the resource",
+				"type": [
+					{
+						"code": "Meta"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Resource.implicitRules"
+				},
+				"comment": "Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element. Often, when used, the URL is a reference to an implementation guide that defines these special rules as part of it's narrative along with other profiles, value sets, etc.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.",
+				"id": "Observation.implicitRules",
+				"isModifier": true,
+				"isModifierReason": "This element is labeled as a modifier because the implicit rules may provide additional knowledge about the resource that modifies it's meaning or interpretation",
+				"isSummary": true,
+				"max": "1",
+				"min": 0,
+				"path": "Observation.implicitRules",
+				"short": "A set of rules under which this content was created",
+				"type": [
+					{
+						"code": "uri"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Resource.language"
+				},
+				"binding": {
+					"description": "A human language.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-maxValueSet",
+							"valueCanonical": "http://hl7.org/fhir/ValueSet/all-languages"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "Language"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding",
+							"valueBoolean": true
+						}
+					],
+					"strength": "preferred",
+					"valueSet": "http://hl7.org/fhir/ValueSet/languages"
+				},
+				"comment": "Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource. Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute).",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The base language in which the resource is written.",
+				"id": "Observation.language",
+				"isModifier": false,
+				"isSummary": false,
+				"max": "1",
+				"min": 0,
+				"path": "Observation.language",
+				"short": "Language of the resource content",
+				"type": [
+					{
+						"code": "code"
+					}
+				]
+			},
+			{
+				"alias": [
+					"display",
+					"html",
+					"narrative",
+					"xhtml"
+				],
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "DomainResource.text"
+				},
+				"comment": "Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative. In some cases, a resource may only have text with little or no additional discrete data (as long as all minOccurs=1 elements are satisfied).  This may be necessary for data from legacy systems where information is captured as a \"text blob\" or where text is additionally entered raw or narrated and encoded information is added later.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "A human-readable narrative that contains a summary of the resource and can be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.",
+				"id": "Observation.text",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "Act.text?"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"path": "Observation.text",
+				"short": "Text summary of the resource, for human interpretation",
+				"type": [
+					{
+						"code": "Narrative"
+					}
+				]
+			},
+			{
+				"alias": [
+					"anonymous resources",
+					"contained resources",
+					"inline resources"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "DomainResource.contained"
+				},
+				"comment": "This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again. Contained resources may have profiles and tags In their meta elements, but SHALL NOT have security labels.",
+				"definition": "These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.",
+				"id": "Observation.contained",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"path": "Observation.contained",
+				"short": "Contained, inline Resources",
+				"type": [
+					{
+						"code": "Resource"
+					}
+				]
+			},
+			{
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "DomainResource.extension"
+				},
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"expression": "extension.exists() != value.exists()",
+						"human": "Must have either extensions or value[x], not both",
+						"key": "ext-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Extension",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])"
+					}
+				],
+				"definition": "May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"id": "Observation.extension",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"path": "Observation.extension",
+				"short": "Additional content defined by implementations",
+				"type": [
+					{
+						"code": "Extension"
+					}
+				]
+			},
+			{
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "DomainResource.modifierExtension"
+				},
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"expression": "extension.exists() != value.exists()",
+						"human": "Must have either extensions or value[x], not both",
+						"key": "ext-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Extension",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])"
+					}
+				],
+				"definition": "May be used to represent additional information that is not part of the basic definition of the resource and that modifies the understanding of the element that contains it and/or the understanding of the containing element's descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+				"id": "Observation.modifierExtension",
+				"isModifier": true,
+				"isModifierReason": "Modifier extensions are expected to modify the meaning or interpretation of the resource that contains them",
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"path": "Observation.modifierExtension",
+				"requirements": "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](extensibility.html#modifierExtension).",
+				"short": "Extensions that cannot be ignored",
+				"type": [
+					{
+						"code": "Extension"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.identifier"
+				},
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "A unique identifier assigned to this observation.",
+				"id": "Observation.identifier",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "id"
+					},
+					{
+						"identity": "rim",
+						"map": "id"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.21  For OBX segments from systems without OBX-21 support a combination of ORC/OBR and OBX must be negotiated between trading partners to uniquely identify the OBX segment. Depending on how V2 has been implemented each of these may be an option: 1) OBR-3 + OBX-3 + OBX-4 or 2) OBR-3 + OBR-4 + OBX-3 + OBX-4 or 2) some other way to uniquely ID the OBR/ORC + OBX-3 + OBX-4."
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.21  For OBX segments from systems without OBX-21 support a combination of ORC/OBR and OBX must be negotiated between trading partners to uniquely identify the OBX segment. Depending on how V2 has been implemented each of these may be an option: 1) OBR-3 + OBX-3 + OBX-4 or 2) OBR-3 + OBR-4 + OBX-3 + OBX-4 or 2) some other way to uniquely ID the OBR/ORC + OBX-3 + OBX-4."
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.identifier"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.identifier"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.identifier"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.identifier"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.identifier",
+				"requirements": "Allows observations to be distinguished and referenced.",
+				"short": "Business Identifier for observation",
+				"type": [
+					{
+						"code": "Identifier"
+					}
+				]
+			},
+			{
+				"alias": [
+					"Fulfills"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.basedOn"
+				},
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "A plan, proposal or order that is fulfilled in whole or in part by this event.  For example, a MedicationRequest may require a patient to have laboratory test performed before  it is dispensed.",
+				"id": "Observation.basedOn",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": ".inboundRelationship[typeCode=COMP].source[moodCode=EVN]"
+					},
+					{
+						"identity": "rim",
+						"map": ".inboundRelationship[typeCode=COMP].source[moodCode=EVN]"
+					},
+					{
+						"identity": "v2",
+						"map": "ORC"
+					},
+					{
+						"identity": "v2",
+						"map": "ORC"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.basedOn"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.basedOn"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.basedOn",
+				"requirements": "Allows tracing of authorization for the event and tracking whether proposals/recommendations were acted upon.",
+				"short": "Fulfills plan, proposal or order",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/CarePlan",
+							"http://hl7.org/fhir/StructureDefinition/DeviceRequest",
+							"http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation",
+							"http://hl7.org/fhir/StructureDefinition/MedicationRequest",
+							"http://hl7.org/fhir/StructureDefinition/NutritionOrder",
+							"http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+						]
+					}
+				]
+			},
+			{
+				"alias": [
+					"Container"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.partOf"
+				},
+				"comment": "To link an Observation to an Encounter use `encounter`.  See the  [Notes](observation.html#obsgrouping) below for guidance on referencing another Observation.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "A larger event of which this particular Observation is a component or step.  For example,  an observation as part of a procedure.",
+				"id": "Observation.partOf",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": ".outboundRelationship[typeCode=FLFS].target"
+					},
+					{
+						"identity": "rim",
+						"map": ".outboundRelationship[typeCode=FLFS].target"
+					},
+					{
+						"identity": "v2",
+						"map": "Varies by domain"
+					},
+					{
+						"identity": "v2",
+						"map": "Varies by domain"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.partOf"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.partOf"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.partOf",
+				"short": "Part of referenced event",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/ImagingStudy",
+							"http://hl7.org/fhir/StructureDefinition/Immunization",
+							"http://hl7.org/fhir/StructureDefinition/MedicationAdministration",
+							"http://hl7.org/fhir/StructureDefinition/MedicationDispense",
+							"http://hl7.org/fhir/StructureDefinition/MedicationStatement",
+							"http://hl7.org/fhir/StructureDefinition/Procedure"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 1,
+					"path": "Observation.status"
+				},
+				"binding": {
+					"description": "Codes providing the status of an observation.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationStatus"
+						}
+					],
+					"strength": "required",
+					"valueSet": "http://hl7.org/fhir/ValueSet/observation-status|4.0.1"
+				},
+				"comment": "This element is labeled as a modifier because the status contains codes that mark the resource as not currently valid.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The status of the result value.",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint",
+						"valueString": "default: final"
+					}
+				],
+				"id": "Observation.status",
+				"isModifier": true,
+				"isModifierReason": "This element is labeled as a modifier because it is a status element that contains status entered-in-error which means that the resource should not be treated as valid",
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "status  Amended & Final are differentiated by whether it is the subject of a ControlAct event with a type of \"revise\""
+					},
+					{
+						"identity": "rim",
+						"map": "status  Amended & Final are differentiated by whether it is the subject of a ControlAct event with a type of \"revise\""
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 445584004 |Report by finality status|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 445584004 |Report by finality status|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-11"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-11"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.status"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.status"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.status"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.status"
+					}
+				],
+				"max": "1",
+				"min": 1,
+				"mustSupport": false,
+				"path": "Observation.status",
+				"requirements": "Need to track the status of individual results. Some results are finalized before the whole report is finalized.",
+				"short": "registered | preliminary | final | amended +",
+				"type": [
+					{
+						"code": "code"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.category"
+				},
+				"binding": {
+					"description": "Codes for high level observation categories.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationCategory"
+						}
+					],
+					"strength": "preferred",
+					"valueSet": "http://hl7.org/fhir/ValueSet/observation-category"
+				},
+				"comment": "In addition to the required category valueset, this element allows various categorization schemes based on the owner’s definition of the category and effectively multiple categories can be used at once.  The level of granularity is defined by the category concepts in the value set.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "A code that classifies the general type of observation being made.",
+				"id": "Observation.category",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": ".outboundRelationship[typeCode=\"COMP].target[classCode=\"LIST\", moodCode=\"EVN\"].code"
+					},
+					{
+						"identity": "rim",
+						"map": ".outboundRelationship[typeCode=\"COMP].target[classCode=\"LIST\", moodCode=\"EVN\"].code"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.class"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.class"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.category",
+				"requirements": "Used for filtering what observations are retrieved and displayed.",
+				"short": "Classification of  type of observation",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"alias": [
+					"Name"
+				],
+				"base": {
+					"max": "1",
+					"min": 1,
+					"path": "Observation.code"
+				},
+				"binding": {
+					"description": "Codes identifying names of simple observations.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationCode"
+						}
+					],
+					"strength": "example",
+					"valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
+				},
+				"comment": "*All* code-value and, if present, component.code-component.value pairs need to be taken into account to correctly understand the meaning of the observation.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Describes what was observed. Sometimes this is called the observation \"name\".",
+				"id": "Observation.code",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "code"
+					},
+					{
+						"identity": "rim",
+						"map": "code"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "116680003 |Is a|"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "116680003 |Is a|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 363787002 |Observable entity| OR < 386053000 |Evaluation procedure|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 363787002 |Observable entity| OR < 386053000 |Evaluation procedure|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-3"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-3"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.what[x]"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.what[x]"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.code"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.code"
+					}
+				],
+				"max": "1",
+				"min": 1,
+				"mustSupport": false,
+				"path": "Observation.code",
+				"requirements": "Knowing what kind of observation is being made is essential to understanding the observation.",
+				"short": "Type of observation (code / type)",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.subject"
+				},
+				"comment": "One would expect this element to be a cardinality of 1..1. The only circumstance in which the subject can be missing is when the observation is made by a device that does not know the patient. In this case, the observation SHALL be matched to a patient through some context/channel matching technique, and at this point, the observation should be updated.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The patient, or group of patients, location, or device this observation is about and into whose record the observation is placed. If the actual focus of the observation is different from the subject (or a sample of, part, or region of the subject), the `focus` element or the `code` itself specifies the actual focus of the observation.",
+				"id": "Observation.subject",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=RTGT] "
+					},
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=RTGT] "
+					},
+					{
+						"identity": "v2",
+						"map": "PID-3"
+					},
+					{
+						"identity": "v2",
+						"map": "PID-3"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.subject[x]"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.subject"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.subject[x]"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.subject"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.subject"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.subject"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.subject",
+				"requirements": "Observations have no value if you don't know who or what they're about.",
+				"short": "Who and/or what the observation is about",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/Device",
+							"http://hl7.org/fhir/StructureDefinition/Group",
+							"http://hl7.org/fhir/StructureDefinition/Location",
+							"http://hl7.org/fhir/StructureDefinition/Patient"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.focus"
+				},
+				"comment": "Typically, an observation is made about the subject - a patient, or group of patients, location, or device - and the distinction between the subject and what is directly measured for an observation is specified in the observation code itself ( e.g., \"Blood Glucose\") and does not need to be represented separately using this element.  Use `specimen` if a reference to a specimen is required.  If a code is required instead of a resource use either  `bodysite` for bodysites or the standard extension [focusCode](extension-observation-focuscode.html).",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The actual focus of an observation when it is not the patient of record representing something or someone associated with the patient such as a spouse, parent, fetus, or donor. For example, fetus observations in a mother's record.  The focus of an observation could also be an existing condition,  an intervention, the subject's diet,  another observation of the subject,  or a body structure such as tumor or implanted device.   An example use case would be using the Observation resource to capture whether the mother is trained to change her child's tracheostomy tube. In this example, the child is the patient of record and the mother is the focus.",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+						"valueCode": "trial-use"
+					}
+				],
+				"id": "Observation.focus",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=SBJ]"
+					},
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=SBJ]"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-3"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-3"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.subject[x]"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.subject"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.subject[x]"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.subject"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.focus",
+				"short": "What the observation is about, when it is not about the subject of record",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/Resource"
+						]
+					}
+				]
+			},
+			{
+				"alias": [
+					"Context"
+				],
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.encounter"
+				},
+				"comment": "This will typically be the encounter the event occurred within, but some events may be initiated prior to or after the official completion of an encounter but still be tied to the context of the encounter (e.g. pre-admission laboratory tests).",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.",
+				"id": "Observation.encounter",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "inboundRelationship[typeCode=COMP].source[classCode=ENC, moodCode=EVN]"
+					},
+					{
+						"identity": "rim",
+						"map": "inboundRelationship[typeCode=COMP].source[classCode=ENC, moodCode=EVN]"
+					},
+					{
+						"identity": "v2",
+						"map": "PV1"
+					},
+					{
+						"identity": "v2",
+						"map": "PV1"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.context"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.context"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.context"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.context"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.encounter",
+				"requirements": "For some observations it may be important to know the link between an observation and a particular encounter.",
+				"short": "Healthcare event during which this observation is made",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						]
+					}
+				]
+			},
+			{
+				"alias": [
+					"Occurrence"
+				],
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.effective[x]"
+				},
+				"comment": "At least a date should be present unless this observation is a historical report.  For recording imprecise or \"fuzzy\" times (For example, a blood glucose measurement taken \"after breakfast\") use the [Timing](datatypes.html#timing) datatype which allow the measurement to be tied to regular life events.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.",
+				"id": "Observation.effective[x]",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "effectiveTime"
+					},
+					{
+						"identity": "rim",
+						"map": "effectiveTime"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-14, and/or OBX-19 after v2.4  (depends on who observation made)"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-14, and/or OBX-19 after v2.4  (depends on who observation made)"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.done[x]"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.done[x]"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.occurrence[x]"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.occurrence[x]"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.effective[x]",
+				"requirements": "Knowing when an observation was deemed true is important to its relevance as well as determining trends.",
+				"short": "Clinically relevant time/time-period for observation",
+				"type": [
+					{
+						"code": "Period"
+					},
+					{
+						"code": "Timing"
+					},
+					{
+						"code": "dateTime"
+					},
+					{
+						"code": "instant"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.issued"
+				},
+				"comment": "For Observations that don’t require review and verification, it may be the same as the [`lastUpdated` ](resource-definitions.html#Meta.lastUpdated) time of the resource itself.  For Observations that do require review and verification for certain updates, it might not be the same as the `lastUpdated` time of the resource itself due to a non-clinically significant update that doesn’t require the new version to be reviewed and verified again.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The date and time this version of the observation was made available to providers, typically after the results have been reviewed and verified.",
+				"id": "Observation.issued",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=AUT].time"
+					},
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=AUT].time"
+					},
+					{
+						"identity": "v2",
+						"map": "OBR.22 (or MSH.7), or perhaps OBX-19 (depends on who observation made)"
+					},
+					{
+						"identity": "v2",
+						"map": "OBR.22 (or MSH.7), or perhaps OBX-19 (depends on who observation made)"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.recorded"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.recorded"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.issued",
+				"short": "Date/Time this version was made available",
+				"type": [
+					{
+						"code": "instant"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.performer"
+				},
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Who was responsible for asserting the observed value as \"true\".",
+				"id": "Observation.performer",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=PRF]"
+					},
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=PRF]"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.15 / (Practitioner)  OBX-16,  PRT-5:PRT-4='RO' /  (Device)  OBX-18 , PRT-10:PRT-4='EQUIP' / (Organization)  OBX-23,  PRT-8:PRT-4='PO'"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.15 / (Practitioner)  OBX-16,  PRT-5:PRT-4='RO' /  (Device)  OBX-18 , PRT-10:PRT-4='EQUIP' / (Organization)  OBX-23,  PRT-8:PRT-4='PO'"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.actor"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.actor"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.performer.actor"
+					},
+					{
+						"identity": "workflow",
+						"map": "Event.performer.actor"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.performer",
+				"requirements": "May give a degree of confidence in the observation and also indicates where follow-up questions should be directed.",
+				"short": "Who is responsible for the observation",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/CareTeam",
+							"http://hl7.org/fhir/StructureDefinition/Organization",
+							"http://hl7.org/fhir/StructureDefinition/Patient",
+							"http://hl7.org/fhir/StructureDefinition/Practitioner",
+							"http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+							"http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.value[x]"
+				},
+				"binding": {
+					"strength": "required",
+					"valueSet": "https://bb/ValueSet/BBDemographicAgeUnit"
+				},
+				"comment": "An observation may have; 1)  a single value here, 2)  both a value and a set of related or component values,  or 3)  only a set of related or component values. If a value is present, the datatype for this element should be determined by Observation.code.  A CodeableConcept with just a text would be used instead of a string if the field was usually coded, or if the type associated with the Observation.code defines a coded value.  For additional guidance, see the [Notes section](observation.html#notes) below.",
+				"condition": [
+					"obs-7"
+				],
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The information determined as a result of making the observation, if the information has a simple value.",
+				"id": "Observation.value[x]",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "value"
+					},
+					{
+						"identity": "rim",
+						"map": "value"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "363714003 |Interprets|"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "363714003 |Interprets|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 441742003 |Evaluation finding|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 441742003 |Evaluation finding|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.2, OBX.5, OBX.6"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.2, OBX.5, OBX.6"
+					}
+				],
+				"max": "1",
+				"min": 1,
+				"mustSupport": false,
+				"path": "Observation.value[x]",
+				"requirements": "An observation exists to have a value, though it might not if it is in error, or if it represents a group of observations.",
+				"short": "Actual result",
+				"type": [
+					{
+						"code": "Quantity"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.dataAbsentReason"
+				},
+				"binding": {
+					"description": "Codes specifying why the result (`Observation.value[x]`) is missing.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationValueAbsentReason"
+						}
+					],
+					"strength": "extensible",
+					"valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason"
+				},
+				"comment": "Null or exceptional values can be represented two ways in FHIR Observations.  One way is to simply include them in the value set and represent the exceptions in the value.  For example, measurement values for a serology test could be  \"detected\", \"not detected\", \"inconclusive\", or  \"specimen unsatisfactory\".   \n\nThe alternate way is to use the value element for actual observations and use the explicit dataAbsentReason element to record exceptional values.  For example, the dataAbsentReason code \"error\" could be used when the measurement was not completed. Note that an observation may only be reported if there are values to report. For example differential cell counts values may be reported only when > 0.  Because of these options, use-case agreements are required to interpret general observations for null or exceptional values.",
+				"condition": [
+					"obs-6"
+				],
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Provides a reason why the expected value in the element Observation.value[x] is missing.",
+				"id": "Observation.dataAbsentReason",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "value.nullFlavor"
+					},
+					{
+						"identity": "rim",
+						"map": "value.nullFlavor"
+					},
+					{
+						"identity": "v2",
+						"map": "N/A"
+					},
+					{
+						"identity": "v2",
+						"map": "N/A"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.dataAbsentReason",
+				"requirements": "For many results it is necessary to handle exceptional values in measurements.",
+				"short": "Why the result is missing",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"alias": [
+					"Abnormal Flag"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.interpretation"
+				},
+				"binding": {
+					"description": "Codes identifying interpretations of observations.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationInterpretation"
+						}
+					],
+					"strength": "extensible",
+					"valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
+				},
+				"comment": "Historically used for laboratory results (known as 'abnormal flag' ),  its use extends to other use cases where coded interpretations  are relevant.  Often reported as one or more simple compact codes this element is often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "A categorical assessment of an observation value.  For example, high, low, normal.",
+				"id": "Observation.interpretation",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "interpretationCode"
+					},
+					{
+						"identity": "rim",
+						"map": "interpretationCode"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "363713009 |Has interpretation|"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "363713009 |Has interpretation|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 260245000 |Findings values|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 260245000 |Findings values|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-8"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-8"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.interpretation",
+				"requirements": "For some results, particularly numeric results, an interpretation is necessary to fully understand the significance of a result.",
+				"short": "High, low, normal, etc.",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.note"
+				},
+				"comment": "May include general statements about the observation, or statements about significant, unexpected or unreliable results values, or information about its source when relevant to its interpretation.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Comments about the observation or the results.",
+				"id": "Observation.note",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "subjectOf.observationEvent[code=\"annotation\"].value"
+					},
+					{
+						"identity": "rim",
+						"map": "subjectOf.observationEvent[code=\"annotation\"].value"
+					},
+					{
+						"identity": "v2",
+						"map": "NTE.3 (partner NTE to OBX, or sometimes another (child?) OBX)"
+					},
+					{
+						"identity": "v2",
+						"map": "NTE.3 (partner NTE to OBX, or sometimes another (child?) OBX)"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.note",
+				"requirements": "Need to be able to provide free text additional information.",
+				"short": "Comments about the observation",
+				"type": [
+					{
+						"code": "Annotation"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.bodySite"
+				},
+				"binding": {
+					"description": "Codes describing anatomical locations. May include laterality.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "BodySite"
+						}
+					],
+					"strength": "example",
+					"valueSet": "http://hl7.org/fhir/ValueSet/body-site"
+				},
+				"comment": "Only used if not implicit in code found in Observation.code.  In many systems, this may be represented as a related observation instead of an inline component.   \n\nIf the use case requires BodySite to be handled as a separate resource (e.g. to identify and track separately) then use the standard extension[ bodySite](extension-bodysite.html).",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Indicates the site on the subject's body where the observation was made (i.e. the target site).",
+				"id": "Observation.bodySite",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "targetSiteCode"
+					},
+					{
+						"identity": "rim",
+						"map": "targetSiteCode"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "718497002 |Inherent location|"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "718497002 |Inherent location|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 123037004 |Body structure|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 123037004 |Body structure|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-20"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-20"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.bodySite",
+				"short": "Observed body part",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.method"
+				},
+				"binding": {
+					"description": "Methods for simple observations.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationMethod"
+						}
+					],
+					"strength": "example",
+					"valueSet": "http://hl7.org/fhir/ValueSet/observation-methods"
+				},
+				"comment": "Only used if not implicit in code for Observation.code.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Indicates the mechanism used to perform the observation.",
+				"id": "Observation.method",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "methodCode"
+					},
+					{
+						"identity": "rim",
+						"map": "methodCode"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-17"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-17"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.method",
+				"requirements": "In some cases, method can impact results and is thus used for determining whether results can be compared or determining significance of results.",
+				"short": "How it was done",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.specimen"
+				},
+				"comment": "Should only be used if not implicit in code found in `Observation.code`.  Observations are not made on specimens themselves; they are made on a subject, but in many cases by the means of a specimen. Note that although specimens are often involved, they are not always tracked and reported explicitly. Also note that observation resources may be used in contexts that track the specimen explicitly (e.g. Diagnostic Report).",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The specimen that was used when this observation was made.",
+				"id": "Observation.specimen",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=SPC].specimen"
+					},
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=SPC].specimen"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "704319004 |Inherent in|"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "704319004 |Inherent in|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 123038009 |Specimen|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 123038009 |Specimen|"
+					},
+					{
+						"identity": "v2",
+						"map": "SPM segment"
+					},
+					{
+						"identity": "v2",
+						"map": "SPM segment"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.specimen",
+				"short": "Specimen used for this observation",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/Specimen"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.device"
+				},
+				"comment": "Note that this is not meant to represent a device involved in the transmission of the result, e.g., a gateway.  Such devices may be documented using the Provenance resource where relevant.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The device used to generate the observation data.",
+				"id": "Observation.device",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=DEV]"
+					},
+					{
+						"identity": "rim",
+						"map": "participation[typeCode=DEV]"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "424226004 |Using device|"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "424226004 |Using device|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 49062001 |Device|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 49062001 |Device|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-17 / PRT -10"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-17 / PRT -10"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.device",
+				"short": "(Measurement) Device",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/Device",
+							"http://hl7.org/fhir/StructureDefinition/DeviceMetric"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.referenceRange"
+				},
+				"comment": "Most observations only have one generic reference range. Systems MAY choose to restrict to only supplying the relevant reference range based on knowledge about the patient (e.g., specific to the patient's age, gender, weight and other factors), but this might not be possible or appropriate. Whenever more than one reference range is supplied, the differences between them SHOULD be provided in the reference range and/or age properties.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"expression": "low.exists() or high.exists() or text.exists()",
+						"human": "Must have at least a low or a high or text",
+						"key": "obs-3",
+						"severity": "error",
+						"xpath": "(exists(f:low) or exists(f:high)or exists(f:text))"
+					}
+				],
+				"definition": "Guidance on how to interpret the value by comparison to a normal or recommended range.  Multiple reference ranges are interpreted as an \"OR\".   In other words, to represent two distinct target populations, two `referenceRange` elements would be used.",
+				"id": "Observation.referenceRange",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "outboundRelationship[typeCode=REFV]/target[classCode=OBS, moodCode=EVN]"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.7"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.referenceRange",
+				"requirements": "Knowing what values are considered \"normal\" can help evaluate the significance of a particular result. Need to be able to provide multiple reference ranges for different contexts.",
+				"short": "Provides guide for interpretation",
+				"type": [
+					{
+						"code": "BackboneElement"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Element.id"
+				},
+				"definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"id": "Observation.referenceRange.id",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"path": "Observation.referenceRange.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "Unique id for inter-element referencing",
+				"type": [
+					{
+						"code": "string",
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+								"valueUrl": "string"
+							}
+						]
+					}
+				]
+			},
+			{
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Element.extension"
+				},
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"expression": "extension.exists() != value.exists()",
+						"human": "Must have either extensions or value[x], not both",
+						"key": "ext-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Extension",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])"
+					}
+				],
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"id": "Observation.referenceRange.extension",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"path": "Observation.referenceRange.extension",
+				"short": "Additional content defined by implementations",
+				"type": [
+					{
+						"code": "Extension"
+					}
+				]
+			},
+			{
+				"alias": [
+					"extensions",
+					"modifiers",
+					"user content"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "BackboneElement.modifierExtension"
+				},
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"expression": "extension.exists() != value.exists()",
+						"human": "Must have either extensions or value[x], not both",
+						"key": "ext-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Extension",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])"
+					}
+				],
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element and that modifies the understanding of the element in which it is contained and/or the understanding of the containing element's descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+				"id": "Observation.referenceRange.modifierExtension",
+				"isModifier": true,
+				"isModifierReason": "Modifier extensions are expected to modify the meaning or interpretation of the element that contains them",
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"path": "Observation.referenceRange.modifierExtension",
+				"requirements": "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](extensibility.html#modifierExtension).",
+				"short": "Extensions that cannot be ignored even if unrecognized",
+				"type": [
+					{
+						"code": "Extension"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.referenceRange.low"
+				},
+				"condition": [
+					"obs-3"
+				],
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9). If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).",
+				"id": "Observation.referenceRange.low",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "value:IVL_PQ.low"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-7"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.referenceRange.low",
+				"short": "Low Range, if relevant",
+				"type": [
+					{
+						"code": "Quantity",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.referenceRange.high"
+				},
+				"condition": [
+					"obs-3"
+				],
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9). If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).",
+				"id": "Observation.referenceRange.high",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "value:IVL_PQ.high"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-7"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.referenceRange.high",
+				"short": "High Range, if relevant",
+				"type": [
+					{
+						"code": "Quantity",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.referenceRange.type"
+				},
+				"binding": {
+					"description": "Code for the meaning of a reference range.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationRangeMeaning"
+						}
+					],
+					"strength": "preferred",
+					"valueSet": "http://hl7.org/fhir/ValueSet/referencerange-meaning"
+				},
+				"comment": "This SHOULD be populated if there is more than one range.  If this element is not present then the normal range is assumed.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Codes to indicate the what part of the targeted reference population it applies to. For example, the normal or therapeutic range.",
+				"id": "Observation.referenceRange.type",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "interpretationCode"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 260245000 |Findings values| OR  \r< 365860008 |General clinical state finding| \rOR \r< 250171008 |Clinical history or observation findings| OR  \r< 415229000 |Racial group| OR \r< 365400002 |Finding of puberty stage| OR\r< 443938003 |Procedure carried out on subject|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-10"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.referenceRange.type",
+				"requirements": "Need to be able to say what kind of reference range this is - normal, recommended, therapeutic, etc.,  - for proper interpretation.",
+				"short": "Reference range qualifier",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.referenceRange.appliesTo"
+				},
+				"binding": {
+					"description": "Codes identifying the population the reference range applies to.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationRangeType"
+						}
+					],
+					"strength": "example",
+					"valueSet": "http://hl7.org/fhir/ValueSet/referencerange-appliesto"
+				},
+				"comment": "This SHOULD be populated if there is more than one range.  If this element is not present then the normal population is assumed.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.  Multiple `appliesTo`  are interpreted as an \"AND\" of the target populations.  For example, to represent a target population of African American females, both a code of female and a code for African American would be used.",
+				"id": "Observation.referenceRange.appliesTo",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "interpretationCode"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 260245000 |Findings values| OR  \r< 365860008 |General clinical state finding| \rOR \r< 250171008 |Clinical history or observation findings| OR  \r< 415229000 |Racial group| OR \r< 365400002 |Finding of puberty stage| OR\r< 443938003 |Procedure carried out on subject|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-10"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.referenceRange.appliesTo",
+				"requirements": "Need to be able to identify the target population for proper interpretation.",
+				"short": "Reference range population",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.referenceRange.age"
+				},
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.",
+				"id": "Observation.referenceRange.age",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "outboundRelationship[typeCode=PRCN].targetObservationCriterion[code=\"age\"].value"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.referenceRange.age",
+				"requirements": "Some analytes vary greatly over age.",
+				"short": "Applicable age range, if relevant",
+				"type": [
+					{
+						"code": "Range"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.referenceRange.text"
+				},
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of \"Negative\" or a list or table of \"normals\".",
+				"id": "Observation.referenceRange.text",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "value:ST"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-7"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.referenceRange.text",
+				"short": "Text based reference range in an observation",
+				"type": [
+					{
+						"code": "string"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.hasMember"
+				},
+				"comment": "When using this element, an observation will typically have either a value or a set of related resources, although both may be present in some cases.  For a discussion on the ways Observations can assembled in groups together, see [Notes](observation.html#obsgrouping) below.  Note that a system may calculate results from [QuestionnaireResponse](questionnaireresponse.html)  into a final score and represent the score as an Observation.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.",
+				"id": "Observation.hasMember",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "outBoundRelationship"
+					},
+					{
+						"identity": "rim",
+						"map": "outBoundRelationship"
+					},
+					{
+						"identity": "v2",
+						"map": "Relationships established by OBX-4 usage"
+					},
+					{
+						"identity": "v2",
+						"map": "Relationships established by OBX-4 usage"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.hasMember",
+				"short": "Related resource that belongs to the Observation group",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/MolecularSequence",
+							"http://hl7.org/fhir/StructureDefinition/Observation",
+							"http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.derivedFrom"
+				},
+				"comment": "All the reference choices that are listed in this element can represent clinical observations and other measurements that may be the source for a derived value.  The most common reference will be another Observation.  For a discussion on the ways Observations can assembled in groups together, see [Notes](observation.html#obsgrouping) below.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The target resource that represents a measurement from which this observation value is derived. For example, a calculated anion gap or a fetal measurement based on an ultrasound image.",
+				"id": "Observation.derivedFrom",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": ".targetObservation"
+					},
+					{
+						"identity": "rim",
+						"map": ".targetObservation"
+					},
+					{
+						"identity": "v2",
+						"map": "Relationships established by OBX-4 usage"
+					},
+					{
+						"identity": "v2",
+						"map": "Relationships established by OBX-4 usage"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.derivedFrom",
+				"short": "Related measurements the observation is made from",
+				"type": [
+					{
+						"code": "Reference",
+						"targetProfile": [
+							"http://hl7.org/fhir/StructureDefinition/DocumentReference",
+							"http://hl7.org/fhir/StructureDefinition/ImagingStudy",
+							"http://hl7.org/fhir/StructureDefinition/Media",
+							"http://hl7.org/fhir/StructureDefinition/MolecularSequence",
+							"http://hl7.org/fhir/StructureDefinition/Observation",
+							"http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
+						]
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.component"
+				},
+				"comment": "For a discussion on the ways Observations can be assembled in groups together see [Notes](observation.html#notes) below.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.",
+				"id": "Observation.component",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "outBoundRelationship[typeCode=COMP]"
+					},
+					{
+						"identity": "v2",
+						"map": "containment by OBX-4?"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.component",
+				"requirements": "Component observations share the same attributes in the Observation resource as the primary observation and are always treated a part of a single observation (they are not separable).   However, the reference range for the primary observation value is not inherited by the component values and is required when appropriate for each component observation.",
+				"short": "Component results",
+				"type": [
+					{
+						"code": "BackboneElement"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Element.id"
+				},
+				"definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"id": "Observation.component.id",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"path": "Observation.component.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "Unique id for inter-element referencing",
+				"type": [
+					{
+						"code": "string",
+						"extension": [
+							{
+								"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+								"valueUrl": "string"
+							}
+						]
+					}
+				]
+			},
+			{
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Element.extension"
+				},
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"expression": "extension.exists() != value.exists()",
+						"human": "Must have either extensions or value[x], not both",
+						"key": "ext-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Extension",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])"
+					}
+				],
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"id": "Observation.component.extension",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"path": "Observation.component.extension",
+				"short": "Additional content defined by implementations",
+				"type": [
+					{
+						"code": "Extension"
+					}
+				]
+			},
+			{
+				"alias": [
+					"extensions",
+					"modifiers",
+					"user content"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "BackboneElement.modifierExtension"
+				},
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"expression": "extension.exists() != value.exists()",
+						"human": "Must have either extensions or value[x], not both",
+						"key": "ext-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Extension",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])"
+					}
+				],
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element and that modifies the understanding of the element in which it is contained and/or the understanding of the containing element's descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+				"id": "Observation.component.modifierExtension",
+				"isModifier": true,
+				"isModifierReason": "Modifier extensions are expected to modify the meaning or interpretation of the element that contains them",
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"path": "Observation.component.modifierExtension",
+				"requirements": "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](extensibility.html#modifierExtension).",
+				"short": "Extensions that cannot be ignored even if unrecognized",
+				"type": [
+					{
+						"code": "Extension"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 1,
+					"path": "Observation.component.code"
+				},
+				"binding": {
+					"description": "Codes identifying names of simple observations.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationCode"
+						}
+					],
+					"strength": "example",
+					"valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
+				},
+				"comment": "*All* code-value and  component.code-component.value pairs need to be taken into account to correctly understand the meaning of the observation.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Describes what was observed. Sometimes this is called the observation \"code\".",
+				"id": "Observation.component.code",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "code"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 363787002 |Observable entity| OR \r< 386053000 |Evaluation procedure|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-3"
+					},
+					{
+						"identity": "w5",
+						"map": "FiveWs.what[x]"
+					}
+				],
+				"max": "1",
+				"min": 1,
+				"mustSupport": false,
+				"path": "Observation.component.code",
+				"requirements": "Knowing what kind of observation is being made is essential to understanding the observation.",
+				"short": "Type of component observation (code / type)",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.component.value[x]"
+				},
+				"comment": "Used when observation has a set of component observations. An observation may have both a value (e.g. an  Apgar score)  and component observations (the observations from which the Apgar score was derived). If a value is present, the datatype for this element should be determined by Observation.code. A CodeableConcept with just a text would be used instead of a string if the field was usually coded, or if the type associated with the Observation.code defines a coded value.  For additional guidance, see the [Notes section](observation.html#notes) below.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "The information determined as a result of making the observation, if the information has a simple value.",
+				"id": "Observation.component.value[x]",
+				"isModifier": false,
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "value"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "363714003 |Interprets|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "363714003 |Interprets| < 441742003 |Evaluation finding|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.2, OBX.5, OBX.6"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.component.value[x]",
+				"requirements": "An observation exists to have a value, though it might not if it is in error, or if it represents a group of observations.",
+				"short": "Actual component result",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					},
+					{
+						"code": "Period"
+					},
+					{
+						"code": "Quantity"
+					},
+					{
+						"code": "Range"
+					},
+					{
+						"code": "Ratio"
+					},
+					{
+						"code": "SampledData"
+					},
+					{
+						"code": "boolean"
+					},
+					{
+						"code": "dateTime"
+					},
+					{
+						"code": "integer"
+					},
+					{
+						"code": "string"
+					},
+					{
+						"code": "time"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "1",
+					"min": 0,
+					"path": "Observation.component.dataAbsentReason"
+				},
+				"binding": {
+					"description": "Codes specifying why the result (`Observation.value[x]`) is missing.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationValueAbsentReason"
+						}
+					],
+					"strength": "extensible",
+					"valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason"
+				},
+				"comment": "\"Null\" or exceptional values can be represented two ways in FHIR Observations.  One way is to simply include them in the value set and represent the exceptions in the value.  For example, measurement values for a serology test could be  \"detected\", \"not detected\", \"inconclusive\", or  \"test not done\". \n\nThe alternate way is to use the value element for actual observations and use the explicit dataAbsentReason element to record exceptional values.  For example, the dataAbsentReason code \"error\" could be used when the measurement was not completed.  Because of these options, use-case agreements are required to interpret general observations for exceptional values.",
+				"condition": [
+					"obs-6"
+				],
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "Provides a reason why the expected value in the element Observation.component.value[x] is missing.",
+				"id": "Observation.component.dataAbsentReason",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "value.nullFlavor"
+					},
+					{
+						"identity": "v2",
+						"map": "N/A"
+					}
+				],
+				"max": "1",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.component.dataAbsentReason",
+				"requirements": "For many results it is necessary to handle exceptional values in measurements.",
+				"short": "Why the component result is missing",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"alias": [
+					"Abnormal Flag"
+				],
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.component.interpretation"
+				},
+				"binding": {
+					"description": "Codes identifying interpretations of observations.",
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+							"valueString": "ObservationInterpretation"
+						}
+					],
+					"strength": "extensible",
+					"valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
+				},
+				"comment": "Historically used for laboratory results (known as 'abnormal flag' ),  its use extends to other use cases where coded interpretations  are relevant.  Often reported as one or more simple compact codes this element is often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"definition": "A categorical assessment of an observation value.  For example, high, low, normal.",
+				"id": "Observation.component.interpretation",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "interpretationCode"
+					},
+					{
+						"identity": "sct-attr",
+						"map": "363713009 |Has interpretation|"
+					},
+					{
+						"identity": "sct-concept",
+						"map": "< 260245000 |Findings values|"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX-8"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.component.interpretation",
+				"requirements": "For some results, particularly numeric results, an interpretation is necessary to fully understand the significance of a result.",
+				"short": "High, low, normal, etc.",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				]
+			},
+			{
+				"base": {
+					"max": "*",
+					"min": 0,
+					"path": "Observation.component.referenceRange"
+				},
+				"comment": "Most observations only have one generic reference range. Systems MAY choose to restrict to only supplying the relevant reference range based on knowledge about the patient (e.g., specific to the patient's age, gender, weight and other factors), but this might not be possible or appropriate. Whenever more than one reference range is supplied, the differences between them SHOULD be provided in the reference range and/or age properties.",
+				"constraint": [
+					{
+						"expression": "hasValue() or (children().count() > id.count())",
+						"human": "All FHIR elements must have a @value or children",
+						"key": "ele-1",
+						"severity": "error",
+						"source": "http://hl7.org/fhir/StructureDefinition/Element",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"contentReference": "#Observation.referenceRange",
+				"definition": "Guidance on how to interpret the value by comparison to a normal or recommended range.",
+				"id": "Observation.component.referenceRange",
+				"isModifier": false,
+				"isSummary": false,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "outboundRelationship[typeCode=REFV]/target[classCode=OBS, moodCode=EVN]"
+					},
+					{
+						"identity": "v2",
+						"map": "OBX.7"
+					}
+				],
+				"max": "*",
+				"min": 0,
+				"mustSupport": false,
+				"path": "Observation.component.referenceRange",
+				"requirements": "Knowing what values are considered \"normal\" can help evaluate the significance of a particular result. Need to be able to provide multiple reference ranges for different contexts.",
+				"short": "Provides guide for interpretation of component result"
+			}
+		]
+	},
+	"status": "draft",
+	"title": "Babylon Demographic Age",
+	"type": "Observation",
+	"url": "https://bb/StructureDefinition/BBDemographicAge"
+}

@@ -23,7 +23,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import(TestJPAConfig.class)
@@ -41,6 +41,11 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		 */
 		if (ourMaxThreads == null) {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+
+			if ("true".equals(System.getProperty("single_db_connection"))) {
+				ourMaxThreads = 1;
+			}
+
 		}
 	}
 

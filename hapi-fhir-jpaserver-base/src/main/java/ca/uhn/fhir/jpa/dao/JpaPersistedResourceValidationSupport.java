@@ -28,6 +28,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -57,6 +60,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
 	private final FhirContext myFhirContext;
+	private final IBaseResource myNoMatch;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -65,6 +69,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private Class<? extends IBaseResource> myValueSetType;
 	private Class<? extends IBaseResource> myQuestionnaireType;
 	private Class<? extends IBaseResource> myImplementationGuideType;
+	private Cache<String, IBaseResource> myLoadCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 
 	/**
 	 * Constructor
@@ -73,6 +78,8 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		super();
 		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
+
+		myNoMatch = myFhirContext.getResourceDefinition("Basic").newInstance();
 	}
 
 
@@ -99,77 +106,86 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			return null;
 		}
 
-		IdType id = new IdType(theUri);
-		boolean localReference = false;
-		if (id.hasBaseUrl() == false && id.hasIdPart() == true) {
-			localReference = true;
-		}
+		String key = theClass.getSimpleName() + " " + theUri;
+		IBaseResource fetched = myLoadCache.get(key, t -> {
+			IdType id = new IdType(theUri);
+			boolean localReference = false;
+			if (id.hasBaseUrl() == false && id.hasIdPart() == true) {
+				localReference = true;
+			}
 
-		String resourceName = myFhirContext.getResourceDefinition(theClass).getName();
-		IBundleProvider search;
-		if ("ValueSet".equals(resourceName)) {
-			if (localReference) {
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
-				search = myDaoRegistry.getResourceDao("ValueSet").search(params);
-				if (search.size() == 0) {
-					params = new SearchParameterMap();
+			String resourceName = myFhirContext.getResourceType(theClass);
+			IBundleProvider search;
+			if ("ValueSet".equals(resourceName)) {
+				if (localReference) {
+					SearchParameterMap params = new SearchParameterMap();
+					params.setLoadSynchronousUpTo(1);
+					params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
+					search = myDaoRegistry.getResourceDao("ValueSet").search(params);
+					if (search.size() == 0) {
+						params = new SearchParameterMap();
+						params.setLoadSynchronousUpTo(1);
+						params.add(ValueSet.SP_URL, new UriParam(theUri));
+						search = myDaoRegistry.getResourceDao("ValueSet").search(params);
+					}
+				} else {
+					SearchParameterMap params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
 					params.add(ValueSet.SP_URL, new UriParam(theUri));
 					search = myDaoRegistry.getResourceDao("ValueSet").search(params);
 				}
-			} else {
+			} else if ("StructureDefinition".equals(resourceName)) {
+				// Don't allow the core FHIR definitions to be overwritten
+				if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+					String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+					if (myFhirContext.getElementDefinition(typeName) != null) {
+						return myNoMatch;
+					}
+				}
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
-				params.add(ValueSet.SP_URL, new UriParam(theUri));
-				search = myDaoRegistry.getResourceDao("ValueSet").search(params);
-			}
-		} else if ("StructureDefinition".equals(resourceName)) {
-			// Don't allow the core FHIR definitions to be overwritten
-			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-				String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
-				if (myFhirContext.getElementDefinition(typeName) != null) {
-					return null;
+				params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params);
+			} else if ("Questionnaire".equals(resourceName)) {
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				if (localReference || myFhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU2)) {
+					params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+				} else {
+					params.add(Questionnaire.SP_URL, new UriParam(id.getValue()));
 				}
-			}
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronousUpTo(1);
-			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
-			search = myDaoRegistry.getResourceDao("StructureDefinition").search(params);
-		} else if ("Questionnaire".equals(resourceName)) {
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronousUpTo(1);
-			if (localReference || myFhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU2)) {
-				params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+				search = myDaoRegistry.getResourceDao("Questionnaire").search(params);
+			} else if ("CodeSystem".equals(resourceName)) {
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add(CodeSystem.SP_URL, new UriParam(theUri));
+				search = myDaoRegistry.getResourceDao(resourceName).search(params);
+			} else if ("ImplementationGuide".equals(resourceName)) {
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
+				search = myDaoRegistry.getResourceDao("ImplementationGuide").search(params);
 			} else {
-				params.add(Questionnaire.SP_URL, new UriParam(id.getValue()));
+				throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 			}
-			search = myDaoRegistry.getResourceDao("Questionnaire").search(params);
-		} else if ("CodeSystem".equals(resourceName)) {
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronousUpTo(1);
-			params.add(CodeSystem.SP_URL, new UriParam(theUri));
-			search = myDaoRegistry.getResourceDao(resourceName).search(params);
-		} else if ("ImplementationGuide".equals(resourceName)) {
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronousUpTo(1);
-			params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
-			search = myDaoRegistry.getResourceDao("ImplementationGuide").search(params);
-		} else {
-			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
-		}
 
-		Integer size = search.size();
-		if (size == null || size == 0) {
+			Integer size = search.size();
+			if (size == null || size == 0) {
+				return myNoMatch;
+			}
+
+			if (size > 1) {
+				ourLog.warn("Found multiple {} instances with URL search value of: {}", resourceName, theUri);
+			}
+
+			return search.getResources(0, 1).get(0);
+		});
+
+		if (fetched == myNoMatch) {
 			return null;
 		}
 
-		if (size > 1) {
-			ourLog.warn("Found multiple {} instances with URL search value of: {}", resourceName, theUri);
-		}
-
-		return (T) search.getResources(0, 1).get(0);
+		return (T) fetched;
 	}
 
 	@Override
@@ -192,4 +208,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	}
 
 
+	public void clearCaches() {
+		myLoadCache.invalidateAll();
+	}
 }

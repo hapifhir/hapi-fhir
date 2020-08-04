@@ -5,11 +5,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.PractitionerRole;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
+
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
@@ -23,7 +26,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
+		IIdType locId = myClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
 
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
@@ -31,7 +34,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|" + CoordCalculatorTest.LONGITUDE_CHIN +
 				"|" + bigEnoughDistance;
 
-			Bundle actual = ourClient
+			Bundle actual = myClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()
@@ -49,7 +52,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				"|" + tooSmallDistance;
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = ourClient
+			Bundle actual = myClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()
@@ -69,16 +72,16 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		double longitude = CoordCalculatorTest.LONGITUDE_CHIN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
+		IIdType locId = myClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
 
 		PractitionerRole pr = new PractitionerRole();
 		pr.addLocation().setReference(locId.getValue());
-		IIdType prId = ourClient.create().resource(pr).execute().getId().toUnqualifiedVersionless();
+		IIdType prId = myClient.create().resource(pr).execute().getId().toUnqualifiedVersionless();
 
 		String url = "PractitionerRole?location." +
 			Location.SP_NEAR + "=" + latitude + "|" + longitude;
 
-		Bundle actual = ourClient
+		Bundle actual = myClient
 			.search()
 			.byUrl(ourServerBase + "/" + url)
 			.encodedJson()
@@ -111,7 +114,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				"|" + bigEnoughDistance;
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = ourClient
+			Bundle actual = myClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()
@@ -131,7 +134,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				"|" + tooSmallDistance;
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = ourClient
+			Bundle actual = myClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()

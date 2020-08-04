@@ -1,0 +1,217 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-episodeofcare",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-episodeofcare",
+  "version": "1.1.1",
+  "name": "nl-core-episodeofcare",
+  "title": "nl-core-episodeofcare",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "An EpisodeOfCare resource as defined for the Dutch realm",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-concernfortransfer-v1.2-2015EN",
+      "uri": "https://zibs.nl/wiki/ConcernForTransfer-v1.2(2015EN)",
+      "name": "HCIM ConcernForTransfer-v1.2(2015EN)"
+    },
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "EpisodeOfCare",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/EpisodeOfCare",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "EpisodeOfCare.extension",
+        "path": "EpisodeOfCare.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "EpisodeOfCare.extension:dateFirstEncounter",
+        "path": "EpisodeOfCare.extension",
+        "sliceName": "dateFirstEncounter",
+        "comment": "For episodes of care it can be relevant, and always is in general practitioner workflow, when the first encounter was that a problem/concern was discussed.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/EpisodeOfCare-DateFirstEncounter"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.extension:dateLastEncounter",
+        "path": "EpisodeOfCare.extension",
+        "sliceName": "dateLastEncounter",
+        "comment": "For episodes of care it can be relevant, and always is in general practitioner workflow, when the last encounter was that a problem/concern was discussed.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/EpisodeOfCare-DateLastEncounter"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.extension:title",
+        "path": "EpisodeOfCare.extension",
+        "sliceName": "title",
+        "comment": "For episodes of care it can be relevant to carry the title that the episode of care is known as for the physisian. This is standard for general practitioner workflow. Usually it is the common name for the latest associated Condition",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/EpisodeOfCare-Title"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.identifier",
+        "path": "EpisodeOfCare.identifier",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.type.text",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-translatable",
+            "valueBoolean": true
+          }
+        ],
+        "path": "EpisodeOfCare.type.text",
+        "short": "ConcernLabel",
+        "definition": "If needed, a short, written description of the concern. Mainly in first-line care this will be used for the episode name.",
+        "alias": [
+          "ConcernLabel"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-concernfortransfer-v1.2-2015EN",
+            "map": "NL-CM:5.1.9",
+            "comment": "ConcernLabel"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.diagnosis.condition",
+        "path": "EpisodeOfCare.diagnosis.condition",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://nictiz.nl/fhir/StructureDefinition/zib-Problem"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.patient",
+        "path": "EpisodeOfCare.patient",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.11",
+            "comment": "Subject"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.managingOrganization",
+        "path": "EpisodeOfCare.managingOrganization",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-organization"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.period",
+        "path": "EpisodeOfCare.period",
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.14",
+            "comment": "DateTime"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.careManager",
+        "path": "EpisodeOfCare.careManager",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          }
+        ]
+      },
+      {
+        "id": "EpisodeOfCare.careManager.extension",
+        "path": "EpisodeOfCare.careManager.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "EpisodeOfCare.careManager.extension:practitionerRole",
+        "path": "EpisodeOfCare.careManager.extension",
+        "sliceName": "practitionerRole",
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      }
+    ]
+  }
+}

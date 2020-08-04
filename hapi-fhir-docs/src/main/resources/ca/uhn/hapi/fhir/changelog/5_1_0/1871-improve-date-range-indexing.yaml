@@ -1,0 +1,7 @@
+---
+type: add
+issue: 1871
+title: "In the JPA server, when indexing Date SearchParameters where the value being indexed is a
+   FHIR Period that is missing either a lower bound or an upper bound, a default value representing an 
+   extreme 'beginning of time' or 'end of time' is now used. This allows range searches to return more
+   accurate results."

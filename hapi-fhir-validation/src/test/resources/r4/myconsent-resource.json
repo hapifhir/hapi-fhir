@@ -22,7 +22,8 @@
 		}
 	],
 	"sourceAttachment": {
-		"title": "The terms of the consent in lawyer speak."
+		"title": "The terms of the consent in lawyer speak.",
+		"url": "http://foo"
 	},
 	"identifier": [
 		{

@@ -83,7 +83,7 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	@Override
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
 		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(getContext().getResourceDefinition(theResource).getName());
+		urlExtension.append(getContext().getResourceType(theResource));
 
 		return new HttpPostClientInvocation(getContext(), theResource, urlExtension.toString());
 	}

@@ -160,7 +160,7 @@ public class MethodUtil {
 
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource,
 			String theResourceBody, Map<String, List<String>> theMatchParams) {
-		String resourceType = theContext.getResourceDefinition(theResource).getName();
+		String resourceType = theContext.getResourceType(theResource);
 
 		StringBuilder b = createUrl(resourceType, theMatchParams);
 
@@ -188,7 +188,7 @@ public class MethodUtil {
 
 	public static HttpPutClientInvocation createUpdateInvocation(IBaseResource theResource, String theResourceBody,
 			IIdType theId, FhirContext theContext) {
-		String resourceName = theContext.getResourceDefinition(theResource).getName();
+		String resourceName = theContext.getResourceType(theResource);
 		StringBuilder urlBuilder = new StringBuilder();
 		urlBuilder.append(resourceName);
 		urlBuilder.append('/');

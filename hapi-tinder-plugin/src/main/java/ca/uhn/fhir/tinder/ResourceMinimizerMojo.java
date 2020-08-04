@@ -2,12 +2,10 @@ package ca.uhn.fhir.tinder;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ResourceUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +13,6 @@ import org.apache.maven.plugin.*;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -72,7 +69,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 
 			String inputString;
 			try {
-				inputString = IOUtils.toString(new FileInputStream(nextFile), "UTF-8");
+				inputString = IOUtils.toString(new FileInputStream(nextFile), StandardCharsets.UTF_8);
 			} catch (IOException e) {
 				throw new MojoFailureException("Failed to read file: " + nextFile, e);
 			}
@@ -81,18 +78,18 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			IBaseResource input = parser.parseResource(inputString);
 
 			if (input instanceof IResource) {
-				((IResource) input).getText().getDiv().setValueAsString((String) null);
-				((IResource) input).getText().getStatus().setValueAsString((String) null);
+				((IResource) input).getText().getDiv().setValueAsString(null);
+				((IResource) input).getText().getStatus().setValueAsString(null);
 				if (input instanceof Bundle) {
 					for (Entry nextEntry : ((Bundle) input).getEntry()) {
 						if (nextEntry.getResource() != null) {
-							nextEntry.getResource().getText().getDiv().setValueAsString((String) null);
-							nextEntry.getResource().getText().getStatus().setValueAsString((String) null);
+							nextEntry.getResource().getText().getDiv().setValueAsString(null);
+							nextEntry.getResource().getText().getStatus().setValueAsString(null);
 						}
 					}
 				}
 			} else {
-				minimizeResource((IBaseResource)input);
+				ResourceUtil.removeNarrative(myCtx, input);
 			}
 
 			String outputString = parser.setPrettyPrint(true).encodeResourceToString(input);
@@ -117,7 +114,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 				myFileCount++;
 				try {
 					String f = nextFile.getAbsolutePath();
-					Writer w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
+					Writer w = new OutputStreamWriter(new FileOutputStream(f, false), StandardCharsets.UTF_8);
 					w = new BufferedWriter(w);
 					w.append(outputString);
 					w.close();
@@ -127,20 +124,6 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 
 			}
 
-		}
-	}
-
-	private void minimizeResource(IBaseResource theInput) {
-		if (theInput instanceof IBaseBundle) {
-			for (IBaseResource next : BundleUtil.toListOfResources(myCtx, (IBaseBundle) theInput)) {
-				minimizeResource(next);
-			}
-		}
-
-		BaseRuntimeElementCompositeDefinition<?> element = (BaseRuntimeElementCompositeDefinition) myCtx.getElementDefinition(theInput.getClass());
-		BaseRuntimeChildDefinition textElement = element.getChildByName("text");
-		if (textElement != null) {
-			textElement.getMutator().setValue(theInput, null);
 		}
 	}
 

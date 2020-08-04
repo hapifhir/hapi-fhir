@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -30,19 +31,23 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.utilities.graphql.Value;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JpaGraphQLR4ProviderTest {
 
@@ -50,11 +55,11 @@ public class JpaGraphQLR4ProviderTest {
 	public static final String DATA_PREFIX = "{\"data\": ";
 	public static final String DATA_SUFFIX = "}";
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		//nothing
 	}
@@ -157,7 +162,7 @@ public class JpaGraphQLR4ProviderTest {
 				"    }]\n" +
 				"  },{\n" +
 				"    \"name\":[{\n" +
-				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
+				"      \"given\":[\"pet\",\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
 				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
@@ -169,13 +174,43 @@ public class JpaGraphQLR4ProviderTest {
 
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+	@Test
+	public void testGraphSystemArrayArgumentList() throws Exception {
+		String query = "{PatientList(id:[\"hapi-123\",\"hapi-124\"]){id,name{family}}}";
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + "{\n" +
+				"  \"PatientList\":[{\n" +
+				"    \"id\":\"Patient/hapi-123/_history/2\",\n" +
+				"    \"name\":[{\n" +
+				"      \"family\":\"FAMILY 123\"\n" +
+				"    }]\n" +
+				"  },{\n" +
+				"    \"id\":\"Patient/hapi-124/_history/1\",\n" +
+				"    \"name\":[{\n" +
+				"      \"family\":\"FAMILY 124\"\n" +
+				"    }]\n" +
+				"  }]\n" +
+				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
 	}
 
-	@BeforeClass
+	@AfterAll
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+	}
+
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 
@@ -230,24 +265,46 @@ public class JpaGraphQLR4ProviderTest {
 			ourLog.info("listResources of {} - {}", theType, theSearchParams);
 
 			if (theSearchParams.size() == 1) {
-				String name = theSearchParams.get(0).getName();
-				if ("name".equals(name)) {
-					Patient p = new Patient();
-					p.addName()
-						.setFamily(theSearchParams.get(0).getValues().get(0).toString())
+				Argument argument = theSearchParams.get(0);
+
+				String name = argument.getName();
+				List<String> value = argument.getValues().stream()
+					.map((it) -> it.getValue())
+					.collect(Collectors.toList());
+
+				if ("name".equals(name) && "pet".equals(value.get(0))) {
+					Patient patient1 = new Patient();
+					patient1.addName()
+						.setFamily("pet")
 						.addGiven("GIVEN1")
 						.addGiven("GIVEN2");
-					p.addName()
+					patient1.addName()
 						.addGiven("GivenOnly1")
 						.addGiven("GivenOnly2");
-					theMatches.add(p);
 
-					p = new Patient();
-					p.addName()
+					Patient patient2 = new Patient();
+					patient2.addName()
+						.addGiven("pet")
 						.addGiven("GivenOnlyB1")
 						.addGiven("GivenOnlyB2");
-					theMatches.add(p);
 
+					theMatches.add(patient1);
+					theMatches.add(patient2);
+				}
+
+				if ("id".equals(name) && Arrays.asList("hapi-123", "hapi-124").containsAll(value)) {
+					Patient patient1 = new Patient();
+					patient1.setId("Patient/hapi-123/_history/2");
+					patient1.addName()
+						.setFamily("FAMILY 123");
+
+					Patient patient2 = new Patient();
+					patient2.setId("Patient/hapi-124/_history/1");
+					patient2.addName()
+						.setFamily("FAMILY 124");
+
+					theMatches.add(patient1);
+					theMatches.add(patient2);
 				}
 			}
 		}

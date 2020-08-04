@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cli;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class InstallIgPackTest {
 

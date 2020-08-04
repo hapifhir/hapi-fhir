@@ -1,0 +1,916 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "nl-core-contactpoint",
+  "url": "http://fhir.nl/fhir/StructureDefinition/nl-core-contactpoint",
+  "version": "1.0.2",
+  "name": "nl-core-contactpoint",
+  "title": "nl-core-contactpoint",
+  "status": "active",
+  "publisher": "HL7 Netherlands",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Base StructureDefinition for Address Type with additions for Dutch realm addresses. Dutch addresses break down Address.line in several parts and it is important to mark an address as being 'officially registered'.",
+  "purpose": "Address information is used for visiting a person or organization and for addressing of mail.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-contactinformation-v2.0.1-2015EN",
+      "uri": "https://zibs.nl/wiki/Patient-v2.0.1(2015EN)",
+      "name": "ContactInformation as part of HCIM Patient-v2.0.1(2015EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-contactinformation-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/Patient-v3.0(2016EN)",
+      "name": "ContactInformation as part of HCIM Patient-v3.0(2016EN)",
+      "comment": "ContactInformation has become an independent information model as of release 2017 of the HCIMs"
+    },
+    {
+      "identity": "hcim-contactinformation-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/ContactInformation-v1.0(2017EN)",
+      "name": "HCIM ContactInformation-v1.0.1(2017EN)"
+    }
+  ],
+  "kind": "complex-type",
+  "abstract": false,
+  "type": "ContactPoint",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/ContactPoint",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "ContactPoint",
+        "path": "ContactPoint",
+        "short": "ContactInformation",
+        "definition": "Contact information includes a person's telephone numbers en e-mail addresses.",
+        "alias": [
+          "Contactgegevens"
+        ],
+        "example": [
+          {
+            "label": "Mobile business phone number. Note: the mobile nature stems from the number being an 06-* number.",
+            "valueContactPoint": {
+              "system": "phone",
+              "value": "+31611234567",
+              "use": "work"
+            }
+          },
+          {
+            "label": "Mobile phone number undetermined private/business. Note: the mobile nature stems from the number being an 06-* number.",
+            "valueContactPoint": {
+              "system": "phone",
+              "value": "+31611234567",
+              "use": "mobile"
+            }
+          },
+          {
+            "label": "Primary Home Land Line",
+            "valueContactPoint": {
+              "system": "phone",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "urn:oid:2.16.840.1.113883.2.4.3.11.60.40.4.22.1",
+                          "code": "LL",
+                          "display": "Land Line"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "home",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "HP",
+                          "display": "Primary Home"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Temporary Land Line",
+            "valueContactPoint": {
+              "system": "phone",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "urn:oid:2.16.840.1.113883.2.4.3.11.60.40.4.22.1",
+                          "code": "LL",
+                          "display": "Land Line"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "temp",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "TMP",
+                          "display": "Temporary"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Primary Work Land Line",
+            "valueContactPoint": {
+              "system": "phone",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "urn:oid:2.16.840.1.113883.2.4.3.11.60.40.4.22.1",
+                          "code": "LL",
+                          "display": "Land Line"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "work",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "WP",
+                          "display": "Primary Work"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Primary Home Fax",
+            "valueContactPoint": {
+              "system": "fax",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "urn:oid:2.16.840.1.113883.2.4.3.11.60.40.4.22.1",
+                          "code": "FAX",
+                          "display": "Fax"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "home",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "HP",
+                          "display": "Primary Home"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Temporary Fax",
+            "valueContactPoint": {
+              "system": "fax",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "urn:oid:2.16.840.1.113883.2.4.3.11.60.40.4.22.1",
+                          "code": "FAX",
+                          "display": "Fax"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "temp",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "TMP",
+                          "display": "Temporary"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Primary Work Fax",
+            "valueContactPoint": {
+              "system": "fax",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "urn:oid:2.16.840.1.113883.2.4.3.11.60.40.4.22.1",
+                          "code": "FAX",
+                          "display": "Fax"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "work",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "WP",
+                          "display": "Primary Work"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Primary Home Mobile Phone",
+            "valueContactPoint": {
+              "system": "phone",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "MC",
+                          "display": "Mobile Phone"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "mobile",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "HP",
+                          "display": "Primary Home"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Temporary Mobile Phone",
+            "valueContactPoint": {
+              "system": "phone",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "MC",
+                          "display": "Mobile Phone"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "temp",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "TMP",
+                          "display": "Temporary"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Primary Work Mobile Phone",
+            "valueContactPoint": {
+              "system": "phone",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "MC",
+                          "display": "Mobile Phone"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "mobile",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "WP",
+                          "display": "Primary Work"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Primary Home Pager",
+            "valueContactPoint": {
+              "system": "pager",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "PG",
+                          "display": "Pager"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "home",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "HP",
+                          "display": "Primary Home"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Temporary Pager",
+            "valueContactPoint": {
+              "system": "pager",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "PG",
+                          "display": "Pager"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "temp",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "TMP",
+                          "display": "Temporary"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Primary Work Pager",
+            "valueContactPoint": {
+              "system": "pager",
+              "_system": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "PG",
+                          "display": "Pager"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "value": "...",
+              "use": "work",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "WP",
+                          "display": "Primary Work"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Private email address",
+            "valueContactPoint": {
+              "system": "email",
+              "value": "giesput@myweb.nl",
+              "use": "home",
+              "_use": {
+                "extension": [
+                  {
+                    "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://hl7.org/fhir/v3/AddressUse",
+                          "code": "HP",
+                          "display": "Primary Home"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-contactinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.5",
+            "comment": "ContactInformation"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.1",
+            "comment": "ContactInformation"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.system",
+        "path": "ContactPoint.system",
+        "short": "TelecomType / EmailAddressType",
+        "alias": [
+          "TelecomSoort / EmailSoort"
+        ],
+        "min": 1,
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.5",
+            "comment": "TelecomType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/TelecomSoortCodelijst-to-ContactPointSystem"
+          },
+          {
+            "identity": "hcim-contactinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.19",
+            "comment": "EmailAddressType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/EmailSoortCodelijst-to-ContactPointSystem"
+          },
+          {
+            "identity": "hcim-contactinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.19",
+            "comment": "EmailAddressType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/EmailSoortCodelijst-to-ContactPointSystem"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.8",
+            "comment": "EmailAddressType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/EmailSoortCodelijst-to-ContactPointSystem"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.system.extension",
+        "path": "ContactPoint.system.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "ContactPoint.system.extension:EmailAddressTypeCodelist",
+        "path": "ContactPoint.system.extension",
+        "sliceName": "EmailAddressTypeCodelist",
+        "short": "EmailAddressTypeCodelist",
+        "alias": [
+          "EmailSoortCodelijst"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.system.extension:EmailAddressTypeCodelist.valueCodeableConcept:valueCodeableConcept",
+        "path": "ContactPoint.system.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "EmailSoortCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.6.3--20171231000000",
+            "display": "EmailSoortCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.8",
+            "comment": "EmailAddressType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/EmailSoortCodelijst-to-ContactPointSystem"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.system.extension:TelecomTypeCodelist",
+        "path": "ContactPoint.system.extension",
+        "sliceName": "TelecomTypeCodelist",
+        "short": "TelecomTypeCodelist",
+        "alias": [
+          "TelecomSoortCodelijst"
+        ],
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.system.extension:TelecomTypeCodelist.valueCodeableConcept:valueCodeableConcept",
+        "path": "ContactPoint.system.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "TelecomSoortCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.6.1--20171231000000",
+            "display": "TelecomSoortCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.5",
+            "comment": "TelecomType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/TelecomSoortCodelijst-to-ContactPointSystem"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.value",
+        "path": "ContactPoint.value",
+        "short": "TelephoneNumber / EmailAddress",
+        "alias": [
+          "Telefoonnummer / E-mailadres"
+        ],
+        "example": [
+          {
+            "label": "Example TelephoneNumber international",
+            "valueString": "+31611234567"
+          },
+          {
+            "label": "Example EmailAddress",
+            "valueString": "giesput@myweb.nl"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.23",
+            "comment": "TelephoneNumber"
+          },
+          {
+            "identity": "hcim-contactinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.23",
+            "comment": "TelephoneNumber"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.4",
+            "comment": "EmailAddress"
+          },
+          {
+            "identity": "hcim-contactinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.20",
+            "comment": "EmailAddress"
+          },
+          {
+            "identity": "hcim-contactinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.20",
+            "comment": "EmailAddress"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.7",
+            "comment": "EmailAddress"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.use",
+        "path": "ContactPoint.use",
+        "short": "TelecomType / NumberType / EmailAddressType",
+        "definition": "Purpose of this contact point",
+        "alias": [
+          "TelecomSoort / NummerSoort / EmailSoort"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.5",
+            "comment": "TelecomType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/TelecomSoortCodelijst-to-ContactPointUse"
+          },
+          {
+            "identity": "hcim-contactinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.22",
+            "comment": "NumberType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/NummerSoortCodelijst-to-ContactPointUse"
+          },
+          {
+            "identity": "hcim-contactinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.22",
+            "comment": "NumberType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/NummerSoortCodelijst-to-ContactPointUse"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.6",
+            "comment": "NumberType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/NummerSoortCodelijst-to-ContactPointUse"
+          },
+          {
+            "identity": "hcim-contactinformation-v2.0.1-2015EN",
+            "map": "NL-CM:0.1.19",
+            "comment": "EmailAddressType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/EmailSoortCodelijst-to-ContactPointUse"
+          },
+          {
+            "identity": "hcim-contactinformation-v3.0-2016EN",
+            "map": "NL-CM:0.1.19",
+            "comment": "EmailAddressType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/EmailSoortCodelijst-to-ContactPointUse"
+          },
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.8",
+            "comment": "EmailAddressType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/EmailSoortCodelijst-to-ContactPointUse"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.use.extension",
+        "path": "ContactPoint.use.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "ContactPoint.use.extension:EmailAddressTypeCodelist",
+        "path": "ContactPoint.use.extension",
+        "sliceName": "EmailAddressTypeCodelist",
+        "short": "EmailAddressTypeCodelist",
+        "alias": [
+          "EmailSoortCodelijst"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.use.extension:EmailAddressTypeCodelist.valueCodeableConcept:valueCodeableConcept",
+        "path": "ContactPoint.use.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "EmailSoortCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.6.3--20171231000000",
+            "display": "EmailSoortCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.8",
+            "comment": "EmailAddressType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/EmailSoortCodelijst-to-ContactPointUse"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.use.extension:TelecomTypeCodelist.valueCodeableConcept:valueCodeableConcept",
+        "path": "ContactPoint.use.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "TelecomSoortCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.6.1--20171231000000",
+            "display": "TelecomSoortCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.5",
+            "comment": "TelecomType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/TelecomSoortCodelijst-to-ContactPointUse"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.use.extension:NumberTypeCodelist",
+        "path": "ContactPoint.use.extension",
+        "sliceName": "NumberTypeCodelist",
+        "short": "NumberTypeCodelist",
+        "alias": [
+          "NummerSoortCodelijst"
+        ],
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ]
+      },
+      {
+        "id": "ContactPoint.use.extension:NumberTypeCodelist.valueCodeableConcept:valueCodeableConcept",
+        "path": "ContactPoint.use.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "NummerSoortCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.6.2--20171231000000",
+            "display": "NummerSoortCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-contactinformation-v1.0-2017EN",
+            "map": "NL-CM:20.6.6",
+            "comment": "NumberType. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/NummerSoortCodelijst-to-ContactPointUse"
+          }
+        ]
+      }
+    ]
+  }
+}

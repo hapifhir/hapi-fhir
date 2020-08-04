@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupportingAnyResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;

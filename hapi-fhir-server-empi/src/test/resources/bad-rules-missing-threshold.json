@@ -1,0 +1,14 @@
+{
+	"version": "1",
+	"candidateSearchParams" : [],
+	"candidateFilterSearchParams" : [],
+	"matchFields" : [ {
+		"name" : "given-name",
+		"resourceType" : "*",
+		"resourcePath" : "name.given",
+		"metric" : "COSINE"
+	}],
+	"matchResultMap" : {
+		"given-name" : "POSSIBLE_MATCH"
+	}
+}

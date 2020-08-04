@@ -9,10 +9,10 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -20,10 +20,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
-@Ignore
+@Disabled
 public class WebsocketWithCriteriaDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaDstu3Test.class);
@@ -34,13 +34,13 @@ public class WebsocketWithCriteriaDstu3Test extends BaseResourceProviderDstu3Tes
 	private SocketImplementation mySocketImplementation;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 	}
 	
 	@Override
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -86,7 +86,7 @@ public class WebsocketWithCriteriaDstu3Test extends BaseResourceProviderDstu3Tes
 		ourLog.info("Connected to WS: {}", session.isOpen());
 	}
 
-	@After
+	@AfterEach
 	public void afterCloseWebsocket() throws Exception {
 		ourLog.info("Shutting down websocket client");
 		myWebSocketClient.stop();

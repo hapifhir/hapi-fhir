@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1637
+title: "An index has been added on the TRM_CONCEPT table. This index was previously missing, meaning that rebuilding large
+  code systems took an abnormally long amount of time. Thanks to Jacob Stampe Mikkelsen for the pull request!"

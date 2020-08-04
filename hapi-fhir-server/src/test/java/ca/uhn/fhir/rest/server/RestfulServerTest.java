@@ -11,29 +11,30 @@ import ca.uhn.fhir.rest.api.server.IFhirVersionServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RestfulServerTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private FhirContext myCtx;
 	private RestfulServer restfulServer;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws ServletException {
 		when(myCtx.getVersion().getVersion()).thenReturn(FhirVersionEnum.DSTU3);
 		when(myCtx.getVersion().getServerVersion()).thenReturn(new MyFhirVersionServer());
@@ -63,9 +64,14 @@ public class RestfulServerTest {
 		assertTrue(restfulServer.getResourceProviders().isEmpty());
 	}
 
-	@Test(expected = ConfigurationException.class)
+	@Test
 	public void testFailRegisterInterfaceProviderWithoutRestfulMethod() {
-		restfulServer.registerProvider(new MyClassWithoutRestInterface());
+		try {
+			restfulServer.registerProvider(new MyClassWithoutRestInterface());
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface", e.getMessage());
+		}
 	}
 
 
@@ -102,10 +108,6 @@ public class RestfulServerTest {
 			};
 		}
 
-		@Override
-		public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-			return new MyResourceProvider();
-		}
 	}
 
 	@SuppressWarnings("unused")

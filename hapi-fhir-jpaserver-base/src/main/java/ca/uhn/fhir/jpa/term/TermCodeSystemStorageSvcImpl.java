@@ -23,8 +23,8 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -49,6 +48,7 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -74,7 +74,17 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -189,23 +199,36 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.NEVER)
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
 		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
 
-		myEntityManager.flush();
-		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
-		cs.setCurrentVersion(null);
-		myCodeSystemDao.save(cs);
-		myCodeSystemDao.flush();
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.executeWithoutResult(t -> {
+			myEntityManager.flush();
+			TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
+			cs.setCurrentVersion(null);
+			myCodeSystemDao.save(cs);
+			myCodeSystemDao.flush();
+		});
 
-		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
-		for (TermCodeSystemVersion next : codeSystemVersions) {
-			deleteCodeSystemVersion(next.getPid());
+		List<Long> codeSystemVersionPids = txTemplate.execute(t -> {
+			List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
+			return codeSystemVersions
+				.stream()
+				.map(v -> v.getPid())
+				.collect(Collectors.toList());
+		});
+		for (Long next : codeSystemVersionPids) {
+			deleteCodeSystemVersion(next);
 		}
-		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
-		myCodeSystemDao.delete(theCodeSystem);
 
-		myEntityManager.flush();
+		txTemplate.executeWithoutResult(t -> {
+			myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
+			myCodeSystemDao.delete(theCodeSystem);
+			myEntityManager.flush();
+		});
 	}
 
 	/**
@@ -424,16 +447,19 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			doDelete(descriptor, loader, counter, myConceptDao);
 		}
 
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
-		if (codeSystemOpt.isPresent()) {
-			TermCodeSystem codeSystem = codeSystemOpt.get();
-			ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
-			codeSystem.setCurrentVersion(null);
-			myCodeSystemDao.save(codeSystem);
-		}
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.executeWithoutResult(tx -> {
+			Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
+			if (codeSystemOpt.isPresent()) {
+				TermCodeSystem codeSystem = codeSystemOpt.get();
+				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
+				codeSystem.setCurrentVersion(null);
+				myCodeSystemDao.save(codeSystem);
+			}
 
-		ourLog.info(" * Deleting code system version");
-		myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+			ourLog.info(" * Deleting code system version");
+			myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+		});
 
 	}
 
@@ -669,29 +695,33 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 
+	@SuppressWarnings("ConstantConditions")
 	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, IHapiJpaRepository<T> theDao) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
-		int totalCount = theCounter.get();
+		int totalCount = txTemplate.execute(t -> theCounter.get());
 		StopWatch sw = new StopWatch();
 		count = 0;
 		while (true) {
-			Slice<Long> link = theLoader.get();
+			Slice<Long> link = txTemplate.execute(t -> theLoader.get());
 			if (!link.hasContent()) {
 				break;
 			}
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(t -> {
 				link.forEach(id -> theDao.deleteByPid(id));
+				theDao.flush();
 				return null;
 			});
 
 			count += link.getNumberOfElements();
-			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
+			ourLog.info(" * {} {} deleted ({}/{}) remaining - {}/sec - ETA: {}", count, theDescriptor, count, totalCount, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
+
 		}
-		theDao.flush();
+
 	}
 
 

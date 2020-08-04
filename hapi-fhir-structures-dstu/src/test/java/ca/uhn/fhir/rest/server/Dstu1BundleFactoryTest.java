@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -36,12 +36,12 @@ public class Dstu1BundleFactoryTest {
     private List<IBaseResource> myResourceList;
     private Dstu1BundleFactory myBundleFactory;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         ourCtx = new FhirContext(Patient.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         // DiagnosticReport
         //     Performer(practitioner)
@@ -191,7 +191,7 @@ public class Dstu1BundleFactoryTest {
         return resources;
     }
 
- 	@AfterClass
+ 	@AfterAll
  	public static void afterClassClearContext() {
  		TestUtil.clearAllStaticFieldsForUnitTest();
  	}

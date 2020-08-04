@@ -180,18 +180,21 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	/**
 	 * Log all captured UPDATE queries
 	 */
-	public void logUpdateQueriesForCurrentThread() {
+	public String logUpdateQueriesForCurrentThread() {
 		List<String> queries = getUpdateQueriesForCurrentThread()
 			.stream()
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
-		ourLog.info("Update Queries:\n{}", String.join("\n", queries));
+		String joined = String.join("\n", queries);
+		ourLog.info("Update Queries:\n{}", joined);
+		return joined;
 	}
 
 	/**
 	 * Log all captured SELECT queries
+	 * @return
 	 */
-	public void logSelectQueriesForCurrentThread(int... theIndexes) {
+	public String logSelectQueriesForCurrentThread(int... theIndexes) {
 		List<String> queries = getSelectQueriesForCurrentThread()
 			.stream()
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
@@ -205,7 +208,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			queries = newList;
 		}
 
-		ourLog.info("Select Queries:\n{}", String.join("\n", queries));
+		String queriesAsString = String.join("\n", queries);
+		ourLog.info("Select Queries:\n{}", queriesAsString);
+		return queriesAsString;
 	}
 
 	/**
@@ -234,12 +239,14 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	/**
 	 * Log all captured INSERT queries
 	 */
-	public void logInsertQueriesForCurrentThread() {
+	public String logInsertQueriesForCurrentThread() {
 		List<String> queries = getInsertQueriesForCurrentThread()
 			.stream()
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
-		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+		String queriesAsString = String.join("\n", queries);
+		ourLog.info("Insert Queries:\n{}", queriesAsString);
+		return queriesAsString;
 	}
 
 	/**
@@ -278,13 +285,16 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	/**
 	 * Log all captured DELETE queries
 	 */
-	public void logDeleteQueriesForCurrentThread() {
+	public String logDeleteQueriesForCurrentThread() {
 		List<String> queries = getDeleteQueriesForCurrentThread()
 			.stream()
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
-		ourLog.info("Delete Queries:\n{}", String.join("\n", queries));
+		String joined = String.join("\n", queries);
+		ourLog.info("Delete Queries:\n{}", joined);
+		return joined;
 	}
+
 
 	/**
 	 * Log all captured DELETE queries

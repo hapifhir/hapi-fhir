@@ -1,0 +1,66 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "code-specification",
+  "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+  "version": "1.0.2",
+  "name": "Zib extension code specification",
+  "title": "HCIM extension code-specification",
+  "status": "active",
+  "publisher": "Nictiz",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "info@nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Provides the specific HCIM code for a FHIR element that has a required binding to a FHIR ValueSet.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "kind": "complex-type",
+  "abstract": false,
+  "contextType": "datatype",
+  "context": [
+    "code",
+    "Coding",
+    "CodeableConcept",
+    "Address.country"
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Provides the specific HCIM code for a FHIR element that has a required binding to a FHIR ValueSet",
+        "definition": "Defines a more specific coded value for a code or string. Especially useful for FHIR's required ValueSets. These extensions are primarily used on codes bound to a required value set, where you would like to use a more specific code than the codes in the bounded value set.",
+        "alias": [
+          "Bevat de specifieke code conform de zib, bij een FHIR-element die een verplichte koppeling heeft met een bepaalde FHIR waardelijst of een FHIR element die niet gecodeerd is gedefinieerd, terwijl de zib dit wel doet."
+        ]
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+      },
+      {
+        "id": "Extension.value[x]:valueCodeableConcept",
+        "path": "Extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "min": 1,
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ]
+      }
+    ]
+  }
+}

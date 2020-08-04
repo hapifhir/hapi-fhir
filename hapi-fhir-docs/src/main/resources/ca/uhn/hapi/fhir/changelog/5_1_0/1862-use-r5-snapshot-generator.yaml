@@ -1,0 +1,6 @@
+---
+type: add
+issue: 1862
+title: "The Snapshot Generator now uses the R5 codebase for all versions of FHIR (similar to how the validator already
+   worked). This means that the snapshot generator will be much more feature complete and hopefully have fewer bugs
+   given the single codebase."

@@ -1,15 +1,15 @@
 package ca.uhn.fhir.cli;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ValidateCommandTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCommandTest.class);
 
-	@Before
+	@BeforeEach
 	public void before() {
 		System.setProperty("test", "true");
 	}
@@ -27,7 +27,7 @@ public class ValidateCommandTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateUsingIgPackSucceedingDstu2() {
 		String resourcePath = ValidateCommandTest.class.getResource("/argo-dstu2-observation-good.json").getFile();
 		ourLog.info(resourcePath);

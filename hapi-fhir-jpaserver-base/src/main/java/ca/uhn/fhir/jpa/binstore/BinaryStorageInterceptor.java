@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.IModelVisitor2;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -56,7 +57,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.EXT_EXTERNALIZED_BINARY_ID;
+import static ca.uhn.fhir.util.HapiExtensions.EXT_EXTERNALIZED_BINARY_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Interceptor
@@ -106,7 +107,7 @@ public class BinaryStorageInterceptor {
 		List<String> attachmentIds = binaryElements
 			.stream()
 			.flatMap(t -> ((IBaseHasExtensions) t).getExtension().stream())
-			.filter(t -> JpaConstants.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
+			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
 			.map(t -> ((IPrimitiveType<?>) t.getValue()).getValueAsString())
 			.collect(Collectors.toList());
 
@@ -181,7 +182,7 @@ public class BinaryStorageInterceptor {
 
 		IIdType resourceId = theResource.getIdElement();
 		if (!resourceId.hasResourceType() && resourceId.hasIdPart()) {
-			String resourceType = myCtx.getResourceDefinition(theResource).getName();
+			String resourceType = myCtx.getResourceType(theResource);
 			resourceId = new IdType(resourceType + "/" + resourceId.getIdPart());
 		}
 

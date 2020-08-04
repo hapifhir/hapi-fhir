@@ -2,15 +2,15 @@ package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -34,9 +34,9 @@ import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
@@ -67,7 +67,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
 	protected static Server ourServer;
-	protected IGenericClient ourClient;
+	protected IGenericClient myClient;
 	ResourceCountCache ourResourceCountsCache;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
@@ -82,14 +82,16 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 		super();
 	}
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		if (ourRestServer != null) {
+			ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		}
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
@@ -181,9 +183,9 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
 
-		ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 		if (shouldLogClient()) {
-			ourClient.registerInterceptor(new LoggingInterceptor());
+			myClient.registerInterceptor(new LoggingInterceptor());
 		}
 	}
 
@@ -203,24 +205,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 		return names;
 	}
 
-	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
-		for (int i = 0; ; i++) {
-			if (i == 10) {
-				fail("Failed to init subscriptions");
-			}
-			try {
-				mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
-				break;
-			} catch (ResourceVersionConflictException e) {
-				Thread.sleep(250);
-			}
-		}
-
-		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
-		Thread.sleep(500);
-	}
-
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContextBaseResourceProviderR5Test() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		ourHttpClient.close();
@@ -230,7 +215,6 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 		myValidationSupport = null;
 		ourWebApplicationContext.close();
 		ourWebApplicationContext = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {

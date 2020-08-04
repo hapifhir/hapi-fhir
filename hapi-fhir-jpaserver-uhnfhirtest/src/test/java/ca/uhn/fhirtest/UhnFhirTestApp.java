@@ -1,15 +1,16 @@
 package ca.uhn.fhirtest;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
-import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
+import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public class UhnFhirTestApp {
 
@@ -18,7 +19,7 @@ public class UhnFhirTestApp {
 	public static void main(String[] args) throws Exception {
 
 		int myPort = 8889;
-		String base = "http://localhost:" + myPort + "/baseDstu2";
+		String base = "http://localhost:" + myPort + "/baseR4";
 
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
@@ -28,6 +29,8 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.lucene.location.dstu3", "./target/testlucene_dstu3");
 		System.setProperty("fhir.db.location.r4", "./target/fhirtest_r4");
 		System.setProperty("fhir.lucene.location.r4", "./target/testlucene_r4");
+		System.setProperty("fhir.db.location.r5", "./target/fhirtest_r5");
+		System.setProperty("fhir.lucene.location.r5", "./target/testlucene_r5");
 		System.setProperty("fhir.db.location.tdl2", "./target/testdb_tdl2");
 		System.setProperty("fhir.lucene.location.tdl2", "./target/testlucene_tdl2");
 		System.setProperty("fhir.db.location.tdl3", "./target/testdb_tdl3");
@@ -36,6 +39,7 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
 		System.setProperty("fhir.baseurl.dstu3", base.replace("Dstu2", "Dstu3"));
 		System.setProperty("fhir.baseurl.r4", base.replace("Dstu2", "R4"));
+		System.setProperty("fhir.baseurl.r5", base.replace("Dstu2", "R5"));
 		System.setProperty("fhir.baseurl.tdl2", base.replace("baseDstu2", "testDataLibraryDstu2"));
 		System.setProperty("fhir.baseurl.tdl3", base.replace("baseDstu2", "testDataLibraryStu3"));
 		System.setProperty("fhir.tdlpass", "aa,bb");
@@ -48,8 +52,8 @@ public class UhnFhirTestApp {
 		WebAppContext root = new WebAppContext();
 
 		root.setContextPath("/");
-		root.setDescriptor("src/main/webapp/WEB-INF/web.xml");
-		root.setResourceBase("target/hapi-fhir-jpaserver");
+		root.setDescriptor("hapi-fhir-jpaserver-uhnfhirtest/src/main/webapp/WEB-INF/web.xml");
+		root.setResourceBase("hapi-fhir-jpaserver-uhnfhirtest/target/hapi-fhir-jpaserver");
 
 		root.setParentLoaderPriority(true);
 

@@ -141,10 +141,10 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		myChildren.add(theNext);
 	}
 
+	@Override
 	public BaseRuntimeChildDefinition getChildByName(String theName){
 		validateSealed();
-		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
-		return retVal;
+		return myNameToChild.get(theName);
 	}
 
 	public BaseRuntimeChildDefinition getChildByNameOrThrowDataFormatException(String theName) throws DataFormatException {
@@ -156,6 +156,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		return retVal;
 	}
 
+	@Override
 	public List<BaseRuntimeChildDefinition> getChildren() {
 		validateSealed();
 		return myChildren;
