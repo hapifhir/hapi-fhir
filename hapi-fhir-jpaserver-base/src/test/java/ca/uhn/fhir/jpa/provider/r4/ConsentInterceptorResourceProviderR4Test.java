@@ -287,6 +287,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnlyBackwards.subList(0, 5), returnedIdValues);
 
+		// Per #2012
+		assertNull(result.getTotalElement().getValue());
 	}
 
 	@Test
