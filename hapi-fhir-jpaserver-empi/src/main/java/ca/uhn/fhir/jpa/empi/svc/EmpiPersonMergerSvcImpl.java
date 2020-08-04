@@ -90,8 +90,8 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	}
 
 	private void mergeLinks(IAnyResource theFromPerson, IAnyResource theToPerson, Long theToPersonPid, EmpiTransactionContext theEmpiTransactionContext) {
-		List<EmpiLink> incomingLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(theFromPerson);
-		List<EmpiLink> origLinks = myEmpiLinkDaoSvc.findEmpiLinksByPersonId(theToPerson);
+		List<EmpiLink> incomingLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(theFromPerson);
+		List<EmpiLink> origLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(theToPerson);
 
 		// For each incomingLink, either ignore it, move it, or replace the original one
 

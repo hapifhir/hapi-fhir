@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.empi.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Enterprise Master Patient Index
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,18 +20,14 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.Closeable;
-import java.util.Collection;
-import java.util.Iterator;
+public interface IEmpiChannelSubmitterSvc {
 
-public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
-
-	int getSkippedCount();
-
-	int getNonSkippedCount();
-
-	Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize);
-
+	/**
+	 * Given an IBaseResource, submit it to the EMPI channel for processing.
+	 *
+	 * @param theResource the {@link IBaseResource} that should have EMPI processing applied to it.
+	 */
+	void submitResourceToEmpiChannel(IBaseResource theResource);
 }

@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -24,12 +23,11 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -669,6 +667,15 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
+		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
+			Collection<ResourcePersistentId> batch = new ArrayList<>();
+			while (this.hasNext() && batch.size() < theBatchSize) {
+				batch.add(this.next());
+			}
+			return batch;
+		}
+
+		@Override
 		public void close() {
 			// nothing
 		}
@@ -702,6 +709,15 @@ public class SearchCoordinatorSvcImplTest {
 		@Override
 		public int getNonSkippedCount() {
 			return myCount;
+		}
+
+		@Override
+		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
+			Collection<ResourcePersistentId> batch = new ArrayList<>();
+			while (this.hasNext() && batch.size() < theBatchSize) {
+				batch.add(this.next());
+			}
+			return batch;
 		}
 
 		@Override
@@ -773,6 +789,15 @@ public class SearchCoordinatorSvcImplTest {
 		@Override
 		public int getNonSkippedCount() {
 			return 0;
+		}
+
+		@Override
+		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
+			Collection<ResourcePersistentId> batch = new ArrayList<>();
+			while (this.hasNext() && batch.size() < theBatchSize) {
+				batch.add(this.next());
+			}
+			return batch;
 		}
 
 		@Override

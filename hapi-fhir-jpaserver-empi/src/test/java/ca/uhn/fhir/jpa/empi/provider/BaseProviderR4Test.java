@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
+import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
+import ca.uhn.fhir.empi.api.IEmpiResetSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
@@ -33,6 +35,10 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 	private IResourceLoader myResourceLoader;
 	@Autowired
 	private IEmpiSettings myEmpiSettings;
+	@Autowired
+	private IEmpiResetSvc myEmpiExpungeSvc;
+	@Autowired
+	private IEmpiBatchSvc myEmpiBatchSvc;
 
 	private String defaultScript;
 
@@ -46,7 +52,7 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 
 	@BeforeEach
 	public void before() {
-		myEmpiProviderR4 = new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader);
+		myEmpiProviderR4 = new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiExpungeSvc, myEmpiBatchSvc);
 		defaultScript = ((EmpiSettings)myEmpiSettings).getScriptText();
 	}
 	@AfterEach

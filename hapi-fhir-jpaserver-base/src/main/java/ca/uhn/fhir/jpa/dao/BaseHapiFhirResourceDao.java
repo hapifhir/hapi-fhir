@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -136,8 +135,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired(required = false)
-	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
@@ -148,16 +145,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	@Autowired
+	private HapiTransactionService myTransactionService;
+	@Autowired(required = false)
+	protected IFulltextSearchSvc mySearchDao;
 
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
 	private Class<T> myResourceType;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private HapiTransactionService myTransactionService;
 
 	@Override
 	@Transactional
@@ -706,6 +703,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public String getResourceName() {
 		return myResourceName;
 	}
+
 
 	@Override
 	public Class<T> getResourceType() {

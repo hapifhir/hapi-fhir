@@ -60,6 +60,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	@Autowired
 	private PersonHelper myPersonHelper;
 
+
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
 

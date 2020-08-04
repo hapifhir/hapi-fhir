@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
@@ -74,6 +75,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
+	private static final String NAME_GIVEN_FRANK = "Frank";
+	protected static final String FRANK_ID = "ID.FRANK.789";
 
 	@Autowired
 	protected FhirContext myFhirContext;
@@ -101,6 +104,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
+	@Autowired
+	private IEmpiBatchSvc myEmpiBatchService;
 
 	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
@@ -156,6 +161,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
 		return patient;
+	}
+	@Nonnull
+	protected Practitioner createPractitioner(Practitioner thePractitioner) {
+		//Note that since our empi-rules block on active=true, all patients must be active.
+		thePractitioner.setActive(true);
+		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
+		thePractitioner.setId(daoMethodOutcome.getId());
+		return thePractitioner;
 	}
 
 	@Nonnull
@@ -233,6 +246,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Patient buildPaulPatient() {
 		return buildPatientWithNameAndId(NAME_GIVEN_PAUL, PAUL_ID);
+	}
+
+	@Nonnull
+	protected Patient buildFrankPatient() {
+		return buildPatientWithNameAndId(NAME_GIVEN_FRANK, FRANK_ID);
 	}
 
 	@Nonnull

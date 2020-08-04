@@ -51,6 +51,8 @@ public class EmpiLink {
 	public static final int VERSION_LENGTH = 16;
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;
+	public static final int TARGET_TYPE_LENGTH = 40;
+
 
 	@SequenceGenerator(name = "SEQ_EMPI_LINK_ID", sequenceName = "SEQ_EMPI_LINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_EMPI_LINK_ID")
@@ -110,6 +112,9 @@ public class EmpiLink {
 	public EmpiLink(String theVersion) {
 		myVersion = theVersion;
 	}
+
+	@Column(name = "TARGET_TYPE", nullable = true, length = TARGET_TYPE_LENGTH)
+	private String myEmpiTargetType;
 
 	public Long getId() {
 		return myId;
@@ -276,11 +281,20 @@ public class EmpiLink {
 		return new ToStringBuilder(this)
 			.append("myPersonPid", myPersonPid)
 			.append("myTargetPid", myTargetPid)
+			.append("myEmpiTargetType", myEmpiTargetType)
 			.append("myMatchResult", myMatchResult)
 			.append("myLinkSource", myLinkSource)
 			.append("myEidMatch", myEidMatch)
 			.append("myNewPerson", myNewPerson)
 			.append("myScore", myScore)
 			.toString();
+	}
+
+	public String getEmpiTargetType() {
+		return myEmpiTargetType;
+	}
+
+	public void setEmpiTargetType(String theEmpiTargetType) {
+		myEmpiTargetType = theEmpiTargetType;
 	}
 }

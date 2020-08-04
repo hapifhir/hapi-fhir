@@ -33,9 +33,9 @@ public interface IResourceExpungeService {
 
 	void expungeHistoricalVersions(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
 
-	void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
+	void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount);
 
-	void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
+	void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount);
 
 	void deleteAllSearchParams(Long theResourceId);
 }

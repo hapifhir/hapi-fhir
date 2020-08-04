@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.empi.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Enterprise Master Patient Index
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,18 +20,22 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+public interface IEmpiResetSvc {
 
-import java.io.Closeable;
-import java.util.Collection;
-import java.util.Iterator;
+	/**
+	 * Given a resource type, delete the underlying EMPI links, and their related person objects.
+	 *
+	 * @param theResourceType The type of resources
+	 *
+	 * @return the count of deleted EMPI links
+	 */
+	long expungeAllEmpiLinksOfTargetType(String theResourceType);
 
-public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
-
-	int getSkippedCount();
-
-	int getNonSkippedCount();
-
-	Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize);
-
+	/**
+	 * Delete all EMPI links, and their related Person objects.
+	 *
+	 *
+	 * @return the count of deleted EMPI links
+	 */
+	long removeAllEmpiLinks();
 }
