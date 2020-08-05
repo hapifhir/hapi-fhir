@@ -103,6 +103,19 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	}
 
 	@Test
+	public void testCreatingPersonWithInsufficentEMPIAttributesIsNotEMPIProcessed() throws InterruptedException {
+		myEmpiHelper.createWithLatch(new Patient());
+		assertLinkCount(0);
+	}
+
+	@Test
+	public void testCreatingPatientWithOneOrMoreMatchingAttributesIsEMPIProcessed() throws InterruptedException {
+		myEmpiHelper.createWithLatch(buildPaulPatient());
+		assertLinkCount(1);
+
+	}
+
+	@Test
 	public void testCreateOrganizationWithEmpiTagForbidden() throws InterruptedException {
 		//Creating a organization with the EMPI-MANAGED tag should fail
 		Organization organization = new Organization();
