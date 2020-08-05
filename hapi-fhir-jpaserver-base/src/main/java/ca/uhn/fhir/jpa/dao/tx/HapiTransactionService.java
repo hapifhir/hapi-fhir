@@ -53,6 +53,10 @@ public class HapiTransactionService {
 	}
 
 	public <T> T execute(RequestDetails theRequestDetails, TransactionCallback<T> theCallback) {
+		return execute(theRequestDetails, theCallback, null);
+	}
+
+	public <T> T execute(RequestDetails theRequestDetails, TransactionCallback<T> theCallback, Runnable theOnRollback) {
 
 		for (int i = 0; ; i++) {
 			try {
@@ -69,6 +73,10 @@ public class HapiTransactionService {
 
 			} catch (ResourceVersionConflictException e) {
 				ourLog.debug("Version conflict detected: {}", e.toString());
+
+				if (theOnRollback != null) {
+					theOnRollback.run();
+				}
 
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequestDetails)

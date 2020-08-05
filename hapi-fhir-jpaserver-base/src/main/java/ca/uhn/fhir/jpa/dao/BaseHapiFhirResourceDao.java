@@ -1360,17 +1360,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		assert theResource.getIdElement().hasIdPart() || isNotBlank(theMatchUrl);
 
-		return myTransactionService.execute(theRequest, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails));
+		/*
+		 * Resource updates will modify/update the version of the resource with the new version. This is generally helpful,
+		 * but leads to issues if the transaction is rolled back and retried. So if we do a rollback, we reset the resource
+		 * version to what it was.
+		 */
+		String id = theResource.getIdElement().getValue();
+		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
+
+		// Execute the update in a retriable transasction
+		return myTransactionService.execute(theRequest, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
 	}
 
 	private DaoMethodOutcome doUpdate(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
 
 		T resource = theResource;
-		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT, myInterceptorBroadcaster, theRequest)) {
-			resource = (T) getContext().getResourceDefinition(theResource).newInstance();
-			getContext().newTerser().cloneInto(theResource, resource, false);
-		}
 
 		preProcessResourceForStorage(resource);
 
