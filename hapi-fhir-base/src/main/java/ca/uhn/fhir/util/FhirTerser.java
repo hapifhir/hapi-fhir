@@ -155,7 +155,17 @@ public class FhirTerser {
 
 		if (theSource instanceof IPrimitiveType<?>) {
 			if (theTarget instanceof IPrimitiveType<?>) {
-				((IPrimitiveType<?>) theTarget).setValueAsString(((IPrimitiveType<?>) theSource).getValueAsString());
+				String valueAsString = ((IPrimitiveType<?>) theSource).getValueAsString();
+				if (isNotBlank(valueAsString)) {
+					((IPrimitiveType<?>) theTarget).setValueAsString(valueAsString);
+				}
+				if (theSource instanceof IBaseHasExtensions && theTarget instanceof IBaseHasExtensions) {
+					List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) theSource).getExtension();
+					for (IBaseExtension<?, ?> nextSource : extensions) {
+						IBaseExtension<?, ?> nextTarget = ((IBaseHasExtensions) theTarget).addExtension();
+						cloneInto(nextSource, nextTarget, theIgnoreMissingFields);
+					}
+				}
 				return theSource;
 			}
 			if (theIgnoreMissingFields) {

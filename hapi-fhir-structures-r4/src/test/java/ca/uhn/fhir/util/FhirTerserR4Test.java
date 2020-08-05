@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -179,6 +180,20 @@ public class FhirTerserR4Test {
 		List<Extension> exts = target.getExtensionsByUrl("http://example.com");
 		assertEquals(1, exts.size());
 		assertEquals("FOO", ((StringType) exts.get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testCloneIntoExtensionOnPrimitive() {
+		DocumentReference source = new DocumentReference();
+		source.addContent().getAttachment().getDataElement().addExtension("http://foo", new StringType("bar"));
+
+		DocumentReference target = new DocumentReference();
+
+		ourCtx.newTerser().cloneInto(source, target, true);
+
+		assertEquals(1, target.getContentFirstRep().getAttachment().getDataElement().getExtension().size());
+		assertEquals("http://foo", target.getContentFirstRep().getAttachment().getDataElement().getExtension().get(0).getUrl());
+		assertEquals("bar", target.getContentFirstRep().getAttachment().getDataElement().getExtension().get(0).getValueAsPrimitive().getValueAsString());
 	}
 
 	@Test

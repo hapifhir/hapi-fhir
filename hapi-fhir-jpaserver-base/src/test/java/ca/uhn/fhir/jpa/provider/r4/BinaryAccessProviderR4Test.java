@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -32,6 +33,7 @@ import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -543,6 +545,41 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		assertFalse(myStorageSvc.writeBlob(id, attachmentId, capture));
 		assertEquals(0, capture.size());
 
+	}
+
+
+
+	@Test
+	public void testWriteWithConflictInterceptor() throws IOException {
+		UserRequestRetryVersionConflictsInterceptor interceptor = new UserRequestRetryVersionConflictsInterceptor();
+		ourRestServer.registerInterceptor(interceptor);
+		try {
+
+			IIdType id = createDocumentReference(false);
+
+			String path = ourServerBase +
+				"/DocumentReference/" + id.getIdPart() + "/" +
+				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
+				"?path=DocumentReference.content.attachment";
+			HttpPost post = new HttpPost(path);
+			post.setEntity(new ByteArrayEntity(SOME_BYTES, ContentType.IMAGE_JPEG));
+			post.addHeader("Accept", "application/fhir+json; _pretty=true");
+			String attachmentId;
+			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+				String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
+				ourLog.info("Response: {}\n{}", resp, response);
+
+				assertEquals(200, resp.getStatusLine().getStatusCode());
+				assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+				DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+				Attachment attachment = ref.getContentFirstRep().getAttachment();
+				attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+				assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+			}
+
+		} finally {
+			ourRestServer.unregisterInterceptor(interceptor);
+		}
 	}
 
 
