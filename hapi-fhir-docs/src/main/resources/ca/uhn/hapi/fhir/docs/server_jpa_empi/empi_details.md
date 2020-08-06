@@ -21,6 +21,8 @@ In a typical configuration it is often desirable to have links be created automa
 
 This automatic linking is done via configurable matching rules that create links between Patients and Persons.  Based on the strength of the match configured in these rules, the link will be set to either POSSIBLE_MATCH or MATCH.
 
+It is important to note that before a resource is to be processed by EMPI, it is first checked to ensure that it has at least one attribute that the EMPI system cares about, as defined in the `empi-rules.json` file. If the incoming resource has no attributes that the EMPI system cares about, EMPI processing does not occur on it. In this case, no Person is created for them. If in the future that Patient is updated to contain attributes the EMPI system does concern itself with, it will be processed at that time. 
+
 ## Design
 
 Below are some simplifying principles HAPI EMPI enforces to reduce complexity and ensure data integrity.
@@ -29,7 +31,7 @@ Below are some simplifying principles HAPI EMPI enforces to reduce complexity an
 
 1. Every Patient in the system has a MATCH link to at most one Person resource.
 
-1. Every Patient resource in the system has a MATCH link to a Person resource unless that Patient has the "no-empi" tag or it has POSSIBLE_MATCH links pending review.
+1. Every Patient resource in the system that has been processed by EMPI has a MATCH link to a Person resource unless that Patient has the "no-empi" tag or it has POSSIBLE_MATCH links pending review.
 
 1. The HAPI EMPI rules define a single identifier system that holds the external enterprise id ("EID").  If a Patient has an external EID, then the Person it links to always has the same EID. If a patient has no EID when it arrives, the person created from this patient is given an internal EID.
 
