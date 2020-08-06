@@ -11,9 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- *
- */
 @Service
 public class EmpiResourceFilteringSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
