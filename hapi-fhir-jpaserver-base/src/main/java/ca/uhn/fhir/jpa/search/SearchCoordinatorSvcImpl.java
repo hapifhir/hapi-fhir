@@ -813,7 +813,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							if (nonSkippedCount == 0 || (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch)) {
 								ourLog.trace("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
-								mySearch.setTotalCount(myCountSavedTotal);
+								mySearch.setTotalCount(myCountSavedTotal - countBlocked);
 							} else if (myAdditionalPrefetchThresholdsRemaining) {
 								ourLog.trace("Setting search status to PASSCMPLET");
 								mySearch.setStatus(SearchStatusEnum.PASSCMPLET);
@@ -821,7 +821,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							} else {
 								ourLog.trace("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
-								mySearch.setTotalCount(myCountSavedTotal);
+								mySearch.setTotalCount(myCountSavedTotal - countBlocked);
 							}
 						}
 					}

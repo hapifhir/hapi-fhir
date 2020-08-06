@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -55,6 +56,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
@@ -537,8 +539,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	}
 
 	@Test
-	void bundleTotal()
-	{
+	public void testBundleTotalIsStripped() {
 		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcCantSeeFemales());
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
@@ -547,14 +548,26 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
 
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
+		String searchId = response.getId();
 
-		// response.getTotal() returns 3 - expected is 2, since letting the client know that there are more than it can find in the bundles makes the client aware that something is missing
-		assertEquals(2, response.getTotal());
+		// 2 results returned, but no total since it's stripped
+		assertEquals(1, response.getEntry().size());
+		assertNull(response.getTotalElement().getValue());
 
+		// Load next page
 		response = myClient.loadPage().next(response).execute();
+		assertEquals(1, response.getEntry().size());
+		assertNull(response.getTotalElement().getValue());
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
 		assertNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+
+		runInTransaction(()->{
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(()->new IllegalStateException());
+			assertEquals(3, search.getNumFound());
+			assertEquals(1, search.getNumBlocked());
+			assertEquals(2, search.getTotalCount());
+		});
 	}
 
 	@Test
@@ -723,46 +736,21 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	}
 
-	private static class ConsentSvcCantSeeFemales implements IConsentService
-	{
-		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
-			return ConsentOutcome.PROCEED;
-		}
+	private static class ConsentSvcCantSeeFemales implements IConsentService {
 
 		@Override
 		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
-			if( theRequestDetails.getRestOperationType() != RestOperationTypeEnum.CREATE)
-			{
+			if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.CREATE) {
 				Patient patient = (Patient) theResource;
-				return patient.getGender() == Enumerations.AdministrativeGender.FEMALE ? ConsentOutcome.REJECT : ConsentOutcome.PROCEED;
+				if (patient.getGender() == Enumerations.AdministrativeGender.FEMALE) {
+					return ConsentOutcome.REJECT;
+				}
+				return ConsentOutcome.PROCEED;
 
 			}
 			return ConsentOutcome.AUTHORIZED;
 		}
 
-		@Override
-		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
-			if(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.CREATE && theResource instanceof Patient)
-			{
-				Patient patient = (Patient) theResource;
-				if(patient.getGender() == Enumerations.AdministrativeGender.MALE)
-					return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, patient);
-				else
-					return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
-			}
-			return ConsentOutcome.AUTHORIZED;
-		}
-
-		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
-
-		}
-
-		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
-
-		}
 	}
 
 	private static class ConsentSvcCantSeeEvenNumbered implements IConsentService {

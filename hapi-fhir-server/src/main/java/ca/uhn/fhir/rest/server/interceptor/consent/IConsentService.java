@@ -24,6 +24,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+/**
+ * Note: Since HAPI FHIR 5.1.0, methods in this interface have default methods that return {@link ConsentOutcome#PROCEED}
+ */
 public interface IConsentService {
 
 	/**
@@ -42,7 +45,9 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @return An outcome object. See {@link ConsentOutcome}
 	 */
-	ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices);
+	default ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		return ConsentOutcome.PROCEED;
+	}
 
 	/**
 	 * This method is called if a user may potentially see a resource via READ
@@ -73,7 +78,9 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @return An outcome object. See {@link ConsentOutcome}
 	 */
-	ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
+	default ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return ConsentOutcome.PROCEED;
+	}
 
 	/**
 	 * This method is called if a user is about to see a resource, either completely
@@ -108,7 +115,9 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @return An outcome object. See method documentation for a description.
 	 */
-	ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
+	default ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return ConsentOutcome.PROCEED;
+	}
 
 	/**
 	 * This method is called when an operation is complete. It can be used to perform
@@ -129,7 +138,7 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @see #completeOperationFailure(RequestDetails, BaseServerResponseException, IConsentContextServices)
 	 */
-	void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices);
+	default void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {}
 
 	/**
 	 * This method is called when an operation is complete. It can be used to perform
@@ -151,5 +160,5 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @see #completeOperationSuccess(RequestDetails, IConsentContextServices)
 	 */
-	void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices);
+	default void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {}
 }
