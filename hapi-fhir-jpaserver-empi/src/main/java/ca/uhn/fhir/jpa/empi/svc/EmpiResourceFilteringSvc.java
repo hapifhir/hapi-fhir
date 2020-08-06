@@ -23,10 +23,11 @@ public class EmpiResourceFilteringSvc {
 	FhirContext myFhirContext;
 
 	/**
-	 * Given a message from the EMPI Channel, determine whether or not EMPI processing should occur on the payload.
-	 * EMPI processing should occur iff for any {@link EmpiResourceSearchParamJson) Search Param, the resource contains a value.
+	 * Given a resource from the EMPI Channel, determine whether or not EMPI processing should occur on it.
 	 *
-	 * If the payload has no attributes that appear in the Candidate Search Params, processing should be skipped, as there is not
+	 * EMPI processing should occur if for any {@link EmpiResourceSearchParamJson) Search Param, the resource contains a value.
+	 *
+	 * If the resource has no attributes that appear in the candidate search params, processing should be skipped, as there is not
 	 * sufficient information to perform meaningful EMPI processing. (For example, how can EMPI processing occur on a patient that has _no_ attributes?)
 	 *
 	 * @param theResource the resource that you wish to check against EMPI rules.
