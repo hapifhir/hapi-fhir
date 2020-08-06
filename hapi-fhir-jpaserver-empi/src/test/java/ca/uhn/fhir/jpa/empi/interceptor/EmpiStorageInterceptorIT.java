@@ -104,7 +104,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 
 	@Test
 	public void testCreatingPersonWithInsufficentEMPIAttributesIsNotEMPIProcessed() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Patient());
+		myEmpiHelper.doCreateResource(new Patient(), true);
 		assertLinkCount(0);
 	}
 
@@ -112,7 +112,6 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testCreatingPatientWithOneOrMoreMatchingAttributesIsEMPIProcessed() throws InterruptedException {
 		myEmpiHelper.createWithLatch(buildPaulPatient());
 		assertLinkCount(1);
-
 	}
 
 	@Test
