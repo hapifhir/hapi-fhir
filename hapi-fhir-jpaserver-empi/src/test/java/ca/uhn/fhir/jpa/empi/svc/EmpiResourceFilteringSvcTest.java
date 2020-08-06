@@ -10,10 +10,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-class EmpiMessageFilteringSvcTest extends BaseEmpiR4Test {
+class EmpiResourceFilteringSvcTest extends BaseEmpiR4Test {
 
 	@Autowired
-	private EmpiMessageFilteringSvc myEmpiMessageFilteringSvc;
+	private EmpiResourceFilteringSvc myEmpiMessageFilteringSvc;
 
 	@Test
 	public void testFilterResourcesWhichHaveNoRelevantAttributes() {

@@ -28,7 +28,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiMessageFilteringSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiResourceFilteringSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
@@ -52,7 +52,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private EmpiMessageFilteringSvc myEmpiResourceFileringSvc;
+	private EmpiResourceFilteringSvc myEmpiResourceFileringSvc;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {

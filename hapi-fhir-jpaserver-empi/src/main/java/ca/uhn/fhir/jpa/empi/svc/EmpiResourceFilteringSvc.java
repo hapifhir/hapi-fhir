@@ -15,7 +15,7 @@ import java.util.List;
  *
  */
 @Service
-public class EmpiMessageFilteringSvc {
+public class EmpiResourceFilteringSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
@@ -46,6 +46,7 @@ public class EmpiMessageFilteringSvc {
 			.map(searchParam -> myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
 			.anyMatch(valueList -> !valueList.isEmpty());
 
+		ourLog.debug("Is {} suitable for EMPI processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
 		return containsValueForSomeSearchParam;
 	}
 

@@ -47,7 +47,7 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiLinkSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiMessageFilteringSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiResourceFilteringSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonDeletingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResetSvcImpl;
@@ -214,7 +214,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiMessageFilteringSvc empiMessageFilteringSvc() {
-		return new EmpiMessageFilteringSvc();
+	EmpiResourceFilteringSvc empiMessageFilteringSvc() {
+		return new EmpiResourceFilteringSvc();
 	}
 }
