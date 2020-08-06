@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2012
+title: "In some cases, the Bundle total was not getting filtered from search results when using the consent interceptor. Thanks
+  to Jens Kristian Villadsen for reporting!"
