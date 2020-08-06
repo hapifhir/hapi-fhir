@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -32,6 +33,8 @@ import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -534,6 +537,27 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	}
 
 	@Test
+	void bundleTotal()
+	{
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcCantSeeFemales());
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
+
+		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
+
+		// response.getTotal() returns 3 - expected is 2, since letting the client know that there are more than it can find in the bundles makes the client aware that something is missing
+		assertEquals(2, response.getTotal());
+
+		response = myClient.loadPage().next(response).execute();
+
+		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
+		assertNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+	}
+
+	@Test
 	public void testGraphQL_MaskLinkedResource() throws IOException {
 		createPatientAndOrg();
 
@@ -697,6 +721,48 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 
+	}
+
+	private static class ConsentSvcCantSeeFemales implements IConsentService
+	{
+		@Override
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			if( theRequestDetails.getRestOperationType() != RestOperationTypeEnum.CREATE)
+			{
+				Patient patient = (Patient) theResource;
+				return patient.getGender() == Enumerations.AdministrativeGender.FEMALE ? ConsentOutcome.REJECT : ConsentOutcome.PROCEED;
+
+			}
+			return ConsentOutcome.AUTHORIZED;
+		}
+
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			if(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.CREATE && theResource instanceof Patient)
+			{
+				Patient patient = (Patient) theResource;
+				if(patient.getGender() == Enumerations.AdministrativeGender.MALE)
+					return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, patient);
+				else
+					return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
+			}
+			return ConsentOutcome.AUTHORIZED;
+		}
+
+		@Override
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+
+		}
+
+		@Override
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+
+		}
 	}
 
 	private static class ConsentSvcCantSeeEvenNumbered implements IConsentService {
