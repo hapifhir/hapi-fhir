@@ -9,7 +9,9 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
@@ -568,6 +570,60 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertEquals(1, search.getNumBlocked());
 			assertEquals(2, search.getTotalCount());
 		});
+	}
+
+	/**
+	 * Make sure the default methods all work and allow the response to proceed
+	 */
+	@Test
+	public void testDefaultInterceptorAllowsAll() {
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
+
+		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
+		String searchId = response.getId();
+
+		assertEquals(1, response.getEntry().size());
+		assertNull(response.getTotalElement().getValue());
+
+		// Load next page
+		response = myClient.loadPage().next(response).execute();
+		assertEquals(1, response.getEntry().size());
+		assertNull(response.getTotalElement().getValue());
+
+		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
+		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+
+		runInTransaction(()->{
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(()->new IllegalStateException());
+			assertEquals(3, search.getNumFound());
+			assertEquals(0, search.getNumBlocked());
+			assertEquals(3, search.getTotalCount());
+		});
+	}
+
+	/**
+	 * Make sure the default methods all work and allow the response to proceed
+	 */
+	@Test
+	public void testDefaultInterceptorAllowsFailure() {
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
+
+		try {
+			myClient.search().forResource(Patient.class).where(new StringClientParam("INVALID_PARAM").matchesExactly().value("value")).returnBundle(Bundle.class).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("INVALID_PARAM"));
+		}
 	}
 
 	@Test
