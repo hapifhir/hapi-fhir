@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiResourceFilteringSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
@@ -50,6 +51,8 @@ public class EmpiMessageHandler implements MessageHandler {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private EmpiResourceFilteringSvc myEmpiResourceFileringSvc;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -62,13 +65,14 @@ public class EmpiMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-			matchEmpiAndUpdateLinks(msg);
+			if (myEmpiResourceFileringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
+				matchEmpiAndUpdateLinks(msg);
+			}
 		} catch (Exception e) {
 			ourLog.error("Failed to handle EMPI Matching Resource:", e);
 			throw e;
 		}
 	}
-
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
 		String resourceType = theMsg.getId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);

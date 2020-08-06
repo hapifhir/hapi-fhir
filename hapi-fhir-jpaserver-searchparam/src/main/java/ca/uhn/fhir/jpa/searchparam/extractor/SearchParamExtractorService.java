@@ -399,6 +399,7 @@ public class SearchParamExtractorService {
 		myInterceptorBroadcaster = theJpaInterceptorBroadcaster;
 	}
 
+	@Nonnull
 	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theActiveSearchParam, IBaseResource theResource) {
 		return mySearchParamExtractor.extractParamValuesAsStrings(theActiveSearchParam, theResource);
 	}

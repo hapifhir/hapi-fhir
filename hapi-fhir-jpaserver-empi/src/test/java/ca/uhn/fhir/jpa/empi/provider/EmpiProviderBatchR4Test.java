@@ -36,7 +36,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-		myPractitioner = createPractitionerAndUpdateLinks(new Practitioner());
+		myPractitioner = createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
 		myPractitionerPerson = getPersonFromTarget(myPractitioner);
 		myPractitionerPersonId = new StringType(myPractitionerPerson.getIdElement().getValue());

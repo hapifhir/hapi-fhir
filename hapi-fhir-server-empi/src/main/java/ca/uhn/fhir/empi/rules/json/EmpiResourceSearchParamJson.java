@@ -54,7 +54,7 @@ public class EmpiResourceSearchParamJson implements IModelJson, Iterable<String>
 		return this;
 	}
 
-	private List<String> getSearchParams() {
+	public List<String> getSearchParams() {
 		if (mySearchParams == null) {
 			mySearchParams = new ArrayList<>();
 		}

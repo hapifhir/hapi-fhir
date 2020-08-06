@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,26 +62,20 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCreatePatient() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Patient());
-		assertLinkCount(1);
-	}
-
-	@Test
 	public void testCreatePractitioner() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Practitioner());
+		myEmpiHelper.createWithLatch(buildPractitionerWithNameAndId("somename", "some_id"));
 		assertLinkCount(1);
 	}
 
 	@Test
-	public void testCreatePerson() throws InterruptedException {
+	public void testCreatePerson() {
 		myPersonDao.create(new Person());
 		assertLinkCount(0);
 	}
 
 	@Test
 	public void testDeletePersonDeletesLinks() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Patient());
+		myEmpiHelper.createWithLatch(buildPaulPatient());
 		assertLinkCount(1);
 		Person person = getOnlyActivePerson();
 		myPersonDao.delete(person.getIdElement());
@@ -100,6 +93,18 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCreatingPersonWithInsufficentEMPIAttributesIsNotEMPIProcessed() throws InterruptedException {
+		myEmpiHelper.doCreateResource(new Patient(), true);
+		assertLinkCount(0);
+	}
+
+	@Test
+	public void testCreatingPatientWithOneOrMoreMatchingAttributesIsEMPIProcessed() throws InterruptedException {
+		myEmpiHelper.createWithLatch(buildPaulPatient());
+		assertLinkCount(1);
 	}
 
 	@Test
@@ -163,7 +168,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links of Persons with the EMPI-MANAGED tag.
 		Patient patient = new Patient();
-		IIdType patientId = myEmpiHelper.createWithLatch(new Patient()).getDaoMethodOutcome().getId().toUnqualifiedVersionless();
+		IIdType patientId = myEmpiHelper.createWithLatch(buildPaulPatient()).getDaoMethodOutcome().getId().toUnqualifiedVersionless();
 
 		patient.setId(patientId);
 
@@ -263,7 +268,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	@Test
 	public void testPatientsWithNoEIDCanBeUpdated() throws InterruptedException {
 		setPreventEidUpdates(true);
-		Patient p = new Patient();
+		Patient p = buildPaulPatient();
 		EmpiHelperR4.OutcomeAndLogMessageWrapper wrapper = myEmpiHelper.createWithLatch(p);
 
 		p.setId(wrapper.getDaoMethodOutcome().getId());
@@ -275,7 +280,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	@Test
 	public void testPatientsCanHaveEIDAddedInStrictMode() throws InterruptedException {
 		setPreventEidUpdates(true);
-		Patient p = new Patient();
+		Patient p = buildPaulPatient();
 		EmpiHelperR4.OutcomeAndLogMessageWrapper messageWrapper = myEmpiHelper.createWithLatch(p);
 		p.setId(messageWrapper.getDaoMethodOutcome().getId());
 		addExternalEID(p, "external eid");
