@@ -87,10 +87,20 @@ public class EmpiSearchParamSvc implements ISearchParamRetriever {
 			spMap = mapFromCriteria(theTargetType, theCriteria);
 		}
 		return spMap;
-    }
+	}
 
-    public ISearchBuilder generateSearchBuilderForType(String theTargetType) {
+	public ISearchBuilder generateSearchBuilderForType(String theTargetType) {
 		 IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theTargetType);
 		 return mySearchBuilderFactory.newSearchBuilder(resourceDao, theTargetType, resourceDao.getResourceType());
+	 }
+
+	/**
+	 * Will return true if the types match, or the search param type is '*', otherwise false.
+	 * @param theSearchParamType
+	 * @param theResourceType
+	 * @return
+	 */
+	 public boolean searchParamTypeIsValidForResourceType(String theSearchParamType, String theResourceType) {
+		 return theSearchParamType.equalsIgnoreCase(theResourceType) || theSearchParamType.equalsIgnoreCase("*");
 	 }
 }

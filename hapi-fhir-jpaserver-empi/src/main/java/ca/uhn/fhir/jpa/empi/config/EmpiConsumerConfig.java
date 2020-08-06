@@ -214,7 +214,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiResourceFilteringSvc empiMessageFilteringSvc() {
+	EmpiResourceFilteringSvc empiResourceFilteringSvc() {
 		return new EmpiResourceFilteringSvc();
 	}
 }

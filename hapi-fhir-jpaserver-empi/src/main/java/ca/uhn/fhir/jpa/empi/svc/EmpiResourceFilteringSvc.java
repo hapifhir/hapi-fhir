@@ -32,7 +32,7 @@ public class EmpiResourceFilteringSvc {
 	 * If the payload has no attributes that appear in the Candidate Search Params, processing should be skipped, as there is not
 	 * sufficient information to perform meaningful EMPI processing. (For example, how can EMPI processing occur on a patient that has _no_ attributes?)
 	 *
-	 * @param theMessage the message provided by the EMPI channel.
+	 * @param theResource the resource that you wish to check against EMPI rules.
 	 *
 	 * @return whether or not EMPI processing should proceed
 	 */
@@ -41,17 +41,12 @@ public class EmpiResourceFilteringSvc {
 		List<EmpiResourceSearchParamJson> candidateSearchParams = empiSettings.getEmpiRules().getCandidateSearchParams();
 
 		boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
-			.filter(csp -> searchParamIsValidForType(csp, resourceType))
+			.filter(csp -> myEmpiSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
 			.flatMap(csp -> csp.getSearchParams().stream())
 			.map(searchParam -> myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
 			.anyMatch(valueList -> !valueList.isEmpty());
 
 		ourLog.debug("Is {} suitable for EMPI processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
 		return containsValueForSomeSearchParam;
-	}
-
-	private boolean searchParamIsValidForType(EmpiResourceSearchParamJson theSearchParamJson, String theResourceType) {
-		return theSearchParamJson.getResourceType().equalsIgnoreCase(theResourceType) || theSearchParamJson.getResourceType().equalsIgnoreCase("*");
-
 	}
 }

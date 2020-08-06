@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.is;
 class EmpiResourceFilteringSvcTest extends BaseEmpiR4Test {
 
 	@Autowired
-	private EmpiResourceFilteringSvc myEmpiMessageFilteringSvc;
+	private EmpiResourceFilteringSvc myEmpiResourceFilteringSvc;
 
 	@Test
 	public void testFilterResourcesWhichHaveNoRelevantAttributes() {
@@ -21,7 +21,7 @@ class EmpiResourceFilteringSvcTest extends BaseEmpiR4Test {
 		patient.setDeceased(new BooleanType(true)); //EMPI rules defined do not care about the deceased attribute.
 
 		//SUT
-		boolean shouldBeProcessed = myEmpiMessageFilteringSvc.shouldBeProcessed(patient);
+		boolean shouldBeProcessed = myEmpiResourceFilteringSvc.shouldBeProcessed(patient);
 
 		assertThat(shouldBeProcessed, is(equalTo(false)));
 	}
@@ -32,7 +32,7 @@ class EmpiResourceFilteringSvcTest extends BaseEmpiR4Test {
 		patient.addIdentifier().setValue("Hey I'm an ID! rules defined in empi-rules.json care about me!");
 
 		//SUT
-		boolean shouldBeProcessed = myEmpiMessageFilteringSvc.shouldBeProcessed(patient);
+		boolean shouldBeProcessed = myEmpiResourceFilteringSvc.shouldBeProcessed(patient);
 
 		assertThat(shouldBeProcessed, is(equalTo(true)));
 	}
