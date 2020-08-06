@@ -31,7 +31,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	public void before() {
 		super.before();
 
-		myPatient = createPatientAndUpdateLinks(new Patient());
+		myPatient = createPatientAndUpdateLinks(buildPaulPatient());
 		myPatientId = new StringType(myPatient.getIdElement().getValue());
 
 		myPerson = getPersonFromTarget(myPatient);

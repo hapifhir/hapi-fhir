@@ -65,7 +65,7 @@ public class EmpiMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-			if (myEmpiResourceFileringSvc.shouldBeProcessed(msg)) {
+			if (myEmpiResourceFileringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
 				matchEmpiAndUpdateLinks(msg);
 			}
 		} catch (Exception e) {

@@ -17,7 +17,7 @@ import java.util.Date;
 class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 
 	@Autowired
-    IEmpiBatchSvc myEmpiBatchSvc;
+	IEmpiBatchSvc myEmpiBatchSvc;
 
 	@Autowired
 	IInterceptorService myInterceptorService;
