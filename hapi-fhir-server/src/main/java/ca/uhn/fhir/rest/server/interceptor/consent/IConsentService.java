@@ -24,6 +24,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+/**
+ * Note: Since HAPI FHIR 5.1.0, methods in this interface have default methods that return {@link ConsentOutcome#PROCEED}
+ */
 public interface IConsentService {
 
 	/**
@@ -42,7 +45,9 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @return An outcome object. See {@link ConsentOutcome}
 	 */
-	ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices);
+	default ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		return ConsentOutcome.PROCEED;
+	}
 
 	/**
 	 * This method is called if a user may potentially see a resource via READ
@@ -61,19 +66,21 @@ public interface IConsentService {
 	 * will suffer.
 	 * </p>
 	 *
-	 * @param theRequestDetails Contains details about the operation that is
-	 *                          beginning, including details about the request type,
-	 *                          URL, etc. Note that the RequestDetails has a generic
-	 *                          Map (see {@link RequestDetails#getUserData()}) that
-	 *                          can be used to store information and state to be
-	 *                          passed between methods in the consent service.
-	 * @param theResource       The resource that will be exposed
+	 * @param theRequestDetails  Contains details about the operation that is
+	 *                           beginning, including details about the request type,
+	 *                           URL, etc. Note that the RequestDetails has a generic
+	 *                           Map (see {@link RequestDetails#getUserData()}) that
+	 *                           can be used to store information and state to be
+	 *                           passed between methods in the consent service.
+	 * @param theResource        The resource that will be exposed
 	 * @param theContextServices An object passed in by the consent framework that
 	 *                           provides utility functions relevant to acting on
 	 *                           consent directives.
 	 * @return An outcome object. See {@link ConsentOutcome}
 	 */
-	ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
+	default ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return ConsentOutcome.PROCEED;
+	}
 
 	/**
 	 * This method is called if a user is about to see a resource, either completely
@@ -96,19 +103,21 @@ public interface IConsentService {
 	 * <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will not be returned to the client. If the resource supplied to the </li>
 	 * </ul>
 	 *
-	 * @param theRequestDetails Contains details about the operation that is
-	 *                          beginning, including details about the request type,
-	 *                          URL, etc. Note that the RequestDetails has a generic
-	 *                          Map (see {@link RequestDetails#getUserData()}) that
-	 *                          can be used to store information and state to be
-	 *                          passed between methods in the consent service.
-	 * @param theResource       The resource that will be exposed
+	 * @param theRequestDetails  Contains details about the operation that is
+	 *                           beginning, including details about the request type,
+	 *                           URL, etc. Note that the RequestDetails has a generic
+	 *                           Map (see {@link RequestDetails#getUserData()}) that
+	 *                           can be used to store information and state to be
+	 *                           passed between methods in the consent service.
+	 * @param theResource        The resource that will be exposed
 	 * @param theContextServices An object passed in by the consent framework that
 	 *                           provides utility functions relevant to acting on
 	 *                           consent directives.
 	 * @return An outcome object. See method documentation for a description.
 	 */
-	ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
+	default ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return ConsentOutcome.PROCEED;
+	}
 
 	/**
 	 * This method is called when an operation is complete. It can be used to perform
@@ -118,18 +127,19 @@ public interface IConsentService {
 	 * will be called instead in that case.
 	 * </p>
 	 *
-	 * @param theRequestDetails Contains details about the operation that is
-	 *                          beginning, including details about the request type,
-	 *                          URL, etc. Note that the RequestDetails has a generic
-	 *                          Map (see {@link RequestDetails#getUserData()}) that
-	 *                          can be used to store information and state to be
-	 *                          passed between methods in the consent service.
+	 * @param theRequestDetails  Contains details about the operation that is
+	 *                           beginning, including details about the request type,
+	 *                           URL, etc. Note that the RequestDetails has a generic
+	 *                           Map (see {@link RequestDetails#getUserData()}) that
+	 *                           can be used to store information and state to be
+	 *                           passed between methods in the consent service.
 	 * @param theContextServices An object passed in by the consent framework that
 	 *                           provides utility functions relevant to acting on
 	 *                           consent directives.
 	 * @see #completeOperationFailure(RequestDetails, BaseServerResponseException, IConsentContextServices)
 	 */
-	void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices);
+	default void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+	}
 
 	/**
 	 * This method is called when an operation is complete. It can be used to perform
@@ -140,16 +150,17 @@ public interface IConsentService {
 	 * the operation failed and a failure is being returned to the client.
 	 * </p>
 	 *
-	 * @param theRequestDetails Contains details about the operation that is
-	 *                          beginning, including details about the request type,
-	 *                          URL, etc. Note that the RequestDetails has a generic
-	 *                          Map (see {@link RequestDetails#getUserData()}) that
-	 *                          can be used to store information and state to be
-	 *                          passed between methods in the consent service.
+	 * @param theRequestDetails  Contains details about the operation that is
+	 *                           beginning, including details about the request type,
+	 *                           URL, etc. Note that the RequestDetails has a generic
+	 *                           Map (see {@link RequestDetails#getUserData()}) that
+	 *                           can be used to store information and state to be
+	 *                           passed between methods in the consent service.
 	 * @param theContextServices An object passed in by the consent framework that
 	 *                           provides utility functions relevant to acting on
 	 *                           consent directives.
 	 * @see #completeOperationSuccess(RequestDetails, IConsentContextServices)
 	 */
-	void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices);
+	default void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+	}
 }
