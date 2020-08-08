@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2025
+title: "A new interceptor has been added for the JPA server that selectively allows resource deletions to proceed even if
+   there are valid references to the candidate for deletion from other resources that are not being deleted."
