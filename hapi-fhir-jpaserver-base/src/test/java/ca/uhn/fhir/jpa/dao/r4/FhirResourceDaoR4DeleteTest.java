@@ -99,7 +99,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 
 	@Test
-	public void testDeleteCircularReferenceInTransaction() throws IOException {
+	public void testDeleteCircularReferenceInTransaction() {
 
 		// Create two resources with a circular reference
 		Organization org1 = new Organization();
@@ -217,6 +217,14 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
+
+	}
+
+
+	@Test
+	public void testDeleteIgnoreReferentialIntegrityForPaths() {
+
+
 
 	}
 

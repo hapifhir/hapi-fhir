@@ -44,27 +44,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
 @Service
 public class DeleteConflictService {
-	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.class);
 	public static final int FIRST_QUERY_RESULT_COUNT = 1;
+	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.class);
 	public static int MAX_RETRY_ATTEMPTS = 10;
 	public static String MAX_RETRY_ATTEMPTS_EXCEEDED_MSG = "Requested delete operation stopped before all conflicts were handled. May need to increase the configured Maximum Delete Conflict Query Count.";
-
+	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	DeleteConflictFinderService myDeleteConflictFinderService;
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
-	protected IResourceLinkDao myResourceLinkDao;
-	@Autowired
 	private FhirContext myFhirContext;
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
@@ -87,9 +85,9 @@ public class DeleteConflictService {
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);
-		if(retryCount >= MAX_RETRY_ATTEMPTS && !theDeleteConflicts.isEmpty()) {
+		if (retryCount >= MAX_RETRY_ATTEMPTS && !theDeleteConflicts.isEmpty()) {
 			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
-			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, MAX_RETRY_ATTEMPTS_EXCEEDED_MSG,null, "processing");
+			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, null, "processing");
 			throw new ResourceVersionConflictException(MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, oo);
 		}
 		return retryCount;
@@ -123,7 +121,7 @@ public class DeleteConflictService {
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(TransactionDetails.class, theTransactionDetails);
-		return (DeleteConflictOutcome)JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
+		return (DeleteConflictOutcome) JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
 	}
 
 	private void addConflictsToList(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, List<ResourceLink> theResultList) {
@@ -142,24 +140,31 @@ public class DeleteConflictService {
 	}
 
 	public static void validateDeleteConflictsEmptyOrThrowException(FhirContext theFhirContext, DeleteConflictList theDeleteConflicts) {
-		if (theDeleteConflicts.isEmpty()) {
-			return;
-		}
-
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
+		IBaseOperationOutcome oo = null;
 		String firstMsg = null;
 
 		for (DeleteConflict next : theDeleteConflicts) {
+
+			if (theDeleteConflicts.isResourceIdToIgnoreConflict(next.getTargetId())) {
+				continue;
+			}
+
 			String msg = "Unable to delete " +
 				next.getTargetId().toUnqualifiedVersionless().getValue() +
 				" because at least one resource has a reference to this resource. First reference found was resource " +
 				next.getSourceId().toUnqualifiedVersionless().getValue() +
 				" in path " +
 				next.getSourcePath();
+
 			if (firstMsg == null) {
 				firstMsg = msg;
+				oo = OperationOutcomeUtil.newInstance(theFhirContext);
 			}
 			OperationOutcomeUtil.addIssue(theFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, null, "processing");
+		}
+
+		if (firstMsg == null) {
+			return;
 		}
 
 		throw new ResourceVersionConflictException(firstMsg, oo);
