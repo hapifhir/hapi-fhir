@@ -26,6 +26,8 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
@@ -179,6 +181,8 @@ public class JpaServerDemo extends RestfulServer {
 		getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 
 		getInterceptorService().registerInterceptor(new ResponseHighlighterInterceptor());
+
+		registerProvider(myAppCtx.getBean(BinaryAccessProvider.class));
 
 	}
 

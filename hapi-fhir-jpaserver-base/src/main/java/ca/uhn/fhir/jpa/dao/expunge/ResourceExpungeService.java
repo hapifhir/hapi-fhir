@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -60,7 +61,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -108,6 +113,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	private ISearchParamPresentDao mySearchParamPresentDao;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	@Override
 	@Transactional
@@ -158,6 +165,20 @@ public class ResourceExpungeService implements IResourceExpungeService {
 				return;
 			}
 		}
+
+		/*
+		 * Once this transaction is committed, we will invalidate all memory caches
+		 * in order to avoid any caches having references to things that no longer
+		 * exist. This is a pretty brute-force way of addressing this, and could probably
+		 * be optimized, but expunge is hopefully not frequently called on busy servers
+		 * so it shouldn't be too big a deal.
+		 */
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){
+			@Override
+			public void afterCommit() {
+				myMemoryCacheService.invalidateAllCaches();
+			}
+		});
 	}
 
 	private void expungeHistoricalVersion(RequestDetails theRequestDetails, Long theNextVersionId, AtomicInteger theRemainingCount) {
