@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2022
+title: When performing a resource $expunge in the JPA server, in-memory caches caused issues if a
+   forced ID was reused quickly enough (as can be the case in some testing scenarios). Thanks to
+   GitHub user @janvdpol for reporting!"

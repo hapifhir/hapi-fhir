@@ -100,6 +100,8 @@ public class IdHelperService {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private FhirContext myFhirCtx;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.deleteByPid(forcedId.getId());
@@ -122,9 +124,6 @@ public class IdHelperService {
 		}
 		return matches.iterator().next();
 	}
-
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
 
 	/**
 	 * Given a resource type and ID, determines the internal persistent ID for the resource.
@@ -389,7 +388,7 @@ public class IdHelperService {
 			lookup
 				.stream()
 				.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
-				.forEach(t->{
+				.forEach(t -> {
 					theTarget.add(t);
 					if (!myDaoConfig.isDeleteEnabled()) {
 						String nextKey = Long.toString(t.getResourceId());
@@ -432,19 +431,6 @@ public class IdHelperService {
 		return retVal;
 	}
 
-	public static boolean isValidPid(IIdType theId) {
-		if (theId == null) {
-			return false;
-		}
-
-		String idPart = theId.getIdPart();
-		return isValidPid(idPart);
-	}
-
-	public static boolean isValidPid(String theIdPart) {
-		return StringUtils.isNumeric(theIdPart);
-	}
-
 	@Nullable
 	public Long getPidOrNull(IBaseResource theResource) {
 		IAnyResource anyResource = (IAnyResource) theResource;
@@ -481,11 +467,24 @@ public class IdHelperService {
 		return theIds.stream().collect(Collectors.toMap(this::getPidOrThrowException, Function.identity()));
 	}
 
-    public IIdType resourceIdFromPidOrThrowException(Long thePid) {
-		 Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
-		 if (!optionalResource.isPresent()) {
-		 	throw new ResourceNotFoundException("Requested resource not found");
-		 }
-		 return optionalResource.get().getIdDt().toVersionless();
-    }
+	public IIdType resourceIdFromPidOrThrowException(Long thePid) {
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
+		if (!optionalResource.isPresent()) {
+			throw new ResourceNotFoundException("Requested resource not found");
+		}
+		return optionalResource.get().getIdDt().toVersionless();
+	}
+
+	public static boolean isValidPid(IIdType theId) {
+		if (theId == null) {
+			return false;
+		}
+
+		String idPart = theId.getIdPart();
+		return isValidPid(idPart);
+	}
+
+	public static boolean isValidPid(String theIdPart) {
+		return StringUtils.isNumeric(theIdPart);
+	}
 }
