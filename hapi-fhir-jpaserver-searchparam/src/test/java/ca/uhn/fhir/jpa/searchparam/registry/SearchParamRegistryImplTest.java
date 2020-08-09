@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -46,7 +47,7 @@ public class SearchParamRegistryImplTest {
 	@MockBean
 	private ModelConfig myModelConfig;
 	@MockBean
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	private IInterceptorService myInterceptorBroadcaster;
 
 	@Configuration
 	static class SpringConfig {

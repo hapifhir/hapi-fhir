@@ -24,8 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -38,8 +40,6 @@ import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.DatatypeUtil;
-import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -89,7 +90,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	private volatile long myLastRefresh;
 
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	private IInterceptorService myInterceptorBroadcaster;
+	private RefreshSearchParameterCacheOnUpdate myInterceptor;
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
@@ -236,8 +238,16 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 	}
 
 	@PostConstruct
-	public void postConstruct() {
+	public void start() {
 		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
+
+		myInterceptor = new RefreshSearchParameterCacheOnUpdate();
+		myInterceptorBroadcaster.registerInterceptor(myInterceptor);
+	}
+
+	@PreDestroy
+	public void stop() {
+		myInterceptorBroadcaster.unregisterInterceptor(myInterceptor);
 	}
 
 	public int doRefresh(long theRefreshInterval) {
@@ -376,16 +386,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
-	public static class Job implements HapiJob {
-		@Autowired
-		private ISearchParamRegistry myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.refreshCacheIfNecessary();
-		}
-	}
-
 	@Override
 	public boolean refreshCacheIfNecessary() {
 		if (myActiveSearchParams == null || System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
@@ -402,30 +402,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 		return Collections.unmodifiableMap(myActiveSearchParams);
 	}
 
-	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {
-		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
-
-		Set<String> resourceNames = theFhirContext.getResourceTypes();
-
-		for (String resourceName : resourceNames) {
-			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
-			String nextResourceName = nextResDef.getName();
-			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
-			resourceNameToSearchParams.put(nextResourceName, nameToParam);
-
-			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				nameToParam.put(nextSp.getName(), nextSp);
-			}
-		}
-		return Collections.unmodifiableMap(resourceNameToSearchParams);
-	}
-
 	/**
 	 * All SearchParameters with the name "phonetic" encode the normalized index value using this phonetic encoder.
 	 *
 	 * @since 5.1.0
 	 */
-
+	@Override
 	public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
 		myPhoneticEncoder = thePhoneticEncoder;
 
@@ -445,5 +427,59 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 				searchParam.getName(), searchParam.getPath(), myPhoneticEncoder == null ? "null" : myPhoneticEncoder.name());
 			searchParam.setPhoneticEncoder(myPhoneticEncoder);
 		}
+	}
+
+	@Interceptor
+	public class RefreshSearchParameterCacheOnUpdate {
+
+		@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
+		public void created(IBaseResource theResource) {
+			handle(theResource);
+		}
+
+		@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
+		public void deleted(IBaseResource theResource) {
+			handle(theResource);
+		}
+
+		@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
+		public void updated(IBaseResource theResource) {
+			handle(theResource);
+		}
+
+		private void handle(IBaseResource theResource) {
+			if (theResource != null && myFhirContext.getResourceType(theResource).equals("SearchParameter")) {
+				requestRefresh();
+			}
+		}
+
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ISearchParamRegistry myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.refreshCacheIfNecessary();
+		}
+	}
+
+	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {
+		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
+
+		Set<String> resourceNames = theFhirContext.getResourceTypes();
+
+		for (String resourceName : resourceNames) {
+			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
+			String nextResourceName = nextResDef.getName();
+			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
+			resourceNameToSearchParams.put(nextResourceName, nameToParam);
+
+			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+				nameToParam.put(nextSp.getName(), nextSp);
+			}
+		}
+		return Collections.unmodifiableMap(resourceNameToSearchParams);
 	}
 }
