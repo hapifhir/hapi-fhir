@@ -521,7 +521,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		IValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM),null, mySrd);
+		IValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM), null,null, mySrd);
 		assertEquals(true, lookupResults.isFound());
 
 		ValueSet vs = new ValueSet();
@@ -711,7 +711,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");
-		IValidationSupport.LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, mySrd);
+		IValidationSupport.LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null,null, mySrd);
 		assertEquals(true, outcome.isFound());
 	}
 

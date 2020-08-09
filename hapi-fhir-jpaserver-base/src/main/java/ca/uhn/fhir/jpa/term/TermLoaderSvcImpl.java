@@ -378,6 +378,10 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		try {
 			String loincCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
 			loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
+			String  codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+			if (codeSystemVersionId != null) {
+				loincCs.setVersion(codeSystemVersionId);
+			}
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load loinc.xml", e);
 		}

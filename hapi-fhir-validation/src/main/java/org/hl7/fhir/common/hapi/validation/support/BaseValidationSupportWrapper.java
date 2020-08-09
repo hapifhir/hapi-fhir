@@ -59,6 +59,11 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	}
 
 	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theVersion) {
+		return myWrap.lookupCode(theValidationSupportContext, theSystem, theCode, theVersion);
+	}
+
+	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return myWrap.lookupCode(theValidationSupportContext, theSystem, theCode);
 	}

@@ -113,14 +113,17 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
 
-		source.getCompose().addInclude().addValueSet(theUri);
+//		source.getCompose().addInclude().addValueSet(theUri);
 
 		if (isNotBlank(theFilter)) {
-			ConceptSetComponent include = source.getCompose().addInclude();
-			ConceptSetFilterComponent filter = include.addFilter();
+//			ConceptSetComponent include = source.getCompose().addInclude();
+//			ConceptSetFilterComponent filter = include.addFilter();
+			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
 			filter.setProperty("display");
 			filter.setOp(FilterOperator.EQUAL);
 			filter.setValue(theFilter);
+		} else {
+			source.getCompose().addInclude().addValueSet(theUri);
 		}
 
 		ValueSet retVal = doExpand(source);
@@ -148,14 +151,17 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
 
-		source.getCompose().addInclude().addValueSet(theUri);
+//		source.getCompose().addInclude().addValueSet(theUri);
 
 		if (isNotBlank(theFilter)) {
-			ConceptSetComponent include = source.getCompose().addInclude();
-			ConceptSetFilterComponent filter = include.addFilter();
+//			ConceptSetComponent include = source.getCompose().addInclude();
+//			ConceptSetFilterComponent filter = include.addFilter();
+			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
 			filter.setProperty("display");
 			filter.setOp(FilterOperator.EQUAL);
 			filter.setValue(theFilter);
+		} else {
+			source.getCompose().addInclude().addValueSet(theUri);
 		}
 
 		ValueSet retVal = doExpand(source, theOffset, theCount);

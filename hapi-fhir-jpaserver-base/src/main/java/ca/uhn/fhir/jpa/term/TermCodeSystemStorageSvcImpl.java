@@ -284,16 +284,19 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				ResourcePersistentId codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
 
 				/*
-				 * If this is a not-present codesystem, we don't want to store a new version if one
-				 * already exists, since that will wipe out the existing concepts. We do create or update
-				 * the TermCodeSystem table though, since that allows the DB to reject changes
-				 * that would result in duplicate CodeSysten.url values.
+				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
+				 * overwrite the existing version since that will wipe out the existing concepts. We do create
+				 * or update the TermCodeSystem table though, since that allows the DB to reject changes that would
+				 * result in duplicate CodeSystem.url values.
 				 */
 				if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-					TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystem.getUrl());
-					if (codeSystem != null) {
-						getOrCreateTermCodeSystem(codeSystemResourcePid, theCodeSystem.getUrl(), theCodeSystem.getUrl(), theResourceEntity);
-						return;
+					TermCodeSystem termCodeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystem.getUrl());
+					if (termCodeSystem != null) {
+						TermCodeSystemVersion codeSystemVersion = getExistingTermCodeSystemVersion(termCodeSystem.getPid(), theCodeSystem.getVersion());
+						if (codeSystemVersion != null) {
+							getOrCreateTermCodeSystem(codeSystemResourcePid, theCodeSystem.getUrl(), theCodeSystem.getUrl(), theResourceEntity);
+							return;
+						}
 					}
 				}
 
@@ -338,22 +341,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
-		// Grab the existing versions so we can delete them later
-		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
-
-		/*
-		 * For now we always delete old versions. At some point it would be nice to allow configuration to keep old versions.
-		 */
-
-		for (TermCodeSystemVersion next : existing) {
-			ourLog.info("Deleting old code system version {}", next.getPid());
-			Long codeSystemVersionPid = next.getPid();
-			deleteCodeSystemVersion(codeSystemVersionPid);
+		// Grab the existing version so we can delete it
+		TermCodeSystem existingCodeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
+		TermCodeSystemVersion existing = null;
+		if (existingCodeSystem != null) {
+			existing = getExistingTermCodeSystemVersion(existingCodeSystem.getPid(), theSystemVersionId);
 		}
 
-		ourLog.debug("Flushing...");
-		myConceptDao.flush();
-		ourLog.debug("Done flushing");
+		/*
+		 * Delete version being replaced.
+		 */
+
+		if(existing != null) {
+			ourLog.info("Deleting old code system version {}", existing.getPid());
+			Long codeSystemVersionPid = existing.getPid();
+			deleteCodeSystemVersion(codeSystemVersionPid);
+
+		}
 
 		/*
 		 * Do the upload
@@ -408,6 +412,17 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 	}
 
+	private TermCodeSystemVersion getExistingTermCodeSystemVersion(Long theCodeSystemVersionPid, String theCodeSystemVersion) {
+		TermCodeSystemVersion existing;
+		if (theCodeSystemVersion == null) {
+			existing = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystemVersionPid);
+		} else {
+			existing = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCodeSystemVersionPid, theCodeSystemVersion);
+		}
+
+		return existing;
+	}
+
 	private void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
 		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
 
@@ -457,8 +472,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				myCodeSystemDao.save(codeSystem);
 			}
 
+			myConceptDao.flush();
+
 			ourLog.info(" * Deleting code system version");
-			myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+			myCodeSystemVersionDao.delete(theCodeSystemVersionPid);
+			myCodeSystemVersionDao.flush();
 		});
 
 	}

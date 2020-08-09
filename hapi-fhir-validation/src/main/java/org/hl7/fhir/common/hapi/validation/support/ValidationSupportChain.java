@@ -258,6 +258,16 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theVersion) {
+		for (IValidationSupport next : myChain) {
+			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
+				return next.lookupCode(theValidationSupportContext, theSystem, theCode, theVersion);
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {

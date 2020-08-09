@@ -309,6 +309,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theVersion) {
+		// TODO: Add support for validating versioned codes as well.
+		return lookupCode(theValidationSupportContext, theSystem, theCode);
+	}
+
+	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return validateCode(theValidationSupportContext, new ConceptValidationOptions(), theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
 	}
@@ -470,6 +476,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			List<VersionIndependentConcept> nextCodeList = new ArrayList<>();
 			String system = nextInclude.getSystem();
+			String systemVersion = nextInclude.getVersion();
 			if (isNotBlank(system)) {
 
 				if (theWantSystem != null && !theWantSystem.equals(system)) {
@@ -492,7 +499,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 					if (theWantCode != null) {
 						if (theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, system)) {
-							LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, system, theWantCode);
+							LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, system, theWantCode, systemVersion);
 							if (lookup != null && lookup.isFound()) {
 								CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
 									.addConcept()

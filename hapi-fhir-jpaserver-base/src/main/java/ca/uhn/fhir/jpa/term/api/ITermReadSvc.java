@@ -73,6 +73,8 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	List<VersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet);
 
+	Optional<TermConcept> findCode(String theCodeSystem, String theCode, String theVersion);
+
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
@@ -102,6 +104,8 @@ public interface ITermReadSvc extends IValidationSupport {
 	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
+
+	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB, IPrimitiveType<String> theSystemVersion);
 
 	void preExpandDeferredValueSetsToTerminologyTables();
 

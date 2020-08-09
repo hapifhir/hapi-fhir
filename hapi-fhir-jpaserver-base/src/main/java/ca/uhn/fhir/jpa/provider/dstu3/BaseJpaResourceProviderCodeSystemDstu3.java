@@ -53,6 +53,7 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 		@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
 		@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
+		@OperationParam(name="version", min=0, max=1) StringType theVersion,
 		@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
 		RequestDetails theRequestDetails
 	) {
@@ -60,7 +61,7 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-			IValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+			IValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theVersion, theRequestDetails);
 			result.throwNotFoundIfAppropriate();
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
 		} catch (FHIRException e) {

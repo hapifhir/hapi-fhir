@@ -17,12 +17,10 @@ import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -343,6 +341,28 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	@Test
+	public void testLoadLoincMultipleVersions() throws IOException {
+
+		// Load LOINC marked as version 2.67
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		CodeSystem loincCS = mySystemCaptor.getValue();
+		assertEquals("2.67", loincCS.getVersion());
+
+		// Load LOINC marked as version 2.68
+		myFiles = new ZipCollectionBuilder();
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		loincCS = mySystemCaptor.getValue();
+		assertEquals("2.68", loincCS.getVersion());
+
+	}
+
+	@Test
 	@Disabled
 	public void testLoadLoincMandatoryFilesOnly() throws IOException {
 		addLoincMandatoryFilesToZip(myFiles);
@@ -382,7 +402,11 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		addLoincMandatoryFilesWithPropertiesFileToZip(theFiles, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+	}
+
+	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
+		theFiles.addFileZip("/loinc/", thePropertiesFile);
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());

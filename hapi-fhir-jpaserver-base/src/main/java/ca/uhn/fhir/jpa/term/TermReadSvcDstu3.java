@@ -149,7 +149,12 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
-		return super.lookupCode(theSystem, theCode);
+		return super.lookupCode(theSystem, theCode, null);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theVersion) {
+		return super.lookupCode(theSystem, theCode, theVersion);
 	}
 
 	@Override

@@ -48,6 +48,7 @@ import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -235,6 +236,12 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		return null;
 	}
 
+	@NotNull
+	@Override
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException();
+	}
+
 	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
@@ -278,6 +285,11 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Override
 	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CodingDt theCodingA, CodingDt theCodingB, RequestDetails theRequestDetails) {
 		return myTerminologySvc.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB);
+	}
+
+	@Override
+	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CodingDt theCodingA, CodingDt theCodingB, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
