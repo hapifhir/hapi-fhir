@@ -91,7 +91,7 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptor {
 	 *
 	 * @see #addPath(String)
 	 */
-	private Set<String> getPaths() {
+	public Set<String> getPaths() {
 		return myPaths;
 	}
 
