@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -9,7 +10,11 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu2.valueset.XPathUsageTypeEnum;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -111,6 +116,46 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParameterDao.create(fooSp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 	}
+
+	/**
+	 * See #2023
+	 */
+	@Test
+	public void testNumberSearchParam() {
+		SearchParameter numberParameter = new SearchParameter();
+		numberParameter.setId("future-appointment-count");
+		numberParameter.setName("Future Appointment Count");
+		numberParameter.setCode("future-appointment-count");
+		numberParameter.setDescription("Count of future appointments for the patient");
+		numberParameter.setUrl("http://integer");
+		numberParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		numberParameter.addBase("Patient");
+		numberParameter.setType(Enumerations.SearchParamType.NUMBER);
+		numberParameter.setExpression("Patient.extension('http://integer')");
+		mySearchParameterDao.update(numberParameter);
+
+		// This fires every 10 seconds
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
+		Patient patient = new Patient();
+		patient.setId("future-appointment-count-pt");
+		patient.setActive(true);
+		patient.addExtension( "http://integer", new IntegerType(1));
+		myPatientDao.update(patient);
+
+		IBundleProvider search;
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam(1)));
+		assertEquals(1, search.size());
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("gt0")));
+		assertEquals(1, search.size());
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("lt0")));
+		assertEquals(0, search.size());
+
+	}
+
 
 	/**
 	 * Draft search parameters should be ok even if they aren't completely valid

@@ -51,6 +51,7 @@ public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao
 	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
 		super.postPersist(theEntity, theResource);
 		markAffectedResources(theResource);
+
 	}
 
 	@Override

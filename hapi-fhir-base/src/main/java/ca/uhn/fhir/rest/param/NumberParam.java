@@ -56,7 +56,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	 * Constructor
 	 * 
 	 * @param theValue
-	 *            A string value, e.g. "&gt;5.0"
+	 *            A string value, e.g. "gt5.0"
 	 */
 	public NumberParam(String theValue) {
 		setValueAsQueryToken(null, null, null, theValue);

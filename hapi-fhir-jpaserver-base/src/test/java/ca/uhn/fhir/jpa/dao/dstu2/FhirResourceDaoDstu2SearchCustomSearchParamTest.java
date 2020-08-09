@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -28,6 +29,8 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -231,6 +234,47 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
 	}
+
+	/**
+	 * See #2023
+	 */
+	@Test
+	public void testNumberSearchParam() {
+		SearchParameter numberParameter = new ca.uhn.fhir.model.dstu2.resource.SearchParameter();
+		numberParameter.setId("future-appointment-count");
+		numberParameter.setName("Future Appointment Count");
+		numberParameter.setCode("future-appointment-count");
+		numberParameter.setDescription("Count of future appointments for the patient");
+		numberParameter.setUrl("http://integer");
+		numberParameter.setStatus(ca.uhn.fhir.model.dstu2.valueset.ConformanceResourceStatusEnum.ACTIVE);
+		numberParameter.setBase(ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum.PATIENT);
+		numberParameter.setType(ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.NUMBER);
+		numberParameter.setXpathUsage(XPathUsageTypeEnum.NORMAL);
+		numberParameter.setXpath("Patient.extension('http://integer')");
+		mySearchParameterDao.update(numberParameter);
+
+		// This fires every 10 seconds
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
+		Patient patient = new Patient();
+		patient.setId("future-appointment-count-pt");
+		patient.setActive(true);
+		patient.addUndeclaredExtension(false, "http://integer", new IntegerDt(1));
+		myPatientDao.update(patient);
+
+		IBundleProvider search;
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam(1)));
+		assertEquals(1, search.size());
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("gt0")));
+		assertEquals(1, search.size());
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("lt0")));
+		assertEquals(0, search.size());
+
+	}
+
 
 	@Test
 	public void testIncludeExtensionReferenceAsRecurse() {
