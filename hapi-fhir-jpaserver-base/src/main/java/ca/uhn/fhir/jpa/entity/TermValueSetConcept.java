@@ -41,7 +41,9 @@ import static org.apache.commons.lang3.StringUtils.length;
  */
 @Table(name = "TRM_VALUESET_CONCEPT", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"}),
+	// FIXME: add task
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_VS", columnNames = {"VALUESET_PID"})
 })
 @Entity()
 public class TermValueSetConcept implements Serializable {

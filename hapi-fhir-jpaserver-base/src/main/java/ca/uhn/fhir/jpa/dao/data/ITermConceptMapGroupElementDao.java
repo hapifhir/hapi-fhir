@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -27,7 +28,10 @@ import org.springframework.data.repository.query.Param;
  */
 
 public interface ITermConceptMapGroupElementDao extends JpaRepository<TermConceptMapGroupElement, Long> {
-	@Query("DELETE FROM TermConceptMapGroupElement e WHERE e.myId = :pid")
+	@Query("DELETE FROM TermConceptMapGroupElement e WHERE e.myConceptMapGroup IN (" +
+		"   SELECT g FROM TermConceptMapGroup g WHERE g.myConceptMap = :concept_map" +
+		")"
+	)
 	@Modifying
-	void deleteTermConceptMapGroupElementById(@Param("pid") Long theId);
+	void deleteTermConceptMapGroupElementById(@Param("concept_map") TermConceptMap theConceptMap);
 }

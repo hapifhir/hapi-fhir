@@ -37,7 +37,9 @@ import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(name = "TRM_CONCEPT_MAP_GRP_ELEMENT", indexes = {
-	@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE")
+	@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE"),
+	// FIXME: add task
+	@Index(name = "IDX_CNCPT_MAP_GRP_GRP", columnList = "CONCEPT_MAP_GROUP_PID")
 })
 public class TermConceptMapGroupElement implements Serializable {
 	private static final long serialVersionUID = 1L;

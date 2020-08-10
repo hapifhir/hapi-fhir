@@ -32,6 +32,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 @Entity
 @Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = {
 }, indexes = {
+	// FIXME: Add migration task
+	@Index(name = "IDX_CONCEPTDESIG_CONCEPT_PID", columnList = "CONCEPT_PID")
 })
 public class TermConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;

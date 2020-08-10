@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -38,7 +40,7 @@ public interface ITermConceptDesignationDao extends IHapiJpaRepository<TermConce
 
 	@Override
 	@Modifying
-	@Query("DELETE FROM TermConceptDesignation t WHERE t.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
+	@Query("DELETE FROM TermConceptDesignation t WHERE t.myId IN :pid")
+	void deleteByPid(@Param("pid") List<Long> theId);
 
 }

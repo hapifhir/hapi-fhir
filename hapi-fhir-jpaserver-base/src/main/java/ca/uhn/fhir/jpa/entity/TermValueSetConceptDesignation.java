@@ -33,7 +33,10 @@ import java.io.Serializable;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_VALUESET_C_DESIGNATION")
+@Table(name = "TRM_VALUESET_C_DESIGNATION", indexes = {
+	// FIXME: add task
+	@Index(name="IDX_VALUESET_C_DSGNTN_CNCPT", columnList = "VALUESET_CONCEPT_PID")
+})
 @Entity()
 public class TermValueSetConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;

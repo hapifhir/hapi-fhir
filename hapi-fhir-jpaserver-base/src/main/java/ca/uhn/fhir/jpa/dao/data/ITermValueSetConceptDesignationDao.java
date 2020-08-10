@@ -20,19 +20,27 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermValueSetConceptDesignation, Long> {
+import java.util.List;
+
+public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermValueSetConceptDesignation, Long>, IHapiJpaRepository<TermValueSetConceptDesignation> {
 
 	@Query("SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
-	@Modifying
-	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
+	@Query("SELECT vscd.myId FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
+	Slice<Long> findByTermValueSetId(Pageable thePage1000, @Param("pid") Long theValueSetId);
 
+	@Override
+	@Modifying
+	@Query("DELETE FROM TermValueSetConceptDesignation t WHERE t.myId IN :pid")
+	void deleteByPid(@Param("pid") List<Long> theId);
 }

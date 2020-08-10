@@ -57,6 +57,10 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			}
 		});
 
+		runInTransaction(()->{
+			assertEquals(0, myTermConceptMapDao.count());
+		});
+
 	}
 
 	@Test

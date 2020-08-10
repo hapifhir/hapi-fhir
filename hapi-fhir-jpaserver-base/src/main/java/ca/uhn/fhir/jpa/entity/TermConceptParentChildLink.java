@@ -28,6 +28,9 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "TRM_CONCEPT_PC_LINK", indexes = {
+	// FIXME: Add migration task
+	@Index(name = "IDX_CONCEPTPC_CHILD_PID", columnList = "CHILD_PID"),
+	@Index(name = "IDX_CONCEPTPC_PARENT_PID", columnList = "PARENT_PID")
 })
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;

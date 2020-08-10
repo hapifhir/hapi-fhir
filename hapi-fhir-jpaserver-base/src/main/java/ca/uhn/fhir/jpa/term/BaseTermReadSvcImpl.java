@@ -126,7 +126,6 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -174,7 +173,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -310,20 +308,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapById.get();
 
 			ourLog.info("Deleting existing TermConceptMap[{}] and its children...", existingTermConceptMap.getId());
-			for (TermConceptMapGroup group : existingTermConceptMap.getConceptMapGroups()) {
 
-				for (TermConceptMapGroupElement element : group.getConceptMapGroupElements()) {
-
-					for (TermConceptMapGroupElementTarget target : element.getConceptMapGroupElementTargets()) {
-
-						myConceptMapGroupElementTargetDao.deleteTermConceptMapGroupElementTargetById(target.getId());
-					}
-
-					myConceptMapGroupElementDao.deleteTermConceptMapGroupElementById(element.getId());
-				}
-
-				myConceptMapGroupDao.deleteTermConceptMapGroupById(group.getId());
-			}
+			myConceptMapGroupElementTargetDao.deleteTermConceptMapGroupElementTargetById(existingTermConceptMap);
+			myConceptMapGroupElementDao.deleteTermConceptMapGroupElementById(existingTermConceptMap);
+			myConceptMapGroupDao.deleteTermConceptMapGroupById(existingTermConceptMap);
 
 			myConceptMapDao.deleteTermConceptMapById(existingTermConceptMap.getId());
 			ourLog.info("Done deleting existing TermConceptMap[{}] and its children.", existingTermConceptMap.getId());
@@ -338,16 +326,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	public void deleteValueSet(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
-		Optional<TermValueSet> optionalExistingTermValueSetById = myValueSetDao.findByResourcePid(theResourceTable.getId());
-
-		if (optionalExistingTermValueSetById.isPresent()) {
-			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
-
-			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
-			myValueSetConceptDesignationDao.deleteByTermValueSetId(existingTermValueSet.getId());
-			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
-			myValueSetDao.deleteById(existingTermValueSet.getId());
-			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
+		List<TermValueSet> termValueSets = myValueSetDao.findByResourcePid(theResourceTable.getId());
+		for (TermValueSet next : termValueSets) {
+			myDeferredStorageSvc.deleteValueSet(next);
 		}
 	}
 
@@ -1236,8 +1217,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
-		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
-		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
+		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByUrl(theValueSet.getUrl());
 
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. {}", getValueSetInfo(theValueSet));
@@ -1265,18 +1245,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
 			if (theValidationOptions.isInferSystem()) {
-				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getIdAsLong(), theCode));
+				concepts.addAll(myValueSetConceptDao.findByValueSetUrlAndCode(theValueSet.getUrl(), theCode));
 			} else if (isNotBlank(theSystem)) {
-				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
+				concepts.addAll(findByValueSetResourcePidSystemAndCode(theValueSet.getUrl(), theSystem, theCode));
 			}
 		} else if (theCoding != null) {
 			if (theCoding.hasSystem() && theCoding.hasCode()) {
-				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theCoding.getSystem(), theCoding.getCode()));
+				concepts.addAll(findByValueSetResourcePidSystemAndCode(theValueSet.getUrl(), theCoding.getSystem(), theCoding.getCode()));
 			}
 		} else if (theCodeableConcept != null) {
 			for (Coding coding : theCodeableConcept.getCoding()) {
 				if (coding.hasSystem() && coding.hasCode()) {
-					concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, coding.getSystem(), coding.getCode()));
+					concepts.addAll(findByValueSetResourcePidSystemAndCode(theValueSet.getUrl(), coding.getSystem(), coding.getCode()));
 					if (!concepts.isEmpty()) {
 						break;
 					}
@@ -1318,9 +1298,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			.setMessage("Unknown code {" + theSystem + "}" + theCode + theAppend);
 	}
 
-	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {
+	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(String theValueSetUrl, String theSystem, String theCode) {
 		List<TermValueSetConcept> retVal = new ArrayList<>();
-		Optional<TermValueSetConcept> optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid.getIdAsLong(), theSystem, theCode);
+		Optional<TermValueSetConcept> optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetUrlSystemAndCode(theValueSetUrl, theSystem, theCode);
 		optionalTermValueSetConcept.ifPresent(retVal::add);
 		return retVal;
 	}
@@ -1667,6 +1647,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			// We have a ValueSet to pre-expand.
 			try {
 				ValueSet valueSet = txTemplate.execute(t -> {
+					ourLog.info("About to pre-expand TermValueSet[pid={}]", valueSetToExpand.getId());
 					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).get();
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
