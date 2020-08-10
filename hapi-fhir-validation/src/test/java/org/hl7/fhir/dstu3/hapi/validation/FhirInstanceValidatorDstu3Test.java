@@ -643,6 +643,9 @@ public class FhirInstanceValidatorDstu3Test {
 					ourLog.info("Skipping logical type: {}", next.getId());
 					continue;
 				}
+				if (sd.getUrl().equals("http://hl7.org/fhir/StructureDefinition/Resource")) {
+					continue;
+				}
 			}
 
 			ourLog.info("Validating {}", next.getId());
@@ -762,7 +765,7 @@ public class FhirInstanceValidatorDstu3Test {
 		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
 		ValidationResult results = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("The Coding provided is not in the value set http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000"));
+		assertThat(outcome.toString(), containsString("The Coding provided (urn:oid:2.16.840.1.113883.2.4.4.16.34#6030) is not in the value set http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000"));
 	}
 
 	private void loadNL() throws IOException {

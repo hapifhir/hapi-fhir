@@ -451,7 +451,7 @@ public class FhirInstanceValidatorR5Test {
 			"  \"resourceType\":\"Patient\"," +
 			"  \"text\": {\n" +
 			"    \"status\": \"generated\",\n" +
-			"    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"> </div>\"\n" +
+			"    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">HELLO</div>\"\n" +
 			"  },\n" +
 			"  \"id\":\"123\"" +
 			"}";
@@ -467,7 +467,7 @@ public class FhirInstanceValidatorR5Test {
 				"\"resourceType\":\"Patient\"," +
 				"  \"text\": {\n" +
 				"    \"status\": \"generated\",\n" +
-				"    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"> </div>\"\n" +
+				"    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">HELLO</div>\"\n" +
 				"  },\n" +
 				"\"id\":\"123\"," +
 				"\"foo\":\"123\"" +
