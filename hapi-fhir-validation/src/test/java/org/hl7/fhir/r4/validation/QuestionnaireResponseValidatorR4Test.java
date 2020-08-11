@@ -246,7 +246,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code for \"http://codesystems.com/system#code1\""));
+		assertThat(errors.toString(), containsString("Unknown code for 'http://codesystems.com/system#code1'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -257,7 +257,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3' for \"http://codesystems.com/system2#code3\""));
+		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3' for 'http://codesystems.com/system2#code3'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 	}
@@ -319,7 +319,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
+		assertThat(errors.toString(), containsString("No response answer found for required item 'link0'"));
 	}
 
 	@Test
@@ -641,7 +641,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay(""));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
+		assertThat(errors.toString(), containsString("No response answer found for required item 'link0'"));
 
 	}
 
@@ -711,7 +711,7 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString(" - QuestionnaireResponse"));
-		assertThat(errors.toString(), containsString("LinkId \"link1\" not found in questionnaire"));
+		assertThat(errors.toString(), containsString("LinkId 'link1' not found in questionnaire"));
 	}
 
 	@Test
@@ -729,7 +729,7 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString(" - QuestionnaireResponse"));
-		assertThat(errors.toString(), containsString("LinkId \"link1\" not found in questionnaire"));
+		assertThat(errors.toString(), containsString("LinkId 'link1' not found in questionnaire"));
 	}
 
 	@Test

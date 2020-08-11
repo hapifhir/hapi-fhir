@@ -364,7 +364,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
+		assertThat(errors.toString(), containsString("No response answer found for required item 'link0'"));
 	}
 
 	@Test
@@ -490,7 +490,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString(" No response answer found for required item \"link1\""));
+		assertThat(errors.toString(), containsString(" No response answer found for required item 'link1'"));
 	}
 
 	@Test
@@ -532,7 +532,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("HELLO"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Item has answer, even though it is not enabled (item id = \"link1\")"));
+		assertThat(errors.toString(), containsString("Item has answer, even though it is not enabled (item id = 'link1')"));
 
 		// link0 has an answer, and it's the right one
 		qa = new QuestionnaireResponse();
@@ -541,7 +541,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding("http://foo", "YES", null));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item \"link1\""));
+		assertThat(errors.toString(), containsString("No response answer found for required item 'link1'"));
 	}
 
 	@Test
@@ -669,7 +669,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		// Without an answer
 		ValidationResult errors = myVal.validateWithResult(qr);
-		assertThat(errors.toString(), containsString("No response answer found for required item \"link2\""));
+		assertThat(errors.toString(), containsString("No response answer found for required item 'link2'"));
 
 		// With an answer
 		qr.getItem().get(2).addAnswer().setValue(new StringType("AAA"));
@@ -1064,7 +1064,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code for \"http://codesystems.com/system#code1\""));
+		assertThat(errors.toString(), containsString("Unknown code for 'http://codesystems.com/system#code1'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Partial code
@@ -1132,7 +1132,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay(""));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
+		assertThat(errors.toString(), containsString("No response answer found for required item 'link0'"));
 	}
 
 	@Test
@@ -1150,7 +1150,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString(" - QuestionnaireResponse"));
-		assertThat(errors.toString(), containsString("LinkId \"link1\" not found in questionnaire"));
+		assertThat(errors.toString(), containsString("LinkId 'link1' not found in questionnaire"));
 	}
 
 	@Test
@@ -1168,7 +1168,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString(" - QuestionnaireResponse"));
-		assertThat(errors.toString(), containsString("LinkId \"link1\" not found in questionnaire"));
+		assertThat(errors.toString(), containsString("LinkId 'link1' not found in questionnaire"));
 	}
 
 	@BeforeAll
