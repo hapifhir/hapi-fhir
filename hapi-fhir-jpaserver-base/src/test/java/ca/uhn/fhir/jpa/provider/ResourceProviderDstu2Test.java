@@ -35,6 +35,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
+import ca.uhn.fhir.model.dstu2.valueset.XPathUsageTypeEnum;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -167,6 +173,52 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 		}
 	}
+
+	/**
+	 * See #2023
+	 */
+	@Test
+	public void testCustomNumberSearchParam() {
+		SearchParameter numberParameter = new SearchParameter();
+		numberParameter.setId("future-appointment-count");
+		numberParameter.setName("Future Appointment Count");
+		numberParameter.setCode("future-appointment-count");
+		numberParameter.setDescription("Count of future appointments for the patient");
+		numberParameter.setUrl("http://integer");
+		numberParameter.setStatus(ca.uhn.fhir.model.dstu2.valueset.ConformanceResourceStatusEnum.ACTIVE);
+		numberParameter.setBase(ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum.PATIENT);
+		numberParameter.setType(ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.NUMBER);
+		numberParameter.setXpathUsage(XPathUsageTypeEnum.NORMAL);
+		numberParameter.setXpath("Patient.extension('http://integer')");
+		ourClient.update().resource(numberParameter).execute();
+
+		// This fires every 10 seconds
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
+		Patient patient = new Patient();
+		patient.setId("future-appointment-count-pt");
+		patient.setActive(true);
+		patient.addUndeclaredExtension(false,  "http://integer", new IntegerDt(2));
+		ourClient.update().resource(patient).execute();
+
+		Bundle futureAppointmentCountBundle2 = ourClient
+			.search()
+			.forResource(Patient.class)
+			.where(new NumberClientParam("future-appointment-count").greaterThan().number(1))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(futureAppointmentCountBundle2.getTotal().intValue(), 1);
+
+		Bundle futureAppointmentCountBundle3 = ourClient
+			.search()
+			.forResource(Patient.class)
+			.where(new NumberClientParam("future-appointment-count").exactly().number(2))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(futureAppointmentCountBundle3.getTotal().intValue(), 1);
+
+	}
+
 
 	/**
 	 * See #484
