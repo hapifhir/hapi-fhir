@@ -58,13 +58,18 @@ public class EmpiResourceFilteringSvc {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		List<EmpiResourceSearchParamJson> candidateSearchParams = empiSettings.getEmpiRules().getCandidateSearchParams();
 
-		boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
-			.filter(csp -> myEmpiSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
-			.flatMap(csp -> csp.getSearchParams().stream())
-			.map(searchParam -> myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
-			.anyMatch(valueList -> !valueList.isEmpty());
 
-		ourLog.debug("Is {} suitable for EMPI processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
-		return containsValueForSomeSearchParam;
+		if (candidateSearchParams.isEmpty()) {
+			ourLog.debug("As there are no Candidate Search parameters, {} is suitable for processing.", theResource.getId());;
+			return true;
+		} else {
+			boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
+				.filter(csp -> myEmpiSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
+				.flatMap(csp -> csp.getSearchParams().stream())
+				.map(searchParam -> myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
+				.anyMatch(valueList -> !valueList.isEmpty());
+			ourLog.debug("Is {} suitable for EMPI processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
+			return containsValueForSomeSearchParam;
+		}
 	}
 }
