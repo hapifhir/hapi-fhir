@@ -28,12 +28,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
-	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
+	List<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url")
 	Optional<TermValueSet> findByUrl(@Param("url") String theUrl);

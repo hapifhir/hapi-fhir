@@ -36,6 +36,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -48,7 +49,9 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_PROPERTY", uniqueConstraints = {
+@Table(name = "TRM_CONCEPT_PROPERTY", indexes = {
+	// FIXME: Add migration task
+	@Index(name = "IDX_CONCEPTPROP_CONCEPT_PID", columnList = "CONCEPT_PID")
 })
 public class TermConceptProperty implements Serializable {
 	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;

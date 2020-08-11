@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -31,6 +32,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -54,7 +57,10 @@ public interface ITermCodeSystemStorageSvc {
 
 	UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theRemovals);
 
-	int saveConcept(TermConcept theNextConcept);
+    @Transactional(propagation = Propagation.NEVER)
+    void deleteValueSet(TermValueSet theValueSet);
+
+    int saveConcept(TermConcept theNextConcept);
 
 	ResourcePersistentId getValueSetResourcePid(IIdType theIdElement);
 }

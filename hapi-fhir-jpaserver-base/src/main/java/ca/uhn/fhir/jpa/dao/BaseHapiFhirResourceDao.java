@@ -994,36 +994,39 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public T read(IIdType theId) {
 		return read(theId, null);
 	}
 
 	@Override
-	@Transactional
 	public T read(IIdType theId, RequestDetails theRequestDetails) {
 		return read(theId, theRequestDetails, false);
 	}
 
 	@Override
-	@Transactional
 	public T read(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
+		return myTransactionService.execute(theRequest, tx-> doRead(theId, theRequest, theDeletedOk));
+	}
+
+	public T doRead(IIdType theTheId, RequestDetails theTheRequest, boolean theTheDeletedOk) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+
 		// Notify interceptors
-		if (theRequest != null) {
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getResourceName(), theId);
-			RestOperationTypeEnum operationType = theId.hasVersionIdPart() ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
+		if (theTheRequest != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theTheRequest, getResourceName(), theTheId);
+			RestOperationTypeEnum operationType = theTheId.hasVersionIdPart() ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
 			notifyInterceptors(operationType, requestDetails);
 		}
 
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, theRequest);
+		BaseHasResource entity = readEntity(theTheId, theTheRequest);
 		validateResourceType(entity);
 
 		T retVal = toResource(myResourceType, entity, null, false);
 
-		if (theDeletedOk == false) {
+		if (theTheDeletedOk == false) {
 			if (entity.getDeleted() != null) {
 				throw createResourceGoneException(entity);
 			}
@@ -1034,11 +1037,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
 			HookParams params = new HookParams()
 				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				.add(RequestDetails.class, theTheRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theTheRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theTheRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				throw new ResourceNotFoundException(theId);
+				throw new ResourceNotFoundException(theTheId);
 			}
 		}
 
@@ -1047,14 +1050,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
 			HookParams params = new HookParams()
 				.add(IPreResourceShowDetails.class, showDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				.add(RequestDetails.class, theTheRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theTheRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theTheRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 			//noinspection unchecked
 			retVal = (T) showDetails.getResource(0);
 		}
 
-		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+		ourLog.debug("Processed read on {} in {}ms", theTheId.getValue(), w.getMillisAndRestart());
 		return retVal;
 	}
 

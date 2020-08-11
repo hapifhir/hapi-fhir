@@ -33,7 +33,9 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_MAP_GROUP")
+@Table(name = "TRM_CONCEPT_MAP_GROUP", indexes = {
+	@Index(name = "IDX_TCMGROUP_CM", columnList = "CONCEPT_MAP_PID")
+})
 public class TermConceptMapGroup implements Serializable {
 	private static final long serialVersionUID = 1L;
 

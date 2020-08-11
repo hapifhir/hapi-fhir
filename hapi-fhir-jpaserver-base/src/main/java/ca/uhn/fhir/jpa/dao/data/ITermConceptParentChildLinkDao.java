@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 
 /*
  * #%L
@@ -47,7 +48,7 @@ public interface ITermConceptParentChildLinkDao extends IHapiJpaRepository<TermC
 
 	@Override
 	@Modifying
-	@Query("DELETE FROM TermConceptParentChildLink t WHERE t.myPid = :pid")
-	void deleteByPid(@Param("pid") Long theId);
+	@Query("DELETE FROM TermConceptParentChildLink t WHERE t.myPid IN :pid")
+	void deleteByPid(@Param("pid") List<Long> theId);
 
 }

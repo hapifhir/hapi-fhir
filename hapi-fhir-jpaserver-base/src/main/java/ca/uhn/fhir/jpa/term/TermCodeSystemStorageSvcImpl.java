@@ -33,6 +33,9 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -40,12 +43,14 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -125,6 +130,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private ITermValueSetDao myValueSetDao;
+	@Autowired
+	private ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
+	@Autowired
+	private ITermValueSetConceptDao myValueSetConceptDao;
 
 	@Override
 	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
@@ -227,6 +238,38 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		txTemplate.executeWithoutResult(t -> {
 			myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
 			myCodeSystemDao.delete(theCodeSystem);
+			myEntityManager.flush();
+		});
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.NEVER)
+	public void deleteValueSet(TermValueSet theValueSet) {
+		ourLog.info(" * Deleting valueset {}", theValueSet.getId());
+
+		PageRequest page1000 = PageRequest.of(0, 1000);
+
+		// Concept Designations
+		{
+			String descriptor = "concept designations";
+			Supplier<Slice<Long>> loader = () -> myValueSetConceptDesignationDao.findByTermValueSetId(page1000, theValueSet.getId());
+			Supplier<Integer> counter = () -> myValueSetConceptDesignationDao.countByTermValueSetId(theValueSet.getId());
+			doDelete(descriptor, loader, counter, myValueSetConceptDesignationDao);
+		}
+
+		// Concepts
+		{
+			String descriptor = "concepts";
+			Supplier<Slice<Long>> loader = () -> myValueSetConceptDao.findByTermValueSetId(page1000, theValueSet.getId());
+			Supplier<Integer> counter = () -> myValueSetConceptDao.countByTermValueSetId(theValueSet.getId());
+			doDelete(descriptor, loader, counter, myValueSetConceptDao);
+		}
+
+		// ValueSet
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.executeWithoutResult(t -> {
+			myValueSetDao.deleteById(theValueSet.getId());
 			myEntityManager.flush();
 		});
 	}
@@ -690,7 +733,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		myConceptPropertyDao.deleteAll(theConcept.getProperties());
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
-		myConceptDao.deleteByPid(theConcept.getId());
+		myConceptDao.deleteByPid(Collections.singletonList(theConcept.getId()));
 		theRemoveCounter.incrementAndGet();
 	}
 
@@ -698,7 +741,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@SuppressWarnings("ConstantConditions")
 	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, IHapiJpaRepository<T> theDao) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
@@ -712,7 +755,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			}
 
 			txTemplate.execute(t -> {
-				link.forEach(id -> theDao.deleteByPid(id));
+				QueryChunker<Long> chunker = new QueryChunker<>();
+				chunker.chunk(link.getContent(), pids -> theDao.deleteByPid(pids));
 				theDao.flush();
 				return null;
 			});

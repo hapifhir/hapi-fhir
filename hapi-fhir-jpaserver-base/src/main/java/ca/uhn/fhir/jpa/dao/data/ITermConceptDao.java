@@ -52,7 +52,7 @@ public interface ITermConceptDao extends IHapiJpaRepository<TermConcept> {
 
 	@Override
 	@Modifying
-	@Query("DELETE FROM TermConcept t WHERE t.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
+	@Query("DELETE FROM TermConcept t WHERE t.myId IN :pid")
+	void deleteByPid(@Param("pid") List<Long> theId);
 
 }

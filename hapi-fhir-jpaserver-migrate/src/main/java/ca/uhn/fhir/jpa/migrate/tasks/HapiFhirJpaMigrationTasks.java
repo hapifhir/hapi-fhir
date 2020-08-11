@@ -141,6 +141,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		//EMPI Target Type
 		empiLink.addColumn("20200727.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, EmpiLink.TARGET_TYPE_LENGTH);
+
+
 	}
 
 	protected void init510_20200725() {
