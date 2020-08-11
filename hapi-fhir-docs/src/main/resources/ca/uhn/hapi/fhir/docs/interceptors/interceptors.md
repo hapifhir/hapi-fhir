@@ -32,6 +32,8 @@ Creating your own interceptors is easy. Custom interceptor classes do not need t
 
 * The method may have any of the parameters specified for the given [Pointcut](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html). 
 
+* The method must be public.
+
 The following example shows a simple request counter interceptor.
 
 ```java
