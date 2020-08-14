@@ -69,4 +69,39 @@ public class TransactionBuilderExamples {
 		//END SNIPPET: updateConditional
 	}
 
+	public void create() throws FHIRException {
+		//START SNIPPET: create
+		// Create a TransactionBuilder
+		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+
+		// Create a Patient to create
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		// Add the patient as a create (aka POST) to the Bundle
+		builder.addCreateEntry(patient);
+
+		// Execute the transaction
+		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		//END SNIPPET: create
+	}
+
+	public void createConditional() throws FHIRException {
+		//START SNIPPET: createConditional
+		// Create a TransactionBuilder
+		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+
+		// Create a Patient to create
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+
+		// Add the patient as a create (aka POST) to the Bundle
+		builder.addCreateEntry(patient).conditional("Patient?identifier=http://foo|bar");
+
+		// Execute the transaction
+		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		//END SNIPPET: createConditional
+	}
+
 }

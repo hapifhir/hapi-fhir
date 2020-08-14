@@ -61,4 +61,49 @@ public class TransactionBuilderTest {
 	}
 
 
+	@Test
+	public void testAddEntryCreate() {
+		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		builder.addCreateEntry(patient);
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patient, bundle.getEntry().get(0).getResource());
+		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
+
+
+	}
+
+
+	@Test
+	public void testAddEntryCreateConditional() {
+		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		builder.addCreateEntry(patient).conditional("Patient?active=true");
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patient, bundle.getEntry().get(0).getResource());
+		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getIfNoneExist());
+		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
+
+
+	}
+
+
 }
