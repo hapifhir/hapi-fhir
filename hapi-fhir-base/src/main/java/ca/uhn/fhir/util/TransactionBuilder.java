@@ -89,7 +89,7 @@ public class TransactionBuilder {
 	 *
 	 * @param theResource The resource to update
 	 */
-	public TransactionBuilder addUpdateEntry(IBaseResource theResource) {
+	public UpdateBuilder addUpdateEntry(IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
 		Validate.notEmpty(theResource.getIdElement().getValue(), "theResource must have an ID");
 
@@ -118,7 +118,7 @@ public class TransactionBuilder {
 		method.setValueAsString("PUT");
 		myEntryRequestMethodChild.getMutator().setValue(request, method);
 
-		return this;
+		return new UpdateBuilder(url);
 	}
 
 
@@ -127,4 +127,17 @@ public class TransactionBuilder {
 		return myBundle;
 	}
 
+	public class UpdateBuilder {
+
+		private final IPrimitiveType<?> myUrl;
+
+		public UpdateBuilder(IPrimitiveType<?> theUrl) {
+			myUrl = theUrl;
+		}
+
+		public void conditional(String theConditionalUrl) {
+			myUrl.setValueAsString(theConditionalUrl);
+		}
+
+	}
 }
