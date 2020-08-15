@@ -115,8 +115,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 						.phrase()
 						.withSlop(2)
 						.onField(theFieldName).boostedTo(4.0f)
-//						.andField(theFieldNameEdgeNGram).boostedTo(2.0f)
-//						.andField(theFieldNameNGram).boostedTo(1.0f)
+						// with dedicated search analyzer, this now yields good results
+						.andField(theFieldNameEdgeNGram).boostedTo(2.0f)
+						.andField(theFieldNameNGram).boostedTo(1.0f)
 						.sentence(terms.iterator().next().toLowerCase()).createQuery();
 					//@formatter:on
 
@@ -179,7 +180,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 		*/
 
-		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+		// Using ngram-based analyzers on the search side tend to overly broaden the search, so override them here.
+		// QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class)
+			.overridesForField("myContentTextEdgeNGram","autocompleteEdgeSearchAnalyzer")
+			.overridesForField("myContentTextNGram","standardAnalyzer")
+			.overridesForField("myNarrativeTextEdgeNGram","autocompleteEdgeSearchAnalyzer")
+			.overridesForField("myNarrativeTextNGram","standardAnalyzer")
+			.get();
 		BooleanJunction<?> bool = qb.bool();
 
 		/*
