@@ -38,6 +38,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	@Autowired
@@ -76,7 +79,12 @@ public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao
 		String encoded = getContext().newJsonParser().encodeResourceToString(theResource);
 		org.hl7.fhir.dstu2.model.SearchParameter hl7Org = myDstu2Hl7OrgContext.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.SearchParameter.class, encoded);
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(SearchParameter10_40.convertSearchParameter(hl7Org), getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor);
+		org.hl7.fhir.r4.model.SearchParameter convertedSp = SearchParameter10_40.convertSearchParameter(hl7Org);
+		if (isBlank(convertedSp.getExpression()) && isNotBlank(hl7Org.getXpath())) {
+			convertedSp.setExpression(hl7Org.getXpath());
+		}
+
+		FhirResourceDaoSearchParameterR4.validateSearchParam(convertedSp, getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor);
 
 	}
 
