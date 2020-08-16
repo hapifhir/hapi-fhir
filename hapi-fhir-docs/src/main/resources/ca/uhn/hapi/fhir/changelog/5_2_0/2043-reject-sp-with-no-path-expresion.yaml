@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2043
+title: "The JPA SearchParameetr validator did not reject custom Search Parameetrs with an invalid path
+   expression consisting of only a resource type and no element name. Creating such a search parameter could cause
+   strange indexing issues, so this has been added to the validator."
