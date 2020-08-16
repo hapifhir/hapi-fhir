@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import org.hl7.fhir.convertors.conv30_40.SearchParameter30_40;
+import org.hl7.fhir.convertors.conv40_50.SearchParameter40_50;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,14 +68,7 @@ public class FhirResourceDaoSearchParameterR5 extends BaseHapiFhirResourceDao<Se
 	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
-		Enum<?> status = theResource.getStatus();
-		List<CodeType> base = theResource.getBase();
-		String code = theResource.getCode();
-		String expression = theResource.getExpression();
-		FhirContext context = getContext();
-		Enum<?> type = theResource.getType();
-
-		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamRegistry, mySearchParamExtractor, code, type, status, base, expression, context, getConfig());
+		FhirResourceDaoSearchParameterR4.validateSearchParam(SearchParameter40_50.convertSearchParameter(theResource), getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor);
 	}
 
 
