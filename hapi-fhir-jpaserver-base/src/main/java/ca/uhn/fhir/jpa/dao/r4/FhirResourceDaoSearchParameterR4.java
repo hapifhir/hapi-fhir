@@ -129,10 +129,6 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 			String expression = theResource.getExpression().trim();
 
-			if (!isUnique && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches()) {
-				throw new UnprocessableEntityException("SearchParameter.expression value \"" + expression + "\" is invalid");
-			}
-
 			if (isUnique) {
 				if (theResource.getComponent().size() == 0) {
 					throw new UnprocessableEntityException("SearchParameter is marked as unique but has no components");
@@ -153,7 +149,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 					int dotIdx = nextPath.indexOf('.');
 					if (dotIdx == -1) {
-						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name");
+						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name.");
 					}
 
 					String resourceName = nextPath.substring(0, dotIdx);
@@ -177,6 +173,10 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 				}
 
 			} else {
+
+				if (!isUnique && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches()) {
+					throw new UnprocessableEntityException("SearchParameter.expression value \"" + expression + "\" is invalid");
+				}
 
 				// R4 and above
 				try {
