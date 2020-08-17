@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
@@ -74,6 +75,13 @@ public class CommonConfig {
 	@Bean
 	public PartitionSettings partitionSettings() {
 		return new PartitionSettings();
+	}
+
+	@Bean
+	public SqlCaptureInterceptor sqlCaptureInterceptor(IInterceptorService theInterceptorService) {
+		SqlCaptureInterceptor retVal = new SqlCaptureInterceptor();
+		theInterceptorService.registerInterceptor(retVal);
+		return retVal;
 	}
 
 	public static boolean isLocalTestMode() {

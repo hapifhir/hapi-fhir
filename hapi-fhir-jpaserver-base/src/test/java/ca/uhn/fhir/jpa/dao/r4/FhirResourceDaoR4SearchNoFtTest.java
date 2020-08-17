@@ -1316,7 +1316,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
 		List<IBaseResource> patients = toList(myPatientDao.search(params));
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 		assertTrue(patients.size() >= 2);
 	}
 
