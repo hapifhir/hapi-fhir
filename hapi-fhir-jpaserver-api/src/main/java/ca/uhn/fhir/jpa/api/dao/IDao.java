@@ -34,8 +34,9 @@ import java.util.Collection;
  * time to time, even within minor point releases.
  */
 public interface IDao {
+	String RESOURCE_PID_KEY = "RESOURCE_PID";
 
-	MetadataKeyResourcePid RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");
+	MetadataKeyResourcePid RESOURCE_PID = new MetadataKeyResourcePid(RESOURCE_PID_KEY);
 
 	MetadataKeyCurrentlyReindexing CURRENTLY_REINDEXING = new MetadataKeyCurrentlyReindexing("CURRENTLY_REINDEXING");
 

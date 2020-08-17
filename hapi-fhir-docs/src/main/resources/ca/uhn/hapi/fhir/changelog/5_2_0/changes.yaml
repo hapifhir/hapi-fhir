@@ -1,0 +1,8 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+        <li>Flyway (JPA): 6.4.1-&gt; 6.5.4</li>
+    </ul>"
