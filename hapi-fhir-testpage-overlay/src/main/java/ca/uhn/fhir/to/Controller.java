@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.gson.stream.JsonWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
@@ -49,6 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
+import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -128,7 +130,7 @@ public class Controller extends BaseController {
 			return "resource";
 		}
 
-		String id = StringUtils.defaultString(theServletRequest.getParameter("resource-delete-id"));
+		String id = sanitizeUrlPart(defaultString(theServletRequest.getParameter("resource-delete-id")));
 		if (StringUtils.isBlank(id)) {
 			populateModelForResource(theServletRequest, theRequest, theModel);
 			theModel.put("errorMsg", toDisplayError("No ID specified", null));
@@ -184,7 +186,7 @@ public class Controller extends BaseController {
 		FhirContext context = getContext(theRequest);
 		GenericClient client = theRequest.newClient(theReq, context, myConfig, interceptor);
 
-		String url = defaultString(theReq.getParameter("page-url"));
+		String url = sanitizeUrlPart(defaultString(theReq.getParameter("page-url")));
 		if (myConfig.isRefuseToFetchThirdPartyUrls()) {
 			if (!url.startsWith(theModel.get("base").toString())) {
 				ourLog.warn(logPrefix(theModel) + "Refusing to load page URL: {}", url);
@@ -230,7 +232,7 @@ public class Controller extends BaseController {
 			theModel.put("errorMsg", toDisplayError(e.toString(), e));
 			return "resource";
 		}
-		String id = StringUtils.defaultString(theServletRequest.getParameter("id"));
+		String id = sanitizeUrlPart(defaultString(theServletRequest.getParameter("id")));
 		if (StringUtils.isBlank(id)) {
 			populateModelForResource(theServletRequest, theRequest, theModel);
 			theModel.put("errorMsg", toDisplayError("No ID specified", null));
@@ -238,7 +240,7 @@ public class Controller extends BaseController {
 		}
 		ResultType returnsResource = ResultType.RESOURCE;
 
-		String versionId = StringUtils.defaultString(theServletRequest.getParameter("vid"));
+		String versionId = sanitizeUrlPart(defaultString(theServletRequest.getParameter("vid")));
 		String outcomeDescription;
 		if (StringUtils.isBlank(versionId)) {
 			versionId = null;
@@ -353,7 +355,7 @@ public class Controller extends BaseController {
 				return "resource";
 			}
 			clientCodeJsonWriter.name("resource");
-			clientCodeJsonWriter.value(theServletRequest.getParameter("resource"));
+			clientCodeJsonWriter.value(sanitizeUrlPart(theServletRequest.getParameter("resource")));
 		} else {
 			query = search.forAllResources();
 			clientCodeJsonWriter.name("resource");
@@ -394,7 +396,7 @@ public class Controller extends BaseController {
 
 		clientCodeJsonWriter.name("includes");
 		clientCodeJsonWriter.beginArray();
-		String[] incValues = theServletRequest.getParameterValues(Constants.PARAM_INCLUDE);
+		String[] incValues = sanitizeUrlPart(theServletRequest.getParameterValues(Constants.PARAM_INCLUDE));
 		if (incValues != null) {
 			for (String next : incValues) {
 				if (isNotBlank(next)) {
@@ -407,7 +409,7 @@ public class Controller extends BaseController {
 
 		clientCodeJsonWriter.name("revincludes");
 		clientCodeJsonWriter.beginArray();
-		String[] revIncValues = theServletRequest.getParameterValues(Constants.PARAM_REVINCLUDE);
+		String[] revIncValues = sanitizeUrlPart(theServletRequest.getParameterValues(Constants.PARAM_REVINCLUDE));
 		if (revIncValues != null) {
 			for (String next : revIncValues) {
 				if (isNotBlank(next)) {
@@ -418,7 +420,7 @@ public class Controller extends BaseController {
 		}
 		clientCodeJsonWriter.endArray();
 
-		String limit = theServletRequest.getParameter("resource-search-limit");
+		String limit = sanitizeUrlPart(theServletRequest.getParameter("resource-search-limit"));
 		if (isNotBlank(limit)) {
 			if (!limit.matches("[0-9]+")) {
 				populateModelForResource(theServletRequest, theRequest, theModel);
@@ -434,13 +436,13 @@ public class Controller extends BaseController {
 			clientCodeJsonWriter.nullValue();
 		}
 
-		String[] sort = theServletRequest.getParameterValues("sort_by");
+		String[] sort = sanitizeUrlPart(theServletRequest.getParameterValues("sort_by"));
 		if (sort != null) {
 			for (String next : sort) {
 				if (isBlank(next)) {
 					continue;
 				}
-				String direction = theServletRequest.getParameter("sort_direction");
+				String direction = sanitizeUrlPart(theServletRequest.getParameter("sort_direction"));
 				if ("asc".equals(direction)) {
 					query.sort().ascending(new StringClientParam(next));
 				} else if ("desc".equals(direction)) {
@@ -545,6 +547,7 @@ public class Controller extends BaseController {
 			type = def.getImplementingClass();
 		}
 
+		// Don't sanitize this param, it's a raw resource body and may well be XML
 		String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
 		if (isBlank(body)) {
 			theModel.put("errorMsg", toDisplayError("No message body specified", null));
@@ -583,7 +586,7 @@ public class Controller extends BaseController {
 				outcomeDescription = "Validate Resource";
 				client.validate().resource(resource).prettyPrint().execute();
 			} else {
-				String id = theReq.getParameter("resource-create-id");
+				String id = sanitizeUrlPart(theReq.getParameter("resource-create-id"));
 				if ("update".equals(theMethod)) {
 					outcomeDescription = "Update Resource";
 					client.update(id, resource);
@@ -626,17 +629,17 @@ public class Controller extends BaseController {
 		if ("history-type".equals(theMethod)) {
 			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
 			type = def.getImplementingClass();
-			id = StringUtils.defaultString(theReq.getParameter("resource-history-id"));
+			id = sanitizeUrlPart(defaultString(theReq.getParameter("resource-history-id")));
 		}
 
 		DateTimeDt since = null;
-		String sinceStr = theReq.getParameter("since");
+		String sinceStr = sanitizeUrlPart(theReq.getParameter("since"));
 		if (isNotBlank(sinceStr)) {
 			since = new DateTimeDt(sinceStr);
 		}
 
 		Integer limit = null;
-		String limitStr = theReq.getParameter("limit");
+		String limitStr = sanitizeUrlPart(theReq.getParameter("limit"));
 		if (isNotBlank(limitStr)) {
 			limit = Integer.parseInt(limitStr);
 		}
@@ -811,17 +814,17 @@ public class Controller extends BaseController {
 	}
 
 	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery, JsonWriter theClientCodeJsonWriter) throws IOException {
-		String nextName = theReq.getParameter("param." + paramIdxString + ".name");
+		String nextName = sanitizeUrlPart(theReq.getParameter("param." + paramIdxString + ".name"));
 		if (isBlank(nextName)) {
 			return false;
 		}
 
-		String nextQualifier = StringUtils.defaultString(theReq.getParameter("param." + paramIdxString + ".qualifier"));
-		String nextType = theReq.getParameter("param." + paramIdxString + ".type");
+		String nextQualifier = sanitizeUrlPart(defaultString(theReq.getParameter("param." + paramIdxString + ".qualifier")));
+		String nextType = sanitizeUrlPart(theReq.getParameter("param." + paramIdxString + ".type"));
 
 		List<String> parts = new ArrayList<String>();
 		for (int i = 0; i < 5; i++) {
-			parts.add(defaultString(theReq.getParameter("param." + paramIdxString + "." + i)));
+			parts.add(sanitizeUrlPart(defaultString(theReq.getParameter("param." + paramIdxString + "." + i))));
 		}
 
 		List<String> values;

@@ -29,6 +29,7 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.cache.BasePackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -56,8 +57,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private static final FhirContext ourR5Context = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final IVersionTypeConverter myModelConverter;
-	private volatile List<StructureDefinition> myAllStructures;
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
+	private volatile List<StructureDefinition> myAllStructures;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
 	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, IVersionTypeConverter theModelConverter) {
@@ -122,8 +123,18 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FileNotFoundException, IOException, FHIRException {
+		throw new UnsupportedOperationException();
+	}
 
+	@Override
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int loadFromPackageAndDependencies(NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm) throws FileNotFoundException, IOException, FHIRException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -527,6 +538,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		String display = theCoding.getDisplay();
 
 		return doValidation(convertedVs, validationOptions, system, code, display);
+	}
+
+	@Override
+	public void validateCodeBatch(ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
+		for (CodingValidationRequest next : codes) {
+			ValidationResult outcome = validateCode(options, next.getCoding(), vs);
+			next.setResult(outcome);
+		}
 	}
 
 	@Nonnull

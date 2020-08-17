@@ -71,6 +71,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor
 public class CascadingDeleteInterceptor {
 
+	/*
+	 * We keep the orders for the various handlers of {@link Pointcut#STORAGE_PRESTORAGE_DELETE_CONFLICTS} in one place
+	 * so it's easy to compare them
+	 */
+	public static final int OVERRIDE_PATH_BASED_REF_INTEGRITY_INTERCEPTOR_ORDER = 0;
+	public static final int CASCADING_DELETE_INTERCEPTOR_ORDER = 1;
+
 	private static final Logger ourLog = LoggerFactory.getLogger(CascadingDeleteInterceptor.class);
 	private static final String CASCADED_DELETES_KEY = CascadingDeleteInterceptor.class.getName() + "_CASCADED_DELETES_KEY";
 	private static final String CASCADED_DELETES_FAILED_KEY = CascadingDeleteInterceptor.class.getName() + "_CASCADED_DELETES_FAILED_KEY";
@@ -94,7 +101,7 @@ public class CascadingDeleteInterceptor {
 		myFhirContext = theFhirContext;
 	}
 
-	@Hook(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS)
+	@Hook(value = Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, order = CASCADING_DELETE_INTERCEPTOR_ORDER)
 	public DeleteConflictOutcome handleDeleteConflicts(DeleteConflictList theConflictList, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ourLog.debug("Have delete conflicts: {}", theConflictList);
 

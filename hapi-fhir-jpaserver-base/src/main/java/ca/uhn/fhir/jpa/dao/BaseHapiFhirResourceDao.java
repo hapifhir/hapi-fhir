@@ -994,21 +994,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public T read(IIdType theId) {
 		return read(theId, null);
 	}
 
 	@Override
-	@Transactional
 	public T read(IIdType theId, RequestDetails theRequestDetails) {
 		return read(theId, theRequestDetails, false);
 	}
 
 	@Override
-	@Transactional
 	public T read(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
+
+		return myTransactionService.execute(theRequest, tx-> doRead(theId, theRequest, theDeletedOk));
+	}
+
+	public T doRead(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		// Notify interceptors
 		if (theRequest != null) {

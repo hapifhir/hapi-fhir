@@ -33,6 +33,7 @@ import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.cache.BasePackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -169,6 +170,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		String code = theCode.getCode();
 		String display = theCode.getDisplay();
 		return validateCode(theOptions, system, code, display, theVs);
+	}
+
+	@Override
+	public void validateCodeBatch(ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -406,7 +412,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int loadFromPackageAndDependencies(NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm) throws FHIRException {
 		throw new UnsupportedOperationException();
 	}
 

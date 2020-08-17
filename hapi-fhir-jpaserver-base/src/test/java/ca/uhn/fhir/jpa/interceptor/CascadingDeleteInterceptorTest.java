@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,9 +30,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test {
+public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CascadingDeleteInterceptorR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CascadingDeleteInterceptorTest.class);
 	private IIdType myDiagnosticReportId;
 
 	@Autowired
@@ -42,18 +41,13 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private IIdType myPatientId;
+	@Autowired
 	private CascadingDeleteInterceptor myDeleteInterceptor;
 	private IIdType myObservationId;
 	private IIdType myConditionId;
 	private IIdType myEncounterId;
-
-	@Override
-	@BeforeEach
-	public void before() throws Exception {
-		super.before();
-
-		myDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorBroadcaster);
-	}
+	@Autowired
+	private OverridePathBasedReferentialIntegrityForDeletesInterceptor myOverridePathBasedReferentialIntegrityForDeletesInterceptor;
 
 	@Override
 	@AfterEach
@@ -158,6 +152,37 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
+		}
+	}
+
+	@Test
+	public void testDeleteCascadingWithOverridePathBasedReferentialIntegrityForDeletesInterceptorAlsoRegistered() throws IOException {
+		ourRestServer.getInterceptorService().registerInterceptor(myOverridePathBasedReferentialIntegrityForDeletesInterceptor);
+		try {
+
+			createResources();
+
+			ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
+
+			HttpDelete delete = new HttpDelete(ourServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
+			delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+			try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
+				assertEquals(200, response.getStatusLine().getStatusCode());
+				String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+				ourLog.info("Response: {}", deleteResponse);
+				assertThat(deleteResponse, containsString("Cascaded delete to "));
+			}
+
+			try {
+				ourLog.info("Reading {}", myPatientId);
+				myClient.read().resource(Patient.class).withId(myPatientId).execute();
+				fail();
+			} catch (ResourceGoneException e) {
+				// good
+			}
+
+		} finally {
+			ourRestServer.getInterceptorService().unregisterInterceptor(myOverridePathBasedReferentialIntegrityForDeletesInterceptor);
 		}
 	}
 

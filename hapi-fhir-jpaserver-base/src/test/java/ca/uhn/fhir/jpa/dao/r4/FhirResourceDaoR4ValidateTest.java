@@ -314,7 +314,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
-			assertThat(outcomeStr, containsString("The Profile \\\"https://bb/StructureDefinition/BBDemographicAge\\\" definition allows for the type Quantity but found type string"));
+			assertThat(outcomeStr, containsString("The Profile 'https://bb/StructureDefinition/BBDemographicAge' definition allows for the type Quantity but found type string"));
 		}
 	}
 
@@ -466,7 +466,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/123"));
 		OperationOutcome oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of wrong type
 		obs.setSubject(new Reference("Group/ABC"));
@@ -530,7 +530,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/123"));
 		OperationOutcome oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of wrong type
 		obs.setSubject(new Reference("Group/ABC"));
@@ -595,7 +595,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/123"));
 		OperationOutcome oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("Unable to resolve resource \"Group/123\"", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of wrong type
 		obs.setSubject(new Reference("Group/ABC"));
@@ -625,7 +625,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			"  },\n" +
 			"  \"text\": {\n" +
 			"    \"status\": \"generated\",\n" +
-			"    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"></div>\"\n" +
+			"    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">HELLO</div>\"\n" +
 			"  },\n" +
 			"  \"url\": \"https://foo/bb\",\n" +
 			"  \"name\": \"BBBehaviourType\",\n" +
@@ -1134,7 +1134,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
 			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
-			assertThat(outputString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
+			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
 		}
 	}
 
@@ -1170,7 +1170,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
 			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
-			assertThat(outputString, containsString("Profile reference \\\"http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid\\\" could not be resolved, so has not been checked"));
+			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
 		}
 	}
 
@@ -1453,7 +1453,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			fail("Didn't fail- response was " + encode);
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("No response answer found for required item \"link0\"", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals("No response answer found for required item 'link0'", oo.getIssueFirstRep().getDiagnostics());
 		}
 
 	}
@@ -1482,7 +1482,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			fail("Didn't fail- response was " + encode);
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("No response answer found for required item \"link0\"", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals("No response answer found for required item 'link0'", oo.getIssueFirstRep().getDiagnostics());
 		}
 
 	}
@@ -1506,7 +1506,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		try {
 			MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
 			OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
-			assertEquals("The questionnaire \"http://foo/Questionnaire/DOES_NOT_EXIST\" could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals("The questionnaire 'http://foo/Questionnaire/DOES_NOT_EXIST' could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
 		} catch (PreconditionFailedException e) {
 			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
