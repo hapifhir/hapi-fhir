@@ -228,11 +228,6 @@ public class DaoConfig {
 	private boolean myPreloadBlobFromInputStream = false;
 
 	/**
-	 * @since 5.1.0
-	 */
-	private boolean myMultipleCodeSystemVersionsEnabled = false;
-
-	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -2129,36 +2124,6 @@ public class DaoConfig {
 	 */
 	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
 		myPreloadBlobFromInputStream = thePreloadBlobFromInputStream;
-	}
-
-	/**
-	 * <p>
-	 * This determines whether multiple code system versions will be enabled. If not enabled, existing code systems will be
-	 * deleted when a new version is uploaded.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}.
-	 * </p>
-	 *
-	 * @since 5.1.0
-	 */
-	public boolean isMultipleCodeSystemVersionsEnabled() {
-		return myMultipleCodeSystemVersionsEnabled;
-	}
-
-	/**
-	 * <p>
-	 * This determines whether multiple code system versions will be enabled. If not enabled, existing code systems will be
-	 * deleted when a new version is uploaded.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}.
-	 * </p>
-	 *
-	 * @since 5.1.0
-	 */
-	public void setMultipleCodeSystemVersionsEnabled(Boolean theMultipleCodeSystemVersionsEnabled) {
-		myMultipleCodeSystemVersionsEnabled = theMultipleCodeSystemVersionsEnabled;
 	}
 
 }

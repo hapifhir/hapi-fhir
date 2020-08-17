@@ -44,7 +44,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -82,7 +81,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		return valueSetIds;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		return lookupCode(theCode, theSystem, theCoding, null, theRequestDetails);
@@ -116,7 +115,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 			codeSystemVersion = theVersion.getValue();
 		}
 
-		ourLog.info("Looking up {} / {}, version {}", system, code, codeSystemVersion);
+		ourLog.debug("Looking up {} / {}, version {}", system, code, codeSystemVersion);
 
 		if (myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system)) {
 
