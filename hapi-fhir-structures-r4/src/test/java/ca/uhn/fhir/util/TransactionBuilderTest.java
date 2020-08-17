@@ -37,4 +37,73 @@ public class TransactionBuilderTest {
 
 	}
 
+
+	@Test
+	public void testAddEntryUpdateConditional() {
+		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+
+		Patient patient = new Patient();
+		patient.setId("http://foo/Patient/123");
+		patient.setActive(true);
+		builder.addUpdateEntry(patient).conditional("Patient?active=true");
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patient, bundle.getEntry().get(0).getResource());
+		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
+
+
+	}
+
+
+	@Test
+	public void testAddEntryCreate() {
+		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		builder.addCreateEntry(patient);
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patient, bundle.getEntry().get(0).getResource());
+		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
+
+
+	}
+
+
+	@Test
+	public void testAddEntryCreateConditional() {
+		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		builder.addCreateEntry(patient).conditional("Patient?active=true");
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patient, bundle.getEntry().get(0).getResource());
+		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getIfNoneExist());
+		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
+
+
+	}
+
+
 }

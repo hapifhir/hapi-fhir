@@ -32,7 +32,7 @@ import org.thymeleaf.util.Validate;
 
 /**
  * This class can be used to build a Bundle resource to be used as a FHIR transaction.
- *
+ * <p>
  * This is not yet complete, and doesn't support all FHIR features. <b>USE WITH CAUTION</b> as the API
  * may change.
  *
@@ -52,6 +52,7 @@ public class TransactionBuilder {
 	private final BaseRuntimeChildDefinition myEntryRequestUrlChild;
 	private final BaseRuntimeChildDefinition myEntryRequestMethodChild;
 	private final BaseRuntimeElementDefinition<?> myEntryRequestMethodDef;
+	private final BaseRuntimeChildDefinition myEntryRequestIfNoneExistChild;
 
 	/**
 	 * Constructor
@@ -77,10 +78,11 @@ public class TransactionBuilder {
 		myEntryRequestDef = myEntryRequestChild.getChildByName("request");
 
 		myEntryRequestUrlChild = myEntryRequestDef.getChildByName("url");
-		
+
 		myEntryRequestMethodChild = myEntryRequestDef.getChildByName("method");
 		myEntryRequestMethodDef = myEntryRequestMethodChild.getChildByName("method");
 
+		myEntryRequestIfNoneExistChild = myEntryRequestDef.getChildByName("ifNoneExist");
 
 	}
 
@@ -89,9 +91,47 @@ public class TransactionBuilder {
 	 *
 	 * @param theResource The resource to update
 	 */
-	public TransactionBuilder addUpdateEntry(IBaseResource theResource) {
+	public UpdateBuilder addUpdateEntry(IBaseResource theResource) {
+		IBase request = addEntryAndReturnRequest(theResource);
+
+		// Bundle.entry.request.url
+		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().getValue());
+		myEntryRequestUrlChild.getMutator().setValue(request, url);
+
+		// Bundle.entry.request.url
+		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
+		method.setValueAsString("PUT");
+		myEntryRequestMethodChild.getMutator().setValue(request, method);
+
+		return new UpdateBuilder(url);
+	}
+
+	/**
+	 * Adds an entry containing an create (POST) request
+	 *
+	 * @param theResource The resource to create
+	 */
+	public CreateBuilder addCreateEntry(IBaseResource theResource) {
+		IBase request = addEntryAndReturnRequest(theResource);
+
+		String resourceType = myContext.getResourceType(theResource);
+
+		// Bundle.entry.request.url
+		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		url.setValueAsString(resourceType);
+		myEntryRequestUrlChild.getMutator().setValue(request, url);
+
+		// Bundle.entry.request.url
+		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
+		method.setValueAsString("POST");
+		myEntryRequestMethodChild.getMutator().setValue(request, method);
+
+		return new CreateBuilder(request);
+	}
+
+	public IBase addEntryAndReturnRequest(IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
-		Validate.notEmpty(theResource.getIdElement().getValue(), "theResource must have an ID");
 
 		IBase entry = myEntryDef.newInstance();
 		myEntryChild.getMutator().addValue(myBundle, entry);
@@ -107,24 +147,47 @@ public class TransactionBuilder {
 		// Bundle.entry.request
 		IBase request = myEntryRequestDef.newInstance();
 		myEntryRequestChild.getMutator().setValue(entry, request);
-
-		// Bundle.entry.request.url
-		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().getValue());
-		myEntryRequestUrlChild.getMutator().setValue(request, url);
-
-		// Bundle.entry.request.url
-		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
-		method.setValueAsString("PUT");
-		myEntryRequestMethodChild.getMutator().setValue(request, method);
-
-		return this;
+		return request;
 	}
-
 
 
 	public IBaseBundle getBundle() {
 		return myBundle;
 	}
 
+	public class UpdateBuilder {
+
+		private final IPrimitiveType<?> myUrl;
+
+		public UpdateBuilder(IPrimitiveType<?> theUrl) {
+			myUrl = theUrl;
+		}
+
+		/**
+		 * Make this update a Conditional Update
+		 */
+		public void conditional(String theConditionalUrl) {
+			myUrl.setValueAsString(theConditionalUrl);
+		}
+
+	}
+
+	public class CreateBuilder {
+		private final IBase myRequest;
+
+		public CreateBuilder(IBase theRequest) {
+			myRequest = theRequest;
+		}
+
+		/**
+		 * Make this create a Conditional Create
+		 */
+		public void conditional(String theConditionalUrl) {
+			IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) myContext.getElementDefinition("string").newInstance();
+			ifNoneExist.setValueAsString(theConditionalUrl);
+
+			myEntryRequestIfNoneExistChild.getMutator().setValue(myRequest, ifNoneExist);
+		}
+
+	}
 }
