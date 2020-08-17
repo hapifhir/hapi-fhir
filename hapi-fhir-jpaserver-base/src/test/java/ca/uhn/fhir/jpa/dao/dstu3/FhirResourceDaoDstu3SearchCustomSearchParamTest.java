@@ -114,7 +114,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"gender\". Must start with a resource name", e.getMessage());
+			assertEquals("Invalid SearchParameter.expression value \"gender\". Must start with a resource name.", e.getMessage());
 		}
 	}
 

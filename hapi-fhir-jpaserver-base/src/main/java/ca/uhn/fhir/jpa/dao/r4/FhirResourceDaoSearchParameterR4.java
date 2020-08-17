@@ -48,7 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
-	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[A-Z][a-zA-Z]+\\.[a-z].*");
+	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*[A-Z][a-zA-Z]+\\.[a-z].*");
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
