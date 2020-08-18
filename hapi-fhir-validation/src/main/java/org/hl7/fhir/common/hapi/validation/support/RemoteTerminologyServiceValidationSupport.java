@@ -48,6 +48,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+
+		if (theOptions != null) {
+			if (theOptions.isInferSystem()) {
+				return null;
+			}
+		}
+
 		IBaseResource valueSet = theValueSet;
 		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
 		if (isNotBlank(valueSetUrl)) {
