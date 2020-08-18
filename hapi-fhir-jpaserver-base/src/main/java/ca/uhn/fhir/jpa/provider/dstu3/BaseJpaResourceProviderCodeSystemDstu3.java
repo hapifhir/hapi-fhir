@@ -85,13 +85,14 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
 		@OperationParam(name = "codingA", min = 0, max = 1) Coding theCodingA,
 		@OperationParam(name = "codingB", min = 0, max = 1) Coding theCodingB,
+		@OperationParam(name="version", min=0, max=1) org.hl7.fhir.r4.model.StringType theVersion,
 		RequestDetails theRequestDetails
 	) {
 
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-			IFhirResourceDaoCodeSystem.SubsumesResult result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theRequestDetails);
+			IFhirResourceDaoCodeSystem.SubsumesResult result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theVersion, theRequestDetails);
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext());
 		} finally {
 			endRequest(theServletRequest);

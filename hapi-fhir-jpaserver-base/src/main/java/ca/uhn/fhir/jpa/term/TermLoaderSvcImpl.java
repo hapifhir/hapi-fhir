@@ -504,7 +504,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		retVal.setId("loinc-all");
 		retVal.setUrl("http://loinc.org/vs");
 		retVal.setVersion("1.0.0");
-		retVal.setName("Ø");
+		retVal.setName("All LOINC codes");
 		retVal.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		retVal.setDate(new Date());
 		retVal.setPublisher("Regenstrief Institute, Inc.");
