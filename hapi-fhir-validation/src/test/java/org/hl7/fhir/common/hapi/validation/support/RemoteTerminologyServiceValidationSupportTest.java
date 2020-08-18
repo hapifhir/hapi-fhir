@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -132,7 +133,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(VALUE_SET_URL);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, null, CODE_SYSTEM, CODE, DISPLAY, valueSet);
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, DISPLAY, valueSet);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(null, outcome.getSeverity());
@@ -143,6 +144,20 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValueAsString());
 		assertEquals(null, myValueSetProvider.myLastValueSet);
+	}
+
+	/**
+	 * Remote terminology services shouldn't be used to validatre codes with an implied system
+	 */
+	@Test
+	public void testValidateCodeInValueSet_InferSystem() {
+		createNextValueSetReturnParameters(true, DISPLAY, null);
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(VALUE_SET_URL);
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+		assertEquals(null, outcome);
 	}
 
 	@Test
