@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -230,7 +231,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
 		sp.setCode("patient-uniq-identifier");
-		sp.setExpression("Patient.identifier");
+		sp.setExpression("Patient");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
@@ -361,6 +362,50 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		mySearchParamRegistry.forceRefresh();
 	}
+
+	@Test
+	public void testCreateUniqueSpWithNoComponent() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-uniq-identifier");
+		sp.setCode("patient-uniq-identifier");
+		sp.setExpression("Patient");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+
+		try {
+			mySearchParameterDao.create(sp);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("SearchParameter is marked as unique but has no components", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testCreateUniqueSpWithNoComponentDefinition() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-uniq-identifier");
+		sp.setCode("patient-uniq-identifier");
+		sp.setExpression("Patient");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()			.setExpression("Patient");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+
+		try {
+			mySearchParameterDao.create(sp);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("SearchParameter is marked as unique but is missing component.definition", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testDoubleMatchingOnAnd_Search() {

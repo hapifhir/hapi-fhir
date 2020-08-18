@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponen
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -115,6 +116,23 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid", e.getMessage());
+		}
+	}
+
+	@Test
+	public void saveCreateSearchParamInvalidWithPathMissingElementName() {
+		SearchParameter sp = new SearchParameter();
+		sp.setCode("foo");
+		sp.setExpression("Patient");
+		sp.addBase("Patient");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setTitle("Foo Param");
+
+		try {
+			myClient.create().resource(sp).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.expression value \"Patient\" is invalid", e.getMessage());
 		}
 	}
 
