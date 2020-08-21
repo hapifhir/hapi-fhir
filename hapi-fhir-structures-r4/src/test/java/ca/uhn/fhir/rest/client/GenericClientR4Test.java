@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import ca.uhn.fhir.util.TransactionBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.helger.commons.io.stream.StringInputStream;
@@ -36,6 +37,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -2103,6 +2105,31 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		} catch (IllegalArgumentException e) {
 			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
+
+	}
+
+	@Test
+	public void testTransactionWithResponseHttp204NoContent() throws IOException {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 204, "No Content"));
+		when(myHttpResponse.getEntity()).thenReturn(null);
+		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
+			@Override
+			public Header[] answer(InvocationOnMock theInvocation) {
+				return new Header[0];
+			}
+		});
+
+		TransactionBuilder builder = new TransactionBuilder(ourCtx);
+		builder.addCreateEntry(new Patient().setActive(true));
+
+		IBaseBundle outcome = client.transaction().withBundle(builder.getBundle()).execute();
+		assertNull(outcome);
+
+		assertEquals("http://example.com/fhir", capt.getAllValues().get(0).getURI().toASCIIString());
 
 	}
 
