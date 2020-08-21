@@ -2398,33 +2398,6 @@ public class GenericClientDstu2Test {
 	}
 
 	@Test
-	public void testTransactionHandle204NoBody() throws Exception {
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new Bundle();
-		bundle.setType(BundleTypeEnum.TRANSACTION);
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle.Entry entry = bundle.addEntry();
-		entry.setResource(new Patient());
-		entry.getRequest().setMethod(HTTPVerbEnum.PUT);
-
-
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, ""));
-		when(myHttpResponse.getEntity() ).thenReturn(null);
-
-		try {
-			client.transaction().withBundle(bundle).execute();
-			fail("Should throw an exception");
-		} catch (NonFhirResponseException e) {
-			assertEquals(Constants.STATUS_HTTP_204_NO_CONTENT, e.getStatusCode());
-		}
-	}
-
-	@Test
 	public void testUpdateConditional() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
