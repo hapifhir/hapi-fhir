@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2045
+title: "The `RemoteTerminologyServiceValidationSupport` class used for connecting to a remote terminology service
+   will no longer attempt to perform code validation for fields where the code system is implied, since there is no
+   FHIR operation allowing this style of validation to be performed remotely."
