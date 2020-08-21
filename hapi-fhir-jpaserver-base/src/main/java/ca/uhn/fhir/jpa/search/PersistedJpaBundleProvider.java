@@ -355,6 +355,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	}
 
+	protected boolean hasIncludes() {
+		ensureSearchEntityLoaded();
+		return !mySearchEntity.getIncludes().isEmpty();
+	}
+
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
 	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<ResourcePersistentId> thePids) {
