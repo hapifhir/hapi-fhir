@@ -1927,7 +1927,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeSystem
 			.addConcept().setCode("C").setDisplay("Code C");
 
-		myCodeSystemDao.update(codeSystem, mySrd).getId().toUnqualified();
+		myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "C");
 		assertThat(toCodes(codes), containsInAnyOrder("C"));
 
