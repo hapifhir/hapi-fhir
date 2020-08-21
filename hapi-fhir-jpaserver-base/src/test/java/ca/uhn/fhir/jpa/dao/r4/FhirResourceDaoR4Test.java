@@ -892,25 +892,22 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		Patient initialPatient = new Patient();
 		IIdType id = myPatientDao.create(initialPatient).getId().toUnqualifiedVersionless();
 
-		myCaptureQueriesListener.clear();
-		try {
-			runInTransaction(() -> {
-				Patient p = new Patient();
-				p.setId(id);
-				p.addName().setFamily("FAMILY");
-				myPatientDao.update(p);
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId(id);
+			p.setActive(true);
+			p.addName().setFamily("FAMILY");
+			myPatientDao.update(p);
 
-				p = new Patient();
-				p.setId(id);
-				p.addName().setFamily("FAMILY2");
-				myPatientDao.update(p);
-			});
-		} catch (Exception e) {
-			myCaptureQueriesListener.logAllQueriesForCurrentThread();
-			throw e;
-		}
+			p = new Patient();
+			p.setId(id);
+			p.setActive(false);
+			p.addName().setFamily("FAMILY2");
+			myPatientDao.update(p);
+		});
 
-		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous("name", new StringParam("family2"))).size());
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous("active", new TokenParam("false"))).size());
 
 	}
 
