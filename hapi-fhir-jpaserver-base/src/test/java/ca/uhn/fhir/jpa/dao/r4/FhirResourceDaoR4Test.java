@@ -888,6 +888,33 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testCreateThenUpdateInSameTransaction() {
+		Patient initialPatient = new Patient();
+		IIdType id = myPatientDao.create(initialPatient).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		try {
+			runInTransaction(() -> {
+				Patient p = new Patient();
+				p.setId(id);
+				p.addName().setFamily("FAMILY");
+				myPatientDao.update(p);
+
+				p = new Patient();
+				p.setId(id);
+				p.addName().setFamily("FAMILY2");
+				myPatientDao.update(p);
+			});
+		} catch (Exception e) {
+			myCaptureQueriesListener.logAllQueriesForCurrentThread();
+			throw e;
+		}
+
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+
+	}
+
+	@Test
 	public void testCreateSummaryFails() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateTextIdFails");
