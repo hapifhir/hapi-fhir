@@ -25,7 +25,9 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.HapiFhirResourceDaoCodeSystemUtil;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -66,6 +68,8 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
+	@Autowired
+	private ITermCodeSystemVersionDao myCsvDao;
 	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
@@ -148,13 +152,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
 		super.preDelete(theResourceToDelete, theEntityToDelete);
 
-		String codeSystemUrl = theResourceToDelete.getUrl();
-		if (isNotBlank(codeSystemUrl)) {
-			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
-			if (persCs != null) {
-				myTermDeferredStorageSvc.deleteCodeSystem(persCs);
-			}
-		}
+		HapiFhirResourceDaoCodeSystemUtil.deleteCodeSystemEntities(myCsDao, myCsvDao, myTermDeferredStorageSvc, theResourceToDelete.getUrl(),
+			theResourceToDelete.getVersion());
+
 	}
 
 	@Override

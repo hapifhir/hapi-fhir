@@ -231,6 +231,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		});
 	}
 
+	@Override
+	@Transactional(propagation = Propagation.NEVER)
+	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		ourLog.info(" * Deleting code system version {}", theCodeSystemVersion.getPid());
+
+		deleteCodeSystemVersion(theCodeSystemVersion.getPid());
+	}
+
 	/**
 	 * Returns the number of saved concepts
 	 */
@@ -680,9 +688,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}
-			codeSystem.setResource(theCodeSystemResourceTable);
 		}
 
+		codeSystem.setResource(theCodeSystemResourceTable);
 		codeSystem.setCodeSystemUri(theSystemUri);
 		codeSystem.setName(theSystemName);
 		codeSystem = myCodeSystemDao.save(codeSystem);
@@ -692,15 +700,19 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private void validateCodeSystemVersionUpdate(TermCodeSystem theCodeSystem, String theSystemUri, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
 		// Check if CodeSystemVersion entity already exists.
 		TermCodeSystemVersion codeSystemVersionEntity;
-		String msg;
+		String msg = null;
 		if (theSystemVersionId == null) {
 			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystem.getPid());
-			msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
-				theCodeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			if (codeSystemVersionEntity != null) {
+				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
+					codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			}
 		} else {
 			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCodeSystem.getPid(), theSystemVersionId);
-			msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrlAndVersion", theSystemUri,
-				theSystemVersionId, theCodeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			if (codeSystemVersionEntity != null) {
+				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrlAndVersion", theSystemUri,
+					theSystemVersionId, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			}
 		}
 		// Throw exception if the CodeSystemVersion is being duplicated.
 		if (codeSystemVersionEntity != null) {

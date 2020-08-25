@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -68,6 +69,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	protected PlatformTransactionManager myTransactionMgr;
 	private boolean myProcessDeferred = true;
 	private List<TermCodeSystem> myDefferedCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
+	private List<TermCodeSystemVersion> myDefferedCodeSystemVersionsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
 	private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
@@ -113,6 +115,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		theCodeSystem.setCodeSystemUri("urn:uuid:" + UUID.randomUUID().toString());
 		myCodeSystemDao.save(theCodeSystem);
 		myDefferedCodeSystemsDeletions.add(theCodeSystem);
+	}
+
+	@Override
+	@Transactional
+	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		myDefferedCodeSystemVersionsDeletions.add(theCodeSystemVersion);
 	}
 
 	@Override
@@ -266,6 +274,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private void processDeferredCodeSystemDeletions() {
+
+		for (TermCodeSystemVersion next : myDefferedCodeSystemVersionsDeletions) {
+			myCodeSystemStorageSvc.deleteCodeSystemVersion(next);
+		}
+
+		myDefferedCodeSystemVersionsDeletions.clear();
 		for (TermCodeSystem next : myDefferedCodeSystemsDeletions) {
 			myCodeSystemStorageSvc.deleteCodeSystem(next);
 		}
@@ -300,7 +314,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private boolean isDeferredCodeSystemDeletions() {
-		return !myDefferedCodeSystemsDeletions.isEmpty();
+		return !myDefferedCodeSystemsDeletions.isEmpty() || !myDefferedCodeSystemVersionsDeletions.isEmpty();
 	}
 
 	private boolean isDeferredConcepts() {

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term.api;
  */
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -53,6 +54,8 @@ public interface ITermDeferredStorageSvc {
 	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
 
 	void deleteCodeSystem(TermCodeSystem theCodeSystem);
+
+	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
 	/**
 	 * This is mostly here for unit tests - Saves any and all deferred concepts and links

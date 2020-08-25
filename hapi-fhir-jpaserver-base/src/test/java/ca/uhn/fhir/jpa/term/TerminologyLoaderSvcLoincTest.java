@@ -351,12 +351,21 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		CodeSystem loincCS = mySystemCaptor.getValue();
 		assertEquals("2.67", loincCS.getVersion());
 
+		// Update LOINC marked as version 2.67
+		myFiles = new ZipCollectionBuilder();
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		loincCS = mySystemCaptor.getValue();
+		assertEquals("2.67", loincCS.getVersion());
+
 		// Load LOINC marked as version 2.68
 		myFiles = new ZipCollectionBuilder();
 		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(3)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		loincCS = mySystemCaptor.getValue();
 		assertEquals("2.68", loincCS.getVersion());
 

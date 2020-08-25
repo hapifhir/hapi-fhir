@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.model.dstu2.valueset.ContentTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -25,7 +24,6 @@ import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1787,10 +1785,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		createCodeSystem();
 
 		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
-		assertEquals(true, validation.isOk());
+		assertTrue(validation.isOk());
 
 		validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);
-		assertEquals(false, validation.isOk());
+		assertFalse(validation.isOk());
 	}
 
 	@Test
@@ -1927,8 +1925,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeSystem
 			.addConcept().setCode("C").setDisplay("Code C");
 
-		myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "C");
+		IIdType id_v2 = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+		codes = myTermSvc.findCodesBelow(id_v2.getIdPartAsLong(), id_v2.getVersionIdPartAsLong(), "C");
 		assertThat(toCodes(codes), containsInAnyOrder("C"));
 
 		runInTransaction(() -> {
@@ -1939,7 +1937,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
 			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B", "C"));
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
 			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
 	}
