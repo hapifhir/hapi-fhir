@@ -1057,7 +1057,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						entity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
 					}
 
-					newParams.setParamsOn(entity);
+					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 					populateFullTextFields(myContext, theResource, entity);
 				}
@@ -1205,6 +1205,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				// Synchronize search param indexes
 				AddRemoveCount searchParamAddRemoveCount = myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, entity, existingParams);
+
+				newParams.populateResourceTableParamCollections(entity);
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
 				if (!searchParamAddRemoveCount.isEmpty()) {
