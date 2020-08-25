@@ -745,6 +745,9 @@ public class SearchBuilder implements ISearchBuilder {
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 						List<Long> results = q.getResultList();
 						for (Long resourceLink : results) {
+							if (resourceLink == null) {
+								continue;
+							}
 							if (theReverseMode) {
 								pidsToInclude.add(new ResourcePersistentId(resourceLink));
 							} else {

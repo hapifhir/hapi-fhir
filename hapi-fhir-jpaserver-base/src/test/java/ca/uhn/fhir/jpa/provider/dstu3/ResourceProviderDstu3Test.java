@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.BaseValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import com.google.common.base.Charsets;
@@ -76,6 +75,7 @@ import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
+import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -96,6 +96,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Quantity;
@@ -103,6 +104,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -112,7 +114,6 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -138,6 +139,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -360,6 +362,45 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Bundle bundle = client.read().resource(Bundle.class).withId(id).execute();
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+	}
+
+	@Test
+	public void testSearchWithIncludeAllWithNotResolvableReference() {
+		// Arrange
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient patient = new Patient();
+		patient.addName().setFamily(UUID.randomUUID().toString());
+		IIdType createdPatientId = ourClient.create().resource(patient).execute().getId();
+
+		RelatedArtifact relatedArtifactInternalReference = new RelatedArtifact();
+		relatedArtifactInternalReference.setDisplay(UUID.randomUUID().toString());
+		relatedArtifactInternalReference.setType(RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+		relatedArtifactInternalReference.setResource(new Reference(createdPatientId.toUnqualifiedVersionless()));
+
+		RelatedArtifact relatedArtifactExternalReference = new RelatedArtifact();
+		relatedArtifactExternalReference.setDisplay(UUID.randomUUID().toString());
+		relatedArtifactExternalReference.setType(RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+		relatedArtifactExternalReference.setResource(new Reference("http://not-local-host.dk/hapi-fhir-jpaserver/fhir/Patient/2"));
+
+		PlanDefinition planDefinition = new PlanDefinition();
+		planDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		planDefinition.setName(UUID.randomUUID().toString());
+		planDefinition.setRelatedArtifact(Arrays.asList(relatedArtifactInternalReference, relatedArtifactExternalReference));
+		IIdType createdPlanDefinitionId = ourClient.create().resource(planDefinition).execute().getId();
+
+		// Act
+		Bundle returnedBundle = ourClient.search()
+			.forResource(PlanDefinition.class)
+			.include(PlanDefinition.INCLUDE_ALL)
+			.where(PlanDefinition.NAME.matches().value(planDefinition.getName()))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Assert
+		assertEquals(returnedBundle.getEntry().size(), 2);
+		assertEquals(createdPlanDefinitionId, genResourcesOfType(returnedBundle, PlanDefinition.class).get(0).getIdElement());
+		assertEquals(createdPatientId, genResourcesOfType(returnedBundle, Patient.class).get(0).getIdElement());
 	}
 
 	@Test
