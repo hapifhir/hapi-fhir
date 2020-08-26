@@ -105,7 +105,7 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 
-	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB, IPrimitiveType<String> theSystemVersion);
+	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB, IPrimitiveType<String> theSystemVersion, String theCodingAVersion, String theCodingBVersion);
 
 	void preExpandDeferredValueSetsToTerminologyTables();
 

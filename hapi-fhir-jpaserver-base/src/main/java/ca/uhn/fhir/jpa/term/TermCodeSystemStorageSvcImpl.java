@@ -234,9 +234,19 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
-		ourLog.info(" * Deleting code system version {}", theCodeSystemVersion.getPid());
-
+		TermCodeSystem termCodeSystem = theCodeSystemVersion.getCodeSystem();
+		ourLog.info(" * Deleting code system version {}", theCodeSystemVersion.getCodeSystemVersionId());
 		deleteCodeSystemVersion(theCodeSystemVersion.getPid());
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.executeWithoutResult(t -> {
+			if (myCodeSystemVersionDao.findByCodeSystemPid(termCodeSystem.getPid()).size() == 0) {
+				ourLog.info(" * Deleting code system {}", termCodeSystem.getPid());
+				deleteCodeSystem(termCodeSystem);
+			}
+		});
+
 	}
 
 	/**

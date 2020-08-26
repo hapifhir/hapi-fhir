@@ -325,6 +325,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("FOO"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
 				.execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Unknown code: [http://parentchild|FOO]", e.getMessage());
 		}
@@ -340,6 +341,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("FOO"))
 				.execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Unknown code: [http://parentchild|FOO]", e.getMessage());
 		}
@@ -355,6 +357,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD + "A").setCode("ChildAA"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD + "B").setCode("ParentA"))
 				.execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Unable to test subsumption across different code systems", e.getMessage());
 		}

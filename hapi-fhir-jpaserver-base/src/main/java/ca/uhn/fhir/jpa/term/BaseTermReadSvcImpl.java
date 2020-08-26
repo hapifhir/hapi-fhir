@@ -1380,7 +1380,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return txTemplate.execute(t -> {
 			TermCodeSystemVersion csv = getCurrentCodeSystemVersionForVersion(theCodeSystem, theVersion);
 			if (csv == null) {
-				return null;
+				return Optional.empty();
 			}
 			return myConceptDao.findByCodeSystemAndCode(csv, theCode);
 		});
@@ -1392,9 +1392,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (theVersion != null) {
 			key.append("_").append(theVersion);
 		}
-		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(key.toString(), uri -> myTxTemplate.execute(tx -> {
+		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(key.toString(), t -> myTxTemplate.execute(tx -> {
 			TermCodeSystemVersion csv = null;
-			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(uri);
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theUri);
 			if (cs != null) {
 				if (theVersion != null) {
 					csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), theVersion);
@@ -1819,28 +1819,32 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
-		return subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, null);
+	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,
+																				 IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
+		return subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, null, null, null);
 	}
 
 	@Override
 	@Transactional
-	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB, IPrimitiveType<String> theSystemVersion) {
-		VersionIndependentConcept conceptA = toConcept(theCodeA, theSystem, theCodingA);
-		VersionIndependentConcept conceptB = toConcept(theCodeB, theSystem, theCodingB);
-		String systemVersion = null;
-		if (theSystemVersion != null) {
-			systemVersion = theSystemVersion.getValue();
-		}
+	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,
+																				 IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB,
+																				 IPrimitiveType<String> theSystemVersion, String theCodingAVersion,
+																				 String theCodingBVersion) {
+		VersionIndependentConceptWithSystemVersion conceptA = toConcept(theCodeA, theSystem, theCodingA, theSystemVersion, theCodingAVersion);
+		VersionIndependentConceptWithSystemVersion conceptB = toConcept(theCodeB, theSystem, theCodingB, theSystemVersion, theCodingBVersion);
 
 		if (!StringUtils.equals(conceptA.getSystem(), conceptB.getSystem())) {
 			throw new InvalidRequestException("Unable to test subsumption across different code systems");
 		}
 
-		TermConcept codeA = findCode(conceptA.getSystem(), conceptA.getCode(), systemVersion)
+		if (!StringUtils.equals(conceptA.getCodeSystemVersion(), conceptB.getCodeSystemVersion())) {
+			throw new InvalidRequestException("Unable to test subsumption across different code system versions");
+		}
+
+		TermConcept codeA = findCode(conceptA.getSystem(), conceptA.getCode(), conceptA.getCodeSystemVersion())
 			.orElseThrow(() -> new InvalidRequestException("Unknown code: " + conceptA));
 
-		TermConcept codeB = findCode(conceptB.getSystem(), conceptB.getCode(), systemVersion)
+		TermConcept codeB = findCode(conceptB.getSystem(), conceptB.getCode(), conceptB.getCodeSystemVersion())
 			.orElseThrow(() -> new InvalidRequestException("Unknown code: " + conceptB));
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
@@ -2411,14 +2415,33 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@NotNull
-	private static VersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theSystemType, IBaseCoding theCodingType) {
+	private VersionIndependentConceptWithSystemVersion toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theSystemType,
+																					 IBaseCoding theCodingType, IPrimitiveType<String> theSystemVersionType,
+																					 String theCodingVersionType) {
 		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
 		String system = theSystemType != null ? theSystemType.getValueAsString() : null;
+		String systemVersion = theSystemVersionType != null ? theSystemVersionType.getValueAsString() : null;
 		if (theCodingType != null) {
 			code = theCodingType.getCode();
 			system = theCodingType.getSystem();
+			systemVersion = theCodingVersionType;
 		}
-		return new VersionIndependentConcept(system, code);
+		return new VersionIndependentConceptWithSystemVersion(system, code, systemVersion);
+	}
+
+	private static class VersionIndependentConceptWithSystemVersion extends VersionIndependentConcept {
+
+		String myCodeSystemVersion;
+
+		public VersionIndependentConceptWithSystemVersion(String theSystem, String theCode, String theSystemVersion) {
+			super(theSystem, theCode);
+			myCodeSystemVersion = theSystemVersion;
+		}
+
+		public String getCodeSystemVersion() {
+			return myCodeSystemVersion;
+		}
+
 	}
 
 	/**

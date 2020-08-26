@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.fail;
-
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
@@ -80,85 +78,11 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	}
 
-	@Test
-	public void testDeleteCodeSystem() {
-		CodeSystem codeSystemToDelete = createSmallCodeSystem();
-
-		// Create CodeSystem resource and entity
-		ResourceTable codeSystemResourceEntity = (ResourceTable)myCodeSystemDao.create(codeSystemToDelete, mySrd).getEntity();
-		validateCodeSystemUpdates(10);
-
-		runInTransaction(() -> {
-			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(1, myTermCodeSystemVersionDao.count());
-		});
-
-		// Attempt to delete
-		myCodeSystemDao.delete(codeSystemResourceEntity.getIdDt(), mySrd);
-		validateCodeSystemUpdates(0);
-
-		runInTransaction(() -> {
-			assertEquals(0, myTermCodeSystemDao.count());
-			assertEquals(0, myTermCodeSystemVersionDao.count());
-		});
-
-	}
-
-	@Test
-	public void testDeleteCodeSystemVersion() {
-		CodeSystem firstCodeSystemVersion = createSmallCodeSystem();
-		firstCodeSystemVersion.setVersion("1");
-
-		// Create first CodeSystem resource and entity
-		ResourceTable codeSystemResourceEntity = (ResourceTable)myCodeSystemDao.create(firstCodeSystemVersion, mySrd).getEntity();
-		validateCodeSystemUpdates(10);
-
-		runInTransaction(() -> {
-			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(1, myTermCodeSystemVersionDao.count());
-		});
-
-		CodeSystem secondCodeSystemVersion = createSmallCodeSystem();
-		secondCodeSystemVersion.setVersion("2");
-
-		// Create CodeSystem resource and entity
-		myCodeSystemDao.create(secondCodeSystemVersion, mySrd);
-		validateCodeSystemUpdates(20);
-
-		runInTransaction(() -> {
-			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
-		});
-
-		// Attempt to delete first version
-		myCodeSystemDao.delete(codeSystemResourceEntity.getIdDt(), mySrd);
-		validateCodeSystemUpdates(10);
-
-		runInTransaction(() -> {
-			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(1, myTermCodeSystemVersionDao.count());
-		});
-
-	}
-
 	private CodeSystem createCodeSystemWithMoreThan100Concepts() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 
 		for (int i = 0; i < 125; i++) {
-			codeSystem.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("codeA " + i)));
-		}
-
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		return codeSystem;
-
-	}
-
-	private CodeSystem createSmallCodeSystem() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-
-		for (int i = 0; i < 10; i++) {
 			codeSystem.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("codeA " + i)));
 		}
 

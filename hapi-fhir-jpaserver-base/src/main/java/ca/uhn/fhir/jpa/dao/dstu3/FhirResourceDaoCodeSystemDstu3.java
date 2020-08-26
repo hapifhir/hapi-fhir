@@ -112,16 +112,17 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		String code;
 		String system;
+		String codeSystemVersion = null;
 		if (haveCoding) {
 			code = theCoding.getCode();
 			system = theCoding.getSystem();
+			codeSystemVersion = theCoding.getVersion();
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();
-		}
-		String codeSystemVersion = null;
-		if (theVersion != null) {
-			codeSystemVersion = theVersion.getValue();
+			if (theVersion != null) {
+				codeSystemVersion = theVersion.getValue();
+			}
 		}
 
 		ourLog.debug("Looking up {} / {}, version {}", system, code, codeSystemVersion);
@@ -140,7 +141,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 	@Override
 	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, Coding theCodingA, Coding theCodingB, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
-		return myTerminologySvc.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theVersion);
+		String codingBVersion = theCodingB != null ? theCodingB.getVersion() : null;
+		String codingAVersion = theCodingA != null ? theCodingA.getVersion() : null;
+		return myTerminologySvc.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theVersion, codingAVersion, codingBVersion);
 	}
 
 	@Override
