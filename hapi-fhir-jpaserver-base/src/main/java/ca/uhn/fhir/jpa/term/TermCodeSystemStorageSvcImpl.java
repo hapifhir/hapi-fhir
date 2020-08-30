@@ -234,10 +234,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
-		TermCodeSystem termCodeSystem = theCodeSystemVersion.getCodeSystem();
+		// Delete TermCodeSystemVersion
 		ourLog.info(" * Deleting code system version {}", theCodeSystemVersion.getCodeSystemVersionId());
 		deleteCodeSystemVersion(theCodeSystemVersion.getPid());
 
+		// Check if the version deleted is the current version. If so, delete TermCodeSystem as well.
+		TermCodeSystem termCodeSystem = theCodeSystemVersion.getCodeSystem();
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		txTemplate.executeWithoutResult(t -> {
@@ -312,8 +314,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					if (termCodeSystem != null) {
 						TermCodeSystemVersion codeSystemVersion = getExistingTermCodeSystemVersion(termCodeSystem.getPid(), theCodeSystem.getVersion());
 						if (codeSystemVersion != null) {
-							TermCodeSystem myCodeSystemEntity = getOrCreateTermCodeSystem(codeSystemResourcePid, theCodeSystem.getUrl(), theCodeSystem.getUrl(), theResourceEntity);
-							validateCodeSystemVersionUpdate(myCodeSystemEntity,theCodeSystem.getUrl(), theCodeSystem.getVersion(), theResourceEntity);
+							TermCodeSystem myCodeSystemEntity = getOrCreateDistinctTermCodeSystem(codeSystemResourcePid, theCodeSystem.getUrl(), theCodeSystem.getUrl(), theCodeSystem.getVersion(), theResourceEntity);
 							return;
 						}
 					}
@@ -370,8 +371,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		/*
 		 * Get CodeSystem and validate CodeSystemVersion
 		 */
-		TermCodeSystem codeSystem = getOrCreateTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theCodeSystemResourceTable);
-		validateCodeSystemVersionUpdate(codeSystem, theSystemUri, theSystemVersionId, theCodeSystemResourceTable);
+		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId, theCodeSystemResourceTable);
 
 		/*
 		 * Delete version being replaced.
@@ -691,7 +691,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Nonnull
-	private TermCodeSystem getOrCreateTermCodeSystem(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, ResourceTable theCodeSystemResourceTable) {
+	private TermCodeSystem getOrCreateDistinctTermCodeSystem(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
 			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid.getIdAsLong());
@@ -704,10 +704,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		codeSystem.setCodeSystemUri(theSystemUri);
 		codeSystem.setName(theSystemName);
 		codeSystem = myCodeSystemDao.save(codeSystem);
+		checkForCodeSystemVersionDuplicate(codeSystem,theSystemUri, theSystemVersionId, theCodeSystemResourceTable);
 		return codeSystem;
 	}
 
-	private void validateCodeSystemVersionUpdate(TermCodeSystem theCodeSystem, String theSystemUri, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
+	private void checkForCodeSystemVersionDuplicate(TermCodeSystem theCodeSystem, String theSystemUri, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
 		// Check if CodeSystemVersion entity already exists.
 		TermCodeSystemVersion codeSystemVersionEntity;
 		String msg = null;

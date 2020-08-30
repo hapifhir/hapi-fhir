@@ -88,7 +88,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 	}
 
 	@Nonnull
-		@Override
+	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		return lookupCode(theCode, theSystem, theCoding, null, theRequestDetails);
 	}

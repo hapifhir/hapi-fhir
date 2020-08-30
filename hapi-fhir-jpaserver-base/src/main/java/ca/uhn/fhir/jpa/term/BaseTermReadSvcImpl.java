@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -126,7 +125,6 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -174,7 +172,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -237,14 +234,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ITermCodeSystemStorageSvc myConceptStorageSvc;
 	@Autowired
 	private ApplicationContext myApplicationContext;
-	@Autowired
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 	private volatile IValidationSupport myJpaValidationSupport;
 	private volatile IValidationSupport myValidationSupport;
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		TermCodeSystemVersion cs = getCurrentCodeSystemVersionForVersion(theSystem,null);
+		TermCodeSystemVersion cs = getCurrentCodeSystemVersion(theSystem,null);
 		return cs != null;
 	}
 
@@ -616,7 +611,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull) {
 
 		String system = theIncludeOrExclude.getSystem();
-		String systemVersion = theIncludeOrExclude.getVersion();
 		boolean hasSystem = isNotBlank(system);
 		boolean hasValueSet = theIncludeOrExclude.getValueSet().size() > 0;
 
@@ -631,7 +625,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 			if (cs != null) {
 
-				return expandValueSetHandleIncludeOrExcludeUsingDatabase(theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, theAdd, theCodeCounter, theQueryIndex, theWantConceptOrNull, system, cs, systemVersion);
+				return expandValueSetHandleIncludeOrExcludeUsingDatabase(theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, theAdd, theCodeCounter, theQueryIndex, theWantConceptOrNull, system, cs);
 
 			} else {
 
@@ -672,7 +666,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 								nextSystem = system;
 							}
 
-							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode(), systemVersion);
+							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode());
 							if (lookup != null && lookup.isFound()) {
 								addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, nextSystem, next.getCode(), lookup.getCodeDisplay());
 								foundCount++;
@@ -766,7 +760,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nonnull
-	private Boolean expandValueSetHandleIncludeOrExcludeUsingDatabase(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull, String theSystem, TermCodeSystem theCs, String theSystemVersion) {
+	private Boolean expandValueSetHandleIncludeOrExcludeUsingDatabase(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull, String theSystem, TermCodeSystem theCs) {
 		TermCodeSystemVersion csv = theCs.getCurrentVersion();
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
@@ -794,7 +788,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * Filters
 		 */
-		handleFilters(bool, theSystem, qb, theIncludeOrExclude, theSystemVersion);
+		handleFilters(bool, theSystem, qb, theIncludeOrExclude);
 
 		Query luceneQuery = bool.createQuery();
 
@@ -903,15 +897,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void handleFilters(BooleanJunction<?> theBool, String theSystem, QueryBuilder theQb, ValueSet.ConceptSetComponent theIncludeOrExclude, String theSystemVersion) {
+	private void handleFilters(BooleanJunction<?> theBool, String theSystem, QueryBuilder theQb, ValueSet.ConceptSetComponent theIncludeOrExclude) {
 		if (theIncludeOrExclude.getFilter().size() > 0) {
 			for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
-				handleFilter(theSystem, theQb, theBool, nextFilter, theSystemVersion);
+				handleFilter(theSystem, theQb, theBool, nextFilter);
 			}
 		}
 	}
 
-	private void handleFilter(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter, String theSystemVersion) {
+	private void handleFilter(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		if (isBlank(theFilter.getValue()) && theFilter.getOp() == null && isBlank(theFilter.getProperty())) {
 			return;
 		}
@@ -927,24 +921,24 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				break;
 			case "concept":
 			case "code":
-				handleFilterConceptAndCode(theSystem, theQb, theBool, theFilter, theSystemVersion);
+				handleFilterConceptAndCode(theSystem, theQb, theBool, theFilter);
 				break;
 			case "parent":
 			case "child":
 				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
-				handleFilterLoincParentChild(theQb, theBool, theFilter);
+				handleFilterLoincParentChild(theBool, theFilter);
 				break;
 			case "ancestor":
 				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
-				handleFilterLoincAncestor(theSystem, theQb, theBool, theFilter, theSystemVersion);
+				handleFilterLoincAncestor(theSystem, theBool, theFilter);
 				break;
 			case "descendant":
 				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
-				handleFilterLoincDescendant(theSystem, theQb, theBool, theFilter, theSystemVersion);
+				handleFilterLoincDescendant(theSystem, theBool, theFilter);
 				break;
 			case "copyright":
 				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
-				handleFilterLoincCopyright(theQb, theBool, theFilter);
+				handleFilterLoincCopyright(theBool, theFilter);
 				break;
 			default:
 				handleFilterRegex(theBool, theFilter);
@@ -952,11 +946,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private boolean isCodeSystemLoingOrThrowInvalidRequestException(String theSystem, String theProperty) {
+	private void isCodeSystemLoingOrThrowInvalidRequestException(String theSystem, String theProperty) {
 		if (!isCodeSystemLoinc(theSystem)) {
 			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + theSystem);
 		}
-		return true;
 	}
 
 	private boolean isCodeSystemLoinc(String theSystem) {
@@ -991,8 +984,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		bool.must(textQuery);
 	}
 
-	private void handleFilterConceptAndCode(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter, String theSystemVersion) {
-		TermConcept code = findCode(theSystem, theFilter.getValue(), theSystemVersion)
+	private void handleFilterConceptAndCode(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		TermConcept code = findCode(theSystem, theFilter.getValue())
 			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theFilter.getValue()));
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
@@ -1004,7 +997,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	private void handleFilterLoincParentChild(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void handleFilterLoincParentChild(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
 				addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
@@ -1037,41 +1030,41 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	private void handleFilterLoincAncestor(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter, String theSystemVersion) {
+	private void handleFilterLoincAncestor(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
-				addLoincFilterAncestorEqual(theSystem, theQb, theBool, theFilter, theSystemVersion);
+				addLoincFilterAncestorEqual(theSystem, theBool, theFilter);
 				break;
 			case IN:
-				addLoincFilterAncestorIn(theSystem, theQb, theBool, theFilter, theSystemVersion);
+				addLoincFilterAncestorIn(theSystem, theBool, theFilter);
 				break;
 			default:
 				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
-	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter, String theSystemVersion) {
-		addLoincFilterAncestorEqual(theSystem, theQb, theBool, theFilter.getProperty(), theFilter.getValue(), theSystemVersion);
+	private void addLoincFilterAncestorEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterAncestorEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue());
 	}
 
-	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, String theProperty, String theValue, String theSystemVersion) {
-		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue, theSystemVersion);
+	private void addLoincFilterAncestorEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
+		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
 		theBool.must(new TermsQuery(terms));
 	}
 
-	private void addLoincFilterAncestorIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter, String theSystemVersion) {
+	private void addLoincFilterAncestorIn(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		String[] values = theFilter.getValue().split(",");
 		List<Term> terms = new ArrayList<>();
 		for (String value : values) {
-			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value, theSystemVersion));
+			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
 		}
 		theBool.must(new TermsQuery(terms));
 	}
 
-	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue, String theSystemVersion) {
+	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue) {
 		List<Term> retVal = new ArrayList<>();
 
-		TermConcept code = findCode(theSystem, theValue, theSystemVersion)
+		TermConcept code = findCode(theSystem, theValue)
 			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
 
 		retVal.add(new Term("myParentPids", "" + code.getId()));
@@ -1081,41 +1074,41 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	private void handleFilterLoincDescendant(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter, String theSystemVersion) {
+	private void handleFilterLoincDescendant(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
-				addLoincFilterDescendantEqual(theSystem, theBool, theFilter, theSystemVersion);
+				addLoincFilterDescendantEqual(theSystem, theBool, theFilter);
 				break;
 			case IN:
-				addLoincFilterDescendantIn(theSystem, theQb, theBool, theFilter, theSystemVersion);
+				addLoincFilterDescendantIn(theSystem, theBool, theFilter);
 				break;
 			default:
 				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
-	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter, String theSystemVersion) {
-		addLoincFilterDescendantEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue(), theSystemVersion);
+	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterDescendantEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue());
 	}
 
-	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue, String theSystemVersion) {
-		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue, theSystemVersion);
+	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
+		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
 		theBool.must(new TermsQuery(terms));
 	}
 
-	private void addLoincFilterDescendantIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter, String theSystemVersion) {
+	private void addLoincFilterDescendantIn(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		String[] values = theFilter.getValue().split(",");
 		List<Term> terms = new ArrayList<>();
 		for (String value : values) {
-			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value, theSystemVersion));
+			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
 		}
 		theBool.must(new TermsQuery(terms));
 	}
 
-	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue, String theSystemVersion) {
+	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
 		List<Term> retVal = new ArrayList<>();
 
-		TermConcept code = findCode(theSystem, theValue, theSystemVersion)
+		TermConcept code = findCode(theSystem, theValue)
 			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
 
 		String[] parentPids = code.getParentPidsAsString().split(" ");
@@ -1127,7 +1120,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return retVal;
 	}
 
-	private void handleFilterLoincCopyright(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void handleFilterLoincCopyright(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
 
 			String copyrightFilterValue = defaultString(theFilter.getValue()).toLowerCase();
@@ -1365,7 +1358,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	public Optional<TermConcept> findCode(String theCodeSystem, String theCode) {
 		return findCode(theCodeSystem, theCode, null);
-
 	}
 
 	@Override
@@ -1378,7 +1370,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
 		return txTemplate.execute(t -> {
-			TermCodeSystemVersion csv = getCurrentCodeSystemVersionForVersion(theCodeSystem, theVersion);
+			TermCodeSystemVersion csv = getCurrentCodeSystemVersion(theCodeSystem, theVersion);
 			if (csv == null) {
 				return Optional.empty();
 			}
@@ -1387,8 +1379,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nullable
-	private TermCodeSystemVersion getCurrentCodeSystemVersionForVersion(String theUri, String theVersion) {
-		StringBuffer key = new StringBuffer(theUri);
+	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theUri, String theVersion) {
+		StringBuilder key = new StringBuilder(theUri);
 		if (theVersion != null) {
 			key.append("_").append(theVersion);
 		}
@@ -1820,16 +1812,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,
-																				 IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
+		IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
 		return subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, null, null, null);
 	}
 
 	@Override
 	@Transactional
-	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,
-																				 IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB,
-																				 IPrimitiveType<String> theSystemVersion, String theCodingAVersion,
-																				 String theCodingBVersion) {
+	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB, IPrimitiveType<String> theSystemVersion, String theCodingAVersion, String theCodingBVersion) {
 		VersionIndependentConceptWithSystemVersion conceptA = toConcept(theCodeA, theSystem, theCodingA, theSystemVersion, theCodingAVersion);
 		VersionIndependentConceptWithSystemVersion conceptB = toConcept(theCodeB, theSystem, theCodingB, theSystemVersion, theCodingBVersion);
 
@@ -2085,6 +2074,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 					while (scrollableResultsIterator.hasNext()) {
 						TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
+						// TODO: The invocation of the size() below does not seem to be necessary but for some reason, removing it causes tests in TerminologySvcImplR4Test to fail.
 						nextElement.getConceptMapGroupElementTargets().size();
 						myEntityManager.detach(nextElement);
 
@@ -2138,11 +2128,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@CoverageIgnore
 	@Override
 	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
-	}
-
-	@Override
-	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, String theSystemVersion) {
 		invokeRunnableForUnitTest();
 
 		if (isNotBlank(theValueSetUrl)) {
@@ -2151,7 +2136,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		Optional<VersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode, theSystemVersion).map(c -> new VersionIndependentConcept(theCodeSystem, c.getCode())));
+		Optional<VersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> new VersionIndependentConcept(theCodeSystem, c.getCode())));
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
@@ -2182,7 +2167,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 		}
 
-		CodeValidationResult retVal = null;
+		CodeValidationResult retVal;
 		if (valueSet != null) {
 			retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, valueSet);
 		} else {
@@ -2415,9 +2400,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@NotNull
-	private VersionIndependentConceptWithSystemVersion toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theSystemType,
-																					 IBaseCoding theCodingType, IPrimitiveType<String> theSystemVersionType,
-																					 String theCodingVersionType) {
+	private VersionIndependentConceptWithSystemVersion toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theSystemType, IBaseCoding theCodingType, IPrimitiveType<String> theSystemVersionType, String theCodingVersionType) {
 		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
 		String system = theSystemType != null ? theSystemType.getValueAsString() : null;
 		String systemVersion = theSystemVersionType != null ? theSystemVersionType.getValueAsString() : null;
