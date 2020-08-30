@@ -26,6 +26,10 @@
 			<code value="8450-9" />
 			<display value="Systolic blood pressure--expiration" />
 		</concept>
+		<concept>
+			<code value="11378-7" />
+			<display value="Systolic blood pressure at First encounter" />
+		</concept>
 	</codeSystem>
 	<compose>
 		<include>

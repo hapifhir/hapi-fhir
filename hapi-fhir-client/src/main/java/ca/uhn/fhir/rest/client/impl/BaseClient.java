@@ -567,6 +567,10 @@ public abstract class BaseClient implements IRestfulClient {
 
 		@Override
 		public T invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+			if (theResponseStatusCode == Constants.STATUS_HTTP_204_NO_CONTENT) {
+				return null;
+			}
+
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				if (myAllowHtmlResponse && theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) && myReturnType != null) {

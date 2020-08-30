@@ -2,6 +2,9 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -10,30 +13,57 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(SpringExtension.class)
 public class SearchParamRegistryImplTest {
+	@Autowired
+	SearchParamRegistryImpl mySearchParamRegistry;
 
-	@Mock
+	@MockBean
 	private ISchedulerService mySchedulerService;
-	@Mock
+	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
+	@MockBean
+	private ModelConfig myModelConfig;
+	@MockBean
+	private IInterceptorService myInterceptorBroadcaster;
+
+	@Configuration
+	static class SpringConfig {
+		@Bean
+		FhirContext fhirContext() { return FhirContext.forR4(); }
+		@Bean
+		ISearchParamRegistry searchParamRegistry() { return new SearchParamRegistryImpl(); }
+		@Bean
+		SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
+			return new SearchParameterCanonicalizer(theFhirContext);
+		}
+	}
+
 	private int myAnswerCount = 0;
 
-
-	@Before
+	@BeforeEach
 	public void before() {
 		myAnswerCount = 0;
 	}
@@ -42,56 +72,40 @@ public class SearchParamRegistryImplTest {
 	public void testRefreshAfterExpiry() {
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
-		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
-		registry.setSchedulerServiceForUnitTest(mySchedulerService);
-		registry.setFhirContextForUnitTest(FhirContext.forR4());
-		registry.setSearchParamProviderForUnitTest(mySearchParamProvider);
-		registry.postConstruct();
-
-		registry.requestRefresh();
-		assertEquals(146, registry.doRefresh(100000));
+		mySearchParamRegistry.requestRefresh();
+		assertEquals(146, mySearchParamRegistry.doRefresh(100000));
 
 		// Second time we don't need to run because we ran recently
-		assertEquals(0, registry.doRefresh(100000));
+		assertEquals(0, mySearchParamRegistry.doRefresh(100000));
 
-		assertEquals(146, registry.getActiveSearchParams().size());
+		assertEquals(146, mySearchParamRegistry.getActiveSearchParams().size());
 	}
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
-		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
 
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t -> {
-			registry.doRefresh(t.getArgument(1, Long.class));
+			mySearchParamRegistry.doRefresh(t.getArgument(1, Long.class));
 			return 0;
 		});
 
-		registry.setSchedulerServiceForUnitTest(mySchedulerService);
-		registry.setFhirContextForUnitTest(FhirContext.forR4());
-		registry.setSearchParamProviderForUnitTest(mySearchParamProvider);
-		registry.postConstruct();
-		registry.requestRefresh();
+		mySearchParamRegistry.requestRefresh();
 
-		assertTrue(registry.refreshCacheIfNecessary());
-		assertFalse(registry.refreshCacheIfNecessary());
+		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
 
-		registry.requestRefresh();
-		assertTrue(registry.refreshCacheIfNecessary());
+		mySearchParamRegistry.requestRefresh();
+		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
 	}
 
 	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
-		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
-		assertThat(registry.getActiveUniqueSearchParams("Patient"), Matchers.empty());
+		assertThat(mySearchParamRegistry.getActiveUniqueSearchParams("Patient"), Matchers.empty());
 	}
 
 	@Test
 	public void testGetActiveSearchParams() {
-		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
-		registry.setFhirContextForUnitTest(FhirContext.forR4());
-		registry.postConstruct();
-
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t -> {
 			if (myAnswerCount == 0) {
@@ -99,21 +113,16 @@ public class SearchParamRegistryImplTest {
 				throw new InternalErrorException("this is an error!");
 			}
 
-			registry.doRefresh(0);
+			mySearchParamRegistry.doRefresh(0);
 
 			return 0;
 		});
 
-		registry.setSearchParamProviderForUnitTest(mySearchParamProvider);
-		Map<String, RuntimeSearchParam> outcome = registry.getActiveSearchParams("Patient");
+		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
 	}
 
 	@Test
 	public void testExtractExtensions() {
-		SearchParamRegistryImpl registry = new SearchParamRegistryImpl();
-		registry.setFhirContextForUnitTest(FhirContext.forR4());
-		registry.postConstruct();
-
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setCode("foo");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -129,12 +138,12 @@ public class SearchParamRegistryImplTest {
 
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(searchParameter));
 		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t -> {
-			registry.doRefresh(0);
+			mySearchParamRegistry.doRefresh(0);
 			return 0;
 		});
 
-		registry.setSearchParamProviderForUnitTest(mySearchParamProvider);
-		Map<String, RuntimeSearchParam> outcome = registry.getActiveSearchParams("Patient");
+		mySearchParamRegistry.forceRefresh();
+		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
 
 		RuntimeSearchParam converted = outcome.get("foo");
 		assertNotNull(converted);

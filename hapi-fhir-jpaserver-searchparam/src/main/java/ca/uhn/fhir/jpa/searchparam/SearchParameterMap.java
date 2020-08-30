@@ -159,8 +159,9 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-	public void addRevInclude(Include theInclude) {
+	public SearchParameterMap addRevInclude(Include theInclude) {
 		getRevIncludes().add(theInclude);
+		return this;
 	}
 
 	private void addUrlIncludeParams(StringBuilder b, String paramName, Set<Include> theList) {
@@ -268,8 +269,9 @@ public class SearchParameterMap implements Serializable {
 		return mySort;
 	}
 
-	public void setSort(SortSpec theSort) {
+	public SearchParameterMap setSort(SortSpec theSort) {
 		mySort = theSort;
+		return this;
 	}
 
 	/**

@@ -1,15 +1,24 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.GraphQL;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -20,10 +29,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -31,12 +40,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GraphQLR4RawTest {
 
@@ -50,13 +57,13 @@ public class GraphQLR4RawTest {
 	private static String ourLastQuery;
 	private static int ourMethodCount;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 
@@ -80,7 +87,7 @@ public class GraphQLR4RawTest {
 
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourNextRetVal = null;
 		ourLastId = null;
@@ -110,6 +117,62 @@ public class GraphQLR4RawTest {
 		}
 
 	}
+
+
+	@Test
+	public void testGraphPostContentTypeJson() throws Exception {
+		ourNextRetVal = "{\"foo\"}";
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$graphql");
+		StringEntity entity = new StringEntity("{\"query\": \"{name{family,given}}\"}");
+		httpPost.setEntity(entity);
+		httpPost.setHeader("Accept", "application/json");
+		httpPost.setHeader("Content-type", "application/json");
+
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\"foo\"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertEquals("Patient/123", ourLastId.getValue());
+			assertEquals("{name{family,given}}", ourLastQuery);
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testGraphPostContentTypeGraphql() throws Exception {
+		ourNextRetVal = "{\"foo\"}";
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$graphql");
+		StringEntity entity = new StringEntity("{name{family,given}}");
+		httpPost.setEntity(entity);
+		httpPost.setHeader("Accept", "application/json");
+		httpPost.setHeader("Content-type", "application/graphql");
+
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\"foo\"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertEquals("Patient/123", ourLastId.getValue());
+			assertEquals("{name{family,given}}", ourLastQuery);
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
 
 	@Test
 	public void testGraphInstanceUnknownType() throws Exception {
@@ -154,9 +217,16 @@ public class GraphQLR4RawTest {
 
 	public static class MyGraphQLProvider {
 
+		@GraphQL(type=RequestTypeEnum.GET)
+		public String processGet(@IdParam IdType theId, @GraphQLQueryUrl String theQuery) {
+			ourMethodCount++;
+			ourLastId = theId;
+			ourLastQuery = theQuery;
+			return ourNextRetVal;
+		}
 
-		@GraphQL
-		public String process(@IdParam IdType theId, @GraphQLQuery String theQuery) {
+		@GraphQL(type=RequestTypeEnum.POST)
+		public String processPost(@IdParam IdType theId, @GraphQLQueryBody String theQuery) {
 			ourMethodCount++;
 			ourLastId = theId;
 			ourLastQuery = theQuery;

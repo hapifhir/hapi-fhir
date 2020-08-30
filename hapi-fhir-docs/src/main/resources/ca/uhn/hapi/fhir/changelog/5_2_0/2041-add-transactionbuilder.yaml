@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2041
+title: "A new class called TransactionBuilder has been added. This class can be used to build FHIR Transaction Bundles easily."

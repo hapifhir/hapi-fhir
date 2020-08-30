@@ -8,7 +8,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 	public static final String PATIENT_GIVEN = "patient-given";
@@ -18,7 +18,7 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 	protected EmpiFieldMatchJson myGivenNameMatchField;
 	protected String myBothNameFields;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myGivenNameMatchField = new EmpiFieldMatchJson()
 			.setName(PATIENT_GIVEN)
@@ -37,10 +37,10 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 
 		EmpiResourceSearchParamJson patientBirthdayBlocking = new EmpiResourceSearchParamJson()
 			.setResourceType("Patient")
-			.setSearchParam(Patient.SP_BIRTHDATE);
+			.addSearchParam(Patient.SP_BIRTHDATE);
 		EmpiResourceSearchParamJson patientIdentifierBlocking = new EmpiResourceSearchParamJson()
 			.setResourceType("Patient")
-			.setSearchParam(Patient.SP_IDENTIFIER);
+			.addSearchParam(Patient.SP_IDENTIFIER);
 
 
 		EmpiFieldMatchJson lastNameMatchField = new EmpiFieldMatchJson()
@@ -51,6 +51,7 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 			.setMatchThreshold(NAME_THRESHOLD);
 
 		EmpiRulesJson retval = new EmpiRulesJson();
+		retval.setVersion("test version");
 		retval.addResourceSearchParam(patientBirthdayBlocking);
 		retval.addResourceSearchParam(patientIdentifierBlocking);
 		retval.addFilterSearchParam(activePatientsBlockingFilter);

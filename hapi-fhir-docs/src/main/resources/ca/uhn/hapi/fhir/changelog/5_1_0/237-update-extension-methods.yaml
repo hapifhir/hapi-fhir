@@ -1,0 +1,8 @@
+---
+type: change
+issue: 237
+title: "The R5 structure methods for working with extensions on arbitrary fields, e.g.
+   `getExtensionByUrl(String)`, `removeExtension(String)`, `getExtensionsByUrl(String)`
+   `hasExtension(String)`, and `getExtensionString(String)` have been enhanced so that they
+   now return modifier extensions as well as the non-modifier extensions they previously
+   returned."

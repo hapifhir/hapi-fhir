@@ -28,4 +28,5 @@ public interface IEmpiLinkQuerySvc {
 	IBaseParameters queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
 
 	IBaseParameters getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
+
 }

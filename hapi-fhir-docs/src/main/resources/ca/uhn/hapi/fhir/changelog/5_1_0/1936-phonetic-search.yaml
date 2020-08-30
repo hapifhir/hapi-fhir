@@ -1,0 +1,4 @@
+---
+type: add
+issue: 1936
+title: "Phonetic name search is now supported via ISearchParamRegistry.setStringEncoder()."

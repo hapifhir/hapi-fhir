@@ -22,6 +22,8 @@ package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiMatchEvaluation;
+import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
@@ -47,19 +49,19 @@ public class EmpiResourceMatcherSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	private final FhirContext myFhirContext;
-	private final IEmpiSettings myEmpiConfig;
+	private final IEmpiSettings myEmpiSettings;
 	private EmpiRulesJson myEmpiRulesJson;
 	private final List<EmpiResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
 	@Autowired
-	public EmpiResourceMatcherSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
+	public EmpiResourceMatcherSvc(FhirContext theFhirContext, IEmpiSettings theEmpiSettings) {
 		myFhirContext = theFhirContext;
-		myEmpiConfig = theEmpiConfig;
+		myEmpiSettings = theEmpiSettings;
 	}
 
 	@PostConstruct
 	public void init() {
-		myEmpiRulesJson = myEmpiConfig.getEmpiRules();
+		myEmpiRulesJson = myEmpiSettings.getEmpiRules();
 		if (myEmpiRulesJson == null) {
 			throw new ConfigurationException("Failed to load EMPI Rules.  If EMPI is enabled, then EMPI rules must be available in context.");
 		}
@@ -78,18 +80,19 @@ public class EmpiResourceMatcherSvc {
 	 *
 	 * @return an {@link EmpiMatchResultEnum} indicating the result of the comparison.
 	 */
-	public EmpiMatchResultEnum getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
+	public EmpiMatchOutcome getMatchResult(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		return match(theLeftResource, theRightResource);
 	}
 
-	EmpiMatchResultEnum match(IBaseResource theLeftResource, IBaseResource theRightResource) {
-		long matchVector = getMatchVector(theLeftResource, theRightResource);
-		EmpiMatchResultEnum matchResult = myEmpiRulesJson.getMatchResult(matchVector);
+	EmpiMatchOutcome match(IBaseResource theLeftResource, IBaseResource theRightResource) {
+		EmpiMatchOutcome matchResult = getMatchOutcome(theLeftResource, theRightResource);
+		EmpiMatchResultEnum matchResultEnum = myEmpiRulesJson.getMatchResult(matchResult.vector);
+		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
-			if (matchResult == EmpiMatchResultEnum.MATCH || matchResult == EmpiMatchResultEnum.POSSIBLE_MATCH) {
-				ourLog.debug("{} {} with field matchers {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myEmpiRulesJson.getFieldMatchNamesForVector(matchVector));
+			if (matchResult.isMatch() || matchResult.isPossibleMatch()) {
+				ourLog.debug("{} {} with field matchers {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myEmpiRulesJson.getFieldMatchNamesForVector(matchResult.vector));
 			} else if (ourLog.isTraceEnabled()) {
-				ourLog.trace("{} {}.  Field matcher results: {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myEmpiRulesJson.getDetailedFieldMatchResultForUnmatchedVector(matchVector));
+				ourLog.trace("{} {}.  Field matcher results: {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myEmpiRulesJson.getDetailedFieldMatchResultForUnmatchedVector(matchResult.vector));
 			}
 		}
 		return matchResult;
@@ -110,15 +113,18 @@ public class EmpiResourceMatcherSvc {
 	 * 0001|0010 = 0011
 	 * The binary string is now `0011`, which when you return it as a long becomes `3`.
 	 */
-	private long getMatchVector(IBaseResource theLeftResource, IBaseResource theRightResource) {
-		long retval = 0;
+	private EmpiMatchOutcome getMatchOutcome(IBaseResource theLeftResource, IBaseResource theRightResource) {
+		long vector = 0;
+		double score = 0.0;
 		for (int i = 0; i < myFieldMatchers.size(); ++i) {
 			//any that are not for the resourceType in question.
 			EmpiResourceFieldMatcher fieldComparator = myFieldMatchers.get(i);
-			if (fieldComparator.match(theLeftResource, theRightResource)) {
-				retval |= (1 << i);
+			EmpiMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
+			if (matchEvaluation.match) {
+				vector |= (1 << i);
 			}
+			score += matchEvaluation.score;
 		}
-		return retval;
+		return new EmpiMatchOutcome(vector, score);
 	}
 }

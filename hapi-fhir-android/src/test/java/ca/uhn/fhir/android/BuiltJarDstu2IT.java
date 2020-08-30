@@ -1,7 +1,7 @@
 package ca.uhn.fhir.android;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.util.*;
@@ -10,8 +10,9 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
@@ -22,7 +23,7 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 public class BuiltJarDstu2IT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2IT.class);
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		System.setProperty("javax.xml.stream.XMLInputFactory", "FOO");
 		System.setProperty("javax.xml.stream.XMLOutputFactory", "FOO");

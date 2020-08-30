@@ -37,13 +37,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -55,7 +52,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -105,6 +100,8 @@ public class IdHelperService {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private FhirContext myFhirCtx;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.deleteByPid(forcedId.getId());
@@ -128,9 +125,6 @@ public class IdHelperService {
 		return matches.iterator().next();
 	}
 
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
-
 	/**
 	 * Given a resource type and ID, determines the internal persistent ID for the resource.
 	 *
@@ -138,6 +132,8 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
+		Validate.notNull(theId, "theId must not be null");
+
 		Long retVal;
 		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
@@ -392,7 +388,7 @@ public class IdHelperService {
 			lookup
 				.stream()
 				.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
-				.forEach(t->{
+				.forEach(t -> {
 					theTarget.add(t);
 					if (!myDaoConfig.isDeleteEnabled()) {
 						String nextKey = Long.toString(t.getResourceId());
@@ -435,19 +431,6 @@ public class IdHelperService {
 		return retVal;
 	}
 
-	public static boolean isValidPid(IIdType theId) {
-		if (theId == null) {
-			return false;
-		}
-
-		String idPart = theId.getIdPart();
-		return isValidPid(idPart);
-	}
-
-	public static boolean isValidPid(String theIdPart) {
-		return StringUtils.isNumeric(theIdPart);
-	}
-
 	@Nullable
 	public Long getPidOrNull(IBaseResource theResource) {
 		IAnyResource anyResource = (IAnyResource) theResource;
@@ -481,14 +464,27 @@ public class IdHelperService {
 	}
 
 	public Map<Long, IIdType> getPidToIdMap(Collection<IIdType> theIds, RequestDetails theRequestDetails) {
-		return theIds.stream().collect(Collectors.toMap(t->getPidOrThrowException(t), Function.identity()));
+		return theIds.stream().collect(Collectors.toMap(this::getPidOrThrowException, Function.identity()));
 	}
 
-    public IIdType resourceIdFromPidOrThrowException(Long thePid) {
-		 Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
-		 if (!optionalResource.isPresent()) {
-		 	throw new ResourceNotFoundException("Requested resource not found");
-		 }
-		 return optionalResource.get().getIdDt().toVersionless();
-    }
+	public IIdType resourceIdFromPidOrThrowException(Long thePid) {
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
+		if (!optionalResource.isPresent()) {
+			throw new ResourceNotFoundException("Requested resource not found");
+		}
+		return optionalResource.get().getIdDt().toVersionless();
+	}
+
+	public static boolean isValidPid(IIdType theId) {
+		if (theId == null) {
+			return false;
+		}
+
+		String idPart = theId.getIdPart();
+		return isValidPid(idPart);
+	}
+
+	public static boolean isValidPid(String theIdPart) {
+		return StringUtils.isNumeric(theIdPart);
+	}
 }

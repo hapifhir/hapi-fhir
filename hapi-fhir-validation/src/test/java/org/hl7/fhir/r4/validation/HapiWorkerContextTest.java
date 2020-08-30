@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HapiWorkerContextTest extends BaseTest {
 	FhirContext myCtx = FhirContext.forR4();
@@ -59,20 +59,20 @@ public class HapiWorkerContextTest extends BaseTest {
 		vs.setUrl("http://hl7.org/fhir/ValueSet/fm-status");
 		ValidationOptions options = new ValidationOptions().guessSystem();
 		outcome = workerCtx.validateCode(options, "active", vs);
-		assertEquals(outcome.getMessage(), true, outcome.isOk());
+		assertEquals(true, outcome.isOk(), outcome.getMessage());
 
 		outcome = workerCtx.validateCode(options, "active2", vs);
-		assertEquals(outcome.getMessage(), false, outcome.isOk());
+		assertEquals(false, outcome.isOk(), outcome.getMessage());
 		assertEquals("Unknown code[active2] in system[(none)]", outcome.getMessage());
 
 		// PrePopulated codes
 
 		vs.setUrl("http://hl7.org/fhir/us/core/ValueSet/birthsex");
 		outcome = workerCtx.validateCode(options, "F", vs);
-		assertEquals(outcome.getMessage(), true, outcome.isOk());
+		assertEquals(true, outcome.isOk(), outcome.getMessage());
 
 		outcome = workerCtx.validateCode(options, "F2", vs);
-		assertEquals(outcome.getMessage(), false, outcome.isOk());
+		assertEquals(false, outcome.isOk(), outcome.getMessage());
 		assertEquals("Unknown code[F2] in system[(none)]", outcome.getMessage());
 
 	}

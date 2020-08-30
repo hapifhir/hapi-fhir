@@ -29,6 +29,7 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
+import org.hl7.fhir.utilities.cache.BasePackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -56,8 +57,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private static final FhirContext ourR5Context = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final IVersionTypeConverter myModelConverter;
-	private volatile List<StructureDefinition> myAllStructures;
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
+	private volatile List<StructureDefinition> myAllStructures;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
 	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, IVersionTypeConverter theModelConverter) {
@@ -122,13 +123,33 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FileNotFoundException, IOException, FHIRException {
+		throw new UnsupportedOperationException();
+	}
 
+	@Override
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String[] types) throws FHIRException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int loadFromPackageAndDependencies(NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm) throws FileNotFoundException, IOException, FHIRException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean hasPackage(String id, String ver) {
 		return false;
+	}
+
+	@Override
+	public int getClientRetryCount() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWorkerContext setClientRetryCount(int value) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -461,8 +482,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCode(myValidationSupportContext, convertConceptValidationOptions(theOptions), system, code, display, null);
-		return convertValidationResult(result);
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
+
+		return doValidation(null, validationOptions, system, code, display);
 	}
 
 	@Override
@@ -477,8 +499,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions), theSystem, theCode, display, convertedVs);
-		return convertValidationResult(result);
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
+
+		return doValidation(convertedVs, validationOptions, theSystem, theCode, display);
 	}
 
 	@Override
@@ -492,12 +515,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions).setInferSystem(true), null, code, null, convertedVs);
-		return convertValidationResult(result);
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions).setInferSystem(true);
+
+		return doValidation(convertedVs, validationOptions, null, code, null);
 	}
 
 	@Override
-	public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.Coding code, org.hl7.fhir.r5.model.ValueSet theValueSet) {
+	public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.Coding theCoding, org.hl7.fhir.r5.model.ValueSet theValueSet) {
 		IBaseResource convertedVs = null;
 
 		try {
@@ -508,7 +532,30 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new InternalErrorException(e);
 		}
 
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, convertConceptValidationOptions(theOptions), code.getSystem(), code.getCode(), code.getDisplay(), convertedVs);
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
+		String system = theCoding.getSystem();
+		String code = theCoding.getCode();
+		String display = theCoding.getDisplay();
+
+		return doValidation(convertedVs, validationOptions, system, code, display);
+	}
+
+	@Override
+	public void validateCodeBatch(ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
+		for (CodingValidationRequest next : codes) {
+			ValidationResult outcome = validateCode(options, next.getCoding(), vs);
+			next.setResult(outcome);
+		}
+	}
+
+	@Nonnull
+	private ValidationResult doValidation(IBaseResource theValueSet, ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
+		IValidationSupport.CodeValidationResult result;
+		if (theValueSet != null) {
+			result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
+		} else {
+			result = myValidationSupportContext.getRootValidationSupport().validateCode(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
+		}
 		return convertValidationResult(result);
 	}
 

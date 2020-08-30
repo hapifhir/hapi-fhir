@@ -1,16 +1,25 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.internet.InternetAddress;
@@ -21,7 +30,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Test the rest-hook subscriptions
@@ -37,9 +47,9 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	private static GreenMail ourTestSmtp;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
-	@After
+	@AfterEach
 	public void afterUnregisterEmailListener() {
-		ourLog.info("**** Starting @After *****");
+		ourLog.info("**** Starting @AfterEach *****");
 
 		for (IIdType next : mySubscriptionIds) {
 			ourClient.delete().resourceById(next).execute();
@@ -56,7 +66,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeRegisterEmailListener() throws FolderException {
 		ourTestSmtp.purgeEmailFromAllMailboxes();
 
@@ -114,7 +124,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	/**
 	 * Tests an email subscription with payload set to XML. The email sent must include content in the body of the email that is formatted as XML.
-	 * @throws Exception
 	 */
 	@Test
 	public void testEmailSubscriptionNormal() throws Exception {
@@ -131,7 +140,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		waitForSize(1, 60000, new Callable<Number>() {
 			@Override
-			public Number call() throws Exception {
+			public Number call() {
 				return ourTestSmtp.getReceivedMessages().length;
 			}
 		});
@@ -152,7 +161,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	/**
 	 * Tests an email subscription with payload set to JSON. The email sent must include content in the body of the email that is formatted as JSON.
-	 * @throws Exception
 	 */
 	@Test
 	public void testEmailSubscriptionWithCustom() throws Exception {
@@ -163,13 +171,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription sub1 = createSubscription(criteria1, payload);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("mailto:myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 
@@ -218,12 +226,12 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription sub1 = createSubscription(criteria1, payload);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		assertNotNull(subscriptionTemp);
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 
@@ -265,12 +273,12 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() {
 		ourTestSmtp.stop();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);

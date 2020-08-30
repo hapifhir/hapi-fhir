@@ -32,7 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.BaseValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import com.google.common.base.Charsets;
@@ -75,6 +75,7 @@ import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
+import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -95,6 +96,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Quantity;
@@ -102,6 +104,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -111,10 +114,10 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -136,31 +139,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -170,7 +159,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	private ISearchDao mySearchEntityDao;
 
 	@Override
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
@@ -280,6 +269,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 	}
 
+	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
@@ -372,6 +362,45 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Bundle bundle = client.read().resource(Bundle.class).withId(id).execute();
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+	}
+
+	@Test
+	public void testSearchWithIncludeAllWithNotResolvableReference() {
+		// Arrange
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient patient = new Patient();
+		patient.addName().setFamily(UUID.randomUUID().toString());
+		IIdType createdPatientId = ourClient.create().resource(patient).execute().getId();
+
+		RelatedArtifact relatedArtifactInternalReference = new RelatedArtifact();
+		relatedArtifactInternalReference.setDisplay(UUID.randomUUID().toString());
+		relatedArtifactInternalReference.setType(RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+		relatedArtifactInternalReference.setResource(new Reference(createdPatientId.toUnqualifiedVersionless()));
+
+		RelatedArtifact relatedArtifactExternalReference = new RelatedArtifact();
+		relatedArtifactExternalReference.setDisplay(UUID.randomUUID().toString());
+		relatedArtifactExternalReference.setType(RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+		relatedArtifactExternalReference.setResource(new Reference("http://not-local-host.dk/hapi-fhir-jpaserver/fhir/Patient/2"));
+
+		PlanDefinition planDefinition = new PlanDefinition();
+		planDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		planDefinition.setName(UUID.randomUUID().toString());
+		planDefinition.setRelatedArtifact(Arrays.asList(relatedArtifactInternalReference, relatedArtifactExternalReference));
+		IIdType createdPlanDefinitionId = ourClient.create().resource(planDefinition).execute().getId();
+
+		// Act
+		Bundle returnedBundle = ourClient.search()
+			.forResource(PlanDefinition.class)
+			.include(PlanDefinition.INCLUDE_ALL)
+			.where(PlanDefinition.NAME.matches().value(planDefinition.getName()))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Assert
+		assertEquals(returnedBundle.getEntry().size(), 2);
+		assertEquals(createdPlanDefinitionId, genResourcesOfType(returnedBundle, PlanDefinition.class).get(0).getIdElement());
+		assertEquals(createdPatientId, genResourcesOfType(returnedBundle, Patient.class).get(0).getIdElement());
 	}
 
 	@Test
@@ -612,7 +641,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 
 			@Override
-			public void interceptResponse(IHttpResponse theResponse) throws IOException {               // TODO Auto-generated method stu
+			public void interceptResponse(IHttpResponse theResponse) {               // TODO Auto-generated method stu
 			}
 
 		});
@@ -640,7 +669,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testCreateQuestionnaireResponseWithValidation() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://urn/system");
@@ -1392,7 +1421,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(ids.toString(), dupes);
+			assertFalse(dupes, ids.toString());
 		}
 
 		/*
@@ -1413,7 +1442,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(ids.toString(), dupes);
+			assertFalse(dupes, ids.toString());
 			assertThat(ids.toString(), containsString("Condition"));
 			assertThat(ids.size(), greaterThan(10));
 		}
@@ -2744,7 +2773,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		for (BundleEntryComponent ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getIdElement().getIdPart());
 		}
-		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
+		assertEquals(expectedIds, actualIds, "Expects to retrieve the 2 patients which reference the two different organizations");
 	}
 
 	@Test
@@ -2999,7 +3028,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info(value.getTime() + "");
 		ourLog.info(before.getTime() + "");
 		assertTrue(value.after(before));
-		assertTrue(new InstantDt(value) + " should be before " + new InstantDt(after), value.before(after));
+		assertTrue(value.before(after), new InstantDt(value) + " should be before " + new InstantDt(after));
 	}
 
 	@Test
@@ -3370,12 +3399,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void testSearchWithInvalidSort() {
+		try {
 		Observation o = new Observation();
 		o.getCode().setText("testSearchWithInvalidSort");
 		myObservationDao.create(o, mySrd);
-		//@formatter:off
 		ourClient
 			.search()
 			.forResource(Observation.class)
@@ -3383,7 +3412,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.execute();
-		//@formatter:on
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: This server does not support _sort specifications of type COMPOSITE - Can't serve _sort=code-value-quantity", e.getMessage());
+		}
 	}
 
 	@Test
@@ -3401,7 +3433,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType deletedIdMissingFalse = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourClient.delete().resourceById(deletedIdMissingFalse).execute();
 
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		List<IBaseResource> resources = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			org = new Organization();
 			org.setName(methodName + "_0" + i);
@@ -3769,7 +3801,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * This does not currently cause an error, so this test is disabled
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testUpdateNoIdInBody() throws Exception {
 		String methodName = "testUpdateNoIdInBody";
 
@@ -4042,7 +4074,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 
 		patient.setId(patientid);
@@ -4050,12 +4082,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourClient.update().resource(patient).execute();
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 
 			readPatient.addName().setFamily("testUpdateWithSource");
 			ourClient.update().resource(readPatient).execute();
 			readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 	}
 
@@ -4377,9 +4409,5 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

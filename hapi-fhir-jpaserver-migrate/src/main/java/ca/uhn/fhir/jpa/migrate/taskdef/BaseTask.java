@@ -230,6 +230,10 @@ public abstract class BaseTask {
 
 	protected abstract void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject);
 
+	public boolean initializedSchema() {
+		return false;
+	}
+
 	public static class ExecutedStatement {
 		private final String mySql;
 		private final List<Object> myArguments;

@@ -4,23 +4,23 @@ import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DateMatcherR4Test extends BaseMatcherR4Test {
 
 	@Test
 	public void testExactDatePrecision() {
-		Calendar cal = new GregorianCalendar(2020,6,15);
-		Calendar sameMonthCal = new GregorianCalendar(2020,6,22);
-		Calendar sameYearCal = new GregorianCalendar(2020,11,13);
-		Calendar otherYearCal = new GregorianCalendar(1965,8,9);
+		Calendar cal = new GregorianCalendar(2020, 6, 15);
+		Calendar sameMonthCal = new GregorianCalendar(2020, 6, 22);
+		Calendar sameYearCal = new GregorianCalendar(2020, 11, 13);
+		Calendar otherYearCal = new GregorianCalendar(1965, 8, 9);
 
 		Date date = cal.getTime();
 		Date sameMonth = sameMonthCal.getTime();
@@ -49,11 +49,11 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 
 	@Test
 	public void testExactDateTimePrecision() {
-		Calendar cal =           new GregorianCalendar(2020,6,15, 11, 12, 13);
-		Calendar sameSecondCal = new GregorianCalendar(2020,6,15, 11, 12, 13);
+		Calendar cal = new GregorianCalendar(2020, 6, 15, 11, 12, 13);
+		Calendar sameSecondCal = new GregorianCalendar(2020, 6, 15, 11, 12, 13);
 		sameSecondCal.add(Calendar.MILLISECOND, 123);
 
-		Calendar sameDayCal =    new GregorianCalendar(2020,6,15, 12, 34, 56);
+		Calendar sameDayCal = new GregorianCalendar(2020, 6, 15, 12, 34, 56);
 
 		Date date = cal.getTime();
 		Date sameSecond = sameSecondCal.getTime();

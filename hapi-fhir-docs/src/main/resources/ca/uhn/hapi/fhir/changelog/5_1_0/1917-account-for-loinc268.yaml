@@ -1,0 +1,4 @@
+---
+type: add
+issue: 1917
+title: "The LOINC importer has been updated to support the file format used by the LOINC 2.68 release."

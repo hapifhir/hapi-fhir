@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2049
+title: A potential NPE in the JPA server was fixed. This error could be triggered by searching for resources with
+   unresolvable references. Thanks to Anders Havn for the pull request!

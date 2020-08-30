@@ -160,7 +160,6 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		UPDATE,
 		DELETE,
 		MANUALLY_TRIGGERED
-
 	}
 
 	private static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {

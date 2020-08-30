@@ -4,24 +4,24 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
-import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AddIdGeneratorTaskTest extends BaseTest {
 
 
-	public AddIdGeneratorTaskTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testAddIdGenerator(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
 
-	@Test
-	public void testAddIdGenerator() throws SQLException {
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());
 
 		MyMigrationTasks migrationTasks = new MyMigrationTasks("123456.7");

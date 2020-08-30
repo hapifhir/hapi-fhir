@@ -25,15 +25,15 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
@@ -45,33 +45,49 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { TestR4ConfigWithElasticsearchClient.class })
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
 public class BaseR4SearchLastN extends BaseJpaTest {
 
+	private static final Map<String, String> observationPatientMap = new HashMap<>();
+	private static final Map<String, String> observationCategoryMap = new HashMap<>();
+	private static final Map<String, String> observationCodeMap = new HashMap<>();
+	private static final Map<String, Date> observationEffectiveMap = new HashMap<>();
+	protected static IIdType patient0Id = null;
+	protected static IIdType patient1Id = null;
+	protected static IIdType patient2Id = null;
+	// Using static variables including the flag below so that we can initalize the database and indexes once
+	// (all of the tests only read from the DB and indexes and so no need to re-initialze them for each test).
+	private static boolean dataLoaded = false;
+	private static Calendar observationDate = new GregorianCalendar();
+	protected final String observationCd0 = "code0";
+	protected final String observationCd1 = "code1";
+	protected final String observationCd2 = "code2";
+	protected final String categoryCd0 = "category0";
+	protected final String codeSystem = "http://mycode.com";
+	private final String observationCd3 = "code3";
+	private final String categoryCd1 = "category1";
+	private final String categoryCd2 = "category2";
+	private final String categoryCd3 = "category3";
+	private final String categorySystem = "http://mycategory.com";
 	@Autowired
 	@Qualifier("myPatientDaoR4")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
-
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDaoObservation<Observation> myObservationDao;
-
 	@Autowired
 	protected DaoConfig myDaoConfig;
-
 	@Autowired
 	protected FhirContext myFhirCtx;
-
-	@Autowired
-	private ElasticsearchSvcImpl myElasticsearchSvc;
-
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
+	@Autowired
+	private ElasticsearchSvcImpl myElasticsearchSvc;
 
 	@Override
 	protected FhirContext getContext() {
@@ -83,50 +99,19 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		return myPlatformTransactionManager;
 	}
 
-	@Before
-	public void beforeEnableLastN() {
-		myDaoConfig.setLastNEnabled(true);
-	}
-
-	@After
+	@AfterEach
 	public void afterDisableLastN() {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 	}
 
-	protected final String observationCd0 = "code0";
-	protected final String observationCd1 = "code1";
-	protected final String observationCd2 = "code2";
-	private final String observationCd3 = "code3";
-
-	protected final String categoryCd0 = "category0";
-	private final String categoryCd1 = "category1";
-	private final String categoryCd2 = "category2";
-	private final String categoryCd3 = "category3";
-
-	protected final String codeSystem = "http://mycode.com";
-	private final String categorySystem = "http://mycategory.com";
-
-	// Using static variables including the flag below so that we can initalize the database and indexes once
-	// (all of the tests only read from the DB and indexes and so no need to re-initialze them for each test).
-	private static boolean dataLoaded = false;
-
-	protected static IIdType patient0Id = null;
-	protected static IIdType patient1Id = null;
-	protected static IIdType patient2Id = null;
-
-	private static final Map<String, String> observationPatientMap = new HashMap<>();
-	private static final Map<String, String> observationCategoryMap = new HashMap<>();
-	private static final Map<String, String> observationCodeMap = new HashMap<>();
-	private static final Map<String, Date> observationEffectiveMap = new HashMap<>();
-
-	private static Calendar observationDate = new GregorianCalendar();
-
-	@Before
+	@BeforeEach
 	public void beforeCreateTestPatientsAndObservations() throws IOException {
+		myDaoConfig.setLastNEnabled(true);
+
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
 		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
-		if(!dataLoaded) {
+		if (!dataLoaded) {
 			Patient pt = new Patient();
 			pt.addName().setFamily("Lastn").addGiven("Arthur");
 			patient0Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
@@ -149,19 +134,19 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	}
 
 	private void createObservationsForPatient(IIdType thePatientId) {
-		createFiveObservationsForPatientCodeCategory(thePatientId,observationCd0, categoryCd0, 15);
-		createFiveObservationsForPatientCodeCategory(thePatientId,observationCd0, categoryCd1, 10);
-		createFiveObservationsForPatientCodeCategory(thePatientId,observationCd0, categoryCd2, 5);
-		createFiveObservationsForPatientCodeCategory(thePatientId,observationCd1, categoryCd0, 10);
-		createFiveObservationsForPatientCodeCategory(thePatientId,observationCd1, categoryCd1, 5);
-		createFiveObservationsForPatientCodeCategory(thePatientId,observationCd2, categoryCd2, 5);
-		createFiveObservationsForPatientCodeCategory(thePatientId,observationCd3, categoryCd3, 5);
+		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd0, categoryCd0, 15);
+		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd0, categoryCd1, 10);
+		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd0, categoryCd2, 5);
+		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd1, categoryCd0, 10);
+		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd1, categoryCd1, 5);
+		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd2, categoryCd2, 5);
+		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd3, categoryCd3, 5);
 	}
 
 	private void createFiveObservationsForPatientCodeCategory(IIdType thePatientId, String theObservationCode, String theCategoryCode,
 																				 Integer theTimeOffset) {
 
-		for (int idx=0; idx<5; idx++ ) {
+		for (int idx = 0; idx < 5; idx++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReferenceElement(thePatientId);
 			obs.getCode().addCoding().setCode(theObservationCode).setSystem(codeSystem);
@@ -178,9 +163,9 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	}
 
 	private Date calculateObservationDateFromOffset(Integer theTimeOffset, Integer theObservationIndex) {
-		int milliSecondsPerHour = 3600*1000;
+		long milliSecondsPerHour = 3600L * 1000L;
 		// Generate a Date by subtracting a calculated number of hours from the static observationDate property.
-		return new Date(observationDate.getTimeInMillis() - (milliSecondsPerHour*(theTimeOffset+theObservationIndex)));
+		return new Date(observationDate.getTimeInMillis() - (milliSecondsPerHour * (theTimeOffset + theObservationIndex)));
 	}
 
 	protected ServletRequestDetails mockSrd() {
@@ -207,7 +192,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		sortedObservationCodes.add(observationCd2);
 		sortedObservationCodes.add(observationCd3);
 
-		executeTestCase(params, sortedPatients, sortedObservationCodes, null,105);
+		executeTestCase(params, sortedPatients, sortedObservationCodes, null, 105);
 	}
 
 	@Test
@@ -219,7 +204,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		Map<String, String[]> requestParameters = new HashMap<>();
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
-		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(),null));
+		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 
 		assertEquals(4, actual.size());
 	}
@@ -233,7 +218,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
-		actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(),null));
+		actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 
 		assertEquals(expectedObservationCount, actual.size());
 
@@ -245,7 +230,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		// Validate patient grouping
 		for (String patientId : thePatientIds) {
 			assertEquals(patientId, observationPatientMap.get(theObservationIds.get(theNextObservationIdx)));
-			theNextObservationIdx = validateSortingWithinPatient(theObservationIds,theNextObservationIdx,theCodes, theCategores, patientId);
+			theNextObservationIdx = validateSortingWithinPatient(theObservationIds, theNextObservationIdx, theCodes, theCategores, patientId);
 		}
 		assertEquals(theObservationIds.size(), theNextObservationIdx);
 	}
@@ -256,7 +241,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		for (String codeValue : theCodes) {
 			assertEquals(codeValue, observationCodeMap.get(theObservationIds.get(theNextObservationIdx)));
 			// Validate sorting within code group
-			theNextObservationIdx = validateSortingWithinCode(theObservationIds,theNextObservationIdx,
+			theNextObservationIdx = validateSortingWithinCode(theObservationIds, theNextObservationIdx,
 				observationCodeMap.get(theObservationIds.get(theNextObservationIdx)), theCategories, thePatientId);
 		}
 		return theNextObservationIdx;
@@ -267,8 +252,8 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		int theNextObservationIdx = theFirstObservationIdxForPatientAndCode;
 		Date lastEffectiveDt = observationEffectiveMap.get(theObservationIds.get(theNextObservationIdx));
 		theNextObservationIdx++;
-		while(theObservationCode.equals(observationCodeMap.get(theObservationIds.get(theNextObservationIdx)))
-		&& thePatientId.equals(observationPatientMap.get(theObservationIds.get(theNextObservationIdx)))) {
+		while (theObservationCode.equals(observationCodeMap.get(theObservationIds.get(theNextObservationIdx)))
+			&& thePatientId.equals(observationPatientMap.get(theObservationIds.get(theNextObservationIdx)))) {
 			// Check that effective date is before that of the previous observation.
 			assertTrue(lastEffectiveDt.compareTo(observationEffectiveMap.get(theObservationIds.get(theNextObservationIdx))) > 0);
 			lastEffectiveDt = observationEffectiveMap.get(theObservationIds.get(theNextObservationIdx));
@@ -302,7 +287,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		sortedObservationCodes.add(observationCd2);
 		sortedObservationCodes.add(observationCd3);
 
-		executeTestCase(params, sortedPatients,sortedObservationCodes, null,35);
+		executeTestCase(params, sortedPatients, sortedObservationCodes, null, 35);
 
 		params = new SearchParameterMap();
 		ReferenceParam patientParam = new ReferenceParam("Patient", "", patient0Id.getValue());
@@ -317,7 +302,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		sortedObservationCodes.add(observationCd2);
 		sortedObservationCodes.add(observationCd3);
 
-		executeTestCase(params, sortedPatients,sortedObservationCodes, null,35);
+		executeTestCase(params, sortedPatients, sortedObservationCodes, null, 35);
 	}
 
 	protected ReferenceAndListParam buildReferenceAndListParam(ReferenceParam... theReference) {
@@ -347,7 +332,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		sortedObservationCodes.add(observationCd2);
 		sortedObservationCodes.add(observationCd3);
 
-		executeTestCase(params, sortedPatients, sortedObservationCodes, null,70);
+		executeTestCase(params, sortedPatients, sortedObservationCodes, null, 70);
 
 		// Two Patient parameters
 		params = new SearchParameterMap();
@@ -359,7 +344,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		sortedPatients.add(patient0Id.getValue());
 		sortedPatients.add(patient2Id.getValue());
 
-		executeTestCase(params,sortedPatients, sortedObservationCodes, null,70);
+		executeTestCase(params, sortedPatients, sortedObservationCodes, null, 70);
 
 	}
 
@@ -564,7 +549,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", patient0Id.getValue());
 		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
 
-		DateParam myDateParam = new DateParam(ParamPrefixEnum.LESSTHAN, new Date(observationDate.getTimeInMillis() - (3600*1000*9)));
+		DateParam myDateParam = new DateParam(ParamPrefixEnum.LESSTHAN, new Date(observationDate.getTimeInMillis() - (3600 * 1000 * 9)));
 		params.add(Observation.SP_DATE, myDateParam);
 
 		List<String> sortedPatients = new ArrayList<>();
@@ -574,7 +559,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		sortedObservationCodes.add(observationCd0);
 		sortedObservationCodes.add(observationCd1);
 
-		executeTestCase(params, sortedPatients,sortedObservationCodes, null,15);
+		executeTestCase(params, sortedPatients, sortedObservationCodes, null, 15);
 
 	}
 
@@ -585,8 +570,8 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", patient0Id.getValue());
 		params.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
 
-		DateParam lowDateParam = new DateParam(ParamPrefixEnum.LESSTHAN, new Date(observationDate.getTimeInMillis() - (3600*1000*(9))));
-		DateParam highDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(observationDate.getTimeInMillis() - (3600*1000*(15))));
+		DateParam lowDateParam = new DateParam(ParamPrefixEnum.LESSTHAN, new Date(observationDate.getTimeInMillis() - (3600 * 1000 * (9))));
+		DateParam highDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(observationDate.getTimeInMillis() - (3600 * 1000 * (15))));
 		DateAndListParam myDateAndListParam = new DateAndListParam();
 		myDateAndListParam.addAnd(new DateOrListParam().addOr(lowDateParam));
 		myDateAndListParam.addAnd(new DateOrListParam().addOr(highDateParam));
@@ -600,11 +585,11 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		sortedObservationCodes.add(observationCd0);
 		sortedObservationCodes.add(observationCd1);
 
-		executeTestCase(params, sortedPatients,sortedObservationCodes, null,10);
+		executeTestCase(params, sortedPatients, sortedObservationCodes, null, 10);
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

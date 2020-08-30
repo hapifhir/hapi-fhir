@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1966
+title: "The GraphQL module can now accept arrays of arguments as input to searches, and will treat them as
+   OR'ed parameters. Thanks to Ibrohim Kholilul Isla for the pull request!"

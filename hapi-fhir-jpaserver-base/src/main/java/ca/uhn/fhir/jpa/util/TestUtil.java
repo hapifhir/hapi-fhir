@@ -285,11 +285,6 @@ public class TestUtil {
 		}
 	}
 
-
-	public static void clearAllStaticFieldsForUnitTest() {
-		ca.uhn.fhir.util.TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	public static InstantType getTimestamp(IBaseResource resource) {
 		return new InstantType(new Date(resource.getMeta().getLastUpdated().getTime()));
 	}

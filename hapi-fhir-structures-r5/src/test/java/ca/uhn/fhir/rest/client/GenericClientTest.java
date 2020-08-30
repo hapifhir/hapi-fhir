@@ -1,8 +1,11 @@
 package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -35,7 +38,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.Bundle.HTTPVerb;
-import org.junit.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -44,12 +51,15 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,7 +71,7 @@ public class GenericClientTest {
 
 	private HttpResponse myHttpResponse;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
@@ -396,7 +406,7 @@ public class GenericClientTest {
 		oo = (OperationOutcome) outcome.getOperationOutcome();
 		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
-		Assert.assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
+		assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
 	}
@@ -457,7 +467,7 @@ public class GenericClientTest {
 		oo = (OperationOutcome) outcome.getOperationOutcome();
 		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
-		Assert.assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
+		assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
 	}
@@ -488,7 +498,7 @@ public class GenericClientTest {
 			.execute();
 		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
-		Assert.assertEquals(1, response.getEntry().size());
+		assertEquals(1, response.getEntry().size());
 		idx++;
 
 		response = client
@@ -499,7 +509,7 @@ public class GenericClientTest {
 			.withAdditionalHeader("myHeaderName", "myHeaderValue2")
 			.execute();
 		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
-		Assert.assertEquals(1, response.getEntry().size());
+		assertEquals(1, response.getEntry().size());
 		assertEquals("myHeaderValue1", capt.getValue().getHeaders("myHeaderName")[0].getValue());
 		assertEquals("myHeaderValue2", capt.getValue().getHeaders("myHeaderName")[1].getValue());
 		idx++;
@@ -510,12 +520,12 @@ public class GenericClientTest {
 			.andReturnBundle(Bundle.class)
 			.execute();
 		assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
-		Assert.assertEquals(1, response.getEntry().size());
+		assertEquals(1, response.getEntry().size());
 		idx++;
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testInvalidCalls() {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
@@ -638,11 +648,11 @@ public class GenericClientTest {
 
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
 
-		Assert.assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
+		assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
 
 		InstantType lm = response.getMeta().getLastUpdatedElement();
 		lm.setTimeZoneZulu(true);
-		Assert.assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
+		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
 	}
 
@@ -809,7 +819,7 @@ public class GenericClientTest {
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
-		Assert.assertEquals("PRP1660", BundleUtil.toListOfResourcesOfType(ourCtx, response, Patient.class).get(0).getIdentifier().get(0).getValue());
+		assertEquals("PRP1660", BundleUtil.toListOfResourcesOfType(ourCtx, response, Patient.class).get(0).getIdentifier().get(0).getValue());
 
 		try {
 			client
@@ -848,7 +858,7 @@ public class GenericClientTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		Assert.assertEquals("http://foo/Observation?" + Observation.SP_CODE_VALUE_DATE + "=" + UrlUtil.escapeUrlParam("FOO\\$BAR$2001-01-01"), capt.getValue().getURI().toString());
+		assertEquals("http://foo/Observation?" + Observation.SP_CODE_VALUE_DATE + "=" + UrlUtil.escapeUrlParam("FOO\\$BAR$2001-01-01"), capt.getValue().getURI().toString());
 
 	}
 
@@ -1426,7 +1436,7 @@ public class GenericClientTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		Assert.assertEquals(1, response.getEntry().size());
+		assertEquals(1, response.getEntry().size());
 	}
 
 	@SuppressWarnings("unused")
@@ -1609,7 +1619,7 @@ public class GenericClientTest {
 			.execute();
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
-		Assert.assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
+		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
 		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 	}
@@ -1635,7 +1645,7 @@ public class GenericClientTest {
 			.execute();
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
-		Assert.assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
+		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
 		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 	}
@@ -1798,7 +1808,7 @@ public class GenericClientTest {
 		MethodOutcome resp = client.validate(p1);
 		assertEquals("http://example.com/fhir/Patient/$validate", capt.getValue().getURI().toString());
 		oo = (OperationOutcome) resp.getOperationOutcome();
-		Assert.assertEquals("OOOK", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals("OOOK", oo.getIssueFirstRep().getDiagnostics());
 
 	}
 
@@ -1814,12 +1824,12 @@ public class GenericClientTest {
 		return ourCtx.newXmlParser().encodeResourceToString(retVal);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR5();
 	}

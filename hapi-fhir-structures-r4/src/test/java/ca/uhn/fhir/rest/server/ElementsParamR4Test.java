@@ -17,7 +17,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -26,10 +26,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 
 public class ElementsParamR4Test {
 
@@ -43,7 +47,7 @@ public class ElementsParamR4Test {
 	private static RestfulServer ourServlet;
 	private static Observation ourNextObservation;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourLastElements = null;
 		ourNextProcedure = null;
@@ -79,7 +83,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testElementsOnChoiceWithSpecificNameNotMatching() throws IOException {
 		createObservationWithQuantity();
 		verifyXmlAndJson(
@@ -488,13 +492,13 @@ public class ElementsParamR4Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 

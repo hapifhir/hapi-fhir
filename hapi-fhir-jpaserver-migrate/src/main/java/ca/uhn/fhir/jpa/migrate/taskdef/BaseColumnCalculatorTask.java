@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.VersionEnum;
 import com.google.common.collect.ForwardingMap;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +32,17 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
@@ -43,19 +51,27 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 	private int myBatchSize = 10000;
 	private ThreadPoolExecutor myExecutor;
 
-	public void setBatchSize(int theBatchSize) {
-		myBatchSize = theBatchSize;
+	/**
+	 * Constructor
+	 */
+	public BaseColumnCalculatorTask(VersionEnum theRelease, String theVersion) {
+		this(theRelease.toString(), theVersion);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public BaseColumnCalculatorTask(VersionEnum theRelease, String theVersion) {
-		super(theRelease.toString(), theVersion);
+	public BaseColumnCalculatorTask(String theRelease, String theVersion) {
+		super(theRelease, theVersion);
+	}
+
+	public void setBatchSize(int theBatchSize) {
+		myBatchSize = theBatchSize;
 	}
 
 	/**
 	 * Allows concrete implementations to decide if they should be skipped.
+	 *
 	 * @return a boolean indicating whether or not to skip execution of the task.
 	 */
 	protected abstract boolean shouldSkipTask();
@@ -70,7 +86,7 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 
 		try {
 
-			while(true) {
+			while (true) {
 				MyRowCallbackHandler rch = new MyRowCallbackHandler();
 				getTxTemplate().execute(t -> {
 					JdbcTemplate jdbcTemplate = newJdbcTemplate();

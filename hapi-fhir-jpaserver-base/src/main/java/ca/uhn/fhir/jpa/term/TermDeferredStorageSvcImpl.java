@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -62,6 +63,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
 	@Autowired
+   protected ITermCodeSystemVersionDao myCodeSystemVersionDao;
+   @Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	private boolean myProcessDeferred = true;
 	private List<TermCodeSystem> myDefferedCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
@@ -138,11 +141,21 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		int codeCount = 0, relCount = 0;
 		StopWatch stopwatch = new StopWatch();
 
-		int count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myDeferredConcepts.size());
+		int count = Math.min(1000, myDeferredConcepts.size());
 		ourLog.info("Saving {} deferred concepts...", count);
 		while (codeCount < count && myDeferredConcepts.size() > 0) {
 			TermConcept next = myDeferredConcepts.remove(0);
-			codeCount += myCodeSystemStorageSvc.saveConcept(next);
+			if(myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
+				try {
+					codeCount += myCodeSystemStorageSvc.saveConcept(next);
+				} catch (Exception theE) {
+					ourLog.error("Exception thrown when attempting to save TermConcept {} in Code System {}",
+						next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), theE);
+				}
+			} else {
+				ourLog.warn("Unable to save deferred TermConcept {} because Code System {} version PID {} is no longer valid. Code system may have since been replaced.",
+					next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), next.getCodeSystemVersion().getPid());
+			}
 		}
 
 		if (codeCount > 0) {
@@ -151,7 +164,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		}
 
 		if (codeCount == 0) {
-			count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myConceptLinksToSaveLater.size());
+			count = Math.min(1000, myConceptLinksToSaveLater.size());
 			ourLog.info("Saving {} deferred concept relationships...", count);
 			while (relCount < count && myConceptLinksToSaveLater.size() > 0) {
 				TermConceptParentChildLink next = myConceptLinksToSaveLater.remove(0);
@@ -180,7 +193,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private void processDeferredValueSets() {
-		int count = Math.min(myDeferredValueSets.size(), 20);
+		int count = Math.min(myDeferredValueSets.size(), 200);
 		for (ValueSet nextValueSet : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
 			ourLog.info("Creating ValueSet: {}", nextValueSet.getId());
 			myTerminologyVersionAdapterSvc.createOrUpdateValueSet(nextValueSet);
@@ -224,6 +237,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 					processDeferredConcepts();
 					return null;
 				});
+
+				continue;
 			}
 
 			if (isDeferredValueSets()) {
@@ -231,6 +246,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 					processDeferredValueSets();
 					return null;
 				});
+
+				continue;
 			}
 
 			if (isDeferredConceptMaps()) {
@@ -238,6 +255,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 					processDeferredConceptMaps();
 					return null;
 				});
+
+				continue;
 			}
 
 			if (isDeferredCodeSystemDeletions()) {
@@ -339,5 +358,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@VisibleForTesting
 	void setConceptDaoForUnitTest(ITermConceptDao theConceptDao) {
 		myConceptDao = theConceptDao;
+	}
+
+	@VisibleForTesting
+	void setCodeSystemVersionDaoForUnitTest(ITermCodeSystemVersionDao theCodeSystemVersionDao) {
+		myCodeSystemVersionDao = theCodeSystemVersionDao;
 	}
 }

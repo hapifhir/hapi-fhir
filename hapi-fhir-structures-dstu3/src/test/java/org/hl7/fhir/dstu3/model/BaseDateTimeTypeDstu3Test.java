@@ -1,30 +1,37 @@
 package org.hl7.fhir.dstu3.model;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
-
-import org.apache.commons.lang3.time.FastDateFormat;
-import org.hamcrest.Matchers;
-import org.junit.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.apache.commons.lang3.time.FastDateFormat;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+
+import javax.xml.crypto.Data;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.endsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BaseDateTimeTypeDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -33,7 +40,7 @@ public class BaseDateTimeTypeDstu3Test {
 	private SimpleDateFormat myDateInstantParser;
 	private FastDateFormat myDateInstantZoneParser;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		myDateInstantZoneParser = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
@@ -189,7 +196,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals(TemporalPrecisionEnum.SECOND, c.getStatusDateElement().getPrecision());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(c);
-		Assert.assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
+		assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
 
 		c = ourCtx.newXmlParser().parseResource(Goal.class, encoded);
 
@@ -492,9 +499,14 @@ public class BaseDateTimeTypeDstu3Test {
 		}
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseMalformatted() throws DataFormatException {
-		new DateTimeType("20120102");
+		try {
+			new DateTimeType("20120102");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Invalid date/time format: \"20120102\": Expected character '-' at index 4 but found 0", e.getMessage());
+		}
 	}
 
 	@Test
@@ -547,10 +559,15 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals("2013-02", myDateInstantParser.format(dt.getValue()).substring(0, 7));
 	}
 
-	@Test(expected = DataFormatException.class)
+	@Test
 	public void testParseMonthNoDashes() throws DataFormatException {
 		DateTimeType dt = new DateTimeType();
+		try {
 		dt.setValueAsString("201302");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Invalid date/time format: \"201302\": Expected character '-' at index 4 but found 0", e.getMessage());
+		}
 	}
 
 	@Test
@@ -908,12 +925,12 @@ public class BaseDateTimeTypeDstu3Test {
 		Locale.setDefault(ourDefaultLocale);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		/*
 		 * We cache the default locale, but temporarily set it to a random value during this test. This helps ensure that

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2050
+title: An issue was fixed where multiple JPA server updates to the same resource within the same 
+    database transaction would fail with a database constraint error.

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
@@ -15,15 +16,20 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.*;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.aspectj.lang.annotation.Before;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.persistence.EntityManager;
@@ -34,13 +40,15 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	@Autowired
@@ -61,8 +69,9 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	@Before
+	@BeforeEach
 	public void before() throws IOException {
+		myDaoConfig.setLastNEnabled(true);
 
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
@@ -71,12 +80,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
-	@Before
-	public void beforeEnableLastN() {
-		myDaoConfig.setLastNEnabled(true);
-	}
-
-	@After
+	@AfterEach
 	public void afterDisableLastN() {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 	}
@@ -95,6 +99,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	private ReferenceAndListParam multiSubjectParams = null;
 
+	@Order(3)
 	@Test
 	public void testIndexObservationSingle() throws IOException {
 		indexSingleObservation();
@@ -195,6 +200,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		return codeableConceptField;
 	}
 
+	@Order(2)
 	@Test
 	public void testIndexObservationMultiple() throws IOException {
 		indexMultipleObservations();
@@ -202,9 +208,6 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		searchParameterMap.setLastNMax(100);
 		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
 		assertEquals(100, observationDocuments.size());
-
-		//List<CodeJson> codeDocuments = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
-		//assertEquals(2, codeDocuments.size());
 
 		// Check that all observations were indexed.
 		searchParameterMap = new SearchParameterMap();
@@ -305,6 +308,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
+	@Order(0)
 	@Test
 	public void testDeleteObservation() throws IOException {
 		indexMultipleObservations();
@@ -346,6 +350,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
+	@Order(4)
 	@Test
 	public void testUpdateObservation() throws IOException {
 		indexSingleObservation();
@@ -406,9 +411,10 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
+	@Order(1)
 	@Test
 	public void testSampleBundleInTransaction() throws IOException {
-		FhirContext myFhirCtx = FhirContext.forR4();
+		FhirContext myFhirCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 		PathMatchingResourcePatternResolver provider = new PathMatchingResourcePatternResolver();
 		final Resource[] bundleResources;

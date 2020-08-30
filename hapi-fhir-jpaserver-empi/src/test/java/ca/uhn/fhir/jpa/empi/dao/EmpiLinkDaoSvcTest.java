@@ -1,23 +1,27 @@
 package ca.uhn.fhir.jpa.empi.dao;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.util.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmpiLinkDaoSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	@Autowired
+	IEmpiSettings myEmpiSettings;
 
 	@Test
 	public void testCreate() {
@@ -38,6 +42,14 @@ public class EmpiLinkDaoSvcTest extends BaseEmpiR4Test {
 		createdLink.setLinkSource(EmpiLinkSourceEnum.AUTO);
 		EmpiLink updatedLink = myEmpiLinkDaoSvc.save(createdLink);
 		assertNotEquals(updatedLink.getCreated(), updatedLink.getUpdated());
+	}
+
+	@Test
+	public void testNew() {
+		EmpiLink newLink = myEmpiLinkDaoSvc.newEmpiLink();
+		EmpiRulesJson rules = myEmpiSettings.getEmpiRules();
+		assertEquals("1", rules.getVersion());
+		assertEquals(rules.getVersion(), newLink.getVersion());
 	}
 
 }

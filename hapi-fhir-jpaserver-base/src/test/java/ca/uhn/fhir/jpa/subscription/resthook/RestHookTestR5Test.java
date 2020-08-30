@@ -1,17 +1,16 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR5Test;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.model.*;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +19,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -32,9 +39,9 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 
-	@After
+	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
-		ourLog.info("@After");
+		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 	}
@@ -262,7 +269,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		// Send an update with no changes
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
-		ourClient.update().resource(obs).execute();
+		myClient.update().resource(obs).execute();
 
 		// Should be no further deliveries
 		Thread.sleep(1000);
@@ -299,12 +306,12 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertEquals(observation1.getIdElement().getVersionIdPart(), idElement.getVersionIdPart());
 
 		subscription1
-			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
+			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 
 		int modCount = myCountingInterceptor.getSentCount("Subscription");
 		ourLog.info("** About to send another...");
-		ourClient.update().resource(subscription1).execute();
+		myClient.update().resource(subscription1).execute();
 		waitForSize(modCount + 2, () -> myCountingInterceptor.getSentCount("Subscription"), () -> myCountingInterceptor.toString());
 
 		ourLog.info("** About to send observation");
@@ -342,7 +349,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertNull(observation.getNoteFirstRep().getText());
 
 		observation.getNoteFirstRep().setText("changed");
-		MethodOutcome methodOutcome = ourClient.update().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.update().resource(observation).execute();
 		assertEquals("2", methodOutcome.getId().getVersionIdPart());
 		assertEquals("changed", observation.getNoteFirstRep().getText());
 
@@ -375,8 +382,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		Subscription subscription = newSubscription(criteria1, payload);
 		subscription
-			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
-		ourClient.create().resource(subscription).execute();
+			.addExtension(HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
+		myClient.create().resource(subscription).execute();
 
 		waitForActivatedSubscriptionCount(1);
 
@@ -390,7 +397,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertNull(observation.getNoteFirstRep().getText());
 
 		observation.getNoteFirstRep().setText("changed");
-		MethodOutcome methodOutcome = ourClient.update().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.update().resource(observation).execute();
 		assertEquals("2", methodOutcome.getId().getVersionIdPart());
 		assertEquals("changed", observation.getNoteFirstRep().getText());
 
@@ -434,13 +441,13 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
+		assertNotNull(subscriptionTemp);
 
 		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
 
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -450,7 +457,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 		waitForQueueToDrain();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
@@ -460,27 +467,27 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -516,13 +523,13 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
+		assertNotNull(subscriptionTemp);
 
 		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
 
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -532,7 +539,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 		waitForQueueToDrain();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
@@ -542,27 +549,27 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -595,11 +602,11 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(1, ourContentTypes);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
+		assertNotNull(subscriptionTemp);
 		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -609,7 +616,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -618,27 +625,27 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -690,7 +697,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 			.getRequest()
 			.setUrl("Patient?identifier=foo|bar2")
 			.setMethod(Bundle.HTTPVerb.PUT);
-		ourClient.transaction().withBundle(requestBundle).execute();
+		myClient.transaction().withBundle(requestBundle).execute();
 
 		// Should see 1 subscription notification
 		waitForSize(0, ourCreatedObservations);
@@ -721,15 +728,15 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Thread.sleep(1000);
 		assertEquals(0, ourUpdatedObservations.size());
 
-		Subscription subscriptionTemp = ourClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
-		Assert.assertNotNull(subscriptionTemp);
+		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
+		assertNotNull(subscriptionTemp);
 		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
 		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteriaGood);
 
 		ourLog.info("** About to update subscription");
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		ourLog.info("** About to send Observation 2");
@@ -740,7 +747,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -798,7 +805,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		subscription.addHeader("X-Foo: FOO");
 		subscription.addHeader("X-Bar: BAR");
 		subscription.setStatus(Enumerations.SubscriptionState.REQUESTED);
-		ourClient.update().resource(subscription).execute();
+		myClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
 
 		sendObservation(code, "SNOMED-CT");
@@ -831,7 +838,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		// Disable
 		subscription.setStatus(Enumerations.SubscriptionState.OFF);
-		ourClient.update().resource(subscription).execute();
+		myClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
 
 		// Send another object
@@ -844,28 +851,34 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 	}
 
-	@Test(expected = UnprocessableEntityException.class)
+	@Test
 	public void testInvalidProvenanceParam() {
+		assertThrows(UnprocessableEntityException.class, () -> {
 		String payload = "application/fhir+json";
 		String criteriabad = "Provenance?foo=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
 		Subscription subscription = newSubscription(criteriabad, payload);
-		ourClient.create().resource(subscription).execute();
+		myClient.create().resource(subscription).execute();
+		});
 	}
 
-	@Test(expected = UnprocessableEntityException.class)
+	@Test
 	public void testInvalidProcedureRequestParam() {
+		assertThrows(UnprocessableEntityException.class, () -> {
 		String payload = "application/fhir+json";
 		String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
 		Subscription subscription = newSubscription(criteriabad, payload);
-		ourClient.create().resource(subscription).execute();
+		myClient.create().resource(subscription).execute();
+		});
 	}
 
-	@Test(expected = UnprocessableEntityException.class)
+	@Test
 	public void testInvalidBodySiteParam() {
+		assertThrows(UnprocessableEntityException.class, () -> {
 		String payload = "application/fhir+json";
 		String criteriabad = "BodySite?accessType=Catheter";
 		Subscription subscription = newSubscription(criteriabad, payload);
-		ourClient.create().resource(subscription).execute();
+		myClient.create().resource(subscription).execute();
+		});
 	}
 
 	@Test
@@ -874,12 +887,12 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String payload = "application/fhir+json";
 		String criteriaGood = "Patient?gender=male";
 		Subscription subscription = newSubscription(criteriaGood, payload);
-		ourClient.create().resource(subscription).execute();
+		myClient.create().resource(subscription).execute();
 		assertEquals(1, subscriptionCount());
 	}
 
 	private int subscriptionCount() {
-		IBaseBundle found = ourClient.search().forResource(Subscription.class).cacheControl(new CacheControlDirective().setNoCache(true)).execute();
+		IBaseBundle found = myClient.search().forResource(Subscription.class).cacheControl(new CacheControlDirective().setNoCache(true)).execute();
 		return toUnqualifiedVersionlessIdValues(found).size();
 	}
 
@@ -889,7 +902,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		subscription.setStatus(null);
 
 		try {
-			ourClient.create().resource(subscription).execute();
+			myClient.create().resource(subscription).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
@@ -904,7 +917,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String criteriaBad = "BodySite?accessType=Catheter";
 		Subscription subscription = newSubscription(criteriaBad, payload);
 		try {
-			ourClient.create().resource(subscription).execute();
+			myClient.create().resource(subscription).execute();
 		} catch (UnprocessableEntityException e) {
 			ourLog.info("Expected exception", e);
 		}
@@ -930,7 +943,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		{
 			Observation bodySite = new Observation();
 			bodySite.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("Catheter"));
-			MethodOutcome methodOutcome = ourClient.create().resource(bodySite).execute();
+			MethodOutcome methodOutcome = myClient.create().resource(bodySite).execute();
 			assertEquals(true, methodOutcome.getCreated());
 			waitForQueueToDrain();
 			waitForSize(1, ourUpdatedObservations);
@@ -938,14 +951,14 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		{
 			Observation observation = new Observation();
 			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("PD Catheter"));
-			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 			assertEquals(true, methodOutcome.getCreated());
 			waitForQueueToDrain();
 			waitForSize(2, ourUpdatedObservations);
 		}
 		{
 			Observation observation = new Observation();
-			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 			assertEquals(true, methodOutcome.getCreated());
 			waitForQueueToDrain();
 			waitForSize(2, ourUpdatedObservations);
@@ -953,7 +966,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		{
 			Observation observation = new Observation();
 			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("XXX"));
-			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 			assertEquals(true, methodOutcome.getCreated());
 			waitForQueueToDrain();
 			waitForSize(2, ourUpdatedObservations);

@@ -2,7 +2,7 @@ package test;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.test.ant.single.TestConfigDstu2;
 import ca.uhn.test.ant.multi.*;

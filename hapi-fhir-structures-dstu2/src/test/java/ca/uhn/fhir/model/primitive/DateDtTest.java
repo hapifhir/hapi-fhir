@@ -1,21 +1,18 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.Assert.assertEquals;
+import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.util.TestUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateDtTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateDtTest.class);
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

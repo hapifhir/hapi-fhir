@@ -29,13 +29,16 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ETagServerR4Test {
 
@@ -49,7 +52,7 @@ public class ETagServerR4Test {
   private static boolean ourPutVersionInPatientId;
   private static boolean ourPutVersionInPatientMeta;
 
-  @Before
+  @BeforeEach
   public void before() {
     ourLastId = null;
     ourPutVersionInPatientId = true;
@@ -88,8 +91,8 @@ public class ETagServerR4Test {
 
     assertEquals(200, status.getStatusLine().getStatusCode());
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
-    Assert.assertEquals("2", dt.getSystemElement().getValueAsString());
-    Assert.assertEquals("3", dt.getValue());
+    assertEquals("2", dt.getSystemElement().getValueAsString());
+    assertEquals("3", dt.getValue());
 
     Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
     assertNotNull(cl);
@@ -124,8 +127,8 @@ public class ETagServerR4Test {
 
     assertEquals(200, status.getStatusLine().getStatusCode());
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
-    Assert.assertEquals("2", dt.getSystemElement().getValueAsString());
-    Assert.assertEquals("3", dt.getValue());
+    assertEquals("2", dt.getSystemElement().getValueAsString());
+    assertEquals("3", dt.getValue());
 
     Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
     assertNotNull(cl);
@@ -146,7 +149,7 @@ public class ETagServerR4Test {
     CloseableHttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
     assertEquals(200, status.getStatusLine().getStatusCode());
-    Assert.assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
+    assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
 
   }
 
@@ -164,7 +167,7 @@ public class ETagServerR4Test {
     CloseableHttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
     assertEquals(Constants.STATUS_HTTP_412_PRECONDITION_FAILED, status.getStatusLine().getStatusCode());
-    Assert.assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
+    assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
   }
 
   @Test
@@ -183,12 +186,12 @@ public class ETagServerR4Test {
 
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() throws Exception {
     JettyUtil.closeServer(ourServer);
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
     ourServer = new Server(0);
 

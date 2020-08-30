@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
  */
 public class NumberClientParam extends BaseClientParam  implements IParam {
 
-	private String myParamName;
+	private final String myParamName;
 
 	public NumberClientParam(String theParamName) {
 		myParamName = theParamName;
@@ -37,12 +37,12 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), Long.toString(theNumber));
+				return new StringCriterion<>(getParamName(), Long.toString(theNumber));
 			}
 
 			@Override
 			public ICriterion<NumberClientParam> number(String theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), (theNumber));
+				return new StringCriterion<>(getParamName(), (theNumber));
 			}
 		};
 	}
@@ -56,12 +56,12 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), ParamPrefixEnum.GREATERTHAN, Long.toString(theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.GREATERTHAN, Long.toString(theNumber));
 			}
 
 			@Override
 			public ICriterion<NumberClientParam> number(String theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), ParamPrefixEnum.GREATERTHAN, (theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.GREATERTHAN, (theNumber));
 			}
 		};
 	}
@@ -70,12 +70,12 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
 			}
 
 			@Override
 			public ICriterion<NumberClientParam> number(String theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), ParamPrefixEnum.GREATERTHAN_OR_EQUALS, (theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.GREATERTHAN_OR_EQUALS, (theNumber));
 			}
 		};
 	}
@@ -84,12 +84,12 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), ParamPrefixEnum.LESSTHAN, Long.toString(theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.LESSTHAN, Long.toString(theNumber));
 			}
 
 			@Override
 			public ICriterion<NumberClientParam> number(String theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), ParamPrefixEnum.LESSTHAN, (theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.LESSTHAN, (theNumber));
 			}
 		};
 	}
@@ -98,12 +98,12 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
 			}
 
 			@Override
 			public ICriterion<NumberClientParam> number(String theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), ParamPrefixEnum.LESSTHAN_OR_EQUALS,  (theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.LESSTHAN_OR_EQUALS, (theNumber));
 			}
 		};
 	}
@@ -112,12 +112,12 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), thePrefix, Long.toString(theNumber));
+				return new StringCriterion<>(getParamName(), thePrefix, Long.toString(theNumber));
 			}
 
 			@Override
 			public ICriterion<NumberClientParam> number(String theNumber) {
-				return new StringCriterion<NumberClientParam>(getParamName(), thePrefix,  (theNumber));
+				return new StringCriterion<>(getParamName(), thePrefix, (theNumber));
 			}
 		};
 	}

@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
@@ -14,18 +15,18 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EmpiCandidateSearchSvcTest extends BaseEmpiR4Test {
 
 	@Autowired
-	EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
+    EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 
 	@Test
 	public void testFindCandidates() {
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
-		Patient createdJane = createPatient(jane);
+		createPatient(jane);
 		Patient newJane = buildJanePatient();
 
 		Collection<IAnyResource> result = myEmpiCandidateSearchSvc.findCandidates("Patient", newJane);

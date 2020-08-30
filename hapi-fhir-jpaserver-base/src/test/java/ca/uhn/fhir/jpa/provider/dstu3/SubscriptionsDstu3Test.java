@@ -13,40 +13,42 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu3Test.class);
 	private SubscriptionsRequireManualActivationInterceptorDstu3 myInterceptor;
 
-	@Before
+	@BeforeEach
 	public void beforeCreateInterceptor() {
 		myInterceptor = new SubscriptionsRequireManualActivationInterceptorDstu3();
 		myInterceptor.setDao(mySubscriptionDao);
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
 
-	@After
+	@AfterEach
 	public void afterDestroyInterceptor() {
 		myInterceptorRegistry.unregisterInterceptor(myInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeEnableScheduling() {
 		myDaoConfig.setSchedulingDisabled(false);
 	}
@@ -124,7 +126,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatus) null);
+			subs.setStatus(null);
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -155,7 +157,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatus) null);
+			subs.setStatus(null);
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -166,10 +168,6 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		ourClient.update().resource(subs).execute();
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 	public class BaseSocket {
 		protected String myError;

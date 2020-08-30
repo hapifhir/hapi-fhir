@@ -297,7 +297,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					}
 					myPackageVersionResourceDao.save(resourceEntity);
 
-					String msg = "Indexing Resource[" + dirName + '/' + nextFile + "] with URL: " + defaultString(url) + "|" + defaultString(version);
+					String resType = packageContext.getResourceType(resource);
+					String msg = "Indexing " + resType + " Resource[" + dirName + '/' + nextFile + "] with URL: " + defaultString(url) + "|" + defaultString(version);
 					getProcessingMessages(npmPackage).add(msg);
 					ourLog.info("Package[{}#{}] " + msg, thePackageId, packageVersionId);
 				}
@@ -408,7 +409,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				.build()
 				.execute(new HttpGet(thePackageUrl))) {
 				if (request.getStatusLine().getStatusCode() != 200) {
-					throw new IOException("Received HTTP " + request.getStatusLine().getStatusCode());
+					throw new ResourceNotFoundException("Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
 				}
 				return IOUtils.toByteArray(request.getEntity().getContent());
 			} catch (IOException e) {

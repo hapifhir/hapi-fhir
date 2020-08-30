@@ -16,10 +16,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.StringTokenizer;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
@@ -370,7 +376,7 @@ public class UrlUtil {
 	/**
 	 * This method specifically HTML-encodes the &quot; and
 	 * &lt; characters in order to prevent injection attacks.
-	 *
+	 * <p>
 	 * The following characters are escaped:
 	 * <ul>
 	 *    <li>&apos;</li>
@@ -379,7 +385,6 @@ public class UrlUtil {
 	 *    <li>&gt;</li>
 	 *    <li>\n (newline)</li>
 	 * </ul>
-	 *
 	 */
 	public static String sanitizeUrlPart(CharSequence theString) {
 		if (theString == null) {
@@ -430,6 +435,21 @@ public class UrlUtil {
 		}
 
 		return theString.toString();
+	}
+
+	/**
+	 * Applies the same logic as {@link #sanitizeUrlPart(CharSequence)} but against an array, returning an array with the
+	 * same strings as the input but with sanitization applied
+	 */
+	public static String[] sanitizeUrlPart(String[] theParameterValues) {
+		String[] retVal = null;
+		if (theParameterValues != null) {
+			retVal = new String[theParameterValues.length];
+			for (int i = 0; i < theParameterValues.length; i++) {
+				retVal[i] = sanitizeUrlPart(theParameterValues[i]);
+			}
+		}
+		return retVal;
 	}
 
 	private static Map<String, String[]> toQueryStringMap(HashMap<String, List<String>> map) {

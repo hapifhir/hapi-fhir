@@ -20,6 +20,10 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -32,10 +36,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.assertThat;
 
 /**
  * This is an experiment to see if we can make test data creation for storage unit tests a bit more readable.

@@ -1,26 +1,35 @@
 package ca.uhn.fhir.model;
 
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.dstu3.model.Appointment;
+import org.hl7.fhir.dstu3.model.Claim;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Element;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
+import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import ca.uhn.fhir.parser.DataFormatException;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Claim.CareTeamComponent;
-import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
-import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.TestUtil;
-
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ModelDstu3Test {
 
@@ -68,7 +77,7 @@ public class ModelDstu3Test {
 		assertEquals(CodeableConcept.class, roleField.getClass());
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -5,8 +5,8 @@ import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
@@ -15,7 +15,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +28,7 @@ public class AbstractJaxRsConformanceProviderTest {
 	private ResteasyHttpHeaders headers;
 	private MultivaluedHashMap<String, String> queryParameters;
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		// uri info
 		queryParameters = new MultivaluedHashMap<>();

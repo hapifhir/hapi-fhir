@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2051
+title: The FHIR Client will now accept an HTTP 204 NO CONTENT as a response to a write operation such
+  as a create/update/transaction/etc.

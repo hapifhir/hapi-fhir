@@ -34,6 +34,7 @@ import java.util.function.Predicate;
 public class DeleteConflictList implements Iterable<DeleteConflict> {
 	private final List<DeleteConflict> myList = new ArrayList<>();
 	private final Set<String> myResourceIdsMarkedForDeletion;
+	private final Set<String> myResourceIdsToIgnoreConflict;
 	private int myRemoveModCount;
 
 	/**
@@ -41,6 +42,7 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 	 */
 	public DeleteConflictList() {
 		myResourceIdsMarkedForDeletion = new HashSet<>();
+		myResourceIdsToIgnoreConflict = new HashSet<>();
 	}
 
 	/**
@@ -49,6 +51,7 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 	 */
 	public DeleteConflictList(DeleteConflictList theParentList) {
 		myResourceIdsMarkedForDeletion = theParentList.myResourceIdsMarkedForDeletion;
+		myResourceIdsToIgnoreConflict = theParentList.myResourceIdsToIgnoreConflict;
 	}
 
 
@@ -62,6 +65,18 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 		Validate.notNull(theIdType);
 		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
 		myResourceIdsMarkedForDeletion.add(theIdType.toUnqualifiedVersionless().getValue());
+	}
+
+	public boolean isResourceIdToIgnoreConflict(IIdType theIdType) {
+		Validate.notNull(theIdType);
+		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
+		return myResourceIdsToIgnoreConflict.contains(theIdType.toUnqualifiedVersionless().getValue());
+	}
+
+	public void setResourceIdToIgnoreConflict(IIdType theIdType) {
+		Validate.notNull(theIdType);
+		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
+		myResourceIdsToIgnoreConflict.add(theIdType.toUnqualifiedVersionless().getValue());
 	}
 
 	public void add(DeleteConflict theDeleteConflict) {
@@ -125,6 +140,10 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 
 	public int size() {
 		return myList.size();
+	}
+
+	public void removeAll() {
+		this.removeIf(x -> true);
 	}
 
 	@Override

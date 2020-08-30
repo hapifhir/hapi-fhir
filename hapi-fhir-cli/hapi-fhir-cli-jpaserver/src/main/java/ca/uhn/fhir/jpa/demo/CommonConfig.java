@@ -20,28 +20,18 @@ package ca.uhn.fhir.jpa.demo;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
-import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.H2Dialect;
-import org.hibernate.search.elasticsearch.cfg.ElasticsearchIndexStatus;
-import org.hibernate.search.elasticsearch.cfg.IndexSchemaManagementStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
-import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
-import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.util.Properties;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -110,55 +100,7 @@ public class CommonConfig {
 			extraProperties.put("hibernate.search.autoregister_listeners", "false");
 		}
 
-		return configureElasticearch(extraProperties);
-	}
-
-	private Properties configureElasticearch(Properties theExtraProperties) {
-
-		String elasticsearchHost = "localhost";
-		String elasticsearchUserId = "";
-		String elasticsearchPassword = "";
-		int elasticsearchPort = embeddedElasticSearch().getHttpPort();
-
-		new ElasticsearchHibernatePropertiesBuilder()
-			.setDebugRefreshAfterWrite(true)
-			.setDebugPrettyPrintJsonLog(true)
-			.setIndexSchemaManagementStrategy(IndexSchemaManagementStrategy.CREATE)
-			.setIndexManagementWaitTimeoutMillis(10000)
-			.setRequiredIndexStatus(ElasticsearchIndexStatus.YELLOW)
-			.setRestUrl("http://" + elasticsearchHost + ":" + elasticsearchPort)
-			.setUsername(elasticsearchUserId)
-			.setPassword(elasticsearchPassword)
-			.apply(theExtraProperties);
-
-		return theExtraProperties;
-
-	}
-
-	@Bean
-	public EmbeddedElastic embeddedElasticSearch() {
-		String ELASTIC_VERSION = "6.5.4";
-
-		EmbeddedElastic embeddedElastic = null;
-		try {
-			embeddedElastic = EmbeddedElastic.builder()
-				.withElasticVersion(ELASTIC_VERSION)
-				.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
-				.withSetting(PopularProperties.HTTP_PORT, 0)
-				.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
-				.withStartTimeout(60, TimeUnit.SECONDS)
-				.build()
-				.start();
-		} catch (IOException | InterruptedException e) {
-			throw new ConfigurationException(e);
-		}
-
-		return embeddedElastic;
-	}
-
-	@PreDestroy
-	public void stop() {
-		embeddedElasticSearch().stop();
+		return extraProperties;
 	}
 
 	@Bean

@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -209,11 +210,11 @@ public class BinaryAccessProvider {
 		theTarget
 			.getTarget()
 			.getExtension()
-			.removeIf(t -> JpaConstants.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()));
+			.removeIf(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()));
 		theTarget.setData(null);
 
 		IBaseExtension<?, ?> ext = theTarget.getTarget().addExtension();
-		ext.setUrl(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+		ext.setUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 		ext.setUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED, Boolean.TRUE);
 		IPrimitiveType<String> blobIdString = (IPrimitiveType<String>) myCtx.getElementDefinition("string").newInstance();
 		blobIdString.setValueAsString(theBlobId);

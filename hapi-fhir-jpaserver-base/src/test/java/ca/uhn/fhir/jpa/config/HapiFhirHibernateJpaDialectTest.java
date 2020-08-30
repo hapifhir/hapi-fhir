@@ -7,21 +7,22 @@ import org.hibernate.HibernateException;
 import org.hibernate.PersistentObjectException;
 import org.hibernate.StaleStateException;
 import org.hibernate.exception.ConstraintViolationException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessException;
 
 import javax.persistence.PersistenceException;
 import java.sql.SQLException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HapiFhirHibernateJpaDialectTest {
 
 	private HapiFhirHibernateJpaDialect mySvc;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		mySvc = new HapiFhirHibernateJpaDialect(new HapiLocalizer());
 	}

@@ -2,13 +2,17 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -42,17 +46,77 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
 	}
 
+	@Override
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+
+		if (theOptions != null) {
+			if (theOptions.isInferSystem()) {
+				return null;
+			}
+		}
+
+		IBaseResource valueSet = theValueSet;
+		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
+		if (isNotBlank(valueSetUrl)) {
+			valueSet = null;
+		} else {
+			valueSetUrl = null;
+		}
+		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, valueSetUrl, valueSet);
+	}
+
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		IGenericClient client = provideClient();
+		Class<? extends IBaseBundle> bundleType = myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
+		IBaseBundle results = client
+			.search()
+			.forResource("CodeSystem")
+			.where(CodeSystem.URL.matches().value(theSystem))
+			.returnBundle(bundleType)
+			.execute();
+		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
+		if (resultsList.size() > 0) {
+			return resultsList.get(0);
+		}
+
+		return null;
+	}
+
+	@Override
+	public IBaseResource fetchValueSet(String theValueSetUrl) {
+		IGenericClient client = provideClient();
+		Class<? extends IBaseBundle> bundleType = myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
+		IBaseBundle results = client
+			.search()
+			.forResource("ValueSet")
+			.where(CodeSystem.URL.matches().value(theValueSetUrl))
+			.returnBundle(bundleType)
+			.execute();
+		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
+		if (resultsList.size() > 0) {
+			return resultsList.get(0);
+		}
+
+		return null;
+	}
+
+	@Override
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		return fetchCodeSystem(theSystem) != null;
+	}
+
+	@Override
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		return fetchValueSet(theValueSetUrl) != null;
+	}
+
 	private IGenericClient provideClient() {
 		IGenericClient retVal = myCtx.newRestfulGenericClient(myBaseUrl);
 		for (Object next : myClientInterceptors) {
 			retVal.registerInterceptor(next);
 		}
 		return retVal;
-	}
-
-	@Override
-	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, null, theValueSet);
 	}
 
 	protected CodeValidationResult invokeRemoteValidateCode(String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
@@ -64,23 +128,38 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		IBaseParameters input = ParametersUtil.newInstance(getFhirContext());
 
-		if (isNotBlank(theValueSetUrl)) {
-			ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "url", theValueSetUrl);
+		String resourceType = "ValueSet";
+		if (theValueSet == null && theValueSetUrl == null) {
+			resourceType = "CodeSystem";
+
+			ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "url", theCodeSystem);
+			ParametersUtil.addParameterToParametersString(getFhirContext(), input, "code", theCode);
+			if (isNotBlank(theDisplay)) {
+				ParametersUtil.addParameterToParametersString(getFhirContext(), input, "display", theDisplay);
+			}
+
+		} else {
+
+			if (isNotBlank(theValueSetUrl)) {
+				ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "url", theValueSetUrl);
+			}
+			ParametersUtil.addParameterToParametersString(getFhirContext(), input, "code", theCode);
+			if (isNotBlank(theCodeSystem)) {
+				ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "system", theCodeSystem);
+			}
+			if (isNotBlank(theDisplay)) {
+				ParametersUtil.addParameterToParametersString(getFhirContext(), input, "display", theDisplay);
+			}
+			if (theValueSet != null) {
+				ParametersUtil.addParameterToParameters(getFhirContext(), input, "valueSet", theValueSet);
+			}
+
 		}
-		ParametersUtil.addParameterToParametersString(getFhirContext(), input, "code", theCode);
-		if (isNotBlank(theCodeSystem)) {
-			ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "system", theCodeSystem);
-		}
-		if (isNotBlank(theDisplay)) {
-			ParametersUtil.addParameterToParametersString(getFhirContext(), input, "display", theDisplay);
-		}
-		if (theValueSet != null) {
-			ParametersUtil.addParameterToParameters(getFhirContext(), input, "valueSet", theValueSet);
-		}
+
 
 		IBaseParameters output = client
 			.operation()
-			.onType("ValueSet")
+			.onType(resourceType)
 			.named("validate-code")
 			.withParameters(input)
 			.execute();

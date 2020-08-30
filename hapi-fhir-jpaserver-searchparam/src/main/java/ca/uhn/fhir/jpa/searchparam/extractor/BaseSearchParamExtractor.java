@@ -37,12 +37,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,8 +81,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
-	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 
+	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 	private static final Pattern SPLIT_R4 = Pattern.compile("\\|");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 	@Autowired
@@ -95,6 +95,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private ModelConfig myModelConfig;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
 	private Set<String> myIgnoredForSearchDatatypes;
 	private BaseRuntimeChildDefinition myQuantityValueValueChild;
 	private BaseRuntimeChildDefinition myQuantitySystemValueChild;
@@ -252,7 +253,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
 		IExtractor extractor;
-		switch(theSearchParam.getParamType()) {
+		switch (theSearchParam.getParamType()) {
 			case DATE:
 				extractor = createDateExtractor(theResource);
 				break;
@@ -972,12 +973,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		for (String next : families) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
-
 		List<String> givens = extractValuesAsStrings(myHumanNameGivenValueChild, theValue);
 		for (String next : givens) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
-
 	}
 
 	private void addString_Quantity(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -1099,11 +1098,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 			String searchParamName = theSearchParam.getName();
 			String valueNormalized = StringUtil.normalizeStringForSearchIndexing(value);
-			if (valueNormalized.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-				valueNormalized = valueNormalized.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+			String valueEncoded = theSearchParam.encode(valueNormalized);
+
+			if (valueEncoded.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+				valueEncoded = valueEncoded.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 			}
 
-			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getModelConfig(), theResourceType, searchParamName, valueNormalized, value);
+			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getModelConfig(), theResourceType, searchParamName, valueEncoded, value);
 
 			Set params = theParams;
 			params.add(nextEntity);
@@ -1374,7 +1375,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
-		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(JpaConstants.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
+		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
 			.map(IBaseExtension::getValue)
 			.map(val -> (IPrimitiveType<?>) val)
 			.map(IPrimitiveType::getValueAsString)

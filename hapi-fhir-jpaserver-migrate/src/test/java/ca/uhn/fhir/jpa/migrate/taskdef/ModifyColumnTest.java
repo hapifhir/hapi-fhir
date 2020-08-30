@@ -3,21 +3,27 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.flywaydb.core.internal.command.DbMigrate;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ModifyColumnTest extends BaseTest {
-	public ModifyColumnTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
-	@Test
-	public void testColumnWithJdbcTypeClob() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnWithJdbcTypeClob(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED) {
 			return;
 		}
@@ -43,8 +49,11 @@ public class ModifyColumnTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testColumnAlreadyExists() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
 		ModifyColumnTask task = new ModifyColumnTask("1", "1");
@@ -66,8 +75,11 @@ public class ModifyColumnTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testNoShrink_SameNullable() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testNoShrink_SameNullable(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
 		ModifyColumnTask task = new ModifyColumnTask("1", "123456.7");
@@ -90,8 +102,11 @@ public class ModifyColumnTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testColumnMakeNullable() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnMakeNullable(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255) not null)");
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
@@ -130,8 +145,11 @@ public class ModifyColumnTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testNoShrink_ColumnMakeDateNullable() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testNoShrink_ColumnMakeDateNullable(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, DATECOL timestamp not null)");
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "DATECOL"));
@@ -169,8 +187,11 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 	}
 
-	@Test
-	public void testColumnMakeNotNullable() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnMakeNotNullable(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
@@ -208,8 +229,11 @@ public class ModifyColumnTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testColumnDoesntAlreadyExist() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testColumnDoesntAlreadyExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 
 		ModifyColumnTask task = new ModifyColumnTask("1", "1");
@@ -224,8 +248,11 @@ public class ModifyColumnTest extends BaseTest {
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
 	}
 
-	@Test
-	public void testFailureAllowed() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testFailureAllowed(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
 
@@ -242,8 +269,11 @@ public class ModifyColumnTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testFailureNotAllowed() {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testFailureNotAllowed(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
 
@@ -263,8 +293,11 @@ public class ModifyColumnTest extends BaseTest {
 
 	}
 
-	@Test
-	public void dontCompareLengthIfNoneSpecifiedInTask() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void dontCompareLengthIfNoneSpecifiedInTask(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 
 		ModifyColumnTask task = new ModifyColumnTask("1", "1");
@@ -280,8 +313,11 @@ public class ModifyColumnTest extends BaseTest {
 	}
 
 
-	@Test
-	public void testShrinkDoesntFailIfShrinkCannotProceed() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testShrinkDoesntFailIfShrinkCannotProceed(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(10))");
 		executeSql("insert into SOMETABLE (PID, TEXTCOL) values (1, '0123456789')");
 

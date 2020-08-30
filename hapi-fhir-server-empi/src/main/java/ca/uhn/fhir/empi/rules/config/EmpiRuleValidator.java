@@ -23,6 +23,7 @@ package ca.uhn.fhir.empi.rules.config;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
+import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
@@ -42,7 +43,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class EmpiRuleValidator {
+public class EmpiRuleValidator implements IEmpiRuleValidator {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiRuleValidator.class);
 
 	private final FhirContext myFhirContext;
@@ -67,8 +68,9 @@ public class EmpiRuleValidator {
 	}
 
 	private void validateSearchParams(EmpiRulesJson theEmpiRulesJson) {
-		for (EmpiResourceSearchParamJson searchParam : theEmpiRulesJson.getCandidateSearchParams()) {
-			validateSearchParam("candidateSearchParams", searchParam.getResourceType(), searchParam.getSearchParam());
+		for (EmpiResourceSearchParamJson searchParams : theEmpiRulesJson.getCandidateSearchParams()) {
+			searchParams.iterator().forEachRemaining(
+				searchParam -> validateSearchParam("candidateSearchParams", searchParams.getResourceType(), searchParam));
 		}
 		for (EmpiFilterSearchParamJson filter : theEmpiRulesJson.getCandidateFilterSearchParams()) {
 			validateSearchParam("candidateFilterSearchParams", filter.getResourceType(), filter.getSearchParam());
@@ -129,7 +131,7 @@ public class EmpiRuleValidator {
 	private void validatePatientPath(EmpiFieldMatchJson theFieldMatch) {
 		try {
 			myTerser.getDefinition(myPatientClass, "Patient." + theFieldMatch.getResourcePath());
-		} catch (DataFormatException|ConfigurationException e) {
+		} catch (DataFormatException | ConfigurationException e) {
 			throw new ConfigurationException("MatchField " +
 				theFieldMatch.getName() +
 				" resourceType " +

@@ -1,21 +1,22 @@
 package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParserWithValidationDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ParserWithValidationDstu3Test.class);
@@ -36,7 +37,7 @@ public class ParserWithValidationDstu3Test {
 			for (SingleValidationMessage msg : result.getMessages()) {
 				ourLog.info("{}", msg);
 			}
-			Assert.assertEquals(0, result.getMessages().size());
+			assertEquals(0, result.getMessages().size());
 		}
 
 		ActivityDefinition fhirObj = parser.parseResource(ActivityDefinition.class, origContent);
@@ -51,11 +52,11 @@ public class ParserWithValidationDstu3Test {
 			for (SingleValidationMessage msg : result.getMessages()) {
 				ourLog.info("{}", msg);
 			}
-			Assert.assertEquals(0, result.getMessages().size());
+			assertEquals(0, result.getMessages().size());
 		}
 
 		// verify that the original and newly serialized match
-		Assert.assertEquals(origContent, content);
+		assertEquals(origContent, content);
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class ParserWithValidationDstu3Test {
 			for (SingleValidationMessage msg : result.getMessages()) {
 				ourLog.info("{}", msg);
 			}
-			Assert.assertEquals(0, result.getMessages().size());
+			assertEquals(0, result.getMessages().size());
 		}
 
 		ActivityDefinition fhirObj = parser.parseResource(ActivityDefinition.class, origContent);
@@ -90,11 +91,11 @@ public class ParserWithValidationDstu3Test {
 			for (SingleValidationMessage msg : result.getMessages()) {
 				ourLog.info("{}", msg);
 			}
-			Assert.assertEquals(0, result.getMessages().size());
+			assertEquals(0, result.getMessages().size());
 		}
 
 		// verify that the original and newly serialized match
-		Assert.assertEquals(origContent, content);
+		assertEquals(origContent, content);
 	}
 
 	@Test
@@ -111,7 +112,7 @@ public class ParserWithValidationDstu3Test {
 			for (SingleValidationMessage msg : result.getMessages()) {
 				ourLog.info("{}", msg);
 			}
-			Assert.assertEquals(0, result.getMessages().size());
+			assertEquals(0, result.getMessages().size());
 		}
 
 		ConceptMap fhirObj = parser.parseResource(ConceptMap.class, origContent);
@@ -126,11 +127,11 @@ public class ParserWithValidationDstu3Test {
 			for (SingleValidationMessage msg : result.getMessages()) {
 				ourLog.info("{}", msg);
 			}
-			Assert.assertEquals(0, result.getMessages().size());
+			assertEquals(0, result.getMessages().size());
 		}
 
 		// verify that the original and newly serialized match
-		Assert.assertEquals(origContent, content);
+		assertEquals(origContent, content);
 	}
 
 	private IValidationSupport getValidationSupport() {
@@ -151,7 +152,7 @@ public class ParserWithValidationDstu3Test {
 			for (SingleValidationMessage msg : result.getMessages()) {
 				ourLog.info("{}", msg);
 			}
-			Assert.assertEquals(0, result.getMessages().size());
+			assertEquals(0, result.getMessages().size());
 		}
 
 		ConceptMap fhirObj = parser.parseResource(ConceptMap.class, origContent);
@@ -166,14 +167,14 @@ public class ParserWithValidationDstu3Test {
 			for (SingleValidationMessage msg : result.getMessages()) {
 				ourLog.info("{}", msg);
 			}
-			Assert.assertEquals(0, result.getMessages().size());
+			assertEquals(0, result.getMessages().size());
 		}
 
 		// verify that the original and newly serialized match
-		Assert.assertEquals(origContent, content);
+		assertEquals(origContent, content);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

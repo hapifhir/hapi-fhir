@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>5.1.0-SNAPSHOT</version>
+		<version>5.2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -157,7 +157,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
-			<version>5.1.0-SNAPSHOT</version>
+			<version>5.2.0-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>
@@ -232,6 +232,9 @@
 						<overlay>
 							<groupId>ca.uhn.hapi.fhir</groupId>
 							<artifactId>hapi-fhir-testpage-overlay</artifactId>
+							<excludes>
+								<exclude>WEB-INF/classes/**/*.class</exclude>
+							</excludes>
 						</overlay>
 					</overlays>
 				</configuration>

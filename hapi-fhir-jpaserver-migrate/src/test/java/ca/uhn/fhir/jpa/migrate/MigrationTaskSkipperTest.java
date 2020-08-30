@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MigrationTaskSkipperTest {
 	public static final String RELEASE = "4_1_0";
@@ -21,7 +21,7 @@ public class MigrationTaskSkipperTest {
 	private static final String VERSION_PREFIX = RELEASE + "." + DATE_PREFIX;
 	private List<BaseTask> myTasks;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myTasks = new ArrayList<>();
 		myTasks.add(new DropIndexTask(RELEASE, DATE_PREFIX + 1));

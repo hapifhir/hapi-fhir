@@ -1,53 +1,67 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.DateOrListParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.*;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestElasticsearchConfig.class})
 public class LastNElasticsearchSvcMultipleObservationsIT {
 
-	@Autowired
-	private ElasticsearchSvcImpl elasticsearchSvc;
-
+	static private final Calendar baseObservationDate = new GregorianCalendar();
 	private static ObjectMapper ourMapperNonPrettyPrint;
 
 	private static boolean indexLoaded = false;
 
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
 
-	private final FhirContext myFhirContext = FhirContext.forR4();
+	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	@Autowired
+	private ElasticsearchSvcImpl elasticsearchSvc;
 
-	static private final Calendar baseObservationDate = new GregorianCalendar();
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourMapperNonPrettyPrint = new ObjectMapper();
-		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
-		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-	}
-
-	@Before
+	@BeforeEach
 	public void before() throws IOException {
 		if (!indexLoaded) {
 			createMultiplePatientsAndObservations();
@@ -198,7 +212,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
 		TokenParam categoryParam = new TokenParam(null, "test-heart-rate");
 		searchParameterMap.add(Observation.SP_CATEGORY, buildTokenAndListParam(categoryParam));
-		TokenParam codeParam = new TokenParam(null,"test-code-1");
+		TokenParam codeParam = new TokenParam(null, "test-code-1");
 		searchParameterMap.add(Observation.SP_CODE, buildTokenAndListParam(codeParam));
 		searchParameterMap.setLastNMax(100);
 
@@ -295,9 +309,9 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	public void testLastNNoMatchQueries() {
 
 		ReferenceParam validPatientParam = new ReferenceParam("Patient", "", "9");
-		TokenParam validCategoryCodeParam = new TokenParam("http://mycodes.org/fhir/observation-category","test-heart-rate");
+		TokenParam validCategoryCodeParam = new TokenParam("http://mycodes.org/fhir/observation-category", "test-heart-rate");
 		TokenParam validObservationCodeParam = new TokenParam("http://mycodes.org/fhir/observation-code", "test-code-1");
-		DateParam validDateParam = new DateParam(ParamPrefixEnum.EQUAL, new Date(baseObservationDate.getTimeInMillis() - (9*3600*1000)));
+		DateParam validDateParam = new DateParam(ParamPrefixEnum.EQUAL, new Date(baseObservationDate.getTimeInMillis() - (9 * 3600 * 1000)));
 
 		// Ensure that valid parameters are indeed valid
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
@@ -383,8 +397,8 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	@Test
 	public void testLastNEffectiveDates() {
-		Date highDate = new Date(baseObservationDate.getTimeInMillis() - (3600*1000));
-		Date lowDate = new Date(baseObservationDate.getTimeInMillis() - (10*3600*1000));
+		Date highDate = new Date(baseObservationDate.getTimeInMillis() - (3600 * 1000));
+		Date lowDate = new Date(baseObservationDate.getTimeInMillis() - (10 * 3600 * 1000));
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "3");
@@ -445,7 +459,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		DateParam startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4*3600*1000)));
+		DateParam startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4 * 3600 * 1000)));
 		DateAndListParam dateAndListParam = new DateAndListParam();
 		dateAndListParam.addAnd(new DateOrListParam().addOr(startDateParam));
 		dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, highDate);
@@ -457,7 +471,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		searchParameterMap = new SearchParameterMap();
 		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4*3600*1000)));
+		startDateParam = new DateParam(ParamPrefixEnum.GREATERTHAN, new Date(baseObservationDate.getTimeInMillis() - (4 * 3600 * 1000)));
 		searchParameterMap.add(Observation.SP_DATE, startDateParam);
 		dateParam = new DateParam(ParamPrefixEnum.LESSTHAN, lowDate);
 		searchParameterMap.add(Observation.SP_DATE, dateParam);
@@ -511,7 +525,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 			for (int entryCount = 0; entryCount < 10; entryCount++) {
 
 				ObservationJson observationJson = new ObservationJson();
-				String identifier = String.valueOf((entryCount + patientCount * 10));
+				String identifier = String.valueOf((entryCount + patientCount * 10L));
 				observationJson.setIdentifier(identifier);
 				observationJson.setSubject(subject);
 
@@ -527,7 +541,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 //					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId2, codeJson2));
 				}
 
-				Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10-entryCount)*3600*1000));
+				Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10L - entryCount) * 3600L * 1000L));
 				observationJson.setEffectiveDtm(effectiveDtm);
 
 				assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(identifier, observationJson));
@@ -583,6 +597,14 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		}
 
 
+	}
+
+	@BeforeAll
+	public static void beforeClass() {
+		ourMapperNonPrettyPrint = new ObjectMapper();
+		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
+		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
 	}
 
 

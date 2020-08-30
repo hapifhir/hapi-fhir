@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,10 +20,10 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringStartsWith;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -57,12 +57,12 @@ public class PlainProviderTest {
 	private RestfulServer myRestfulServer;
 	private Server myServer;
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		myServer.stop();
 	}
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		myPort = PortUtil.findFreePort();
 		myServer = new Server(myPort);
@@ -166,7 +166,7 @@ public class PlainProviderTest {
 		httpGet.releaseConnection();
 	}
 	
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

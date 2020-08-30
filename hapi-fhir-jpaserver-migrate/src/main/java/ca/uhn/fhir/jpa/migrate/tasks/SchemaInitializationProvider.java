@@ -41,15 +41,18 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 
 	private String mySchemaDescription;
 	private final String mySchemaExistsIndicatorTable;
+	private final boolean myCanInitializeSchema;
 
 	/**
 	 * @param theSchemaFileClassPath        pathname to script used to initialize schema
 	 * @param theSchemaExistsIndicatorTable a table name we can use to determine if this schema has already been initialized
+	 * @param theCanInitializeSchema this is a "root" schema initializer that creates the primary tables used by this app
 	 */
-	public SchemaInitializationProvider(String theSchemaDescription, String theSchemaFileClassPath, String theSchemaExistsIndicatorTable) {
+	public SchemaInitializationProvider(String theSchemaDescription, String theSchemaFileClassPath, String theSchemaExistsIndicatorTable, boolean theCanInitializeSchema) {
 		mySchemaDescription = theSchemaDescription;
 		mySchemaFileClassPath = theSchemaFileClassPath;
 		mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
+		myCanInitializeSchema = theCanInitializeSchema;
 	}
 
 	@Override
@@ -128,6 +131,11 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 	public SchemaInitializationProvider setSchemaDescription(String theSchemaDescription) {
 		mySchemaDescription = theSchemaDescription;
 		return this;
+	}
+
+	@Override
+	public boolean canInitializeSchema() {
+		return myCanInitializeSchema;
 	}
 }
 

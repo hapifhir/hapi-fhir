@@ -1,0 +1,62 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "kfdrc-patient-no-phi",
+  "url": "http://fhir.kids-first.io/StructureDefinition/kfdrc-patient-no-phi",
+  "version": "0.1.0",
+  "name": "kfdrc-patient-no-phi",
+  "title": "Kids First DRC Patient without Protected Health Information",
+  "status": "draft",
+  "fhirVersion": "4.0.0",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Patient",
+  "baseDefinition": "http://fhir.kids-first.io/StructureDefinition/kfdrc-patient",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Patient",
+        "path": "Patient"
+      },
+      {
+        "id": "Patient.name",
+        "path": "Patient.name",
+        "max": "0"
+      },
+      {
+        "id": "Patient.telecom",
+        "path": "Patient.telecom",
+        "max": "0"
+      },
+      {
+        "id": "Patient.birthDate",
+        "path": "Patient.birthDate",
+        "max": "0"
+      },
+      {
+        "id": "Patient.deceased[x]",
+        "path": "Patient.deceased[x]",
+        "type" : [
+          {
+            "code" : "boolean"
+          }
+        ]
+      },
+      {
+        "id": "Patient.address",
+        "path": "Patient.address",
+        "max": "0"
+      },
+      {
+        "id": "Patient.photo",
+        "path": "Patient.photo",
+        "max": "0"
+      },
+      {
+        "id": "Patient.contact",
+        "path": "Patient.contact",
+        "max": "0"
+      }
+    ]
+  }
+}

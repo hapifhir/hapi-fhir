@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -55,6 +56,7 @@ public class RuntimeSearchParam {
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
+	private IPhoneticEncoder myPhoneticEncoder;
 
 	/**
 	 * Constructor
@@ -245,7 +247,6 @@ public class RuntimeSearchParam {
 		return myProvidesMembershipInCompartments;
 	}
 
-
 	public enum RuntimeSearchParamStatusEnum {
 		ACTIVE,
 		DRAFT,
@@ -253,4 +254,15 @@ public class RuntimeSearchParam {
 		UNKNOWN
 	}
 
+	public RuntimeSearchParam setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
+		myPhoneticEncoder = thePhoneticEncoder;
+		return this;
+	}
+
+	public String encode(String theString) {
+		if (myPhoneticEncoder == null || theString == null) {
+			return theString;
+		}
+		return myPhoneticEncoder.encode(theString);
+	}
 }

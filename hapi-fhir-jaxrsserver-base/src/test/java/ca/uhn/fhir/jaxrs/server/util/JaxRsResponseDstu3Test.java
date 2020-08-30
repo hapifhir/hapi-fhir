@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -12,8 +12,8 @@ import javax.ws.rs.core.Response;
 
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -27,7 +27,7 @@ public class JaxRsResponseDstu3Test {
 	private Bundle bundle;
 	private Set<SummaryEnum> theSummaryMode;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws URISyntaxException {
 		request = new JaxRsRequestDstu3Test().createRequestDetails();
 		this.response = (JaxRsResponse) request.getResponse();

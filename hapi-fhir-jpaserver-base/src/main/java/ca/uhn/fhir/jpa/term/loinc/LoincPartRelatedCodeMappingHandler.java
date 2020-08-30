@@ -88,6 +88,9 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 			case "wider":
 				equivalence = Enumerations.ConceptMapEquivalence.WIDER;
 				break;
+			case "relatedto":
+				equivalence = Enumerations.ConceptMapEquivalence.RELATEDTO;
+				break;
 			default:
 				throw new InternalErrorException("Unknown equivalence '" + mapType + "' for PartNumber: " + partNumber);
 		}

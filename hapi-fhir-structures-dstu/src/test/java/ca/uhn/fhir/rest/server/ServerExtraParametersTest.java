@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,10 +10,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.core.StringContains;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -38,7 +38,7 @@ public class ServerExtraParametersTest {
 	private RestfulServer myServlet;
 	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		myPort = PortUtil.findFreePort();
 		myServer = new Server(myPort);
@@ -92,7 +92,7 @@ public class ServerExtraParametersTest {
 		}
 	}
 
-	@After
+	@AfterEach
 	public void after() throws Exception {
 		myServer.stop();
 	}
@@ -136,7 +136,7 @@ public class ServerExtraParametersTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

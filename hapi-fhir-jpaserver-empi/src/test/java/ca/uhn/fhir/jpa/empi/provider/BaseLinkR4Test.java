@@ -6,12 +6,12 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected static final StringType NO_MATCH_RESULT = new StringType(EmpiMatchResultEnum.NO_MATCH.name());
@@ -26,12 +26,12 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected StringType myPersonId;
 	protected StringType myVersionlessPersonId;
 
-
-	@Before
+	@Override
+	@BeforeEach
 	public void before() {
 		super.before();
 
-		myPatient = createPatientAndUpdateLinks(new Patient());
+		myPatient = createPatientAndUpdateLinks(buildPaulPatient());
 		myPatientId = new StringType(myPatient.getIdElement().getValue());
 
 		myPerson = getPersonFromTarget(myPatient);
@@ -41,7 +41,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myLink = getOnlyPatientLink();
 		// Tests require our initial link to be a POSSIBLE_MATCH
 		myLink.setMatchResult(EmpiMatchResultEnum.POSSIBLE_MATCH);
-		myEmpiLinkDao.save(myLink);
+		saveLink(myLink);
 		assertEquals(EmpiLinkSourceEnum.AUTO, myLink.getLinkSource());
 	}
 
@@ -50,8 +50,10 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		return myEmpiLinkDaoSvc.findEmpiLinkByTarget(myPatient).get();
 	}
 
+
 	@Nonnull
 	protected List<EmpiLink> getPatientLinks() {
 		return myEmpiLinkDaoSvc.findEmpiLinksByTarget(myPatient);
 	}
+
 }

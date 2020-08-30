@@ -83,6 +83,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -632,7 +633,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		ResourceMetadataKeyEnum.VERSION.put(res, Long.toString(theEntity.getVersion()));
 		ResourceMetadataKeyEnum.PUBLISHED.put(res, theEntity.getPublished());
 		ResourceMetadataKeyEnum.UPDATED.put(res, theEntity.getUpdated());
-		IDao.RESOURCE_PID.put(res, theEntity.getId());
+		IDao.RESOURCE_PID.put(res, theEntity.getResourceId());
 
 		Collection<? extends BaseTag> tags = theTagList;
 		if (theEntity.isHasTags()) {
@@ -704,7 +705,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		res.setId(res.getIdElement().withVersion(theVersion.toString()));
 
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
-		IDao.RESOURCE_PID.put(res, theEntity.getId());
+		IDao.RESOURCE_PID.put(res, theEntity.getResourceId());
 
 		Collection<? extends BaseTag> tags = theTagList;
 
@@ -915,7 +916,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (resourceEncoding != ResourceEncodingEnum.DEL) {
 
 			LenientErrorHandler errorHandler = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
-			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler);
+			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler, theEntity.getId());
 
 			try {
 				retVal = parser.parseResource(resourceType, resourceText);
@@ -1056,7 +1057,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						entity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
 					}
 
-					newParams.setParamsOn(entity);
+					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 					populateFullTextFields(myContext, theResource, entity);
 				}
@@ -1130,7 +1131,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					source = ((IBaseHasExtensions) theResource.getMeta())
 						.getExtension()
 						.stream()
-						.filter(t -> Constants.EXT_META_SOURCE.equals(t.getUrl()))
+						.filter(t -> HapiExtensions.EXT_META_SOURCE.equals(t.getUrl()))
 						.filter(t -> t.getValue() instanceof IPrimitiveType)
 						.map(t -> ((IPrimitiveType<?>) t.getValue()).getValueAsString())
 						.findFirst()
@@ -1204,6 +1205,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				// Synchronize search param indexes
 				AddRemoveCount searchParamAddRemoveCount = myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, entity, existingParams);
+
+				newParams.populateResourceTableParamCollections(entity);
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
 				if (!searchParamAddRemoveCount.isEmpty()) {

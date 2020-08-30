@@ -1,13 +1,13 @@
 package ca.uhn.fhir.model.base.composite;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.util.TestUtil;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by Bill de Beaubien on 12/30/2014.
@@ -73,7 +73,7 @@ public class BaseCodingDtTest {
         assertFalse(new CodingDt("http://bar.org", "53").matchesToken(myTokenWithEmptySystem));
     }
 
- 	@AfterClass
+ 	@AfterAll
  	public static void afterClassClearContext() {
  		TestUtil.clearAllStaticFieldsForUnitTest();
  	}

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1951
+title: "REST Hook subscriptions may now specify a search expression to be used to fetch a collection of
+  resources to deliver when a subscription matches."

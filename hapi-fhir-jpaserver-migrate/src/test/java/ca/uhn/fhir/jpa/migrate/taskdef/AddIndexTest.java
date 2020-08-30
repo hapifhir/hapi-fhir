@@ -1,23 +1,25 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertThat;
 
 public class AddIndexTest extends BaseTest {
 
-	public AddIndexTest(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		super(theTestDatabaseDetails);
-	}
 
-	@Test
-	public void testUniqueConstraintAlreadyExists() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testUniqueConstraintAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		executeSql("ALTER TABLE SOMETABLE ADD CONSTRAINT IDX_ANINDEX UNIQUE(TEXTCOL)");
 
@@ -37,8 +39,11 @@ public class AddIndexTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testUniqueIndexAlreadyExists() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testUniqueIndexAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		executeSql("create unique index IDX_ANINDEX on SOMETABLE (PID, TEXTCOL)");
 		executeSql("create unique index IDX_DIFINDEX on SOMETABLE (TEXTCOL)");
@@ -58,8 +63,11 @@ public class AddIndexTest extends BaseTest {
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
 	}
 
-	@Test
-	public void testNonUniqueIndexAlreadyExists() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testNonUniqueIndexAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		executeSql("create index IDX_ANINDEX on SOMETABLE (PID, TEXTCOL)");
 		executeSql("create index IDX_DIFINDEX on SOMETABLE (TEXTCOL)");
@@ -79,8 +87,11 @@ public class AddIndexTest extends BaseTest {
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
 	}
 
-	@Test
-	public void testIndexDoesntAlreadyExist() throws SQLException {
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testIndexDoesntAlreadyExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		executeSql("create unique index IDX_DIFINDEX on SOMETABLE (TEXTCOL)");
 

@@ -22,12 +22,17 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -36,40 +41,65 @@ public class LoincPartLinkHandler implements IRecordHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(LoincPartLinkHandler.class);
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
+	private final Map<String, CodeSystem.PropertyType> myPropertyNames;
 	private Long myPartCount;
 
-	public LoincPartLinkHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept) {
+	public LoincPartLinkHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames) {
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
+		myPropertyNames = thePropertyNames;
 	}
 
 	@Override
 	public void accept(CSVRecord theRecord) {
 
 		String loincNumber = trim(theRecord.get("LoincNumber"));
-		String longCommonName = trim(theRecord.get("LongCommonName"));
+		String property = trim(theRecord.get("Property"));
+		String partName = trim(theRecord.get("PartName"));
 		String partNumber = trim(theRecord.get("PartNumber"));
 
+		/*
+		 * Property has the form http://loinc.org/property/COMPONENT
+		 * but we want just the COMPONENT part
+		 */
+		int lastSlashIdx = property.lastIndexOf("/");
+		String propertyPart = property.substring(lastSlashIdx + 1);
+
 		TermConcept loincConcept = myCode2Concept.get(loincNumber);
-		TermConcept partConcept = myCode2Concept.get(partNumber);
-
 		if (loincConcept == null) {
-			ourLog.warn("No loinc code: {}", loincNumber);
-			return;
+			throw new InternalErrorException("Unknown loinc code: " + loincNumber);
 		}
-		if (partConcept == null) {
-			if (myPartCount == null) {
-				myPartCount = myCode2Concept
-					.keySet()
-					.stream()
-					.filter(t->t.startsWith("LP"))
-					.count();
-			}
-			ourLog.debug("No part code: {} - Have {} part codes", partNumber, myPartCount);
+
+		CodeSystem.PropertyType propertyType = myPropertyNames.get(propertyPart);
+		if (propertyType == null) {
 			return;
 		}
 
-		// For now we're ignoring these
+		String expectedValue;
+		if (propertyType == CodeSystem.PropertyType.STRING) {
+			expectedValue = partName;
+		} else if (propertyType == CodeSystem.PropertyType.CODING) {
+			expectedValue = partNumber;
+		} else {
+			throw new InternalErrorException("Don't know how to handle property of type: " + propertyType);
+		}
+
+		Optional<TermConceptProperty> existingProprty = loincConcept
+			.getProperties()
+			.stream()
+			.filter(t -> t.getKey().equals(propertyPart))
+			.filter(t -> t.getValue().equals(expectedValue))
+			.findFirst();
+		if (existingProprty.isPresent()) {
+			return;
+		}
+
+		ourLog.debug("Adding new property {} = {}", propertyPart, partNumber);
+		if (propertyType == CodeSystem.PropertyType.STRING) {
+			loincConcept.addPropertyString(propertyPart, partName);
+		} else {
+			loincConcept.addPropertyCoding(propertyPart, ITermLoaderSvc.LOINC_URI, partNumber, partName);
+		}
 
 	}
 }

@@ -1,6 +1,6 @@
 ---
 type: fix
 issue: 1856
-title: "The subscription delivery queue in the JPA server was erroniously keeping both a copy of the serialized and the 
+title: "The subscription delivery queue in the JPA server was erroneously keeping both a copy of the serialized and the
    deserialized payload in memory for each entry in the queue, doubling the memory requirements. This also caused failures
    when delivering XML payloads in some configurations. This has been corrected."

@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -50,7 +51,7 @@ public class MatchUrlService {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 
-	public SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition) {
+	public SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters = translateMatchUrl(theMatchUrl);
 
@@ -79,6 +80,13 @@ public class MatchUrlService {
 
 		for (String nextParamName : nameToParamLists.keySet()) {
 			List<QualifiedParamList> paramList = nameToParamLists.get(nextParamName);
+
+			if (theFlags != null) {
+				for (Flag next : theFlags) {
+					next.process(nextParamName, paramList, paramMap);
+				}
+			}
+
 			if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
 				if (paramList != null && paramList.size() > 0) {
 					if (paramList.size() > 2) {
@@ -131,8 +139,8 @@ public class MatchUrlService {
 		return UrlUtil.translateMatchUrl(theMatchUrl);
 	}
 
-	private IQueryParameterAnd newInstanceAnd(String theParamType) {
-		Class<? extends IQueryParameterAnd> clazz = ResourceMetaParams.RESOURCE_META_AND_PARAMS.get(theParamType);
+	private IQueryParameterAnd<?> newInstanceAnd(String theParamType) {
+		Class<? extends IQueryParameterAnd<?>> clazz = ResourceMetaParams.RESOURCE_META_AND_PARAMS.get(theParamType);
 		return ReflectionUtil.newInstance(clazz);
 	}
 
@@ -140,4 +148,44 @@ public class MatchUrlService {
 		Class<? extends IQueryParameterType> clazz = ResourceMetaParams.RESOURCE_META_PARAMS.get(theParamType);
 		return ReflectionUtil.newInstance(clazz);
 	}
+
+	public abstract static class Flag {
+
+		/**
+		 * Constructor
+		 */
+		Flag() {
+			// nothing
+		}
+
+		abstract void process(String theParamName, List<QualifiedParamList> theValues, SearchParameterMap theMapToPopulate);
+
+	}
+
+	/**
+	 * Indicates that the parser should process _include and _revinclude (by default these are not handled)
+	 */
+	public static Flag processIncludes() {
+		return new Flag() {
+
+			@Override
+			void process(String theParamName, List<QualifiedParamList> theValues, SearchParameterMap theMapToPopulate) {
+				if (Constants.PARAM_INCLUDE.equals(theParamName)) {
+					for (QualifiedParamList nextQualifiedList : theValues) {
+						for (String nextValue : nextQualifiedList) {
+							theMapToPopulate.addInclude(new Include(nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
+						}
+					}
+				} else if (Constants.PARAM_REVINCLUDE.equals(theParamName)) {
+					for (QualifiedParamList nextQualifiedList : theValues) {
+						for (String nextValue : nextQualifiedList) {
+							theMapToPopulate.addInclude(new Include(nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
+						}
+					}
+				}
+
+			}
+		};
+	}
+
 }

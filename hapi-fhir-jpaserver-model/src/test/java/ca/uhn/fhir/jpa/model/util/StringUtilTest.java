@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.util;
 
 import ca.uhn.fhir.util.StringUtil;
 import com.google.common.base.Charsets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StringUtilTest {
 	@Test

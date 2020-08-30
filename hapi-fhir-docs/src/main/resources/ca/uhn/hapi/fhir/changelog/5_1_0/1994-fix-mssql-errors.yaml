@@ -1,0 +1,4 @@
+---
+type: add
+issue: 1994
+title: "A few issues in the migrator when applying migrations against some versions of MSSQL were resolved"

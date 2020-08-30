@@ -2,29 +2,24 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test {
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemTest.class);
 
-	@Before
+	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
@@ -51,7 +46,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	public void testLookupOnExternalCode() {
 		ResourceProviderR4ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -72,7 +67,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -97,7 +92,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -121,7 +116,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInNonexistantCode() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -136,7 +131,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedCode() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -158,7 +153,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedNonExistantCode() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -173,7 +168,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testLookupOperationByCoding() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -194,7 +189,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testLookupOperationByInvalidCombination() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -211,7 +206,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testLookupOperationByInvalidCombination2() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -227,7 +222,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testLookupOperationByInvalidCombination3() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -241,7 +236,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testLookupOperationForBuiltInCode() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -264,7 +259,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testSubsumesOnCodes_Subsumes() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -284,7 +279,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testSubsumesOnCodes_Subsumedby() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -303,7 +298,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testSubsumesOnCodes_Disjoint() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -323,7 +318,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testSubsumesOnCodes_InvalidCodeLeft() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_SUBSUMES)
@@ -338,7 +333,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testSubsumesOnCodes_InvalidCodeRight() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_SUBSUMES)
@@ -353,7 +348,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testSubsumesOnCodings_MismatchedCs() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_SUBSUMES)
@@ -368,7 +363,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testSubsumesOnCodings_Subsumes() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -387,7 +382,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testSubsumesOnCodings_Subsumedby() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -405,7 +400,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testSubsumesOnCodings_Disjoint() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -421,10 +416,5 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
 
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

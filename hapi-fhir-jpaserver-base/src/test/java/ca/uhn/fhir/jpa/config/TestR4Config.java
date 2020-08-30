@@ -1,7 +1,11 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -11,12 +15,10 @@ import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -25,10 +27,10 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import(TestJPAConfig.class)
+@Import({TestJPAConfig.class, BatchJobsConfig.class})
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
 
@@ -42,18 +44,32 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * starvation
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
+
+			if ("true".equals(System.getProperty("single_db_connection"))) {
+				ourMaxThreads = 1;
+			}
 		}
 	}
 
-	@Autowired
-	private Environment myEnvironment;
 
 	private Exception myLastStackTrace;
+
+
+	@Override
+	@Bean
+	public IBatchJobSubmitter batchJobSubmitter() {
+		return new BatchJobSubmitterImpl();
+	}
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
+	}
+
+	@Bean
+	public BulkExportDaoSvc bulkExportDaoSvc() {
+		return new BulkExportDaoSvc();
 	}
 
 	@Bean
@@ -103,7 +119,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:testdb_r4");
-		retVal.setMaxWaitMillis(10000);
+		retVal.setMaxWaitMillis(30000);
 		retVal.setUsername("");
 		retVal.setPassword("");
 		retVal.setMaxTotal(ourMaxThreads);
@@ -111,7 +127,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+//			.logQueryBySlf4j(level)
+			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())
@@ -147,6 +164,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
+		extraProperties.put("hibernate.temp.use_jdbc_metadata_defaults","false");
 
 		return extraProperties;
 	}

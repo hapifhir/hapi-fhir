@@ -9,6 +9,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -19,20 +20,20 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,7 +53,7 @@ public class QuestionnaireResponseValidatorR4Test {
 	private FhirValidator myVal;
 	private IValidationSupport myValSupport;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myValSupport = mock(IValidationSupport.class);
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
@@ -61,7 +62,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx));
+		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -233,7 +234,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(errors.toString(), 0, errors.getMessages().size());
+		assertEquals(0, errors.getMessages().size(), errors.toString());
 
 		// Bad code
 
@@ -245,7 +246,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code for \"http://codesystems.com/system#code1\""));
+		assertThat(errors.toString(), containsString("Unknown code for 'http://codesystems.com/system#code1'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -256,7 +257,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3' for \"http://codesystems.com/system2#code3\""));
+		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3' for 'http://codesystems.com/system2#code3'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 	}
@@ -318,7 +319,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
+		assertThat(errors.toString(), containsString("No response answer found for required item 'link0'"));
 	}
 
 	@Test
@@ -640,7 +641,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay(""));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item \"link0\""));
+		assertThat(errors.toString(), containsString("No response answer found for required item 'link0'"));
 
 	}
 
@@ -710,7 +711,7 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString(" - QuestionnaireResponse"));
-		assertThat(errors.toString(), containsString("LinkId \"link1\" not found in questionnaire"));
+		assertThat(errors.toString(), containsString("LinkId 'link1' not found in questionnaire"));
 	}
 
 	@Test
@@ -728,7 +729,7 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString(" - QuestionnaireResponse"));
-		assertThat(errors.toString(), containsString("LinkId \"link1\" not found in questionnaire"));
+		assertThat(errors.toString(), containsString("LinkId 'link1' not found in questionnaire"));
 	}
 
 	@Test
@@ -801,7 +802,7 @@ public class QuestionnaireResponseValidatorR4Test {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;

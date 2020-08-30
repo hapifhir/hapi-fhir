@@ -19,15 +19,16 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_EMPI_MANAGED;
@@ -35,12 +36,12 @@ import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_EMPI_MANAGED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -49,38 +50,32 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 
 	private static final Logger ourLog = getLogger(EmpiStorageInterceptorIT.class);
 
-	@Rule
+	@RegisterExtension
 	@Autowired
 	public EmpiHelperR4 myEmpiHelper;
 	@Autowired
 	private IdHelperService myIdHelperService;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		super.loadEmpiSearchParameters();
 	}
 
 	@Test
-	public void testCreatePatient() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Patient());
-		assertLinkCount(1);
-	}
-
-	@Test
 	public void testCreatePractitioner() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Practitioner());
+		myEmpiHelper.createWithLatch(buildPractitionerWithNameAndId("somename", "some_id"));
 		assertLinkCount(1);
 	}
 
 	@Test
-	public void testCreatePerson() throws InterruptedException {
+	public void testCreatePerson() {
 		myPersonDao.create(new Person());
 		assertLinkCount(0);
 	}
 
 	@Test
 	public void testDeletePersonDeletesLinks() throws InterruptedException {
-		myEmpiHelper.createWithLatch(new Patient());
+		myEmpiHelper.createWithLatch(buildPaulPatient());
 		assertLinkCount(1);
 		Person person = getOnlyActivePerson();
 		myPersonDao.delete(person.getIdElement());
@@ -98,6 +93,18 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCreatingPersonWithInsufficentEMPIAttributesIsNotEMPIProcessed() throws InterruptedException {
+		myEmpiHelper.doCreateResource(new Patient(), true);
+		assertLinkCount(0);
+	}
+
+	@Test
+	public void testCreatingPatientWithOneOrMoreMatchingAttributesIsEMPIProcessed() throws InterruptedException {
+		myEmpiHelper.createWithLatch(buildPaulPatient());
+		assertLinkCount(1);
 	}
 
 	@Test
@@ -135,7 +142,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
-		for (IBaseResource person: resources) {
+		for (IBaseResource person : resources) {
 			assertThat(person.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED), is(notNullValue()));
 		}
 	}
@@ -153,7 +160,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 			myEmpiHelper.doUpdateResource(person, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("The HAPI-EMPI tag on a resource may not be changed once created.", e.getMessage() );
+			assertEquals("The HAPI-EMPI tag on a resource may not be changed once created.", e.getMessage());
 		}
 	}
 
@@ -161,14 +168,14 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testEmpiManagedPersonCannotBeModifiedByPersonUpdateRequest() throws InterruptedException {
 		// When EMPI is enabled, only the EMPI system is allowed to modify Person links of Persons with the EMPI-MANAGED tag.
 		Patient patient = new Patient();
-		IIdType patientId = myEmpiHelper.createWithLatch(new Patient()).getDaoMethodOutcome().getId().toUnqualifiedVersionless();
+		IIdType patientId = myEmpiHelper.createWithLatch(buildPaulPatient()).getDaoMethodOutcome().getId().toUnqualifiedVersionless();
 
 		patient.setId(patientId);
 
 		//Updating a Person who was created via EMPI should fail.
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(patient)).get();
 		Long personPid = empiLink.getPersonPid();
-		Person empiPerson= (Person)myPersonDao.readByPid(new ResourcePersistentId(personPid));
+		Person empiPerson = (Person) myPersonDao.readByPid(new ResourcePersistentId(personPid));
 		empiPerson.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myEmpiHelper.doUpdateResource(empiPerson, true);
@@ -177,7 +184,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testEmpiPointcutReceivesTransactionLogMessages() throws InterruptedException {
 		EmpiHelperR4.OutcomeAndLogMessageWrapper wrapper = myEmpiHelper.createWithLatch(buildJanePatient());
@@ -205,6 +212,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		assertThat(externalEids, hasSize(1));
 		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));
 	}
+
 	@Test
 	public void testWhenEidUpdatesAreDisabledForbidsUpdatesToEidsOnTargets() throws InterruptedException {
 		setPreventEidUpdates(true);
@@ -236,15 +244,56 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		}
 
 		setPreventMultipleEids(false);
+	}
 
+	@Test
+	public void testInterceptorHandlesNonEmpiResources() {
+		setPreventEidUpdates(true);
+
+		//Create some arbitrary resource.
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.addBase("Bundle");
+		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Bundle.entry[0].resource.as(Composition).encounter");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+		myEmpiHelper.doCreateResource(fooSp, true);
+		fooSp.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
+		myEmpiHelper.doUpdateResource(fooSp, true);
+	}
+
+	@Test
+	public void testPatientsWithNoEIDCanBeUpdated() throws InterruptedException {
+		setPreventEidUpdates(true);
+		Patient p = buildPaulPatient();
+		EmpiHelperR4.OutcomeAndLogMessageWrapper wrapper = myEmpiHelper.createWithLatch(p);
+
+		p.setId(wrapper.getDaoMethodOutcome().getId());
+		p.setBirthDate(new Date());
+		myEmpiHelper.updateWithLatch(p);
+		setPreventEidUpdates(false);
+	}
+
+	@Test
+	public void testPatientsCanHaveEIDAddedInStrictMode() throws InterruptedException {
+		setPreventEidUpdates(true);
+		Patient p = buildPaulPatient();
+		EmpiHelperR4.OutcomeAndLogMessageWrapper messageWrapper = myEmpiHelper.createWithLatch(p);
+		p.setId(messageWrapper.getDaoMethodOutcome().getId());
+		addExternalEID(p, "external eid");
+		myEmpiHelper.updateWithLatch(p);
+		setPreventEidUpdates(false);
 	}
 
 	private void setPreventEidUpdates(boolean thePrevent) {
-		((EmpiSettings)myEmpiConfig).setPreventEidUpdates(thePrevent);
+		((EmpiSettings) myEmpiConfig).setPreventEidUpdates(thePrevent);
 	}
 
 	private void setPreventMultipleEids(boolean thePrevent) {
-		((EmpiSettings)myEmpiConfig).setPreventMultipleEids(thePrevent);
+		((EmpiSettings) myEmpiConfig).setPreventMultipleEids(thePrevent);
 	}
 
 }

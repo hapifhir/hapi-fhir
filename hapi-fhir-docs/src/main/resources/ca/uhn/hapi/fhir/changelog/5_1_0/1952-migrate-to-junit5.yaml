@@ -1,0 +1,5 @@
+---
+type: change
+issue: 1952
+title: HAPI FHIR has been migrated to use JUnit 5 (from JUnit 4) for unit testing. This change does not affect users of the
+  library, but helps to make tests more maintainable.

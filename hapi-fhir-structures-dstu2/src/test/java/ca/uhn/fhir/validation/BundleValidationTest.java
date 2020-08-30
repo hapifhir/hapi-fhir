@@ -3,20 +3,17 @@ package ca.uhn.fhir.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Appointment;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AppointmentStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ParticipantTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ParticipationStatusEnum;
 import ca.uhn.fhir.util.TestUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
-import org.junit.AfterClass;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author Bill de Beaubien on 11/30/2015.
@@ -40,14 +37,7 @@ public class BundleValidationTest {
 		}
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
-
-	@Ignore
+	@Disabled
 	@Test
 	public void testBundleIsInvalid() throws Exception {
 		Appointment appointment = createAppointment();
@@ -61,7 +51,7 @@ public class BundleValidationTest {
 		validator.setValidateAgainstStandardSchematron(true);
 
 		ValidationResult result = validator.validateWithResult(bundle);
-		assertFalse("Validation should have failed", result.isSuccessful());
+		assertFalse(result.isSuccessful(), "Validation should have failed");
 		assertEquals(1, result.getMessages().size());
 		for (SingleValidationMessage singleValidationMessage : result.getMessages()) {
 			System.out.println(singleValidationMessage.getMessage());
@@ -71,5 +61,10 @@ public class BundleValidationTest {
 	private Appointment createAppointment() {
 		Appointment.Participant participant = new Appointment.Participant().setStatus(ParticipationStatusEnum.ACCEPTED).setType(ParticipantTypeEnum.PART);
 		return new Appointment().setStatus(AppointmentStatusEnum.BOOKED).addParticipant(participant);
+	}
+
+	@AfterAll
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 }

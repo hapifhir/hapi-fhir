@@ -2,9 +2,11 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.util.TestUtil;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SearchFilterSyntaxTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchFilterSyntaxTest.class);
@@ -13,13 +15,8 @@ public class SearchFilterSyntaxTest {
 		SearchFilterParser.Filter filter = SearchFilterParser.parse(theExpression);
 		ourLog.info("Source: {}", theExpression);
 		ourLog.info("Parsed: {}", filter.toString());
-		Assert.assertNotNull("Parsing failed - returned null",
-			filter);
-		Assert.assertEquals(String.format("Expression mismatch: found %s, expecting %s",
-			filter.toString(),
-			theExpression),
-			theExpression,
-			filter.toString());
+		assertNotNull(filter, "Parsing failed - returned null");
+		assertEquals(theExpression, filter.toString(), String.format("Expression mismatch: found %s, expecting %s", filter.toString(), theExpression));
 	}
 
 	@Test
@@ -70,11 +67,6 @@ public class SearchFilterSyntaxTest {
 	@Test
 	public void testPrecedence() throws SearchFilterParser.FilterSyntaxException {
 		testParse("this eq that and this1 eq that1");
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

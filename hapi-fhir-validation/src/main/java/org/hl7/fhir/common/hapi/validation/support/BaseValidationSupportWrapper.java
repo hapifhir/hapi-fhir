@@ -70,7 +70,7 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 
 	@Override
 	public IValidationSupport.ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
-		return myWrap.expandValueSet(theValidationSupportContext, null, theValueSetToExpand);
+		return myWrap.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
 	}
 
 	@Override

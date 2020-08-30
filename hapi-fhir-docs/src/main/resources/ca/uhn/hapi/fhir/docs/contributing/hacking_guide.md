@@ -15,7 +15,7 @@ The following is a list of key subprojects you might open in your IDE:
 # Getting the Sources
 
 <p style="float:right;">
-    <a class="externalLink" href="https://dev.azure.com/jamesagnew214/jamesagnew214/_build/latest?definitionId=1&branchName=master"><img src="https://dev.azure.com/jamesagnew214/jamesagnew214/_apis/build/status/jamesagnew.hapi-fhir?branchName=master" alt="Build Status" class="img-fluid"/></a>
+    <a class="externalLink" href="https://dev.azure.com/hapifhir/HAPI%20FHIR/_build/latest?definitionId=1&branchName=master"><img src="https://dev.azure.com/hapifhir/HAPI%20FHIR/_apis/build/status/jamesagnew.hapi-fhir?branchName=master" alt="Build Status" class="img-fluid"/></a>
 </p>
 
 The best way to grab our sources is with Git. Grab the repository URL from our [GitHub page](https://github.com/jamesagnew/hapi-fhir). We try our best to ensure that the sources are always left in a buildable state. Check Azure Pipelines CI (see the image/link on the right) to see if the sources currently build.

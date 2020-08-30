@@ -1,0 +1,7 @@
+---
+type: add
+issue: 2023
+title: "The JPA server maintains a cache of active SearchParameeter resources that can cause misleading results
+  if a SearchParameter is changed and other resources that would be indexed by the changed SearchParameter are updated
+  before the cache refreshes. A new interceptor has been added that should force a refresh sooner, especially on 
+  non-clustered systems."

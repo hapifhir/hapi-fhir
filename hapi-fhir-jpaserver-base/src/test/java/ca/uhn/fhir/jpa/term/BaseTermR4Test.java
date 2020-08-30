@@ -11,8 +11,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -27,12 +27,12 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 	Long myExtensionalCsIdOnResourceTable;
 	Long myExtensionalVsIdOnResourceTable;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setAllowExternalReferences(true);
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());

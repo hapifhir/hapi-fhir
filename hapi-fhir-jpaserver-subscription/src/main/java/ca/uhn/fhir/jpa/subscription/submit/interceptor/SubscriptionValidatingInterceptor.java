@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,32 +98,19 @@ public class SubscriptionValidatingInterceptor {
 
 		if (!finished) {
 
-			String query = subscription.getCriteriaString();
-			if (isBlank(query)) {
-				throw new UnprocessableEntityException("Subscription.criteria must be populated");
-			}
+			validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
 
-			int sep = query.indexOf('?');
-			if (sep <= 1) {
-				throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-			}
-
-			String resType = query.substring(0, sep);
-			if (resType.contains("/")) {
-				throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
+			if (subscription.getPayloadSearchCriteria() != null) {
+				validateQuery(subscription.getPayloadSearchCriteria(), "Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA + "')");
 			}
 
 			validateChannelType(subscription);
 
-			if (!myDaoRegistry.isResourceTypeSupported(resType)) {
-				throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
-			}
-
 			try {
-				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(query);
+				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription.getCriteriaString());
 				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
 			} catch (InvalidRequestException | DataFormatException e) {
-				throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + query + " " + e.getMessage());
+				throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + subscription.getCriteriaString() + " " + e.getMessage());
 			}
 
 			if (subscription.getChannelType() == null) {
@@ -129,6 +118,28 @@ public class SubscriptionValidatingInterceptor {
 			} else if (subscription.getChannelType() == CanonicalSubscriptionChannelType.MESSAGE) {
 				validateMessageSubscriptionEndpoint(subscription.getEndpointUrl());
 			}
+
+
+		}
+	}
+
+	public void validateQuery(String theQuery, String theFieldName) {
+		if (isBlank(theQuery)) {
+			throw new UnprocessableEntityException(theFieldName + " must be populated");
+		}
+
+		int sep = theQuery.indexOf('?');
+		if (sep <= 1) {
+			throw new UnprocessableEntityException(theFieldName + " must be in the form \"{Resource Type}?[params]\"");
+		}
+
+		String resType = theQuery.substring(0, sep);
+		if (resType.contains("/")) {
+			throw new UnprocessableEntityException(theFieldName + " must be in the form \"{Resource Type}?[params]\"");
+		}
+
+		if (!myDaoRegistry.isResourceTypeSupported(resType)) {
+			throw new UnprocessableEntityException(theFieldName + " contains invalid/unsupported resource type: " + resType);
 		}
 	}
 

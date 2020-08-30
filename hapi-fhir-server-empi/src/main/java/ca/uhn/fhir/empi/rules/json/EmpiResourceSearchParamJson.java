@@ -23,14 +23,18 @@ package ca.uhn.fhir.empi.rules.json;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  *
  */
-public class EmpiResourceSearchParamJson implements IModelJson {
+public class EmpiResourceSearchParamJson implements IModelJson, Iterable<String> {
 	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
-	@JsonProperty(value = "searchParam", required = true)
-	String mySearchParam;
+	@JsonProperty(value = "searchParams", required = true)
+	List<String> mySearchParams;
 
 	public String getResourceType() {
 		return myResourceType;
@@ -41,12 +45,19 @@ public class EmpiResourceSearchParamJson implements IModelJson {
 		return this;
 	}
 
-	public String getSearchParam() {
-		return mySearchParam;
+	public Iterator<String> iterator() {
+		return getSearchParams().iterator();
 	}
 
-	public EmpiResourceSearchParamJson setSearchParam(String theSearchParam) {
-		mySearchParam = theSearchParam;
+	public EmpiResourceSearchParamJson addSearchParam(String theSearchParam) {
+		getSearchParams().add(theSearchParam);
 		return this;
+	}
+
+	public List<String> getSearchParams() {
+		if (mySearchParams == null) {
+			mySearchParams = new ArrayList<>();
+		}
+		return mySearchParams;
 	}
 }

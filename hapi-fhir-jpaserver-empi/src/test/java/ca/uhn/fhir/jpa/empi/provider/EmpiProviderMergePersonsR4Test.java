@@ -5,20 +5,18 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
@@ -27,7 +25,8 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	private Person myToPerson;
 	private StringType myToPersonId;
 
-	@Before
+	@Override
+	@BeforeEach
 	public void before() {
 		super.before();
 		super.loadEmpiSearchParameters();
@@ -36,18 +35,6 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 		myFromPersonId = new StringType(myFromPerson.getIdElement().getValue());
 		myToPerson = createPerson();
 		myToPersonId = new StringType(myToPerson.getIdElement().getValue());
-	}
-
-	@Test
-	public void testMatch() {
-		Patient jane = buildJanePatient();
-		jane.setActive(true);
-		Patient createdJane = createPatient(jane);
-		Patient newJane = buildJanePatient();
-
-		Bundle result = myEmpiProviderR4.match(newJane);
-		assertEquals(1, result.getEntry().size());
-		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
 	}
 
 	@Test

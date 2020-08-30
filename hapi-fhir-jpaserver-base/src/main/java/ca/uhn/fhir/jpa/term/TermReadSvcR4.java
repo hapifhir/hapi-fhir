@@ -5,28 +5,19 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.VersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.transaction.Transactional;
-import java.util.Optional;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -98,46 +89,27 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 		return (CodeSystem) theCodeSystem;
 	}
 
-	@CoverageIgnore
-	@Override
-	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
-		boolean haveValidated = false;
-
-		if (isNotBlank(theValueSetUrl)) {
-			codeOpt = super.validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode);
-			haveValidated = true;
-		}
-
-		if (!haveValidated) {
-			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> c.toVersionIndependentConcept()));
-		}
-
-		if (codeOpt != null && codeOpt.isPresent()) {
-			VersionIndependentConcept code = codeOpt.get();
-			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult()
-				.setCode(code.getCode());
-			return retVal;
-		}
-
-		return new IValidationSupport.CodeValidationResult()
-			.setSeverity(IssueSeverity.ERROR)
-			.setMessage("Unknown code {" + theCodeSystem + "}" + theCode);
-	}
-
 	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return super.lookupCode(theSystem, theCode);
 	}
 
 	@Override
-	public IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInPreExpandedValueSet(ValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+	public IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValueSet valueSet = (ValueSet) theValueSet;
-		Coding coding = (Coding) theCoding;
-		CodeableConcept codeableConcept = (CodeableConcept) theCodeableConcept;
+		Coding coding = toCanonicalCoding(theCoding);
+		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
 		return super.validateCodeIsInPreExpandedValueSet(theOptions, valueSet, theSystem, theCode, theDisplay, coding, codeableConcept);
+	}
+
+	@Override
+	protected Coding toCanonicalCoding(IBaseDatatype theCoding) {
+		return (Coding) theCoding;
+	}
+
+	@Override
+	protected CodeableConcept toCanonicalCodeableConcept(IBaseDatatype theCodeableConcept) {
+		return (CodeableConcept) theCodeableConcept;
 	}
 
 	@Override

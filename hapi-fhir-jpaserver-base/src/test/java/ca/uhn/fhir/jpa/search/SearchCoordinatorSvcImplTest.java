@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -12,7 +13,6 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -23,19 +23,18 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,11 +58,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -81,11 +80,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked"})
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SearchCoordinatorSvcImplTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.DSTU3);
 	@Mock
 	private IFhirResourceDao<?> myCallingDao;
 	@Mock
@@ -112,14 +111,14 @@ public class SearchCoordinatorSvcImplTest {
 	@Mock
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
-	@After
+	@AfterEach
 	public void after() {
 		System.clearProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK);
 
 		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		System.setProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK, "true");
 
@@ -138,21 +137,6 @@ public class SearchCoordinatorSvcImplTest {
 
 		DaoConfig daoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(daoConfig);
-
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-
-		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
-
-		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchCoordinatorSvcImpl.SearchTask.class), nullable(ISearchBuilder.class))).thenAnswer(t->{
-			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
-			Search search = t.getArgument(1, Search.class);
-			SearchCoordinatorSvcImpl.SearchTask searchTask = t.getArgument(2, SearchCoordinatorSvcImpl.SearchTask.class);
-			ISearchBuilder searchBuilder = t.getArgument(3, ISearchBuilder.class);
-			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
-			retVal.setTxManagerForUnitTest(myTxManager);
-			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
-			return retVal;
-		});
 
 	}
 
@@ -179,6 +163,8 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testAsyncSearchFailDuringSearchSameCoordinator() {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -201,6 +187,8 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
+		initSearches();
+
 		List<ResourcePersistentId> allResults = new ArrayList<>();
 		doAnswer(t -> {
 			List<ResourcePersistentId> oldResults = t.getArgument(1, List.class);
@@ -294,6 +282,8 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testAsyncSearchLargeResultSetSameCoordinator() {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -316,8 +306,27 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
+	private void initSearches() {
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
+		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchCoordinatorSvcImpl.SearchTask.class), nullable(ISearchBuilder.class))).thenAnswer(t->{
+			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
+			Search search = t.getArgument(1, Search.class);
+			SearchCoordinatorSvcImpl.SearchTask searchTask = t.getArgument(2, SearchCoordinatorSvcImpl.SearchTask.class);
+			ISearchBuilder searchBuilder = t.getArgument(3, ISearchBuilder.class);
+			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
+			retVal.setTxManagerForUnitTest(myTxManager);
+			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
+			return retVal;
+		});
+	}
+
 	@Test
 	public void testCancelActiveSearches() throws InterruptedException {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -363,6 +372,8 @@ public class SearchCoordinatorSvcImplTest {
 	 */
 	@Test
 	public void testAsyncSearchLargeResultSetSecondRequestSameCoordinator() {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -411,6 +422,8 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testAsyncSearchSmallResultSetSameCoordinator() {
+		initSearches();
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -441,6 +454,9 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testLoadSearchResultsFromDifferentCoordinator() {
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
 		final String uuid = UUID.randomUUID().toString();
 
 		final Search search = new Search();
@@ -513,6 +529,9 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testSynchronousSearch() {
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add("name", new StringParam("ANAME"));
@@ -534,6 +553,9 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Test
 	public void testSynchronousSearchUpTo() {
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(100);
 		params.add("name", new StringParam("ANAME"));
@@ -645,6 +667,15 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
+		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
+			Collection<ResourcePersistentId> batch = new ArrayList<>();
+			while (this.hasNext() && batch.size() < theBatchSize) {
+				batch.add(this.next());
+			}
+			return batch;
+		}
+
+		@Override
 		public void close() {
 			// nothing
 		}
@@ -678,6 +709,15 @@ public class SearchCoordinatorSvcImplTest {
 		@Override
 		public int getNonSkippedCount() {
 			return myCount;
+		}
+
+		@Override
+		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
+			Collection<ResourcePersistentId> batch = new ArrayList<>();
+			while (this.hasNext() && batch.size() < theBatchSize) {
+				batch.add(this.next());
+			}
+			return batch;
 		}
 
 		@Override
@@ -752,14 +792,18 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
+		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
+			Collection<ResourcePersistentId> batch = new ArrayList<>();
+			while (this.hasNext() && batch.size() < theBatchSize) {
+				batch.add(this.next());
+			}
+			return batch;
+		}
+
+		@Override
 		public void close() {
 			// nothing
 		}
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

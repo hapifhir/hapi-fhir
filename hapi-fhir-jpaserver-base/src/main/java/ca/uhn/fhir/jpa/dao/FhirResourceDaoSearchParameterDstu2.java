@@ -30,16 +30,22 @@ import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import org.hl7.fhir.convertors.conv10_40.SearchParameter10_40;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+	private FhirContext myDstu2Hl7OrgContext = FhirContext.forDstu2Hl7Org();
 
 	protected void markAffectedResources(SearchParameter theResource) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
@@ -51,6 +57,7 @@ public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao
 	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
 		super.postPersist(theEntity, theResource);
 		markAffectedResources(theResource);
+
 	}
 
 	@Override
@@ -69,17 +76,16 @@ public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao
 	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
-		Enum<?> status = theResource.getStatusElement().getValueAsEnum();
-		List<BoundCodeDt<ResourceTypeEnum>> base = Collections.emptyList();
-		if (theResource.getBase() != null) {
-			base = Arrays.asList(theResource.getBaseElement());
-		}
-		String expression = theResource.getXpath();
-		FhirContext context = getContext();
-		SearchParamTypeEnum type = theResource.getTypeElement().getValueAsEnum();
-		String code = theResource.getCode();
+		String encoded = getContext().newJsonParser().encodeResourceToString(theResource);
+		org.hl7.fhir.dstu2.model.SearchParameter hl7Org = myDstu2Hl7OrgContext.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.SearchParameter.class, encoded);
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamRegistry, mySearchParamExtractor, code, type, status, base, expression, context, getConfig());
+		org.hl7.fhir.r4.model.SearchParameter convertedSp = SearchParameter10_40.convertSearchParameter(hl7Org);
+		if (isBlank(convertedSp.getExpression()) && isNotBlank(hl7Org.getXpath())) {
+			convertedSp.setExpression(hl7Org.getXpath());
+		}
+
+		FhirResourceDaoSearchParameterR4.validateSearchParam(convertedSp, getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor);
+
 	}
 
 

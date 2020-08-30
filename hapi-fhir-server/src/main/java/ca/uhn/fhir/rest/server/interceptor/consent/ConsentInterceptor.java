@@ -208,6 +208,11 @@ public class ConsentInterceptor {
 				theResource.setResponseResource(outcome.getResource());
 			}
 
+			// Clear the total
+			if (theResource.getResponseResource() instanceof IBaseBundle) {
+				BundleUtil.setTotal(theRequestDetails.getFhirContext(), (IBaseBundle) theResource.getResponseResource(), null);
+			}
+
 			switch (outcome.getStatus()) {
 				case REJECT:
 					if (outcome.getOperationOutcome() != null) {

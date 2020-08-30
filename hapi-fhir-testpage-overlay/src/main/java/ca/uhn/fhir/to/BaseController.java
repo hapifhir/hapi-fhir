@@ -41,6 +41,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 
+import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class BaseController {
@@ -49,7 +50,7 @@ public class BaseController {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseController.class);
 	@Autowired
 	protected TesterConfig myConfig;
-	private Map<FhirVersionEnum, FhirContext> myContexts = new HashMap<FhirVersionEnum, FhirContext>();
+	private final Map<FhirVersionEnum, FhirContext> myContexts = new HashMap<FhirVersionEnum, FhirContext>();
 	private List<String> myFilterHeaders;
 	@Autowired
 	private ITemplateEngine myTemplateEngine;
@@ -76,19 +77,6 @@ public class BaseController {
 		theModel.put("base", serverBase);
 
 		return loadAndAddConf(theServletRequest, theRequest, theModel);
-	}
-
-	private Header[] applyHeaderFilters(Header[] theAllHeaders) {
-		if (myFilterHeaders == null || myFilterHeaders.isEmpty()) {
-			return theAllHeaders;
-		}
-		ArrayList<Header> retVal = new ArrayList<Header>();
-		for (Header next : theAllHeaders) {
-			if (!myFilterHeaders.contains(next.getName().toLowerCase())) {
-				retVal.add(next);
-			}
-		}
-		return retVal.toArray(new Header[retVal.size()]);
 	}
 
 	private Header[] applyHeaderFilters(Map<String, List<String>> theAllHeaders) {
@@ -274,7 +262,7 @@ public class BaseController {
 	}
 
 	protected RuntimeResourceDefinition getResourceType(HomeRequest theRequest, HttpServletRequest theReq) throws ServletException {
-		String resourceName = StringUtils.defaultString(theReq.getParameter(PARAM_RESOURCE));
+		String resourceName = sanitizeUrlPart(defaultString(theReq.getParameter(PARAM_RESOURCE)));
 		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(resourceName);
 		if (def == null) {
 			throw new ServletException("Invalid resourceName: " + resourceName);
@@ -317,7 +305,7 @@ public class BaseController {
 
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;
 		try {
-			conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) client.fetchConformance().ofType(Conformance.class).execute();
+			conformance = client.fetchConformance().ofType(Conformance.class).execute();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement, error was: {}", e.toString());
 			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + e.toString(), e));
@@ -326,7 +314,7 @@ public class BaseController {
 
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
 
-		Map<String, Number> resourceCounts = new HashMap<String, Number>();
+		Map<String, Number> resourceCounts = new HashMap<>();
 		long total = 0;
 		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
 			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextResource : nextRest.getResource()) {
@@ -385,7 +373,7 @@ public class BaseController {
 
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
 
-		Map<String, Number> resourceCounts = new HashMap<String, Number>();
+		Map<String, Number> resourceCounts = new HashMap<>();
 		long total = 0;
 
 		for (CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
@@ -446,7 +434,7 @@ public class BaseController {
 
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
 
-		Map<String, Number> resourceCounts = new HashMap<String, Number>();
+		Map<String, Number> resourceCounts = new HashMap<>();
 		long total = 0;
 
 		for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
@@ -507,7 +495,7 @@ public class BaseController {
 
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
 
-		Map<String, Number> resourceCounts = new HashMap<String, Number>();
+		Map<String, Number> resourceCounts = new HashMap<>();
 		long total = 0;
 
 		for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
@@ -614,25 +602,6 @@ public class BaseController {
 	protected void processAndAddLastClientInvocation(GenericClient theClient, ResultType theResultType, ModelMap theModelMap, long theLatency, String outcomeDescription,
 																	 CaptureInterceptor theInterceptor, HomeRequest theRequest) {
 		try {
-//			ApacheHttpRequest lastRequest = theInterceptor.getLastRequest();
-//			HttpResponse lastResponse = theInterceptor.getLastResponse();
-//			String requestBody = null;
-//			String requestUrl = lastRequest != null ? lastRequest.getApacheRequest().getURI().toASCIIString() : null;
-//			String action = lastRequest != null ? lastRequest.getApacheRequest().getMethod() : null;
-//			String resultStatus = lastResponse != null ? lastResponse.getStatusLine().toString() : null;
-//			String resultBody = StringUtils.defaultString(theInterceptor.getLastResponseBody());
-//
-//			if (lastRequest instanceof HttpEntityEnclosingRequest) {
-//				HttpEntity entity = ((HttpEntityEnclosingRequest) lastRequest).getEntity();
-//				if (entity.isRepeatable()) {
-//					requestBody = IOUtils.toString(entity.getContent());
-//				}
-//			}
-//
-//			ContentType ct = lastResponse != null ? ContentType.get(lastResponse.getEntity()) : null;
-//			String mimeType = ct != null ? ct.getMimeType() : null;
-
-
 			IHttpRequest lastRequest = theInterceptor.getLastRequest();
 			IHttpResponse lastResponse = theInterceptor.getLastResponse();
 			String requestBody = null;

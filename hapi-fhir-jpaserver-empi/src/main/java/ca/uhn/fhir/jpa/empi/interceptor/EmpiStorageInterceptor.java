@@ -29,7 +29,7 @@ import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
+import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDeleteSvc;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -50,7 +50,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
-	private EmpiLinkDaoSvc myEmpiLinkDaoSvc;
+	private EmpiLinkDeleteSvc myEmpiLinkDeleteSvc;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -59,6 +59,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	private IEmpiSettings myEmpiSettings;
 	@Autowired
 	private PersonHelper myPersonHelper;
+
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualPersonManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
@@ -78,6 +79,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void blockManualPersonManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+
 		//If running in single EID mode, forbid multiple eids.
 		if (myEmpiSettings.isPreventMultipleEids()) {
 			forbidIfHasMultipleEids(theNewResource);
@@ -86,7 +88,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 		if (EmpiUtil.isEmpiManagedPerson(myFhirContext, theNewResource) &&
 			myPersonHelper.isDeactivated(theNewResource)) {
 			ourLog.debug("Deleting empi links to deactivated Person {}", theNewResource.getIdElement().toUnqualifiedVersionless());
-			myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theNewResource);
+			myEmpiLinkDeleteSvc.deleteWithAnyReferenceTo(theNewResource);
 		}
 
 		if (isInternalRequest(theRequestDetails)) {
@@ -94,6 +96,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 		}
 		forbidIfEmpiManagedTagIsPresent(theOldResource);
 		forbidModifyingEmpiTag(theNewResource, theOldResource);
+
 		if (myEmpiSettings.isPreventEidUpdates()) {
 			forbidIfModifyingExternalEidOnTarget(theNewResource, theOldResource);
 		}
@@ -104,12 +107,16 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 		if (!EmpiUtil.isEmpiResourceType(myFhirContext, theResource)) {
 			return;
 		}
-		myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theResource);
+		myEmpiLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {
 		List<CanonicalEID> newExternalEids = myEIDHelper.getExternalEid(theNewResource);
 		List<CanonicalEID> oldExternalEids = myEIDHelper.getExternalEid(theOldResource);
+		if (oldExternalEids.isEmpty()) {
+			return;
+		}
+
 		if (!myEIDHelper.eidMatchExists(newExternalEids, oldExternalEids)) {
 			throwBlockEidChange();
 		}
@@ -144,7 +151,6 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 		return theRequestDetails == null;
 	}
 
-
 	private void forbidIfEmpiManagedTagIsPresent(IBaseResource theResource) {
 		if (EmpiUtil.isEmpiManaged(theResource)) {
 			throwModificationBlockedByEmpi();
@@ -176,6 +182,6 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
 	public void expungeAllMatchedEmpiLinks(AtomicInteger theCounter, IBaseResource theResource) {
 		ourLog.debug("Expunging EmpiLink records with reference to {}", theResource.getIdElement());
-		theCounter.addAndGet(myEmpiLinkDaoSvc.deleteWithAnyReferenceTo(theResource));
+		theCounter.addAndGet(myEmpiLinkDeleteSvc.deleteWithAnyReferenceTo(theResource));
 	}
 }

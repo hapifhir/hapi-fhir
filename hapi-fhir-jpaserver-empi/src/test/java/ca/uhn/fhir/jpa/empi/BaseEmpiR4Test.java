@@ -4,19 +4,20 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.config.EmpiConsumerConfig;
 import ca.uhn.fhir.jpa.empi.config.EmpiSearchParameterLoader;
 import ca.uhn.fhir.jpa.empi.config.EmpiSubmitterConfig;
 import ca.uhn.fhir.jpa.empi.config.TestEmpiConfigR4;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.empi.matcher.IsLinkedTo;
 import ca.uhn.fhir.jpa.empi.matcher.IsMatchedToAPerson;
 import ca.uhn.fhir.jpa.empi.matcher.IsPossibleDuplicateOf;
@@ -42,36 +43,40 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.After;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {EmpiSubmitterConfig.class, EmpiConsumerConfig.class, TestEmpiConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = getLogger(BaseEmpiR4Test.class);
 
-	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
-	protected static final String JANE_ID = "ID.JANE.123";
 	public static final String NAME_GIVEN_JANE = "Jane";
-	protected static final String PAUL_ID = "ID.PAUL.456";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
+	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
+	protected static final String JANE_ID = "ID.JANE.123";
+	protected static final String PAUL_ID = "ID.PAUL.456";
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
+	private static final String NAME_GIVEN_FRANK = "Frank";
+	protected static final String FRANK_ID = "ID.FRANK.789";
 
 	@Autowired
 	protected FhirContext myFhirContext;
@@ -99,14 +104,21 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
+	@Autowired
+	private IEmpiBatchSvc myEmpiBatchService;
 
 	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
 	@Override
-	@After
-	public void after() {
+	@AfterEach
+	public void after() throws IOException {
 		myEmpiLinkDao.deleteAll();
+		assertEquals(0, myEmpiLinkDao.count());
 		super.after();
+	}
+
+	protected void saveLink(EmpiLink theEmpiLink) {
+		myEmpiLinkDaoSvc.save(theEmpiLink);
 	}
 
 	@Nonnull
@@ -149,6 +161,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
 		return patient;
+	}
+	@Nonnull
+	protected Practitioner createPractitioner(Practitioner thePractitioner) {
+		//Note that since our empi-rules block on active=true, all patients must be active.
+		thePractitioner.setActive(true);
+		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
+		thePractitioner.setId(daoMethodOutcome.getId());
+		return thePractitioner;
 	}
 
 	@Nonnull
@@ -226,6 +246,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Patient buildPaulPatient() {
 		return buildPatientWithNameAndId(NAME_GIVEN_PAUL, PAUL_ID);
+	}
+
+	@Nonnull
+	protected Patient buildFrankPatient() {
+		return buildPatientWithNameAndId(NAME_GIVEN_FRANK, FRANK_ID);
 	}
 
 	@Nonnull
@@ -356,7 +381,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		Person person = createPerson();
 		Patient patient = createPatient();
 
-		EmpiLink empiLink = new EmpiLink();
+		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		empiLink.setPersonPid(myIdHelperService.getPidOrNull(person));
@@ -368,4 +393,33 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		myEmpiSearchParameterLoader.daoUpdateEmpiSearchParameters();
 		mySearchParamRegistry.forceRefresh();
 	}
+
+	protected void logAllLinks() {
+		ourLog.info("Logging all EMPI Links:");
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		for (EmpiLink link : links) {
+			ourLog.info(link.toString());
+		}
+	}
+
+	protected void assertLinksMatchResult(EmpiMatchResultEnum... theExpectedValues) {
+		assertFields(EmpiLink::getMatchResult, theExpectedValues);
+	}
+
+	protected void assertLinksNewPerson(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getNewPerson, theExpectedValues);
+	}
+
+	protected void assertLinksMatchedByEid(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getEidMatch, theExpectedValues);
+	}
+
+	private <T> void assertFields(Function<EmpiLink, T> theAccessor, T... theExpectedValues) {
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+		assertEquals(theExpectedValues.length, links.size());
+		for (int i = 0; i < links.size(); ++i) {
+			assertEquals(theExpectedValues[i], theAccessor.apply(links.get(i)), "Value at index " + i + " was not equal");
+		}
+	}
+
 }

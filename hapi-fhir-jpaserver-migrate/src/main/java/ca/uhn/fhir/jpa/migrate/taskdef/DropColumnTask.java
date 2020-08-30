@@ -20,12 +20,15 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Driver;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 
 public class DropColumnTask extends BaseTableColumnTask {
@@ -48,6 +51,21 @@ public class DropColumnTask extends BaseTableColumnTask {
 		if (!columnNames.contains(getColumnName())) {
 			logInfo(ourLog, "Column {} does not exist on table {} - No action performed", getColumnName(), getTableName());
 			return;
+		}
+
+		if(getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || getDriverType().equals(DriverTypeEnum.MARIADB_10_1)
+		 || getDriverType().equals(DriverTypeEnum.MSSQL_2012)) {
+			// Some DBs such as MYSQL and Maria DB require that foreign keys depending on the column be dropped before the column itself is dropped.
+			logInfo(ourLog, "Dropping any foreign keys on table {} depending on column {}", getTableName(), getColumnName());
+			Set<String> foreignKeys = JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), getColumnName(), getTableName());
+			if(foreignKeys != null) {
+				for (String foreignKey:foreignKeys) {
+					List<String> dropFkSqls = DropForeignKeyTask.generateSql(getTableName(), foreignKey, getDriverType());
+					for(String dropFkSql : dropFkSqls) {
+						executeSql(getTableName(), dropFkSql);
+					}
+				}
+			}
 		}
 
 		String tableName = getTableName();

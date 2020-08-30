@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.1.0-SNAPSHOT</version>
+		<version>5.2.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -147,11 +147,21 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-elasticsearch-6</artifactId>
 			<version>${project.version}</version>
 			<classifier>shaded6</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-
 
 		<dependency>
 			<groupId>net.ttddyy</groupId>
@@ -236,11 +246,6 @@
 		</dependency>
 
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
-		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> <version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> 
-			</exclusion> <exclusion> <artifactId>commons-discovery</artifactId> <groupId>commons-discovery</groupId> </exclusion> <exclusion> <artifactId>commons-codec</artifactId> <groupId>commons-codec</groupId> 
-			</exclusion> <exclusion> <artifactId>commons-logging</artifactId> <groupId>commons-logging</groupId> </exclusion> <exclusion> <artifactId>xpp3</artifactId> <groupId>xpp3</groupId> </exclusion> <exclusion> 
-			<artifactId>junit</artifactId> <groupId>junit</groupId> </exclusion> <exclusion> <artifactId>jdom</artifactId> <groupId>org.jdom</groupId> </exclusion> <exclusion> <artifactId>gson</artifactId> <groupId>com.google.code.gson</groupId> 
-			</exclusion> </exclusions> </dependency> -->
 
 		<!-- 
 		For some reason JavaDoc crashed during site generation unless we have this dependency
@@ -283,17 +288,6 @@
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.hamcrest</groupId>
-					<artifactId>hamcrest-core</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -566,6 +560,10 @@
 					<groupId>com.sun.mail</groupId>
 					<artifactId>javax.mail</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -593,6 +591,12 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-testlib</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jetbrains</groupId>

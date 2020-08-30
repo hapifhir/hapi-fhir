@@ -5,9 +5,9 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +22,15 @@ import java.sql.Blob;
 import java.sql.SQLException;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,12 +45,12 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	@Before
+	@BeforeEach
 	public void backupDaoConfig() {
 		defaultPreloadBlobFromInputStream = myDaoConfig.isPreloadBlobFromInputStream();
 	}
 
-	@After
+	@AfterEach
 	public void restoreDaoConfig() {
 		myDaoConfig.setPreloadBlobFromInputStream(defaultPreloadBlobFromInputStream);
 	}

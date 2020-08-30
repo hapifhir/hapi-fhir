@@ -20,16 +20,22 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -112,6 +118,33 @@ public class FhirTerserDstu2Test {
 		}
 
 	}
+
+	@Test
+	public void testCloneIntoResourceCopiesId() {
+		Observation obs = new Observation();
+		obs.setId("http://foo/base/Observation/_history/123");
+		obs.setValue(new StringDt("AAA"));
+
+		Observation target = new Observation();
+		ourCtx.newTerser().cloneInto(obs, target, false);
+
+		assertEquals("http://foo/base/Observation/_history/123", target.getId().getValue());
+	}
+
+
+	@Test
+	public void testCloneIntoResourceCopiesElementId() {
+		Observation obs = new Observation();
+		StringDt string = new StringDt("AAA");
+		string.setId("BBB");
+		obs.setValue(string);
+
+		Observation target = new Observation();
+		ourCtx.newTerser().cloneInto(obs, target, false);
+
+		assertEquals("BBB", ((StringDt)target.getValue()).getElementSpecificId());
+	}
+
 
 	/**
 	 * See #369
@@ -796,7 +829,7 @@ public class FhirTerserDstu2Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

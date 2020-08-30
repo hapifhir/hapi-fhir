@@ -3,18 +3,18 @@ package ca.uhn.fhir.okhttp;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OkHttpRestfulClientFactoryTest {
 
     private OkHttpRestfulClientFactory clientFactory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clientFactory = new OkHttpRestfulClientFactory();
     }

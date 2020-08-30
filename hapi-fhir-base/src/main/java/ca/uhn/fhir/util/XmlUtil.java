@@ -31,7 +31,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -49,7 +49,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -1890,11 +1889,18 @@ public class XmlUtil {
 		return builder.parse(src);
 	}
 
-	public static String encodeDocument(Element theElement) throws TransformerException {
+	public static String encodeDocument(Node theElement) throws TransformerException {
+		return encodeDocument(theElement, false);
+	}
+
+	public static String encodeDocument(Node theElement, boolean theIndent) throws TransformerException {
 		TransformerFactory transFactory = TransformerFactory.newInstance();
 		Transformer transformer = transFactory.newTransformer();
 		StringWriter buffer = new StringWriter();
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		if (theIndent) {
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		}
 		transformer.transform(new DOMSource(theElement), new StreamResult(buffer));
 		return buffer.toString();
 	}

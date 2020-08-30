@@ -1,12 +1,13 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.apache.commons.io.input.ReaderInputStream;
@@ -19,7 +20,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.junit.*;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -44,12 +47,12 @@ public class SearchClientDstu3Test {
 	private HttpClient ourHttpClient;
 	private HttpResponse ourHttpResponse;
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu3();
 
@@ -74,7 +77,7 @@ public class SearchClientDstu3Test {
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(response), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(response), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -102,7 +105,7 @@ public class SearchClientDstu3Test {
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(response), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(response), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -111,10 +114,10 @@ public class SearchClientDstu3Test {
 		int idx = 0;
 
 		client.search(new SortSpec("param1", SortOrderEnum.ASC));
-		assertEquals("http://localhost/fhir/Bundle?_sort=param1", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
+		assertEquals("http://localhost/fhir/Bundle?_sort=param1", capt.getAllValues().get(idx++).getURI().toString());
 
 		client.search(new SortSpec("param1", SortOrderEnum.ASC).setChain(new SortSpec("param2", SortOrderEnum.DESC)));
-		assertEquals("http://localhost/fhir/Bundle?_sort=param1%2C-param2", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
+		assertEquals("http://localhost/fhir/Bundle?_sort=param1%2C-param2", capt.getAllValues().get(idx++).getURI().toString());
 	}
 
 	@Test
@@ -126,7 +129,6 @@ public class SearchClientDstu3Test {
 			Date date = new Date(23898235986L);
 			Calendar cal = new GregorianCalendar();
 			cal.setTime(date);
-			;
 
 			final String response = createBundleWithSearchExtension();
 			ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -136,7 +138,7 @@ public class SearchClientDstu3Test {
 			when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 				@Override
 				public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-					return new ReaderInputStream(new StringReader(response), Charset.forName("UTF-8"));
+					return new ReaderInputStream(new StringReader(response), StandardCharsets.UTF_8);
 				}
 			});
 
@@ -146,11 +148,11 @@ public class SearchClientDstu3Test {
 
 			client.search("STRING1", new StringType("STRING2"), date, cal);
 			assertEquals("http://localhost/fhir/Bundle?stringParam=STRING1&stringTypeParam=STRING2&dateParam=1970-10-04T10:23:55.986-04:00&calParam=1970-10-04T10:23:55.986-04:00",
-					UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
+					UrlUtil.unescape(capt.getAllValues().get(idx++).getURI().toString()));
 
 			client.search(null, null, null, null);
 			assertEquals("http://localhost/fhir/Bundle",
-					UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
+					UrlUtil.unescape(capt.getAllValues().get(idx++).getURI().toString()));
 		} finally {
 			TimeZone.setDefault(tz);
 		}
@@ -170,7 +172,7 @@ public class SearchClientDstu3Test {
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(response), Charset.forName("UTF-8"));
+				return new ReaderInputStream(new StringReader(response), StandardCharsets.UTF_8);
 			}
 		});
 
@@ -218,17 +220,17 @@ public class SearchClientDstu3Test {
 
 	public interface ILocationClient extends IRestfulClient {
 		@Search(queryName = "match")
-		public List<Location> getMatches(final @RequiredParam(name = Location.SP_NAME) StringParam name, final @Count Integer count);
+		List<Location> getMatches(final @RequiredParam(name = Location.SP_NAME) StringParam name, final @Count Integer count);
 
 		@Search(queryName = "match", type = Location.class)
-		public Bundle getMatchesReturnBundle(final @RequiredParam(name = Location.SP_NAME) StringParam name, final @Count Integer count);
+		Bundle getMatchesReturnBundle(final @RequiredParam(name = Location.SP_NAME) StringParam name, final @Count Integer count);
 
 		@Search
-		public Bundle search(@Sort SortSpec theSort);
+		Bundle search(@Sort SortSpec theSort);
 
 		@Search
-		public Bundle search(@OptionalParam(name = "stringParam") String theString, @OptionalParam(name = "stringTypeParam") StringType theStringDt, @OptionalParam(name = "dateParam") Date theDate,
-				@OptionalParam(name = "calParam") Calendar theCal);
+		Bundle search(@OptionalParam(name = "stringParam") String theString, @OptionalParam(name = "stringTypeParam") StringType theStringDt, @OptionalParam(name = "dateParam") Date theDate,
+						  @OptionalParam(name = "calParam") Calendar theCal);
 
 	}
 

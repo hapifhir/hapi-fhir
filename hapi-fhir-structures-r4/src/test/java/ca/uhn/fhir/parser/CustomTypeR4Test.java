@@ -1,45 +1,55 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r4.model.*;
-import org.junit.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomResource364R4.CustomResource364CustomDate;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomTypeR4Test {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeR4Test.class);
 
-	@Before
+	@BeforeEach
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@SuppressWarnings("serial")
 	@ResourceDef
 	public static class PatientWithExtensionWithTwoTypes extends Patient {
 		@Child(name = "foo", type = { DateTimeType.class, Period.class }, min = 0, max = 1)
@@ -68,7 +78,6 @@ public class CustomTypeR4Test {
 		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType)pt.getFoo()).getValueAsString());
 	}
 
-	@SuppressWarnings("serial")
 	@ResourceDef
 	public static class PatientWithExtensionWithOneTypes extends Patient {
 		@Child(name = "foo", type = { DateTimeType.class }, min = 0, max = 1)
@@ -131,7 +140,7 @@ public class CustomTypeR4Test {
 	@Test
 	public void testCustomTypeWithPrimitiveType() {
 		FhirContext context = FhirContext.forR4();
-		context.registerCustomTypes(new ArrayList<Class<? extends IBase>>());
+		context.registerCustomTypes(new ArrayList<>());
 
 		IParser parser = context.newXmlParser();
 
@@ -276,7 +285,7 @@ public class CustomTypeR4Test {
 		patient.setCholesterol(new Quantity());
 		patient.setWeight(new StringDt("80 kg"));
 		patient.setWeight(new StringDt("185 cm"));
-		patient.setCheckDates(new ArrayList<DateTimeDt>());
+		patient.setCheckDates(new ArrayList<>());
 		patient.getCheckDates().add(new DateTimeDt("2014-01-26T11:11:11"));
 
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
@@ -318,7 +327,7 @@ public class CustomTypeR4Test {
 		patient.setCholesterol(new Quantity());
 		patient.setWeight(new StringDt("80 kg"));
 		patient.setWeight(new StringDt("185 cm"));
-		patient.setCheckDates(new ArrayList<DateTimeDt>());
+		patient.setCheckDates(new ArrayList<>());
 		patient.getCheckDates().add(new DateTimeDt("2014-01-26T11:11:11"));
 
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
@@ -530,7 +539,7 @@ public class CustomTypeR4Test {
 
 		public List<DateTimeDt> getCheckDates() {
 			if (myCheckDates == null) {
-				myCheckDates = new ArrayList<DateTimeDt>();
+				myCheckDates = new ArrayList<>();
 			}
 			return myCheckDates;
 		}

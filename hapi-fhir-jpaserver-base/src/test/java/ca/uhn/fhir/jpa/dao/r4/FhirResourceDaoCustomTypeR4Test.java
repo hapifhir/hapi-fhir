@@ -1,20 +1,21 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.Assert.assertEquals;
-
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({ })
 public class FhirResourceDaoCustomTypeR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCustomTypeR4Test.class);
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myFhirCtx.setDefaultTypeForProfile(CustomObservationR4.PROFILE, CustomObservationR4.class);
 	}
@@ -36,7 +37,7 @@ public class FhirResourceDaoCustomTypeR4Test extends BaseJpaR4Test {
 		
 	}
 	
-	@After
+	@AfterEach
 	public void after() {
 		myFhirCtx.setDefaultTypeForProfile(CustomObservationR4.PROFILE, null);
 	}

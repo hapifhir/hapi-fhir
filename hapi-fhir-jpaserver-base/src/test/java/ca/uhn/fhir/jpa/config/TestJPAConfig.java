@@ -24,7 +24,6 @@ import javax.persistence.EntityManagerFactory;
 	SubscriptionChannelConfig.class
 })
 public class TestJPAConfig {
-
 	@Bean
 	public DaoConfig daoConfig() {
 		return new DaoConfig();
@@ -40,8 +39,13 @@ public class TestJPAConfig {
 		return daoConfig().getModelConfig();
 	}
 
+	/*
+	Please do not rename this bean to "transactionManager()" as this will conflict with the transactionManager
+	provided by Spring Batch.
+	 */
 	@Bean
-	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+	@Primary
+	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1896
+title: "Support has been added for GraphQL querying using an HTTP POST (with the query in the body). Thanks to
+  Ibrohim Kholilul Islam for the pull request implementing this new feature!"

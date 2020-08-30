@@ -13,41 +13,42 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.in;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu2Test.class);
 	private SubscriptionsRequireManualActivationInterceptorDstu2 myInterceptor;
 
-	@Before
+	@BeforeEach
 	public void beforeCreateInterceptor() {
 		myInterceptor = new SubscriptionsRequireManualActivationInterceptorDstu2();
 		myInterceptor.setDao(mySubscriptionDao);
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
 
-	@After
+	@AfterEach
 	public void afterDestroyInterceptor() {
 		myInterceptorRegistry.unregisterInterceptor(myInterceptor);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeEnableScheduling() {
 		myDaoConfig.setSchedulingDisabled(false);
 	}
@@ -174,11 +175,6 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 		subs.setStatus(SubscriptionStatusEnum.OFF);
 		ourClient.update().resource(subs).execute();
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	public class BaseSocket {

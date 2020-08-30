@@ -10,12 +10,11 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
@@ -23,12 +22,9 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
@@ -42,23 +38,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplDstu3Test.class);
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
@@ -503,9 +497,12 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("LOINC");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Don't know how to handle op=ISA on property copyright");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Don't know how to handle op=ISA on property copyright", e.getMessage());
+		}
 	}
 
 	@Test
@@ -526,9 +523,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("LOINC");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -548,9 +549,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("bogus");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Don't know how to handle value=bogus on property copyright");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Don't know how to handle value=bogus on property copyright", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -758,9 +763,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("50015-7");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Don't know how to handle op=ISA on property ancestor");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Don't know how to handle op=ISA on property ancestor", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -781,9 +790,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -992,9 +1005,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("50015-7");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Don't know how to handle op=ISA on property child");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Don't know how to handle op=ISA on property child", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1015,9 +1032,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1226,9 +1247,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("50015-7");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Don't know how to handle op=ISA on property descendant");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Don't know how to handle op=ISA on property descendant", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1249,9 +1274,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1459,9 +1488,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("50015-7");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Don't know how to handle op=ISA on property parent");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Don't know how to handle op=ISA on property parent", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1482,9 +1515,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
 
-		expectedException.expect(InvalidRequestException.class);
-		expectedException.expectMessage("Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSet(null, vs);
+		try {
+			myTermSvc.expandValueSet(null, vs);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1948,7 +1985,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
 		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
@@ -1967,8 +2004,4 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		return retVal;
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 }

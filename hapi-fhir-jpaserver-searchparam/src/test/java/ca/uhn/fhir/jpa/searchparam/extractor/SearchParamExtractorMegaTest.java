@@ -16,6 +16,7 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -25,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParamExtractorMegaTest {
 
@@ -213,7 +214,7 @@ public class SearchParamExtractorMegaTest {
 		theIndexesCounter.addAndGet(set.size());
 
 		set = theExtractor.extractSearchParamQuantity(resource);
-		assertEquals(String.join("\n", set.getWarnings()), 0, set.getWarnings().size());
+		assertEquals(0, set.getWarnings().size(), String.join("\n", set.getWarnings()));
 		theIndexesCounter.addAndGet(set.size());
 
 		set = theExtractor.extractSearchParamTokens(resource);
@@ -299,6 +300,11 @@ public class SearchParamExtractorMegaTest {
 		@Override
 		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
 			return null;
+		}
+
+		@Override
+		public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
+			// nothing
 		}
 	}
 

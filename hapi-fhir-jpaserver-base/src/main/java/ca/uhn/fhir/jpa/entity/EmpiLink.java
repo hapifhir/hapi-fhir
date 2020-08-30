@@ -24,7 +24,6 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,8 +48,11 @@ import java.util.Date;
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
 })
 public class EmpiLink {
+	public static final int VERSION_LENGTH = 16;
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;
+	public static final int TARGET_TYPE_LENGTH = 40;
+
 
 	@SequenceGenerator(name = "SEQ_EMPI_LINK_ID", sequenceName = "SEQ_EMPI_LINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_EMPI_LINK_ID")
@@ -87,6 +89,32 @@ public class EmpiLink {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "UPDATED", nullable = false)
 	private Date myUpdated;
+
+	@Column(name = "VERSION", nullable = false, length = VERSION_LENGTH)
+	private String myVersion;
+
+	/** This link was created as a result of an eid match **/
+	@Column(name = "EID_MATCH")
+	private Boolean myEidMatch;
+
+	/** This link created a new person **/
+	@Column(name = "NEW_PERSON")
+	private Boolean myNewPerson;
+
+	@Column(name = "VECTOR")
+	private Long myVector;
+
+	@Column(name = "SCORE")
+	private Double myScore;
+
+	public EmpiLink() {}
+
+	public EmpiLink(String theVersion) {
+		myVersion = theVersion;
+	}
+
+	@Column(name = "TARGET_TYPE", nullable = true, length = TARGET_TYPE_LENGTH)
+	private String myEmpiTargetType;
 
 	public Long getId() {
 		return myId;
@@ -177,17 +205,6 @@ public class EmpiLink {
 		return myLinkSource == EmpiLinkSourceEnum.MANUAL;
 	}
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append("myPersonPid", myPersonPid)
-			.append("myTargetPid", myTargetPid)
-			.append("myMatchResult", myMatchResult)
-			.append("myLinkSource", myLinkSource)
-			.toString();
-	}
-
 	public Date getCreated() {
 		return myCreated;
 	}
@@ -204,5 +221,80 @@ public class EmpiLink {
 	public EmpiLink setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
 		return this;
+	}
+
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public EmpiLink setVersion(String theVersion) {
+		myVersion = theVersion;
+		return this;
+	}
+
+	public Long getVector() {
+		return myVector;
+	}
+
+	public EmpiLink setVector(Long theVector) {
+		myVector = theVector;
+		return this;
+	}
+
+	public Double getScore() {
+		return myScore;
+	}
+
+	public EmpiLink setScore(Double theScore) {
+		myScore = theScore;
+		return this;
+	}
+
+	public Boolean getEidMatch() {
+		return myEidMatch;
+	}
+
+	public boolean isEidMatch() {
+		return myEidMatch != null && myEidMatch;
+	}
+
+	public EmpiLink setEidMatch(Boolean theEidMatch) {
+		myEidMatch = theEidMatch;
+		return this;
+	}
+
+	public Boolean getNewPerson() {
+		return myNewPerson;
+	}
+
+	public boolean isNewPerson() {
+		return myNewPerson != null && myNewPerson;
+	}
+
+	public EmpiLink setNewPerson(Boolean theNewPerson) {
+		myNewPerson = theNewPerson;
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myPersonPid", myPersonPid)
+			.append("myTargetPid", myTargetPid)
+			.append("myEmpiTargetType", myEmpiTargetType)
+			.append("myMatchResult", myMatchResult)
+			.append("myLinkSource", myLinkSource)
+			.append("myEidMatch", myEidMatch)
+			.append("myNewPerson", myNewPerson)
+			.append("myScore", myScore)
+			.toString();
+	}
+
+	public String getEmpiTargetType() {
+		return myEmpiTargetType;
+	}
+
+	public void setEmpiTargetType(String theEmpiTargetType) {
+		myEmpiTargetType = theEmpiTargetType;
 	}
 }

@@ -6,7 +6,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class NameUtilTestDSTU3 {
 		IBase name = names.get(0);
 
 		{
-			String familyName = NameUtil.extractFamilyName(myFhirContext, name );
+			String familyName = NameUtil.extractFamilyName(myFhirContext, name);
 			assertThat(familyName, is(equalTo("family")));
 		}
 

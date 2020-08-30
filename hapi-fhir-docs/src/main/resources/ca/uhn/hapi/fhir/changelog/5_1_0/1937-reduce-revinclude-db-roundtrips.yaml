@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 1937
+title: Due to an inefficient SQL statement when performing searches with large numbers of _revincludes where the resources
+   have tags, a large number of database roundtrips were produced when searching. This has been streamlined, greatly improving
+   the response times for some searches.

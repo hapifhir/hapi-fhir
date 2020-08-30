@@ -10,16 +10,16 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +33,14 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -73,13 +73,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(24, myTermValueSetConceptDao.count());
 		});
 
 		myValueSetDao.delete(valueSet.getIdElement());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(0, myTermValueSetConceptDao.count());
 		});
 
@@ -560,11 +560,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(expanded, 2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals(expanded, "offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(expanded, 0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals(expanded, "count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(expanded, 0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size(), expanded);
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName(), expanded);
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue(), expanded);
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName(), expanded);
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue(), expanded);
 
 		assertFalse(expandedValueSet.getExpansion().hasContains());
 	}
@@ -796,7 +796,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 
-		Extension extensionByUrl = outcome.getExpansion().getExtensionByUrl(JpaConstants.EXT_VALUESET_EXPANSION_MESSAGE);
+		Extension extensionByUrl = outcome.getExpansion().getExtensionByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE);
 		assertEquals("Unknown CodeSystem URI \"http://unknown-system\" referenced from ValueSet", extensionByUrl.getValueAsPrimitive().getValueAsString());
 	}
 

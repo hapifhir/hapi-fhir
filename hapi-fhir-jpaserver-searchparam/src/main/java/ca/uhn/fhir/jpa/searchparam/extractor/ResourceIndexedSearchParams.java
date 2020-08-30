@@ -105,24 +105,28 @@ public final class ResourceIndexedSearchParams {
 		return myLinks;
 	}
 
-	public void setParamsOn(ResourceTable theEntity) {
-		theEntity.setParamsString(myStringParams);
+	public void populateResourceTableSearchParamsPresentFlags(ResourceTable theEntity) {
 		theEntity.setParamsStringPopulated(myStringParams.isEmpty() == false);
-		theEntity.setParamsToken(myTokenParams);
 		theEntity.setParamsTokenPopulated(myTokenParams.isEmpty() == false);
-		theEntity.setParamsNumber(myNumberParams);
 		theEntity.setParamsNumberPopulated(myNumberParams.isEmpty() == false);
-		theEntity.setParamsQuantity(myQuantityParams);
 		theEntity.setParamsQuantityPopulated(myQuantityParams.isEmpty() == false);
-		theEntity.setParamsDate(myDateParams);
 		theEntity.setParamsDatePopulated(myDateParams.isEmpty() == false);
-		theEntity.setParamsUri(myUriParams);
 		theEntity.setParamsUriPopulated(myUriParams.isEmpty() == false);
-		theEntity.setParamsCoords(myCoordsParams);
 		theEntity.setParamsCoordsPopulated(myCoordsParams.isEmpty() == false);
 		theEntity.setParamsCompositeStringUniquePresent(myCompositeStringUniques.isEmpty() == false);
-		theEntity.setResourceLinks(myLinks);
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
+	}
+
+
+	public void populateResourceTableParamCollections(ResourceTable theEntity) {
+		theEntity.setParamsString(myStringParams);
+		theEntity.setParamsToken(myTokenParams);
+		theEntity.setParamsNumber(myNumberParams);
+		theEntity.setParamsQuantity(myQuantityParams);
+		theEntity.setParamsDate(myDateParams);
+		theEntity.setParamsUri(myUriParams);
+		theEntity.setParamsCoords(myCoordsParams);
+		theEntity.setResourceLinks(myLinks);
 	}
 
 	void setUpdatedTime(Date theUpdateTime) {

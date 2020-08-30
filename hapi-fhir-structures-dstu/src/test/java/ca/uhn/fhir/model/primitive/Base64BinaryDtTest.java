@@ -1,7 +1,7 @@
 package ca.uhn.fhir.model.primitive;
 
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.util.TestUtil;
 
@@ -14,7 +14,7 @@ public class Base64BinaryDtTest {
 	}
 	
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

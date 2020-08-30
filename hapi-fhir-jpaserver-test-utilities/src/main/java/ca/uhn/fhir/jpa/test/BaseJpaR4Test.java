@@ -25,5 +25,4 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {TestJpaR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
-
 }

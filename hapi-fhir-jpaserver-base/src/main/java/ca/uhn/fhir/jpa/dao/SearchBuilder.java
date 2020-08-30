@@ -35,9 +35,9 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactory;
-import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryStack;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryStack;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -90,6 +90,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -245,6 +246,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Override
 	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
@@ -263,6 +265,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Override
 	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchRuntimeDetails.getSearchUuid(), theRequestPartitionId);
 
@@ -742,6 +745,9 @@ public class SearchBuilder implements ISearchBuilder {
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 						List<Long> results = q.getResultList();
 						for (Long resourceLink : results) {
+							if (resourceLink == null) {
+								continue;
+							}
 							if (theReverseMode) {
 								pidsToInclude.add(new ResourcePersistentId(resourceLink));
 							} else {
@@ -1304,11 +1310,21 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		@Override
+		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
+			Collection<ResourcePersistentId> batch = new ArrayList<>();
+			while (this.hasNext() && batch.size() < theBatchSize) {
+				batch.add(this.next());
+			}
+			return batch;
+		}
+
+		@Override
 		public void close() {
 			if (myResultsIterator != null) {
 				myResultsIterator.close();
 			}
 		}
+
 	}
 
 	private static class CountQueryIterator implements Iterator<Long> {

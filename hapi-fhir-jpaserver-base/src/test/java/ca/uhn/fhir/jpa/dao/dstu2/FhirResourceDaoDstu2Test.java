@@ -76,11 +76,11 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -94,6 +94,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -101,21 +102,22 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2Test.class);
+	@Autowired
+	private IForcedIdDao myForcedIdDao;
 
-	@After
+	@AfterEach
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
@@ -144,7 +146,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
@@ -588,19 +590,27 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testDeleteFailsIfIncomingLinks() {
 		String methodName = "testDeleteFailsIfIncomingLinks";
+		SearchParameterMap map;
+		List<IIdType> found;
+
 		Organization org = new Organization();
 		org.setName(methodName);
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		map = SearchParameterMap.newSynchronous();
+		map.add("_id", new StringParam(orgId.getIdPart()));
+		map.addRevInclude(new Include("*"));
+		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+		assertThat(found, contains(orgId));
 
 		Patient patient = new Patient();
 		patient.addName().addFamily(methodName);
 		patient.getManagingOrganization().setReference(orgId);
 		IIdType patId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		SearchParameterMap map = new SearchParameterMap();
 		map.add("_id", new StringParam(orgId.getIdPart()));
 		map.addRevInclude(new Include("*"));
-		List<IIdType> found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
 		assertThat(found, contains(orgId, patId));
 
 		try {
@@ -611,9 +621,21 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		}
 
+		map = SearchParameterMap.newSynchronous();
+		map.add("_id", new StringParam(orgId.getIdPart()));
+		map.addRevInclude(new Include("*"));
+		ourLog.info("***** About to perform search");
+		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+
+		runInTransaction(()->{
+			ourLog.info("Resources:\n * {}", myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		assertThat(found.toString(), found, contains(orgId, patId));
+
 		myPatientDao.delete(patId, mySrd);
 
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add("_id", new StringParam(orgId.getIdPart()));
 		map.addRevInclude(new Include("*"));
 		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
@@ -621,7 +643,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		myOrganizationDao.delete(orgId, mySrd);
 
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add("_id", new StringParam(orgId.getIdPart()));
 		map.addRevInclude(new Include("*"));
 		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
@@ -986,9 +1008,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertGone(org2Id);
 	}
 
-	@Autowired
-	private IForcedIdDao myForcedIdDao;
-
 	@Test
 	public void testHistoryByForcedId() {
 		IIdType idv1;
@@ -1005,8 +1024,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			idv2 = myPatientDao.update(patient, mySrd).getId();
 		}
 
-		runInTransaction(()->{
-			ourLog.info("Forced IDs:\n{}", myForcedIdDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n")));
+		runInTransaction(() -> {
+			ourLog.info("Forced IDs:\n{}", myForcedIdDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n")));
 		});
 
 		List<Patient> patients = toList(myPatientDao.history(idv1.toVersionless(), null, null, mySrd));
@@ -1053,7 +1072,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
-			assertEquals("Failure at " + i, expected, actual);
+			assertEquals(expected, actual, "Failure at " + i);
 		}
 
 		// By type
@@ -1121,7 +1140,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(log(history), fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.size().intValue(), log(history));
 
 		// By type
 		history = myPatientDao.history(null, null, mySrd);
@@ -1132,7 +1151,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 		ourLog.info(log(history));
 		ourLog.info("Want {} but got {}", fullSize + 1, history.size().intValue());
-		assertEquals(log(history), fullSize + 1, history.size().intValue()); // fails?
+		assertEquals(fullSize + 1, history.size().intValue(), log(history)); // fails?
 
 		// By server
 		history = mySystemDao.history(null, null, mySrd);
@@ -1141,7 +1160,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(log(history), fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.size().intValue(), log(history));
 
 		/*
 		 * With since date
@@ -2253,7 +2272,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSortByQuantity() {
 		Observation res;
 
@@ -2518,7 +2537,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testSortByUri() {
 		ConceptMap res = new ConceptMap();
 		res.addElement().addTarget().addDependsOn().setElement("http://foo2");
@@ -2727,15 +2746,15 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		sort(published);
 		assertEquals(3, published.size());
-		assertEquals(published.toString(), "Dog", published.get(0).getTerm());
-		assertEquals(published.toString(), "Puppies", published.get(0).getLabel());
-		assertEquals(published.toString(), null, published.get(0).getScheme());
-		assertEquals(published.toString(), "Cat", published.get(1).getTerm());
-		assertEquals(published.toString(), "Kittens", published.get(1).getLabel());
-		assertEquals(published.toString(), "http://foo", published.get(1).getScheme());
-		assertEquals(published.toString(), "Cow", published.get(2).getTerm());
-		assertEquals(published.toString(), "Calves", published.get(2).getLabel());
-		assertEquals(published.toString(), "http://foo", published.get(2).getScheme());
+		assertEquals( "Dog", published.get(0).getTerm());
+		assertEquals( "Puppies", published.get(0).getLabel());
+		assertEquals(null, published.get(0).getScheme());
+		assertEquals( "Cat", published.get(1).getTerm());
+		assertEquals( "Kittens", published.get(1).getLabel());
+		assertEquals( "http://foo", published.get(1).getScheme());
+		assertEquals( "Cow", published.get(2).getTerm());
+		assertEquals( "Calves", published.get(2).getLabel());
+		assertEquals( "http://foo", published.get(2).getScheme());
 
 		secLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved);
 		sortCodings(secLabels);
@@ -2807,11 +2826,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		} catch (PreconditionFailedException e) {
 			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

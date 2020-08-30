@@ -1,14 +1,14 @@
 package ca.uhn.fhir.narrative;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.InputStreamReader;
 import java.util.Date;
 
 import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -41,7 +41,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorTest.class);
 	private DefaultThymeleafNarrativeGenerator gen;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		gen = new DefaultThymeleafNarrativeGenerator();
 		gen.setUseHapiServerConformanceNarrative(true);
@@ -241,7 +241,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 	}
 
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

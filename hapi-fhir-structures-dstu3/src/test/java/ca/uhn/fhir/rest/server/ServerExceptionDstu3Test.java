@@ -1,14 +1,17 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -27,29 +30,35 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerExceptionDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerExceptionDstu3Test.class);
-	public static BaseServerResponseException ourException;
+	public static Exception ourException;
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 	private static Server ourServer;
+	private static RestfulServer ourServlet;
+
+	@AfterEach
+	public void after() {
+		ourException = null;
+	}
 
 	@Test
 	public void testAddHeadersNotFound() throws Exception {
@@ -57,8 +66,8 @@ public class ServerExceptionDstu3Test {
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
 
-		ourException = new ResourceNotFoundException("SOME MESSAGE");
-		ourException.addResponseHeader("X-Foo", "BAR BAR");
+		ourException = new ResourceNotFoundException("SOME MESSAGE")
+			.addResponseHeader("X-Foo", "BAR BAR");
 
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
@@ -99,6 +108,65 @@ public class ServerExceptionDstu3Test {
 		}
 
 	}
+
+	@Test
+	public void testMethodThrowsNonHapiUncheckedExceptionHandledCleanly() throws Exception {
+
+		ourException = new NullPointerException("Hello");
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(500, status.getStatusLine().getStatusCode());
+			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
+			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
+			ourLog.info(status.getStatusLine().toString());
+			ourLog.info(responseContent);
+			assertThat(responseContent, containsString("\"diagnostics\":\"Failed to call access method: java.lang.NullPointerException: Hello\""));
+		}
+
+	}
+
+	@Test
+	public void testMethodThrowsNonHapiCheckedExceptionHandledCleanly() throws Exception {
+
+		ourException = new IOException("Hello");
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(500, status.getStatusLine().getStatusCode());
+			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
+			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
+			ourLog.info(status.getStatusLine().toString());
+			ourLog.info(responseContent);
+			assertThat(responseContent, containsString("\"diagnostics\":\"Failed to call access method: java.io.IOException: Hello\""));
+		}
+
+	}
+
+	@Test
+	public void testInterceptorThrowsNonHapiUncheckedExceptionHandledCleanly() throws Exception {
+
+		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, new IAnonymousInterceptor() {
+			@Override
+			public void invoke(Pointcut thePointcut, HookParams theArgs) {
+				throw new NullPointerException("Hello");
+			}
+		});
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(500, status.getStatusLine().getStatusCode());
+			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
+			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
+			ourLog.info(status.getStatusLine().toString());
+			ourLog.info(responseContent);
+			assertThat(responseContent, containsString("\"diagnostics\":\"Hello\""));
+		}
+
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
+
+	}
+
 
 	@Test
 	public void testPostWithNoBody() throws IOException {
@@ -144,7 +212,10 @@ public class ServerExceptionDstu3Test {
 		}
 
 		@Search()
-		public List<Patient> search() {
+		public List<Patient> search() throws Exception {
+			if (ourException == null) {
+				return Collections.emptyList();
+			}
 			throw ourException;
 		}
 
@@ -156,28 +227,28 @@ public class ServerExceptionDstu3Test {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
+		ourServlet.setResourceProviders(patientProvider);
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

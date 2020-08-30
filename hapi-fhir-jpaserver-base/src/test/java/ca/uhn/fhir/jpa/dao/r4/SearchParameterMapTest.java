@@ -1,16 +1,17 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.test.BaseTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParameterMapTest extends BaseTest {
 
-	private FhirContext myContext = FhirContext.forR4();
+	private FhirContext myContext = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Test
 	public void toNormalizedQueryStringTest() {

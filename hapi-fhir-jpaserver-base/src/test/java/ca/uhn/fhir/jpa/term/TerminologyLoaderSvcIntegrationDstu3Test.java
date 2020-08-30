@@ -2,10 +2,8 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -13,12 +11,12 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +28,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
@@ -45,12 +43,12 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Autowired
 	private ITermLoaderSvc myLoader;
 
-	@After
+	@AfterEach
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 	}
 
-	@Before
+	@BeforeEach
 	public void before() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(20000);
 	}
@@ -86,7 +84,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("10019-8", "10013-1", "10014-9", "10016-4", "17788-1", "10000-8", "10017-2", "10015-6", "10020-6", "10018-0"));
+		assertThat(codes, containsInAnyOrder("10013-1"));
 
 		// Search by display name
 		input = new ValueSet();
@@ -101,7 +99,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(codes, containsInAnyOrder("10019-8", "10013-1", "10014-9", "10016-4", "17788-1", "10000-8", "10017-2", "10015-6", "10020-6", "10018-0"));
+		assertThat(codes, containsInAnyOrder("10013-1"));
 
 		// Search by something that doesn't match
 		input = new ValueSet();
@@ -149,7 +147,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("10019-8", "10013-1", "10014-9", "10000-8", "10016-4", "10017-2", "10015-6", "10020-6", "10018-0"));
+		assertThat(codes, containsInAnyOrder("10013-1"));
 	}
 
 	@Test
@@ -188,7 +186,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("17788-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, null);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
@@ -196,8 +194,8 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
 		assertTrue(propertyValue.isPresent());
 		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
-		assertEquals("LP19258-0", propertyValue.get().getCode());
-		assertEquals("Large unstained cells/100 leukocytes", propertyValue.get().getDisplay());
+		assertEquals("LP31101-6", propertyValue.get().getCode());
+		assertEquals("R' wave amplitude.lead I", propertyValue.get().getDisplay());
 	}
 
 	@Test
@@ -228,11 +226,13 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
-		assertTrue(result.isResult());
-		assertEquals("Found code", result.getMessage());
+		assertTrue(result.isOk());
+		assertEquals("R' wave amplitude in lead I", result.getDisplay());
 	}
 
 	@Test
@@ -240,11 +240,13 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
-		assertFalse(result.isResult());
-		assertEquals("Code not found", result.getMessage());
+		assertFalse(result.isOk());
+		assertEquals("Unknown code {http://loinc.org}10013-1-9999999999 - Unable to expand ValueSet[http://loinc.org/vs]", result.getMessage());
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {
@@ -256,9 +258,5 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 			.collect(Collectors.toSet());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
 }

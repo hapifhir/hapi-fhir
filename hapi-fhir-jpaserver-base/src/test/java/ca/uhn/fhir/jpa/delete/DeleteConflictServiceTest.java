@@ -9,23 +9,23 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {DeleteConflictServiceTest.SpringConfig.class})
 public class DeleteConflictServiceTest {
 
@@ -47,15 +47,6 @@ public class DeleteConflictServiceTest {
 	@Autowired
 	private DeleteConflictService myDeleteConflictService;
 
-	static class SpringConfig {
-		@Bean
-		DeleteConflictService myDeleteConflictService() { return new DeleteConflictService(); }
-		@Bean
-		DaoConfig myDaoConfig() { return new DaoConfig(); }
-		@Bean
-		PartitionSettings partitionSettings() { return new PartitionSettings(); }
-	}
-
 	@Test
 	public void noInterceptorTwoConflictsDoesntRetry() {
 		ResourceTable entity = new ResourceTable();
@@ -68,5 +59,22 @@ public class DeleteConflictServiceTest {
 		when(myDeleteConflictFinderService.findConflicts(any(), anyInt())).thenReturn(list);
 		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null, new TransactionDetails());
 		assertEquals(0, retryCount);
+	}
+
+	static class SpringConfig {
+		@Bean
+		DeleteConflictService myDeleteConflictService() {
+			return new DeleteConflictService();
+		}
+
+		@Bean
+		DaoConfig myDaoConfig() {
+			return new DaoConfig();
+		}
+
+		@Bean
+		PartitionSettings partitionSettings() {
+			return new PartitionSettings();
+		}
 	}
 }

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
@@ -19,13 +20,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,19 +34,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestElasticsearchConfig.class})
 public class LastNElasticsearchSvcSingleObservationIT {
 
-	@Autowired
-	ElasticsearchSvcImpl elasticsearchSvc;
-
 	static ObjectMapper ourMapperNonPrettyPrint;
-
 	final String RESOURCEPID = "123";
 	final String SUBJECTID = "Patient/4567";
 	final Date EFFECTIVEDTM = new Date();
@@ -73,25 +70,16 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	final String THIRDCATEGORYSECONDCODINGDISPLAY = "test-alt-vitals display";
 	final String THIRDCATEGORYTHIRDCODINGCODE = "test-2nd-alt-vitals-panel";
 	final String THIRDCATEGORYTHIRDCODINGDISPLAY = "test-2nd-alt-vitals-panel display";
-
 //	final String OBSERVATIONSINGLECODEID = UUID.randomUUID().toString();
 	final String OBSERVATIONCODETEXT = "Test Codeable Concept Field for Code";
 	final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	final String CODEFIRSTCODINGCODE = "test-code";
 	final String CODEFIRSTCODINGDISPLAY = "test-code display";
+	final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	@Autowired
+	ElasticsearchSvcImpl elasticsearchSvc;
 
-	final FhirContext myFhirContext = FhirContext.forR4();
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourMapperNonPrettyPrint = new ObjectMapper();
-		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
-		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-
-	}
-
-	@After
+	@AfterEach
 	public void after() throws IOException {
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
@@ -121,32 +109,22 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(1, observationIdsOnly.size());
 		assertEquals(RESOURCEPID, observationIdsOnly.get(0));
 
-		ObservationJson observationJson = elasticsearchSvc.getObservationDocument(RESOURCEPID);
-		validateFullObservationSearch(observationJson);
-
 		// execute Observation search for all search fields
 		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
-		assertEquals(1, observations.size());
-		observationJson = observations.get(0);
-		validateFullObservationSearch(observationJson);
 
-		// delete Observation
-		elasticsearchSvc.deleteObservationDocument(RESOURCEPID);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		observationJson = elasticsearchSvc.getObservationDocument(RESOURCEPID);
-		assertNull(observationJson);
-
+		validateFullObservationSearch(observations);
 	}
 
-	private void validateFullObservationSearch(ObservationJson observation) throws IOException {
+	private void validateFullObservationSearch(List<ObservationJson> observations) throws IOException {
 
+		assertEquals(1, observations.size());
+		ObservationJson observation = observations.get(0);
 		assertEquals(RESOURCEPID, observation.getIdentifier());
 
 		assertEquals(SUBJECTID, observation.getSubject());
 		assertEquals(RESOURCEPID, observation.getIdentifier());
 		assertEquals(EFFECTIVEDTM, observation.getEffectiveDtm());
-//		assertEquals(OBSERVATIONSINGLECODEID, observation.getCode_concept_id());
-		assertEquals(ElasticsearchSvcImpl.INITIAL_OBSERVATION_CODE_ID, observation.getCode_concept_id());
+		assertEquals(OBSERVATIONSINGLECODEID, observation.getCode_concept_id());
 
 		List<String> category_concept_text_values = observation.getCategory_concept_text();
 		assertEquals(3, category_concept_text_values.size());
@@ -227,25 +205,25 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		String code_concept_text_values = observation.getCode_concept_text();
 		assertEquals(OBSERVATIONCODETEXT, code_concept_text_values);
 
-		List<String> code_coding_systems = observation.getCode_coding_system();
-		assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems.get(0));
+		String code_coding_systems = observation.getCode_coding_system();
+		assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems);
 
-		List<String> code_coding_codes = observation.getCode_coding_code();
-		assertEquals(CODEFIRSTCODINGCODE, code_coding_codes.get(0));
+		String code_coding_codes = observation.getCode_coding_code();
+		assertEquals(CODEFIRSTCODINGCODE, code_coding_codes);
 
-		List<String> code_coding_display = observation.getCode_coding_display();
-		assertEquals(CODEFIRSTCODINGDISPLAY, code_coding_display.get(0));
+		String code_coding_display = observation.getCode_coding_display();
+		assertEquals(CODEFIRSTCODINGDISPLAY, code_coding_display);
 
-		List<String> code_coding_code_system_hash = observation.getCode_coding_code_system_hash();
-		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash.get(0));
+		String code_coding_code_system_hash = observation.getCode_coding_code_system_hash();
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash);
 
 		// Retrieve all Observation codes
-/*		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
+		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
 		assertEquals(1, codes.size());
 		CodeJson persistedObservationCode = codes.get(0);
 
 		String persistedCodeConceptID = persistedObservationCode.getCodeableConceptId();
-		assertEquals(ElasticsearchSvcImpl.INITIAL_OBSERVATION_CODE_ID, persistedCodeConceptID);
+		assertEquals(OBSERVATIONSINGLECODEID, persistedCodeConceptID);
 		String persistedCodeConceptText = persistedObservationCode.getCodeableConceptText();
 		assertEquals(OBSERVATIONCODETEXT, persistedCodeConceptText);
 
@@ -264,7 +242,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		List<String> persistedCodeCodingCodeSystemHashes = persistedObservationCode.getCoding_code_system_hash();
 		assertEquals(1, persistedCodeCodingCodeSystemHashes.size());
 		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), persistedCodeCodingCodeSystemHashes.get(0));
-*/
+
 
 	}
 
@@ -314,6 +292,15 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+	}
+
+	@BeforeAll
+	public static void beforeClass() {
+		ourMapperNonPrettyPrint = new ObjectMapper();
+		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
+		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+
 	}
 
 }
