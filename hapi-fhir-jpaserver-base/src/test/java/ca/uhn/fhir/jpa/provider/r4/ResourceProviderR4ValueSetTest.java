@@ -1060,6 +1060,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
@@ -1093,6 +1094,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails, String theCodeSystemVersion) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		codeSystem.setVersion(theCodeSystemVersion);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
