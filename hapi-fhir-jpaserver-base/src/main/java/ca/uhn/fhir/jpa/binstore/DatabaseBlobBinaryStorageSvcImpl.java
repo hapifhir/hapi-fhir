@@ -60,8 +60,15 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	private DaoConfig myDaoConfig;
 
 	@Override
-	@Transactional(Transactional.TxType.SUPPORTS)
+	@Transactional(Transactional.TxType.REQUIRED)
 	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
+
+		/*
+		 * Note on transactionality: This method used to have a propagation value of SUPPORTS and then do the actual
+		 * write in a new transaction.. I don't actually get why that was the original design, but it causes
+		 * connection pool deadlocks under load!
+		 */
+
 		Date publishedDate = new Date();
 
 		HashingInputStream hashingInputStream = createHashingInputStream(theInputStream);
@@ -87,22 +94,13 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		entity.setBlob(dataBlob);
 
 		// Save the entity
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		txTemplate.execute(t -> {
-			myEntityManager.persist(entity);
-			return null;
-		});
+		myEntityManager.persist(entity);
 
 		// Update the entity with the final byte count and hash
 		long bytes = countingInputStream.getCount();
 		String hash = hashingInputStream.hash().toString();
-		txTemplate.execute(t -> {
-			myBinaryStorageEntityDao.setSize(id, (int) bytes);
-			myBinaryStorageEntityDao.setHash(id, hash);
-			return null;
-		});
+		myBinaryStorageEntityDao.setSize(id, (int) bytes);
+		myBinaryStorageEntityDao.setHash(id, hash);
 
 		return new StoredDetails()
 			.setBlobId(id)
