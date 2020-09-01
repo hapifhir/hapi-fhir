@@ -84,23 +84,18 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		Session session = (Session) myEntityManager.getDelegate();
 		LobHelper lobHelper = session.getLobHelper();
-		Blob dataBlob;
-		if (myDaoConfig.isPreloadBlobFromInputStream()) {
-			byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
-			dataBlob = lobHelper.createBlob(loadedStream);
-		}  else {
-			dataBlob = lobHelper.createBlob(countingInputStream, 0);
-		}
+		byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
+		Blob dataBlob = lobHelper.createBlob(loadedStream);
 		entity.setBlob(dataBlob);
-
-		// Save the entity
-		myEntityManager.persist(entity);
 
 		// Update the entity with the final byte count and hash
 		long bytes = countingInputStream.getCount();
 		String hash = hashingInputStream.hash().toString();
-		myBinaryStorageEntityDao.setSize(id, (int) bytes);
-		myBinaryStorageEntityDao.setHash(id, hash);
+		entity.setSize((int) bytes);
+		entity.setHash(hash);
+
+		// Save the entity
+		myEntityManager.persist(entity);
 
 		return new StoredDetails()
 			.setBlobId(id)

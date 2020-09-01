@@ -89,4 +89,12 @@ public class BinaryStorageEntity {
 	public String getBlobId() {
 		return myBlobId;
 	}
+
+	public void setSize(int theSize) {
+		mySize = theSize;
+	}
+
+	public void setHash(String theHash) {
+		myHash = theHash;
+	}
 }
