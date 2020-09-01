@@ -668,7 +668,7 @@ public class SearchParameterMap implements Serializable {
 		return mySearchParameterMap.get(theName);
 	}
 
-	private void put(String theName, List<List<IQueryParameterType>> theParams) {
+	public void put(String theName, List<List<IQueryParameterType>> theParams) {
 		mySearchParameterMap.put(theName, theParams);
 	}
 
@@ -698,13 +698,13 @@ public class SearchParameterMap implements Serializable {
 
 	public static SearchParameterMap newSynchronous() {
 		SearchParameterMap retVal = new SearchParameterMap();
-		retVal.setLoadSynchronousUpTo(10);
+		retVal.setLoadSynchronous(true);
 		return retVal;
 	}
 
 	public static SearchParameterMap newSynchronous(String theName, IQueryParameterType theParam) {
 		SearchParameterMap retVal = new SearchParameterMap();
-		retVal.setLoadSynchronousUpTo(10);
+		retVal.setLoadSynchronous(true);
 		retVal.add(theName, theParam);
 		return retVal;
 	}

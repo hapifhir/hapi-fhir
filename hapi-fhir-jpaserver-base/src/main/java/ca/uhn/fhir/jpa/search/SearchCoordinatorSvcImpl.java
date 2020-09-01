@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -473,9 +474,22 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
 
 			Long count = 0L;
-			if (wantCount) {
+			// TODO not sure if this is good idea or not? synchronous is mostly used on internal operations, maybe count is not needed
+			//  but code has to be fixed. Most operations are looking for one resource. Those that are fetching larger could be  fixed to
+			//  handle size nullability and pages correctly.
+			if (wantCount || theParams.isLoadSynchronous()) {
 				ourLog.trace("Performing count");
+				// TODO FulltextSearchSvcImpl will remove necessary parameters from the "theParams", this will cause actual query after count to
+				//  return wrong response. This is some dirty fix to avoid that issue. Params should not be mutated?
+				//  Maybe instead of removing them we could skip them in db query builder if full text search was used?
+				List<List<IQueryParameterType>> contentAndTerms = theParams.get(Constants.PARAM_CONTENT);
+				List<List<IQueryParameterType>> textAndTerms = theParams.get(Constants.PARAM_TEXT);
+
 				Iterator<Long> countIterator = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, requestPartitionId);
+
+				if (contentAndTerms != null) theParams.put(Constants.PARAM_CONTENT, contentAndTerms);
+				if (textAndTerms != null) theParams.put(Constants.PARAM_TEXT, textAndTerms);
+
 				count = countIterator.next();
 				ourLog.trace("Got count {}", count);
 			}
@@ -517,7 +531,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * For synchronous queries, we load all the includes right away
 			 * since we're returning a static bundle with all the results
-			 * pre-loaded. This is ok because syncronous requests are not
+			 * pre-loaded. This is ok because synchronous requests are not
 			 * expected to be paged
 			 *
 			 * On the other hand for async queries we load includes/revincludes
@@ -536,7 +550,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
 
-			if (wantCount) {
+			if (wantCount || theParams.isLoadSynchronous()) {
 				bundleProvider.setSize(count.intValue());
 			} else {
 				if (theLoadSynchronousUpTo != null) {

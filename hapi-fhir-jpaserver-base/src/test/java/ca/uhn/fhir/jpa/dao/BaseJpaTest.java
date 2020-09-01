@@ -374,7 +374,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theProvider.getResources(0, size);
+		List<IBaseResource> resources = theProvider instanceof PersistedJpaBundleProvider ?
+			theProvider.getResources(0, size) :
+			theProvider.getResources(0, Integer.MAX_VALUE);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}

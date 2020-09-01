@@ -53,6 +53,8 @@ public interface IQuery<Y> extends IBaseQuery<IQuery<Y>>, IClientExecutable<IQue
 	 * Specifies the <code>_offset</code> parameter, which indicates to the server the offset of the query. Use
 	 * with {@link #count(int)}.
 	 *
+	 * This parameter is not part of the FHIR standard, all servers might not implement it.
+	 *
 	 * @since 5.2
 	 */
 	IQuery<Y> offset(int theOffset);
