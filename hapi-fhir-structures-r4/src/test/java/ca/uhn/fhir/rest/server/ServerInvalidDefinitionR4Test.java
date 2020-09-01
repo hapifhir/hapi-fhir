@@ -1,15 +1,20 @@
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Lists;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -19,21 +24,19 @@ import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletException;
 
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ServerInvalidDefinitionR4Test {
-
-	private static FhirContext ourCtx = FhirContext.forR4();
+public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 
 	@Test
-	public void testWrongConditionalUrlType() {
-		RestfulServer srv = new RestfulServer(ourCtx);
-		srv.setFhirContext(ourCtx);
-		srv.setResourceProviders(new UpdateWithWrongConditionalUrlType());
-
+	public void testWrongConditionalUrlType() throws Exception {
 		try {
-			srv.init();
+			startServer(new UpdateWithWrongConditionalUrlType());
 			fail();
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
@@ -43,13 +46,9 @@ public class ServerInvalidDefinitionR4Test {
 	}
 
 	@Test
-	public void testWrongResourceType() {
-		RestfulServer srv = new RestfulServer(ourCtx);
-		srv.setFhirContext(ourCtx);
-		srv.setResourceProviders(new UpdateWithWrongResourceType());
-
+	public void testWrongResourceType() throws Exception {
 		try {
-			srv.init();
+			startServer(new UpdateWithWrongResourceType());
 			fail();
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
@@ -59,13 +58,9 @@ public class ServerInvalidDefinitionR4Test {
 	}
 
 	@Test
-	public void testWrongValidateModeType() {
-		RestfulServer srv = new RestfulServer(ourCtx);
-		srv.setFhirContext(ourCtx);
-		srv.setResourceProviders(new ValidateWithWrongModeType());
-
+	public void testWrongValidateModeType() throws Exception {
 		try {
-			srv.init();
+			startServer(new ValidateWithWrongModeType());
 			fail();
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
@@ -74,13 +69,9 @@ public class ServerInvalidDefinitionR4Test {
 	}
 
 	@Test
-	public void testWrongValidateProfileType() {
-		RestfulServer srv = new RestfulServer(ourCtx);
-		srv.setFhirContext(ourCtx);
-		srv.setResourceProviders(new ValidateWithWrongProfileType());
-
+	public void testWrongValidateProfileType() throws Exception {
 		try {
-			srv.init();
+			startServer(new ValidateWithWrongProfileType());
 			fail();
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
@@ -89,7 +80,7 @@ public class ServerInvalidDefinitionR4Test {
 	}
 
 	@Test
-	public void testWrongParameterAnnotationOnOperation() {
+	public void testWrongParameterAnnotationOnOperation() throws Exception {
 		class MyProvider {
 
 			@Operation(name = "foo")
@@ -99,17 +90,41 @@ public class ServerInvalidDefinitionR4Test {
 
 		}
 
-		RestfulServer srv = new RestfulServer(ourCtx);
-		srv.setFhirContext(ourCtx);
-		srv.registerProvider(new MyProvider());
-
 		try {
-			srv.init();
+			startServer(new MyProvider());
 			fail();
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("Failure scanning class MyProvider: Illegal method parameter annotation @OptionalParam on method: public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$1MyProvider.update(org.hl7.fhir.r4.model.StringType)"));
 		}
 	}
+
+	/**
+	 * @OperationParam on a search method
+	 * <p>
+	 * See #2063
+	 */
+	@Test
+	public void testOperationParamOnASearchMethod() throws Exception {
+
+		class MyProvider extends ServerMethodSelectionR4Test.MyBaseProvider {
+			@Search
+			public List<IBaseResource> search(
+				@OptionalParam(name = "name") StringType theName,
+				@OperationParam(name = "name2") StringType theName2
+			) {
+				return Lists.newArrayList(new Patient().setActive(true).setId("Patient/123"));
+			}
+		}
+		MyProvider provider = new MyProvider();
+
+		try {
+			startServer(provider);
+			fail();
+		} catch (ServletException e) {
+			assertEquals("Failure scanning class MyProvider: @OperationParam detected on method that is not annotated with @Operation: public java.util.List<org.hl7.fhir.instance.model.api.IBaseResource> ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$2MyProvider.search(org.hl7.fhir.r4.model.StringType,org.hl7.fhir.r4.model.StringType)", e.getCause().getMessage());
+		}
+	}
+
 
 	public static class UpdateWithWrongConditionalUrlType implements IResourceProvider {
 
