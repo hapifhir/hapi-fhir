@@ -1138,7 +1138,9 @@ public class SearchBuilder implements ISearchBuilder {
 				// If we don't have a query yet, create one
 				if (myResultsIterator == null) {
 					if (myMaxResultsToFetch == null) {
-						if (!isPagingProviderDatabaseBacked() || myOffset != null) {
+						if (myParams.getLoadSynchronousUpTo() != null) {
+							myMaxResultsToFetch = myParams.getLoadSynchronousUpTo();
+						} else if (myParams.getCount() != null) {
 							myMaxResultsToFetch = myParams.getCount();
 						} else {
 							myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();

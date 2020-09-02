@@ -474,10 +474,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
 
 			Long count = 0L;
-			// TODO not sure if this is good idea or not? synchronous is mostly used on internal operations, maybe count is not needed
-			//  but code has to be fixed. Most operations are looking for one resource. Those that are fetching larger could be  fixed to
-			//  handle size nullability and pages correctly.
-			if (wantCount || theParams.isLoadSynchronous()) {
+			if (wantCount) {
 				ourLog.trace("Performing count");
 				// TODO FulltextSearchSvcImpl will remove necessary parameters from the "theParams", this will cause actual query after count to
 				//  return wrong response. This is some dirty fix to avoid that issue. Params should not be mutated?
@@ -550,20 +547,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
 
-			if (wantCount || theParams.isLoadSynchronous()) {
+			if (wantCount) {
 				bundleProvider.setSize(count.intValue());
 			} else {
-				if (theLoadSynchronousUpTo != null) {
-					if (theParams.getOffset() != null && theLoadSynchronousUpTo > pids.size()) {
-						bundleProvider.setSize(theParams.getOffset() + pids.size());
-					} else {
-						bundleProvider.setSize(null);
-					}
-				} else if (theParams.getOffset() != null && 
-					theParams.getCount() != null && theParams.getCount() > pids.size()) {
-					bundleProvider.setSize(theParams.getOffset() + pids.size());
-				} else if (theParams.getCount() != null && theParams.getCount() > pids.size()) {
-					bundleProvider.setSize(pids.size());
+				Integer queryCount = getQueryCount(theLoadSynchronousUpTo, theParams);
+				if (queryCount == null || queryCount > pids.size()) {
+					// No limit, last page or everything was fetched within the limit
+					bundleProvider.setSize(getTotalCount(queryCount, theParams.getOffset(), pids.size()));
 				} else {
 					bundleProvider.setSize(null);
 				}
@@ -571,6 +561,29 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			return bundleProvider;
 		});
+	}
+
+	private int getTotalCount(Integer queryCount, Integer offset, int queryResultCount) {
+		if (queryCount != null) {
+			if (offset != null) {
+				return offset + queryResultCount;
+			} else {
+				return queryResultCount;
+			}
+		} else {
+			return queryResultCount;
+		}
+	}
+
+	private Integer getQueryCount(Integer theLoadSynchronousUpTo, SearchParameterMap theParams) {
+		if (theLoadSynchronousUpTo != null) {
+			return theLoadSynchronousUpTo;
+		} else if (theParams.getCount() != null) {
+			return theParams.getCount();
+		} else if (myDaoConfig.getFetchSizeDefaultMaximum() != null) {
+			return myDaoConfig.getFetchSizeDefaultMaximum();
+		}
+		return null;
 	}
 
 	@org.jetbrains.annotations.Nullable
