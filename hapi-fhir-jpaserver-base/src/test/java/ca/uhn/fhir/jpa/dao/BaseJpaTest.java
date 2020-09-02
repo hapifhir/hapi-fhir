@@ -207,6 +207,8 @@ public abstract class BaseJpaTest extends BaseTest {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(myRequestOperationCallback);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+		when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
+		when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
 	}
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
