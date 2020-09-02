@@ -32,6 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface IFhirResourceDaoComposition<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails);
+	IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails);
 
 }

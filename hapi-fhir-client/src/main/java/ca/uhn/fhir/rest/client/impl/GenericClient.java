@@ -1877,7 +1877,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IQuery offset(int theOffset) {
-			if (theOffset > 0) {
+			if (theOffset >= 0) {
 				myParamOffset = theOffset;
 			} else {
 				myParamOffset = null;

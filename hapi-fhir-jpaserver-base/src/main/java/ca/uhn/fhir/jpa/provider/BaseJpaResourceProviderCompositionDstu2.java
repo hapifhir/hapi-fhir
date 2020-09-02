@@ -41,7 +41,7 @@ public class BaseJpaResourceProviderCompositionDstu2 extends JpaResourceProvider
 
 		startRequest(theServletRequest);
 		try {
-			((IFhirResourceDaoComposition<Composition>)getDao()).getDocumentForComposition(theServletRequest, null, null, null, null, null);
+			((IFhirResourceDaoComposition<Composition>)getDao()).getDocumentForComposition(theServletRequest, null, null, null, null, null, null);
 			return null;
 		} finally {
 			endRequest(theServletRequest);

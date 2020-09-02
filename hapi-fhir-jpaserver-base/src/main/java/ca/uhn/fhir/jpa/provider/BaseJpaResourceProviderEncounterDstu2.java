@@ -51,6 +51,10 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 			@OperationParam(name = Constants.PARAM_COUNT)
 			ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
 
+			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+			@OperationParam(name = Constants.PARAM_OFFSET)
+			ca.uhn.fhir.model.primitive.UnsignedIntDt theOffset,
+
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1)
 			DateRangeParam theLastUpdated,
@@ -61,7 +65,7 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoEncounter<Encounter>)getDao()).encounterInstanceEverything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec);
+			return ((IFhirResourceDaoEncounter<Encounter>)getDao()).encounterInstanceEverything(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}}
@@ -78,6 +82,10 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 				@OperationParam(name = Constants.PARAM_COUNT)
 				ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
 
+				@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+				@OperationParam(name = Constants.PARAM_OFFSET)
+				ca.uhn.fhir.model.primitive.UnsignedIntDt theOffset,
+
 				@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 				@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1)
 				DateRangeParam theLastUpdated,
@@ -88,7 +96,7 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 
 			startRequest(theServletRequest);
 			try {
-				return ((IFhirResourceDaoEncounter<Encounter>)getDao()).encounterTypeEverything(theServletRequest, theCount, theLastUpdated, theSortSpec);
+				return ((IFhirResourceDaoEncounter<Encounter>)getDao()).encounterTypeEverything(theServletRequest, theCount, theOffset,theLastUpdated, theSortSpec);
 			} finally {
 				endRequest(theServletRequest);
 			}
