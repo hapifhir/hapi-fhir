@@ -60,11 +60,11 @@ public abstract class BaseTask {
 		mySchemaVersion = theSchemaVersion;
 	}
 
-	public String getMyProductVersion() {
+	public String getProductVersion() {
 		return myProductVersion;
 	}
 
-	public String getMySchemaVersion() {
+	public String getSchemaVersion() {
 		return mySchemaVersion;
 	}
 
