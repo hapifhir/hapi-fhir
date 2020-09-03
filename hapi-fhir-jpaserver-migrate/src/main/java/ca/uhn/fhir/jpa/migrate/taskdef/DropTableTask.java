@@ -63,7 +63,7 @@ public class DropTableTask extends BaseTableTask {
 			}
 		}
 
-		DropIndexTask theIndexTask = new DropIndexTask(getMyProductVersion(), getMySchemaVersion());
+		DropIndexTask theIndexTask = new DropIndexTask(getProductVersion(), getSchemaVersion());
 		theIndexTask
 			.setTableName(getTableName())
 			.setConnectionProperties(getConnectionProperties())
