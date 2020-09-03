@@ -101,7 +101,7 @@ public class MatchUrlService {
 				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (Constants.PARAM_COUNT.equals(nextParamName)) {
-				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
+				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
 					try {
 						paramMap.setCount(Integer.parseInt(intString));
@@ -110,7 +110,7 @@ public class MatchUrlService {
 					}
 				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
-				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
+				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
 					try {
 						paramMap.setOffset(Integer.parseInt(intString));
