@@ -60,6 +60,14 @@ public abstract class BaseTask {
 		mySchemaVersion = theSchemaVersion;
 	}
 
+	public String getProductVersion() {
+		return myProductVersion;
+	}
+
+	public String getSchemaVersion() {
+		return mySchemaVersion;
+	}
+
 	public boolean isNoColumnShrink() {
 		return myNoColumnShrink;
 	}
@@ -137,16 +145,18 @@ public abstract class BaseTask {
 		return myConnectionProperties;
 	}
 
-	public void setConnectionProperties(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
+	public BaseTask setConnectionProperties(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 		myConnectionProperties = theConnectionProperties;
+		return this;
 	}
 
 	public DriverTypeEnum getDriverType() {
 		return myDriverType;
 	}
 
-	public void setDriverType(DriverTypeEnum theDriverType) {
+	public BaseTask setDriverType(DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
+		return this;
 	}
 
 	public abstract void validate();
