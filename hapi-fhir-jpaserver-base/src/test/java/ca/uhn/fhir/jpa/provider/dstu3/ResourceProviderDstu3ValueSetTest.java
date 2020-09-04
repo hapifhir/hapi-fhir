@@ -823,7 +823,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		codeSystem.setName("ACME Codes");
-		codeSystem.setVersion("1.2.3.4");
+		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
 		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);

@@ -136,10 +136,10 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 		// Attempt to delete second version
 		myCodeSystemDao.delete(id_second, mySrd);
 
-		// Only the resource will be deleted initially
+		// Only the resource will be deleted initially, but the URL for the TermCodeSystem will be cleared and not searchable.
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
+			assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
 			assertEquals(1, myTermCodeSystemVersionDao.count());
 			assertEquals(222,  myTermConceptDao.count());
 			List<ResourceTable> resourceList = myResourceTableDao.findAll();

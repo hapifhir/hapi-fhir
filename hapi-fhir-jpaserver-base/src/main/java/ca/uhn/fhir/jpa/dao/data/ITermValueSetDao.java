@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +39,8 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url")
 	Optional<TermValueSet> findByUrl(@Param("url") String theUrl);
 
-	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status")
-	Slice<TermValueSet> findByExpansionStatus(Pageable pageable, @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myCurrentVersion.myId = :vsv_pid")
+	Optional<TermValueSet> findWithCodeSystemVersionAsCurrentVersion(@Param("vsv_pid") Long theValueSetVersionPid);
+
 
 }

@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
@@ -117,6 +118,10 @@ public class ExpungeEverythingService {
 			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 			return null;
 		});
+		myTxTemplate.execute(t -> {
+			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermValueSet.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
+			return null;
+		});
 		counter.addAndGet(expungeEverythingByType(NpmPackageVersionResourceEntity.class));
 		counter.addAndGet(expungeEverythingByType(NpmPackageVersionEntity.class));
 		counter.addAndGet(expungeEverythingByType(NpmPackageEntity.class));
@@ -135,6 +140,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(SearchInclude.class));
 		counter.addAndGet(expungeEverythingByType(TermValueSetConceptDesignation.class));
 		counter.addAndGet(expungeEverythingByType(TermValueSetConcept.class));
+		counter.addAndGet(expungeEverythingByType(TermValueSetVersion.class));
 		counter.addAndGet(expungeEverythingByType(TermValueSet.class));
 		counter.addAndGet(expungeEverythingByType(TermConceptParentChildLink.class));
 		counter.addAndGet(expungeEverythingByType(TermConceptMapGroupElementTarget.class));

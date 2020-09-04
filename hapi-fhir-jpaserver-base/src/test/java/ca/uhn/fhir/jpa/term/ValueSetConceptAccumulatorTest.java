@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetVersionDao;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,9 +25,9 @@ import static org.mockito.Mockito.when;
 public class ValueSetConceptAccumulatorTest {
 
 	private ValueSetConceptAccumulator myAccumulator;
-	private TermValueSet myValueSet;
+	private TermValueSetVersion myValueSetVersion;
 	@Mock
-	private ITermValueSetDao myValueSetDao;
+	private ITermValueSetVersionDao myValueSetVersionDao;
 	@Mock
 	private ITermValueSetConceptDesignationDao myValueSetDesignationDao;
 	@Mock
@@ -35,8 +35,8 @@ public class ValueSetConceptAccumulatorTest {
 
 	@BeforeEach
 	public void before() {
-		myValueSet = new TermValueSet();
-		myAccumulator = new ValueSetConceptAccumulator(myValueSet, myValueSetDao, myValueSetConceptDao, myValueSetDesignationDao);
+		myValueSetVersion = new TermValueSetVersion();
+		myAccumulator = new ValueSetConceptAccumulator(myValueSetVersion, myValueSetVersionDao, null, myValueSetConceptDao, myValueSetDesignationDao);
 	}
 
 	@Test

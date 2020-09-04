@@ -23,54 +23,56 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
 
-import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_VALUESET", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VALUESET_URL", columnNames = {"URL"})
+@Table(name = "TRM_VALUESET_VER", uniqueConstraints = {
+	@UniqueConstraint(name = "IDX_VALUESET_URL_AND_VER", columnNames = {"VALUESET_PID", "VS_VERSION_ID"})
 })
 @Entity()
-public class TermValueSet implements Serializable {
+public class TermValueSetVersion implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
-	public static final int MAX_URL_LENGTH = 200;
-
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CURRENT_VERSION_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_TRMVALUESET_CURVER"))
-	private TermValueSetVersion myCurrentVersion;
-	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = false, updatable = false)
-	private Long myCurrentVersionPid;
+	public static final int MAX_VERSION_LENGTH = 200;
 
 	@Id()
-	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_PID")
+	@SequenceGenerator(name = "SEQ_VALUESETVER_PID", sequenceName = "SEQ_VALUESETVER_PID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESETVER_PID")
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "URL", nullable = false, length = MAX_URL_LENGTH)
-	private String myUrl;
-
 	@OneToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_TRMVALUESETVER_RES"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
-
-	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
-	private String myName;
 
 	@OneToMany(mappedBy = "myValueSet", fetch = FetchType.LAZY)
 	private List<TermValueSetConcept> myConcepts;
@@ -87,10 +89,25 @@ public class TermValueSet implements Serializable {
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
 	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
 
-	@Transient
-	private transient Integer myHashCode;
+	@Column(name = "VS_VERSION_ID", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
+	private String myValueSetVersionId;
 
-	public TermValueSet() {
+	/**
+	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
+	 * issued. It should be made non-nullable at some point.
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_VALSETVER_VS_ID"))
+	private TermValueSet myValueSet;
+
+	@Column(name = "VALUESET_PID", insertable = false, updatable = false)
+	private Long myValueSetPid;
+
+	@SuppressWarnings("unused")
+	@OneToOne(mappedBy = "myCurrentVersion", optional = true, fetch = FetchType.LAZY)
+	private TermValueSet myValueSetHavingThisVersionAsCurrentVersionIfAny;
+
+	public TermValueSetVersion() {
 		super();
 		myExpansionStatus = TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
 		myTotalConcepts = 0L;
@@ -101,42 +118,12 @@ public class TermValueSet implements Serializable {
 		return myId;
 	}
 
-	public String getUrl() {
-		return myUrl;
-	}
-
-	public TermValueSet setUrl(@Nonnull String theUrl) {
-		ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUrl, MAX_URL_LENGTH,
-			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
-		myUrl = theUrl;
-		return this;
-	}
-
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
-	public TermValueSet setResource(ResourceTable theResource) {
+	public TermValueSetVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
-		return this;
-	}
-
-	public String getName() {
-		return myName;
-	}
-
-	public TermValueSet setName(String theName) {
-		myName = left(theName, MAX_NAME_LENGTH);
-		return this;
-	}
-
-	public TermValueSetVersion getCurrentVersion() {
-		return myCurrentVersion;
-	}
-
-	public TermValueSet setCurrentVersion(TermValueSetVersion theCurrentVersion) {
-		myCurrentVersion = theCurrentVersion;
 		return this;
 	}
 
@@ -152,19 +139,19 @@ public class TermValueSet implements Serializable {
 		return myTotalConcepts;
 	}
 
-	public TermValueSet setTotalConcepts(Long theTotalConcepts) {
+	public TermValueSetVersion setTotalConcepts(Long theTotalConcepts) {
 		myTotalConcepts = theTotalConcepts;
 		return this;
 	}
 
-	public TermValueSet decrementTotalConcepts() {
+	public TermValueSetVersion decrementTotalConcepts() {
 		if (myTotalConcepts > 0) {
 			myTotalConcepts--;
 		}
 		return this;
 	}
 
-	public TermValueSet incrementTotalConcepts() {
+	public TermValueSetVersion incrementTotalConcepts() {
 		myTotalConcepts++;
 		return this;
 	}
@@ -173,19 +160,19 @@ public class TermValueSet implements Serializable {
 		return myTotalConceptDesignations;
 	}
 
-	public TermValueSet setTotalConceptDesignations(Long theTotalConceptDesignations) {
+	public TermValueSetVersion setTotalConceptDesignations(Long theTotalConceptDesignations) {
 		myTotalConceptDesignations = theTotalConceptDesignations;
 		return this;
 	}
 
-	public TermValueSet decrementTotalConceptDesignations() {
+	public TermValueSetVersion decrementTotalConceptDesignations() {
 		if (myTotalConceptDesignations > 0) {
 			myTotalConceptDesignations--;
 		}
 		return this;
 	}
 
-	public TermValueSet incrementTotalConceptDesignations() {
+	public TermValueSetVersion incrementTotalConceptDesignations() {
 		myTotalConceptDesignations++;
 		return this;
 	}
@@ -198,35 +185,61 @@ public class TermValueSet implements Serializable {
 		myExpansionStatus = theExpansionStatus;
 	}
 
+	public String getValueSetVersionId() {
+		return myValueSetVersionId;
+	}
+
+	public TermValueSetVersion setValueSetVersionId(String theValueSetVersionId) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+			theValueSetVersionId, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theValueSetVersionId));
+		myValueSetVersionId = theValueSetVersionId;
+		return this;
+	}
+
+	public TermValueSet getValueSet() {
+		return myValueSet;
+	}
+
+	public TermValueSetVersion setValueSet(TermValueSet theValueSet) {
+		myValueSet = theValueSet;
+		return this;
+	}
+
+	public Long getValueSetPid() {
+		return myValueSetPid;
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 
-		if (!(theO instanceof TermValueSet)) return false;
+		if (!(theO instanceof TermValueSetVersion)) return false;
 
-		TermValueSet that = (TermValueSet) theO;
+		TermValueSetVersion that = (TermValueSetVersion) theO;
 
 		return new EqualsBuilder()
-			.append(getUrl(), that.getUrl())
+			.append(myValueSetVersionId, that.myValueSetVersionId)
+			.append(myValueSetPid, that.myValueSetPid)
 			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		if (myHashCode == null) {
-			myHashCode = getUrl().hashCode();
-		}
-		return myHashCode;
+		HashCodeBuilder b = new HashCodeBuilder(17, 37);
+		b.append(myValueSetVersionId);
+		b.append(myValueSetPid);
+		return b.toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
-			.append("myUrl", myUrl)
 			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
 			.append("myResourcePid", myResourcePid)
-			.append("myName", myName)
+			.append("valueSetPid", myValueSetPid)
+			.append("valueSetVersionId", myValueSetVersionId)
 			.append(myConcepts != null ? ("myConcepts - size=" + myConcepts.size()) : ("myConcepts=(null)"))
 			.append("myTotalConcepts", myTotalConcepts)
 			.append("myTotalConceptDesignations", myTotalConceptDesignations)

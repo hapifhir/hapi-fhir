@@ -113,6 +113,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "ValueSet contains a concept with no system value");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "ValueSet contains a concept with no code value");
 
+		myTermValueSetVersion = myValueSetVersionDao.findById(myTermValueSetVersion.getId()).get();
 		TermValueSetConcept concept = new TermValueSetConcept();
 		concept.setValueSet(myTermValueSet);
 		concept.setOrder(myConceptsSaved);

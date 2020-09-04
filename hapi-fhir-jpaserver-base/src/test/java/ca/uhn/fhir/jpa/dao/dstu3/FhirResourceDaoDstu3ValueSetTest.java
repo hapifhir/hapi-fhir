@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -58,7 +59,9 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
 		runInTransaction(() -> {
 			TermValueSet vsEntity = myTermValueSetDao.findByUrl("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000").orElseThrow(() -> new IllegalStateException());
-			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsEntity.getExpansionStatus());
+			Long valueSetId = vsEntity.getId();
+			TermValueSetVersion vsvEntity = myTermValueSetVersionDao.findByValueSetPid(valueSetId).get(0);
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsvEntity.getExpansionStatus());
 		});
 
 		IValidationSupport.CodeValidationResult validationOutcome;
@@ -80,7 +83,8 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
 		runInTransaction(() -> {
 			TermValueSet vsEntity = myTermValueSetDao.findByUrl("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000").orElseThrow(() -> new IllegalStateException());
-			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vsEntity.getExpansionStatus());
+			TermValueSetVersion vsvEntity = myTermValueSetVersionDao.findByValueSetPid(vsEntity.getId()).get(0);
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vsvEntity.getExpansionStatus());
 		});
 
 		// Validate good

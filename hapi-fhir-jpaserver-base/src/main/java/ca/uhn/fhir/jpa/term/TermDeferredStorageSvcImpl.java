@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -119,8 +120,15 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Override
 	@Transactional
-	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
-		myDefferedCodeSystemVersionsDeletions.add(theCodeSystemVersion);
+	public void deleteCodeSystemForResource(ResourceTable theCodeSystemToDelete) {
+		TermCodeSystemVersion codeSystemVersionToDelete = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getResourceId());
+		if (codeSystemVersionToDelete != null) {
+			myDefferedCodeSystemVersionsDeletions.add(codeSystemVersionToDelete);
+		}
+		TermCodeSystem codeSystemToDelete = myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getResourceId());
+		if (codeSystemToDelete != null) {
+			deleteCodeSystem(codeSystemToDelete);
+		}
 	}
 
 	@Override
