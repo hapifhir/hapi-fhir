@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetVersionDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -62,6 +63,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptView;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -204,6 +206,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
 	protected ITermValueSetDao myValueSetDao;
+	@Autowired
+	protected ITermValueSetVersionDao myValueSetVersionDao;
 	@Autowired
 	protected ITermValueSetConceptDao myValueSetConceptDao;
 	@Autowired
@@ -425,10 +429,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
+		TermValueSetVersion termValueSetVersion;
+		String valueSetVersion = theValueSetToExpand.getVersion();
+		if (valueSetVersion != null) {
+			termValueSetVersion = myValueSetVersionDao.findByValueSetPidAndVersion(termValueSet.getId(),theValueSetToExpand.getVersion());
+		} else {
+			termValueSetVersion = myValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
+		}
 
-		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
+		if (termValueSetVersion.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
 			ourLog.warn("{} is present in terminology tables but not ready for persistence-backed invocation of operation $expand. Will perform in-memory expansion without parameters. Current status: {} | {}",
-				getValueSetInfo(theValueSetToExpand), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
+				getValueSetInfo(theValueSetToExpand), termValueSetVersion.getExpansionStatus().name(), termValueSetVersion.getExpansionStatus().getDescription());
 			return expandValueSetInMemory(theExpansionOptions, theValueSetToExpand, null); // In-memory expansion.
 		}
 
@@ -439,7 +450,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		ValueSetExpansionOptions expansionOptions = provideExpansionOptions(theExpansionOptions);
 		int offset = expansionOptions.getOffset();
 		int count = expansionOptions.getCount();
-		populateExpansionComponent(expansionComponent, termValueSet, offset, count);
+		populateExpansionComponent(expansionComponent, termValueSetVersion, offset, count, termValueSet.getUrl());
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -448,8 +459,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return valueSet;
 	}
 
-	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
-		int total = theTermValueSet.getTotalConcepts().intValue();
+	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSetVersion theTermValueSetVersion, int theOffset, int theCount, String theValueSetUrl) {
+		int total = theTermValueSetVersion.getTotalConcepts().intValue();
 		theExpansionComponent.setTotal(total);
 		theExpansionComponent.setOffset(theOffset);
 		theExpansionComponent.addParameter().setName("offset").setValue(new IntegerType(theOffset));
@@ -459,17 +470,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return;
 		}
 
-		expandConcepts(theExpansionComponent, theTermValueSet, theOffset, theCount);
+		expandConcepts(theExpansionComponent, theTermValueSetVersion, theOffset, theCount, theValueSetUrl);
 	}
 
-	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
+	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSetVersion theTermValueSetVersion, int theOffset, int theCount, String theValueSetUrl) {
 		int conceptsExpanded = 0;
 		int designationsExpanded = 0;
 		int toIndex = theOffset + theCount;
-		Collection<TermValueSetConceptView> conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theOffset, toIndex, theTermValueSet.getId());
+		Collection<TermValueSetConceptView> conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theOffset, toIndex, theTermValueSetVersion.getId());
 
 		if (conceptViews.isEmpty()) {
-			logConceptsExpanded("No concepts to expand. ", theTermValueSet, conceptsExpanded);
+			logConceptsExpanded("No concepts to expand. ", theValueSetUrl, conceptsExpanded);
 			return;
 		}
 
@@ -500,28 +511,28 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				designationComponent.setValue(conceptView.getDesignationVal());
 
 				if (++designationsExpanded % 250 == 0) {
-					logDesignationsExpanded("Expansion of designations in progress. ", theTermValueSet, designationsExpanded);
+					logDesignationsExpanded("Expansion of designations in progress. ", theValueSetUrl, designationsExpanded);
 				}
 			}
 
 			if (++conceptsExpanded % 250 == 0) {
-				logConceptsExpanded("Expansion of concepts in progress. ", theTermValueSet, conceptsExpanded);
+				logConceptsExpanded("Expansion of concepts in progress. ", theValueSetUrl, conceptsExpanded);
 			}
 		}
 
-		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
-		logConceptsExpanded("Finished expanding concepts. ", theTermValueSet, conceptsExpanded);
+		logDesignationsExpanded("Finished expanding designations. ", theValueSetUrl, designationsExpanded);
+		logConceptsExpanded("Finished expanding concepts. ", theValueSetUrl, conceptsExpanded);
 	}
 
-	private void logConceptsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
+	private void logConceptsExpanded(String theLogDescriptionPrefix, String theValueSetUrl, int theConceptsExpanded) {
 		if (theConceptsExpanded > 0) {
-			ourLog.debug("{}Have expanded {} concepts in ValueSet[{}]", theLogDescriptionPrefix, theConceptsExpanded, theTermValueSet.getUrl());
+			ourLog.debug("{}Have expanded {} concepts in ValueSet[{}]", theLogDescriptionPrefix, theConceptsExpanded, theValueSetUrl);
 		}
 	}
 
-	private void logDesignationsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theDesignationsExpanded) {
+	private void logDesignationsExpanded(String theLogDescriptionPrefix, String theValueSetUrl, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
-			ourLog.debug("{}Have expanded {} designations in ValueSet[{}]", theLogDescriptionPrefix, theDesignationsExpanded, theTermValueSet.getUrl());
+			ourLog.debug("{}Have expanded {} designations in ValueSet[{}]", theLogDescriptionPrefix, theDesignationsExpanded, theValueSetUrl);
 		}
 	}
 
@@ -1262,10 +1273,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
+		TermValueSetVersion termValueSetVersion;
+		String valueSetVersion = theValueSet.getVersion();
+		if (valueSetVersion != null) {
+			termValueSetVersion = myValueSetVersionDao.findByValueSetPidAndVersion(termValueSet.getId(), valueSetVersion);
+		} else {
+			termValueSetVersion = myValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
+		}
 
-		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
+		if (termValueSetVersion.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
 			ourLog.warn("{} is present in terminology tables but not ready for persistence-backed invocation of operation $validation-code. Will perform in-memory code validation. Current status: {} | {}",
-				getValueSetInfo(theValueSet), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
+				getValueSetInfo(theValueSet), termValueSetVersion.getExpansionStatus().name(), termValueSetVersion.getExpansionStatus().getDescription());
 			return false;
 		}
 
@@ -1680,15 +1698,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		while (true) {
 			StopWatch sw = new StopWatch();
-			TermValueSet valueSetToExpand = txTemplate.execute(t -> {
-				Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
-				if (!optionalTermValueSet.isPresent()) {
+			TermValueSetVersion valueSetToExpand = txTemplate.execute(t -> {
+				Optional<TermValueSetVersion> optionalTermValueSetVersion = getNextTermValueSetNotExpanded();
+				if (!optionalTermValueSetVersion.isPresent()) {
 					return null;
 				}
 
-				TermValueSet termValueSet = optionalTermValueSet.get();
-				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
-				return myValueSetDao.saveAndFlush(termValueSet);
+				TermValueSetVersion termValueSetVersion = optionalTermValueSetVersion.get();
+				termValueSetVersion.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
+				return myValueSetVersionDao.saveAndFlush(termValueSetVersion);
 			});
 			if (valueSetToExpand == null) {
 				return;
@@ -1718,7 +1736,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);
 				txTemplate.execute(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
-					myValueSetDao.saveAndFlush(valueSetToExpand);
+					myValueSetVersionDao.saveAndFlush(valueSetToExpand);
 					return null;
 				});
 			}
@@ -1783,9 +1801,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	protected abstract ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable);
 
-	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
-		Optional<TermValueSet> retVal = Optional.empty();
-		Slice<TermValueSet> page = myValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+	private Optional<TermValueSetVersion> getNextTermValueSetNotExpanded() {
+		Optional<TermValueSetVersion> retVal = Optional.empty();
+		Slice<TermValueSetVersion> page = myValueSetVersionDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 
 		if (!page.getContent().isEmpty()) {
 			retVal = Optional.of(page.getContent().get(0));
