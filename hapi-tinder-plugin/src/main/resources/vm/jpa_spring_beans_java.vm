@@ -51,8 +51,7 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 
 #foreach ( $res in $resources )
 	@Bean(name="my${res.name}Dao${versionCapitalized}", autowire=Autowire.BY_NAME)
-	@Lazy
-	public 
+	public
 #if ( ${versionCapitalized} == 'Dstu2' && ${res.name} == 'ValueSet' )
 		IFhirResourceDaoValueSet<ca.uhn.fhir.model.dstu2.resource.ValueSet, ca.uhn.fhir.model.dstu2.composite.CodingDt, ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt>
 #elseif ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ValueSet' )

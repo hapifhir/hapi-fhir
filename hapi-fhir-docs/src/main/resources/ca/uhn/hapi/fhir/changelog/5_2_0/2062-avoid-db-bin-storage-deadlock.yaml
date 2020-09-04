@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2062
+title: "A deadlock was fixed where the Database-backed Binary Storage service could lock the system up when running
+   under very high contention."
