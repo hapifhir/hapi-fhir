@@ -54,6 +54,13 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		persistConceptMap(conceptMap, HttpVerb.POST);
 	}
 
+	private void createAndPersistConceptMap(String version) {
+		ConceptMap conceptMap = createConceptMap();
+		conceptMap.setId("ConceptMap/cm");
+		conceptMap.setVersion(version);
+		persistConceptMap(conceptMap, HttpVerb.POST);
+	}
+	
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistConceptMap(ConceptMap theConceptMap, HttpVerb theVerb) {
 		switch (theVerb) {
@@ -268,6 +275,19 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	}
 
+	@Test
+	public void testDuplicateConceptMapUrlsAndVersions() {
+		createAndPersistConceptMap("v1");
+
+		try {
+			createAndPersistConceptMap("v1");
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+		}
+
+	}
+	
 	@Test
 	public void testDuplicateValueSetUrls() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
