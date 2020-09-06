@@ -35,12 +35,13 @@ import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(name = "TRM_CONCEPT_MAP", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_CONCEPT_MAP_URL", columnNames = {"URL"})
+	@UniqueConstraint(name = "IDX_CONCEPT_MAP_URL", columnNames = {"URL", "VER"})
 })
 public class TermConceptMap implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	static final int MAX_URL_LENGTH = 200;
+	static final int MAX_VER_LENGTH = 200;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_PID", sequenceName = "SEQ_CONCEPT_MAP_PID")
@@ -64,6 +65,9 @@ public class TermConceptMap implements Serializable {
 	@Column(name = "URL", nullable = false, length = MAX_URL_LENGTH)
 	private String myUrl;
 
+	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
+	private String myVersion;
+	
 	@OneToMany(mappedBy = "myConceptMap")
 	private List<TermConceptMapGroup> myConceptMapGroups;
 
@@ -131,6 +135,17 @@ public class TermConceptMap implements Serializable {
 		return this;
 	}
 
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public TermConceptMap setVersion(String theVersion) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theVersion, MAX_VER_LENGTH,
+			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theVersion));
+		myVersion = theVersion;
+		return this;
+	}
+	
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -140,6 +155,7 @@ public class TermConceptMap implements Serializable {
 			.append("mySource", mySource)
 			.append("myTarget", myTarget)
 			.append("myUrl", myUrl)
+			.append("myVersion", myVersion)
 			.append(myConceptMapGroups != null ? ("myConceptMapGroups - size=" + myConceptMapGroups.size()) : ("myConceptMapGroups=(null)"))
 			.toString();
 	}

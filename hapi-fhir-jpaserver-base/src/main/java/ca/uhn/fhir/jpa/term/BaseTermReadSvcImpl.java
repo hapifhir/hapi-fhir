@@ -131,6 +131,7 @@ import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -1514,6 +1515,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		TermConceptMap termConceptMap = new TermConceptMap();
 		termConceptMap.setResource(theResourceTable);
 		termConceptMap.setUrl(theConceptMap.getUrl());
+		termConceptMap.setVersion(theConceptMap.getVersion());
 
 		String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
 		String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
@@ -1547,7 +1549,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 * Do the upload.
 		 */
 		String conceptMapUrl = termConceptMap.getUrl();
-		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
+		String conceptMapVersion = termConceptMap.getVersion();
+		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndVersion(conceptMapUrl, conceptMapVersion);
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
 				if (isNotBlank(source)) {
@@ -1630,8 +1633,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 			String msg = myContext.getLocalizer().getMessage(
 				BaseTermReadSvcImpl.class,
-				"cannotCreateDuplicateConceptMapUrl",
-				conceptMapUrl,
+				"cannotCreateDuplicateConceptMapUrlAndVersion",
+				conceptMapUrl, conceptMapVersion,
 				existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 
 			throw new UnprocessableEntityException(msg);

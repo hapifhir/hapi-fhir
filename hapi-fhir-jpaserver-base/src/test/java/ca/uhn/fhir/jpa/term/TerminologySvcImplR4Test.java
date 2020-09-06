@@ -25,6 +25,8 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -292,10 +294,11 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				Optional<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(CM_URL);
-				assertTrue(optionalConceptMap.isPresent());
+				Pageable page = PageRequest.of(0, 1);
+				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(page, CM_URL);
+				assertEquals(1, optionalConceptMap.size());
 
-				TermConceptMap conceptMap = optionalConceptMap.get();
+				TermConceptMap conceptMap = optionalConceptMap.get(0);
 
 				ourLog.info("ConceptMap:\n" + conceptMap.toString());
 
@@ -470,10 +473,11 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				Optional<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(CM_URL);
-				assertTrue(optionalConceptMap.isPresent());
+				Pageable page = PageRequest.of(0, 1);
+				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(page, CM_URL);
+				assertEquals(1, optionalConceptMap.size());
 
-				TermConceptMap conceptMap = optionalConceptMap.get();
+				TermConceptMap conceptMap = optionalConceptMap.get(0);
 
 				ourLog.info("ConceptMap:\n" + conceptMap.toString());
 
