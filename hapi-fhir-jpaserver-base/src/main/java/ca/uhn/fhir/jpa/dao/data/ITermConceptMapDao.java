@@ -39,9 +39,7 @@ public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long> 
 	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myResourcePid = :resource_pid")
 	Optional<TermConceptMap> findTermConceptMapByResourcePid(@Param("resource_pid") Long theResourcePid);
 
-	//-- Replaced with next method. Should it be removed?
-	@Deprecated
-	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url")
+	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url and cm.myVersion is null")
 	Optional<TermConceptMap> findTermConceptMapByUrl(@Param("url") String theUrl);
 	
 	@Query(value="SELECT cm FROM TermConceptMap cm INNER JOIN ResourceTable r ON r.myId = cm.myResourcePid WHERE cm.myUrl = :url ORDER BY r.myUpdated DESC") 

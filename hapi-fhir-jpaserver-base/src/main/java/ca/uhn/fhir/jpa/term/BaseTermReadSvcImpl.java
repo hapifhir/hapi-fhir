@@ -1550,7 +1550,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 */
 		String conceptMapUrl = termConceptMap.getUrl();
 		String conceptMapVersion = termConceptMap.getVersion();
-		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndVersion(conceptMapUrl, conceptMapVersion);
+		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = null;
+		if (isBlank(conceptMapVersion)) {
+			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
+		} else {
+			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndVersion(conceptMapUrl, conceptMapVersion);
+		}
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
 				if (isNotBlank(source)) {
@@ -1631,13 +1636,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapByUrl.get();
 
-			String msg = myContext.getLocalizer().getMessage(
-				BaseTermReadSvcImpl.class,
-				"cannotCreateDuplicateConceptMapUrlAndVersion",
-				conceptMapUrl, conceptMapVersion,
-				existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-
-			throw new UnprocessableEntityException(msg);
+			if (isBlank(conceptMapVersion)) {
+				String msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+					"cannotCreateDuplicateConceptMapUrl",
+					conceptMapUrl,
+					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
+				
+			} else {
+				String msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+				    "cannotCreateDuplicateConceptMapUrlAndVersion",
+				    conceptMapUrl, conceptMapVersion,
+				    existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
+			}
 		}
 
 		ourLog.info("Done storing TermConceptMap[{}] for {}", termConceptMap.getId(), theConceptMap.getIdElement().toVersionless().getValueAsString());
@@ -1949,6 +1963,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem().getValueAsString()));
 				}
 
+				if (translationQuery.hasUrl()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
+				}
+				
+				if (translationQuery.hasConceptMapVersion()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVerion"), translationQuery.getConceptMapVersion().getValueAsString()));
+				}
+				
 				if (translationQuery.hasSource()) {
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource().getValueAsString()));
 				}
@@ -2032,6 +2054,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
 				}
 
+				if (translationQuery.hasUrl()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
+				}
+				
+				if (translationQuery.hasConceptMapVersion()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVerion"), translationQuery.getConceptMapVersion().getValueAsString()));
+				}
+				
 				if (translationQuery.hasTargetSystem()) {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem().getValueAsString()));
 				}
