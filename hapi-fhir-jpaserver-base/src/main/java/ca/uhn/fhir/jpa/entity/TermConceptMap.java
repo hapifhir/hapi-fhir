@@ -141,7 +141,7 @@ public class TermConceptMap implements Serializable {
 
 	public TermConceptMap setVersion(String theVersion) {
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theVersion, MAX_VER_LENGTH,
-			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theVersion));
+			"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
 		myVersion = theVersion;
 		return this;
 	}
