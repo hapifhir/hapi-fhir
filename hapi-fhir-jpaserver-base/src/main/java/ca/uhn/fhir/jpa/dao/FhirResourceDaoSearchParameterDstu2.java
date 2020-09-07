@@ -84,7 +84,7 @@ public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao
 			convertedSp.setExpression(hl7Org.getXpath());
 		}
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(convertedSp, getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor);
+		FhirResourceDaoSearchParameterR4.validateSearchParam(convertedSp, getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor, myDaoRegistry.getResourceDao("SearchParameter"));
 
 	}
 

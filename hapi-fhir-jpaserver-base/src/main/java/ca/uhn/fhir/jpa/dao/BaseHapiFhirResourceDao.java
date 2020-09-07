@@ -144,7 +144,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	@Autowired

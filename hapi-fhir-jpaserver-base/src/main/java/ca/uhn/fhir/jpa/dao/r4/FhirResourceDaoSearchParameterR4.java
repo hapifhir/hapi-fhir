@@ -1,31 +1,38 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -82,21 +89,22 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
-		validateSearchParam(theResource, getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor);
+		validateSearchParam(theResource, getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor, myDaoRegistry.getResourceDao("SearchParameter"));
 	}
 
-	public static void validateSearchParam(SearchParameter theResource, FhirContext theContext, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry, ISearchParamExtractor theSearchParamExtractor) {
+	public static void validateSearchParam(SearchParameter theResource, FhirContext theContext, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry, ISearchParamExtractor theSearchParamExtractor, IFhirResourceDao<?> theSearchParameterDao) {
 
 		/*
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
+		String code = theResource.getCode();
 		if (theDaoConfig.getModelConfig().isDefaultSearchParamsCanBeOverridden() == false) {
 			for (IPrimitiveType<?> nextBaseType : theResource.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
-				RuntimeSearchParam existingSearchParam = theSearchParamRegistry.getActiveSearchParam(nextBase, theResource.getCode());
+				RuntimeSearchParam existingSearchParam = theSearchParamRegistry.getActiveSearchParam(nextBase, code);
 				if (existingSearchParam != null && existingSearchParam.getId() == null) {
-					throw new UnprocessableEntityException("Can not override built-in search parameter " + nextBase + ":" + theResource.getCode() + " because overriding is disabled on this server");
+					throw new UnprocessableEntityException("Can not override built-in search parameter " + nextBase + ":" + code + " because overriding is disabled on this server");
 				}
 			}
 		}
@@ -112,11 +120,43 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 			return;
 		}
 
+		// Require SearchParameter.base
 		if (ElementUtil.isEmpty(theResource.getBase()) && (theResource.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(theResource.getType().name()))) {
 			throw new UnprocessableEntityException("SearchParameter.base is missing");
 		}
 
-		boolean isUnique = theResource.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE).stream().anyMatch(t-> "true".equals(t.getValueAsPrimitive().getValueAsString()));
+		// Require SearchParameter.code
+		if (ElementUtil.isEmpty(code) && (theResource.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(theResource.getType().name()))) {
+			throw new UnprocessableEntityException("SearchParameter.code is missing");
+		}
+
+		/*
+		 * Make sure we don't already have a SearchParameter matching the base and code
+		 */
+		List<String> baseValues = theResource.getBase().stream().map(t -> t.getCode()).filter(t -> isNotBlank(t)).collect(Collectors.toList());
+		if (baseValues.size() > 0 && isNotBlank(code)) {
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(SearchParameter.SP_BASE, new TokenOrListParam(null, baseValues));
+			map.add(SearchParameter.SP_CODE, new TokenParam(code));
+			map.add(SearchParameter.SP_STATUS, new TokenParam(Enumerations.PublicationStatus.ACTIVE.toCode()));
+			boolean alredyExists = false;
+			IBundleProvider outcome = theSearchParameterDao.search(map);
+			for (IBaseResource next : outcome.getResources(0, outcome.sizeOrThrowNpe())) {
+				if (theResource.getIdElement().hasIdPart()) {
+					if (theResource.getIdElement().getIdPart().equals(next.getIdElement().getIdPart())) {
+						alredyExists = true;
+						break;
+					}
+				}
+			}
+
+			if (outcome.sizeOrThrowNpe() > 0 && !alredyExists) {
+				String firstExistingId = outcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue();
+				throw new UnprocessableEntityException("SearchParameter resource [" + firstExistingId + "] already exists matching at least one base in " + baseValues + " and/or code [" + code + "]");
+			}
+		}
+
+		boolean isUnique = theResource.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE).stream().anyMatch(t -> "true".equals(t.getValueAsPrimitive().getValueAsString()));
 
 		if (theResource.getType() != null && theResource.getType().name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(theResource.getExpression())) {
 

@@ -238,6 +238,23 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
+	public void testCreateInvalidNoCode() {
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
+		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Patient.gender");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		try {
+			mySearchParameterDao.create(fooSp, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("SearchParameter.code is missing", e.getMessage());
+		}
+	}
+
+	@Test
 	@Disabled
 	public void testCreateInvalidParamInvalidResourceName() {
 		SearchParameter fooSp = new SearchParameter();
@@ -270,25 +287,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("SearchParameter.expression is missing", e.getMessage());
-		}
-	}
-
-	@Test
-	@Disabled
-	public void testCreateInvalidParamNoResourceName() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("foo");
-		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("gender");
-		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		try {
-			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"gender\". Must start with a resource name.", e.getMessage());
 		}
 	}
 
@@ -362,6 +360,70 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		ourLog.info("IDS: " + ids);
 		assertThat(ids, Matchers.contains(pid.getValue()));
+	}
+
+
+	@Test
+	public void testDuplicateSearchParamRejected() {
+		SearchParameter sp1 = new SearchParameter();
+		sp1.addBase("Practitioner");
+		sp1.addBase("Patient");
+		sp1.setCode("foo");
+		sp1.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		sp1.setTitle("FOO SP");
+		sp1.setExpression("gender");
+		sp1.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp1.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		IIdType id = mySearchParameterDao.create(sp1, mySrd).getId();
+
+		// Updating the existing SP is fine
+		sp1 = new SearchParameter();
+		sp1.setId(id.toUnqualifiedVersionless());
+		sp1.addBase("Practitioner");
+		sp1.addBase("Patient");
+		sp1.setCode("foo");
+		sp1.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		sp1.setTitle("FOO SP 2");
+		sp1.setExpression("gender");
+		sp1.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp1.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		id = mySearchParameterDao.update(sp1, mySrd).getId();
+		assertEquals("2", id.getVersionIdPart());
+
+		// Creating a duplicate is blocked
+		SearchParameter sp2 = new SearchParameter();
+		sp2.addBase("Patient");
+		sp2.setCode("foo");
+		sp2.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		sp2.setTitle("FOO SP");
+		sp2.setExpression("gender");
+		sp2.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp2.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		try {
+			mySearchParameterDao.create(sp2, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("SearchParameter resource [SearchParameter/" + id.getIdPart() + "] already exists matching at least one base in [Patient] and/or code [foo]", e.getMessage());
+		}
+
+		// Updating an existing SP so that it becomes a duplicate is also blocked
+		SearchParameter sp3 = new SearchParameter();
+		sp3.addBase("Patient");
+		sp3.setCode("foo2");
+		sp3.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		sp3.setTitle("FOO SP");
+		sp3.setExpression("gender");
+		sp3.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp3.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp3, mySrd);
+		try {
+			sp3.setCode("foo");
+			mySearchParameterDao.update(sp3, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("SearchParameter resource [SearchParameter/" + id.getIdPart() + "] already exists matching at least one base in [Patient] and/or code [foo]", e.getMessage());
+		}
+
 	}
 
 

@@ -68,7 +68,7 @@ public class FhirResourceDaoSearchParameterR5 extends BaseHapiFhirResourceDao<Se
 	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(SearchParameter40_50.convertSearchParameter(theResource), getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor);
+		FhirResourceDaoSearchParameterR4.validateSearchParam(SearchParameter40_50.convertSearchParameter(theResource), getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor, myDaoRegistry.getResourceDao("SearchParameter"));
 	}
 
 

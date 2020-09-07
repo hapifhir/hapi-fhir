@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -48,6 +49,20 @@ public class TokenOrListParam extends BaseOrListParam<TokenOrListParam, TokenPar
 	 *            The values to use for the one token to pre-populate in this list
 	 */
 	public TokenOrListParam(String theSystem, String... theValues) {
+		for (String next : theValues) {
+			add(theSystem, next);
+		}
+	}
+
+	/**
+	 * Create a new token "OR list" with a single token, or multiple tokens which have the same system value
+	 *
+	 * @param theSystem
+	 *            The system to use for the one token to pre-populate in this list
+	 * @param theValues
+	 *            The values to use for the one token to pre-populate in this list
+	 */
+	public TokenOrListParam(String theSystem, Collection<String> theValues) {
 		for (String next : theValues) {
 			add(theSystem, next);
 		}
