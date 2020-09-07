@@ -1968,7 +1968,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				}
 				
 				if (translationQuery.hasConceptMapVersion()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVerion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
 				}
 				
 				if (translationQuery.hasSource()) {
@@ -2059,7 +2059,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				}
 				
 				if (translationQuery.hasConceptMapVersion()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVerion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
 				}
 				
 				if (translationQuery.hasTargetSystem()) {
