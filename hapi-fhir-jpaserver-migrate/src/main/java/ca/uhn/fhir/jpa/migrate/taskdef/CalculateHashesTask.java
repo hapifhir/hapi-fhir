@@ -46,6 +46,7 @@ public class CalculateHashesTask extends BaseColumnCalculatorTask {
 	public CalculateHashesTask(VersionEnum theRelease, String theVersion) {
 		super(theRelease, theVersion);
 		setDescription("Calculate resource search parameter index hashes");
+		setPidColumnName("SP_ID");
 	}
 
 	@Override
