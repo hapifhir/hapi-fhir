@@ -69,7 +69,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - 20200513
 		init501(); // 20200514 - 20200515
-		init510(); // 20200516 - present
+		init510(); // 20200516 - 20200813
+		init520(); // 20200814 - present
+	}
+
+	protected void init520() {
+		Builder version = forVersion(VersionEnum.V5_2_0);
+
+		version.onTable("HFJ_RES_TAG").dropIndex("20200907.1", "IDX_RESTAG_TAGID");
+		version.onTable("HFJ_RES_TAG").addIndex("20200907.2", "IDX_RESTAG_TAGDEF").unique(false).withColumns("RES_ID", "TAG_ID");
+		version.onTable("HFJ_TAG_DEF").dropIndex("20200907.3", "IDX_TAGDEF_TYPESYSCODE");
+		version.onTable("HFJ_TAG_DEF").addIndex("20200907.4", "IDX_TAGDEF_TYPESYSCODE").unique(false).withColumns("TAG_TYPE", "TAG_SYSTEM", "TAG_CODE");
 	}
 
 	protected void init510() {
@@ -140,7 +150,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init510_20200725();
 
 		//EMPI Target Type
-		empiLink.addColumn("20200727.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, EmpiLink.TARGET_TYPE_LENGTH);
+		empiLink.addColumn("20200727.1", "TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, EmpiLink.TARGET_TYPE_LENGTH);
 	}
 
 	protected void init510_20200725() {

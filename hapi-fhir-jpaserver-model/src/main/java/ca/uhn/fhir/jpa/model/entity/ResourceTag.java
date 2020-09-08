@@ -26,11 +26,24 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "HFJ_RES_TAG", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
+	// Index IDX_RESTAG_TAGID was already used, don't reuse this name
+}, indexes = {
+	@Index(name = "IDX_RESTAG_TAGDEF", columnList = "RES_ID,TAG_ID")
 })
 public class ResourceTag extends BaseTag {
 
@@ -52,9 +65,16 @@ public class ResourceTag extends BaseTag {
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceTag() {
+		super();
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, RequestPartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceTable);
