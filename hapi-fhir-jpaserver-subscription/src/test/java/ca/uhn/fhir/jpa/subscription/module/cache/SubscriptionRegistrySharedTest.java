@@ -33,7 +33,6 @@ public class SubscriptionRegistrySharedTest extends BaseSubscriptionRegistryTest
 				return "shared";
 			}
 		}
-
 	}
 
 	@Test

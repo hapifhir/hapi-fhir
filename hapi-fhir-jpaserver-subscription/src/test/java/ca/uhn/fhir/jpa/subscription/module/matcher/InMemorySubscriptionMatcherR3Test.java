@@ -10,16 +10,40 @@ import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.util.UrlUtil;
-import org.hl7.fhir.dstu3.model.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hl7.fhir.dstu3.model.BodySite;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.CommunicationRequest;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Dosage;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.EpisodeOfCare;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Procedure;
+import org.hl7.fhir.dstu3.model.ProcedureRequest;
+import org.hl7.fhir.dstu3.model.Provenance;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.SearchParameter;
+import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.dstu3.model.codesystems.MedicationRequestCategory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageHeaders;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,6 +116,16 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 	}
 
+	@Test
+	public void testSerializationOfMessageHeaders() throws JsonProcessingException {
+		Map<String, Object> headers = new HashMap<>();
+		headers.put("zoop", "zoop");
+		MessageHeaders mh = new MessageHeaders(headers);
+
+		ObjectMapper mapper = new ObjectMapper();
+		//Test that serialization of MessageHeaders works.
+		mapper.writeValueAsString(mh);
+	}
 
 	@Test
 	public void testResourceById() {
