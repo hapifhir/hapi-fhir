@@ -113,7 +113,6 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		pr.setSubject(new Reference("Patient/"));
 		assertMatched(pr, "ProcedureRequest?intent=original-order");
 		assertNotMatched(pr, "ProcedureRequest?subject=Patient/123");
-
 	}
 
 	@Test

@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.subscription.model;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import ca.uhn.fhir.rest.server.messaging.ResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;

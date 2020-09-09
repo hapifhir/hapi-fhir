@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
+package ca.uhn.fhir.rest.server.messaging;
 
 /*-
  * #%L
@@ -20,11 +20,6 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.rest.server.messaging.ResourceModifiedMessage;
-
-public interface ISubscriptionMatcher {
-	//TODO GGG convert this to a ResourceModifiedSubscriptionMessage
-	InMemoryMatchResult match(CanonicalSubscription subscription, ResourceModifiedMessage msg);
+public interface IResourceMessage {
+	String getPayloadId();
 }

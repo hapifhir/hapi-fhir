@@ -5,7 +5,7 @@ import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.rest.server.messaging.json.ResourceModifiedJsonMessage;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
