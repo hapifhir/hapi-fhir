@@ -50,6 +50,7 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 	protected static final Logger ourLog = LoggerFactory.getLogger(BaseColumnCalculatorTask.class);
 	private int myBatchSize = 10000;
 	private ThreadPoolExecutor myExecutor;
+	private String myPidColumnName;
 
 	/**
 	 * Constructor
@@ -160,6 +161,10 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 			rejectedExecutionHandler);
 	}
 
+	public void setPidColumnName(String thePidColumnName) {
+		myPidColumnName = thePidColumnName;
+	}
+
 	private Future<?> updateRows(List<Map<String, Object>> theRows) {
 		Runnable task = () -> {
 			StopWatch sw = new StopWatch();
@@ -193,8 +198,8 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 						sqlBuilder.append(nextNewValueEntry.getKey()).append(" = ?");
 						arguments.add(nextNewValueEntry.getValue());
 					}
-					sqlBuilder.append(" WHERE SP_ID = ?");
-					arguments.add((Number) nextRow.get("SP_ID"));
+					sqlBuilder.append(" WHERE " + myPidColumnName + " = ?");
+					arguments.add((Number) nextRow.get(myPidColumnName));
 
 					// Apply update SQL
 					newJdbcTemplate().update(sqlBuilder.toString(), arguments.toArray());
