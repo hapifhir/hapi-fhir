@@ -20,30 +20,42 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
+public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifiedMessage> {
 
-	private static final long serialVersionUID = 1L;
-	@JsonProperty("headers")
-	private MessageHeaders myHeaders;
+	@JsonProperty("payload")
+	private ResourceModifiedMessage myPayload;
 
 	/**
 	 * Constructor
 	 */
-	public BaseJsonMessage() {
+	public ResourceModifiedJsonMessage() {
 		super();
 	}
 
-	@Override
-	public MessageHeaders getHeaders() {
-		return myHeaders;
+	/**
+	 * Constructor
+	 */
+	public ResourceModifiedJsonMessage(ResourceModifiedMessage thePayload) {
+		myPayload = thePayload;
 	}
 
-	public void setHeaders(MessageHeaders theHeaders) {
-		myHeaders = theHeaders;
+	@Override
+	public ResourceModifiedMessage getPayload() {
+		return myPayload;
+	}
+
+	public void setPayload(ResourceModifiedMessage thePayload) {
+		myPayload = thePayload;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myPayload", myPayload)
+			.toString();
 	}
 }

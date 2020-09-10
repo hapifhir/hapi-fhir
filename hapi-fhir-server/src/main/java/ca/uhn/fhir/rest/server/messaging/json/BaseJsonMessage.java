@@ -25,22 +25,56 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	private static final long serialVersionUID = 1L;
 	@JsonProperty("headers")
 	private MessageHeaders myHeaders;
 
+	private String RETRY_COUNT_HEADER = "retryCount";
+	private String FIRST_FAILURE_HEADER = "firstFailure";
+	private String LAST_FAILURE_HEADER = "lastFailure";
+
 	/**
 	 * Constructor
 	 */
 	public BaseJsonMessage() {
 		super();
+		setDefaultRetryHeaders();
+	}
+
+	protected void setDefaultRetryHeaders() {
+		Map<String, Object> headers = new HashMap<>();
+		headers.put(RETRY_COUNT_HEADER, 0);
+		headers.put(FIRST_FAILURE_HEADER, null);
+		headers.put(LAST_FAILURE_HEADER, null);
+		MessageHeaders messageHeaders = new MessageHeaders(headers);
+		setHeaders(messageHeaders);
 	}
 
 	@Override
 	public MessageHeaders getHeaders() {
 		return myHeaders;
+	}
+	public final Integer getRetryCount() {
+		//TODO GGG this is not NPE-safe
+		return (Integer)this.getHeaders().get(RETRY_COUNT_HEADER);
+	}
+
+	public final Date getFirstFailureDate() {
+		//TODO GGG this is not NPE-safe
+		return (Date)this.getHeaders().get(FIRST_FAILURE_HEADER);
+
+	}
+
+	public final Date getLastFailureDate() {
+		//TODO GGG this is not NPE-safe
+		return (Date)this.getHeaders().get(LAST_FAILURE_HEADER);
+
 	}
 
 	public void setHeaders(MessageHeaders theHeaders) {

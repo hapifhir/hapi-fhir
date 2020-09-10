@@ -22,9 +22,8 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.rest.server.messaging.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 public interface ISubscriptionMatcher {
-	//TODO GGG convert this to a ResourceModifiedSubscriptionMessage
 	InMemoryMatchResult match(CanonicalSubscription subscription, ResourceModifiedMessage msg);
 }

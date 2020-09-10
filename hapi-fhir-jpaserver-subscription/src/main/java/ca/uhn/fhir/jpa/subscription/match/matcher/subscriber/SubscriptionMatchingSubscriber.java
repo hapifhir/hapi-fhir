@@ -12,10 +12,9 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.messaging.ResourceModifiedMessage;
-import ca.uhn.fhir.rest.server.messaging.json.ResourceModifiedSubscriptionJsonMessage;
-import ca.uhn.fhir.rest.server.messaging.ResourceModifiedSubscriptionMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -81,16 +80,16 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		//TODO ADD BACKPORT FOR HANDLING OLD LEGACY SUBSCRIPTIONS HERE
-		if (!(theMessage instanceof ResourceModifiedSubscriptionJsonMessage)) {
+		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
 			return;
 		}
 
-		ResourceModifiedSubscriptionMessage msg = ((ResourceModifiedSubscriptionJsonMessage) theMessage).getPayload();
+		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		matchActiveSubscriptionsAndDeliver(msg);
 	}
 
-	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedSubscriptionMessage theMsg) {
+	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
@@ -118,7 +117,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		}
 	}
 
-	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedSubscriptionMessage theMsg) {
+	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();

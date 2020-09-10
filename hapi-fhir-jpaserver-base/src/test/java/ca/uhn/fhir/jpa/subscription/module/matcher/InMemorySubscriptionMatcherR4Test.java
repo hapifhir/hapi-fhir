@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionM
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -29,8 +30,6 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.messaging.ResourceModifiedMessage;
-import ca.uhn.fhir.rest.server.messaging.ResourceModifiedSubscriptionMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -466,7 +465,7 @@ public class InMemorySubscriptionMatcherR4Test {
 			CanonicalSubscription subscription = new CanonicalSubscription();
 			subscription.setCriteriaString(criteria);
 			subscription.setIdElement(new IdType("Subscription", 123L));
-			ResourceModifiedSubscriptionMessage msg = new ResourceModifiedSubscriptionMessage(myFhirContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+			ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 			msg.setSubscriptionId("123");
 			msg.setId(new IdType("Patient/ABC"));
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);

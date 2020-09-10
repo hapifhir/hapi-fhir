@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,29 +17,29 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
+public class BaseResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
 
 	@JsonProperty("resourceId")
-	private String myId;
+	protected String myId;
 	@JsonProperty("operationType")
-	private OperationTypeEnum myOperationType;
+	protected OperationTypeEnum myOperationType;
 	@JsonProperty("payload")
-	private String myPayload;
+	protected String myPayload;
 	@JsonProperty("payloadId")
-	private String myPayloadId;
+	protected String myPayloadId;
 	@JsonProperty("parentTransactionGuid")
-	private String myParentTransactionGuid;
+	protected String myParentTransactionGuid;
 	@JsonIgnore
-	private transient IBaseResource myPayloadDecoded;
+	protected transient IBaseResource myPayloadDecoded;
 
 	/**
 	 * Constructor
 	 */
-	public ResourceModifiedMessage() {
+	public BaseResourceModifiedMessage() {
 		super();
 	}
 
-	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		this();
 		setId(theResource.getIdElement());
 		setOperationType(theOperationType);
@@ -46,7 +48,7 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		}
 	}
 
-	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		this(theFhirContext, theNewResource, theOperationType);
 		if (theRequest != null) {
 			setParentTransactionGuid(theRequest.getTransactionGuid());
@@ -77,6 +79,24 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		return myPayloadDecoded;
 	}
 
+	public IBaseResource getPayload(FhirContext theCtx) {
+		IBaseResource retVal = myPayloadDecoded;
+		if (retVal == null && isNotBlank(myPayload)) {
+			IParser parser = EncodingEnum.detectEncoding(myPayload).newParser(theCtx);
+			retVal = parser.parseResource(myPayload);
+			myPayloadDecoded = retVal;
+		}
+		return retVal;
+	}
+
+	public String getPayloadString() {
+		if (this.myPayload != null) {
+			return this.myPayload;
+		}
+
+		return "";
+	}
+
 	public OperationTypeEnum getOperationType() {
 		return myOperationType;
 	}
@@ -100,7 +120,7 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		myParentTransactionGuid = theParentTransactionGuid;
 	}
 
-	private void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
+	protected void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
 		/*
 		 * References with placeholders would be invalid by the time we get here, and
 		 * would be caught before we even get here. This check is basically a last-ditch
@@ -128,7 +148,7 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		MANUALLY_TRIGGERED
 	}
 
-	private static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {
+	protected static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {
 		List<ResourceReferenceInfo> refs = theCtx.newTerser().getAllResourceReferences(theNewPayload);
 		for (ResourceReferenceInfo next : refs) {
 			String ref = next.getResourceReference().getReferenceElement().getValue();

@@ -29,10 +29,11 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceFilteringSvc;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.messaging.json.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.rest.server.messaging.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
 		ourLog.info("Handling resource modified message: {}", theMessage);
 
+		//TODO GGG TEST THAT THE MESSAGE HEADERS COME IN HERE
 		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
 			return;
@@ -95,7 +97,8 @@ public class EmpiMessageHandler implements MessageHandler {
 		} finally {
 			// Interceptor call: EMPI_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()
-				.add(ResourceModifiedMessage.class, theMsg)
+				//Janky upcast.
+				.add(BaseResourceModifiedMessage.class, (BaseResourceModifiedMessage) theMsg)
 				.add(TransactionLogMessages.class, empiContext.getTransactionLogMessages());
 			myInterceptorBroadcaster.callHooks(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}

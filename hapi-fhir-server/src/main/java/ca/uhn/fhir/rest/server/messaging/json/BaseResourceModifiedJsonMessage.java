@@ -20,35 +20,44 @@ package ca.uhn.fhir.rest.server.messaging.json;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.messaging.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.messaging.MessageHeaders;
 
-public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifiedMessage> {
+public class BaseResourceModifiedJsonMessage extends BaseJsonMessage<BaseResourceModifiedMessage> {
+
 
 	@JsonProperty("payload")
-	private ResourceModifiedMessage myPayload;
+	private BaseResourceModifiedMessage myPayload;
 
 	/**
 	 * Constructor
 	 */
-	public ResourceModifiedJsonMessage() {
+	public BaseResourceModifiedJsonMessage() {
 		super();
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ResourceModifiedJsonMessage(ResourceModifiedMessage thePayload) {
+	public BaseResourceModifiedJsonMessage(BaseResourceModifiedMessage thePayload) {
 		myPayload = thePayload;
+		setDefaultRetryHeaders();
 	}
 
+	public BaseResourceModifiedJsonMessage(MessageHeaders theRetryMessageHeaders, BaseResourceModifiedMessage thePayload) {
+		myPayload = thePayload;
+		setHeaders(theRetryMessageHeaders);
+	}
+
+
 	@Override
-	public ResourceModifiedMessage getPayload() {
+	public BaseResourceModifiedMessage getPayload() {
 		return myPayload;
 	}
 
-	public void setPayload(ResourceModifiedMessage thePayload) {
+	public void setPayload(BaseResourceModifiedMessage thePayload) {
 		myPayload = thePayload;
 	}
 
