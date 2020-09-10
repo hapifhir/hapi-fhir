@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -264,6 +265,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
 	 * on the device.
 	 */
+	// FIXME KHS is theCodePredicates used?
 	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		/*
@@ -335,12 +337,16 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			// If this is false, we throw an exception below so no sense doing any further processing
 			if (foundChainMatch) {
-				Subquery<Long> subQ = createLinkSubquery(chain, subResourceName, orValues, theRequest, theRequestPartitionId);
+				// FIXME KHS this is the part we need to change
 
+				Join<ResourceLink, ResourceTable> linkTargetJoin = theJoin.join("myTargetResource", JoinType.LEFT);
+				// FIXME hardcode token for now
+				Join<ResourceTable, ResourceIndexedSearchParamToken> tokenJoin = linkTargetJoin.join("myParamsToken", JoinType.LEFT);
+
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
+				Predicate valuesPredicate = myPredicateBuilder.addPredicateToken(theResourceName, paramDef, orValues, null, theRequestPartitionId);
 				Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
-				Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
-				Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
-				theCodePredicates.add(andPredicate);
+				theCodePredicates.add(pathPredicate);
 				candidateTargetTypes.add(nextType);
 			}
 		}
