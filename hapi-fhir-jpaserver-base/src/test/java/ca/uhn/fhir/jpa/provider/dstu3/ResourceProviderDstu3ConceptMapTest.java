@@ -211,45 +211,12 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	@Test
 	public void testTranslateWithReverseConcaptMapUrlAndVersion() {
 		
-		//- conceptMap1 v1
-		ConceptMap conceptMap1 = new ConceptMap();
-		conceptMap1.setUrl(CM_URL).setVersion("v1").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
-		
-		ConceptMapGroupComponent group1 = conceptMap1.addGroup();
-		group1.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
-
-		SourceElementComponent element1 = group1.addElement();
-		element1.setCode("12222").setDisplay("Source Code 12222");
-
-		TargetElementComponent target1 = element1.addTarget();
-		target1.setCode("11111").setDisplay("11111");
-		
-		IIdType conceptMapId1 = myConceptMapDao.create(conceptMap1, mySrd).getId().toUnqualifiedVersionless();
-		conceptMap1 = myConceptMapDao.read(conceptMapId1);
-		
-		ourLog.info("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
-	
-		//- conceptMap1 v2
-		ConceptMap conceptMap2 = new ConceptMap();
-		conceptMap2.setUrl(CM_URL).setVersion("v2").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
-		
-		ConceptMapGroupComponent group2 = conceptMap2.addGroup();
-		group2.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
-
-		SourceElementComponent element2 = group2.addElement();
-		element2.setCode("13333").setDisplay("Source Code 13333");
-
-		TargetElementComponent target2 = element2.addTarget();
-		target2.setCode("11111").setDisplay("Target Code 11111");
-		
-		IIdType conceptMapId2 = myConceptMapDao.create(conceptMap2, mySrd).getId().toUnqualifiedVersionless();
-		conceptMap2 = myConceptMapDao.read(conceptMapId2);
-		
-		ourLog.info("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
-
-		
+		String url = "http://url";
+		createReverseConceptMap(url, "v1", "12222", "Source Code 12222");
+		createReverseConceptMap(url, "v2", "13333", "Source Code 13333");
+				
 		Parameters inParams = new Parameters();
-		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
+		inParams.addParameter().setName("url").setValue(new UriType(url));
 		inParams.addParameter().setName("conceptMapVersion").setValue(new StringType("v2"));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
@@ -284,6 +251,163 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+	}
+	
+	@Test
+	public void testTranslateWithReverseConcaptMapUrl_NoVersion() {
+		
+		String url = "http://url";
+		createReverseConceptMap(url, "v1", "12222", "Source Code 12222");
+		createReverseConceptMap(url, "v2", "13333", "Source Code 13333");
+				
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
+		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
+
+		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		
+		Parameters respParams = ourClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		
+		
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+		param = getParametersByName(respParams, "match").get(0);
+		assertEquals(2, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("13333", coding.getCode());
+		assertEquals("Source Code 13333", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL, coding.getSystem());
+		assertEquals("Version 1", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+	}
+	
+	@Test
+	public void testTranslateWithReverseConcaptMapUrl_NoVersion_null_v1() {
+		
+		String url = "http://url";
+		createReverseConceptMap(url, null, "12222", "Source Code 12222");
+		createReverseConceptMap(url, "v2", "13333", "Source Code 13333");
+				
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
+		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
+
+		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		
+		Parameters respParams = ourClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		
+		
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+		param = getParametersByName(respParams, "match").get(0);
+		assertEquals(2, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("13333", coding.getCode());
+		assertEquals("Source Code 13333", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL, coding.getSystem());
+		assertEquals("Version 1", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+	}
+	
+	@Test
+	public void testTranslateWithReverseConcaptMapUrl_NoVersion_null_v2() {
+		
+		String url = "http://url";
+		createReverseConceptMap(url, "v1", "12222", "Source Code 12222");
+		createReverseConceptMap(url, null, "13333", "Source Code 13333");
+				
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
+		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
+
+		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		
+		Parameters respParams = ourClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		
+		
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+		param = getParametersByName(respParams, "match").get(0);
+		assertEquals(2, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("13333", coding.getCode());
+		assertEquals("Source Code 13333", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL, coding.getSystem());
+		assertEquals("Version 1", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+	}
+	
+	private void createReverseConceptMap(String url, String version, String sourceCode, String sourceDisplay) {
+		
+		//- conceptMap1 v1
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setUrl(url).setVersion(version).setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
+		
+		ConceptMapGroupComponent group1 = conceptMap.addGroup();
+		group1.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
+
+		SourceElementComponent element1 = group1.addElement();
+		element1.setCode(sourceCode).setDisplay(sourceDisplay);
+
+		TargetElementComponent target1 = element1.addTarget();
+		target1.setCode("11111").setDisplay("11111");
+		
+		IIdType conceptMapId = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
+		ConceptMap conceptMap1 = myConceptMapDao.read(conceptMapId);
+		
+		ourLog.info("ConceptMap : \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
+	
 	}
 }

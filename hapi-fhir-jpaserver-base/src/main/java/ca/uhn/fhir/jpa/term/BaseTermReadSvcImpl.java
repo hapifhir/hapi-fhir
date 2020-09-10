@@ -1937,6 +1937,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermConceptMapGroupElementTarget> cachedTargets;
 		ArrayList<Predicate> predicates;
 		Coding coding;
+		
+		//-- get the latest ConceptMapVersion if theTranslationRequest has url, but ConceptMapVersion
+		String latestConceptMapVersion = null;
+		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
+			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
+		
 		for (TranslationQuery translationQuery : translationQueries) {
 			cachedTargets = myTranslationCache.getIfPresent(translationQuery);
 			if (cachedTargets == null) {
@@ -1963,12 +1969,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem().getValueAsString()));
 				}
 
-				if (translationQuery.hasUrl()) {
+				if (translationQuery.hasUrl()) { 
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
-				}
-				
-				if (translationQuery.hasConceptMapVersion()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					if (translationQuery.hasConceptMapVersion()) {
+						// both url and conceptMapVersion
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					} else {
+						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
+							// only url and use latestConceptMapVersion
+							predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+						} else {
+							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
+						}
+					}
+				} else {
+					if (translationQuery.hasConceptMapVersion()) {
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					}
 				}
 				
 				if (translationQuery.hasSource()) {
@@ -2028,6 +2045,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermConceptMapGroupElement> cachedElements;
 		ArrayList<Predicate> predicates;
 		Coding coding;
+		
+		//-- get the latest ConceptMapVersion if theTranslationRequest has url, but ConceptMapVersion
+		String latestConceptMapVersion = null;
+		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
+			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
+		
 		for (TranslationQuery translationQuery : translationQueries) {
 			cachedElements = myTranslationWithReverseCache.getIfPresent(translationQuery);
 			if (cachedElements == null) {
@@ -2054,12 +2077,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
 				}
 
-				if (translationQuery.hasUrl()) {
+				if (translationQuery.hasUrl()) { 
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
-				}
-				
-				if (translationQuery.hasConceptMapVersion()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					if (translationQuery.hasConceptMapVersion()) {
+						// both url and conceptMapVersion
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					} else {
+						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
+							// only url and use latestConceptMapVersion
+							predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+						} else {
+							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
+						}
+					}
+				} else {
+					if (translationQuery.hasConceptMapVersion()) {
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					}
 				}
 				
 				if (translationQuery.hasTargetSystem()) {
@@ -2125,6 +2159,20 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	void throwInvalidValueSet(String theValueSet) {
 		throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSet));
+	}
+
+	// Special case for the translate operation with url and without
+	// conceptMapVersion, find the latest conecptMapVersion
+	private String getLatestConceptMapVersion(TranslationRequest theTranslationRequest) {
+
+		Pageable page = PageRequest.of(0, 1);
+		List<TermConceptMap> theConceptMapList = myConceptMapDao.findTermConceptMapByUrl(page,
+				theTranslationRequest.getUrl().asStringValue());
+		if (!theConceptMapList.isEmpty()) {
+			return theConceptMapList.get(0).getVersion();
+		}
+
+		return null;
 	}
 
 	@Override

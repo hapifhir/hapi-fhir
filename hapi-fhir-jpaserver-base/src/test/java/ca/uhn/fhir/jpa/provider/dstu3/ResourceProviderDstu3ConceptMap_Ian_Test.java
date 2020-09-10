@@ -26,50 +26,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ResourceProviderDstu3ConceptMap_Ian_Test extends BaseResourceProviderDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderDstu3ConceptMap_Ian_Test.class);
 
+	
 	@BeforeEach
 	@Transactional
 	public void before02() {
-		//- conceptMap v1
-		ConceptMap conceptMap = new ConceptMap();
-		conceptMap.setUrl(CM_URL).setVersion("v1").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
-
-		ConceptMapGroupComponent group1 = conceptMap.addGroup();
-		group1.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
-
-		SourceElementComponent element1 = group1.addElement();
-		element1.setCode("11111").setDisplay("Source Code 11111");
-
-		TargetElementComponent target1 = element1.addTarget();
-		target1.setCode("12222").setDisplay("Target Code 12222").setEquivalence(ConceptMapEquivalence.EQUAL);
-
-		IIdType conceptMapId1 = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
-		conceptMap = myConceptMapDao.read(conceptMapId1);
-
-		ourLog.info("ConceptMap: v1 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
-
-		//- conceptMap v2
-		conceptMap = new ConceptMap();
-		conceptMap.setUrl(CM_URL).setVersion("v2").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
-
-		ConceptMapGroupComponent group2 = conceptMap.addGroup();
-		group2.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
-
-		SourceElementComponent element2 = group2.addElement();
-		element2.setCode("11111").setDisplay("Source Code 11111");
-
-		TargetElementComponent target2 = element2.addTarget();
-		target2.setCode("13333").setDisplay("Target Code 13333").setEquivalence(ConceptMapEquivalence.EQUAL);
-
-		IIdType conceptMapId2 = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
-		conceptMap = myConceptMapDao.read(conceptMapId2);
-
-		ourLog.info("ConceptMap: v2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 	}
 
 	@Test
 	public void testTranslateWithVersionedConcaptMapUrl_v2() {
 
+		createConceptMap("v1", "12222", "Target Code 12222");
+		createConceptMap("v2", "13333", "Target Code 13333");
+		
 		// Call translate with ConceptMap v2.
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
@@ -116,6 +85,9 @@ public class ResourceProviderDstu3ConceptMap_Ian_Test extends BaseResourceProvid
 	@Test
 	public void testTranslateWithVersionedConcaptMapUrl_v1() {
 
+		createConceptMap("v1", "12222", "Target Code 12222");
+		createConceptMap("v2", "13333", "Target Code 13333");;
+		
 		// Call translate with ConceptMap v1.
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
@@ -162,6 +134,9 @@ public class ResourceProviderDstu3ConceptMap_Ian_Test extends BaseResourceProvid
 	@Test
 	public void testTranslateWithVersionedConcaptMapUrl_NoVersion() {
 
+		createConceptMap("v1", "12222", "Target Code 12222");
+		createConceptMap("v2", "13333", "Target Code 13333");
+		
 		// Call translate with no ConceptMap version.
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
@@ -202,5 +177,120 @@ public class ResourceProviderDstu3ConceptMap_Ian_Test extends BaseResourceProvid
 		part = getPartByName(param, "source");
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 	}
+
+	@Test
+	public void testTranslateWithVersionedConcaptMapUrl_NoVersion_null_v1() {
+
+		createConceptMap(null, "12222", "Target Code 12222"); // first version is null
+		createConceptMap("v2", "13333", "Target Code 13333");
+		 		
+		// Call translate with no ConceptMap version.
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
+		inParams.addParameter().setName("system").setValue(new UriType(CS_URL));
+		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
+		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
+
+		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		Parameters respParams = ourClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		// Should return v2 since v2 is the most recently updated version.
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+		param = getParametersByName(respParams, "match").get(0);
+		assertEquals(3, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "equivalence");
+		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
+		part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("13333", coding.getCode());
+		assertEquals("Target Code 13333", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_2, coding.getSystem());
+		assertEquals("Version 2", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testTranslateWithVersionedConcaptMapUrl_NoVersion_null_v2() {
+
+		createConceptMap("v1", "12222", "Target Code 12222"); 
+		createConceptMap(null, "13333", "Target Code 13333"); // second version is null
+		
+		// Call translate with no ConceptMap version.
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
+		inParams.addParameter().setName("system").setValue(new UriType(CS_URL));
+		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
+		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
+
+		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		Parameters respParams = ourClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		// Should return v2 since v2 is the most recently updated version.
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+		param = getParametersByName(respParams, "match").get(0);
+		assertEquals(3, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "equivalence");
+		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
+		part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("13333", coding.getCode());
+		assertEquals("Target Code 13333", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_2, coding.getSystem());
+		assertEquals("Version 2", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+	}
+	
+	private void createConceptMap(String version, String targetCode, String targetDisplay) {
+		
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setUrl(CM_URL).setVersion(version).setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
+
+		ConceptMapGroupComponent group1 = conceptMap.addGroup();
+		group1.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
+
+		SourceElementComponent element1 = group1.addElement();
+		element1.setCode("11111").setDisplay("Source Code 11111");
+
+		TargetElementComponent target1 = element1.addTarget();
+		target1.setCode(targetCode).setDisplay(targetDisplay).setEquivalence(ConceptMapEquivalence.EQUAL);
+
+		IIdType conceptMapId = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
+		conceptMap = myConceptMapDao.read(conceptMapId);
+		
+		ourLog.info("ConceptMap: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+	}
+	
 
 }
