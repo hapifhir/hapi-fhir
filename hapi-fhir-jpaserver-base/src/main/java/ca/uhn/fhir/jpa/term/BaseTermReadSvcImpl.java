@@ -131,6 +131,7 @@ import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -1514,6 +1515,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		TermConceptMap termConceptMap = new TermConceptMap();
 		termConceptMap.setResource(theResourceTable);
 		termConceptMap.setUrl(theConceptMap.getUrl());
+		termConceptMap.setVersion(theConceptMap.getVersion());
 
 		String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
 		String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
@@ -1547,7 +1549,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 * Do the upload.
 		 */
 		String conceptMapUrl = termConceptMap.getUrl();
-		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
+		String conceptMapVersion = termConceptMap.getVersion();
+		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = null;
+		if (isBlank(conceptMapVersion)) {
+			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndNullVersion(conceptMapUrl);
+		} else {
+			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndVersion(conceptMapUrl, conceptMapVersion);
+		}
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
 				if (isNotBlank(source)) {
@@ -1628,13 +1636,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapByUrl.get();
 
-			String msg = myContext.getLocalizer().getMessage(
-				BaseTermReadSvcImpl.class,
-				"cannotCreateDuplicateConceptMapUrl",
-				conceptMapUrl,
-				existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-
-			throw new UnprocessableEntityException(msg);
+			if (isBlank(conceptMapVersion)) {
+				String msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+					"cannotCreateDuplicateConceptMapUrl",
+					conceptMapUrl,
+					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
+				
+			} else {
+				String msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+				    "cannotCreateDuplicateConceptMapUrlAndVersion",
+				    conceptMapUrl, conceptMapVersion,
+				    existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
+			}
 		}
 
 		ourLog.info("Done storing TermConceptMap[{}] for {}", termConceptMap.getId(), theConceptMap.getIdElement().toVersionless().getValueAsString());
@@ -1920,6 +1937,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermConceptMapGroupElementTarget> cachedTargets;
 		ArrayList<Predicate> predicates;
 		Coding coding;
+		
+		//-- get the latest ConceptMapVersion if theTranslationRequest has url, but ConceptMapVersion
+		String latestConceptMapVersion = null;
+		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
+			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
+		
 		for (TranslationQuery translationQuery : translationQueries) {
 			cachedTargets = myTranslationCache.getIfPresent(translationQuery);
 			if (cachedTargets == null) {
@@ -1946,6 +1969,21 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem().getValueAsString()));
 				}
 
+				if (translationQuery.hasUrl()) { 
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
+					if (translationQuery.hasConceptMapVersion()) {
+						// both url and conceptMapVersion
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					} else {
+						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
+							// only url and use latestConceptMapVersion
+							predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+						} else {
+							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
+						}
+					}
+				} 
+								
 				if (translationQuery.hasSource()) {
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource().getValueAsString()));
 				}
@@ -2003,6 +2041,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermConceptMapGroupElement> cachedElements;
 		ArrayList<Predicate> predicates;
 		Coding coding;
+		
+		//-- get the latest ConceptMapVersion if theTranslationRequest has url, but ConceptMapVersion
+		String latestConceptMapVersion = null;
+		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
+			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
+		
 		for (TranslationQuery translationQuery : translationQueries) {
 			cachedElements = myTranslationWithReverseCache.getIfPresent(translationQuery);
 			if (cachedElements == null) {
@@ -2029,6 +2073,21 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
 				}
 
+				if (translationQuery.hasUrl()) { 
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
+					if (translationQuery.hasConceptMapVersion()) {
+						// both url and conceptMapVersion
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					} else {
+						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
+							// only url and use latestConceptMapVersion
+							predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+						} else {
+							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
+						}
+					}
+				}
+				
 				if (translationQuery.hasTargetSystem()) {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem().getValueAsString()));
 				}
@@ -2092,6 +2151,20 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	void throwInvalidValueSet(String theValueSet) {
 		throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSet));
+	}
+
+	// Special case for the translate operation with url and without
+	// conceptMapVersion, find the latest conecptMapVersion
+	private String getLatestConceptMapVersion(TranslationRequest theTranslationRequest) {
+
+		Pageable page = PageRequest.of(0, 1);
+		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page,
+				theTranslationRequest.getUrl().asStringValue());
+		if (!theConceptMapList.isEmpty()) {
+			return theConceptMapList.get(0).getVersion();
+		}
+
+		return null;
 	}
 
 	@Override

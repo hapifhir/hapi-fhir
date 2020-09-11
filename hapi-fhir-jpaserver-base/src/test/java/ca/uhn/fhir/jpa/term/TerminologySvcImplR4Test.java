@@ -25,6 +25,8 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -52,6 +54,13 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		persistConceptMap(conceptMap, HttpVerb.POST);
 	}
 
+	private void createAndPersistConceptMap(String version) {
+		ConceptMap conceptMap = createConceptMap();
+		conceptMap.setId("ConceptMap/cm");
+		conceptMap.setVersion(version);
+		persistConceptMap(conceptMap, HttpVerb.POST);
+	}
+	
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistConceptMap(ConceptMap theConceptMap, HttpVerb theVerb) {
 		switch (theVerb) {
@@ -267,6 +276,19 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	}
 
 	@Test
+	public void testDuplicateConceptMapUrlsAndVersions() {
+		createAndPersistConceptMap("v1");
+
+		try {
+			createAndPersistConceptMap("v1");
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+		}
+
+	}
+	
+	@Test
 	public void testDuplicateValueSetUrls() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
 
@@ -292,10 +314,11 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				Optional<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(CM_URL);
-				assertTrue(optionalConceptMap.isPresent());
+				Pageable page = PageRequest.of(0, 1);
+				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, CM_URL);
+				assertEquals(1, optionalConceptMap.size());
 
-				TermConceptMap conceptMap = optionalConceptMap.get();
+				TermConceptMap conceptMap = optionalConceptMap.get(0);
 
 				ourLog.info("ConceptMap:\n" + conceptMap.toString());
 
@@ -470,10 +493,11 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				Optional<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(CM_URL);
-				assertTrue(optionalConceptMap.isPresent());
+				Pageable page = PageRequest.of(0, 1);
+				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, CM_URL);
+				assertEquals(1, optionalConceptMap.size());
 
-				TermConceptMap conceptMap = optionalConceptMap.get();
+				TermConceptMap conceptMap = optionalConceptMap.get(0);
 
 				ourLog.info("ConceptMap:\n" + conceptMap.toString());
 
