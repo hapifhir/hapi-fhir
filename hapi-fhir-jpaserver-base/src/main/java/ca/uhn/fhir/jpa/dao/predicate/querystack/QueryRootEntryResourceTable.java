@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
@@ -202,4 +203,9 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 		return myQuery.subquery(Long.class);
 	}
 
+	@Override
+	public From<?, ?> addFrom(Class<ResourceIndexedSearchParamToken> theEntity) {
+		Root<ResourceIndexedSearchParamToken> from = myQuery.from(theEntity);
+		return from;
+	}
 }

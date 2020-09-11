@@ -44,7 +44,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -266,7 +265,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	 * on the device.
 	 */
 	// FIXME KHS is theCodePredicates used?
-	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theLinkJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		/*
 		  * Which resource types can the given chained parameter actually link to? This might be a list
@@ -282,7 +281,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		 * Handle chain on _type
 		 */
 		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
-			return createChainPredicateOnType(theResourceName, theParamName, theJoin, theReferenceParam, resourceTypes);
+			return createChainPredicateOnType(theResourceName, theParamName, theLinkJoin, theReferenceParam, resourceTypes);
 		}
 
 		boolean foundChainMatch = false;
@@ -338,15 +337,16 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			// If this is false, we throw an exception below so no sense doing any further processing
 			if (foundChainMatch) {
 				// FIXME KHS this is the part we need to change
-
-				Join<ResourceLink, ResourceTable> linkTargetJoin = theJoin.join("myTargetResource", JoinType.LEFT);
-				// FIXME hardcode token for now
-				Join<ResourceTable, ResourceIndexedSearchParamToken> tokenJoin = linkTargetJoin.join("myParamsToken", JoinType.LEFT);
+				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenFrom = (From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken>) myQueryStack.addFrom(ResourceIndexedSearchParamToken.class);
+				Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), tokenFrom.get("myResourcePid"));
 
 				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-				Predicate valuesPredicate = myPredicateBuilder.addPredicateToken(theResourceName, paramDef, orValues, null, theRequestPartitionId);
-				Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
-				theCodePredicates.add(pathPredicate);
+
+				Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(orValues, theResourceName, paramDef, myCriteriaBuilder, tokenFrom, theRequestPartitionId);
+				Predicate tokenPredicate = myCriteriaBuilder.and(tokenPredicates.toArray(new Predicate[0]));
+				Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
+				Predicate andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, tokenPredicate);
+				theCodePredicates.add(andPredicate);
 				candidateTargetTypes.add(nextType);
 			}
 		}

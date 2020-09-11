@@ -142,4 +142,9 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 	public Subquery<Long> subqueryForTagNegation() {
 		throw new IllegalStateException();
 	}
+
+	@Override
+	public From<?, ?> addFrom(Class<ResourceIndexedSearchParamToken> theEntity) {
+		throw new IllegalStateException();
+	}
 }

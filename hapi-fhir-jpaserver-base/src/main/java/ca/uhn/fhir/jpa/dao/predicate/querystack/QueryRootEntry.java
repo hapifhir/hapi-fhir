@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
 import ca.uhn.fhir.jpa.dao.predicate.IndexJoins;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 
 import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -121,4 +122,6 @@ abstract class QueryRootEntry {
 	abstract Expression<Long> getResourcePidColumn();
 
 	abstract Subquery<Long> subqueryForTagNegation();
+
+	public abstract From<?,?> addFrom(Class<ResourceIndexedSearchParamToken> theEntity);
 }
