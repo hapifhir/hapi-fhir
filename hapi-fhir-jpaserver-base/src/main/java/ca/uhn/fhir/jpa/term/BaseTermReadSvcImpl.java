@@ -1552,7 +1552,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		String conceptMapVersion = termConceptMap.getVersion();
 		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = null;
 		if (isBlank(conceptMapVersion)) {
-			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
+			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndNullVersion(conceptMapUrl);
 		} else {
 			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndVersion(conceptMapUrl, conceptMapVersion);
 		}
@@ -1982,12 +1982,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
 						}
 					}
-				} else {
-					if (translationQuery.hasConceptMapVersion()) {
-						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
-					}
-				}
-				
+				} 
+								
 				if (translationQuery.hasSource()) {
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource().getValueAsString()));
 				}
@@ -2090,10 +2086,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
 						}
 					}
-				} else {
-					if (translationQuery.hasConceptMapVersion()) {
-						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
-					}
 				}
 				
 				if (translationQuery.hasTargetSystem()) {
@@ -2166,7 +2158,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private String getLatestConceptMapVersion(TranslationRequest theTranslationRequest) {
 
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theConceptMapList = myConceptMapDao.findTermConceptMapByUrl(page,
+		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page,
 				theTranslationRequest.getUrl().asStringValue());
 		if (!theConceptMapList.isEmpty()) {
 			return theConceptMapList.get(0).getVersion();

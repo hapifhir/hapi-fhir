@@ -315,7 +315,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				Pageable page = PageRequest.of(0, 1);
-				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(page, CM_URL);
+				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, CM_URL);
 				assertEquals(1, optionalConceptMap.size());
 
 				TermConceptMap conceptMap = optionalConceptMap.get(0);
@@ -494,7 +494,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				Pageable page = PageRequest.of(0, 1);
-				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(page, CM_URL);
+				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, CM_URL);
 				assertEquals(1, optionalConceptMap.size());
 
 				TermConceptMap conceptMap = optionalConceptMap.get(0);

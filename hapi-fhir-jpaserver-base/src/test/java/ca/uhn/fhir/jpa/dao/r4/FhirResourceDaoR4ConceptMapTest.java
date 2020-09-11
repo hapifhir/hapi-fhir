@@ -1158,7 +1158,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testConcaptMapFindTermConceptMapByUrl() {
 			
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpConceptMapList = myTermConceptMapDao.findTermConceptMapByUrl(page, CM_URL);
+		List<TermConceptMap> theExpConceptMapList = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, CM_URL);
 		assertEquals(1, theExpConceptMapList.size());
 		assertEquals(CM_URL, theExpConceptMapList.get(0).getUrl());
 		
@@ -1190,7 +1190,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		// should return the latest one which is v2
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpSecondOne = myTermConceptMapDao.findTermConceptMapByUrl(page, theUrl);
+		List<TermConceptMap> theExpSecondOne = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, theUrl);
 		
 		assertEquals(1, theExpSecondOne.size());
 		assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
@@ -1218,7 +1218,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 		
 		// should return the latest one which is v2
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpSecondOne = myTermConceptMapDao.findTermConceptMapByUrl(page, theUrl);
+		List<TermConceptMap> theExpSecondOne = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, theUrl);
 		
 		assertEquals(1, theExpSecondOne.size());
 		assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
