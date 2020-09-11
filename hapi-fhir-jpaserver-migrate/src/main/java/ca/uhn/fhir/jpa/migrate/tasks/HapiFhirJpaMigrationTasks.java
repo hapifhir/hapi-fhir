@@ -145,7 +145,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		
 		//ConceptMap add version for search
 		Builder.BuilderWithTableName trmConceptMap = version.onTable("TRM_CONCEPT_MAP");
-		trmConceptMap.addColumn("20200910.1", "VER").nonNullable().type(ColumnTypeEnum.STRING, TermConceptMap.MAX_VER_LENGTH);
+		trmConceptMap.addColumn("20200910.1", "VER").nullable().type(ColumnTypeEnum.STRING, TermConceptMap.MAX_VER_LENGTH);
 		trmConceptMap.dropIndex("20200910.2", "IDX_CONCEPT_MAP_URL");
 		trmConceptMap.addIndex("20200910.3", "IDX_CONCEPT_MAP_URL").unique(true).withColumns("URL", "VER");
 	}
