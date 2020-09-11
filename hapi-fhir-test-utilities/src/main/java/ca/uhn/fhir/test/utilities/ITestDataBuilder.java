@@ -185,7 +185,7 @@ public interface ITestDataBuilder {
 				reference.setReference(theHasMember.getValue());
 
 				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
-				resourceDef.getChildByName("organization").getMutator().addValue(t, reference);
+				resourceDef.getChildByName("managingOrganization").getMutator().addValue(t, reference);
 			}
 		};
 	}
