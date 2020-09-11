@@ -39,6 +39,11 @@ public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long> 
 	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myResourcePid = :resource_pid")
 	Optional<TermConceptMap> findTermConceptMapByResourcePid(@Param("resource_pid") Long theResourcePid);
 
+	// Keep backwards compatibility, recommend to use findTermConceptMapByUrlAndNullVersion instead
+	@Deprecated
+	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url and cm.myVersion is null")
+	Optional<TermConceptMap> findTermConceptMapByUrl(@Param("url") String theUrl);
+	
 	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url and cm.myVersion is null")
 	Optional<TermConceptMap> findTermConceptMapByUrlAndNullVersion(@Param("url") String theUrl);
 	
