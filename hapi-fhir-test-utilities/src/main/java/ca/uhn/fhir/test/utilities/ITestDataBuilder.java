@@ -155,6 +155,18 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	default  Consumer<IBaseResource> withObservationHasMember(@Nullable IIdType theHasMember) {
+		return t -> {
+			if (theHasMember != null) {
+				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
+				reference.setReference(theHasMember.getValue());
+
+				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+				resourceDef.getChildByName("hasMember").getMutator().addValue(t, reference);
+			}
+		};
+	}
+
 	/**
 	 * Users of this API must implement this method
 	 */
