@@ -41,7 +41,7 @@ public class TermConceptMap implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	static final int MAX_URL_LENGTH = 200;
-	static final int MAX_VER_LENGTH = 200;
+	public static final int MAX_VER_LENGTH = 200;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_PID", sequenceName = "SEQ_CONCEPT_MAP_PID")
