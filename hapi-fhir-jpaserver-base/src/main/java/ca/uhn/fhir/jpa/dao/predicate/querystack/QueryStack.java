@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.lang3.Validate;
 
@@ -283,7 +283,7 @@ public class QueryStack {
 		return top().addNeverMatchingPredicate();
 	}
 
-	public From<?, ?> addFrom(Class<ResourceIndexedSearchParamToken> theEntity) {
+	public <T extends BaseResourceIndexedSearchParam> From<T, T> addFrom(Class<T> theEntity) {
 		return top().addFrom(theEntity);
 	}
 }

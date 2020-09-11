@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
 
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -140,11 +141,11 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 
 	@Override
 	public Subquery<Long> subqueryForTagNegation() {
-		throw new IllegalStateException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public From<?, ?> addFrom(Class<ResourceIndexedSearchParamToken> theEntity) {
-		throw new IllegalStateException();
+	public <T extends BaseResourceIndexedSearchParam> From<T, T> addFrom(Class<T> theEntity) {
+		throw new UnsupportedOperationException();
 	}
 }

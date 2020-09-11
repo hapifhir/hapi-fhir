@@ -336,18 +336,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			// If this is false, we throw an exception below so no sense doing any further processing
 			if (foundChainMatch) {
-				// FIXME KHS this is the part we need to change
-				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenFrom = (From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken>) myQueryStack.addFrom(ResourceIndexedSearchParamToken.class);
-				Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), tokenFrom.get("myResourcePid"));
-
-				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-
-				Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(orValues, theResourceName, paramDef, myCriteriaBuilder, tokenFrom, theRequestPartitionId);
-				Predicate tokenPredicate = myCriteriaBuilder.and(tokenPredicates.toArray(new Predicate[0]));
-				Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-				Predicate andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, tokenPredicate);
-				theCodePredicates.add(andPredicate);
-				candidateTargetTypes.add(nextType);
+				addChainMatch(theResourceName, theParamName, theLinkJoin, theCodePredicates, theRequestPartitionId, candidateTargetTypes, nextType, chain, subResourceName, orValues);
 			}
 		}
 
@@ -362,6 +351,21 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
 		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
 		return predicate;
+	}
+
+	private void addChainMatch(String theResourceName, String theParamName, From<?, ResourceLink> theLinkJoin, List<Predicate> theCodePredicates, RequestPartitionId theRequestPartitionId, List<Class<? extends IBaseResource>> theCandidateTargetTypes, Class<? extends IBaseResource> nextType, String theChain, String theSubResourceName, ArrayList<IQueryParameterType> theOrValues) {
+		// FIXME KHS this is the part we need to change
+		From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenFrom = (From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken>) myQueryStack.addFrom(ResourceIndexedSearchParamToken.class);
+		Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), tokenFrom.get("myResourcePid"));
+
+		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(theSubResourceName, theChain);
+
+		Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(theOrValues, theResourceName, paramDef, myCriteriaBuilder, tokenFrom, theRequestPartitionId);
+		Predicate tokenPredicate = myCriteriaBuilder.and(tokenPredicates.toArray(new Predicate[0]));
+		Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
+		Predicate andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, tokenPredicate);
+		theCodePredicates.add(andPredicate);
+		theCandidateTargetTypes.add(nextType);
 	}
 
 	private Predicate createChainPredicateOnType(String theResourceName, String theParamName, From<?, ResourceLink> theJoin, ReferenceParam theReferenceParam, List<Class<? extends IBaseResource>> theResourceTypes) {
