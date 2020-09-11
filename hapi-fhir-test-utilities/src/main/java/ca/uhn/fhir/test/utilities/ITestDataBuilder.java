@@ -167,6 +167,18 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	default  Consumer<IBaseResource> withOrganization(@Nullable IIdType theHasMember) {
+		return t -> {
+			if (theHasMember != null) {
+				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
+				reference.setReference(theHasMember.getValue());
+
+				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+				resourceDef.getChildByName("organization").getMutator().addValue(t, reference);
+			}
+		};
+	}
+
 	/**
 	 * Users of this API must implement this method
 	 */
