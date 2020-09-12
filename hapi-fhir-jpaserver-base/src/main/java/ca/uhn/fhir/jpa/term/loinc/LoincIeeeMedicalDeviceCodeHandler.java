@@ -1,5 +1,17 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
+import static org.apache.commons.lang3.StringUtils.trim;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ValueSet;
+
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -21,18 +33,8 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
-import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.ValueSet;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import static org.apache.commons.lang3.StringUtils.trim;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 
 public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IRecordHandler {
 
@@ -51,6 +53,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 	@Override
 	public void accept(CSVRecord theRecord) {
 
+		String loincIeeeCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String longCommonName = trim(theRecord.get("LOINC_LONG_COMMON_NAME"));
 		String ieeeCode = trim(theRecord.get("IEEE_CF_CODE10"));
@@ -63,6 +66,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 			new ConceptMapping()
 				.setConceptMapId(LOINC_IEEE_CM_ID)
 				.setConceptMapUri(LOINC_IEEE_CM_URI)
+				.setConceptMapVersion(loincIeeeCmVersion)
 				.setConceptMapName(LOINC_IEEE_CM_NAME)
 				.setSourceCodeSystem(sourceCodeSystemUri)
 				.setSourceCode(loincNumber)
