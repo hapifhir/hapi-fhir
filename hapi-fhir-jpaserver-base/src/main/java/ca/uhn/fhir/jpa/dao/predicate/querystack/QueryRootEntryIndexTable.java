@@ -145,7 +145,7 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 	}
 
 	@Override
-	public <T extends BaseResourceIndexedSearchParam> From<T, T> addFrom(Class<T> theEntity) {
-		throw new UnsupportedOperationException();
+	public <T extends BaseResourceIndexedSearchParam> From<T, T> addFromOrReturnNull(Class<T> theEntity) {
+		return null;
 	}
 }

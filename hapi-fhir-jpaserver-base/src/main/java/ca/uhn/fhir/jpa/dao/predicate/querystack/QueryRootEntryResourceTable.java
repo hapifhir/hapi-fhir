@@ -204,7 +204,7 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	}
 
 	@Override
-	public <T extends BaseResourceIndexedSearchParam> From<T, T> addFrom(Class<T> theEntity) {
+	public <T extends BaseResourceIndexedSearchParam> From<T, T> addFromOrReturnNull(Class<T> theEntity) {
 		return myQuery.from(theEntity);
 	}
 }

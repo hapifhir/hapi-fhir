@@ -268,12 +268,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theLinkJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		/*
-		  * Which resource types can the given chained parameter actually link to? This might be a list
-		  * where the chain is unqualified, as in: Observation?subject.identifier=(...)
-		  * since subject can link to several possible target types.
-		  *
-		  * If the user has qualified the chain, as in: Observation?subject:Patient.identifier=(...)
-		  * this is just a simple 1-entry list.
+		 * Which resource types can the given chained parameter actually link to? This might be a list
+		 * where the chain is unqualified, as in: Observation?subject.identifier=(...)
+		 * since subject can link to several possible target types.
+		 *
+		 * If the user has qualified the chain, as in: Observation?subject:Patient.identifier=(...)
+		 * this is just a simple 1-entry list.
 		 */
 		final List<Class<? extends IBaseResource>> resourceTypes = determineCandidateResourceTypesForChain(theResourceName, theParamName, theReferenceParam);
 
@@ -336,7 +336,34 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			// If this is false, we throw an exception below so no sense doing any further processing
 			if (foundChainMatch) {
-				addChainMatch(theResourceName, theParamName, theLinkJoin, theCodePredicates, theRequestPartitionId, candidateTargetTypes, nextType, chain, subResourceName, orValues);
+				// FIXME KHS this is the part we need to change
+				RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
+				Predicate andPredicate = null;
+
+				// FIXME KHS rather than all this exclusionary logic, refactor the predicate stuff out of the join code so we can reuse it in createPredicate() below
+				if (canOptimizeToCrossJoin(resourceTypes, orValues, chainParamDef)) {
+					From<?, ?> from = myQueryStack.addFromOrReturnNull(chainParamDef);
+					if (from != null) {
+						// Optimize search with a cross join
+						Predicate valuePredicate = myPredicateBuilder.createPredicate(orValues, subResourceName, chainParamDef, myCriteriaBuilder, from, theRequestPartitionId);
+						Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), from.get("myResourcePid"));
+						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
+						andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, valuePredicate);
+					}
+				}
+
+				if (andPredicate == null) {
+					// If the optimized version didn't pan out, fall back on a subquery
+					Subquery<Long> subQ = createLinkSubquery(chain, subResourceName, orValues, theRequest, theRequestPartitionId);
+
+					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
+					Predicate pidPredicate = theLinkJoin.get("myTargetResourcePid").in(subQ);
+					andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
+				} else {
+
+				}
+				theCodePredicates.add(andPredicate);
+				candidateTargetTypes.add(nextType);
 			}
 		}
 
@@ -353,19 +380,27 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		return predicate;
 	}
 
-	private void addChainMatch(String theResourceName, String theParamName, From<?, ResourceLink> theLinkJoin, List<Predicate> theCodePredicates, RequestPartitionId theRequestPartitionId, List<Class<? extends IBaseResource>> theCandidateTargetTypes, Class<? extends IBaseResource> nextType, String theChain, String theSubResourceName, ArrayList<IQueryParameterType> theOrValues) {
-		// FIXME KHS this is the part we need to change
-		From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenFrom = (From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken>) myQueryStack.addFrom(ResourceIndexedSearchParamToken.class);
-		Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), tokenFrom.get("myResourcePid"));
-
-		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(theSubResourceName, theChain);
-
-		Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(theOrValues, theResourceName, paramDef, myCriteriaBuilder, tokenFrom, theRequestPartitionId);
-		Predicate tokenPredicate = myCriteriaBuilder.and(tokenPredicates.toArray(new Predicate[0]));
-		Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-		Predicate andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, tokenPredicate);
-		theCodePredicates.add(andPredicate);
-		theCandidateTargetTypes.add(nextType);
+	private boolean canOptimizeToCrossJoin(List<Class<? extends IBaseResource>> theResourceTypes, ArrayList<IQueryParameterType> theOrValues, RuntimeSearchParam theChainParamDef) {
+		if (theChainParamDef == null) {
+			return false;
+		}
+		if (theResourceTypes.size() > 1) {
+			return false;
+		}
+		if (theOrValues.size() != 1) {
+			return false;
+		}
+		IQueryParameterType queryParam = theOrValues.get(0);
+		if (queryParam instanceof TokenParam) {
+			TokenParam tokenParam = (TokenParam) queryParam;
+			if (tokenParam.isText()) {
+				return false;
+			}
+		}
+		if (queryParam.getMissing() != null) {
+			return false;
+		}
+		return true;
 	}
 
 	private Predicate createChainPredicateOnType(String theResourceName, String theParamName, From<?, ResourceLink> theJoin, ReferenceParam theReferenceParam, List<Class<? extends IBaseResource>> theResourceTypes) {
@@ -1032,29 +1067,29 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 	}
 
-	private Predicate createCompositeParamPart(String theResourceName, Root<?> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue, RequestPartitionId theRequestPartitionId) {
+	private Predicate createCompositeParamPart(String theResourceName, Root<?> theRoot, RuntimeSearchParam theParam, IQueryParameterType theLeftValue, RequestPartitionId theRequestPartitionId) {
 		Predicate retVal = null;
 		switch (theParam.getParamType()) {
 			case STRING: {
 				From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> stringJoin = theRoot.join("myParamsString", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateString(leftValue, theResourceName, theParam, myCriteriaBuilder, stringJoin, theRequestPartitionId);
+				retVal = myPredicateBuilder.createPredicateString(theLeftValue, theResourceName, theParam, myCriteriaBuilder, stringJoin, theRequestPartitionId);
 				break;
 			}
 			case TOKEN: {
 				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
-				List<IQueryParameterType> tokens = Collections.singletonList(leftValue);
+				List<IQueryParameterType> tokens = Collections.singletonList(theLeftValue);
 				Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(tokens, theResourceName, theParam, myCriteriaBuilder, tokenJoin, theRequestPartitionId);
 				retVal = myCriteriaBuilder.and(tokenPredicates.toArray(new Predicate[0]));
 				break;
 			}
 			case DATE: {
 				From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> dateJoin = theRoot.join("myParamsDate", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateDate(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, theRequestPartitionId);
+				retVal = myPredicateBuilder.createPredicateDate(theLeftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, theRequestPartitionId);
 				break;
 			}
 			case QUANTITY: {
 				From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = theRoot.join("myParamsQuantity", JoinType.INNER);
-				retVal = myPredicateBuilder.createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, theRequestPartitionId);
+				retVal = myPredicateBuilder.createPredicateQuantity(theLeftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, theRequestPartitionId);
 				break;
 			}
 			case COMPOSITE:

@@ -19,27 +19,8 @@ package ca.uhn.fhir.tinder.ant;
  * #L%
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
-import org.apache.commons.lang.WordUtils;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.tinder.AbstractGenerator;
-import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
 import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
 import ca.uhn.fhir.tinder.GeneratorContext;
 import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
@@ -50,6 +31,23 @@ import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.TargetType;
+import org.apache.commons.lang.WordUtils;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.EscapeTool;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
 /**
@@ -377,7 +375,6 @@ public class TinderGeneratorTask extends Task {
 		}
 		targetDirectory.mkdirs();
 		log(" * Output ["+targetType.toString()+"] Directory: " + targetDirectory.getAbsolutePath());
-
 		try {
 			/*
 			 * Single file with all elements

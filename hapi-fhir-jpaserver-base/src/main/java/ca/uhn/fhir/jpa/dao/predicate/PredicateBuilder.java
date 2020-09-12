@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -39,6 +40,8 @@ import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static ca.uhn.fhir.jpa.dao.predicate.BasePredicateBuilder.toArray;
 
 public class PredicateBuilder {
 	private final PredicateBuilderCoords myPredicateBuilderCoords;
@@ -129,11 +132,51 @@ public class PredicateBuilder {
 		return myPredicateBuilderToken.createPredicateToken(theTokens, theResourceName, theSearchParam, theBuilder, theTokenJoin, theRequestPartitionId);
 	}
 
-	Predicate createPredicateDate(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theDateJoin, RequestPartitionId theRequestPartitionId) {
-		return myPredicateBuilderDate.createPredicateDate(theLeftValue, theResourceName, theName, theBuilder, theDateJoin, theRequestPartitionId);
+	Predicate createPredicateCoords(IQueryParameterType theToken, String theResourceName, RuntimeSearchParam theSearchParam, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamCoords, ResourceIndexedSearchParamCoords> theCoordsJoin, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderCoords.createPredicateCoords(theToken, theResourceName, theSearchParam, theBuilder, theCoordsJoin, theRequestPartitionId);
+	}
+	Predicate createPredicateDate(IQueryParameterType theLeftValue, String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theDateJoin, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderDate.createPredicateDate(theLeftValue, theResourceName, theParamName, theBuilder, theDateJoin, theRequestPartitionId);
 	}
 
 	Predicate createPredicateQuantity(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> theDateJoin, RequestPartitionId theRequestPartitionId) {
 		return myPredicateBuilderQuantity.createPredicateQuantity(theLeftValue, theResourceName, theName, theBuilder, theDateJoin, theRequestPartitionId);
+	}
+
+	public Predicate createPredicate(List<IQueryParameterType> theOrValues, String theResourceName, RuntimeSearchParam theSearchParam, CriteriaBuilder theCriteriaBuilder, From<?,?> theFrom, RequestPartitionId theRequestPartitionId) {
+		List<Predicate> codePredicates = new ArrayList<>();
+
+		switch(theSearchParam.getParamType()) {
+			case STRING:
+				for (IQueryParameterType nextOr : theOrValues) {
+					Predicate singleCode = createPredicateString(nextOr, theResourceName, theSearchParam, theCriteriaBuilder, (From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString>) theFrom, theRequestPartitionId);
+					codePredicates.add(singleCode);
+				}
+				break;
+			case DATE:
+				for (IQueryParameterType nextOr : theOrValues) {
+					Predicate singleCode = createPredicateDate(nextOr, theResourceName, theSearchParam.getName(), theCriteriaBuilder, (From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate>) theFrom, theRequestPartitionId);
+					codePredicates.add(singleCode);
+				}
+				break;
+			case TOKEN:
+				if ("Location.position".equals(theSearchParam.getPath())) {
+					// FIXME KHS plural vs more than one
+					codePredicates.add(createPredicateCoords(theOrValues.get(0), theResourceName, theSearchParam, theCriteriaBuilder, (From<ResourceIndexedSearchParamCoords, ResourceIndexedSearchParamCoords>) theFrom, theRequestPartitionId));
+				} else {
+					codePredicates.addAll(createPredicateToken(theOrValues, theResourceName, theSearchParam, theCriteriaBuilder, (From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken>) theFrom, theRequestPartitionId));
+				}
+				break;
+			case QUANTITY:
+				for (IQueryParameterType nextOr : theOrValues) {
+					Predicate singleCode = createPredicateQuantity(nextOr, theResourceName, theSearchParam.getName(), theCriteriaBuilder, (From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity>) theFrom, theRequestPartitionId);
+					codePredicates.add(singleCode);
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException();
+		}
+
+		return theCriteriaBuilder.or(toArray(codePredicates));
 	}
 }

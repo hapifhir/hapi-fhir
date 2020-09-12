@@ -93,7 +93,6 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -215,7 +214,10 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(MedicationAdministration.SP_MEDICATION, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));
+		map.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
 		IBundleProvider results = myMedicationAdministrationDao.search(map);
+		myCaptureQueriesListener.logSelectQueries();
 		List<String> ids = toUnqualifiedIdValues(results);
 
 		assertThat(ids, contains(moId.getValue()));

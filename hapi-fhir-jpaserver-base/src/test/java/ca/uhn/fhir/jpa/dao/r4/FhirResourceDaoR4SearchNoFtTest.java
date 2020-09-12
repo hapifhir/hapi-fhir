@@ -118,7 +118,6 @@ import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -3403,9 +3402,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, retrieved.size().intValue());
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = myCaptureQueriesListener
 			.getSelectQueriesForCurrentThread()
 			.stream()

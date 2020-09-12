@@ -20,10 +20,17 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.lang3.Validate;
 
@@ -283,7 +290,28 @@ public class QueryStack {
 		return top().addNeverMatchingPredicate();
 	}
 
-	public <T extends BaseResourceIndexedSearchParam> From<T, T> addFrom(Class<T> theEntity) {
-		return top().addFrom(theEntity);
+	// FIXME KHS revert to subselect for odd cases
+	public From<?, ?> addFromOrReturnNull(RuntimeSearchParam theParam) {
+		// FIXME KHS partition predicate something like 		addPartitionIdPredicate(theRequestPartitionId, from, codePredicates);
+		switch(theParam.getParamType()) {
+			case STRING:
+				return top().addFromOrReturnNull(ResourceIndexedSearchParamString.class);
+			case DATE:
+				return top().addFromOrReturnNull(ResourceIndexedSearchParamDate.class);
+			case TOKEN:
+				if ("Location.position".equals(theParam.getPath())) {
+					return top().addFromOrReturnNull(ResourceIndexedSearchParamCoords.class);
+				} else {
+					return top().addFromOrReturnNull(ResourceIndexedSearchParamToken.class);
+				}
+			case QUANTITY:
+				return top().addFromOrReturnNull(ResourceIndexedSearchParamQuantity.class);
+			case NUMBER:
+				return top().addFromOrReturnNull(ResourceIndexedSearchParamNumber.class);
+			case URI:
+				return top().addFromOrReturnNull(ResourceIndexedSearchParamUri.class);
+			default:
+				return null;
+		}
 	}
 }

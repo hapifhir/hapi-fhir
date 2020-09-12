@@ -54,7 +54,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 		super(theSearchBuilder);
 	}
 
-	private Predicate createPredicateCoords(IQueryParameterType theParam,
+	Predicate createPredicateCoords(IQueryParameterType theParam,
 														 String theResourceName,
 														 RuntimeSearchParam theSearchParam,
 														 CriteriaBuilder theBuilder,

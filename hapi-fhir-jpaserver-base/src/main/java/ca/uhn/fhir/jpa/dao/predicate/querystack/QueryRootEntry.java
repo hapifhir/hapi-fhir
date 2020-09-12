@@ -123,5 +123,5 @@ abstract class QueryRootEntry {
 
 	abstract Subquery<Long> subqueryForTagNegation();
 
-	public abstract <T extends BaseResourceIndexedSearchParam> From<T, T> addFrom(Class<T> theEntity);
+	public abstract <T extends BaseResourceIndexedSearchParam> From<T, T> addFromOrReturnNull(Class<T> theEntity);
 }
