@@ -17,12 +17,10 @@ import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -167,7 +165,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(1, group.getElement().get(0).getTarget().size());
 		assertEquals("420710006", group.getElement().get(0).getTarget().get(0).getCode());
 		assertEquals("Interferon beta (substance)", group.getElement().get(0).getTarget().get(0).getDisplay());
-
+		
 		// Document Ontology ValueSet
 		vs = valueSets.get(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_ID);
 		assertEquals(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_NAME, vs.getName());
@@ -220,6 +218,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// RSNA Playbook - LOINC Part -> RadLex RID Mappings
 		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID);
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI, conceptMap.getUrl());
+		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
@@ -236,6 +235,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// RSNA Playbook - LOINC Term -> RadLex RPID Mappings
 		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID);
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI, conceptMap.getUrl());
+		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
@@ -302,6 +302,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		ourLog.debug(FhirContext.forCached(FhirVersionEnum.R4).newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME, conceptMap.getName());
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI, conceptMap.getUrl());
+		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(1, conceptMap.getGroup().size());
 		assertEquals(ITermLoaderSvc.LOINC_URI, conceptMap.getGroup().get(0).getSource());
 		assertEquals(ITermLoaderSvc.IEEE_11073_10101_URI, conceptMap.getGroup().get(0).getTarget());
