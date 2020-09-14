@@ -77,7 +77,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 		String extCodeSystemCopyrightNotice = trim(theRecord.get("ExtCodeSystemCopyrightNotice"));
 
 		// ConceptMap version from properties files
-		String loincIeeeCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		String loincPartMapVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		
 		Enumerations.ConceptMapEquivalence equivalence;
 		switch (trim(defaultString(mapType))) {
@@ -134,7 +134,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 			new ConceptMapping()
 				.setConceptMapId(loincPartMapId)
 				.setConceptMapUri(loincPartMapUri)
-				.setConceptMapVersion(loincIeeeCmVersion)
+				.setConceptMapVersion(loincPartMapVersion)
 				.setConceptMapName(loincPartMapName)
 				.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
 				.setSourceCode(partNumber)

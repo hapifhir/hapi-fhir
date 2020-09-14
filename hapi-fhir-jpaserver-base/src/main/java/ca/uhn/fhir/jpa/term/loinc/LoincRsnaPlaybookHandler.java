@@ -82,7 +82,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		String longName = trim(theRecord.get("LongName"));
 
 		// ConceptMap version from properties files
-		String loincIeeeCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		String loincRsnaCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		
 		// RSNA Codes VS
 		ValueSet vs;
@@ -180,7 +180,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 				new ConceptMapping()
 					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID)
 					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
-					.setConceptMapVersion(loincIeeeCmVersion)
+					.setConceptMapVersion(loincRsnaCmVersion)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
 					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
 					.setSourceCode(partNumber)
@@ -198,7 +198,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 				new ConceptMapping()
 					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID)
 					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
-					.setConceptMapVersion(loincIeeeCmVersion)
+					.setConceptMapVersion(loincRsnaCmVersion)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
 					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
 					.setSourceCode(loincNumber)
