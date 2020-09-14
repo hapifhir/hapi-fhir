@@ -104,7 +104,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	}
 
 	private EmpiTransactionContext createEmpiContext(ResourceModifiedMessage theMsg) {
-		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getParentTransactionGuid());
+		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getTransactionId());
 		EmpiTransactionContext.OperationType empiOperation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:

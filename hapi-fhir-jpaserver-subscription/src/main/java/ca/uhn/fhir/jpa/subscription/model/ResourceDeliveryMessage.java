@@ -40,36 +40,16 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	private CanonicalSubscription mySubscription;
 	@JsonProperty("payload")
 	private String myPayloadString;
-	@JsonIgnore
-	private transient IBaseResource myPayload;
 	@JsonProperty("payloadId")
 	private String myPayloadId;
-	@JsonProperty("parentTransactionGuid")
-	private String myParentTransactionGuid;
-	@JsonProperty("operationType")
-	private ResourceModifiedMessage.OperationTypeEnum myOperationType;
-
-	public String getParentTransactionGuid() {
-		return myParentTransactionGuid;
-	}
-
-	public void setParentTransactionGuid(String theParentTransactionGuid) {
-		myParentTransactionGuid = theParentTransactionGuid;
-	}
+	@JsonIgnore
+	private transient IBaseResource myPayload;
 
 	/**
 	 * Constructor
 	 */
 	public ResourceDeliveryMessage() {
 		super();
-	}
-
-	public ResourceModifiedMessage.OperationTypeEnum getOperationType() {
-		return myOperationType;
-	}
-
-	public void setOperationType(ResourceModifiedMessage.OperationTypeEnum theOperationType) {
-		myOperationType = theOperationType;
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
@@ -137,7 +117,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 			.append("myPayloadString", myPayloadString)
 			.append("myPayload", myPayload)
 			.append("myPayloadId", myPayloadId)
-			.append("myOperationType", myOperationType)
+			.append("myOperationType", getOperationType())
 			.toString();
 	}
 

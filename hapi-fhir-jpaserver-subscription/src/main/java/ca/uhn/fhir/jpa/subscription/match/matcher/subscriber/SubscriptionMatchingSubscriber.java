@@ -163,7 +163,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			deliveryMsg.setPayload(myFhirContext, payload, encoding);
 			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
-			deliveryMsg.setParentTransactionGuid(theMsg.getParentTransactionGuid());
+			deliveryMsg.setTransactionId(theMsg.getTransactionId());
 			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
 
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED

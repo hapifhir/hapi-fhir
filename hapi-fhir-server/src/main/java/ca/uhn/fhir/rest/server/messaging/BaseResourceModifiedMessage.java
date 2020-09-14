@@ -21,14 +21,10 @@ public class BaseResourceModifiedMessage extends BaseResourceMessage implements 
 
 	@JsonProperty("resourceId")
 	protected String myId;
-	@JsonProperty("operationType")
-	protected OperationTypeEnum myOperationType;
 	@JsonProperty("payload")
 	protected String myPayload;
 	@JsonProperty("payloadId")
 	protected String myPayloadId;
-	@JsonProperty("parentTransactionGuid")
-	protected String myParentTransactionGuid;
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
 
@@ -51,7 +47,7 @@ public class BaseResourceModifiedMessage extends BaseResourceMessage implements 
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		this(theFhirContext, theNewResource, theOperationType);
 		if (theRequest != null) {
-			setParentTransactionGuid(theRequest.getTransactionGuid());
+			setTransactionId(theRequest.getTransactionGuid());
 		}
 	}
 
@@ -97,27 +93,11 @@ public class BaseResourceModifiedMessage extends BaseResourceMessage implements 
 		return "";
 	}
 
-	public OperationTypeEnum getOperationType() {
-		return myOperationType;
-	}
-
-	public void setOperationType(OperationTypeEnum theOperationType) {
-		myOperationType = theOperationType;
-	}
-
 	public void setId(IIdType theId) {
 		myId = null;
 		if (theId != null) {
 			myId = theId.getValue();
 		}
-	}
-
-	public String getParentTransactionGuid() {
-		return myParentTransactionGuid;
-	}
-
-	public void setParentTransactionGuid(String theParentTransactionGuid) {
-		myParentTransactionGuid = theParentTransactionGuid;
 	}
 
 	protected void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
@@ -139,13 +119,6 @@ public class BaseResourceModifiedMessage extends BaseResourceMessage implements 
 		 */
 		myPayload = theCtx.newJsonParser().encodeResourceToString(theNewPayload);
 		myPayloadId = theNewPayload.getIdElement().toUnqualified().getValue();
-	}
-
-	public enum OperationTypeEnum {
-		CREATE,
-		UPDATE,
-		DELETE,
-		MANUALLY_TRIGGERED
 	}
 
 	protected static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {
