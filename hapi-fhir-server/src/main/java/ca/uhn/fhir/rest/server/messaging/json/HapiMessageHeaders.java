@@ -8,6 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class is for holding headers for BaseJsonMessages. Any serializable data can be thrown into
+ * the header map. There are also three special headers, defined by the constants in this class, which are for use
+ * in message handling retrying. There are also matching helper functions for fetching those special variables; however
+ * they can also be accessed in standard map fashion with a `get` on the map.
+ */
 public class HapiMessageHeaders implements Map<String, Object>, IModelJson {
     public static String RETRY_COUNT_HEADER = "retryCount";
     public static String FIRST_FAILURE_HEADER = "firstFailure";
@@ -100,7 +106,11 @@ public class HapiMessageHeaders implements Map<String, Object>, IModelJson {
     public Map<String, Object> getHeaders() {
         return this.headers;
     }
-    public void initializeDefaultRetryValues() {
+
+	/**
+	 * Sets deffault values for the special headers that HAPI cares about during retry.
+	 */
+	public void initializeDefaultRetryValues() {
         headers.put(RETRY_COUNT_HEADER, 0);
         headers.put(FIRST_FAILURE_HEADER, null);
         headers.put(LAST_FAILURE_HEADER, null);
