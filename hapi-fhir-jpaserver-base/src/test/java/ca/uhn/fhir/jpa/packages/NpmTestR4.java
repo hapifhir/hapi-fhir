@@ -433,6 +433,21 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 	}
 
+
+	@Test
+	public void testInstallPkgContainingSearchParameter() throws IOException {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] contents0111 = loadClasspathBytes("/packages/test-exchange-sample.tgz");
+		myFakeNpmServlet.myResponses.put("/test-exchange.fhir.us.com/2.1.1", contents0111);
+
+		// Install older version
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		igInstaller.install(spec);
+
+	}
+
+
 	@Test
 	public void testLoadContents() throws IOException {
 		byte[] contents0111 = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
