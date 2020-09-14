@@ -59,7 +59,6 @@ public class EmpiMessageHandler implements MessageHandler {
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
 		ourLog.info("Handling resource modified message: {}", theMessage);
 
-		//TODO GGG TEST THAT THE MESSAGE HEADERS COME IN HERE
 		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
 			return;

@@ -31,7 +31,6 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
 
-
 	/**
 	 * Constructor
 	 */
