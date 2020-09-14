@@ -106,6 +106,13 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	/**
+	 * Set Organization.name
+	 */
+	default Consumer<IBaseResource> withName(String theStatus) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "name", "string", theStatus);
+	}
+
 	default Consumer<IBaseResource> withId(String theId) {
 		return t -> {
 			assertThat(theId, matchesPattern("[a-zA-Z0-9]+"));
@@ -127,6 +134,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createPatient(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Patient", theModifiers);
+	}
+
+	default IIdType createOrganization(Consumer<IBaseResource>... theModifiers) {
+		return createResource("Organization", theModifiers);
 	}
 
 	default IIdType createResource(String theResourceType, Consumer<IBaseResource>[] theModifiers) {
@@ -151,6 +162,30 @@ public interface ITestDataBuilder {
 
 				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
 				resourceDef.getChildByName("subject").getMutator().addValue(t, reference);
+			}
+		};
+	}
+
+	default  Consumer<IBaseResource> withObservationHasMember(@Nullable IIdType theHasMember) {
+		return t -> {
+			if (theHasMember != null) {
+				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
+				reference.setReference(theHasMember.getValue());
+
+				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+				resourceDef.getChildByName("hasMember").getMutator().addValue(t, reference);
+			}
+		};
+	}
+
+	default  Consumer<IBaseResource> withOrganization(@Nullable IIdType theHasMember) {
+		return t -> {
+			if (theHasMember != null) {
+				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
+				reference.setReference(theHasMember.getValue());
+
+				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+				resourceDef.getChildByName("managingOrganization").getMutator().addValue(t, reference);
 			}
 		};
 	}
