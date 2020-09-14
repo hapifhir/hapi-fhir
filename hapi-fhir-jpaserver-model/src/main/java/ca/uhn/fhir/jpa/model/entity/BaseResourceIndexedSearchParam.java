@@ -71,11 +71,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@ContainedIn
 	private ResourceTable myResource;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
-	@ContainedIn
-	private ResourceLink myTargetResourceLink;
-
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
 

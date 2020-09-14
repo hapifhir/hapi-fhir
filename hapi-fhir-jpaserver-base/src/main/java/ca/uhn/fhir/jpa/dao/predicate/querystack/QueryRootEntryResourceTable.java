@@ -130,10 +130,9 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	@SuppressWarnings("unchecked")
 	@Override
 	<T> From<?, T> createJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName) {
-		From<?, ?> fromTable;
-		if (theLinkJoin == null) {
-			fromTable = myResourceTableRoot;
-		} else {
+		From<?, ?> fromTable = myResourceTableRoot;
+
+		if (theLinkJoin != null) {
 			fromTable = theLinkJoin;
 		}
 

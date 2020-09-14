@@ -65,12 +65,12 @@ public class PredicateBuilder {
 		myPredicateBuilderUri = thePredicateBuilderFactory.newPredicateBuilderUri(theSearchBuilder);
 	}
 
-	void addLinkPredicateCoords(String theResourceName, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theNextAnd, From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
-		myPredicateBuilderCoords.addPredicate(theResourceName, theSearchParam, theNextAnd, null, theLinkJoin, theRequestPartitionId);
+	Predicate addLinkPredicateCoords(String theResourceName, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theNextAnd, From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderCoords.addPredicate(theResourceName, theSearchParam, theNextAnd, null, theLinkJoin, theRequestPartitionId);
 	}
 
-	void addPredicateCoords(String theResourceName, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
-		myPredicateBuilderCoords.addPredicate(theResourceName, theSearchParam, theNextAnd, null, null, theRequestPartitionId);
+	Predicate addPredicateCoords(String theResourceName, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
+		return myPredicateBuilderCoords.addPredicate(theResourceName, theSearchParam, theNextAnd, null, null, theRequestPartitionId);
 	}
 
 	Predicate addLinkPredicateDate(String theResourceName, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theNextAnd, SearchFilterParser.CompareOperation theOperation, From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
@@ -163,5 +163,29 @@ public class PredicateBuilder {
 
 	Predicate createPredicateQuantity(IQueryParameterType theLeftValue, String theResourceName, String theName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> theDateJoin, RequestPartitionId theRequestPartitionId) {
 		return myPredicateBuilderQuantity.createPredicateQuantity(theLeftValue, theResourceName, theName, theBuilder, theDateJoin, theRequestPartitionId);
+	}
+
+	public Predicate addLinkPredicate(String theResourceName, RuntimeSearchParam theParamDef, List<IQueryParameterType> theOrValues,  SearchFilterParser.CompareOperation theOperation, From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+		switch (theParamDef.getParamType()) {
+			case DATE:
+				return addLinkPredicateDate(theResourceName, theParamDef, theOrValues, theOperation, theLinkJoin, theRequestPartitionId);
+			case NUMBER:
+				return addLinkPredicateNumber(theResourceName, theParamDef, theOrValues, theOperation, theLinkJoin, theRequestPartitionId);
+			case QUANTITY:
+				return addLinkPredicateQuantity(theResourceName, theParamDef, theOrValues, theOperation, theLinkJoin, theRequestPartitionId);
+			case STRING:
+				return addLinkPredicateString(theResourceName, theParamDef, theOrValues, theOperation, theLinkJoin, theRequestPartitionId);
+			case TOKEN:
+					if ("Location.position".equals(theParamDef.getPath())) {
+						return addLinkPredicateCoords(theResourceName, theParamDef, theOrValues, theLinkJoin, theRequestPartitionId);
+					} else {
+						return addLinkPredicateToken(theResourceName, theParamDef, theOrValues, theOperation, theLinkJoin, theRequestPartitionId);
+					}
+			case URI:
+				return addLinkPredicateUri(theResourceName, theParamDef, theOrValues, theOperation, theLinkJoin, theRequestPartitionId);
+			default:
+				throw new UnsupportedOperationException("Chain search on type " + theParamDef.getParamType() +
+					" is not supported: " + theResourceName + "." + theParamDef.getName());
+		}
 	}
 }

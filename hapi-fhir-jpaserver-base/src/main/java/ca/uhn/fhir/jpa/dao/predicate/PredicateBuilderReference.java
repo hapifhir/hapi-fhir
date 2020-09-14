@@ -344,7 +344,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					// FIXME hardcode token for now
 //					Join<ResourceLink, ResourceTable> linkTargetJoin = theLinkJoin.join("myParamsToken", JoinType.LEFT);
 					RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-					Predicate valuesPredicate = myPredicateBuilder.addLinkPredicateToken(theResourceName, paramDef, orValues, null, theLinkJoin, theRequestPartitionId);
+					Predicate valuesPredicate = myPredicateBuilder.addLinkPredicate(theResourceName, paramDef, orValues, null, theLinkJoin, theRequestPartitionId);
 					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
 					theCodePredicates.add(pathPredicate);
 					candidateTargetTypes.add(nextType);

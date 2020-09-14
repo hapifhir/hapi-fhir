@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -94,32 +93,32 @@ public class ResourceLink extends BaseResourceIndex {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
-	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
 
-	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
-	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
 
-	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
 	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
 
-	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
 
-	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
 	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
 
-	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
 	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
 
 	@Transient
