@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
@@ -128,54 +129,62 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	<T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
+	<T> From<?, T> createJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName) {
+		From<?, ?> fromTable;
+		if (theLinkJoin == null) {
+			fromTable = myResourceTableRoot;
+		} else {
+			fromTable = theLinkJoin;
+		}
+
 		Join<?,?> join = null;
 		switch (theType) {
 			case DATE:
-				join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
+				join = fromTable.join("myParamsDate", JoinType.LEFT);
 				break;
 			case NUMBER:
-				join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
+				join = fromTable.join("myParamsNumber", JoinType.LEFT);
 				break;
 			case QUANTITY:
-				join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
+				join = fromTable.join("myParamsQuantity", JoinType.LEFT);
 				break;
 			case REFERENCE:
-				join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
+				join = fromTable.join("myResourceLinks", JoinType.LEFT);
 				break;
 			case STRING:
-				join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
+				join = fromTable.join("myParamsString", JoinType.LEFT);
 				break;
 			case URI:
-				join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
+				join = fromTable.join("myParamsUri", JoinType.LEFT);
 				break;
 			case TOKEN:
-				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
+				join = fromTable.join("myParamsToken", JoinType.LEFT);
 				break;
 			case COORDS:
-				join = myResourceTableRoot.join("myParamsCoords", JoinType.LEFT);
+				join = fromTable.join("myParamsCoords", JoinType.LEFT);
 				break;
 			case HAS:
-				join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
+				join = fromTable.join("myResourceLinksAsTarget", JoinType.LEFT);
 				break;
 			case PROVENANCE:
-				join = myResourceTableRoot.join("myProvenance", JoinType.LEFT);
+				join = fromTable.join("myProvenance", JoinType.LEFT);
 				break;
 			case FORCED_ID:
-				join = myResourceTableRoot.join("myForcedId", JoinType.LEFT);
+				join = fromTable.join("myForcedId", JoinType.LEFT);
 				break;
 			case PRESENCE:
-				join = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
+				join = fromTable.join("mySearchParamPresents", JoinType.LEFT);
 				break;
 			case COMPOSITE_UNIQUE:
-				join = myResourceTableRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+				join = fromTable.join("myParamsCompositeStringUnique", JoinType.LEFT);
 				break;
 			case RESOURCE_TAGS:
-				join = myResourceTableRoot.join("myTags", JoinType.LEFT);
+				join = fromTable.join("myTags", JoinType.LEFT);
 				break;
 
 		}
 
+		// FIXME KHS is this okay with the join variance?
 		SearchBuilderJoinKey key = new SearchBuilderJoinKey(theSearchParameterName, theType);
 		putIndex(key, join);
 

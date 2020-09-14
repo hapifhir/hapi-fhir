@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -53,10 +54,10 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-											RuntimeSearchParam theSearchParam,
-											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation theOperation,
-											RequestPartitionId theRequestPartitionId) {
+                                  RuntimeSearchParam theSearchParam,
+                                  List<? extends IQueryParameterType> theList,
+                                  SearchFilterParser.CompareOperation theOperation,
+                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		From<?, ResourceIndexedSearchParamQuantity> join = myQueryStack.createJoin(SearchBuilderJoinEnum.QUANTITY, theSearchParam.getName());
 

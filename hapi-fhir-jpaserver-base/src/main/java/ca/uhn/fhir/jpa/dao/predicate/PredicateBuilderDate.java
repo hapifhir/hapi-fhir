@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -57,10 +58,10 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-											RuntimeSearchParam theSearchParam,
-											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation,
-											RequestPartitionId theRequestPartitionId) {
+                                  RuntimeSearchParam theSearchParam,
+                                  List<? extends IQueryParameterType> theList,
+                                  SearchFilterParser.CompareOperation theOperation,
+                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
 		boolean newJoin = false;
@@ -88,7 +89,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			Predicate p = createPredicateDate(nextOr,
 				myCriteriaBuilder,
 				join,
-				operation
+                    theOperation
 			);
 			codePredicates.add(p);
 		}
