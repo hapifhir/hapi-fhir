@@ -11,8 +11,11 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -22,7 +25,13 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ImplementationGuide;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
@@ -230,7 +239,6 @@ public class NpmTestR4 extends BaseJpaR4Test {
 	}
 
 
-
 	@Test
 	public void testInstallR4PackageWithNoDescription() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
@@ -433,7 +441,6 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testInstallPkgContainingSearchParameter() throws IOException {
 		myDaoConfig.setAllowExternalReferences(true);
@@ -441,12 +448,45 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		byte[] contents0111 = loadClasspathBytes("/packages/test-exchange-sample.tgz");
 		myFakeNpmServlet.myResponses.put("/test-exchange.fhir.us.com/2.1.1", contents0111);
 
+		contents0111 = loadClasspathBytes("/packages/test-exchange-sample-2.tgz");
+		myFakeNpmServlet.myResponses.put("/test-exchange.fhir.us.com/2.1.2", contents0111);
+
 		// Install older version
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		igInstaller.install(spec);
 
-	}
+		IBundleProvider spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
+		assertEquals(1, spSearch.sizeOrThrowNpe());
+		SearchParameter sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
+		assertEquals("network-id", sp.getCode());
+		assertEquals("2.1", sp.getVersion());
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
 
+		Organization org = new Organization();
+		org.setName("Hello");
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		PractitionerRole pr = new PractitionerRole();
+		pr.addExtension().setUrl("http://test-exchange.com/fhir/us/providerdataexchange/StructureDefinition/networkreference").setValue(new Reference(orgId));
+		myPractitionerRoleDao.create(pr);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous("network-id", new ReferenceParam(orgId.getValue()));
+		spSearch = myPractitionerRoleDao.search(map);
+		assertEquals(1, spSearch.sizeOrThrowNpe());
+		
+		// Install newer version
+		spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		igInstaller.install(spec);
+
+		spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
+		assertEquals(1, spSearch.sizeOrThrowNpe());
+		sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
+		assertEquals("network-id", sp.getCode());
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
+		assertEquals("2.2", sp.getVersion());
+
+	}
+	
 
 	@Test
 	public void testLoadContents() throws IOException {
