@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -36,11 +37,13 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import java.util.Collection;
 import java.util.Date;
 
 @Entity
@@ -90,6 +93,11 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
+
+	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
+
 	@Transient
 	private transient String myTargetResourceId;
 
