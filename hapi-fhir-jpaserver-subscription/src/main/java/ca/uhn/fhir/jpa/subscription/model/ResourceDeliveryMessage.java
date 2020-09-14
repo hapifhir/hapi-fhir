@@ -43,7 +43,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	@JsonProperty("payloadId")
 	private String myPayloadId;
 	@JsonIgnore
-	private transient IBaseResource myPayload;
+	private transient IBaseResource myPayloadDecoded;
 
 	/**
 	 * Constructor
@@ -53,11 +53,11 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
-		IBaseResource retVal = myPayload;
+		IBaseResource retVal = myPayloadDecoded;
 		if (retVal == null && isNotBlank(myPayloadString)) {
 			IParser parser = EncodingEnum.detectEncoding(myPayloadString).newParser(theCtx);
 			retVal = parser.parseResource(myPayloadString);
-			myPayload = retVal;
+			myPayloadDecoded = retVal;
 		}
 		return retVal;
 	}
@@ -115,7 +115,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		return new ToStringBuilder(this)
 			.append("mySubscription", mySubscription)
 			.append("myPayloadString", myPayloadString)
-			.append("myPayload", myPayload)
+			.append("myPayload", myPayloadDecoded)
 			.append("myPayloadId", myPayloadId)
 			.append("myOperationType", getOperationType())
 			.toString();
