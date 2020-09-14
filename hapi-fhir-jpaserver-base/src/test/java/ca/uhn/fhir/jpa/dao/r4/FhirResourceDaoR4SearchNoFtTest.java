@@ -4131,8 +4131,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		IBundleProvider values = myPatientDao.search(map);
-		// FIXME what should the size be if hitting fetch limit?
-		//assertEquals(5, values.size().intValue());
+		assertEquals(null, values.size());
 		assertEquals(5, values.getResources(0, 1000).size());
 	}
 

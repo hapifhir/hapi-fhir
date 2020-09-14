@@ -378,6 +378,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (theCount) {
 				myQueryStack.pushResourceTableCountQuery();
+			} else if (myParams.getEverythingMode() != null && myParams.isLoadSynchronous()) {
+				myQueryStack.pushResourceTableDistinctQuery();
 			} else {
 				myQueryStack.pushResourceTableQuery();
 			}

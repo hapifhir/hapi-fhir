@@ -2655,7 +2655,6 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	// TODO What does this mean? The size in the result is actually wrong if we are hitting the fetchSizeDefaultMaximum?
 	public void testSearchWithFetchSizeDefaultMaximum() {
 		myDaoConfig.setFetchSizeDefaultMaximum(5);
 
@@ -2668,8 +2667,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		IBundleProvider values = myPatientDao.search(map);
-		// FIXME what should the size be if hitting fetch limit?
-		//assertEquals(5, values.size().intValue());
+		assertEquals(null, values.size());
 		assertEquals(5, values.getResources(0, 1000).size());
 	}
 
