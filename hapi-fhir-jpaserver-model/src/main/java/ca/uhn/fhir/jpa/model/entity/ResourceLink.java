@@ -96,7 +96,31 @@ public class ResourceLink extends BaseResourceIndex {
 
 	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
+
+	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
+
+	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
+
+	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
+
+	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamString> myParamsString;
+
+	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
+
+	@OneToMany(mappedBy = "myTargetResourceLink", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
 
 	@Transient
 	private transient String myTargetResourceId;
