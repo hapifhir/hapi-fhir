@@ -15,9 +15,9 @@ import java.util.Set;
  * they can also be accessed in standard map fashion with a `get` on the map.
  */
 public class HapiMessageHeaders implements Map<String, Object>, IModelJson {
-    public static String RETRY_COUNT_HEADER = "retryCount";
-    public static String FIRST_FAILURE_HEADER = "firstFailure";
-    public static String LAST_FAILURE_HEADER = "lastFailure";
+    public static String RETRY_COUNT_KEY = "retryCount";
+    public static String FIRST_FAILURE_KEY = "firstFailure";
+    public static String LAST_FAILURE_KEY = "lastFailure";
 
     private final Map<String, Object> headers;
 
@@ -91,16 +91,16 @@ public class HapiMessageHeaders implements Map<String, Object>, IModelJson {
     }
 
     public Integer getRetryCount() {
-        return (Integer)this.getHeaders().get(RETRY_COUNT_HEADER);
+        return (Integer)this.getHeaders().get(RETRY_COUNT_KEY);
     }
 
     public Date getFirstFailureDate() {
-        return (Date)this.getHeaders().get(FIRST_FAILURE_HEADER);
+        return (Date)this.getHeaders().get(FIRST_FAILURE_KEY);
 
     }
 
     public Date getLastFailureDate() {
-        return (Date)this.getHeaders().get(LAST_FAILURE_HEADER);
+        return (Date)this.getHeaders().get(LAST_FAILURE_KEY);
 
     }
     public Map<String, Object> getHeaders() {
@@ -111,8 +111,8 @@ public class HapiMessageHeaders implements Map<String, Object>, IModelJson {
 	 * Sets deffault values for the special headers that HAPI cares about during retry.
 	 */
 	public void initializeDefaultRetryValues() {
-        headers.put(RETRY_COUNT_HEADER, 0);
-        headers.put(FIRST_FAILURE_HEADER, null);
-        headers.put(LAST_FAILURE_HEADER, null);
+        headers.put(RETRY_COUNT_KEY, 0);
+        headers.put(FIRST_FAILURE_KEY, null);
+        headers.put(LAST_FAILURE_KEY, null);
     }
 }

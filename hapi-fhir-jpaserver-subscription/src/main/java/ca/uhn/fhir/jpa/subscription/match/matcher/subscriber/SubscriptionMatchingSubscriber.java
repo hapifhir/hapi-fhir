@@ -79,7 +79,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
-		//TODO ADD BACKPORT FOR HANDLING OLD LEGACY SUBSCRIPTIONS HERE
 		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
 			return;
