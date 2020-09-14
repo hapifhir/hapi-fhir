@@ -23,7 +23,6 @@ package ca.uhn.fhir.rest.server.messaging.json;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.messaging.MessageHeaders;
 
 public class BaseResourceModifiedJsonMessage extends BaseJsonMessage<BaseResourceModifiedMessage> {
 
@@ -46,7 +45,7 @@ public class BaseResourceModifiedJsonMessage extends BaseJsonMessage<BaseResourc
 		setDefaultRetryHeaders();
 	}
 
-	public BaseResourceModifiedJsonMessage(MessageHeaders theRetryMessageHeaders, BaseResourceModifiedMessage thePayload) {
+	public BaseResourceModifiedJsonMessage(HapiMessageHeaders theRetryMessageHeaders, BaseResourceModifiedMessage thePayload) {
 		myPayload = thePayload;
 		setHeaders(theRetryMessageHeaders);
 	}
