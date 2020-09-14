@@ -25,21 +25,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	private static final long serialVersionUID = 1L;
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
 
-	private String RETRY_COUNT_HEADER = "retryCount";
-	private String FIRST_FAILURE_HEADER = "firstFailure";
-	private String LAST_FAILURE_HEADER = "lastFailure";
 
 	/**
 	 * Constructor
@@ -48,86 +39,10 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 		super();
 		setDefaultRetryHeaders();
 	}
-	public static class HapiMessageHeaders implements Map<String, Object>{
-
-		private final Map<String, Object> headers;
-
-		public HapiMessageHeaders(Map<String, Object> theHeaders) {
-			headers = theHeaders;
-		}
-
-		public HapiMessageHeaders() {
-			headers = new HashMap<>();
-		}
-
-
-		@Override
-		public int size() {
-			return this.headers.size();
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return this.headers.isEmpty();
-		}
-
-		@Override
-		public boolean containsKey(Object key) {
-			return this.headers.containsKey(key);
-		}
-
-		@Override
-		public boolean containsValue(Object value) {
-			return this.headers.containsValue(value);
-		}
-
-		@Override
-		public Object get(Object key) {
-			 return this.headers.get(key);
-		}
-
-		@Override
-		public Object put(String key, Object value) {
-			return this.headers.put(key, value);
-		}
-
-		@Override
-		public Object remove(Object key) {
-			return this.headers.remove(key);
-		}
-
-		@Override
-		public void putAll(Map<? extends String, ?> m) {
-			this.headers.putAll(m);
-		}
-
-		@Override
-		public void clear() {
-			this.headers.clear();
-		}
-
-		@Override
-		public Set<String> keySet() {
-			return this.headers.keySet();
-		}
-
-		@Override
-		public Collection<Object> values() {
-			return this.headers.values();
-		}
-
-		@Override
-		public Set<Entry<String, Object>> entrySet() {
-			return this.headers.entrySet();
-		}
-	}
 
 	protected void setDefaultRetryHeaders() {
-		Map<String, Object> headers = new HashMap<>();
-		headers.put(RETRY_COUNT_HEADER, 0);
-		headers.put(FIRST_FAILURE_HEADER, null);
-		headers.put(LAST_FAILURE_HEADER, null);
-		HapiMessageHeaders messageHeaders = new HapiMessageHeaders(headers);
+		HapiMessageHeaders messageHeaders = new HapiMessageHeaders();
+		messageHeaders.initializeDefaultRetryValues();
 		setHeaders(messageHeaders);
 	}
 
@@ -140,22 +55,6 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 		return myHeaders;
 	}
 
-	public final Integer getRetryCount() {
-		//TODO GGG this is not NPE-safe
-		return (Integer)this.getHeaders().get(RETRY_COUNT_HEADER);
-	}
-
-	public final Date getFirstFailureDate() {
-		//TODO GGG this is not NPE-safe
-		return (Date)this.getHeaders().get(FIRST_FAILURE_HEADER);
-
-	}
-
-	public final Date getLastFailureDate() {
-		//TODO GGG this is not NPE-safe
-		return (Date)this.getHeaders().get(LAST_FAILURE_HEADER);
-
-	}
 
 	public void setHeaders(HapiMessageHeaders theHeaders) {
 		myHeaders = theHeaders;
