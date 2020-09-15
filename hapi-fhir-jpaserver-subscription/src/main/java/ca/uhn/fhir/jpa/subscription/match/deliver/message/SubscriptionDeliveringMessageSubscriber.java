@@ -63,7 +63,6 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	}
 
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, IBaseResource thePayloadResource) {
-		//TODO GGG/KHS Question: is this the point at which we can use a BaseResourceModifiedMessage, since technically we no longer have need of a subscriptionId?
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		payload.setTransactionId(theMsg.getTransactionId());
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(payload);

@@ -5,7 +5,7 @@ import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.rest.server.messaging.json.BaseResourceModifiedJsonMessage;
+import ca.uhn.fhir.rest.server.messaging.json.ConcreteResourceModifiedJsonMessage;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class EmpiQueueConsumerLoader {
 		if (myEmpiChannel == null) {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
 			config.setConcurrentConsumers(myEmpiSettings.getConcurrentConsumers());
-			myEmpiChannel = myChannelFactory.getOrCreateReceiver(IEmpiSettings.EMPI_CHANNEL_NAME, BaseResourceModifiedJsonMessage.class, config);
+			myEmpiChannel = myChannelFactory.getOrCreateReceiver(IEmpiSettings.EMPI_CHANNEL_NAME, ConcreteResourceModifiedJsonMessage.class, config);
 		}
 
 		if (myEmpiChannel != null) {

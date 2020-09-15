@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.messaging;
 
-import ca.uhn.fhir.rest.server.messaging.json.BaseResourceModifiedJsonMessage;
+import ca.uhn.fhir.rest.server.messaging.json.ConcreteResourceModifiedJsonMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -12,15 +12,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-class BaseResourceModifiedMessageTest {
+class ConcreteResourceModifiedMessageTest {
 
 	@Test
 	public void testSerializationAndDeserializationOfResourceModifiedMessage() throws JsonProcessingException {
-		BaseResourceModifiedJsonMessage jsonMessage = new BaseResourceModifiedJsonMessage();
-		jsonMessage.setPayload(new BaseResourceModifiedMessage());
+		ConcreteResourceModifiedJsonMessage jsonMessage = new ConcreteResourceModifiedJsonMessage();
+		jsonMessage.setPayload(new ConcreteResourceModifiedMessage());
 		ObjectMapper mapper = new ObjectMapper();
 		String serialized = mapper.writeValueAsString(jsonMessage);
-		jsonMessage = mapper.readValue(serialized, BaseResourceModifiedJsonMessage.class);
+		jsonMessage = mapper.readValue(serialized, ConcreteResourceModifiedJsonMessage.class);
 
 		assertThat(jsonMessage.getHapiHeaders().getRetryCount(), is(equalTo(0)));
 		assertThat(jsonMessage.getHapiHeaders().getFirstFailureDate(), is(equalTo(null)));

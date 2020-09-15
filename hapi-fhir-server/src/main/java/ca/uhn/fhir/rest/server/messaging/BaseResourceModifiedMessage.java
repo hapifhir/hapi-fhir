@@ -17,7 +17,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class BaseResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
+public abstract class BaseResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
 
 	@JsonProperty("resourceId")
 	protected String myId;
