@@ -860,7 +860,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 			// ...
 
-//			concept = termValueSetVersion.getConcepts().get(22);
 			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
@@ -876,7 +875,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			assertEquals("Synonym", designation.getUseDisplay());
 			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
-//			concept = termValueSetVersion.getConcepts().get(23);
 			concept = termValueSet.getConcepts().get(23);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
