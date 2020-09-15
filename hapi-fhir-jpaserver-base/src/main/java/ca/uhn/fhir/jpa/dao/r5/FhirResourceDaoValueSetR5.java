@@ -65,9 +65,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Autowired
-	private ITermReadSvc myHapiTerminologySvc;
-
-	@Autowired
 	@Qualifier("myDefaultProfileValidationSupport")
 	private IValidationSupport myDefaultProfileValidationSupport;
 
@@ -267,9 +264,9 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 		if (myDaoConfig.isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
-				myHapiTerminologySvc.storeTermValueSet(retVal, org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSet));
+				myTerminologySvc.storeTermValueSet(retVal, org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSet));
 			} else {
-				myHapiTerminologySvc.deleteValueSetAndChildren(retVal);
+				myTerminologySvc.deleteValueSetAndChildren(retVal);
 			}
 		}
 

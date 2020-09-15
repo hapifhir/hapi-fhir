@@ -332,7 +332,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		deleteConceptMap(theResourceTable);
 	}
 
-	public void deleteValueSet(ResourceTable theResourceTable) {
+	public void deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
 		Optional<TermValueSet> optionalExistingTermValueSetById = myValueSetDao.findByResourcePid(theResourceTable.getId());
 
@@ -350,7 +350,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	@Transactional
 	public void deleteValueSetAndChildren(ResourceTable theResourceTable) {
-		deleteValueSet(theResourceTable);
+		deleteValueSetForResource(theResourceTable);
 	}
 
 	private ValueSet expandValueSetInMemory(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull) {
@@ -392,7 +392,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasUrl()) {
-			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
+			if (theValueSetToExpand.hasVersion()) {
+				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
+			} else {
+				List<TermValueSet> termValueSets = myValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 1), theValueSetToExpand.getUrl());
+				optionalTermValueSet = Optional.of(termValueSets.get(0));
+			}
 		} else {
 			optionalTermValueSet = Optional.empty();
 		}
@@ -1795,37 +1800,51 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
 
+		/*
+		 * Get CodeSystem and validate CodeSystemVersion
+		 */
 		TermValueSet termValueSet = new TermValueSet();
 		termValueSet.setResource(theResourceTable);
 		termValueSet.setUrl(theValueSet.getUrl());
+		termValueSet.setVersion(theValueSet.getVersion());
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
 
-		// We delete old versions; we don't support versioned ValueSets.
-		deleteValueSet(theResourceTable);
+		// Delete version being replaced
+		deleteValueSetForResource(theResourceTable);
 
 		/*
 		 * Do the upload.
 		 */
 		String url = termValueSet.getUrl();
-		Optional<TermValueSet> optionalExistingTermValueSetByUrl = myValueSetDao.findByUrl(url);
+		String version = termValueSet.getVersion();
+		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
+		if (version != null) {
+			optionalExistingTermValueSetByUrl = myValueSetDao.findTermValueSetByUrlAndVersion(url, version);
+		} else {
+			optionalExistingTermValueSetByUrl = myValueSetDao.findTermValueSetByUrlAndNullVersion(url);
+		}
 		if (!optionalExistingTermValueSetByUrl.isPresent()) {
 
-			termValueSet = myValueSetDao.save(termValueSet);
+			myValueSetDao.save(termValueSet);
 
 		} else {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
-
-			String msg = myContext.getLocalizer().getMessage(
-				BaseTermReadSvcImpl.class,
-				"cannotCreateDuplicateValueSetUrl",
-				url,
-				existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-
+			String msg;
+			if (version != null) {
+				msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+					"cannotCreateDuplicateValueSetUrlAndVersion",
+					url, version, existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			} else {
+				msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+					"cannotCreateDuplicateValueSetUrl",
+					url, existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			}
 			throw new UnprocessableEntityException(msg);
 		}
-
-		ourLog.info("Done storing TermValueSet[{}] for {}", termValueSet.getId(), theValueSet.getIdElement().toVersionless().getValueAsString());
 	}
+
 
 	@Override
 	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,

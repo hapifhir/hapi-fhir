@@ -66,9 +66,6 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoValueSetDstu3.class);
 
 	@Autowired
-	private ITermReadSvc myHapiTerminologySvc;
-
-	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	private IValidationSupport myValidationSupport;
@@ -283,12 +280,12 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 				try {
 					ValueSet valueSet = (ValueSet) theResource;
 					org.hl7.fhir.r4.model.ValueSet converted = convertValueSet(valueSet);
-					myHapiTerminologySvc.storeTermValueSet(retVal, converted);
+					myTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
 					throw new InternalErrorException(fe);
 				}
 			} else {
-				myHapiTerminologySvc.deleteValueSetAndChildren(retVal);
+				myTerminologySvc.deleteValueSetAndChildren(retVal);
 			}
 		}
 

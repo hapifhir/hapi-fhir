@@ -63,6 +63,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		codeSystem.setName("SYSTEM NAME");
+		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
@@ -116,6 +117,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	private void createCodeSystem2() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL_2);
+		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
@@ -135,6 +137,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		runInTransaction(() -> {
 			CodeSystem codeSystem = new CodeSystem();
 			codeSystem.setUrl(LOINC_URI);
+			codeSystem.setVersion("SYSTEM VERSION");
 			codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 			IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
@@ -204,6 +207,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void testCreateDuplicateCodeSystemUri() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
+		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
@@ -226,12 +230,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Try to update to a different resource
 		codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
+		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		try {
 			myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/"));
+			assertThat(e.getMessage(), containsString("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"SYSTEM VERSION\", already have one with resource ID: CodeSystem/"));
 		}
 
 	}
@@ -1813,6 +1818,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void testStoreCodeSystemInvalidCyclicLoop() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
+		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
@@ -1834,7 +1840,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		child.addChild(parent, RelationshipTypeEnum.ISA);
 
 		try {
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), "http://foo", "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
@@ -1948,6 +1954,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://codesystems-r-us");
+		cs.setVersion("SYSTEM VERSION");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		IIdType csId = myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
 

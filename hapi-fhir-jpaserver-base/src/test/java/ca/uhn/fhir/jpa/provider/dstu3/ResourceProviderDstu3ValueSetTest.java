@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -37,7 +36,6 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -137,6 +135,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		runInTransaction(() -> {
 			CodeSystem codeSystem = new CodeSystem();
 			codeSystem.setUrl(CS_URL);
+			codeSystem.setVersion("SYSTEM VERSION");
 			codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 			IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
@@ -823,7 +822,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		codeSystem.setName("ACME Codes");
-		codeSystem.setVersion("1.2.3.4");
+		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
 		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);

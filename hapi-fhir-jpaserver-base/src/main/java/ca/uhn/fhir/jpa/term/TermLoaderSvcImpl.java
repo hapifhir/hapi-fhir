@@ -381,6 +381,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			String  codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 			if (codeSystemVersionId != null) {
 				loincCs.setVersion(codeSystemVersionId);
+				loincCs.setId(loincCs.getId() + "-" + codeSystemVersionId);
 			}
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load loinc.xml", e);

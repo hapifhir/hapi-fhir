@@ -61,9 +61,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Autowired
-	private ITermReadSvc myHapiTerminologySvc;
-
-	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	private IValidationSupport myValidationSupport;
@@ -113,17 +110,14 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
 
-//		source.getCompose().addInclude().addValueSet(theUri);
+		source.getCompose().addInclude().addValueSet(theUri);
 
 		if (isNotBlank(theFilter)) {
-//			ConceptSetComponent include = source.getCompose().addInclude();
-//			ConceptSetFilterComponent filter = include.addFilter();
-			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
+			ConceptSetComponent include = source.getCompose().addInclude();
+			ConceptSetFilterComponent filter = include.addFilter();
 			filter.setProperty("display");
 			filter.setOp(FilterOperator.EQUAL);
 			filter.setValue(theFilter);
-		} else {
-			source.getCompose().addInclude().addValueSet(theUri);
 		}
 
 		ValueSet retVal = doExpand(source);
@@ -151,17 +145,14 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
 
-//		source.getCompose().addInclude().addValueSet(theUri);
+		source.getCompose().addInclude().addValueSet(theUri);
 
 		if (isNotBlank(theFilter)) {
-//			ConceptSetComponent include = source.getCompose().addInclude();
-//			ConceptSetFilterComponent filter = include.addFilter();
-			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
+			ConceptSetComponent include = source.getCompose().addInclude();
+			ConceptSetFilterComponent filter = include.addFilter();
 			filter.setProperty("display");
 			filter.setOp(FilterOperator.EQUAL);
 			filter.setValue(theFilter);
-		} else {
-			source.getCompose().addInclude().addValueSet(theUri);
 		}
 
 		ValueSet retVal = doExpand(source, theOffset, theCount);
@@ -268,9 +259,9 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		if (myDaoConfig.isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
-				myHapiTerminologySvc.storeTermValueSet(retVal, valueSet);
+				myTerminologySvc.storeTermValueSet(retVal, valueSet);
 			} else {
-				myHapiTerminologySvc.deleteValueSetAndChildren(retVal);
+				myTerminologySvc.deleteValueSetAndChildren(retVal);
 			}
 		}
 
