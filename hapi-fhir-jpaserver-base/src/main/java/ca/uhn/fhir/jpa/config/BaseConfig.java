@@ -263,6 +263,11 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
+	public ThreadPoolTaskExecutor searchCoordinatorThreadFactory() {
+		return new ThreadPoolTaskExecutor();
+	}
+
+	@Bean
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
