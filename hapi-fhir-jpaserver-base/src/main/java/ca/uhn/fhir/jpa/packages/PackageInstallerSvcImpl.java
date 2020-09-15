@@ -29,11 +29,13 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -94,6 +96,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor
@@ -161,6 +165,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
 					install(npmPackage, theInstallationSpec, retVal);
+
+					// If any SearchParameters were installed, let's load them right away
+					mySearchParamRegistry.refreshCacheIfNecessary();
 				}
 
 			} catch (IOException e) {
@@ -304,11 +311,20 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		SearchParameterMap map = createSearchParameterMapFor(theResource);
 		IBundleProvider searchResult = dao.search(map);
-		if (searchResult.isEmpty()) {
+		if (validForUpload(theResource)) {
+			if (searchResult.isEmpty()) {
 
-			if (validForUpload(theResource)) {
+				ourLog.info("Creating new resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 				dao.create(theResource);
+
+			} else {
+
+				ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
+				theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
+				theResource.setId(searchResult.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless());
+				dao.update(theResource);
+
 			}
 
 		}

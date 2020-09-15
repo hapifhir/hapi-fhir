@@ -243,10 +243,10 @@
 			"description": "With the ACS App, Community Health Agents (CHA) work gets faster and faster, and they can take better care of their community. Best of all, it is 100% free to the Health Agent.",
 			"link": "http://ephealth.com.br/?lang=en",
 			"contactName": "Alan Lescano",
-			"contactEmail": "alan@ephealth.com.br",
+			"contactEmail": "alan.lesc1@gmail.com",
 			"city": "Sao Paulo, Brazil",
-			"lat": -6.6167,
-			"lon": -38.1500,
+			"lat": -23.533773,
+			"lon": -46.625290,
 			"added": "2019-09-29"
 		},
 		{
@@ -259,16 +259,7 @@
 			"added": "2019-11-25"
 		},
 		{
-			"title": "Software Interoperability Lab for Asia",
-			"description": "",
-			"link": "",
-			"city": "Manila, Philippines",
-			"lat": 14.6914,
-			"lon": 120.9686,
-			"added": "2019-11-25"
-		},
-		{
-			"title": "Software Interoperability Lab for Asia",
+			"title": "Standards and Interoperability Lab Asia",
 			"description": "SIL-A maintains a suite of tools used to promote interoperability and medical informatics across Asia.",
 			"link": "http://sil-asia.org/",
 			"city": "Manila, Philippines",

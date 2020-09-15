@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
+import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -15,6 +16,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hl7.fhir.dstu2.model.Subscription;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -80,6 +82,15 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	public ModelConfig modelConfig() {
 		return daoConfig().getModelConfig();
 	}
+
+	@Override
+	@Bean
+	public ValidationSettings validationSettings() {
+		ValidationSettings retVal = super.validationSettings();
+		retVal.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_VALID);
+		return retVal;
+	}
+
 
 	@Bean(name = "myPersistenceDataSourceDstu1", destroyMethod = "close")
 	public DataSource dataSource() {

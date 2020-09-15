@@ -38,8 +38,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
-	private volatile FhirContext myDstu2Context;
-	private volatile FhirContext myHl7OrgDstu2Context;
 
 	/**
 	 * Constructor
@@ -136,8 +134,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	/**
 	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
-	 *
-	 * @return
 	 */
 	public IValidationSupport getValidationSupport() {
 		return myValidationSupport;
@@ -274,24 +270,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 		return wrappedWorkerContext;
-	}
-
-	private FhirContext getDstu2Context() {
-		FhirContext dstu2Context = myDstu2Context;
-		if (dstu2Context == null) {
-			dstu2Context = FhirContext.forDstu2();
-			myDstu2Context = dstu2Context;
-		}
-		return dstu2Context;
-	}
-
-	private FhirContext getHl7OrgDstu2Context() {
-		FhirContext hl7OrgDstu2Context = myHl7OrgDstu2Context;
-		if (hl7OrgDstu2Context == null) {
-			hl7OrgDstu2Context = FhirContext.forDstu2Hl7Org();
-			myHl7OrgDstu2Context = hl7OrgDstu2Context;
-		}
-		return hl7OrgDstu2Context;
 	}
 
 	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
