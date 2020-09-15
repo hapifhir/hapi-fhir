@@ -1120,9 +1120,11 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
-			TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
-			assertEquals(0, termValueSetVersion.getConcepts().size());
-			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSetVersion.getExpansionStatus());
+//			TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
+//			assertEquals(0, termValueSetVersion.getConcepts().size());
+//			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSetVersion.getExpansionStatus());
+			assertEquals(0, termValueSet.getConcepts().size());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 		});
 	}
 
@@ -1139,11 +1141,14 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
-			TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
-			assertEquals(theCodeSystem.getConcept().size(), termValueSetVersion.getConcepts().size());
-			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSetVersion.getExpansionStatus());
+//			TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
+//			assertEquals(theCodeSystem.getConcept().size(), termValueSetVersion.getConcepts().size());
+//			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSetVersion.getExpansionStatus());
+			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = termValueSetVersion.getConcepts().get(0);
+//			TermValueSetConcept concept = termValueSetVersion.getConcepts().get(0);
+			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
@@ -1165,7 +1170,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals("Synonym", designation.getUseDisplay());
 			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
 
-			concept = termValueSetVersion.getConcepts().get(1);
+//			concept = termValueSetVersion.getConcepts().get(1);
+			concept = termValueSet.getConcepts().get(1);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
@@ -1175,7 +1181,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 			// ...
 
-			concept = termValueSetVersion.getConcepts().get(22);
+//			concept = termValueSetVersion.getConcepts().get(22);
+			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
@@ -1190,7 +1197,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals("Synonym", designation.getUseDisplay());
 			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
-			concept = termValueSetVersion.getConcepts().get(23);
+//			concept = termValueSetVersion.getConcepts().get(23);
+			concept = termValueSet.getConcepts().get(23);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
@@ -1408,6 +1416,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 

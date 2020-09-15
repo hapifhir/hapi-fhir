@@ -37,9 +37,6 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-v2.xml");
 		myCodeSystemDao.create(cs, mySrd);
 
-		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
-
 		CodeSystem parentChildCs = new CodeSystem();
 		parentChildCs.setUrl(SYSTEM_PARENTCHILD);
 		parentChildCs.setVersion("1");

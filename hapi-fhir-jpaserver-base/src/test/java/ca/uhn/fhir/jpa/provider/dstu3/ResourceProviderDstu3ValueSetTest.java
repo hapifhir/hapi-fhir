@@ -137,6 +137,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		runInTransaction(() -> {
 			CodeSystem codeSystem = new CodeSystem();
 			codeSystem.setUrl(CS_URL);
+			codeSystem.setVersion("SYSTEM VERSION");
 			codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 			IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 

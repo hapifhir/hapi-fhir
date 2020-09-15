@@ -227,6 +227,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myDeferredConceptMaps.clear();
 		myDeferredConcepts.clear();
 		myDefferedCodeSystemsDeletions.clear();
+		myConceptLinksToSaveLater.clear();
 	}
 
 	@Transactional(propagation = Propagation.NEVER)

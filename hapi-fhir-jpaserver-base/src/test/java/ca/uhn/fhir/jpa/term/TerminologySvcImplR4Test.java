@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -195,10 +194,12 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
 		Long termValueSetId = termValueSet.getId();
 		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-		TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
-		assertEquals(3, termValueSetVersion.getTotalConceptDesignations().intValue());
+//		TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
+//		assertEquals(3, termValueSetVersion.getTotalConceptDesignations().intValue());
+		assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
 		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-		assertEquals(24, termValueSetVersion.getTotalConcepts().intValue());
+//		assertEquals(24, termValueSetVersion.getTotalConcepts().intValue());
+		assertEquals(24, termValueSet.getTotalConcepts().intValue());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -233,10 +234,12 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
 		Long termValueSetId = termValueSet.getId();
 		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-		TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
-		assertEquals(3, termValueSetVersion.getTotalConceptDesignations().intValue());
+//		TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
+//		assertEquals(3, termValueSetVersion.getTotalConceptDesignations().intValue());
+		assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
 		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-		assertEquals(24, termValueSetVersion.getTotalConcepts().intValue());
+//		assertEquals(24, termValueSetVersion.getTotalConcepts().intValue());
+		assertEquals(24, termValueSet.getTotalConcepts().intValue());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override

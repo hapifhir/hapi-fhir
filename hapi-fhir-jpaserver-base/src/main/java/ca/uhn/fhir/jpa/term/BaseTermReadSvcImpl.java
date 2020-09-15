@@ -45,7 +45,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetVersionDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -63,7 +62,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptView;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
-import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -83,7 +81,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -206,8 +203,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
 	protected ITermValueSetDao myValueSetDao;
-	@Autowired
-	protected ITermValueSetVersionDao myValueSetVersionDao;
 	@Autowired
 	protected ITermValueSetConceptDao myValueSetConceptDao;
 	@Autowired
@@ -338,37 +333,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	public void deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
-		Optional<TermValueSetVersion> optionalExistingTermValueSetVersionById = myValueSetVersionDao.findByResourcePid(theResourceTable.getId());
+		Optional<TermValueSet> optionalExistingTermValueSetById = myValueSetDao.findByResourcePid(theResourceTable.getId());
 
-		if (optionalExistingTermValueSetVersionById.isPresent()) {
-			TermValueSetVersion existingTermValueSetVersion = optionalExistingTermValueSetVersionById.get();
+		if (optionalExistingTermValueSetById.isPresent()) {
+			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
 
-			ourLog.info("Deleting existing TermValueSetVersion[{}] and its children...", existingTermValueSetVersion.getId());
-			myValueSetConceptDesignationDao.deleteByTermValueSetId(existingTermValueSetVersion.getId());
-			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSetVersion.getId());
-
-			// Check if this is the current version. If so, clear the current version from TermValueSet.
-			TermValueSet termValueSet = existingTermValueSetVersion.getValueSet();
-			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			Boolean versionIsCurrent = termValueSet.getCurrentVersion().getId() == existingTermValueSetVersion.getId();
-			if (versionIsCurrent) {
-				txTemplate.executeWithoutResult(t -> {
-					termValueSet.setCurrentVersion(null);
-					myValueSetDao.save(termValueSet);
-				});
-			}
-
-			myValueSetVersionDao.deleteById(existingTermValueSetVersion.getId());
-			ourLog.info("Done deleting existing TermValueSetVersion[{}] and its children.", existingTermValueSetVersion.getId());
-
-			// If this is the current version, then delete the TermValueSet master as well.
-			if (versionIsCurrent) {
-				txTemplate.executeWithoutResult(t -> {
-					ourLog.info(" * Deleting value set {}", termValueSet.getId());
-					myValueSetDao.deleteById(termValueSet.getId());
-				});
-			}
+			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
+			myValueSetConceptDesignationDao.deleteByTermValueSetId(existingTermValueSet.getId());
+			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
+			myValueSetDao.deleteById(existingTermValueSet.getId());
+			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 
 		}
 	}
@@ -418,7 +392,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasUrl()) {
-			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
+			if (theValueSetToExpand.hasVersion()) {
+				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
+			} else {
+				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndNullVersion(theValueSetToExpand.getUrl());
+			}
 		} else {
 			optionalTermValueSet = Optional.empty();
 		}
@@ -429,17 +407,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
-		TermValueSetVersion termValueSetVersion;
-		String valueSetVersion = theValueSetToExpand.getVersion();
-		if (valueSetVersion != null) {
-			termValueSetVersion = myValueSetVersionDao.findByValueSetPidAndVersion(termValueSet.getId(),theValueSetToExpand.getVersion());
-		} else {
-			termValueSetVersion = myValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
-		}
 
-		if (termValueSetVersion.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
+		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
 			ourLog.warn("{} is present in terminology tables but not ready for persistence-backed invocation of operation $expand. Will perform in-memory expansion without parameters. Current status: {} | {}",
-				getValueSetInfo(theValueSetToExpand), termValueSetVersion.getExpansionStatus().name(), termValueSetVersion.getExpansionStatus().getDescription());
+				getValueSetInfo(theValueSetToExpand), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
 			return expandValueSetInMemory(theExpansionOptions, theValueSetToExpand, null); // In-memory expansion.
 		}
 
@@ -450,7 +421,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		ValueSetExpansionOptions expansionOptions = provideExpansionOptions(theExpansionOptions);
 		int offset = expansionOptions.getOffset();
 		int count = expansionOptions.getCount();
-		populateExpansionComponent(expansionComponent, termValueSetVersion, offset, count, termValueSet.getUrl());
+		populateExpansionComponent(expansionComponent, termValueSet, offset, count, termValueSet.getUrl());
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -459,8 +430,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return valueSet;
 	}
 
-	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSetVersion theTermValueSetVersion, int theOffset, int theCount, String theValueSetUrl) {
-		int total = theTermValueSetVersion.getTotalConcepts().intValue();
+	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount, String theValueSetUrl) {
+		int total = theTermValueSet.getTotalConcepts().intValue();
 		theExpansionComponent.setTotal(total);
 		theExpansionComponent.setOffset(theOffset);
 		theExpansionComponent.addParameter().setName("offset").setValue(new IntegerType(theOffset));
@@ -470,14 +441,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return;
 		}
 
-		expandConcepts(theExpansionComponent, theTermValueSetVersion, theOffset, theCount, theValueSetUrl);
+		expandConcepts(theExpansionComponent, theTermValueSet, theOffset, theCount, theValueSetUrl);
 	}
 
-	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSetVersion theTermValueSetVersion, int theOffset, int theCount, String theValueSetUrl) {
+	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount, String theValueSetUrl) {
 		int conceptsExpanded = 0;
 		int designationsExpanded = 0;
 		int toIndex = theOffset + theCount;
-		Collection<TermValueSetConceptView> conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theOffset, toIndex, theTermValueSetVersion.getId());
+		Collection<TermValueSetConceptView> conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theOffset, toIndex, theTermValueSet.getId());
 
 		if (conceptViews.isEmpty()) {
 			logConceptsExpanded("No concepts to expand. ", theValueSetUrl, conceptsExpanded);
@@ -1273,17 +1244,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
-		TermValueSetVersion termValueSetVersion;
-		String valueSetVersion = theValueSet.getVersion();
-		if (valueSetVersion != null) {
-			termValueSetVersion = myValueSetVersionDao.findByValueSetPidAndVersion(termValueSet.getId(), valueSetVersion);
-		} else {
-			termValueSetVersion = myValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
-		}
 
-		if (termValueSetVersion.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
+		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
 			ourLog.warn("{} is present in terminology tables but not ready for persistence-backed invocation of operation $validation-code. Will perform in-memory code validation. Current status: {} | {}",
-				getValueSetInfo(theValueSet), termValueSetVersion.getExpansionStatus().name(), termValueSetVersion.getExpansionStatus().getDescription());
+				getValueSetInfo(theValueSet), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
 			return false;
 		}
 
@@ -1698,15 +1662,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		while (true) {
 			StopWatch sw = new StopWatch();
-			TermValueSetVersion valueSetToExpand = txTemplate.execute(t -> {
-				Optional<TermValueSetVersion> optionalTermValueSetVersion = getNextTermValueSetNotExpanded();
-				if (!optionalTermValueSetVersion.isPresent()) {
+			TermValueSet valueSetToExpand = txTemplate.execute(t -> {
+				Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
+				if (!optionalTermValueSet.isPresent()) {
 					return null;
 				}
 
-				TermValueSetVersion termValueSetVersion = optionalTermValueSetVersion.get();
-				termValueSetVersion.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
-				return myValueSetVersionDao.saveAndFlush(termValueSetVersion);
+				TermValueSet termValueSet = optionalTermValueSet.get();
+				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
+				return myValueSetDao.saveAndFlush(termValueSet);
 			});
 			if (valueSetToExpand == null) {
 				return;
@@ -1715,18 +1679,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			// We have a ValueSet to pre-expand.
 			try {
 				ValueSet valueSet = txTemplate.execute(t -> {
-					TermValueSetVersion refreshedValueSetVersionToExpand = myValueSetVersionDao.findById(valueSetToExpand.getId()).get();
-					return getValueSetFromResourceTable(refreshedValueSetVersionToExpand.getResource());
+					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).get();
+					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
 
-				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(valueSetToExpand, myValueSetVersionDao, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
+				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
 				expandValueSet(null, valueSet, accumulator);
 
 				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
-					TermValueSetVersion finalValueSetToExpand = myValueSetVersionDao.findById(valueSetToExpand.getId()).get();
-					finalValueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
-					myValueSetVersionDao.saveAndFlush(finalValueSetToExpand);
+					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
+					myValueSetDao.saveAndFlush(valueSetToExpand);
 					return null;
 				});
 
@@ -1736,7 +1699,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);
 				txTemplate.execute(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
-					myValueSetVersionDao.saveAndFlush(valueSetToExpand);
+					myValueSetDao.saveAndFlush(valueSetToExpand);
 					return null;
 				});
 			}
@@ -1801,9 +1764,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	protected abstract ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable);
 
-	private Optional<TermValueSetVersion> getNextTermValueSetNotExpanded() {
-		Optional<TermValueSetVersion> retVal = Optional.empty();
-		Slice<TermValueSetVersion> page = myValueSetVersionDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
+		Optional<TermValueSet> retVal = Optional.empty();
+		Slice<TermValueSet> page = myValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 
 		if (!page.getContent().isEmpty()) {
 			retVal = Optional.of(page.getContent().get(0));
@@ -1823,7 +1786,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * Get CodeSystem and validate CodeSystemVersion
 		 */
-		TermValueSet termValueSet = getOrCreateDistinctTermValueSet(theResourceTable.getPersistentId(), theValueSet.getUrl(), theValueSet.getName(), theValueSet.getVersion(), theResourceTable);
+		TermValueSet termValueSet = new TermValueSet();
+		termValueSet.setResource(theResourceTable);
+		termValueSet.setUrl(theValueSet.getUrl());
+		termValueSet.setVersion(theValueSet.getVersion());
+		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
 
 		// Delete version being replaced
 		deleteValueSetForResource(theResourceTable);
@@ -1831,77 +1798,31 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * Do the upload.
 		 */
-		TermValueSetVersion termValueSetVersion = termValueSet.getCurrentVersion();
-		if (termValueSetVersion == null) {
-			termValueSetVersion = new TermValueSetVersion();
-		}
-
-		termValueSetVersion.setResource(theResourceTable);
-		termValueSetVersion.setValueSetVersionId(theValueSet.getVersion());
-		termValueSetVersion.setValueSet(termValueSet);
-
-		termValueSetVersion = myValueSetVersionDao.saveAndFlush(termValueSetVersion);
-
-		termValueSet.setCurrentVersion(termValueSetVersion);
-		termValueSet = myValueSetDao.saveAndFlush(termValueSet);
-
-		ourLog.info("Done storing TermValueSet[{}] for {}", termValueSet.getId(), theValueSet.getIdElement().toVersionless().getValueAsString());
-	}
-
-
-	@Nonnull
-	private TermValueSet getOrCreateDistinctTermValueSet(ResourcePersistentId theValueSetResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, ResourceTable theValueSetResourceTable) {
-		Optional<TermValueSet> termValueSetOptional = myValueSetDao.findByUrl(theSystemUri);
-		TermValueSet termValueSet;
-		if (!termValueSetOptional.isPresent()) {
-			termValueSetOptional = myValueSetDao.findByResourcePid(theValueSetResourcePid.getIdAsLong());
-			if (!termValueSetOptional.isPresent()) {
-				termValueSet = new TermValueSet();
-			} else {
-				termValueSet = termValueSetOptional.get();
-			}
+		String url = termValueSet.getUrl();
+		String version = termValueSet.getVersion();
+		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
+		if (version != null) {
+			optionalExistingTermValueSetByUrl = myValueSetDao.findTermValueSetByUrlAndVersion(url, version);
 		} else {
-			termValueSet = termValueSetOptional.get();
+			optionalExistingTermValueSetByUrl = myValueSetDao.findTermValueSetByUrlAndNullVersion(url);
 		}
-
-		termValueSet.setResource(theValueSetResourceTable);
-		termValueSet.setUrl(theSystemUri);
-		termValueSet.setName(theSystemName);
-		termValueSet = myValueSetDao.save(termValueSet);
-		checkForValueSetVersionDuplicate(termValueSet,theSystemUri, theSystemVersionId, theValueSetResourceTable);
-		return termValueSet;
-	}
-
-
-	private void checkForValueSetVersionDuplicate(TermValueSet theValueSet, String theSystemUri, String theSystemVersionId, ResourceTable theValueSetResourceTable) {
-		// Check if TermValueSetVersion entity already exists.
-		TermValueSetVersion valueSetVersionEntity;
-		String msg = null;
-		if (theSystemVersionId == null) {
-			// Check if a non-versioned TermValueSetVersion entity already exists for this TermValueSet.
-			valueSetVersionEntity = myValueSetVersionDao.findByValueSetPidAndNullVersion(theValueSet.getId());
-			if (valueSetVersionEntity != null) {
-				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateValueSetUrl", theSystemUri, valueSetVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-			}
+		if (!optionalExistingTermValueSetByUrl.isPresent()) {
+			myValueSetDao.save(termValueSet);
 		} else {
-			// Check if a TermValueSetVersion entity already exists for this TermValueSet and version.
-			valueSetVersionEntity = myValueSetVersionDao.findByValueSetPidAndVersion(theValueSet.getId(), theSystemVersionId);
-			if (valueSetVersionEntity != null) {
-				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateValueSetUrlAndVersion", theSystemUri,	theSystemVersionId, valueSetVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
+			String msg;
+			if (version != null) {
+				msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+					"cannotCreateDuplicateValueSetUrlAndVersion",
+					url, version, existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			} else {
-				// Check if a TermValueSetVersion entity already exists for this ValueSet resource (i.e. with a different version or URL)
-				Optional<TermValueSetVersion> valueSetVersionEntityOptional = myValueSetVersionDao.findByResourcePid(theValueSetResourceTable.getId());
-				if (valueSetVersionEntityOptional.isPresent()) {
-					msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotUpdateUrlOrVersionForValueSetResource", theSystemUri,	theSystemVersionId, valueSetVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-					throw new UnprocessableEntityException(msg);
-				}
+				msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+					"cannotCreateDuplicateValueSetUrl",
+					url, existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			}
-		}
-		// Throw exception if the TermValueSet version is being duplicated.
-		if (valueSetVersionEntity != null) {
-			if (!ObjectUtil.equals(valueSetVersionEntity.getResource().getId(), theValueSetResourceTable.getId())) {
-				throw new UnprocessableEntityException(msg);
-			}
+			throw new UnprocessableEntityException(msg);
 		}
 	}
 

@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetVersionDao;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -53,7 +52,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
@@ -344,8 +342,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
-	@Autowired
-	protected ITermValueSetVersionDao myTermValueSetVersionDao;
 
 	@AfterEach()
 	public void afterCleanupDao() {

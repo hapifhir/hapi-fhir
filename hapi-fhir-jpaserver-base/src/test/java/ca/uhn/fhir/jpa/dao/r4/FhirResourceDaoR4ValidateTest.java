@@ -7,11 +7,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
-import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcLoincTest;
-import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -81,7 +78,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -212,9 +208,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/bl/bb-sd.json"));
 
 		runInTransaction(() -> {
-			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
-			TermValueSetVersion vsv = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(vs.getId());
-			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsv.getExpansionStatus());
+			TermValueSet vs = myTermValueSetDao.findTermValueSetByUrlAndVersion("https://bb/ValueSet/BBDemographicAgeUnit","20190731").orElseThrow(() -> new IllegalArgumentException());
+//			TermValueSetVersion vsv = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(vs.getId());
+//			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsv.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vs.getExpansionStatus());
 		});
 
 		OperationOutcome outcome;
@@ -242,17 +239,19 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// Before, the VS wasn't pre-expanded. Try again with it pre-expanded
 		runInTransaction(() -> {
-			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
-			TermValueSetVersion vsv = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(vs.getId());
-			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsv.getExpansionStatus());
+			TermValueSet vs = myTermValueSetDao.findTermValueSetByUrlAndVersion("https://bb/ValueSet/BBDemographicAgeUnit","20190731").orElseThrow(() -> new IllegalArgumentException());
+//			TermValueSetVersion vsv = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(vs.getId());
+//			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsv.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vs.getExpansionStatus());
 		});
 
 		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		runInTransaction(() -> {
-			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
-			TermValueSetVersion vsv = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(vs.getId());
-			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vsv.getExpansionStatus());
+			TermValueSet vs = myTermValueSetDao.findTermValueSetByUrlAndVersion("https://bb/ValueSet/BBDemographicAgeUnit", "20190731").orElseThrow(() -> new IllegalArgumentException());
+//			TermValueSetVersion vsv = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(vs.getId());
+//			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vsv.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vs.getExpansionStatus());
 		});
 
 		// Use a code that's in the ValueSet
@@ -285,9 +284,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/bl/bb-sd.json"));
 
 		runInTransaction(() -> {
-			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
-			TermValueSetVersion vsv = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(vs.getId());
-			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsv.getExpansionStatus());
+			TermValueSet vs = myTermValueSetDao.findTermValueSetByUrlAndVersion("https://bb/ValueSet/BBDemographicAgeUnit", "20190731").orElseThrow(() -> new IllegalArgumentException());
+//			TermValueSetVersion vsv = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(vs.getId());
+//			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsv.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vs.getExpansionStatus());
 		});
 
 		OperationOutcome outcome;

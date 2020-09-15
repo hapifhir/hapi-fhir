@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
-import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -23,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -59,9 +59,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
 		runInTransaction(() -> {
 			TermValueSet vsEntity = myTermValueSetDao.findByUrl("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000").orElseThrow(() -> new IllegalStateException());
-			Long valueSetId = vsEntity.getId();
-			TermValueSetVersion vsvEntity = myTermValueSetVersionDao.findByValueSetPid(valueSetId).get(0);
-			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsvEntity.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vsEntity.getExpansionStatus());
 		});
 
 		IValidationSupport.CodeValidationResult validationOutcome;
@@ -79,12 +77,12 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
 		assertEquals(false, validationOutcome.isOk());
 
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		runInTransaction(() -> {
 			TermValueSet vsEntity = myTermValueSetDao.findByUrl("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000").orElseThrow(() -> new IllegalStateException());
-			TermValueSetVersion vsvEntity = myTermValueSetVersionDao.findByValueSetPid(vsEntity.getId()).get(0);
-			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vsvEntity.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, vsEntity.getExpansionStatus());
 		});
 
 		// Validate good
@@ -99,6 +97,16 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
 	}
 
+	private boolean clearDeferredStorageQueue() {
+
+		if(!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return false;
+		} else {
+			return true;
+		}
+
+	}
 
 	@Test
 	@Disabled

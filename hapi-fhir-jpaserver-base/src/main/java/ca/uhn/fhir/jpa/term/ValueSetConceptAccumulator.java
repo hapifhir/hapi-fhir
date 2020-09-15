@@ -23,12 +23,10 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetVersionDao;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-import ca.uhn.fhir.jpa.entity.TermValueSetVersion;
 import ca.uhn.fhir.util.ValidateUtil;
 
 import javax.annotation.Nonnull;
@@ -43,8 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetConceptAccumulator.class);
 
-	private TermValueSetVersion myTermValueSetVersion;
-	final private ITermValueSetVersionDao myValueSetVersionDao;
+	private TermValueSet myTermValueSet;
 	final private ITermValueSetDao myValueSetDao;
 	final private ITermValueSetConceptDao myValueSetConceptDao;
 	final private ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
@@ -52,9 +49,8 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private int myDesignationsSaved;
 	private int myConceptsExcluded;
 
-	public ValueSetConceptAccumulator(@Nonnull TermValueSetVersion theTermValueSetVersion, @Nonnull ITermValueSetVersionDao theValueSetVersionDao, @Nonnull ITermValueSetDao theValueSetDao, @Nonnull ITermValueSetConceptDao theValueSetConceptDao, @Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
-		myTermValueSetVersion = theTermValueSetVersion;
-		myValueSetVersionDao = theValueSetVersionDao;
+	public ValueSetConceptAccumulator(@Nonnull TermValueSet theTermValueSet, @Nonnull ITermValueSetDao theValueSetDao, @Nonnull ITermValueSetConceptDao theValueSetConceptDao, @Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
+		myTermValueSet = theTermValueSet;
 		myValueSetDao = theValueSetDao;
 		myValueSetConceptDao = theValueSetConceptDao;
 		myValueSetConceptDesignationDao = theValueSetConceptDesignationDao;
@@ -91,23 +87,23 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		}
 
 		// Get existing entity so it can be deleted.
-		Optional<TermValueSetConcept> optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSetVersion.getId(), theSystem, theCode);
+		Optional<TermValueSetConcept> optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
 
 		if (optionalConcept.isPresent()) {
 			TermValueSetConcept concept = optionalConcept.get();
 
-			ourLog.debug("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSetVersion.getValueSet().getUrl());
+			ourLog.debug("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
 				myValueSetConceptDesignationDao.deleteById(designation.getId());
-				myTermValueSetVersion.decrementTotalConceptDesignations();
+				myTermValueSet.decrementTotalConceptDesignations();
 			}
 			myValueSetConceptDao.deleteById(concept.getId());
-			myTermValueSetVersion.decrementTotalConcepts();
-			myValueSetVersionDao.save(myTermValueSetVersion);
-			ourLog.debug("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSetVersion.getValueSet().getUrl());
+			myTermValueSet.decrementTotalConcepts();
+			myValueSetDao.save(myTermValueSet);
+			ourLog.debug("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 
 			if (++myConceptsExcluded % 250 == 0) {
-				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSetVersion.getValueSet().getUrl());
+				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());
 			}
 		}
 	}
@@ -116,9 +112,8 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "ValueSet contains a concept with no system value");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "ValueSet contains a concept with no code value");
 
-		myTermValueSetVersion = myValueSetVersionDao.findById(myTermValueSetVersion.getId()).get();
 		TermValueSetConcept concept = new TermValueSetConcept();
-		concept.setValueSet(myTermValueSetVersion.getValueSet());
+		concept.setValueSet(myTermValueSet);
 		concept.setOrder(myConceptsSaved);
 		concept.setSystem(theSystem);
 		concept.setCode(theCode);
@@ -126,23 +121,21 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			concept.setDisplay(theDisplay);
 		}
 		myValueSetConceptDao.save(concept);
-		myTermValueSetVersion.incrementTotalConcepts();
-		myValueSetVersionDao.save(myTermValueSetVersion);
+		myValueSetDao.save(myTermValueSet.incrementTotalConcepts());
 
 		if (++myConceptsSaved % 250 == 0) {
-			ourLog.info("Have pre-expanded {} concepts in ValueSet[{}]", myConceptsSaved, myTermValueSetVersion.getValueSet().getUrl());
+			ourLog.info("Have pre-expanded {} concepts in ValueSet[{}]", myConceptsSaved, myTermValueSet.getUrl());
 		}
 
 		return concept;
 	}
 
-	private void saveConceptDesignation(TermValueSetConcept theConcept, TermConceptDesignation theDesignation) {
+	private TermValueSetConceptDesignation saveConceptDesignation(TermValueSetConcept theConcept, TermConceptDesignation theDesignation) {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theDesignation.getValue(), "ValueSet contains a concept designation with no value");
 
 		TermValueSetConceptDesignation designation = new TermValueSetConceptDesignation();
 		designation.setConcept(theConcept);
-		myTermValueSetVersion = myValueSetVersionDao.findById(myTermValueSetVersion.getId()).get();
-		designation.setValueSet(myTermValueSetVersion.getValueSet());
+		designation.setValueSet(myTermValueSet);
 		designation.setLanguage(theDesignation.getLanguage());
 		if (isNoneBlank(theDesignation.getUseSystem(), theDesignation.getUseCode())) {
 			designation.setUseSystem(theDesignation.getUseSystem());
@@ -153,12 +146,13 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		}
 		designation.setValue(theDesignation.getValue());
 		myValueSetConceptDesignationDao.save(designation);
-		myValueSetVersionDao.save(myTermValueSetVersion.incrementTotalConceptDesignations());
+		myValueSetDao.save(myTermValueSet.incrementTotalConceptDesignations());
 
 		if (++myDesignationsSaved % 250 == 0) {
-			ourLog.debug("Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]", myDesignationsSaved, theConcept.getSystem(), theConcept.getCode(), myTermValueSetVersion.getValueSet().getUrl());
+			ourLog.debug("Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]", myDesignationsSaved, theConcept.getSystem(), theConcept.getCode(), myTermValueSet.getUrl());
 		}
 
+		return designation;
 	}
 
 	public Boolean removeGapsFromConceptOrder() {
@@ -166,13 +160,13 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			return false;
 		}
 
-		ourLog.info("Removing gaps from concept order for ValueSet[{}]", myTermValueSetVersion.getValueSet().getUrl());
+		ourLog.info("Removing gaps from concept order for ValueSet[{}]", myTermValueSet.getUrl());
 		int order = 0;
-		List<Long> conceptIds = myValueSetConceptDao.findIdsByTermValueSetId(myTermValueSetVersion.getId());
+		List<Long> conceptIds = myValueSetConceptDao.findIdsByTermValueSetId(myTermValueSet.getId());
 		for (Long conceptId : conceptIds) {
 			myValueSetConceptDao.updateOrderById(conceptId, order++);
 		}
-		ourLog.info("Have removed gaps from concept order for {} concepts in ValueSet[{}]", conceptIds.size(), myTermValueSetVersion.getValueSet().getUrl());
+		ourLog.info("Have removed gaps from concept order for {} concepts in ValueSet[{}]", conceptIds.size(), myTermValueSet.getUrl());
 
 		return true;
 	}

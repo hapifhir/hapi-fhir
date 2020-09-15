@@ -715,7 +715,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				// Check if a TermCodeSystemVersion entity already exists for this CodeSystem resource (i.e. with a different version or URL)
 				codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourceTable.getId());
 				if (codeSystemVersionEntity != null) {
-					msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotUpdateUrlOrVersionForCodeSystemResource", theSystemUri,	theSystemVersionId, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+					msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotUpdateUrlOrVersionForCodeSystemResource", codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue(), theSystemUri, theSystemVersionId);
 					throw new UnprocessableEntityException(msg);
 				}
 			}
