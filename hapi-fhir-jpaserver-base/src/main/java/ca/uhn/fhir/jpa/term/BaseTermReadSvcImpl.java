@@ -343,7 +343,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
 			myValueSetDao.deleteById(existingTermValueSet.getId());
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
-
 		}
 	}
 
@@ -395,7 +394,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			if (theValueSetToExpand.hasVersion()) {
 				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
 			} else {
-				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndNullVersion(theValueSetToExpand.getUrl());
+				List<TermValueSet> termValueSets = myValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 1), theValueSetToExpand.getUrl());
+				optionalTermValueSet = Optional.of(termValueSets.get(0));
 			}
 		} else {
 			optionalTermValueSet = Optional.empty();
@@ -421,7 +421,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		ValueSetExpansionOptions expansionOptions = provideExpansionOptions(theExpansionOptions);
 		int offset = expansionOptions.getOffset();
 		int count = expansionOptions.getCount();
-		populateExpansionComponent(expansionComponent, termValueSet, offset, count, termValueSet.getUrl());
+		populateExpansionComponent(expansionComponent, termValueSet, offset, count);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -430,7 +430,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return valueSet;
 	}
 
-	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount, String theValueSetUrl) {
+	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
 		int total = theTermValueSet.getTotalConcepts().intValue();
 		theExpansionComponent.setTotal(total);
 		theExpansionComponent.setOffset(theOffset);
@@ -441,17 +441,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return;
 		}
 
-		expandConcepts(theExpansionComponent, theTermValueSet, theOffset, theCount, theValueSetUrl);
+		expandConcepts(theExpansionComponent, theTermValueSet, theOffset, theCount);
 	}
 
-	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount, String theValueSetUrl) {
+	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
 		int conceptsExpanded = 0;
 		int designationsExpanded = 0;
 		int toIndex = theOffset + theCount;
 		Collection<TermValueSetConceptView> conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theOffset, toIndex, theTermValueSet.getId());
 
 		if (conceptViews.isEmpty()) {
-			logConceptsExpanded("No concepts to expand. ", theValueSetUrl, conceptsExpanded);
+			logConceptsExpanded("No concepts to expand. ", theTermValueSet, conceptsExpanded);
 			return;
 		}
 
@@ -482,28 +482,28 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				designationComponent.setValue(conceptView.getDesignationVal());
 
 				if (++designationsExpanded % 250 == 0) {
-					logDesignationsExpanded("Expansion of designations in progress. ", theValueSetUrl, designationsExpanded);
+					logDesignationsExpanded("Expansion of designations in progress. ", theTermValueSet, designationsExpanded);
 				}
 			}
 
 			if (++conceptsExpanded % 250 == 0) {
-				logConceptsExpanded("Expansion of concepts in progress. ", theValueSetUrl, conceptsExpanded);
+				logConceptsExpanded("Expansion of concepts in progress. ", theTermValueSet, conceptsExpanded);
 			}
 		}
 
-		logDesignationsExpanded("Finished expanding designations. ", theValueSetUrl, designationsExpanded);
-		logConceptsExpanded("Finished expanding concepts. ", theValueSetUrl, conceptsExpanded);
+		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
+		logConceptsExpanded("Finished expanding concepts. ", theTermValueSet, conceptsExpanded);
 	}
 
-	private void logConceptsExpanded(String theLogDescriptionPrefix, String theValueSetUrl, int theConceptsExpanded) {
+	private void logConceptsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
 		if (theConceptsExpanded > 0) {
-			ourLog.debug("{}Have expanded {} concepts in ValueSet[{}]", theLogDescriptionPrefix, theConceptsExpanded, theValueSetUrl);
+			ourLog.debug("{}Have expanded {} concepts in ValueSet[{}]", theLogDescriptionPrefix, theConceptsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
-	private void logDesignationsExpanded(String theLogDescriptionPrefix, String theValueSetUrl, int theDesignationsExpanded) {
+	private void logDesignationsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
-			ourLog.debug("{}Have expanded {} designations in ValueSet[{}]", theLogDescriptionPrefix, theDesignationsExpanded, theValueSetUrl);
+			ourLog.debug("{}Have expanded {} designations in ValueSet[{}]", theLogDescriptionPrefix, theDesignationsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
@@ -1807,7 +1807,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			optionalExistingTermValueSetByUrl = myValueSetDao.findTermValueSetByUrlAndNullVersion(url);
 		}
 		if (!optionalExistingTermValueSetByUrl.isPresent()) {
+
 			myValueSetDao.save(termValueSet);
+
 		} else {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
 			String msg;

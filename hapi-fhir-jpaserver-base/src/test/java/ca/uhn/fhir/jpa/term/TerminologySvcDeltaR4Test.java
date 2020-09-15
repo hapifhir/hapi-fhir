@@ -184,7 +184,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals(2, outcome.getUpdatedConceptCount());
 
 		runInTransaction(() -> {
-			TermConcept concept = myTermSvc.findCode("http://foo/cs", "ChildAA", null).orElseThrow(() -> new IllegalStateException());
+			TermConcept concept = myTermSvc.findCode("http://foo/cs", "ChildAA").orElseThrow(() -> new IllegalStateException());
 			assertEquals(2, concept.getParents().size());
 			assertThat(concept.getParentPidsAsString(), matchesPattern("^[0-9]+ [0-9]+$"));
 		});

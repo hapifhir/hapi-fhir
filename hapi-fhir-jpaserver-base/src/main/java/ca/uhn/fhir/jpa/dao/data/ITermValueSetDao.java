@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
+
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
 	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 

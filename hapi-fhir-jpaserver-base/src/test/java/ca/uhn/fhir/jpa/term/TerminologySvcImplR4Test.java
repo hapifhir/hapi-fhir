@@ -194,11 +194,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
 		Long termValueSetId = termValueSet.getId();
 		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-//		TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
-//		assertEquals(3, termValueSetVersion.getTotalConceptDesignations().intValue());
 		assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
 		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-//		assertEquals(24, termValueSetVersion.getTotalConcepts().intValue());
 		assertEquals(24, termValueSet.getTotalConcepts().intValue());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -234,11 +231,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
 		Long termValueSetId = termValueSet.getId();
 		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-//		TermValueSetVersion termValueSetVersion = myTermValueSetVersionDao.findByValueSetPidAndNullVersion(termValueSet.getId());
-//		assertEquals(3, termValueSetVersion.getTotalConceptDesignations().intValue());
 		assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
 		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-//		assertEquals(24, termValueSetVersion.getTotalConcepts().intValue());
 		assertEquals(24, termValueSet.getTotalConcepts().intValue());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {

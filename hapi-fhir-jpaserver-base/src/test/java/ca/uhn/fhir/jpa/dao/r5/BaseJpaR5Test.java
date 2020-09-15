@@ -383,8 +383,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
-//	@Autowired
-//	protected ITermValueSetVersionDao myTermValueSetVersionDao;
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
 	@Autowired
