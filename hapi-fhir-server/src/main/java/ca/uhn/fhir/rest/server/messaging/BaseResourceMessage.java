@@ -113,7 +113,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	}
 
 	/**
-	 * Adds a transcation ID to this message. This ID can be used for many purposes. For example, performing tracing
+	 * Adds a transaction ID to this message. This ID can be used for many purposes. For example, performing tracing
 	 * across asynchronous hooks, tying data together, or downstream logging purposes.
 	 *
 	 * One current internal implementation uses this field to tie back EMPI processing results (which are asynchronous)

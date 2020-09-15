@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.messaging;
 
-import ca.uhn.fhir.rest.server.messaging.json.ConcreteResourceModifiedJsonMessage;
+import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -12,15 +12,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-class ConcreteResourceModifiedMessageTest {
+class ResourceOperationMessageTest {
 
 	@Test
 	public void testSerializationAndDeserializationOfResourceModifiedMessage() throws JsonProcessingException {
-		ConcreteResourceModifiedJsonMessage jsonMessage = new ConcreteResourceModifiedJsonMessage();
-		jsonMessage.setPayload(new ConcreteResourceModifiedMessage());
+		ResourceOperationJsonMessage jsonMessage = new ResourceOperationJsonMessage();
+		jsonMessage.setPayload(new ResourceOperationMessage());
 		ObjectMapper mapper = new ObjectMapper();
 		String serialized = mapper.writeValueAsString(jsonMessage);
-		jsonMessage = mapper.readValue(serialized, ConcreteResourceModifiedJsonMessage.class);
+		jsonMessage = mapper.readValue(serialized, ResourceOperationJsonMessage.class);
 
 		assertThat(jsonMessage.getHapiHeaders().getRetryCount(), is(equalTo(0)));
 		assertThat(jsonMessage.getHapiHeaders().getFirstFailureDate(), is(equalTo(null)));
