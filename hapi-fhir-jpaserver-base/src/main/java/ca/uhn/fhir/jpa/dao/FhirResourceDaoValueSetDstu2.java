@@ -43,7 +43,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -236,6 +235,11 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	}
 
 	@Override
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
@@ -278,6 +282,11 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Override
 	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CodingDt theCodingA, CodingDt theCodingB, RequestDetails theRequestDetails) {
 		return myTerminologySvc.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB);
+	}
+
+	@Override
+	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CodingDt theCodingA, CodingDt theCodingB, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

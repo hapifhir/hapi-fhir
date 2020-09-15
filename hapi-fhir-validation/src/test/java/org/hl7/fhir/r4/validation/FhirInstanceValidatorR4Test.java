@@ -254,7 +254,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.lookupCode(any(), any(), any())).thenAnswer(t -> {
+		when(mockSupport.lookupCode(any(), any(), any(), any())).thenAnswer(t -> {
 			String system = t.getArgument(1, String.class);
 			String code = t.getArgument(2, String.class);
 			if (myValidConcepts.contains(system + "___" + code)) {

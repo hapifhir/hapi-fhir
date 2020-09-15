@@ -344,6 +344,37 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	@Test
+	public void testLoadLoincMultipleVersions() throws IOException {
+
+		// Load LOINC marked as version 2.67
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		CodeSystem loincCS = mySystemCaptor.getValue();
+		assertEquals("2.67", loincCS.getVersion());
+
+		// Update LOINC marked as version 2.67
+		myFiles = new ZipCollectionBuilder();
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		loincCS = mySystemCaptor.getValue();
+		assertEquals("2.67", loincCS.getVersion());
+
+		// Load LOINC marked as version 2.68
+		myFiles = new ZipCollectionBuilder();
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(3)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		loincCS = mySystemCaptor.getValue();
+		assertEquals("2.68", loincCS.getVersion());
+
+	}
+
+	@Test
 	@Disabled
 	public void testLoadLoincMandatoryFilesOnly() throws IOException {
 		addLoincMandatoryFilesToZip(myFiles);
@@ -383,7 +414,11 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		addLoincMandatoryFilesWithPropertiesFileToZip(theFiles, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+	}
+
+	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
+		theFiles.addFileZip("/loinc/", thePropertiesFile);
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());

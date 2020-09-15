@@ -25,7 +25,9 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.HapiFhirResourceDaoCodeSystemUtil;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -67,6 +69,8 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
 	@Autowired
+	private ITermCodeSystemVersionDao myCsvDao;
+	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private FhirContext myFhirContext;
@@ -89,6 +93,12 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	@Nonnull
 	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
+		return lookupCode(theCode, theSystem, theCoding, null, theRequestDetails);
+	}
+
+	@Nonnull
+	@Override
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -102,19 +112,24 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		String code;
 		String system;
+		String codeSystemVersion = null;
 		if (haveCoding) {
 			code = theCoding.getCode();
 			system = theCoding.getSystem();
+			codeSystemVersion = theCoding.getVersion();
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();
+			if (theVersion != null) {
+				codeSystemVersion = theVersion.getValue();
+			}
 		}
 
-		ourLog.debug("Looking up {} / {}", system, code);
+		ourLog.debug("Looking up {} / {}, version {}", system, code, codeSystemVersion);
 
 		if (myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system)) {
 			ourLog.debug("Code system {} is supported", system);
-			IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code);
+			IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code, codeSystemVersion);
 			if (result != null) {
 				return result;
 			}
@@ -122,6 +137,13 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		// We didn't find it..
 		return IValidationSupport.LookupCodeResult.notFound(system, code);
+	}
+
+	@Override
+	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, Coding theCodingA, Coding theCodingB, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
+		String codingBVersion = theCodingB != null ? theCodingB.getVersion() : null;
+		String codingAVersion = theCodingA != null ? theCodingA.getVersion() : null;
+		return myTerminologySvc.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theVersion, codingAVersion, codingBVersion);
 	}
 
 	@Override
@@ -133,13 +155,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
 		super.preDelete(theResourceToDelete, theEntityToDelete);
 
-		String codeSystemUrl = theResourceToDelete.getUrl();
-		if (isNotBlank(codeSystemUrl)) {
-			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
-			if (persCs != null) {
-				myTermDeferredStorageSvc.deleteCodeSystem(persCs);
-			}
-		}
+		HapiFhirResourceDaoCodeSystemUtil.deleteCodeSystemEntities(myCsDao, myCsvDao, myTermDeferredStorageSvc, theResourceToDelete.getUrl(),
+			theResourceToDelete.getVersion());
+
 	}
 
 	@Override

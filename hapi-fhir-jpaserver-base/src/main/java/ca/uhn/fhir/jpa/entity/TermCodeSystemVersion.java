@@ -40,17 +40,21 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_CODESYSTEM_VER"
+@Table(name = "TRM_CODESYSTEM_VER",
 	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
-)
+	uniqueConstraints = {
+	@UniqueConstraint(name = TermCodeSystemVersion.IDX_CODESYSTEM_AND_VER, columnNames = {"CODESYSTEM_PID", "CS_VERSION_ID"})
+})
 @Entity()
 public class TermCodeSystemVersion implements Serializable {
+	public static final String IDX_CODESYSTEM_AND_VER = "IDX_CODESYSTEM_AND_VER";
 	public static final int MAX_VERSION_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")

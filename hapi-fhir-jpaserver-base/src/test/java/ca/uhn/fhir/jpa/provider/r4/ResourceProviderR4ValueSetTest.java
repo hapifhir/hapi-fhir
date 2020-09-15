@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -1086,6 +1087,40 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		cs.getConcepts().add(parentB);
 
 		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		return codeSystem;
+	}
+
+	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails, String theCodeSystemVersion) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setVersion(theCodeSystemVersion);
+		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
+
+		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A" + theCodeSystemVersion);
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA").setDisplay("Child AA" + theCodeSystemVersion);
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA").setDisplay("Child AAA" + theCodeSystemVersion);
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB").setDisplay("Child AAB" + theCodeSystemVersion);
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB").setDisplay("Child AB" + theCodeSystemVersion);
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B" + theCodeSystemVersion);
+		cs.getConcepts().add(parentB);
+
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
 		return codeSystem;
 	}
 

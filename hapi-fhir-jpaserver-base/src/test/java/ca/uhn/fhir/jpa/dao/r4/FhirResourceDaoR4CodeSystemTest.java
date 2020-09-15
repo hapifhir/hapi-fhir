@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -8,11 +9,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
@@ -35,15 +39,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	@Test
 	public void testDeleteLargeCompleteCodeSystem() {
 
-		CodeSystem cs = new CodeSystem();
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.setUrl("http://foo");
-		for (int i = 0; i < 222; i++) {
-			cs.addConcept().setCode("CODE" + i);
-		}
-		IIdType id = myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
+		IIdType id = createLargeCodeSystem(null);
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -70,6 +66,122 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 			assertEquals(0, myTermConceptDao.count());
 		});
 
+	}
+
+	@Test
+	public void testDeleteCodeSystemVersion() {
+
+		// Create code system with two versions.
+		IIdType id_first = createLargeCodeSystem("1");
+
+		runInTransaction(() -> {
+			assertEquals(1, myTermCodeSystemDao.count());
+			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
+			assertEquals(1, myTermCodeSystemVersionDao.count());
+			List<ResourceTable> resourceList = myResourceTableDao.findAll();
+			assertEquals(222, myTermConceptDao.count());
+			assertEquals(1, resourceList.size());
+			assertNull(resourceList.get(0).getDeleted());
+		});
+
+		IIdType id_second = createLargeCodeSystem("2");
+
+		runInTransaction(() -> {
+			assertEquals(1, myTermCodeSystemDao.count());
+			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
+			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(444, myTermConceptDao.count());
+			List<ResourceTable> resourceList = myResourceTableDao.findAll();
+			assertEquals(2, resourceList.size());
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
+			assertEquals(2, active);
+		});
+
+		// Attempt to delete first version
+		myCodeSystemDao.delete(id_first, mySrd);
+
+		// Only the resource will be deleted initially
+		runInTransaction(() -> {
+			assertEquals(1, myTermCodeSystemDao.count());
+			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
+			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(444, myTermConceptDao.count());
+			List<ResourceTable> resourceList = myResourceTableDao.findAll();
+			assertEquals(2, resourceList.size());
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
+			assertEquals(1, active);
+		});
+
+		// Now the background scheduler will do its thing
+		myTerminologyDeferredStorageSvc.saveDeferred();
+
+		// Entities for first resource should be gone now.
+		runInTransaction(() -> {
+			assertEquals(1, myTermCodeSystemDao.count());
+			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
+			assertEquals(1, myTermCodeSystemVersionDao.count());
+			assertEquals(222, myTermConceptDao.count());
+			List<ResourceTable> resourceList = myResourceTableDao.findAll();
+			assertEquals(2, resourceList.size());
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
+			assertEquals(1, active);
+		});
+
+		// Attempt to delete second version
+		myCodeSystemDao.delete(id_second, mySrd);
+
+		// Only the resource will be deleted initially
+		runInTransaction(() -> {
+			assertEquals(1, myTermCodeSystemDao.count());
+			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
+			assertEquals(1, myTermCodeSystemVersionDao.count());
+			assertEquals(222,  myTermConceptDao.count());
+			List<ResourceTable> resourceList = myResourceTableDao.findAll();
+			assertEquals(2, resourceList.size());
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
+			assertEquals(0, active);
+		});
+
+		// Now the background scheduler will do its thing
+		myTerminologyDeferredStorageSvc.saveDeferred();
+
+		// The remaining versions and Code System entities should be gone now.
+		runInTransaction(() -> {
+			assertEquals(0, myTermCodeSystemDao.count());
+			assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
+			assertEquals(0, myTermCodeSystemVersionDao.count());
+			List<ResourceTable> resourceList = myResourceTableDao.findAll();
+			assertEquals(2, resourceList.size());
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
+			assertEquals(0, active);
+		});
+
+	}
+
+	private IIdType createLargeCodeSystem(String theVersion) {
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://foo");
+		if (theVersion != null) {
+			cs.setVersion(theVersion);
+		}
+		for (int i = 0; i < 222; i++) {
+			cs.addConcept().setCode("CODE" + i);
+		}
+		IIdType id = myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		return id;
 	}
 
 	@AfterAll

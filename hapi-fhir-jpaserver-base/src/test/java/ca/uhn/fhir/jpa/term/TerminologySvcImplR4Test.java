@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
@@ -21,7 +24,6 @@ import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +34,14 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1802,10 +1809,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		createCodeSystem();
 
 		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
-		assertEquals(true, validation.isOk());
+		assertTrue(validation.isOk());
 
 		validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);
-		assertEquals(false, validation.isOk());
+		assertFalse(validation.isOk());
 	}
 
 	@Test
@@ -1903,5 +1910,110 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+	}
+
+	@Test
+	public void testCreateCodeSystemTwoVersions() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem
+			.addConcept().setCode("A").setDisplay("Code A");
+		codeSystem
+			.addConcept().setCode("B").setDisplay("Code A");
+
+		codeSystem.setVersion("1");
+
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
+		assertThat(toCodes(codes), containsInAnyOrder("A"));
+
+		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
+		assertThat(toCodes(codes), containsInAnyOrder("B"));
+
+		runInTransaction(() -> {
+			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
+			assertEquals(termCodeSystemVersions.size(), 1);
+			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
+			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
+			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
+			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
+
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
+
+		});
+
+		codeSystem.setVersion("2");
+		codeSystem
+			.addConcept().setCode("C").setDisplay("Code C");
+
+		IIdType id_v2 = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+		codes = myTermSvc.findCodesBelow(id_v2.getIdPartAsLong(), id_v2.getVersionIdPartAsLong(), "C");
+		assertThat(toCodes(codes), containsInAnyOrder("C"));
+
+		runInTransaction(() -> {
+			List<TermCodeSystemVersion> termCodeSystemVersions_updated = myTermCodeSystemVersionDao.findAll();
+			assertEquals(termCodeSystemVersions_updated.size(), 2);
+			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(1);
+			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 3);
+			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
+			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B", "C"));
+
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
+			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
+		});
+	}
+
+	@Test
+	public void testUpdateCodeSystemContentModeNotPresent() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem
+			.addConcept().setCode("A").setDisplay("Code A");
+		codeSystem
+			.addConcept().setCode("B").setDisplay("Code A");
+
+		codeSystem.setVersion("1");
+
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
+		assertThat(toCodes(codes), containsInAnyOrder("A"));
+
+		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
+		assertThat(toCodes(codes), containsInAnyOrder("B"));
+
+		runInTransaction(() -> {
+			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
+			assertEquals(termCodeSystemVersions.size(), 1);
+			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
+			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
+			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
+			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
+
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
+
+		});
+
+		// Remove concepts and changed ContentMode to NOTPRESENT
+		codeSystem.setConcept(new ArrayList<>());
+		codeSystem.setContent((CodeSystem.CodeSystemContentMode.NOTPRESENT));
+
+		myCodeSystemDao.update(codeSystem, mySrd).getId().toUnqualified();
+		runInTransaction(() -> {
+			List<TermCodeSystemVersion> termCodeSystemVersions_updated = myTermCodeSystemVersionDao.findAll();
+			assertEquals(termCodeSystemVersions_updated.size(), 1);
+			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(0);
+			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 2);
+			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
+			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B"));
+
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
+		});
 	}
 }
