@@ -18,6 +18,10 @@ public class HapiMessageHeaders implements Map<String, Object>, IModelJson {
     public static String FIRST_FAILURE_KEY = "firstFailure";
     public static String LAST_FAILURE_KEY = "lastFailure";
 
+    private Integer retryCount;
+    private Long firstFailureTimestamp;
+    private Long lastFailureTimestamp;
+
     private final Map<String, Object> headers;
 
     public HapiMessageHeaders(Map<String, Object> theHeaders) {
@@ -90,26 +94,32 @@ public class HapiMessageHeaders implements Map<String, Object>, IModelJson {
     }
 
     public Integer getRetryCount() {
-        return (Integer)this.getHeaders().get(RETRY_COUNT_KEY);
+    	return this.retryCount;
+//        return (Integer)this.getHeaders().get(RETRY_COUNT_KEY);
     }
 
     public Long getFirstFailureDate() {
-    	return (Long)this.getHeaders().get(FIRST_FAILURE_KEY);
+    	return this.firstFailureTimestamp;
+    	//return (Long)this.getHeaders().get(FIRST_FAILURE_KEY);
     }
 
     public Long getLastFailureDate() {
-    	return (Long)this.getHeaders().get(LAST_FAILURE_KEY);
+    	//return (Long)this.getHeaders().get(LAST_FAILURE_KEY);
+    	return this.lastFailureTimestamp;
     }
 
     public void setRetryCount(Integer theRetryCount) {
     	this.getHeaders().put(RETRY_COUNT_KEY, theRetryCount);
+    	this.retryCount = theRetryCount;
 	 }
 
     public void setLastFailureDate(Long theLastFailureDate) {
     	this.getHeaders().put(LAST_FAILURE_KEY, theLastFailureDate);
+    	this.lastFailureTimestamp = theLastFailureDate;
 	 }
 	public void setFirstFailureDate(Long theFirstFailureDate) {
     	this.getHeaders().put(FIRST_FAILURE_KEY, theFirstFailureDate);
+    	this.firstFailureTimestamp = theFirstFailureDate;
 	 }
     public Map<String, Object> getHeaders() {
         return this.headers;
