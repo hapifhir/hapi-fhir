@@ -19,7 +19,7 @@ public class HapiMessageHeaders implements IModelJson {
     public static String LAST_FAILURE_KEY = "lastFailure";
 
     @JsonProperty("retryCount")
-    private Integer myRetryCount;
+    private Integer myRetryCount = 0;
     @JsonProperty("firstFailureTimestamp")
     private Long myFirstFailureTimestamp;
     @JsonProperty("lastFailureTimestamp")
