@@ -10,16 +10,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoTransactionDstu3Test.class);
 	public static final int TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE = 5;
 
 	@AfterEach
@@ -54,7 +50,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	@Test
-	public void testTransactionTooBig() throws IOException {
+	public void testTransactionTooBig() {
 		Bundle bundle = createInputTransactionWithTooManyEntries(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE + 1);
 
 		try {
@@ -68,7 +64,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	@Test
-	public void testTransactionSmallEnough() throws IOException {
+	public void testTransactionSmallEnough() {
 		testTransactionBundleSucceedsWithSize(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE);
 		testTransactionBundleSucceedsWithSize(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE - 1);
 		testTransactionBundleSucceedsWithSize(1);
