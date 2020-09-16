@@ -28,7 +28,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 		myDaoConfig.setMaximumTransactionBundleSize(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE);
 	}
 
-	private Bundle createInputTransactionWithTooManyEntries(int theSize) {
+	private Bundle createInputTransactionWithSize(int theSize) {
 		Bundle retval = new Bundle();
 		retval.setType(BundleType.TRANSACTION);
 		for (int i = 0; i < theSize; ++i) {
@@ -47,7 +47,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionTooBig() {
-		Bundle bundle = createInputTransactionWithTooManyEntries(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE + 1);
+		Bundle bundle = createInputTransactionWithSize(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE + 1);
 
 		try {
 			mySystemDao.transaction(null, bundle);
@@ -67,7 +67,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	private void testTransactionBundleSucceedsWithSize(int theSize) {
-		Bundle bundle = createInputTransactionWithTooManyEntries(theSize);
+		Bundle bundle = createInputTransactionWithSize(theSize);
 		Bundle response = mySystemDao.transaction(null, bundle);
 
 		assertEquals(theSize, response.getEntry().size());
