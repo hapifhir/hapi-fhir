@@ -55,7 +55,8 @@ public class HapiMessageHeaders implements IModelJson {
     public void setLastFailureDate(Long theLastFailureDate) {
     	this.myLastFailureTimestamp = theLastFailureDate;
 	 }
-	public void setFirstFailureDate(Long theFirstFailureDate) {
+
+	 public void setFirstFailureDate(Long theFirstFailureDate) {
     	this.myFirstFailureTimestamp = theFirstFailureDate;
 	 }
 
