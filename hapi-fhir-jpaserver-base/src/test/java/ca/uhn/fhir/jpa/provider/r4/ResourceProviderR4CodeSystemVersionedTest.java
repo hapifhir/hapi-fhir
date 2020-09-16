@@ -31,10 +31,18 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
-		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-v1.xml");
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		cs.setVersion("1");
+		for(CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent : cs.getConcept()) {
+			conceptDefinitionComponent.setDisplay(conceptDefinitionComponent.getDisplay() + " v1");
+		}
 		myCodeSystemDao.create(cs, mySrd);
 
-		cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-v2.xml");
+		cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		cs.setVersion("2");
+		for(CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent : cs.getConcept()) {
+			conceptDefinitionComponent.setDisplay(conceptDefinitionComponent.getDisplay() + " v2");
+		}
 		myCodeSystemDao.create(cs, mySrd);
 
 		CodeSystem parentChildCs = new CodeSystem();
@@ -310,7 +318,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("version", respParam.getParameter().get(1).getName());
 		assertEquals("1", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals(("Systolic blood pressure--expiration v1"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
@@ -392,7 +400,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("version", respParam.getParameter().get(1).getName());
 		assertEquals("1",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals(("Systolic blood pressure--expiration v1"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
