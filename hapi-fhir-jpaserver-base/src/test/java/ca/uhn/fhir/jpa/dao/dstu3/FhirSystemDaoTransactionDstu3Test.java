@@ -29,10 +29,6 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	private Bundle createInputTransactionWithTooManyEntries(int theSize) {
-		/*
-		 * Put one observation before the patient it references, and
-		 * one after it just to make sure that order doesn't matter
-		 */
 		Bundle retval = new Bundle();
 		retval.setType(BundleType.TRANSACTION);
 		for (int i = 0; i < theSize; ++i) {
