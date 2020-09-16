@@ -14,15 +14,15 @@ import java.util.Map;
  * they can also be accessed in standard map fashion with a `get` on the map.
  */
 public class HapiMessageHeaders implements IModelJson {
-    public static String RETRY_COUNT_KEY = "retryCount";
-    public static String FIRST_FAILURE_KEY = "firstFailure";
-    public static String LAST_FAILURE_KEY = "lastFailure";
+    public static final String RETRY_COUNT_KEY = "retryCount";
+    public static final String FIRST_FAILURE_KEY = "firstFailureTimestamp";
+    public static final String LAST_FAILURE_KEY = "lastFailureTimestamp";
 
-    @JsonProperty("retryCount")
+    @JsonProperty(RETRY_COUNT_KEY)
     private Integer myRetryCount = 0;
-    @JsonProperty("firstFailureTimestamp")
+    @JsonProperty(FIRST_FAILURE_KEY)
     private Long myFirstFailureTimestamp;
-    @JsonProperty("lastFailureTimestamp")
+    @JsonProperty(LAST_FAILURE_KEY)
     private Long myLastFailureTimestamp;
 
     @JsonProperty("customHeaders")
