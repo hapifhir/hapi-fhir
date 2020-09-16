@@ -22,13 +22,12 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	protected void setDefaultRetryHeaders() {
 		HapiMessageHeaders messageHeaders = new HapiMessageHeaders();
-		messageHeaders.initializeDefaultRetryValues();
 		setHeaders(messageHeaders);
 	}
 
 	@Override
 	public MessageHeaders getHeaders() {
-		return new MessageHeaders(myHeaders);
+		return myHeaders.toMessageHeaders();
 	}
 
 	public HapiMessageHeaders getHapiHeaders() {
