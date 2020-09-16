@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server.messaging.json;
 import ca.uhn.fhir.model.api.IModelJson;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -94,15 +93,24 @@ public class HapiMessageHeaders implements Map<String, Object>, IModelJson {
         return (Integer)this.getHeaders().get(RETRY_COUNT_KEY);
     }
 
-    public Date getFirstFailureDate() {
-        return (Date)this.getHeaders().get(FIRST_FAILURE_KEY);
-
+    public Long getFirstFailureDate() {
+    	return (Long)this.getHeaders().get(FIRST_FAILURE_KEY);
     }
 
-    public Date getLastFailureDate() {
-        return (Date)this.getHeaders().get(LAST_FAILURE_KEY);
-
+    public Long getLastFailureDate() {
+    	return (Long)this.getHeaders().get(LAST_FAILURE_KEY);
     }
+
+    public void setRetryCount(Integer theRetryCount) {
+    	this.getHeaders().put(RETRY_COUNT_KEY, theRetryCount);
+	 }
+
+    public void setLastFailureDate(Long theLastFailureDate) {
+    	this.getHeaders().put(LAST_FAILURE_KEY, theLastFailureDate);
+	 }
+	public void setFirstFailureDate(Long theFirstFailureDate) {
+    	this.getHeaders().put(FIRST_FAILURE_KEY, theFirstFailureDate);
+	 }
     public Map<String, Object> getHeaders() {
         return this.headers;
     }
