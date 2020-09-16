@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.Join;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
@@ -24,9 +25,6 @@ public class SearchSqlBuilder {
 	private final ArrayList<Object> myBindVariableValues = new ArrayList<>();
 	private final DbSpec mySpec;
 	private final DbSchema mySchema;
-	private final DbTable myResourceEntityTable;
-	private final DbColumn myResourceEntityColumnResId;
-	private final DbColumn myResourceEntityColumnResDeletedAt;
 	private final SelectQuery mySelect;
 	private final PartitionSettings myPartitionSettings;
 	private final RequestPartitionId myRequestPartitionId;
@@ -41,28 +39,6 @@ public class SearchSqlBuilder {
 		mySpec = new DbSpec();
 		mySchema = mySpec.addDefaultSchema();
 		mySelect = new SelectQuery();
-
-		myResourceEntityTable = mySchema.addTable("HFJ_RESOURCE");
-		myResourceEntityColumnResId = myResourceEntityTable.addColumn("RES_ID");
-		myResourceEntityColumnResDeletedAt = myResourceEntityTable.addColumn("RES_DELETED_AT");
-
-
-//		DbTable myIndexString2Table = mySchema.addTable("HFJ_SPIDX_STRING");
-//		DbColumn myIndexString2ColumnResId = myIndexString2Table.addColumn("RES_ID");
-//		DbColumn myIndexString2ColumnValueExact = myIndexString2Table.addColumn("SP_VALUE_EXACT");
-//
-
-//		select.addFromTable(myResourceEntityTable);
-//		select.addColumns(myResourceEntityColumnResId);
-//
-//		DbJoin join = new DbJoin(mySpec, myResourceEntityTable, myIndexStringTable, new DbColumn[]{myResourceEntityColumnResId}, new DbColumn[]{myIndexStringColumnResId});
-//		select.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
-//
-//		DbJoin join2 = new DbJoin(mySpec, myResourceEntityTable, myIndexString2Table, new DbColumn[]{myResourceEntityColumnResId}, new DbColumn[]{myIndexString2ColumnResId});
-//		select.addJoins(SelectQuery.JoinType.LEFT_OUTER, join2);
-//
-//		BinaryCondition eq = BinaryCondition.equalTo(myIndexString2ColumnValueExact, "FOO");
-//		select.addCondition(eq);
 
 	}
 
@@ -91,6 +67,14 @@ public class SearchSqlBuilder {
 	}
 
 	public GeneratedSql generate() {
+
+		// If we don't have an index table at all, there are no search params
+		if (myCurrentIndexTable == null) {
+			ResourceTable resourceTable = new ResourceTable();
+			resourceTable.addResourceTypeAndNonDeletedPredicates();
+			addTable(resourceTable);
+		}
+
 		mySelect.validate();
 		String sql = mySelect.toString();
 
@@ -125,6 +109,38 @@ public class SearchSqlBuilder {
 
 		public abstract DbColumn getResourceIdColumn();
 
+	}
+
+	public class ResourceTable extends BaseIndexTable {
+		private final DbTable myTable;
+		private final DbColumn myColumnResId;
+		private final DbColumn myColumnResDeletedAt;
+		private final DbColumn myColumnResType;
+
+		/**
+		 * Constructor
+		 */
+		public ResourceTable() {
+			myTable = mySchema.addTable("HFJ_RESOURCE");
+			myColumnResId = myTable.addColumn("RES_ID");
+			myColumnResType = myTable.addColumn("RES_TYPE");
+			myColumnResDeletedAt = myTable.addColumn("RES_DELETED_AT");
+		}
+
+		@Override
+		public DbTable getTable() {
+			return myTable;
+		}
+
+		@Override
+		public DbColumn getResourceIdColumn() {
+			return myColumnResId;
+		}
+
+		public void addResourceTypeAndNonDeletedPredicates() {
+			mySelect.addCondition(BinaryCondition.equalTo(myColumnResType, myResourceType));
+			mySelect.addCondition(UnaryCondition.isNull(myColumnResDeletedAt));
+		}
 	}
 
 	public class StringIndexTable extends BaseIndexTable {
