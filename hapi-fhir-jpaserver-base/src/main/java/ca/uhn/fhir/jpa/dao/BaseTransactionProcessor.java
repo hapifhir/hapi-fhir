@@ -348,7 +348,7 @@ public abstract class BaseTransactionProcessor {
 
 		int numberOfEntries = myVersionAdapter.getEntries(theRequest).size();
 
-		if (numberOfEntries > myDaoConfig.getMaximumTransactionBundleSize()) {
+		if (myDaoConfig.getMaximumTransactionBundleSize() != null && numberOfEntries > myDaoConfig.getMaximumTransactionBundleSize()) {
 			throw new PayloadTooLargeException("Transaction Bundle Too large.  Transaction bundle contains " +
 				numberOfEntries +
 				" which exceedes the maximum permitted transaction bundle size of " + myDaoConfig.getMaximumTransactionBundleSize());
