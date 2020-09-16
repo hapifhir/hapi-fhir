@@ -162,7 +162,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	 */
 	@Autowired
 	public SearchCoordinatorSvcImpl(ThreadPoolTaskExecutor searchCoordinatorThreadFactory) {
-		searchCoordinatorThreadFactory.setThreadNamePrefix("search_coord_");
 		myExecutor = searchCoordinatorThreadFactory.getThreadPoolExecutor();
 	}
 

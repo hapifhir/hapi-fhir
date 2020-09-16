@@ -264,7 +264,10 @@ public abstract class BaseConfig {
 
 	@Bean
 	public ThreadPoolTaskExecutor searchCoordinatorThreadFactory() {
-		return new ThreadPoolTaskExecutor();
+		final ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+		threadPoolTaskExecutor.setThreadNamePrefix("search_coord_");
+		threadPoolTaskExecutor.initialize();
+		return threadPoolTaskExecutor;
 	}
 
 	@Bean
