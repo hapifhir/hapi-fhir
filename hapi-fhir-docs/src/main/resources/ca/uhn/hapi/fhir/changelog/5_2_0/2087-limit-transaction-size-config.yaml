@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2087
+title: "Added new DaoConfig parameter called maximumTransactionBundleSize that if not-null will throw a
+PayloadTooLarge exception when the number of resources in a transaction bundle exceeds this size."
