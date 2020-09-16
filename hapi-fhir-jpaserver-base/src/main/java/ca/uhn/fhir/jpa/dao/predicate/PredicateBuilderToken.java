@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -82,10 +83,11 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
+											From<?, ResourceLink> theLinkJoin,
 											RequestPartitionId theRequestPartitionId) {
 
 		if (theList.get(0).getMissing() != null) {
-			From<?, ResourceIndexedSearchParamToken> join = myQueryStack.createJoin(SearchBuilderJoinEnum.TOKEN, theSearchParam.getName());
+			From<?, ResourceIndexedSearchParamToken> join = myQueryStack.createLinkJoin(theLinkJoin, SearchBuilderJoinEnum.TOKEN, theSearchParam.getName());
 			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
@@ -111,7 +113,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 						throw new MethodNotAllowedException(msg);
 					}
 
-					myPredicateBuilder.addPredicateString(theResourceName, theSearchParam, theList, theRequestPartitionId);
+					myPredicateBuilder.addLinkPredicateString(theResourceName, theSearchParam, theList, theLinkJoin, theRequestPartitionId);
 					break;
 				}
 			}
@@ -123,7 +125,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			return null;
 		}
 
-		From<?, ResourceIndexedSearchParamToken> join = myQueryStack.createJoin(SearchBuilderJoinEnum.TOKEN, theSearchParam.getName());
+		From<?, ResourceIndexedSearchParamToken> join = myQueryStack.createLinkJoin(theLinkJoin, SearchBuilderJoinEnum.TOKEN, theSearchParam.getName());
 		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
 
 		Collection<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theSearchParam, myCriteriaBuilder, join, theOperation, theRequestPartitionId);

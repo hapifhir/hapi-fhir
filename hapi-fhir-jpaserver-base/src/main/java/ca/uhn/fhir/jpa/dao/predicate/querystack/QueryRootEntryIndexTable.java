@@ -66,7 +66,7 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 	}
 
 	@Override
-	<T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
+	<T> From<?, T> createJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName) {
 		if (myParamType == null) {
 			switch (theType) {
 				case REFERENCE:

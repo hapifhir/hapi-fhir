@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.lang3.Validate;
 
@@ -137,10 +138,17 @@ public class QueryStack {
 	 * Creates a new SQL join from the current select statement to another table, using the resource PID as the
 	 * joining key
 	 */
-	public <T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
-		return top().createJoin(theType, theSearchParameterName);
+	public <T> From<?, T> createLinkJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName) {
+		return top().createJoin(theLinkJoin, theType, theSearchParameterName);
 	}
 
+	/**
+	 * Creates a new SQL join from the current select statement to another table, using the resource PID as the
+	 * joining key
+	 */
+	public <T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
+		return top().createJoin(null, theType, theSearchParameterName);
+	}
 	/**
 	 * Returns a join that was previously created by a call to {@link #createJoin(SearchBuilderJoinEnum, String)},
 	 * if one exists for the given key.

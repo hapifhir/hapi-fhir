@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
@@ -54,10 +55,10 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-											RuntimeSearchParam theSearchParam,
-											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation,
-											RequestPartitionId theRequestPartitionId) {
+                                  RuntimeSearchParam theSearchParam,
+                                  List<? extends IQueryParameterType> theList,
+                                  SearchFilterParser.CompareOperation theOperation,
+                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
 		From<?, ResourceIndexedSearchParamUri> join = myQueryStack.createJoin(SearchBuilderJoinEnum.URI, paramName);
@@ -125,29 +126,29 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 					} else {
 
 						Predicate uriPredicate = null;
-						if (operation == null || operation == SearchFilterParser.CompareOperation.eq) {
+						if (theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq) {
 							long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName, value);
 							Predicate hashPredicate = myCriteriaBuilder.equal(join.get("myHashUri"), hashUri);
 							codePredicates.add(hashPredicate);
-						} else if (operation == SearchFilterParser.CompareOperation.ne) {
+						} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
 							uriPredicate = myCriteriaBuilder.notEqual(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.co) {
+						} else if (theOperation == SearchFilterParser.CompareOperation.co) {
 							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftAndRightMatchLikeExpression(value));
-						} else if (operation == SearchFilterParser.CompareOperation.gt) {
+						} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
 							uriPredicate = myCriteriaBuilder.greaterThan(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.lt) {
+						} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
 							uriPredicate = myCriteriaBuilder.lessThan(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.ge) {
+						} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
 							uriPredicate = myCriteriaBuilder.greaterThanOrEqualTo(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.le) {
+						} else if (theOperation == SearchFilterParser.CompareOperation.le) {
 							uriPredicate = myCriteriaBuilder.lessThanOrEqualTo(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.sw) {
+						} else if (theOperation == SearchFilterParser.CompareOperation.sw) {
 							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
-						} else if (operation == SearchFilterParser.CompareOperation.ew) {
+						} else if (theOperation == SearchFilterParser.CompareOperation.ew) {
 							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createRightMatchLikeExpression(value));
 						} else {
 							throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
-								operation.toString()));
+								theOperation.toString()));
 						}
 
 						if (uriPredicate != null) {

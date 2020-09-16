@@ -36,11 +36,13 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import java.util.Collection;
 import java.util.Date;
 
 @Entity
@@ -90,6 +92,35 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
+
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
+	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
+
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
+	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
+
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
+	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
+
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
+	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
+
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
+	private Collection<ResourceIndexedSearchParamString> myParamsString;
+
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
+	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
+
+	@OneToMany()
+	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
+	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
+
 	@Transient
 	private transient String myTargetResourceId;
 
