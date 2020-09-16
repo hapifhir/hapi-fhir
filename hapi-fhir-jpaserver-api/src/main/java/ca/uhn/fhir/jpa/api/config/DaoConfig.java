@@ -80,6 +80,7 @@ public class DaoConfig {
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
+	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
@@ -125,6 +126,8 @@ public class DaoConfig {
 	private boolean myIndexContainedResources = true;
 	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
+
+	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	/**
 	 * update setter javadoc if default changes
@@ -620,6 +623,31 @@ public class DaoConfig {
 	 */
 	public void setMaximumSearchResultCountInTransaction(Integer theMaximumSearchResultCountInTransaction) {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
+	}
+
+	/**
+	 * Specifies the maximum number of resources permitted within a single transaction bundle.
+	 * If a transaction bundle is submitted with more than this number of resources, it will be
+	 * rejected with a PayloadTooLarge exception.
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>
+	 */
+	public Integer getMaximumTransactionBundleSize() {
+		return myMaximumTransactionBundleSize;
+	}
+
+	/**
+	 * Specifies the maximum number of resources permitted within a single transaction bundle.
+	 * If a transaction bundle is submitted with more than this number of resources, it will be
+	 * rejected with a PayloadTooLarge exception.
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>
+	 */
+	public DaoConfig setMaximumTransactionBundleSize(Integer theMaximumTransactionBundleSize) {
+		myMaximumTransactionBundleSize = theMaximumTransactionBundleSize;
+		return this;
 	}
 
 	/**

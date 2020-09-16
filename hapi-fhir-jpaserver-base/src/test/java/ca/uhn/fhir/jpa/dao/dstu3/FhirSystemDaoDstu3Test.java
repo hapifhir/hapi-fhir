@@ -24,14 +24,35 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Appointment;
+import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.EpisodeOfCare;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
@@ -2809,108 +2830,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		IBundleProvider found = myObservationDao.search(params);
 		assertEquals(1, found.size().intValue());
 	}
-
-	//
-	//
-	// /**
-	// * Issue #55
-	// */
-	// @Test
-	// public void testTransactionWithCidIds() throws Exception {
-	// Bundle request = new Bundle();
-	//
-	// Patient p1 = new Patient();
-	// p1.setId("cid:patient1");
-	// p1.addIdentifier().setSystem("system").setValue("testTransactionWithCidIds01");
-	// res.add(p1);
-	//
-	// Observation o1 = new Observation();
-	// o1.setId("cid:observation1");
-	// o1.getIdentifier().setSystem("system").setValue("testTransactionWithCidIds02");
-	// o1.setSubject(new Reference("Patient/cid:patient1"));
-	// res.add(o1);
-	//
-	// Observation o2 = new Observation();
-	// o2.setId("cid:observation2");
-	// o2.getIdentifier().setSystem("system").setValue("testTransactionWithCidIds03");
-	// o2.setSubject(new Reference("Patient/cid:patient1"));
-	// res.add(o2);
-	//
-	// ourSystemDao.transaction(res);
-	//
-	// assertTrue(p1.getId().getValue(), p1.getId().getIdPart().matches("^[0-9]+$"));
-	// assertTrue(o1.getId().getValue(), o1.getId().getIdPart().matches("^[0-9]+$"));
-	// assertTrue(o2.getId().getValue(), o2.getId().getIdPart().matches("^[0-9]+$"));
-	//
-	// assertThat(o1.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
-	// assertThat(o2.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
-	//
-	// }
-	//
-	// @Test
-	// public void testTransactionWithDelete() throws Exception {
-	// Bundle request = new Bundle();
-	//
-	// /*
-	// * Create 3
-	// */
-	//
-	// List<IResource> res;
-	// res = new ArrayList<IResource>();
-	//
-	// Patient p1 = new Patient();
-	// p1.addIdentifier().setSystem("urn:system").setValue("testTransactionWithDelete");
-	// res.add(p1);
-	//
-	// Patient p2 = new Patient();
-	// p2.addIdentifier().setSystem("urn:system").setValue("testTransactionWithDelete");
-	// res.add(p2);
-	//
-	// Patient p3 = new Patient();
-	// p3.addIdentifier().setSystem("urn:system").setValue("testTransactionWithDelete");
-	// res.add(p3);
-	//
-	// ourSystemDao.transaction(res);
-	//
-	// /*
-	// * Verify
-	// */
-	//
-	// IBundleProvider results = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system",
-	// "testTransactionWithDelete"));
-	// assertEquals(3, results.size());
-	//
-	// /*
-	// * Now delete 2
-	// */
-	//
-	// request = new Bundle();
-	// res = new ArrayList<IResource>();
-	// List<IResource> existing = results.getResources(0, 3);
-	//
-	// p1 = new Patient();
-	// p1.setId(existing.get(0).getId());
-	// ResourceMetadataKeyEnum.DELETED_AT.put(p1, InstantDt.withCurrentTime());
-	// res.add(p1);
-	//
-	// p2 = new Patient();
-	// p2.setId(existing.get(1).getId());
-	// ResourceMetadataKeyEnum.DELETED_AT.put(p2, InstantDt.withCurrentTime());
-	// res.add(p2);
-	//
-	// ourSystemDao.transaction(res);
-	//
-	// /*
-	// * Verify
-	// */
-	//
-	// IBundleProvider results2 = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system",
-	// "testTransactionWithDelete"));
-	// assertEquals(1, results2.size());
-	// List<IResource> existing2 = results2.getResources(0, 1);
-	// assertEquals(existing2.get(0).getId(), existing.get(2).getId());
-	//
-	// }
 
 	@Test
 	public void testTransactionWithRelativeOidIds() throws Exception {
