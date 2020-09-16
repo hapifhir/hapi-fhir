@@ -61,9 +61,9 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(null, bundle);
 			fail();
 		} catch (PayloadTooLargeException e) {
-			assertThat(e.getMessage(), containsString("transaction bundle contains " +
+			assertThat(e.getMessage(), containsString("Transaction Bundle Too large.  Transaction bundle contains " +
 				(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE + 1) +
-				" which exceedes the maximum transaction bundle size of " + TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE));
+				" which exceedes the maximum permitted transaction bundle size of " + TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE));
 		}
 	}
 

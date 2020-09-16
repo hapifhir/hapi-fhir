@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
@@ -54,6 +55,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
@@ -124,6 +126,8 @@ public abstract class BaseTransactionProcessor {
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	@PostConstruct
 	public void start() {
@@ -342,7 +346,15 @@ public abstract class BaseTransactionProcessor {
 			throw new InvalidRequestException("Unable to process transaction where incoming Bundle.type = " + transactionType);
 		}
 
-		ourLog.debug("Beginning {} with {} resources", theActionName, myVersionAdapter.getEntries(theRequest).size());
+		int numberOfEntries = myVersionAdapter.getEntries(theRequest).size();
+
+		if (numberOfEntries > myDaoConfig.getMaximumTransactionBundleSize()) {
+			throw new PayloadTooLargeException("Transaction Bundle Too large.  Transaction bundle contains " +
+				numberOfEntries +
+				" which exceedes the maximum permitted transaction bundle size of " + myDaoConfig.getMaximumTransactionBundleSize());
+		}
+
+		ourLog.debug("Beginning {} with {} resources", theActionName, numberOfEntries);
 
 		final TransactionDetails transactionDetails = new TransactionDetails();
 		final StopWatch transactionStopWatch = new StopWatch();
@@ -350,7 +362,7 @@ public abstract class BaseTransactionProcessor {
 		List<IBase> requestEntries = myVersionAdapter.getEntries(theRequest);
 
 		// Do all entries have a verb?
-		for (int i = 0; i < myVersionAdapter.getEntries(theRequest).size(); i++) {
+		for (int i = 0; i < numberOfEntries; i++) {
 			IBase nextReqEntry = requestEntries.get(i);
 			String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 			if (verb == null || !isValidVerb(verb)) {
