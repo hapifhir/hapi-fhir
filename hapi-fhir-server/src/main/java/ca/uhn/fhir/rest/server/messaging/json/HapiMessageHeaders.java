@@ -49,37 +49,26 @@ public class HapiMessageHeaders implements IModelJson {
     }
 
     public void setRetryCount(Integer theRetryCount) {
-    	this.getHeaders().put(RETRY_COUNT_KEY, theRetryCount);
     	this.myRetryCount = theRetryCount;
 	 }
 
     public void setLastFailureDate(Long theLastFailureDate) {
-    	this.getHeaders().put(LAST_FAILURE_KEY, theLastFailureDate);
     	this.myLastFailureTimestamp = theLastFailureDate;
 	 }
 	public void setFirstFailureDate(Long theFirstFailureDate) {
-    	this.getHeaders().put(FIRST_FAILURE_KEY, theFirstFailureDate);
     	this.myFirstFailureTimestamp = theFirstFailureDate;
 	 }
-    public Map<String, Object> getHeaders() {
+
+    public Map<String, Object> getCustomHeaders() {
         return this.headers;
     }
 
     public MessageHeaders toMessageHeaders() {
-    	Map<String, Object> returnedHeaders = new HashMap<>();
-    	returnedHeaders.putAll(this.headers);
+		 Map<String, Object> returnedHeaders = new HashMap<>(this.headers);
     	returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
 	 	returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
 	 	returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
 	 	return new MessageHeaders(returnedHeaders);
 	 }
 
-	/**
-	 * Sets deffault values for the special headers that HAPI cares about during retry.
-	 */
-	public void initializeDefaultRetryValues() {
-        headers.put(RETRY_COUNT_KEY, 0);
-        headers.put(FIRST_FAILURE_KEY, null);
-        headers.put(LAST_FAILURE_KEY, null);
-    }
 }
