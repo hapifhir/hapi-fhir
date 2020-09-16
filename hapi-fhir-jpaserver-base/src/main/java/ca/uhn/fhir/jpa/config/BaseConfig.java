@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
+import ca.uhn.fhir.jpa.dao.search.SearchBuilder2;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
@@ -431,8 +432,12 @@ public abstract class BaseConfig {
 
 	@Bean(name = SEARCH_BUILDER)
 	@Scope("prototype")
-	public SearchBuilder persistedJpaSearchFirstPageBundleProvider(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return new SearchBuilder(theDao, theResourceName, theResourceType);
+	public ISearchBuilder persistedJpaSearchFirstPageBundleProvider(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		// FIXME: make configurable
+		if (false) {
+			return new SearchBuilder(theDao, theResourceName, theResourceType);
+		}
+		return new SearchBuilder2(theDao, theResourceName, theResourceType);
 	}
 
 	@Bean
