@@ -395,7 +395,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
 			} else {
 				List<TermValueSet> termValueSets = myValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 1), theValueSetToExpand.getUrl());
-				optionalTermValueSet = Optional.of(termValueSets.get(0));
+				if (termValueSets.size() > 0) {
+					optionalTermValueSet = Optional.of(termValueSets.get(0));
+				} else {
+					optionalTermValueSet = Optional.empty();
+				}
 			}
 		} else {
 			optionalTermValueSet = Optional.empty();
