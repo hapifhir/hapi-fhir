@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -45,13 +46,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderResourceId extends BasePredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderResourceId.class);
+class PredicateBuilderResourceId2 extends BasePredicateBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderResourceId2.class);
 
 	@Autowired
 	IdHelperService myIdHelperService;
 
-	PredicateBuilderResourceId(SearchBuilder theSearchBuilder) {
+	PredicateBuilderResourceId2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
@@ -90,7 +91,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart());
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
-						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest
+						// This is not an error in a search, it just results in no matches
 						ourLog.debug("Resource ID {} was requested but does not exist", valueAsId.getIdPart());
 					}
 				}
@@ -107,8 +108,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 
 		if (allOrPids != null && allOrPids.isEmpty()) {
 
-			// This will never match
-			nextPredicate = myCriteriaBuilder.equal(myQueryStack.getResourcePidColumn(), -1);
+			getSqlBuilder().setMatchNothing();
 
 		} else if (allOrPids != null) {
 
@@ -118,18 +118,16 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 			switch (operation) {
 				default:
 				case eq:
-					codePredicates.add(myQueryStack.getResourcePidColumn().in(ResourcePersistentId.toLongList(allOrPids)));
-					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
+					getSqlBuilder().addPredicateResourceIds(false, ResourcePersistentId.toLongList(allOrPids));
 					break;
 				case ne:
-					codePredicates.add(myQueryStack.getResourcePidColumn().in(ResourcePersistentId.toLongList(allOrPids)).not());
-					nextPredicate = myCriteriaBuilder.and(toArray(codePredicates));
+					getSqlBuilder().addPredicateResourceIds(true, ResourcePersistentId.toLongList(allOrPids));
 					break;
 			}
 
 		}
 
-		return nextPredicate;
+		return null;
 	}
 
 }

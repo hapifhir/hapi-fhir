@@ -23,8 +23,11 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
 import ca.uhn.fhir.jpa.util.SearchBox;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -48,10 +51,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Scope("prototype")
-public class PredicateBuilderCoords extends BasePredicateBuilder implements IPredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderCoords.class);
+public class PredicateBuilderCoords2 extends BasePredicateBuilder implements IPredicateBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderCoords2.class);
 
-	PredicateBuilderCoords(SearchBuilder theSearchBuilder) {
+	PredicateBuilderCoords2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
@@ -150,7 +153,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
-											RequestPartitionId theRequestPartitionId) {
+											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 		From<?, ResourceIndexedSearchParamCoords> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COORDS, theSearchParam.getName());
 
 		if (theList.get(0).getMissing() != null) {

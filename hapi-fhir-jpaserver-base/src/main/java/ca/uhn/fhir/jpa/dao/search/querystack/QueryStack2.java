@@ -22,7 +22,8 @@ package ca.uhn.fhir.jpa.dao.search.querystack;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
-import ca.uhn.fhir.jpa.dao.search.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.lang3.Validate;
 
@@ -54,9 +55,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * select on a different table since many tables have a column with a FK dependency on RES_ID.
  * </p>
  */
-public class QueryStack {
+public class QueryStack2 {
 
-	private final Stack<QueryRootEntry> myQueryRootStack = new Stack<>();
+	private final Stack<QueryRootEntry2> myQueryRootStack = new Stack<>();
 	private final CriteriaBuilder myCriteriaBuilder;
 	private final SearchParameterMap mySearchParameterMap;
 	private final RequestPartitionId myRequestPartitionId;
@@ -65,7 +66,7 @@ public class QueryStack {
 	/**
 	 * Constructor
 	 */
-	public QueryStack(CriteriaBuilder theCriteriaBuilder, String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId) {
+	public QueryStack2(CriteriaBuilder theCriteriaBuilder, String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId) {
 		assert theCriteriaBuilder != null;
 		assert isNotBlank(theResourceType);
 		assert theSearchParameterMap != null;
@@ -85,7 +86,7 @@ public class QueryStack {
 	 */
 	public void pushResourceTableQuery() {
 		assert myQueryRootStack.isEmpty();
-		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, false, mySearchParameterMap, myResourceType, myRequestPartitionId));
+		myQueryRootStack.push(new QueryRootEntryResourceTable2(myCriteriaBuilder, false, mySearchParameterMap, myResourceType, myRequestPartitionId));
 	}
 
 	/**
@@ -97,7 +98,7 @@ public class QueryStack {
 	 */
 	public void pushResourceTableCountQuery() {
 		assert myQueryRootStack.isEmpty();
-		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, true, mySearchParameterMap, myResourceType, myRequestPartitionId));
+		myQueryRootStack.push(new QueryRootEntryResourceTable2(myCriteriaBuilder, true, mySearchParameterMap, myResourceType, myRequestPartitionId));
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class QueryStack {
 	 */
 	public void pushResourceTableSubQuery(String theResourceType) {
 		assert !myQueryRootStack.isEmpty();
-		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, top(), mySearchParameterMap, theResourceType, myRequestPartitionId));
+		myQueryRootStack.push(new QueryRootEntryResourceTable2(myCriteriaBuilder, top(), mySearchParameterMap, theResourceType, myRequestPartitionId));
 	}
 
 	/**
@@ -120,16 +121,17 @@ public class QueryStack {
 	 * This method must only be called when the stack is NOT empty.
 	 * </p>
 	 */
+	// FIXME: remove
 	public void pushIndexTableSubQuery() {
 		assert !myQueryRootStack.isEmpty();
-		myQueryRootStack.push(new QueryRootEntryIndexTable(myCriteriaBuilder, top()));
+		myQueryRootStack.push(new QueryRootEntryIndexTable2(myCriteriaBuilder, top()));
 	}
 
 	/**
 	 * This method must be called once all predicates have been added
 	 */
 	public AbstractQuery<Long> pop() {
-		QueryRootEntry element = myQueryRootStack.pop();
+		QueryRootEntry2 element = myQueryRootStack.pop();
 		return element.pop();
 	}
 
@@ -137,8 +139,16 @@ public class QueryStack {
 	 * Creates a new SQL join from the current select statement to another table, using the resource PID as the
 	 * joining key
 	 */
+	public <T> From<?, T> createLinkJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName) {
+		return top().createJoin(theLinkJoin, theType, theSearchParameterName);
+	}
+
+	/**
+	 * Creates a new SQL join from the current select statement to another table, using the resource PID as the
+	 * joining key
+	 */
 	public <T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
-		return top().createJoin(theType, theSearchParameterName);
+		return top().createJoin(null, theType, theSearchParameterName);
 	}
 
 	/**
@@ -190,6 +200,7 @@ public class QueryStack {
 	 * Setting this flag is a performance optimization, since it avoids the need for us to explicitly
 	 * add predicates for the two conditions above.
 	 */
+	// FIXME: remove
 	public void addPredicatesWithImplicitTypeSelection(List<Predicate> thePredicates) {
 		setHasImplicitTypeSelection();
 		addPredicates(thePredicates);
@@ -259,7 +270,7 @@ public class QueryStack {
 		return top().subqueryForTagNegation();
 	}
 
-	private QueryRootEntry top() {
+	private QueryRootEntry2 top() {
 		Validate.isTrue(!myQueryRootStack.empty());
 		return myQueryRootStack.peek();
 	}

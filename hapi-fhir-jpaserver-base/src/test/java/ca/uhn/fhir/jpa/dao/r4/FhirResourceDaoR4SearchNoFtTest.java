@@ -557,8 +557,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(MedicationAdministration.SP_MEDICATION, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));
+
+		myCaptureQueriesListener.clear();
 		IBundleProvider results = myMedicationAdministrationDao.search(map);
 		List<String> ids = toUnqualifiedIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
 
 		assertThat(ids, contains(moId.getValue()));
 	}
@@ -3117,24 +3120,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(ids, contains(tid1)); // NOT tid2
 
 	}
-
-	@Test
-	public void testSearchStringParamWithLike() {
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Patient.SP_FAMILY, new StringOrListParam().addOr(new StringParam("AAA")).addOr(new StringParam("BBB")));
-		map.setLoadSynchronous(true);
-		myPatientDao.search(map);
-
-		List<String> queries = myCaptureQueriesListener
-			.getCapturedQueries()
-			.stream()
-			.map(t -> t.getSql(true, true))
-			.filter(t -> t.contains("select"))
-			.collect(Collectors.toList());
-
-		ourLog.info("Queries:\n  " + queries.stream().collect(Collectors.joining("\n  ")));
-	}
-
 
 	@Test
 	public void testSearchTokenListLike() {

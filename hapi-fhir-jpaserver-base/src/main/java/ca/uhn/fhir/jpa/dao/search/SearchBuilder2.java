@@ -37,7 +37,9 @@ import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack2;
+import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -58,7 +60,6 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.QueryChunker;
-import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -82,14 +83,13 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.query.Query;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
@@ -104,6 +104,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -146,7 +147,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 	protected IResourceTagDao myResourceTagDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-	private QueryStack myQueryStack;
+	private QueryStack2 myQueryStack;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
@@ -162,7 +163,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private PredicateBuilderFactory myPredicateBuilderFactory;
+	private PredicateBuilderFactory2 myPredicateBuilderFactory;
 	private List<ResourcePersistentId> myAlsoIncludePids;
 	private CriteriaBuilder myCriteriaBuilder;
 	private SearchParameterMap myParams;
@@ -174,6 +175,9 @@ public class SearchBuilder2 implements ISearchBuilder {
 	private RequestPartitionId myRequestPartitionId;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	private SearchSqlBuilder mySqlBuilder;
+	@Autowired
+	private DataSource myDataSource;
 
 	/**
 	 * Constructor
@@ -182,6 +186,10 @@ public class SearchBuilder2 implements ISearchBuilder {
 		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
+	}
+
+	public SearchSqlBuilder getSearchSqlBuilder() {
+		return mySqlBuilder;
 	}
 
 	public static int getMaximumPageSize() {
@@ -250,8 +258,8 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		List<TypedQuery<Long>> queries = createQuery(null, null, true, theRequest, null);
-		return new CountQueryIterator(queries.get(0));
+		List<List<Long>> queries = createQuery(null, null, true, theRequest, null);
+		return queries.get(0).iterator();
 	}
 
 	/**
@@ -278,14 +286,16 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
-		myQueryStack = new QueryStack(myCriteriaBuilder, myResourceName, theParams, theRequestPartitionId);
+		myQueryStack = new QueryStack2(myCriteriaBuilder, myResourceName, theParams, theRequestPartitionId);
 		myParams = theParams;
 		mySearchUuid = theSearchUuid;
-		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
 		myRequestPartitionId = theRequestPartitionId;
+
+		mySqlBuilder = new SearchSqlBuilder(myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName);
+		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
 	}
 
-	private List<TypedQuery<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+	private List<List<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
 															 SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
@@ -335,28 +345,28 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		}
 
-		ArrayList<TypedQuery<Long>> myQueries = new ArrayList<>();
+		ArrayList<List<Long>> queries = new ArrayList<>();
 
 		if (!pids.isEmpty()) {
 			if (theMaximumResults != null && pids.size() > theMaximumResults) {
 				pids.subList(0,theMaximumResults-1);
 			}
-			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t-> doCreateChunkedQueries(t, sort, theCount, theRequest, myQueries));
+			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t-> doCreateChunkedQueries(t, sort, theCount, theRequest, queries));
 		} else {
-			myQueries.add(createChunkedQuery(sort,theMaximumResults, theCount, theRequest, null));
+			queries.add(createChunkedQuery(sort,theMaximumResults, theCount, theRequest, null));
 		}
 
-		return myQueries;
+		return queries;
 	}
 
-	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
+	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<List<Long>> theQueries) {
 		if(thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
 		}
 		theQueries.add(createChunkedQuery(sort, thePids.size(), theCount, theRequest, thePids));
 	}
 
-	private TypedQuery<Long> createChunkedQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
+	private List<Long> createChunkedQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		/*
 		 * Sort
 		 *
@@ -425,7 +435,21 @@ public class SearchBuilder2 implements ISearchBuilder {
 			query.setMaxResults(theMaximumResults);
 		}
 
-		return query;
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDataSource);
+		jdbcTemplate.setFetchSize(myFetchSize);
+		if (theMaximumResults != null) {
+			jdbcTemplate.setMaxRows(theMaximumResults);
+		}
+
+		SearchSqlBuilder.GeneratedSql generatedSql = mySqlBuilder.generate();
+		if (generatedSql.isMatchNothing()) {
+			return Collections.emptyList();
+		}
+
+		String sql = generatedSql.getSql();
+		Object[] args = generatedSql.getBindVariables().toArray(new Object[0]);
+		List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
+		return output;
 	}
 
 	private List<Long> normalizeIdListForLastNInClause(List<Long> lastnResourceIds) {
@@ -466,7 +490,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 	 * @return Returns {@literal true} if any search parameter sorts were found, or false if
 	 * no sorts were found, or only non-search parameters ones (e.g. _id, _lastUpdated)
 	 */
-	private List<Order> createSort(CriteriaBuilder theBuilder, QueryStack theQueryStack, SortSpec theSort) {
+	private List<Order> createSort(CriteriaBuilder theBuilder, QueryStack2 theQueryStack, SortSpec theSort) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return Collections.emptyList();
 		}
@@ -1003,7 +1027,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		return myCriteriaBuilder;
 	}
 
-	public QueryStack getQueryStack() {
+	public QueryStack2 getQueryStack() {
 		return myQueryStack;
 	}
 
@@ -1093,13 +1117,13 @@ public class SearchBuilder2 implements ISearchBuilder {
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
 		private Iterator<ResourcePersistentId> myPreResultsIterator;
-		private ScrollableResultsIterator<Long> myResultsIterator;
+		private Iterator<Long> myResultsIterator;
 		private final SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
 
-		private List<TypedQuery<Long>> myQueryList = new ArrayList<>();
+		private List<List<Long>> myQueryList = new ArrayList<>();
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
@@ -1271,11 +1295,8 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		private void retrieveNextIteratorQuery() {
 			if (myQueryList != null && myQueryList.size() > 0) {
-				final TypedQuery<Long> query = myQueryList.remove(0);
-				Query<Long> hibernateQuery = (Query<Long>) (query);
-				hibernateQuery.setFetchSize(myFetchSize);
-				ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				myResultsIterator = new ScrollableResultsIterator<>(scroll);
+				final List<Long> query = myQueryList.remove(0);
+				myResultsIterator = query.iterator();
 			} else {
 				myResultsIterator = null;
 			}
@@ -1320,13 +1341,12 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		@Override
 		public void close() {
-			if (myResultsIterator != null) {
-				myResultsIterator.close();
-			}
+			// FIXME: we could do cleanup here
 		}
 
 	}
 
+	// FIXME: remove?
 	private static class CountQueryIterator implements Iterator<Long> {
 		private final TypedQuery<Long> myQuery;
 		private boolean myCountLoaded;

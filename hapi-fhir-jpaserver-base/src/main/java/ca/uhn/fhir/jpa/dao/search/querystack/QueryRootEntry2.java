@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.dao.search.querystack;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.predicate.IndexJoins;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
-import ca.uhn.fhir.jpa.dao.search.IndexJoins;
-import ca.uhn.fhir.jpa.dao.search.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 
 import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -40,13 +41,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-abstract class QueryRootEntry {
+abstract class QueryRootEntry2 {
 	private final ArrayList<Predicate> myPredicates = new ArrayList<>();
 	private final IndexJoins myIndexJoins = new IndexJoins();
 	private final CriteriaBuilder myCriteriaBuilder;
 	private boolean myHasImplicitTypeSelection;
 
-	QueryRootEntry(CriteriaBuilder theCriteriaBuilder) {
+	QueryRootEntry2(CriteriaBuilder theCriteriaBuilder) {
 		myCriteriaBuilder = theCriteriaBuilder;
 	}
 
@@ -112,7 +113,7 @@ abstract class QueryRootEntry {
 
 	abstract Expression<Date> getLastUpdatedColumn();
 
-	abstract <T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName);
+	abstract <T> From<?, T> createJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName);
 
 	abstract AbstractQuery<Long> getQueryRoot();
 

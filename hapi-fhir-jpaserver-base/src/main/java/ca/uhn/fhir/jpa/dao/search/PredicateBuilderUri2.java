@@ -22,11 +22,13 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
+import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
@@ -44,12 +46,12 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderUri.class);
+class PredicateBuilderUri2 extends BasePredicateBuilder implements IPredicateBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderUri2.class);
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 
-	PredicateBuilderUri(SearchBuilder theSearchBuilder) {
+	PredicateBuilderUri2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
@@ -57,8 +59,8 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 	public Predicate addPredicate(String theResourceName,
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation,
-											RequestPartitionId theRequestPartitionId) {
+											SearchFilterParser.CompareOperation theOperation,
+											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
 		From<?, ResourceIndexedSearchParamUri> join = myQueryStack.createJoin(SearchBuilderJoinEnum.URI, paramName);
@@ -120,42 +122,37 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 					codePredicates.add(hashAndUriPredicate);
 
 				} else {
-					if (myDontUseHashesForSearch) {
-						Predicate predicate = myCriteriaBuilder.equal(join.get("myUri").as(String.class), value);
-						codePredicates.add(predicate);
+
+					Predicate uriPredicate = null;
+					if (theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq) {
+						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName, value);
+						Predicate hashPredicate = myCriteriaBuilder.equal(join.get("myHashUri"), hashUri);
+						codePredicates.add(hashPredicate);
+					} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
+						uriPredicate = myCriteriaBuilder.notEqual(join.get("myUri").as(String.class), value);
+					} else if (theOperation == SearchFilterParser.CompareOperation.co) {
+						uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftAndRightMatchLikeExpression(value));
+					} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
+						uriPredicate = myCriteriaBuilder.greaterThan(join.get("myUri").as(String.class), value);
+					} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
+						uriPredicate = myCriteriaBuilder.lessThan(join.get("myUri").as(String.class), value);
+					} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
+						uriPredicate = myCriteriaBuilder.greaterThanOrEqualTo(join.get("myUri").as(String.class), value);
+					} else if (theOperation == SearchFilterParser.CompareOperation.le) {
+						uriPredicate = myCriteriaBuilder.lessThanOrEqualTo(join.get("myUri").as(String.class), value);
+					} else if (theOperation == SearchFilterParser.CompareOperation.sw) {
+						uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
+					} else if (theOperation == SearchFilterParser.CompareOperation.ew) {
+						uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createRightMatchLikeExpression(value));
 					} else {
+						throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
+							theOperation.toString()));
+					}
 
-						Predicate uriPredicate = null;
-						if (operation == null || operation == SearchFilterParser.CompareOperation.eq) {
-							long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName, value);
-							Predicate hashPredicate = myCriteriaBuilder.equal(join.get("myHashUri"), hashUri);
-							codePredicates.add(hashPredicate);
-						} else if (operation == SearchFilterParser.CompareOperation.ne) {
-							uriPredicate = myCriteriaBuilder.notEqual(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.co) {
-							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftAndRightMatchLikeExpression(value));
-						} else if (operation == SearchFilterParser.CompareOperation.gt) {
-							uriPredicate = myCriteriaBuilder.greaterThan(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.lt) {
-							uriPredicate = myCriteriaBuilder.lessThan(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.ge) {
-							uriPredicate = myCriteriaBuilder.greaterThanOrEqualTo(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.le) {
-							uriPredicate = myCriteriaBuilder.lessThanOrEqualTo(join.get("myUri").as(String.class), value);
-						} else if (operation == SearchFilterParser.CompareOperation.sw) {
-							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
-						} else if (operation == SearchFilterParser.CompareOperation.ew) {
-							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createRightMatchLikeExpression(value));
-						} else {
-							throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
-								operation.toString()));
-						}
-
-						if (uriPredicate != null) {
-							long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
-							Predicate hashIdentityPredicate = myCriteriaBuilder.equal(join.get("myHashIdentity"), hashIdentity);
-							codePredicates.add(myCriteriaBuilder.and(hashIdentityPredicate, uriPredicate));
-						}
+					if (uriPredicate != null) {
+						long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
+						Predicate hashIdentityPredicate = myCriteriaBuilder.equal(join.get("myHashIdentity"), hashIdentity);
+						codePredicates.add(myCriteriaBuilder.and(hashIdentityPredicate, uriPredicate));
 					}
 				}
 

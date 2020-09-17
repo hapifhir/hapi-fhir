@@ -508,7 +508,7 @@ public class SearchFilterParser {
 		private String FValue;
 		private FilterValueType FValueType;
 
-		FilterParameterPath getParamPath() {
+		public FilterParameterPath getParamPath() {
 
 			return FParamPath;
 		}
@@ -566,7 +566,7 @@ public class SearchFilterParser {
 		private Filter FFilter2;
 
 
-		Filter getFilter1() {
+		public Filter getFilter1() {
 
 			return FFilter1;
 		}
@@ -586,7 +586,7 @@ public class SearchFilterParser {
 			this.FOperation = FOperation;
 		}
 
-		Filter getFilter2() {
+		public Filter getFilter2() {
 
 			return FFilter2;
 		}

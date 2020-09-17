@@ -42,13 +42,13 @@ import javax.persistence.criteria.Subquery;
 import java.util.Date;
 import java.util.List;
 
-public class QueryRootEntryIndexTable extends QueryRootEntry {
+public class QueryRootEntryIndexTable2 extends QueryRootEntry2 {
 	private final Subquery<Long> myQuery;
 	private Root<? extends BaseResourceIndex> myRoot;
 	private SearchBuilderJoinEnum myParamType;
 	private Expression<Long> myResourcePidColumn;
 
-	public QueryRootEntryIndexTable(CriteriaBuilder theCriteriaBuilder, QueryRootEntry theParent) {
+	public QueryRootEntryIndexTable2(CriteriaBuilder theCriteriaBuilder, QueryRootEntry2 theParent) {
 		super(theCriteriaBuilder);
 
 		AbstractQuery<Long> queryRoot = theParent.getQueryRoot();
@@ -66,7 +66,7 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 	}
 
 	@Override
-	<T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
+	<T> From<?, T> createJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName) {
 		if (myParamType == null) {
 			switch (theType) {
 				case REFERENCE:

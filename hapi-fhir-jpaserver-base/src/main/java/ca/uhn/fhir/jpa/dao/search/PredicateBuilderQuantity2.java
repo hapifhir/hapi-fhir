@@ -23,9 +23,12 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -46,18 +49,18 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicateBuilder {
+class PredicateBuilderQuantity2 extends BasePredicateBuilder implements IPredicateBuilder {
 
-	PredicateBuilderQuantity(SearchBuilder theSearchBuilder) {
+	PredicateBuilderQuantity2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-											RuntimeSearchParam theSearchParam,
-											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation theOperation,
-											RequestPartitionId theRequestPartitionId) {
+                                  RuntimeSearchParam theSearchParam,
+                                  List<? extends IQueryParameterType> theList,
+                                  SearchFilterParser.CompareOperation theOperation,
+                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		From<?, ResourceIndexedSearchParamQuantity> join = myQueryStack.createJoin(SearchBuilderJoinEnum.QUANTITY, theSearchParam.getName());
 
@@ -91,7 +94,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 			theBuilder,
 			theFrom,
 			null,
-			theRequestPartitionId);
+                theRequestPartitionId);
 	}
 
 	private Predicate createPredicateQuantity(IQueryParameterType theParam,
@@ -140,37 +143,6 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 			valueValue = param.getValue();
 		} else {
 			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
-		}
-
-		if (myDontUseHashesForSearch) {
-			Predicate system = null;
-			if (!isBlank(systemValue)) {
-				system = theBuilder.equal(theFrom.get("mySystem"), systemValue);
-			}
-
-			Predicate code = null;
-			if (!isBlank(unitsValue)) {
-				code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
-			}
-
-			cmpValue = defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
-			final Expression<BigDecimal> path = theFrom.get("myValue");
-			String invalidMessageName = "invalidQuantityPrefix";
-
-			Predicate num = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, theRequestPartitionId);
-
-			Predicate singleCode;
-			if (system == null && code == null) {
-				singleCode = num;
-			} else if (system == null) {
-				singleCode = theBuilder.and(code, num);
-			} else if (code == null) {
-				singleCode = theBuilder.and(system, num);
-			} else {
-				singleCode = theBuilder.and(system, code, num);
-			}
-
-			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode, theRequestPartitionId);
 		}
 
 		Predicate hashPredicate;

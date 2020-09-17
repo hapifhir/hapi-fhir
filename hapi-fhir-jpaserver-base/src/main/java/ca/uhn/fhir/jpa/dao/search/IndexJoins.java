@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.search;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
 import com.google.common.collect.Maps;
 
 import javax.persistence.criteria.Join;

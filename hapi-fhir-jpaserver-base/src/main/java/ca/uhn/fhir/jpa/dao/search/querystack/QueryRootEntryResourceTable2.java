@@ -22,7 +22,8 @@ package ca.uhn.fhir.jpa.dao.search.querystack;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
-import ca.uhn.fhir.jpa.dao.search.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
@@ -39,57 +40,18 @@ import javax.persistence.criteria.Subquery;
 import java.util.Date;
 import java.util.List;
 
-class QueryRootEntryResourceTable extends QueryRootEntry {
+class QueryRootEntryResourceTable2 extends QueryRootEntry2 {
 
 	private final CriteriaBuilder myCriteriaBuilder;
 	private final AbstractQuery<Long> myQuery;
 	private final SearchParameterMap mySearchParameterMap;
 	private final RequestPartitionId myRequestPartitionId;
 	private final String myResourceType;
-	private final Root<ResourceTable> myResourceTableRoot;
-
-	/**
-	 * Root query constructor
-	 */
-	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, boolean theCountQuery, SearchParameterMap theSearchParameterMap, String theResourceType, RequestPartitionId theRequestPartitionId) {
-		super(theCriteriaBuilder);
-		myCriteriaBuilder = theCriteriaBuilder;
-		mySearchParameterMap = theSearchParameterMap;
-		myRequestPartitionId = theRequestPartitionId;
-		myResourceType = theResourceType;
-
-		CriteriaQuery<Long> query = myCriteriaBuilder.createQuery(Long.class);
-		myResourceTableRoot = query.from(ResourceTable.class);
-
-		if (theCountQuery) {
-			query.multiselect(myCriteriaBuilder.countDistinct(myResourceTableRoot));
-		} else {
-			query.multiselect(get("myId").as(Long.class));
-		}
-		myQuery = query;
-	}
-
-	/**
-	 * Subquery constructor
-	 */
-	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, QueryRootEntry theParent, SearchParameterMap theSearchParameterMap, String theResourceType, RequestPartitionId theRequestPartitionId) {
-		super(theCriteriaBuilder);
-		myCriteriaBuilder = theCriteriaBuilder;
-		mySearchParameterMap = theSearchParameterMap;
-		myRequestPartitionId = theRequestPartitionId;
-		myResourceType = theResourceType;
-
-		AbstractQuery<Long> queryRoot = theParent.getQueryRoot();
-		Subquery<Long> query = queryRoot.subquery(Long.class);
-		myQuery = query;
-		myResourceTableRoot = myQuery.from(ResourceTable.class);
-		query.select(myResourceTableRoot.get("myId").as(Long.class));
-	}
 
 	/**
 	 * This method will ddd a predicate to make sure we only include non-deleted resources, and only include
 	 * resources of the right type.
-	 * <p>
+	 *
 	 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
 	 * need an explicit predicate for it.
 	 */
@@ -113,11 +75,51 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 		return super.pop();
 	}
 
+	private final Root<ResourceTable> myResourceTableRoot;
+
+	/**
+	 * Root query constructor
+	 */
+	QueryRootEntryResourceTable2(CriteriaBuilder theCriteriaBuilder, boolean theCountQuery, SearchParameterMap theSearchParameterMap, String theResourceType, RequestPartitionId theRequestPartitionId) {
+		super(theCriteriaBuilder);
+		myCriteriaBuilder = theCriteriaBuilder;
+		mySearchParameterMap = theSearchParameterMap;
+		myRequestPartitionId = theRequestPartitionId;
+		myResourceType = theResourceType;
+
+		CriteriaQuery<Long> query = myCriteriaBuilder.createQuery(Long.class);
+		myResourceTableRoot = query.from(ResourceTable.class);
+
+		if (theCountQuery) {
+			query.multiselect(myCriteriaBuilder.countDistinct(myResourceTableRoot));
+		} else {
+			query.multiselect(get("myId").as(Long.class));
+		}
+		myQuery = query;
+	}
+
+	/**
+	 * Subquery constructor
+	 */
+	QueryRootEntryResourceTable2(CriteriaBuilder theCriteriaBuilder, QueryRootEntry2 theParent, SearchParameterMap theSearchParameterMap, String theResourceType, RequestPartitionId theRequestPartitionId) {
+		super(theCriteriaBuilder);
+		myCriteriaBuilder = theCriteriaBuilder;
+		mySearchParameterMap = theSearchParameterMap;
+		myRequestPartitionId = theRequestPartitionId;
+		myResourceType = theResourceType;
+
+		AbstractQuery<Long> queryRoot = theParent.getQueryRoot();
+		Subquery<Long> query = queryRoot.subquery(Long.class);
+		myQuery = query;
+		myResourceTableRoot = myQuery.from(ResourceTable.class);
+		query.select(myResourceTableRoot.get("myId").as(Long.class));
+	}
+
 	@Override
 	void orderBy(List<Order> theOrders) {
 		assert myQuery instanceof CriteriaQuery;
 
-		((CriteriaQuery<?>) myQuery).orderBy(theOrders);
+		((CriteriaQuery<?>)myQuery).orderBy(theOrders);
 	}
 
 	@Override
@@ -127,54 +129,61 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	<T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName) {
-		Join<?, ?> join = null;
+	<T> From<?, T> createJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName) {
+		From<?, ?> fromTable = myResourceTableRoot;
+
+		if (theLinkJoin != null) {
+			fromTable = theLinkJoin;
+		}
+
+		Join<?,?> join = null;
 		switch (theType) {
 			case DATE:
-				join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
+				join = fromTable.join("myParamsDate", JoinType.LEFT);
 				break;
 			case NUMBER:
-				join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
+				join = fromTable.join("myParamsNumber", JoinType.LEFT);
 				break;
 			case QUANTITY:
-				join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
+				join = fromTable.join("myParamsQuantity", JoinType.LEFT);
 				break;
 			case REFERENCE:
-				join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
+				join = fromTable.join("myResourceLinks", JoinType.LEFT);
 				break;
 			case STRING:
-				join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
+				join = fromTable.join("myParamsString", JoinType.LEFT);
 				break;
 			case URI:
-				join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
+				join = fromTable.join("myParamsUri", JoinType.LEFT);
 				break;
 			case TOKEN:
-				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
+				join = fromTable.join("myParamsToken", JoinType.LEFT);
 				break;
 			case COORDS:
-				join = myResourceTableRoot.join("myParamsCoords", JoinType.LEFT);
+				join = fromTable.join("myParamsCoords", JoinType.LEFT);
 				break;
 			case HAS:
-				join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
+				join = fromTable.join("myResourceLinksAsTarget", JoinType.LEFT);
 				break;
 			case PROVENANCE:
-				join = myResourceTableRoot.join("myProvenance", JoinType.LEFT);
+				join = fromTable.join("myProvenance", JoinType.LEFT);
 				break;
 			case FORCED_ID:
-				join = myResourceTableRoot.join("myForcedId", JoinType.LEFT);
+				join = fromTable.join("myForcedId", JoinType.LEFT);
 				break;
 			case PRESENCE:
-				join = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
+				join = fromTable.join("mySearchParamPresents", JoinType.LEFT);
 				break;
 			case COMPOSITE_UNIQUE:
-				join = myResourceTableRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+				join = fromTable.join("myParamsCompositeStringUnique", JoinType.LEFT);
 				break;
 			case RESOURCE_TAGS:
-				join = myResourceTableRoot.join("myTags", JoinType.LEFT);
+				join = fromTable.join("myTags", JoinType.LEFT);
 				break;
 
 		}
 
+		// FIXME KHS is this okay with the join variance?
 		SearchBuilderJoinKey key = new SearchBuilderJoinKey(theSearchParameterName, theType);
 		putIndex(key, join);
 

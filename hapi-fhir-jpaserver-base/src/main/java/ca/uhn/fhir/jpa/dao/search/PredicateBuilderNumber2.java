@@ -23,8 +23,11 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -44,19 +47,19 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderNumber.class);
+class PredicateBuilderNumber2 extends BasePredicateBuilder implements IPredicateBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderNumber2.class);
 
-	PredicateBuilderNumber(SearchBuilder theSearchBuilder) {
+	PredicateBuilderNumber2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-											RuntimeSearchParam theSearchParam,
-											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation,
-											RequestPartitionId theRequestPartitionId) {
+                                  RuntimeSearchParam theSearchParam,
+                                  List<? extends IQueryParameterType> theList,
+                                  SearchFilterParser.CompareOperation theOperation,
+                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		From<?, ResourceIndexedSearchParamNumber> join = myQueryStack.createJoin(SearchBuilderJoinEnum.NUMBER, theSearchParam.getName());
 
@@ -80,19 +83,19 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 
 				final Expression<BigDecimal> fromObj = join.get("myValue");
 				ParamPrefixEnum prefix = defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
-				if (operation == SearchFilterParser.CompareOperation.ne) {
+				if (theOperation == SearchFilterParser.CompareOperation.ne) {
 					prefix = ParamPrefixEnum.NOT_EQUAL;
-				} else if (operation == SearchFilterParser.CompareOperation.lt) {
+				} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
 					prefix = ParamPrefixEnum.LESSTHAN;
-				} else if (operation == SearchFilterParser.CompareOperation.le) {
+				} else if (theOperation == SearchFilterParser.CompareOperation.le) {
 					prefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
-				} else if (operation == SearchFilterParser.CompareOperation.gt) {
+				} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
 					prefix = ParamPrefixEnum.GREATERTHAN;
-				} else if (operation == SearchFilterParser.CompareOperation.ge) {
+				} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
 					prefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-				} else if (operation == SearchFilterParser.CompareOperation.eq) {
+				} else if (theOperation == SearchFilterParser.CompareOperation.eq) {
 					prefix = ParamPrefixEnum.EQUAL;
-				} else if (operation != null) {
+				} else if (theOperation != null) {
 					throw new IllegalArgumentException("Invalid operator specified for number type");
 				}
 

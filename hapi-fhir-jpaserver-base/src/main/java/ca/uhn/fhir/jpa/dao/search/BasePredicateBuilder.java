@@ -25,15 +25,17 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
-import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryStack;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
+import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack2;
+import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,7 @@ import java.util.List;
 abstract class BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BasePredicateBuilder.class);
 	final CriteriaBuilder myCriteriaBuilder;
-	final QueryStack myQueryStack;
+	final QueryStack2 myQueryStack;
 	final Class<? extends IBaseResource> myResourceType;
 	final String myResourceName;
 	final SearchParameterMap myParams;
@@ -60,66 +62,53 @@ abstract class BasePredicateBuilder {
 	FhirContext myContext;
 	@Autowired
 	DaoConfig myDaoConfig;
-	boolean myDontUseHashesForSearch;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	private SearchSqlBuilder mySearchSqlBuilder;
 
-	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
+	BasePredicateBuilder(SearchBuilder2 theSearchBuilder) {
 		myCriteriaBuilder = theSearchBuilder.getBuilder();
 		myQueryStack = theSearchBuilder.getQueryStack();
 		myResourceType = theSearchBuilder.getResourceType();
 		myResourceName = theSearchBuilder.getResourceName();
 		myParams = theSearchBuilder.getParams();
+		mySearchSqlBuilder = theSearchBuilder.getSearchSqlBuilder();
+		assert mySearchSqlBuilder != null;
 	}
 
-	@PostConstruct
-	private void postConstruct() {
-		myDontUseHashesForSearch = myDaoConfig.getDisableHashBasedSearches();
+	public SearchSqlBuilder getSqlBuilder() {
+		return mySearchSqlBuilder;
 	}
 
 	void addPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		From<?, SearchParamPresent> paramPresentJoin = myQueryStack.createJoin(SearchBuilderJoinEnum.PRESENCE, null);
 
-		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
-		Long hash = SearchParamPresent.calculateHashPresence(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
+		SearchSqlBuilder.SearchParamPresenceTable join = getSqlBuilder().addSearchParamPresenceSelector();
+		addPartitionIdPredicate(theRequestPartitionId, join, null);
+		join.addPredicatePresence(theParamName, theMissing);
 
-		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(myCriteriaBuilder.equal(hashPresence, hash));
-
-		addPartitionIdPredicate(theRequestPartitionId, paramPresentJoin, predicates);
-
-		myQueryStack.addPredicatesWithImplicitTypeSelection(predicates);
 	}
 
-	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, From<?, ? extends BaseResourceIndexedSearchParam> theJoin, RequestPartitionId theRequestPartitionId) {
+	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, SearchSqlBuilder.BaseSearchParamIndexTable theJoin, RequestPartitionId theRequestPartitionId) {
 		if (!theRequestPartitionId.isAllPartitions()) {
-			if (theRequestPartitionId.getPartitionId() != null) {
-				myQueryStack.addPredicate(myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue"), theRequestPartitionId.getPartitionId()));
-			} else {
-				myQueryStack.addPredicate(myCriteriaBuilder.isNull(theJoin.get("myPartitionIdValue")));
-			}
+			theJoin.addPartitionIdPredicate(theRequestPartitionId.getPartitionId());
 		}
-		myQueryStack.addPredicateWithImplicitTypeSelection(myCriteriaBuilder.equal(theJoin.get("myResourceType"), theResourceName));
-		myQueryStack.addPredicate(myCriteriaBuilder.equal(theJoin.get("myParamName"), theParamName));
-		myQueryStack.addPredicate(myCriteriaBuilder.equal(theJoin.get("myMissing"), theMissing));
+
+		theJoin.addPartitionMissing(theResourceName, theParamName, theMissing);
+	}
+
+	// FIXME: remove
+	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, From<?,?> theJoin, RequestPartitionId theRequestPartitionId) {
+		throw new UnsupportedOperationException();
 	}
 
 	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate, RequestPartitionId theRequestPartitionId) {
 		List<Predicate> andPredicates = new ArrayList<>();
 		addPartitionIdPredicate(theRequestPartitionId, theFrom, andPredicates);
 
-		if (myDontUseHashesForSearch) {
-			Predicate resourceTypePredicate = myCriteriaBuilder.equal(theFrom.get("myResourceType"), theResourceName);
-			Predicate paramNamePredicate = myCriteriaBuilder.equal(theFrom.get("myParamName"), theParamName);
-			andPredicates.add(resourceTypePredicate);
-			andPredicates.add(paramNamePredicate);
-			andPredicates.add(thePredicate);
-		} else {
-			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName);
-			Predicate hashIdentityPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
-			andPredicates.add(hashIdentityPredicate);
-			andPredicates.add(thePredicate);
-		}
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName);
+		Predicate hashIdentityPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
+		andPredicates.add(hashIdentityPredicate);
+		andPredicates.add(thePredicate);
 
 		return myCriteriaBuilder.and(toArray(andPredicates));
 	}
@@ -183,17 +172,17 @@ abstract class BasePredicateBuilder {
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num, theRequestPartitionId);
 	}
 
-	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, From<?, ? extends BasePartitionable> theJoin, List<Predicate> theCodePredicates) {
+	// FIXME: get rid of unused 3rd param
+	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, SearchSqlBuilder.BaseIndexTable theJoin, List<Predicate> theCodePredicates) {
 		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getPartitionId();
-			Predicate partitionPredicate;
-			if (partitionId != null) {
-				partitionPredicate = myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue").as(Integer.class), partitionId);
-			} else {
-				partitionPredicate = myCriteriaBuilder.isNull(theJoin.get("myPartitionIdValue").as(Integer.class));
-			}
-			myQueryStack.addPredicate(partitionPredicate);
+			theJoin.addPartitionIdPredicate(partitionId);
 		}
+	}
+
+	// FIXME: remove
+	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, From<?,?> theJoin, List<Predicate> theCodePredicates) {
+		throw new UnsupportedOperationException();
 	}
 
 	static String createLeftAndRightMatchLikeExpression(String likeExpression) {

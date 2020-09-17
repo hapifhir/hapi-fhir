@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.search.sql;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +10,7 @@ public class SearchSqlBuilderTest {
 
 	@Test
 	public void testSearchNoParams() {
-		SearchSqlBuilder builder = new SearchSqlBuilder(new PartitionSettings(), null, "Patient");
+		SearchSqlBuilder builder = new SearchSqlBuilder(new ModelConfig(), new PartitionSettings(), null, "Patient");
 
 		SearchSqlBuilder.GeneratedSql output = builder.generate();
 		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL))", output.getSql());
@@ -18,7 +19,7 @@ public class SearchSqlBuilderTest {
 
 	@Test
 	public void testSearchStringExact() {
-		SearchSqlBuilder builder = new SearchSqlBuilder(new PartitionSettings(), null, "Patient");
+		SearchSqlBuilder builder = new SearchSqlBuilder(new ModelConfig(), new PartitionSettings(), null, "Patient");
 		SearchSqlBuilder.StringIndexTable stringSelector = builder.addStringSelector();
 		stringSelector.addPredicateExact("family", "Smith");
 
@@ -30,7 +31,7 @@ public class SearchSqlBuilderTest {
 
 	@Test
 	public void testSearchStringJoinedToToken() {
-		SearchSqlBuilder builder = new SearchSqlBuilder(new PartitionSettings(), null, "Patient");
+		SearchSqlBuilder builder = new SearchSqlBuilder(new ModelConfig(), new PartitionSettings(), null, "Patient");
 
 		SearchSqlBuilder.StringIndexTable stringSelector = builder.addStringSelector();
 		stringSelector.addPredicateExact("family", "Smith");

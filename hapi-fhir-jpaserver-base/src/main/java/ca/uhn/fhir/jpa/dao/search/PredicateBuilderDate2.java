@@ -22,9 +22,11 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
+import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -47,12 +49,12 @@ import java.util.Map;
 
 @Component
 @Scope("prototype")
-public class PredicateBuilderDate extends BasePredicateBuilder implements IPredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
+public class PredicateBuilderDate2 extends BasePredicateBuilder implements IPredicateBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate2.class);
 
-	private Map<String, From<?, ResourceIndexedSearchParamDate>> myJoinMap;
+	private Map<String, SearchSqlBuilder.DateIndexTable> myJoinMap;
 
-	PredicateBuilderDate(SearchBuilder theSearchBuilder) {
+	PredicateBuilderDate2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
@@ -60,8 +62,8 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 	public Predicate addPredicate(String theResourceName,
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation operation,
-											RequestPartitionId theRequestPartitionId) {
+											SearchFilterParser.CompareOperation theOperation,
+											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
 		boolean newJoin = false;
@@ -70,9 +72,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		}
 		String key = theResourceName + " " + paramName;
 
-		From<?, ResourceIndexedSearchParamDate> join = myJoinMap.get(key);
+		SearchSqlBuilder.DateIndexTable join = myJoinMap.get(key);
 		if (join == null) {
-			join = myQueryStack.createJoin(SearchBuilderJoinEnum.DATE, paramName);
+			join = getSqlBuilder().addDateSelector();
 			myJoinMap.put(key, join);
 			newJoin = true;
 		}
@@ -86,11 +88,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		List<Predicate> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextOr : theList) {
-			Predicate p = createPredicateDate(nextOr,
-				myCriteriaBuilder,
-				join,
-				operation
-			);
+			Predicate p = createPredicateDate(nextOr, myCriteriaBuilder, join, theOperation);
 			codePredicates.add(p);
 		}
 
@@ -110,7 +108,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 													 String theResourceName,
 													 String theParamName,
 													 CriteriaBuilder theBuilder,
-													 From<?, ResourceIndexedSearchParamDate> theFrom,
+													 SearchSqlBuilder.DateIndexTable theFrom,
 													 RequestPartitionId theRequestPartitionId) {
 		Predicate predicateDate = createPredicateDate(theParam,
 			theBuilder,
@@ -122,7 +120,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 	private Predicate createPredicateDate(IQueryParameterType theParam,
 													  CriteriaBuilder theBuilder,
-													  From<?, ResourceIndexedSearchParamDate> theFrom,
+													  SearchSqlBuilder.DateIndexTable theFrom,
 													  SearchFilterParser.CompareOperation theOperation) {
 
 		Predicate p;
@@ -130,10 +128,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			DateParam date = (DateParam) theParam;
 			if (!date.isEmpty()) {
 				DateRangeParam range = new DateRangeParam(date);
-				p = createPredicateDateFromRange(theBuilder,
-					theFrom,
-					range,
-					theOperation);
+				p = createPredicateDateFromRange(theBuilder, theFrom, range, theOperation);
 			} else {
 				// TODO: handle missing date param?
 				p = null;
