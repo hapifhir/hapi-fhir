@@ -118,7 +118,6 @@ import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -136,6 +135,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -5117,6 +5117,64 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testTokenOfType() {
+		String systemY = "yes";
+		String systemN = "no";
+		String codeY = "on";
+		String codeN = "off";
+		String valueY = "good";
+		String valueN = "bad";
+
+		// Create a match
+		CodeableConcept matchType = new CodeableConcept();
+		matchType.addCoding().setSystem(systemY).setCode(codeY);
+		Patient pMatch = new Patient();
+		pMatch.addIdentifier().setType(matchType).setValue(valueY);
+		IIdType patientMatchId = myPatientDao.create(pMatch).getId().toUnqualifiedVersionless();
+
+		// Now create a bunch of non-matches
+		List<Patient> noMatches = new ArrayList<>();
+		List<IIdType> noMatchIds = new ArrayList<>();
+		{	// match but in wrong place
+			Patient p = new Patient();
+			p.addIdentifier().setSystem(systemY).setValue(valueY);
+			noMatches.add(p);
+			noMatchIds.add(myPatientDao.create(p).getId().toUnqualifiedVersionless());
+		}
+		{ // wrong system
+			Patient p = new Patient();
+			CodeableConcept type = new CodeableConcept();
+			type.addCoding().setSystem(systemN).setCode(codeY);
+			p.addIdentifier().setType(type).setValue(valueY);
+			noMatches.add(p);
+			noMatchIds.add(myPatientDao.create(p).getId().toUnqualifiedVersionless());
+		}
+		{ // wrong code
+			Patient p = new Patient();
+			CodeableConcept type = new CodeableConcept();
+			type.addCoding().setSystem(systemY).setCode(codeN);
+			p.addIdentifier().setType(type).setValue(valueY);
+			noMatches.add(p);
+			noMatchIds.add(myPatientDao.create(p).getId().toUnqualifiedVersionless());
+		}
+		{ // wrong value
+			Patient p = new Patient();
+			CodeableConcept type = new CodeableConcept();
+			type.addCoding().setSystem(systemY).setCode(codeY);
+			p.addIdentifier().setType(type).setValue(valueN);
+			noMatches.add(p);
+			noMatchIds.add(myPatientDao.create(p).getId().toUnqualifiedVersionless());
+		}
+
+		RuntimeResourceDefinition patientDef = myFhirCtx.getResourceDefinition(Patient.class);
+
+		SearchParameterMap params = myMatchUrlService.translateMatchUrl("Patient?identifier" + TokenParamModifier.OF_TYPE.getValue() + "=" + systemY + "|" + codeY + "|" + valueY, patientDef, null);
+		params.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(params);
+		List<String> values = toUnqualifiedVersionlessIdValues(results);
+		assertThat(values.toString(), values, contains(patientMatchId.getValue()));
+	}
 
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();

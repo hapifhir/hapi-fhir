@@ -34,6 +34,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 		for (int i = 0; i < theSize; ++i) {
 			Observation obs = new Observation();
 			obs.setStatus(Observation.ObservationStatus.FINAL);
+			obs.getMeta().addTag().setCode("FOO");
 			retval
 				.addEntry()
 				.setFullUrl("urn:uuid:000" + i)

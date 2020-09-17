@@ -166,13 +166,24 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		TokenParamModifier modifier = null;
 		for (IQueryParameterType nextParameter : theParameters) {
 
-			String code;
 			String system;
+			String code;
+			String value;
 			if (nextParameter instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextParameter;
 				system = id.getSystem();
-				code = (id.getValue());
 				modifier = id.getModifier();
+				if (modifier == TokenParamModifier.OF_TYPE) {
+					// FIXME KHS this doesn't work because hapi doesn't currently index types
+					if (!id.getValue().contains("|")) {
+						throw new InvalidRequestException(TokenParamModifier.OF_TYPE.getValue() + " must have the form system|code|value");
+					}
+					String[] parts = id.getValue().split("\\|");
+					code = parts[0];
+					value = parts[1];
+				} else {
+					code = (id.getValue());
+				}
 			} else if (nextParameter instanceof BaseIdentifierDt) {
 				BaseIdentifierDt id = (BaseIdentifierDt) nextParameter;
 				system = id.getSystemElement().getValueAsString();
@@ -213,6 +224,9 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				system = determineSystemIfMissing(theSearchParam, code, system);
 				validateHaveSystemAndCodeForToken(paramName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
+			} else if (modifier == TokenParamModifier.OF_TYPE) {
+				system = determineSystemIfMissing(theSearchParam, code, system);
+				codes.add(new VersionIndependentConcept(system, code));
 			} else {
 				codes.add(new VersionIndependentConcept(system, code));
 			}
