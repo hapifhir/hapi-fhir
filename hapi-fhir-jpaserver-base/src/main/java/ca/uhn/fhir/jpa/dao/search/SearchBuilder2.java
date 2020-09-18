@@ -171,7 +171,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
-	private PredicateBuilder myPredicateBuilder;
+	private PredicateBuilder2 myPredicateBuilder;
 	private RequestPartitionId myRequestPartitionId;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -292,7 +292,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 
 		mySqlBuilder = new SearchSqlBuilder(myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName);
-		myPredicateBuilder = new PredicateBuilder(this, myPredicateBuilderFactory);
+		myPredicateBuilder = new PredicateBuilder2(this, myPredicateBuilderFactory);
 	}
 
 	private List<List<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,

@@ -1,21 +1,11 @@
 package ca.uhn.fhir.jpa.dao.search.sql;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
-import ca.uhn.fhir.util.ValidateUtil;
-import ca.uhn.fhir.util.VersionIndependentConcept;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
-import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
-import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
-import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.Join;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
@@ -25,9 +15,6 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -45,20 +32,21 @@ public class SearchSqlBuilder {
 	private final RequestPartitionId myRequestPartitionId;
 	private final String myResourceType;
 	private final ModelConfig myModelConfig;
+	private final FhirContext myFhirContext;
+	private final SqlBuilderFactory mySqlBuilderFactory;
 	private BaseIndexTable myCurrentIndexTable;
 	private boolean myMatchNothing;
-	private List<Long> myWantResourceIds;
-	private boolean myWantResourceIdsInverse;
-
 
 	/**
 	 * Constructor
 	 */
-	public SearchSqlBuilder(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType) {
+	public SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory) {
+		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
 		myPartitionSettings = thePartitionSettings;
 		myRequestPartitionId = theRequestPartitionId;
 		myResourceType = theResourceType;
+		mySqlBuilderFactory = theSqlBuilderFactory;
 
 		mySpec = new DbSpec();
 		mySchema = mySpec.addDefaultSchema();
@@ -66,11 +54,43 @@ public class SearchSqlBuilder {
 
 	}
 
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	/**
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on s COORDS search parameter
+	 */
+	public CoordsIndexTable addCoordsSelector() {
+		CoordsIndexTable retVal = mySqlBuilderFactory.coordsIndexTable(this);
+		addTable(retVal);
+		return retVal;
+	}
+
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s DATE search parameter
 	 */
 	public DateIndexTable addDateSelector() {
-		DateIndexTable retVal = new DateIndexTable();
+		DateIndexTable retVal = mySqlBuilderFactory.dateIndexTable(this);
+		addTable(retVal);
+		return retVal;
+	}
+
+	/**
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on s NUMBER search parameter
+	 */
+	public NumberIndexTable addNumberSelector() {
+		NumberIndexTable retVal = mySqlBuilderFactory.numberIndexTable(this);
+		addTable(retVal);
+		return retVal;
+	}
+
+
+	/**
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on s QUANTITY search parameter
+	 */
+	public QuantityIndexTable addQuantity() {
+		QuantityIndexTable retVal = mySqlBuilderFactory.quantityIndexTable(this);
 		addTable(retVal);
 		return retVal;
 	}
@@ -80,7 +100,7 @@ public class SearchSqlBuilder {
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s REFERENCE search parameter
 	 */
 	public ReferenceIndexTable addReferenceSelector() {
-		ReferenceIndexTable retVal = new ReferenceIndexTable();
+		ReferenceIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(this);
 		addTable(retVal);
 		return retVal;
 	}
@@ -89,7 +109,7 @@ public class SearchSqlBuilder {
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s STRING search parameter
 	 */
 	public StringIndexTable addStringSelector() {
-		StringIndexTable retVal = new StringIndexTable();
+		StringIndexTable retVal = mySqlBuilderFactory.stringIndexTable(this);
 		addTable(retVal);
 		return retVal;
 	}
@@ -98,16 +118,29 @@ public class SearchSqlBuilder {
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s TOKEN search parameter
 	 */
 	public TokenIndexTable addTokenSelector() {
-		TokenIndexTable retVal = new TokenIndexTable();
+		TokenIndexTable retVal = mySqlBuilderFactory.tokenIndexTable(this);
 		addTable(retVal);
 		return retVal;
 	}
 
+	/**
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>:missing</code> search parameter
+	 */
 	public SearchParamPresenceTable addSearchParamPresenceSelector() {
-		SearchParamPresenceTable retVal = new SearchParamPresenceTable();
+		SearchParamPresenceTable retVal = mySqlBuilderFactory.searchParamPresenceTable(this);
 		addTable(retVal);
 		return retVal;
 	}
+
+	/**
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on s URI search parameter
+	 */
+	public UriIndexTable addUriSelector() {
+		UriIndexTable retVal = mySqlBuilderFactory.uriIndexTable(this);
+		addTable(retVal);
+		return retVal;
+	}
+
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for an arbitrary table
@@ -128,21 +161,7 @@ public class SearchSqlBuilder {
 	 */
 	public GeneratedSql generate() {
 
-		// If we don't have an index table at all, there are no search params
-		if (myCurrentIndexTable == null) {
-			ResourceTable resourceTable = new ResourceTable();
-			resourceTable.addResourceTypeAndNonDeletedPredicates();
-			addTable(resourceTable);
-		}
-
-		// Handle the _id parameter by adding it to the tail
-		if (myWantResourceIds != null) {
-			Condition inResourceIds = new InCondition(myCurrentIndexTable.getResourceIdColumn(), generatePlaceholders(myWantResourceIds));
-			if (myWantResourceIdsInverse) {
-				inResourceIds = new NotCondition(inResourceIds);
-			}
-			mySelect.addCondition(inResourceIds);
-		}
+		getOrCreateQueryRootTable();
 
 		mySelect.validate();
 		String sql = mySelect.toString();
@@ -178,17 +197,29 @@ public class SearchSqlBuilder {
 	}
 
 	/**
+	 * If a query root already exists, return it. If none has been selected, create a root on HFJ_RESOURCE
+	 */
+	public BaseIndexTable getOrCreateQueryRootTable() {
+		if (myCurrentIndexTable == null) {
+			ResourceSqlTable resourceTable = new ResourceSqlTable(this);
+			resourceTable.addResourceTypeAndNonDeletedPredicates();
+			addTable(resourceTable);
+		}
+		return myCurrentIndexTable;
+	}
+
+	/**
 	 * The SQL Builder library has one annoying limitation, which is that it does not use/understand bind variables
 	 * for its generated SQL. So we work around this by replacing our contents with a string in the SQL consisting
 	 * of <code>[random UUID]-[value index]</code> and then
 	 */
-	private String generatePlaceholder(Object theValue) {
+	String generatePlaceholder(Object theValue) {
 		String placeholder = myBindVariableSubstitutionBase + myBindVariableValues.size();
 		myBindVariableValues.add(theValue);
 		return placeholder;
 	}
 
-	private List<String> generatePlaceholders(List<?> theValues) {
+	List<String> generatePlaceholders(List<?> theValues) {
 		return theValues
 			.stream()
 			.map(t -> generatePlaceholder(t))
@@ -197,397 +228,36 @@ public class SearchSqlBuilder {
 
 
 	public void setMatchNothing() {
-		// FIXME: honour this
 		myMatchNothing = true;
 	}
 
-	public void addPredicateResourceIds(boolean theInverse, List<Long> theResourceIds) {
-		ValidateUtil.isTrueOrThrowInvalidRequest(myWantResourceIds == null, "Can not use the _id parameter multiple times");
-
-		myWantResourceIds = theResourceIds;
-		myWantResourceIdsInverse = theInverse;
+	void addCondition(Condition theCondition) {
+		assert theCondition != null;
+		mySelect.addCondition(theCondition);
 	}
 
-
-	public abstract class BaseIndexTable {
-
-		private final DbTable myTable;
-		private final DbColumn myColumnPartitionId;
-
-		public BaseIndexTable(DbTable theTable) {
-			myTable = theTable;
-			myColumnPartitionId = theTable.addColumn("PARTITION_ID");
-		}
-
-		public DbTable getTable() {
-			return myTable;
-		}
-
-		public abstract DbColumn getResourceIdColumn();
-
-		public DbColumn getPartitionIdColumn() {
-			return myColumnPartitionId;
-		}
-
-		public void addPartitionIdPredicate(Integer thePartitionId) {
-			if (thePartitionId != null) {
-				Object placeholder = generatePlaceholder(thePartitionId);
-				mySelect.addCondition(BinaryCondition.equalTo(getPartitionIdColumn(), placeholder));
-			} else {
-				mySelect.addCondition(UnaryCondition.isNull(getPartitionIdColumn()));
-			}
-		}
-
+	DbTable addTable(String theTableName) {
+		return mySchema.addTable(theTableName);
 	}
 
-	public class ResourceTable extends BaseIndexTable {
-		private final DbColumn myColumnResId;
-		private final DbColumn myColumnResDeletedAt;
-		private final DbColumn myColumnResType;
-
-		/**
-		 * Constructor
-		 */
-		public ResourceTable() {
-			super(mySchema.addTable("HFJ_RESOURCE"));
-			myColumnResId = getTable().addColumn("RES_ID");
-			myColumnResType = getTable().addColumn("RES_TYPE");
-			myColumnResDeletedAt = getTable().addColumn("RES_DELETED_AT");
-		}
-
-
-		@Override
-		public DbColumn getResourceIdColumn() {
-			return myColumnResId;
-		}
-
-		public void addResourceTypeAndNonDeletedPredicates() {
-			mySelect.addCondition(BinaryCondition.equalTo(myColumnResType, myResourceType));
-			mySelect.addCondition(UnaryCondition.isNull(myColumnResDeletedAt));
-		}
+	PartitionSettings getPartitionSettings() {
+		return myPartitionSettings;
 	}
 
-
-	public class ReferenceIndexTable extends BaseIndexTable {
-
-		private final DbColumn myColumnSrcType;
-		private final DbColumn myColumnSrcPath;
-		private final DbColumn myColumnTargetResourceId;
-		private final DbColumn myColumnTargetResourceUrl;
-		private final DbColumn myColumnSrcResourceId;
-
-		/**
-		 * Constructor
-		 */
-		public ReferenceIndexTable() {
-			super(mySchema.addTable("HFJ_RES_LINK"));
-			myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
-			myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
-			myColumnSrcPath = getTable().addColumn("SRC_PATH");
-			myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
-			myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
-		}
-
-		@Override
-		public DbColumn getResourceIdColumn() {
-			return myColumnSrcResourceId;
-		}
-
-		public void addPredicateReference(String theParamName, boolean theInverse, List<String> thePathsToMatch, List<Long> theTargetPidList, List<String> theTargetQualifiedUrls) {
-
-			Condition targetPidCondition = null;
-			if (!theTargetPidList.isEmpty()) {
-				targetPidCondition = new InCondition(myColumnTargetResourceId, generatePlaceholders(theTargetPidList));
-			}
-
-			Condition targetUrlsCondition = null;
-			if (!theTargetQualifiedUrls.isEmpty()) {
-				targetUrlsCondition = new InCondition(myColumnTargetResourceUrl, generatePlaceholders(theTargetQualifiedUrls));
-			}
-
-			Condition joinedCondition;
-			if (targetPidCondition != null && targetUrlsCondition != null) {
-				joinedCondition = ComboCondition.or(targetPidCondition, targetUrlsCondition);
-			} else if (targetPidCondition != null) {
-				joinedCondition = targetPidCondition;
-			} else {
-				joinedCondition = targetUrlsCondition;
-			}
-
-			InCondition pathPredicate = new InCondition(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
-			joinedCondition = ComboCondition.and(pathPredicate, joinedCondition);
-
-			if (theInverse) {
-				mySelect.addCondition(new NotCondition(joinedCondition));
-			} else {
-				mySelect.addCondition(joinedCondition);
-			}
-
-		}
+	RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 
-
-	public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
-
-		private final DbColumn myColumnMissing;
-		private final DbColumn myColumnResType;
-		private final DbColumn myColumnParamName;
-		private final DbColumn myColumnResId;
-
-		public BaseSearchParamIndexTable(DbTable theTable) {
-			super(theTable);
-
-			myColumnResId = getTable().addColumn("RES_ID");
-			myColumnMissing = theTable.addColumn("SP_MISSING");
-			myColumnResType = theTable.addColumn("RES_TYPE");
-			myColumnParamName = theTable.addColumn("SP_NAME");
-		}
-
-		public DbColumn getResourceTypeColumn() {
-			return myColumnResType;
-		}
-
-		public DbColumn getColumnParamName() {
-			return myColumnParamName;
-		}
-
-		public DbColumn getMissingColumn() {
-			return myColumnMissing;
-		}
-
-		@Override
-		public DbColumn getResourceIdColumn() {
-			return myColumnResId;
-		}
-
-		public void addPartitionMissing(String theResourceName, String theParamName, boolean theMissing) {
-			ComboCondition condition = ComboCondition.and(
-				BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)),
-				BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)),
-				// FIXME: deal with oracle here
-				BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
-			);
-			mySelect.addCondition(condition);
-		}
+	String getResourceType() {
+		return myResourceType;
 	}
 
-
-
-	public class StringIndexTable extends BaseSearchParamIndexTable {
-
-		private final DbColumn myColumnResId;
-		private final DbColumn myColumnValueExact;
-		private final DbColumn myColumnValueNormalized;
-		private final DbColumn myColumnHashNormPrefix;
-		private final DbColumn myColumnHashIdentity;
-		private final DbColumn myColumnHashExact;
-
-		/**
-		 * Constructor
-		 */
-		public StringIndexTable() {
-			super(mySchema.addTable("HFJ_SPIDX_STRING"));
-			myColumnResId = getTable().addColumn("RES_ID");
-			myColumnValueExact = getTable().addColumn("SP_VALUE_EXACT");
-			myColumnValueNormalized = getTable().addColumn("SP_VALUE_NORMALIZED");
-			myColumnHashNormPrefix = getTable().addColumn("HASH_NORM_PREFIX");
-			myColumnHashIdentity = getTable().addColumn("HASH_IDENTITY");
-			myColumnHashExact = getTable().addColumn("HASH_EXACT");
-		}
-
-		@Override
-		public DbColumn getResourceIdColumn() {
-			return myColumnResId;
-		}
-
-		public void addPredicateExact(String theParamName, String theValueExact) {
-			addPredicate(createPredicateExact(theParamName, theValueExact));
-		}
-
-		@Nonnull
-		public Condition createPredicateExact(String theTheParamName, String theTheValueExact) {
-			long hash = ResourceIndexedSearchParamString.calculateHashExact(myPartitionSettings, myRequestPartitionId, myResourceType, theTheParamName, theTheValueExact);
-			String placeholderValue = generatePlaceholder(hash);
-			Condition condition = BinaryCondition.equalTo(myColumnValueExact, placeholderValue);
-			return condition;
-		}
-
-		@Nonnull
-		public Condition createPredicateNormalLike(String theParamName, String theNormalizedString, String theLikeExpression) {
-			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myPartitionSettings, myRequestPartitionId, myModelConfig, myResourceType, theParamName, theNormalizedString);
-			Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
-			Condition valuePredicate = BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
-			return ComboCondition.and(hashPredicate, valuePredicate);
-		}
-
-		@Nonnull
-		public Condition createPredicateNormal(String theParamName, String theNormalizedString) {
-			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myPartitionSettings, myRequestPartitionId, myModelConfig, myResourceType, theParamName, theNormalizedString);
-			Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
-			Condition valuePredicate = BinaryCondition.equalTo(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
-			return ComboCondition.and(hashPredicate, valuePredicate);
-		}
-
-		@Nonnull
-		public Condition createPredicateLikeExpressionOnly(String theParamName, String theLikeExpression, boolean theInverse) {
-			long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(myPartitionSettings, myRequestPartitionId, myResourceType, theParamName);
-			BinaryCondition identityPredicate = BinaryCondition.equalTo(myColumnHashIdentity, generatePlaceholder(hashIdentity));
-			BinaryCondition likePredicate = BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
-			Condition retVal = ComboCondition.and(identityPredicate, likePredicate);
-			if (theInverse) {
-				retVal = new NotCondition(retVal);
-			}
-			return retVal;
-		}
+	ModelConfig getModelConfig() {
+		return myModelConfig;
 	}
 
 	public void addPredicate(Condition theCondition) {
 		mySelect.addCondition(theCondition);
-	}
-
-	public class TokenIndexTable extends BaseSearchParamIndexTable {
-
-		private final DbColumn myColumnResId;
-		private final DbColumn myColumnHashSystemAndValue;
-		private final DbColumn myColumnHashSystem;
-		private final DbColumn myColumnHashValue;
-
-		/**
-		 * Constructor
-		 */
-		public TokenIndexTable() {
-			super(mySchema.addTable("HFJ_SPIDX_TOKEN"));
-			myColumnResId = getTable().addColumn("RES_ID");
-			myColumnHashSystem = getTable().addColumn("HASH_SYS");
-			myColumnHashSystemAndValue = getTable().addColumn("HASH_SYS_AND_VALUE");
-			myColumnHashValue = getTable().addColumn("HASH_VALUE");
-		}
-
-		@Override
-		public DbColumn getResourceIdColumn() {
-			return myColumnResId;
-		}
-
-		public void addPredicateSystemAndValue(String theParamName, String theSystem, String theValue) {
-			long hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(myPartitionSettings, myRequestPartitionId, myResourceType, theParamName, theSystem, theValue);
-			String placeholderValue = generatePlaceholder(hash);
-			Condition condition = BinaryCondition.equalTo(myColumnHashSystemAndValue, placeholderValue);
-			mySelect.addCondition(condition);
-		}
-
-
-		public void addPredicateOrList(String theSearchParamName, List<VersionIndependentConcept> theCodes) {
-			Condition[] conditions = new Condition[theCodes.size()];
-			for (int i = 0; i < conditions.length; i++) {
-
-				VersionIndependentConcept nextToken = theCodes.get(i);
-				long hash;
-				DbColumn column;
-				if (nextToken.getSystem() == null) {
-					hash = ResourceIndexedSearchParamToken.calculateHashValue(myPartitionSettings, myRequestPartitionId, myResourceType, theSearchParamName, nextToken.getCode());
-					column = myColumnHashValue;
-				} else if (nextToken.getCode() == null) {
-					hash = ResourceIndexedSearchParamToken.calculateHashSystem(myPartitionSettings, myRequestPartitionId, myResourceType, theSearchParamName, nextToken.getSystem());
-					column = myColumnHashSystem;
-				} else {
-					hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(myPartitionSettings, myRequestPartitionId, myResourceType, theSearchParamName, nextToken.getSystem(), nextToken.getCode());
-					column = myColumnHashSystemAndValue;
-				}
-
-				String valuePlaceholder = generatePlaceholder(hash);
-				conditions[i] = BinaryCondition.equalTo(column, valuePlaceholder);
-			}
-
-			ComboCondition orCondition = ComboCondition.or(conditions);
-			mySelect.addCondition(orCondition);
-		}
-	}
-
-
-	public class DateIndexTable extends BaseSearchParamIndexTable {
-
-		private final DbColumn myColumnValueHigh;
-		private final DbColumn myColumnValueLow;
-		private final DbColumn myColumnValueLowDateOrdinal;
-		private final DbColumn myColumnValueHighDateOrdinal;
-
-		/**
-		 * Constructor
-		 */
-		public DateIndexTable() {
-			super(mySchema.addTable("HFJ_SPIDX_DATE"));
-
-			myColumnValueLow = getTable().addColumn("SP_VALUE_LOW");
-			myColumnValueHigh = getTable().addColumn("SP_VALUE_HIGH");
-			myColumnValueLowDateOrdinal = getTable().addColumn("SP_VALUE_LOW_DATE_ORDINAL");
-			myColumnValueHighDateOrdinal = getTable().addColumn("SP_VALUE_HIGH_DATE_ORDINAL");
-		}
-
-		public void addPredicateSystemAndValue(String theParamName, String theSystem, String theValue) {
-			long hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(myPartitionSettings, myRequestPartitionId, myResourceType, theParamName, theSystem, theValue);
-			String placeholderValue = generatePlaceholder(hash);
-			Condition condition = BinaryCondition.equalTo(myColumnHashSystemAndValue, placeholderValue);
-			mySelect.addCondition(condition);
-		}
-
-
-		public void addPredicateOrList(String theSearchParamName, List<VersionIndependentConcept> theCodes) {
-			Condition[] conditions = new Condition[theCodes.size()];
-			for (int i = 0; i < conditions.length; i++) {
-
-				VersionIndependentConcept nextToken = theCodes.get(i);
-				long hash;
-				DbColumn column;
-				if (nextToken.getSystem() == null) {
-					hash = ResourceIndexedSearchParamToken.calculateHashValue(myPartitionSettings, myRequestPartitionId, myResourceType, theSearchParamName, nextToken.getCode());
-					column = myColumnHashValue;
-				} else if (nextToken.getCode() == null) {
-					hash = ResourceIndexedSearchParamToken.calculateHashSystem(myPartitionSettings, myRequestPartitionId, myResourceType, theSearchParamName, nextToken.getSystem());
-					column = myColumnHashSystem;
-				} else {
-					hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(myPartitionSettings, myRequestPartitionId, myResourceType, theSearchParamName, nextToken.getSystem(), nextToken.getCode());
-					column = myColumnHashSystemAndValue;
-				}
-
-				String valuePlaceholder = generatePlaceholder(hash);
-				conditions[i] = BinaryCondition.equalTo(column, valuePlaceholder);
-			}
-
-			ComboCondition orCondition = ComboCondition.or(conditions);
-			mySelect.addCondition(orCondition);
-		}
-	}
-
-
-
-	public class SearchParamPresenceTable extends BaseIndexTable {
-
-		private final DbColumn myColumnResId;
-		private final DbColumn myColumnHashPresence;
-
-		/**
-		 * Constructor
-		 */
-		public SearchParamPresenceTable() {
-			super(mySchema.addTable("HFJ_RES_PARAM_PRESENT"));
-
-			myColumnResId = getTable().addColumn("RES_ID");
-			myColumnHashPresence = getTable().addColumn("HASH_PRESENCE");
-		}
-
-		@Override
-		public DbColumn getResourceIdColumn() {
-			return myColumnResId;
-		}
-
-		public void addPredicatePresence(String theParamName, boolean thePresence) {
-			long hash = SearchParamPresent.calculateHashPresence(myPartitionSettings, myRequestPartitionId, myResourceType, theParamName, thePresence);
-			String placeholderValue = generatePlaceholder(hash);
-			Condition condition = BinaryCondition.equalTo(myColumnHashPresence, placeholderValue);
-			mySelect.addCondition(condition);
-		}
-
-
 	}
 
 

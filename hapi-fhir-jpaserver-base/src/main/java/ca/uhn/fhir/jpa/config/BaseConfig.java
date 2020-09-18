@@ -22,13 +22,30 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
+import ca.uhn.fhir.jpa.dao.search.PredicateBuilderCoords2;
+import ca.uhn.fhir.jpa.dao.search.PredicateBuilderDate2;
+import ca.uhn.fhir.jpa.dao.search.PredicateBuilderNumber2;
+import ca.uhn.fhir.jpa.dao.search.PredicateBuilderQuantity2;
 import ca.uhn.fhir.jpa.dao.search.SearchBuilder2;
+import ca.uhn.fhir.jpa.dao.search.sql.CoordsIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.DateIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.QuantityIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.ReferenceIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.ResourceSqlTable;
+import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresenceTable;
+import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.SqlBuilderFactory;
+import ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.TokenIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.UriIndexTable;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -436,6 +453,71 @@ public abstract class BaseConfig {
 	@Bean
 	public SearchBuilderFactory searchBuilderFactory() {
 		return new SearchBuilderFactory();
+	}
+
+	@Bean
+	public SqlBuilderFactory sqlBuilderFactory() {
+		return new SqlBuilderFactory();
+	}
+
+	@Bean
+	@Scope("prototype")
+	public CoordsIndexTable indexTableCoords(SearchSqlBuilder theSearchBuilder) {
+		return new CoordsIndexTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public DateIndexTable indexTableDate(SearchSqlBuilder theSearchBuilder) {
+		return new DateIndexTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public NumberIndexTable indexTableNumber(SearchSqlBuilder theSearchBuilder) {
+		return new NumberIndexTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public QuantityIndexTable indexTableQuantity(SearchSqlBuilder theSearchBuilder) {
+		return new QuantityIndexTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ReferenceIndexTable indexTableReference(SearchSqlBuilder theSearchBuilder) {
+		return new ReferenceIndexTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceSqlTable indexTableResource(SearchSqlBuilder theSearchBuilder) {
+		return new ResourceSqlTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SearchParamPresenceTable indexTableSearchParamPresence(SearchSqlBuilder theSearchBuilder) {
+		return new SearchParamPresenceTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public StringIndexTable indexTableString(SearchSqlBuilder theSearchBuilder) {
+		return new StringIndexTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public TokenIndexTable indexTableToken(SearchSqlBuilder theSearchBuilder) {
+		return new TokenIndexTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public UriIndexTable indexTableUri(SearchSqlBuilder theSearchBuilder) {
+		return new UriIndexTable(theSearchBuilder);
 	}
 
 	@Bean(name = SEARCH_BUILDER)

@@ -45,6 +45,9 @@ public class SqlQuery {
 		myElapsedTime = theElapsedTime;
 		myStackTrace = theStackTraceElements;
 		mySize = theSize;
+
+		// FIXME: remove
+		assert !theSql.contains("'") : "SQL contains non-substituted variable: " + theSql;
 	}
 
 	public long getQueryTimestamp() {

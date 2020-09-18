@@ -55,10 +55,10 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-                                  RuntimeSearchParam theSearchParam,
-                                  List<? extends IQueryParameterType> theList,
-                                  SearchFilterParser.CompareOperation theOperation,
-                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+											RuntimeSearchParam theSearchParam,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation theOperation,
+											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
 		From<?, ResourceIndexedSearchParamUri> join = myQueryStack.createJoin(SearchBuilderJoinEnum.URI, paramName);
@@ -181,7 +181,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 			paramName,
 			join,
 			orPredicate,
-                theRequestPartitionId);
+			theRequestPartitionId);
 		myQueryStack.addPredicateWithImplicitTypeSelection(outerPredicate);
 		return outerPredicate;
 	}

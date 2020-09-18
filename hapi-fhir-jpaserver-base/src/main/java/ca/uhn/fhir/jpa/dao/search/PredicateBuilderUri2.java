@@ -26,12 +26,14 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.dao.search.sql.UriIndexTable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
+import com.healthmarketscience.sqlbuilder.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +48,7 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderUri2 extends BasePredicateBuilder implements IPredicateBuilder {
+class PredicateBuilderUri2 extends BasePredicateBuilder implements IPredicateBuilder2 {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderUri2.class);
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
@@ -56,130 +58,26 @@ class PredicateBuilderUri2 extends BasePredicateBuilder implements IPredicateBui
 	}
 
 	@Override
-	public Predicate addPredicate(String theResourceName,
+	public Condition addPredicate(String theResourceName,
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
 											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
-		From<?, ResourceIndexedSearchParamUri> join = myQueryStack.createJoin(SearchBuilderJoinEnum.URI, paramName);
+		UriIndexTable join = getSqlBuilder().addUriSelector();
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, null);
 
-		for (IQueryParameterType nextOr : theList) {
+		Condition outerPredicate = join.addPredicate(theList, paramName, theOperation);
 
-			if (nextOr instanceof UriParam) {
-				UriParam param = (UriParam) nextOr;
+		getSqlBuilder().addPredicate(outerPredicate);
 
-				String value = param.getValue();
-				if (value == null) {
-					continue;
-				}
-
-				if (param.getQualifier() == UriParamQualifierEnum.ABOVE) {
-
-					/*
-					 * :above is an inefficient query- It means that the user is supplying a more specific URL (say
-					 * http://example.com/foo/bar/baz) and that we should match on any URLs that are less
-					 * specific but otherwise the same. For example http://example.com and http://example.com/foo would both
-					 * match.
-					 *
-					 * We do this by querying the DB for all candidate URIs and then manually checking each one. This isn't
-					 * very efficient, but this is also probably not a very common type of query to do.
-					 *
-					 * If we ever need to make this more efficient, lucene could certainly be used as an optimization.
-					 */
-					ourLog.info("Searching for candidate URI:above parameters for Resource[{}] param[{}]", myResourceName, paramName);
-					Collection<String> candidates = myResourceIndexedSearchParamUriDao.findAllByResourceTypeAndParamName(myResourceName, paramName);
-					List<String> toFind = new ArrayList<>();
-					for (String next : candidates) {
-						if (value.length() >= next.length()) {
-							if (value.startsWith(next)) {
-								toFind.add(next);
-							}
-						}
-					}
-
-					if (toFind.isEmpty()) {
-						continue;
-					}
-
-					Predicate uriPredicate = join.get("myUri").as(String.class).in(toFind);
-					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, paramName, join, uriPredicate, theRequestPartitionId);
-					codePredicates.add(hashAndUriPredicate);
-
-				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
-
-					Predicate uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
-					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, paramName, join, uriPredicate, theRequestPartitionId);
-					codePredicates.add(hashAndUriPredicate);
-
-				} else {
-
-					Predicate uriPredicate = null;
-					if (theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq) {
-						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName, value);
-						Predicate hashPredicate = myCriteriaBuilder.equal(join.get("myHashUri"), hashUri);
-						codePredicates.add(hashPredicate);
-					} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
-						uriPredicate = myCriteriaBuilder.notEqual(join.get("myUri").as(String.class), value);
-					} else if (theOperation == SearchFilterParser.CompareOperation.co) {
-						uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftAndRightMatchLikeExpression(value));
-					} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
-						uriPredicate = myCriteriaBuilder.greaterThan(join.get("myUri").as(String.class), value);
-					} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
-						uriPredicate = myCriteriaBuilder.lessThan(join.get("myUri").as(String.class), value);
-					} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
-						uriPredicate = myCriteriaBuilder.greaterThanOrEqualTo(join.get("myUri").as(String.class), value);
-					} else if (theOperation == SearchFilterParser.CompareOperation.le) {
-						uriPredicate = myCriteriaBuilder.lessThanOrEqualTo(join.get("myUri").as(String.class), value);
-					} else if (theOperation == SearchFilterParser.CompareOperation.sw) {
-						uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
-					} else if (theOperation == SearchFilterParser.CompareOperation.ew) {
-						uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createRightMatchLikeExpression(value));
-					} else {
-						throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
-							theOperation.toString()));
-					}
-
-					if (uriPredicate != null) {
-						long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
-						Predicate hashIdentityPredicate = myCriteriaBuilder.equal(join.get("myHashIdentity"), hashIdentity);
-						codePredicates.add(myCriteriaBuilder.and(hashIdentityPredicate, uriPredicate));
-					}
-				}
-
-			} else {
-				throw new IllegalArgumentException("Invalid URI type: " + nextOr.getClass());
-			}
-
-		}
-
-		/*
-		 * If we haven't found any of the requested URIs in the candidates, then we'll
-		 * just add a predicate that can never match
-		 */
-		if (codePredicates.isEmpty()) {
-			Predicate predicate = myCriteriaBuilder.isNull(join.get("myMissing").as(String.class));
-			myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
-			return null;
-		}
-
-		Predicate orPredicate = myCriteriaBuilder.or(toArray(codePredicates));
-
-		Predicate outerPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName,
-			paramName,
-			join,
-			orPredicate,
-			theRequestPartitionId);
-		myQueryStack.addPredicateWithImplicitTypeSelection(outerPredicate);
 		return outerPredicate;
 	}
 

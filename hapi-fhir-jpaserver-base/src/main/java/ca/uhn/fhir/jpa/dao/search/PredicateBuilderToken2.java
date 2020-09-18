@@ -26,10 +26,11 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderTokenModeEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.TokenIndexTable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -46,10 +47,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import com.google.common.collect.Sets;
-import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
-import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPredicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -61,7 +59,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -72,20 +69,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderToken2 extends BasePredicateBuilder implements IPredicateBuilder {
-	private final PredicateBuilder myPredicateBuilder;
+class PredicateBuilderToken2 extends BasePredicateBuilder implements IPredicateBuilder2 {
+	private final PredicateBuilder2 myPredicateBuilder;
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	PredicateBuilderToken2(SearchBuilder2 theSearchBuilder, PredicateBuilder thePredicateBuilder) {
+	PredicateBuilderToken2(SearchBuilder2 theSearchBuilder, PredicateBuilder2 thePredicateBuilder) {
 		super(theSearchBuilder);
 		myPredicateBuilder = thePredicateBuilder;
 	}
 
 	@Override
-	public Predicate addPredicate(String theResourceName,
+	public Condition addPredicate(String theResourceName,
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
@@ -112,9 +109,9 @@ class PredicateBuilderToken2 extends BasePredicateBuilder implements IPredicateB
 					if (!tokenTextIndexingEnabled) {
 						String msg;
 						if (myModelConfig.isSuppressStringIndexingInTokens()) {
-							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken2.class, "textModifierDisabledForServer");
+							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForServer");
 						}else{
-							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken2.class, "textModifierDisabledForSearchParam");
+							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
 						}
 						throw new MethodNotAllowedException(msg);
 					}
@@ -131,19 +128,23 @@ class PredicateBuilderToken2 extends BasePredicateBuilder implements IPredicateB
 			return null;
 		}
 
-		SearchSqlBuilder.TokenIndexTable join = getSqlBuilder().addTokenSelector();
+		TokenIndexTable join = getSqlBuilder().addTokenSelector();
 		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
-		createPredicateToken(tokens, theResourceName, theSearchParam, myCriteriaBuilder, join, theOperation, theRequestPartitionId);
+		Condition predicate = createPredicateToken(tokens, theResourceName, theSearchParam, myCriteriaBuilder, join, theOperation, theRequestPartitionId);
 
-		return null;
+		if (predicate != null) {
+			getSqlBuilder().addPredicate(predicate);
+		}
+
+		return predicate;
 	}
 
-	public Collection<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters,
-																	  String theResourceName,
-																	  RuntimeSearchParam theSearchParam,
-																	  CriteriaBuilder theBuilder,
-																	  SearchSqlBuilder.TokenIndexTable theFrom,
-																	  RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateToken(Collection<IQueryParameterType> theParameters,
+													  String theResourceName,
+													  RuntimeSearchParam theSearchParam,
+													  CriteriaBuilder theBuilder,
+													  TokenIndexTable theFrom,
+													  RequestPartitionId theRequestPartitionId) {
 		return createPredicateToken(
 			theParameters,
 			theResourceName,
@@ -154,13 +155,14 @@ class PredicateBuilderToken2 extends BasePredicateBuilder implements IPredicateB
                 theRequestPartitionId);
 	}
 
-	private Collection<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters,
-																		String theResourceName,
-																		RuntimeSearchParam theSearchParam,
-																		CriteriaBuilder theBuilder,
-																		SearchSqlBuilder.TokenIndexTable theFrom,
-																		SearchFilterParser.CompareOperation operation,
-																		RequestPartitionId theRequestPartitionId) {
+	// FIXME: remove unneeded params
+	private Condition createPredicateToken(Collection<IQueryParameterType> theParameters,
+														String theResourceName,
+														RuntimeSearchParam theSearchParam,
+														CriteriaBuilder theBuilder,
+														TokenIndexTable theFrom,
+														SearchFilterParser.CompareOperation operation,
+														RequestPartitionId theRequestPartitionId) {
 		final List<VersionIndependentConcept> codes = new ArrayList<>();
 		String paramName = theSearchParam.getName();
 
@@ -233,9 +235,7 @@ class PredicateBuilderToken2 extends BasePredicateBuilder implements IPredicateB
 			return null;
 		}
 
-		theFrom.addPredicateOrList(theSearchParam.getName(), sortedCodesList);
-
-		return null;
+		return theFrom.createPredicateOrList(theSearchParam.getName(), sortedCodesList);
 	}
 
 	private String determineSystemIfMissing(RuntimeSearchParam theSearchParam, String code, String theSystem) {

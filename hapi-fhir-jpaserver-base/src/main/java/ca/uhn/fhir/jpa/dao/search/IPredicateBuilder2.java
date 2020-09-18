@@ -25,15 +25,15 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import com.healthmarketscience.sqlbuilder.Condition;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
 import java.util.List;
 
-public interface IPredicateBuilder {
+public interface IPredicateBuilder2 {
 	@Nullable
-	Predicate addPredicate(String theResourceName,
+	Condition addPredicate(String theResourceName,
 								  RuntimeSearchParam theSearchParam,
 								  List<? extends IQueryParameterType> theList,
 								  SearchFilterParser.CompareOperation theOperation,

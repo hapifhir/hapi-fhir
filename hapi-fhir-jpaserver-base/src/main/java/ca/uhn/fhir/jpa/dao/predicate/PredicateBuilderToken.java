@@ -66,6 +66,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
+public
 class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBuilder {
 	private final PredicateBuilder myPredicateBuilder;
 	@Autowired
@@ -107,7 +108,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 						String msg;
 						if (myModelConfig.isSuppressStringIndexingInTokens()) {
 							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForServer");
-						}else{
+						} else {
 							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
 						}
 						throw new MethodNotAllowedException(msg);
@@ -152,7 +153,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			theBuilder,
 			theFrom,
 			null,
-                theRequestPartitionId);
+			theRequestPartitionId);
 	}
 
 	private Collection<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters,

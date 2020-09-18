@@ -24,34 +24,36 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack2;
+import ca.uhn.fhir.jpa.dao.search.sql.BaseIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.BaseSearchParamIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresenceTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.Condition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.ArrayList;
 import java.util.List;
 
-abstract class BasePredicateBuilder {
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
+public abstract class BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BasePredicateBuilder.class);
 	final CriteriaBuilder myCriteriaBuilder;
 	final QueryStack2 myQueryStack;
@@ -82,13 +84,13 @@ abstract class BasePredicateBuilder {
 
 	void addPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
 
-		SearchSqlBuilder.SearchParamPresenceTable join = getSqlBuilder().addSearchParamPresenceSelector();
+		SearchParamPresenceTable join = getSqlBuilder().addSearchParamPresenceSelector();
 		addPartitionIdPredicate(theRequestPartitionId, join, null);
 		join.addPredicatePresence(theParamName, theMissing);
 
 	}
 
-	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, SearchSqlBuilder.BaseSearchParamIndexTable theJoin, RequestPartitionId theRequestPartitionId) {
+	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, BaseSearchParamIndexTable theJoin, RequestPartitionId theRequestPartitionId) {
 		if (!theRequestPartitionId.isAllPartitions()) {
 			theJoin.addPartitionIdPredicate(theRequestPartitionId.getPartitionId());
 		}
@@ -97,83 +99,21 @@ abstract class BasePredicateBuilder {
 	}
 
 	// FIXME: remove
-	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, From<?,?> theJoin, RequestPartitionId theRequestPartitionId) {
+	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, From<?, ?> theJoin, RequestPartitionId theRequestPartitionId) {
 		throw new UnsupportedOperationException();
 	}
 
-	Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate, RequestPartitionId theRequestPartitionId) {
-		List<Predicate> andPredicates = new ArrayList<>();
-		addPartitionIdPredicate(theRequestPartitionId, theFrom, andPredicates);
-
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName);
-		Predicate hashIdentityPredicate = myCriteriaBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
-		andPredicates.add(hashIdentityPredicate);
-		andPredicates.add(thePredicate);
-
-		return myCriteriaBuilder.and(toArray(andPredicates));
+	Condition combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, BaseSearchParamIndexTable theFrom, Condition thePredicate, RequestPartitionId theRequestPartitionId) {
+		return theFrom.combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, thePredicate, theRequestPartitionId);
 	}
 
 	public PartitionSettings getPartitionSettings() {
 		return myPartitionSettings;
 	}
 
-	Predicate createPredicateNumeric(String theResourceName,
-												String theParamName,
-												From<?, ? extends BaseResourceIndexedSearchParam> theFrom,
-												CriteriaBuilder builder,
-												IQueryParameterType theParam,
-												ParamPrefixEnum thePrefix,
-												BigDecimal theValue,
-												final Expression<BigDecimal> thePath,
-												String invalidMessageName, RequestPartitionId theRequestPartitionId) {
-		Predicate num;
-		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL operators below so as to
-		//   use exact value matching.  The "fuzz amount" matching is still used with the APPROXIMATE operator.
-		switch (thePrefix) {
-			case GREATERTHAN:
-				num = builder.gt(thePath, theValue);
-				break;
-			case GREATERTHAN_OR_EQUALS:
-				num = builder.ge(thePath, theValue);
-				break;
-			case LESSTHAN:
-				num = builder.lt(thePath, theValue);
-				break;
-			case LESSTHAN_OR_EQUALS:
-				num = builder.le(thePath, theValue);
-				break;
-			case EQUAL:
-				num = builder.equal(thePath, theValue);
-				break;
-			case NOT_EQUAL:
-				num = builder.notEqual(thePath, theValue);
-				break;
-			case APPROXIMATE:
-				BigDecimal mul = SearchFuzzUtil.calculateFuzzAmount(thePrefix, theValue);
-				BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
-				BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
-				Predicate lowPred;
-				Predicate highPred;
-				lowPred = builder.ge(thePath.as(BigDecimal.class), low);
-				highPred = builder.le(thePath.as(BigDecimal.class), high);
-				num = builder.and(lowPred, highPred);
-				ourLog.trace("Searching for {} <= val <= {}", low, high);
-				break;
-			case ENDS_BEFORE:
-			case STARTS_AFTER:
-			default:
-				String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, invalidMessageName, thePrefix.getValue(), theParam.getValueAsQueryToken(myContext));
-				throw new InvalidRequestException(msg);
-		}
 
-		if (theParamName == null) {
-			return num;
-		}
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num, theRequestPartitionId);
-	}
-
-	// FIXME: get rid of unused 3rd param
-	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, SearchSqlBuilder.BaseIndexTable theJoin, List<Predicate> theCodePredicates) {
+	// FIXME: Can this be added to the constructor of the index tables instead since we just call it everywhere anyhow..
+	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, BaseIndexTable theJoin, List<Predicate> theCodePredicates) {
 		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getPartitionId();
 			theJoin.addPartitionIdPredicate(partitionId);
@@ -181,19 +121,19 @@ abstract class BasePredicateBuilder {
 	}
 
 	// FIXME: remove
-	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, From<?,?> theJoin, List<Predicate> theCodePredicates) {
+	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, From<?, ?> theJoin, List<Predicate> theCodePredicates) {
 		throw new UnsupportedOperationException();
 	}
 
-	static String createLeftAndRightMatchLikeExpression(String likeExpression) {
+	public static String createLeftAndRightMatchLikeExpression(String likeExpression) {
 		return "%" + likeExpression.replace("%", "[%]") + "%";
 	}
 
-	static String createLeftMatchLikeExpression(String likeExpression) {
+	public static String createLeftMatchLikeExpression(String likeExpression) {
 		return likeExpression.replace("%", "[%]") + "%";
 	}
 
-	static String createRightMatchLikeExpression(String likeExpression) {
+	public static String createRightMatchLikeExpression(String likeExpression) {
 		return "%" + likeExpression.replace("%", "[%]");
 	}
 

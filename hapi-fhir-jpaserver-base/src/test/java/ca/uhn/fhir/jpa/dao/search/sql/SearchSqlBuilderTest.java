@@ -20,7 +20,7 @@ public class SearchSqlBuilderTest {
 	@Test
 	public void testSearchStringExact() {
 		SearchSqlBuilder builder = new SearchSqlBuilder(new ModelConfig(), new PartitionSettings(), null, "Patient");
-		SearchSqlBuilder.StringIndexTable stringSelector = builder.addStringSelector();
+		StringIndexTable stringSelector = builder.addStringSelector();
 		stringSelector.addPredicateExact("family", "Smith");
 
 		SearchSqlBuilder.GeneratedSql output = builder.generate();
@@ -33,10 +33,10 @@ public class SearchSqlBuilderTest {
 	public void testSearchStringJoinedToToken() {
 		SearchSqlBuilder builder = new SearchSqlBuilder(new ModelConfig(), new PartitionSettings(), null, "Patient");
 
-		SearchSqlBuilder.StringIndexTable stringSelector = builder.addStringSelector();
+		StringIndexTable stringSelector = builder.addStringSelector();
 		stringSelector.addPredicateExact("family", "Smith");
 
-		SearchSqlBuilder.TokenIndexTable tokenSelector = builder.addTokenSelector();
+		TokenIndexTable tokenSelector = builder.addTokenSelector();
 		tokenSelector.addPredicateSystemAndValue("identifier", "http://foo", "12345");
 
 		SearchSqlBuilder.GeneratedSql output = builder.generate();

@@ -38,7 +38,7 @@ public abstract class PredicateBuilderFactory2 {
 	public abstract PredicateBuilderQuantity2 newPredicateBuilderQuantity(SearchBuilder2 theSearchBuilder);
 
 	@Lookup
-	public abstract PredicateBuilderReference2 newPredicateBuilderReference(SearchBuilder2 theSearchBuilder, PredicateBuilder thePredicateBuilder);
+	public abstract PredicateBuilderReference2 newPredicateBuilderReference(SearchBuilder2 theSearchBuilder, PredicateBuilder2 thePredicateBuilder);
 
 	@Lookup
 	public abstract PredicateBuilderResourceId2 newPredicateBuilderResourceId(SearchBuilder2 theSearchBuilder);
@@ -50,7 +50,7 @@ public abstract class PredicateBuilderFactory2 {
 	public abstract PredicateBuilderTag2 newPredicateBuilderTag(SearchBuilder2 theSearchBuilder);
 
 	@Lookup
-	public abstract PredicateBuilderToken2 newPredicateBuilderToken(SearchBuilder2 theSearchBuilder, PredicateBuilder thePredicateBuilder);
+	public abstract PredicateBuilderToken2 newPredicateBuilderToken(SearchBuilder2 theSearchBuilder, PredicateBuilder2 thePredicateBuilder);
 
 	@Lookup
 	public abstract PredicateBuilderUri2 newPredicateBuilderUri(SearchBuilder2 theSearchBuilder);

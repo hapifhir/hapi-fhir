@@ -21,12 +21,13 @@ package ca.uhn.fhir.jpa.dao.search;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.dao.search.sql.BaseIndexTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.healthmarketscience.sqlbuilder.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,19 +59,17 @@ class PredicateBuilderResourceId2 extends BasePredicateBuilder {
 	@Nullable
 	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
-		Predicate nextPredicate = createPredicate(theResourceName, theValues, theOperation, theRequestPartitionId);
+		Condition predicate = createPredicate(theResourceName, theValues, theOperation, theRequestPartitionId);
 
-		if (nextPredicate != null) {
-			myQueryStack.addPredicate(nextPredicate);
-			return nextPredicate;
+		if (predicate != null) {
+			getSqlBuilder().addPredicate(predicate);
 		}
 
 		return null;
 	}
 
 	@Nullable
-	private Predicate createPredicate(String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
-		Predicate nextPredicate = null;
+	private Condition createPredicate(String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		Set<ResourcePersistentId> allOrPids = null;
 
@@ -114,15 +112,15 @@ class PredicateBuilderResourceId2 extends BasePredicateBuilder {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
 			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
-			List<Predicate> codePredicates = new ArrayList<>();
+
+			BaseIndexTable queryRootTable = getSqlBuilder().getOrCreateQueryRootTable();
+
 			switch (operation) {
 				default:
 				case eq:
-					getSqlBuilder().addPredicateResourceIds(false, ResourcePersistentId.toLongList(allOrPids));
-					break;
+					return queryRootTable.createPredicateResourceIds(false, ResourcePersistentId.toLongList(allOrPids));
 				case ne:
-					getSqlBuilder().addPredicateResourceIds(true, ResourcePersistentId.toLongList(allOrPids));
-					break;
+					return queryRootTable.createPredicateResourceIds(true, ResourcePersistentId.toLongList(allOrPids));
 			}
 
 		}

@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.healthmarketscience.sqlbuilder.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -58,10 +59,10 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-                                  RuntimeSearchParam theSearchParam,
-                                  List<? extends IQueryParameterType> theList,
-                                  SearchFilterParser.CompareOperation theOperation,
-                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+											RuntimeSearchParam theSearchParam,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation theOperation,
+											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
 		boolean newJoin = false;

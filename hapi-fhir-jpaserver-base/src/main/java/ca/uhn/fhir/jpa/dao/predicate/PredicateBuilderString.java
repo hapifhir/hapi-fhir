@@ -89,7 +89,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 			theBuilder,
 			theFrom,
 			null,
-                theRequestPartitionId);
+			theRequestPartitionId);
 	}
 
 	private Predicate createPredicateString(IQueryParameterType theParameter,

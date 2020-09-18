@@ -22,55 +22,50 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
+import com.healthmarketscience.sqlbuilder.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
 @Component
 @Scope("prototype")
-class PredicateBuilderNumber2 extends BasePredicateBuilder implements IPredicateBuilder {
+public
+class PredicateBuilderNumber2 extends BasePredicateBuilder implements IPredicateBuilder2 {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderNumber2.class);
 
-	PredicateBuilderNumber2(SearchBuilder2 theSearchBuilder) {
+	public PredicateBuilderNumber2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
 	@Override
-	public Predicate addPredicate(String theResourceName,
-                                  RuntimeSearchParam theSearchParam,
-                                  List<? extends IQueryParameterType> theList,
-                                  SearchFilterParser.CompareOperation theOperation,
-                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+	public Condition addPredicate(String theResourceName,
+											RuntimeSearchParam theSearchParam,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation theOperation,
+											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
-		From<?, ResourceIndexedSearchParamNumber> join = myQueryStack.createJoin(SearchBuilderJoinEnum.NUMBER, theSearchParam.getName());
+		NumberIndexTable join = getSqlBuilder().addNumberSelector();
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, null);
 
+		List<Condition> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof NumberParam) {
@@ -81,29 +76,8 @@ class PredicateBuilderNumber2 extends BasePredicateBuilder implements IPredicate
 					continue;
 				}
 
-				final Expression<BigDecimal> fromObj = join.get("myValue");
-				ParamPrefixEnum prefix = defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
-				if (theOperation == SearchFilterParser.CompareOperation.ne) {
-					prefix = ParamPrefixEnum.NOT_EQUAL;
-				} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
-					prefix = ParamPrefixEnum.LESSTHAN;
-				} else if (theOperation == SearchFilterParser.CompareOperation.le) {
-					prefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
-				} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
-					prefix = ParamPrefixEnum.GREATERTHAN;
-				} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
-					prefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-				} else if (theOperation == SearchFilterParser.CompareOperation.eq) {
-					prefix = ParamPrefixEnum.EQUAL;
-				} else if (theOperation != null) {
-					throw new IllegalArgumentException("Invalid operator specified for number type");
-				}
-
-
-				String invalidMessageName = "invalidNumberPrefix";
-
-				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theSearchParam.getName(), join, myCriteriaBuilder, nextOr, prefix, value, fromObj, invalidMessageName, theRequestPartitionId);
-				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theSearchParam.getName(), join, predicateNumeric, theRequestPartitionId);
+				Condition predicateNumeric = join.createPredicateNumeric(theResourceName, theSearchParam.getName(), join, myCriteriaBuilder, nextOr, theOperation, value, null, null, theRequestPartitionId);
+				Condition predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theSearchParam.getName(), join, predicateNumeric, theRequestPartitionId);
 				codePredicates.add(predicateOuter);
 
 			} else {
@@ -112,8 +86,8 @@ class PredicateBuilderNumber2 extends BasePredicateBuilder implements IPredicate
 
 		}
 
-		Predicate predicate = myCriteriaBuilder.or(toArray(codePredicates));
-		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
+		Condition predicate = ComboCondition.or(codePredicates.toArray(new Condition[0]));
+		getSqlBuilder().addPredicate(predicate);
 		return predicate;
 	}
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import com.healthmarketscience.sqlbuilder.Condition;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.From;

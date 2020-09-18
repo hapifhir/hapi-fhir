@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.StringUtil;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.springframework.context.annotation.Scope;
@@ -42,7 +41,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,13 +52,13 @@ class PredicateBuilderString2 extends BasePredicateBuilder implements IPredicate
 	}
 
 	@Override
-	public Predicate addPredicate(String theResourceName,
+	public Condition addPredicate(String theResourceName,
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
 											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
-		SearchSqlBuilder.StringIndexTable join = getSqlBuilder().addStringSelector();
+		StringIndexTable join = getSqlBuilder().addStringSelector();
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -85,7 +83,7 @@ class PredicateBuilderString2 extends BasePredicateBuilder implements IPredicate
 														String theResourceName,
 														RuntimeSearchParam theSearchParam,
 														CriteriaBuilder theBuilder, // FIXME: remove
-														SearchSqlBuilder.StringIndexTable theFrom,
+														StringIndexTable theFrom,
 														RequestPartitionId theRequestPartitionId) {
 		return createPredicateString(theParameter,
 			theResourceName,
@@ -93,14 +91,14 @@ class PredicateBuilderString2 extends BasePredicateBuilder implements IPredicate
 			theBuilder,
 			theFrom,
 			null,
-                theRequestPartitionId);
+			theRequestPartitionId);
 	}
 
 	private Condition createPredicateString(IQueryParameterType theParameter,
 														 String theResourceName,
 														 RuntimeSearchParam theSearchParam,
 														 CriteriaBuilder theBuilder999, // FIXME: remove
-														 SearchSqlBuilder.StringIndexTable theFrom,
+														 StringIndexTable theFrom,
 														 SearchFilterParser.CompareOperation operation,
 														 RequestPartitionId theRequestPartitionId) {
 		String rawSearchTerm;

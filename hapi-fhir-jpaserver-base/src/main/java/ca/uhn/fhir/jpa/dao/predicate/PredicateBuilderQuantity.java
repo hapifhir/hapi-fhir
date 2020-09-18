@@ -54,10 +54,10 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 
 	@Override
 	public Predicate addPredicate(String theResourceName,
-                                  RuntimeSearchParam theSearchParam,
-                                  List<? extends IQueryParameterType> theList,
-                                  SearchFilterParser.CompareOperation theOperation,
-                                  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+											RuntimeSearchParam theSearchParam,
+											List<? extends IQueryParameterType> theList,
+											SearchFilterParser.CompareOperation theOperation,
+											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
 
 		From<?, ResourceIndexedSearchParamQuantity> join = myQueryStack.createJoin(SearchBuilderJoinEnum.QUANTITY, theSearchParam.getName());
 
@@ -91,7 +91,7 @@ class PredicateBuilderQuantity extends BasePredicateBuilder implements IPredicat
 			theBuilder,
 			theFrom,
 			null,
-                theRequestPartitionId);
+			theRequestPartitionId);
 	}
 
 	private Predicate createPredicateQuantity(IQueryParameterType theParam,

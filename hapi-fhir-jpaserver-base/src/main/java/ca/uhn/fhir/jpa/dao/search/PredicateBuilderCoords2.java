@@ -22,11 +22,8 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.dao.search.sql.CoordsIndexTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
 import ca.uhn.fhir.jpa.util.SearchBox;
@@ -35,15 +32,13 @@ import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import com.google.common.annotations.VisibleForTesting;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
+import com.healthmarketscience.sqlbuilder.Condition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,18 +46,20 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Scope("prototype")
-public class PredicateBuilderCoords2 extends BasePredicateBuilder implements IPredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderCoords2.class);
+public class PredicateBuilderCoords2 extends BasePredicateBuilder implements IPredicateBuilder2 {
 
-	PredicateBuilderCoords2(SearchBuilder2 theSearchBuilder) {
+	/**
+	 * Constructor
+	 */
+	public PredicateBuilderCoords2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
-	private Predicate createPredicateCoords(IQueryParameterType theParam,
+	private Condition createPredicateCoords(IQueryParameterType theParam,
 														 String theResourceName,
 														 RuntimeSearchParam theSearchParam,
 														 CriteriaBuilder theBuilder,
-														 From<?, ResourceIndexedSearchParamCoords> theFrom,
+														 CoordsIndexTable theFrom,
 														 RequestPartitionId theRequestPartitionId) {
 		String latitudeValue;
 		String longitudeValue;
@@ -106,11 +103,11 @@ public class PredicateBuilderCoords2 extends BasePredicateBuilder implements IPr
 			throw new IllegalArgumentException("Invalid position type: " + theParam.getClass());
 		}
 
-		Predicate latitudePredicate;
-		Predicate longitudePredicate;
+		Condition latitudePredicate;
+		Condition longitudePredicate;
 		if (distanceKm == 0.0) {
-			latitudePredicate = theBuilder.equal(theFrom.get("myLatitude"), latitudeValue);
-			longitudePredicate = theBuilder.equal(theFrom.get("myLongitude"), longitudeValue);
+			latitudePredicate = theFrom.createPredicateLatitudeExact(latitudeValue);
+			longitudePredicate = theFrom.createPredicateLongitudeExact(longitudeValue);
 		} else if (distanceKm < 0.0) {
 			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be >= 0.0");
 		} else if (distanceKm > CoordCalculator.MAX_SUPPORTED_DISTANCE_KM) {
@@ -120,63 +117,38 @@ public class PredicateBuilderCoords2 extends BasePredicateBuilder implements IPr
 			double longitudeDegrees = Double.parseDouble(longitudeValue);
 
 			SearchBox box = CoordCalculator.getBox(latitudeDegrees, longitudeDegrees, distanceKm);
-			latitudePredicate = latitudePredicateFromBox(theBuilder, theFrom, box);
-			longitudePredicate = longitudePredicateFromBox(theBuilder, theFrom, box);
+			latitudePredicate = theFrom.createLatitudePredicateFromBox(box);
+			longitudePredicate = theFrom.createLongitudePredicateFromBox(box);
 		}
-		Predicate singleCode = theBuilder.and(latitudePredicate, longitudePredicate);
+		ComboCondition singleCode = ComboCondition.and(latitudePredicate, longitudePredicate);
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theSearchParam.getName(), theFrom, singleCode, theRequestPartitionId);
 	}
 
-	private Predicate latitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
-		return theBuilder.and(
-			theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), theBox.getSouthWest().getLatitude()),
-			theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), theBox.getNorthEast().getLatitude())
-		);
-	}
-
-	@VisibleForTesting
-	Predicate longitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
-		if (theBox.crossesAntiMeridian()) {
-			return theBuilder.or(
-				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.getNorthEast().getLongitude()),
-				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), theBox.getSouthWest().getLongitude())
-			);
-		}
-		return theBuilder.and(
-			theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.getSouthWest().getLongitude()),
-			theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), theBox.getNorthEast().getLongitude())
-		);
-	}
 
 	@Override
-	public Predicate addPredicate(String theResourceName,
+	public Condition addPredicate(String theResourceName,
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
 											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
-		From<?, ResourceIndexedSearchParamCoords> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COORDS, theSearchParam.getName());
+
+		CoordsIndexTable join = getSqlBuilder().addCoordsSelector();
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
 			return null;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<>();
-		addPartitionIdPredicate(theRequestPartitionId, join, codePredicates);
+		addPartitionIdPredicate(theRequestPartitionId, join, null);
 
+		List<Condition> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
-
-			Predicate singleCode = createPredicateCoords(nextOr,
-				theResourceName,
-				theSearchParam,
-                    myCriteriaBuilder,
-				join,
-                    theRequestPartitionId);
+			Condition singleCode = createPredicateCoords(nextOr, theResourceName, theSearchParam, myCriteriaBuilder, join, theRequestPartitionId);
 			codePredicates.add(singleCode);
 		}
 
-		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
-		myQueryStack.addPredicateWithImplicitTypeSelection(retVal);
+		Condition retVal = ComboCondition.or(codePredicates.toArray(new Condition[0]));
+		getSqlBuilder().addPredicate(retVal);
 		return retVal;
 	}
 }
