@@ -37,11 +37,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
+	private Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
+
 	@Autowired
 	DaoRegistry myDaoRegistry;
+
 	@Autowired
 	MatchUrlService myMatchUrlService;
-	private Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
+
 	@Autowired
 	private FhirContext myCtx;
 
