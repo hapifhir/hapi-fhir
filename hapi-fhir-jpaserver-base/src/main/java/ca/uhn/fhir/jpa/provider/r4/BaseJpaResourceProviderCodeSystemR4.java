@@ -118,7 +118,7 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		@IdParam(optional = true) IdType theId,
 		@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
 		@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
-		@OperationParam(name = "version", min = 0, max = 1) UriType theVersion,
+		@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
 		@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
 		@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
 		@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theCodeableConcept,

@@ -2654,8 +2654,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		
 		if (isNoneBlank(theCodeSystemVersion)) {
 			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
+		} else {
+			query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
 		}
-		
+
 		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 		query.where(outerPredicate);
 		
@@ -2669,6 +2671,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
 		}
 
+		for (TermConcept c :resultsList) 
+			System.out.println(c);
+		
 		if (isBlank(theDisplay))
 			return createFailureCodeValidationResult(theCodeSystemUrl, theCode);
 		else 
