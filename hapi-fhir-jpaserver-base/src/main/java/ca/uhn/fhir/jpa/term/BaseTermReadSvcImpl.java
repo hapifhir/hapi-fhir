@@ -2562,6 +2562,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
+	@Transactional
 	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 
 		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
