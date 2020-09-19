@@ -31,12 +31,11 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Fetch;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
@@ -182,6 +181,7 @@ import ca.uhn.fhir.util.VersionIndependentConcept;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
+	private static final int SINGLE_FETCH_SIZE = 1;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
 	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 	private static final TermCodeSystemVersion NO_CURRENT_VERSION = new TermCodeSystemVersion().setId(-1L);
@@ -2663,16 +2663,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		
 		final TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
 		org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
-		hibernateQuery.setFetchSize(myFetchSize);
+		hibernateQuery.setFetchSize(SINGLE_FETCH_SIZE);
 		List<TermConcept> resultsList = hibernateQuery.getResultList();
 				
 		if (!resultsList.isEmpty()) {
 			TermConcept concept = resultsList.get(0);
 			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
 		}
-
-		for (TermConcept c :resultsList) 
-			System.out.println(c);
 		
 		if (isBlank(theDisplay))
 			return createFailureCodeValidationResult(theCodeSystemUrl, theCode);
