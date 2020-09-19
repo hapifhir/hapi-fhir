@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
@@ -51,6 +52,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
+import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateCodeOptions;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
 
@@ -169,4 +172,12 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		return retVal;
 	}
 
+	@Override
+	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl,
+			IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay,
+			Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
+		
+		return myTerminologySvc.codeSystemValidateCode(theCodeSystemId, toStringOrNull(theCodeSystemUrl), toStringOrNull(theVersion), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
+	}
+	
 }

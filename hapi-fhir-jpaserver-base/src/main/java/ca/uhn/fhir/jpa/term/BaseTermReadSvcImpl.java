@@ -1,5 +1,99 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Fetch;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.TermsQuery;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.RegexpQuery;
+import org.apache.lucene.search.TermQuery;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.FullTextQuery;
+import org.hibernate.search.query.dsl.BooleanJunction;
+import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
+import org.quartz.JobExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
+import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Stopwatch;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -85,94 +179,6 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.VersionIndependentConcept;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Stopwatch;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.queries.TermsQuery;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.RegexpQuery;
-import org.apache.lucene.search.TermQuery;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.FullTextQuery;
-import org.hibernate.search.query.dsl.BooleanJunction;
-import org.hibernate.search.query.dsl.QueryBuilder;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.quartz.JobExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
-import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNoneBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -2555,5 +2561,117 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return ourLastResultsFromTranslationWithReverseCache;
 	}
 
+	@Override
+	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 
+		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
+		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
+
+		Coding coding = toCanonicalCoding(theCoding);
+		boolean haveCoding = coding != null && coding.isEmpty() == false;
+
+		boolean haveCode = theCode != null && theCode.isEmpty() == false;
+
+		if (!haveCodeableConcept && !haveCoding && !haveCode) {
+			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate.");
+		}
+		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
+			throw new InvalidRequestException("$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
+		}
+
+		boolean haveIdentifierParam = isNotBlank(theCodeSystemUrl);
+		String codeSystemUrl;
+		if (theCodeSystemId != null) {
+			IBaseResource codeSystem = myDaoRegistry.getResourceDao("CodeSystem").read(theCodeSystemId);
+			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
+		} else if (haveIdentifierParam) {
+			codeSystemUrl = theCodeSystemUrl;
+		} else {
+			throw new InvalidRequestException("Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+		}
+
+		
+		String code = theCode;
+		String version = theVersion;
+		String display = theDisplay;
+		
+		if (haveCodeableConcept) {
+			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
+				Coding nextCoding = codeableConcept.getCoding().get(i);
+				if (nextCoding.hasSystem()) {
+					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
+						throw new InvalidRequestException("Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+					}
+					codeSystemUrl = nextCoding.getSystem();
+				}
+				code = nextCoding.getCode();
+				display = nextCoding.getDisplay();
+				CodeValidationResult nextValidation = codeSystemValidateCode(codeSystemUrl, version, code, display);
+				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
+					return nextValidation;
+				}
+			}
+		} else if (haveCoding) {
+			if (coding.hasSystem()) {
+				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
+					throw new InvalidRequestException("Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+				}
+			    codeSystemUrl = coding.getSystem();
+			}
+			code = coding.getCode();
+			display = coding.getDisplay();
+		}
+
+		return codeSystemValidateCode(codeSystemUrl, version, code, display);
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {
+		
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TermConcept> query = criteriaBuilder.createQuery(TermConcept.class);
+		Root<TermConcept> root = query.from(TermConcept.class);
+
+		Fetch<TermCodeSystemVersion, TermConcept> systemVersionFetch = root.fetch("myCodeSystem", JoinType.INNER);
+		Join<TermCodeSystemVersion, TermConcept> systemVersionJoin = (Join<TermCodeSystemVersion, TermConcept>)systemVersionFetch;
+		Fetch<TermCodeSystem, TermCodeSystemVersion> systemFetch = systemVersionFetch.fetch("myCodeSystem", JoinType.INNER);
+		Join<TermCodeSystem, TermCodeSystemVersion> systemJoin = (Join<TermCodeSystem, TermCodeSystemVersion>)systemFetch;
+		
+		ArrayList<Predicate> predicates = new ArrayList<>();
+		
+		if (isNotBlank(theCode)) {
+			predicates.add(criteriaBuilder.equal(root.get("myCode"), theCode));
+		}
+		
+		if (isNotBlank(theDisplay)) {
+			predicates.add(criteriaBuilder.equal(root.get("myDisplay"), theDisplay));
+		}
+		
+		if (isNoneBlank(theCodeSystemUrl)) {
+			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
+		}
+		
+		if (isNoneBlank(theCodeSystemVersion)) {
+			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
+		}
+		
+		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+		query.where(outerPredicate);
+		
+		final TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
+		org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
+		hibernateQuery.setFetchSize(myFetchSize);
+		List<TermConcept> resultsList = hibernateQuery.getResultList();
+				
+		if (!resultsList.isEmpty()) {
+			TermConcept concept = resultsList.get(0);
+			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
+		}
+
+		if (isBlank(theDisplay))
+			return createFailureCodeValidationResult(theCodeSystemUrl, theCode);
+		else 
+			return createFailureCodeValidationResult(theCodeSystemUrl, theCode, " - Concept Display : "  + theDisplay);
+	}
 }

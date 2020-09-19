@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -56,6 +57,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateCodeOptions;
 import static ca.uhn.fhir.jpa.util.LogicUtil.multiXor;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -310,6 +312,15 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	public IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
 			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequest) {
 		return myTerminologySvc.validateCode(vsValidateCodeOptions(), theId, toStringOrNull(theValueSetIdentifier), toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
+	}
+
+	//-- For CodeSystem, not sure we need it here or throw invalid operation exception, since there is no CodeSystem in dstu2
+	@Override
+	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl,
+			IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay,
+			CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequestDetails) {
+		
+		return myTerminologySvc.codeSystemValidateCode(theCodeSystemId, toStringOrNull(theCodeSystemUrl), toStringOrNull(theVersion), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
 	}
 
 }
