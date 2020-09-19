@@ -91,7 +91,7 @@ public class EmpiMessageHandler implements MessageHandler {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
 		}catch (Exception e) {
-			log(empiContext, "Failure during EMPI processing: " + e.getMessage());
+			log(empiContext, "Failure during EMPI processing: " + e.getMessage(), e);
 		} finally {
 			// Interceptor call: EMPI_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()
@@ -140,8 +140,13 @@ public class EmpiMessageHandler implements MessageHandler {
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(getResourceFromPayload(theMsg), theEmpiTransactionContext);
 	}
 
-	private void log(EmpiTransactionContext theMessages, String theMessage) {
-		theMessages.addTransactionLogMessage(theMessage);
+	private void log(EmpiTransactionContext theEmpiContext, String theMessage) {
+		theEmpiContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
+	}
+
+	private void log(EmpiTransactionContext theEmpiContext, String theMessage, Exception theException) {
+		theEmpiContext.addTransactionLogMessage(theMessage);
+		ourLog.error(theMessage, theException);
 	}
 }
