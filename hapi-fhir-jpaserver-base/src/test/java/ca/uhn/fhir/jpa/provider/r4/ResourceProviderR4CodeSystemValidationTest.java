@@ -94,7 +94,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CS_ACMS_URL));
 		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
-		inParams.addParameter().setName("display").setValue(new CodeType("Systolic blood pressure.inspiration - expiration"));
+		inParams.addParameter().setName("display").setValue(new StringType("Systolic blood pressure.inspiration - expiration"));
 		
 		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 
@@ -112,7 +112,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CS_ACMS_URL));
 		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
-		inParams.addParameter().setName("display").setValue(new CodeType("Old Systolic blood pressure.inspiration - expiration"));
+		inParams.addParameter().setName("display").setValue(new StringType("Old Systolic blood pressure.inspiration - expiration"));
 		
 		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 
@@ -156,7 +156,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CS_ACMS_URL));
-		inParams.addParameter().setName("display").setValue(new CodeType("Systolic blood pressure.inspiration - expiration"));
+		inParams.addParameter().setName("display").setValue(new StringType("Systolic blood pressure.inspiration - expiration"));
 
 		try {
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
