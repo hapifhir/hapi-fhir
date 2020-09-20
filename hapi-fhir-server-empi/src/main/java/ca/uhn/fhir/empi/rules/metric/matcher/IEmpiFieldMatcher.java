@@ -21,12 +21,11 @@ package ca.uhn.fhir.empi.rules.metric.matcher;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.metric.IEmpiFieldMetric;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**
  * Measure how similar two IBase (resource fields) are to one another.  1.0 means identical.  0.0 means completely different.
  */
-public interface IEmpiFieldMatcher extends IEmpiFieldMetric {
+public interface IEmpiFieldMatcher {
 	boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact);
 }

@@ -7,14 +7,18 @@
 			"name": "foo",
 			"resourceType": "Patient",
 			"resourcePath": "name.family",
-			"metric": "STRING",
+			"matcher" : {
+				"algorithm": "STRING"
+			},
 			"exact": true
 		},
 		{
 			"name": "foo",
 			"resourceType": "Patient",
 			"resourcePath": "name.given",
-			"metric": "STRING"
+			"matcher" : {
+				"algorithm": "STRING"
+			}
 		}
 	],
 	"matchResultMap": {

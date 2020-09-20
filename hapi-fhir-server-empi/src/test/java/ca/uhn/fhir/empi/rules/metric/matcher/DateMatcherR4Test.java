@@ -1,6 +1,6 @@
 package ca.uhn.fhir.empi.rules.metric.matcher;
 
-import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
+import ca.uhn.fhir.empi.rules.metric.EmpiMatcherEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -44,7 +44,7 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateMatch(Date theDate, Date theSameMonth, TemporalPrecisionEnum theTheDay) {
-		return EmpiMetricEnum.DATE.match(ourFhirContext, new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), true);
+		return EmpiMatcherEnum.DATE.match(ourFhirContext, new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), true);
 	}
 
 	@Test
@@ -84,6 +84,6 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateTimeMatch(Date theDate, Date theSameSecond, TemporalPrecisionEnum theTheDay, TemporalPrecisionEnum theTheDay2) {
-		return EmpiMetricEnum.DATE.match(ourFhirContext, new DateTimeType(theDate, theTheDay), new DateTimeType(theSameSecond, theTheDay2), true);
+		return EmpiMatcherEnum.DATE.match(ourFhirContext, new DateTimeType(theDate, theTheDay), new DateTimeType(theSameSecond, theTheDay2), true);
 	}
 }

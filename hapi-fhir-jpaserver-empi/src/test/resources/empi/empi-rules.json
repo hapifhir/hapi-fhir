@@ -37,6 +37,14 @@
 			"metric": "JARO_WINKLER",
 			"matchThreshold": 0.8,
 			"exact": true
+		},
+		{
+			"name": "medicare-id",
+			"resourceType": "*",
+			"resourcePath": "identifier",
+			"metric": "IDENTIFIER_EXACT",
+			"identifierSystem": "http://hl7.org/fhir/sid/us-medicare",
+			"exact": true
 		}
 	],
 	"matchResultMap": {

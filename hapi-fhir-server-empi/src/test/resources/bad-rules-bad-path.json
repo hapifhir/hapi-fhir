@@ -6,7 +6,9 @@
 		"name" : "given-name",
 		"resourceType" : "Patient",
 		"resourcePath" : "name.first",
-		"metric" : "STRING",
+		"matcher" : {
+			"algorithm": "STRING"
+		},
 		"exact" : true
 	}],
 	"matchResultMap" : {
