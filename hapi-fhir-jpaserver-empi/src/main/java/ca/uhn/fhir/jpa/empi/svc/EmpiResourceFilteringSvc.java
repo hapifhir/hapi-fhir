@@ -64,7 +64,7 @@ public class EmpiResourceFilteringSvc {
 			.map(searchParam -> myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
 			.anyMatch(valueList -> !valueList.isEmpty());
 
-		ourLog.debug("Is {} suitable for EMPI processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
+		ourLog.trace("Is {} suitable for EMPI processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
 		return containsValueForSomeSearchParam;
 	}
 }

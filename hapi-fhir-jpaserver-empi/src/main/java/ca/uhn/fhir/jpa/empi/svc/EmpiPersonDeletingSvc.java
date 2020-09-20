@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
@@ -36,11 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 @Service
 public class EmpiPersonDeletingSvc {
-	private static final Logger ourLog = getLogger(EmpiPersonDeletingSvc.class);
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
+
 	/**
 	 * This is here for the case of possible infinite loops. Technically batch conflict deletion should handle this, but this is an escape hatch.
 	 */
@@ -58,7 +58,8 @@ public class EmpiPersonDeletingSvc {
 	 * @param theLongs
 	 */
 	@Transactional
-	public void deleteResourcesAndHandleConflicts(List<Long> theLongs) {
+	public void deletePersonResourcesAndHandleConflicts(List<Long> theLongs) {
+		ourLog.info("Deleting {} Person resources...", theLongs.size());
 		DeleteConflictList
 			deleteConflictList = new DeleteConflictList();
 		theLongs.stream().forEach(pid -> deleteCascade(pid, deleteConflictList));
@@ -72,17 +73,20 @@ public class EmpiPersonDeletingSvc {
 				throw new IllegalStateException("Person deletion seems to have entered an infinite loop. Aborting");
 			}
 		}
+		ourLog.info("Deleted {} Person resources in {} batches", theLongs.size(), batchCount);
 	}
 
 	/**
 	 * Use the expunge service to expunge all historical and current versions of the resources associated to the PIDs.
 	 */
 	public void expungeHistoricalAndCurrentVersionsOfIds(List<Long> theLongs) {
+		ourLog.info("Expunging historical versions of {} Person resources...", theLongs.size());
 		ExpungeOptions options = new ExpungeOptions();
 		options.setExpungeDeletedResources(true);
 		options.setExpungeOldVersions(true);
 		theLongs
 			.forEach(personId -> myExpungeService.expunge("Person", personId, null, options, null));
+		ourLog.info("Expunged historical versions of {} Person resources", theLongs.size());
 	}
 
 	private void deleteCascade(Long pid, DeleteConflictList theDeleteConflictList) {
