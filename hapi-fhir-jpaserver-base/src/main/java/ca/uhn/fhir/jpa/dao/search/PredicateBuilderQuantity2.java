@@ -39,7 +39,7 @@ import java.util.List;
 @Component
 @Scope("prototype")
 public
-class PredicateBuilderQuantity2 extends BasePredicateBuilder implements IPredicateBuilder2 {
+class PredicateBuilderQuantity2 extends BasePredicateBuilder2 implements IPredicateBuilder2 {
 
 	PredicateBuilderQuantity2(SearchBuilder2 theSearchBuilder) {
 		super(theSearchBuilder);

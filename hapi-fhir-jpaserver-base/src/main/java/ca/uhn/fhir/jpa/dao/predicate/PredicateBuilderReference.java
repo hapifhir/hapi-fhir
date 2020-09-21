@@ -109,6 +109,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 @Component
 @Scope("prototype")
+public
 class PredicateBuilderReference extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderReference.class);
 	private final PredicateBuilder myPredicateBuilder;

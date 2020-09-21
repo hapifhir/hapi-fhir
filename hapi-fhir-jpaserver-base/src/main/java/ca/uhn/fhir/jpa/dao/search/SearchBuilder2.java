@@ -30,6 +30,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -38,8 +39,10 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack2;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.SqlBuilderFactory;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -74,14 +77,22 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
+import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -115,6 +126,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -178,6 +191,8 @@ public class SearchBuilder2 implements ISearchBuilder {
 	private SearchSqlBuilder mySqlBuilder;
 	@Autowired
 	private DataSource myDataSource;
+	@Autowired
+	private SqlBuilderFactory mySqlBuilderFactory;
 
 	/**
 	 * Constructor
@@ -209,10 +224,6 @@ public class SearchBuilder2 implements ISearchBuilder {
 		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
-	private void searchForIdsWithAndOr(String theResourceName, String theNextParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
-		myPredicateBuilder.searchForIdsWithAndOr(theResourceName, theNextParamName, theAndOrParams, theRequest, myRequestPartitionId);
-	}
-
 	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		myParams = theParams;
 
@@ -240,6 +251,160 @@ public class SearchBuilder2 implements ISearchBuilder {
 			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
 		}
 	}
+
+	private void searchForIdsWithAndOr(String theResourceName, String theNextParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
+		searchForIdsWithAndOr(theResourceName, theNextParamName, theAndOrParams, theRequest, myRequestPartitionId);
+//		myPredicateBuilder.searchForIdsWithAndOr(theResourceName, theNextParamName, theAndOrParams, theRequest, myRequestPartitionId);
+	}
+
+
+	void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+
+		if (theAndOrParams.isEmpty()) {
+			return;
+		}
+
+		switch (theParamName) {
+			case IAnyResource.SP_RES_ID:
+				myPredicateBuilder.addPredicateResourceId(theAndOrParams, theResourceName, theRequestPartitionId);
+				break;
+
+			case IAnyResource.SP_RES_LANGUAGE:
+				// FIXME: implement
+//				addPredicateLanguage(theAndOrParams, null);
+				break;
+
+			case Constants.PARAM_HAS:
+				// FIXME: implement
+//				addPredicateHas(theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
+				break;
+
+			case Constants.PARAM_TAG:
+			case Constants.PARAM_PROFILE:
+			case Constants.PARAM_SECURITY:
+				myPredicateBuilder.addPredicateTag(theAndOrParams, theParamName, theRequestPartitionId);
+				break;
+
+			case Constants.PARAM_SOURCE:
+				// FIXME: implement
+//				addPredicateSource(theAndOrParams, theRequest);
+				break;
+
+			default:
+
+				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+				if (nextParamDef != null) {
+
+					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
+						if (theRequestPartitionId.isAllPartitions()) {
+							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
+						}
+					}
+
+					switch (nextParamDef.getParamType()) {
+						case DATE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								myPredicateBuilder.addPredicateDate(theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId);
+							}
+							break;
+						case QUANTITY:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								myPredicateBuilder.addPredicateQuantity(theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId);
+							}
+							break;
+						case REFERENCE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								myPredicateBuilder.addPredicateReference(theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId);
+							}
+							break;
+						case STRING:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								myPredicateBuilder.addPredicateString(theResourceName, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.sw, theRequestPartitionId);
+							}
+							break;
+						case TOKEN:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								if ("Location.position".equals(nextParamDef.getPath())) {
+									myPredicateBuilder.addPredicateCoords(theResourceName, nextParamDef, nextAnd, theRequestPartitionId);
+								} else {
+									myPredicateBuilder.addPredicateToken(theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId);
+								}
+							}
+							break;
+						case NUMBER:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								myPredicateBuilder.addPredicateNumber(theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId);
+							}
+							break;
+						case COMPOSITE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								// FIXME: implement
+//								addPredicateComposite(theResourceName, nextParamDef, nextAnd, theRequestPartitionId);
+							}
+							break;
+						case URI:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								myPredicateBuilder.addPredicateUri(theResourceName, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.eq, theRequestPartitionId);
+							}
+							break;
+						case HAS:
+						case SPECIAL:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								if ("Location.position".equals(nextParamDef.getPath())) {
+									myPredicateBuilder.addPredicateCoords(theResourceName, nextParamDef, nextAnd, theRequestPartitionId);
+								}
+							}
+							break;
+					}
+				} else {
+					if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
+						// These are handled later
+					} else if (Constants.PARAM_FILTER.equals(theParamName)) {
+						// Parse the predicates enumerated in the _filter separated by AND or OR...
+						if (theAndOrParams.get(0).get(0) instanceof StringParam) {
+							String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
+							SearchFilterParser.Filter filter;
+							try {
+								filter = SearchFilterParser.parse(filterString);
+							} catch (SearchFilterParser.FilterSyntaxException theE) {
+								throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
+							}
+							if (filter != null) {
+
+								if (!myDaoConfig.isFilterParameterEnabled()) {
+									throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+								}
+
+								// TODO: we clear the predicates below because the filter builds up
+								// its own collection of predicates. It'd probably be good at some
+								// point to do something more fancy...
+								ArrayList<Predicate> holdPredicates = new ArrayList<>(myQueryStack.getPredicates());
+
+								Condition filterPredicate = processFilter(filter, theResourceName, theRequest, theRequestPartitionId);
+								myQueryStack.clearPredicates();
+								myQueryStack.addPredicates(holdPredicates);
+
+								mySqlBuilder.addPredicate(filterPredicate);
+
+								// Because filters can have an OR at the root, we never know for sure that we haven't done an optimized
+								// search that doesn't check the resource type. This could be improved in the future, but for now it's
+								// safest to just clear this flag. The test "testRetrieveDifferentTypeEq" will fail if we don't clear
+								// this here.
+								myQueryStack.clearHasImplicitTypeSelection();
+							}
+						}
+
+					} else {
+						String validNames = new TreeSet<>(mySearchParamRegistry.getActiveSearchParams(theResourceName).keySet()).toString();
+						String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
+						throw new InvalidRequestException(msg);
+					}
+				}
+				break;
+		}
+	}
+
+
 
 	/**
 	 * A search is a candidate for Composite Unique SP if unique indexes are enabled, there is no EverythingMode, and the
@@ -291,7 +456,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		mySearchUuid = theSearchUuid;
 		myRequestPartitionId = theRequestPartitionId;
 
-		mySqlBuilder = new SearchSqlBuilder(myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName);
+		mySqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory);
 		myPredicateBuilder = new PredicateBuilder2(this, myPredicateBuilderFactory);
 	}
 
@@ -421,8 +586,10 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		// Last updated
 		DateRangeParam lu = myParams.getLastUpdated();
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myCriteriaBuilder);
-		myQueryStack.addPredicates(lastUpdatedPredicates);
+		if (lu != null && !lu.isEmpty()) {
+			Condition lastUpdatedPredicates = createLastUpdatedPredicates(lu);
+			mySqlBuilder.addPredicate(lastUpdatedPredicates);
+		}
 
 		/*
 		 * Now perform the search
@@ -1044,20 +1211,8 @@ public class SearchBuilder2 implements ISearchBuilder {
 		myDaoConfig = theDaoConfig;
 	}
 
-	private List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder) {
-		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
-		if (theLastUpdated != null) {
-			if (theLastUpdated.getLowerBoundAsInstant() != null) {
-				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
-				Predicate predicateLower = builder.greaterThanOrEqualTo(myQueryStack.getLastUpdatedColumn(), theLastUpdated.getLowerBoundAsInstant());
-				lastUpdatedPredicates.add(predicateLower);
-			}
-			if (theLastUpdated.getUpperBoundAsInstant() != null) {
-				Predicate predicateUpper = builder.lessThanOrEqualTo(myQueryStack.getLastUpdatedColumn(), theLastUpdated.getUpperBoundAsInstant());
-				lastUpdatedPredicates.add(predicateUpper);
-			}
-		}
-		return lastUpdatedPredicates;
+	private Condition createLastUpdatedPredicates(final DateRangeParam theLastUpdated) {
+		return mySqlBuilder.addPredicateLastUpdated(theLastUpdated);
 	}
 
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
@@ -1416,4 +1571,99 @@ public class SearchBuilder2 implements ISearchBuilder {
 	public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[0]);
 	}
+
+
+
+	private Condition processFilter(SearchFilterParser.Filter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+
+		if (theFilter instanceof SearchFilterParser.FilterParameter) {
+			return processFilterParameter((SearchFilterParser.FilterParameter) theFilter, theResourceName, theRequest, theRequestPartitionId);
+		} else if (theFilter instanceof SearchFilterParser.FilterLogical) {
+			// Left side
+			Condition xPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter1(), theResourceName, theRequest, theRequestPartitionId);
+
+			// Right side
+			Condition yPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter2(), theResourceName, theRequest, theRequestPartitionId);
+
+			if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
+				return ComboCondition.and(xPredicate, yPredicate);
+			} else if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.or) {
+				return ComboCondition.or(xPredicate, yPredicate);
+			}
+		} else if (theFilter instanceof SearchFilterParser.FilterParameterGroup) {
+			return processFilter(((SearchFilterParser.FilterParameterGroup) theFilter).getContained(), theResourceName, theRequest, theRequestPartitionId);
+		}
+		return null;
+	}
+
+	private Condition processFilterParameter(SearchFilterParser.FilterParameter theFilter,
+														  String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+
+		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
+
+		if (searchParam == null) {
+			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
+		} else if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
+			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
+				TokenParam param = new TokenParam();
+				param.setValueAsQueryToken(null,
+					null,
+					null,
+					theFilter.getValue());
+				return myPredicateBuilder.addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
+			} else {
+				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
+			}
+		} else if (searchParam.getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
+			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
+				// FIXME: implement
+				throw new UnsupportedOperationException();
+//				return addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),					theFilter.getOperation());
+			} else {
+				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
+			}
+		} else if (searchParam.getName().equals(Constants.PARAM_SOURCE)) {
+			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
+				TokenParam param = new TokenParam();
+				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
+				// FIXME: implement
+				throw new UnsupportedOperationException();
+//				return addPredicateSource(Collections.singletonList(param), theFilter.getOperation(), theRequest);
+			} else {
+				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
+			}
+		} else {
+			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
+			if (typeEnum == RestSearchParameterTypeEnum.URI) {
+				return myPredicateBuilder.addPredicateUri(theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
+				return myPredicateBuilder.addPredicateString(theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
+				return myPredicateBuilder.addPredicateDate(theResourceName, searchParam, Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
+				return myPredicateBuilder.addPredicateNumber(theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
+				String paramName = theFilter.getParamPath().getName();
+				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
+				String resourceType = null; // The value can either have (Patient/123) or not have (123) a resource type, either way it's not needed here
+				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
+				String value = theFilter.getValue();
+				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
+				return myPredicateBuilder.addPredicateReference(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
+			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
+				return myPredicateBuilder.addPredicateQuantity(theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
+				throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
+			} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
+				TokenParam param = new TokenParam();
+				param.setValueAsQueryToken(null,
+					null,
+					null,
+					theFilter.getValue());
+				return myPredicateBuilder.addPredicateToken(theResourceName, searchParam, Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
+			}
+		}
+		return null;
+	}
+
 }

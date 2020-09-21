@@ -46,7 +46,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Scope("prototype")
-public class PredicateBuilderCoords2 extends BasePredicateBuilder implements IPredicateBuilder2 {
+public class PredicateBuilderCoords2 extends BasePredicateBuilder2 implements IPredicateBuilder2 {
 
 	/**
 	 * Constructor

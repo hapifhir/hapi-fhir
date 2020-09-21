@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
@@ -106,4 +107,11 @@ public abstract class BaseIndexTable {
 	protected void setMatchNothing() {
 		mySearchSqlBuilder.setMatchNothing();
 	}
+
+
+	protected BinaryCondition createConditionForValueWithComparator(ParamPrefixEnum theComparator, DbColumn theColumn, Object theValue) {
+		return mySearchSqlBuilder.createConditionForValueWithComparator(theComparator, theColumn, theValue);
+	}
+
+
 }

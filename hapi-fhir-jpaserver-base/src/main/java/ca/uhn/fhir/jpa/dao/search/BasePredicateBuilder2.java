@@ -23,38 +23,31 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack2;
 import ca.uhn.fhir.jpa.dao.search.sql.BaseIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.BaseSearchParamIndexTable;
-import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresenceTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.healthmarketscience.sqlbuilder.Condition;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import java.math.BigDecimal;
-import java.math.MathContext;
+import javax.persistence.criteria.Subquery;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
-public abstract class BasePredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(BasePredicateBuilder.class);
+public abstract class BasePredicateBuilder2 {
+	private static final Logger ourLog = LoggerFactory.getLogger(BasePredicateBuilder2.class);
 	final CriteriaBuilder myCriteriaBuilder;
 	final QueryStack2 myQueryStack;
 	final Class<? extends IBaseResource> myResourceType;
@@ -68,7 +61,7 @@ public abstract class BasePredicateBuilder {
 	private PartitionSettings myPartitionSettings;
 	private SearchSqlBuilder mySearchSqlBuilder;
 
-	BasePredicateBuilder(SearchBuilder2 theSearchBuilder) {
+	BasePredicateBuilder2(SearchBuilder2 theSearchBuilder) {
 		myCriteriaBuilder = theSearchBuilder.getBuilder();
 		myQueryStack = theSearchBuilder.getQueryStack();
 		myResourceType = theSearchBuilder.getResourceType();
@@ -125,6 +118,10 @@ public abstract class BasePredicateBuilder {
 		throw new UnsupportedOperationException();
 	}
 
+	public Subquery<Long> createLinkSubquery(String theParameterName, String theTargetResourceType, ArrayList<IQueryParameterType> theOrValues, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		throw new UnsupportedOperationException();
+	}
+
 	public static String createLeftAndRightMatchLikeExpression(String likeExpression) {
 		return "%" + likeExpression.replace("%", "[%]") + "%";
 	}
@@ -136,6 +133,8 @@ public abstract class BasePredicateBuilder {
 	public static String createRightMatchLikeExpression(String likeExpression) {
 		return "%" + likeExpression.replace("%", "[%]");
 	}
+
+
 
 	static Predicate[] toArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[0]);

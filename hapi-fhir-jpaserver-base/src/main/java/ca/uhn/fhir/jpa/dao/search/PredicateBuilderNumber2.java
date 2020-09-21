@@ -42,7 +42,7 @@ import java.util.List;
 @Component
 @Scope("prototype")
 public
-class PredicateBuilderNumber2 extends BasePredicateBuilder implements IPredicateBuilder2 {
+class PredicateBuilderNumber2 extends BasePredicateBuilder2 implements IPredicateBuilder2 {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderNumber2.class);
 
 	public PredicateBuilderNumber2(SearchBuilder2 theSearchBuilder) {

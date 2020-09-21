@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.search.sql.DateIndexTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -49,7 +48,7 @@ import java.util.Map;
 
 @Component
 @Scope("prototype")
-public class PredicateBuilderDate2 extends BasePredicateBuilder implements IPredicateBuilder {
+public class PredicateBuilderDate2 extends BasePredicateBuilder2 implements IPredicateBuilder2 {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate2.class);
 
 	private Map<String, DateIndexTable> myJoinMap;
