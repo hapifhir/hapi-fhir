@@ -3,15 +3,21 @@
 	"candidateSearchParams": [
 		{
 			"resourceType": "Patient",
-			"searchParams": ["birthdate"]
+			"searchParams": [
+				"birthdate"
+			]
 		},
 		{
 			"resourceType": "*",
-			"searchParams": ["identifier"]
+			"searchParams": [
+				"identifier"
+			]
 		},
 		{
 			"resourceType": "Patient",
-			"searchParams": ["general-practitioner"]
+			"searchParams": [
+				"general-practitioner"
+			]
 		}
 	],
 	"candidateFilterSearchParams": [
@@ -26,30 +32,36 @@
 			"name": "cosine-given-name",
 			"resourceType": "*",
 			"resourcePath": "name.given",
-			"metric": "COSINE",
-			"matchThreshold": 0.8,
+			"similarity": {
+				"algorithm": "COSINE",
+				"matchThreshold": 0.8
+			},
 			"exact": true
 		},
 		{
 			"name": "jaro-last-name",
 			"resourceType": "*",
 			"resourcePath": "name.family",
-			"metric": "JARO_WINKLER",
-			"matchThreshold": 0.8,
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.8
+			},
 			"exact": true
 		},
 		{
 			"name": "medicare-id",
 			"resourceType": "*",
 			"resourcePath": "identifier",
-			"metric": "IDENTIFIER_EXACT",
-			"identifierSystem": "http://hl7.org/fhir/sid/us-medicare",
+			"matcher": {
+				"algorithm": "IDENTIFIER",
+				"identifierSystem": "http://hl7.org/fhir/sid/us-medicare"
+			},
 			"exact": true
 		}
 	],
 	"matchResultMap": {
-		"cosine-given-name" : "POSSIBLE_MATCH",
-		"cosine-given-name,jaro-last-name" : "MATCH"
+		"cosine-given-name": "POSSIBLE_MATCH",
+		"cosine-given-name,jaro-last-name": "MATCH"
 	},
 	"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
 }

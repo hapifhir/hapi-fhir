@@ -13,16 +13,30 @@
 			"name": "cosine-given-name",
 			"resourceType": "*",
 			"resourcePath": "name.given",
-			"metric": "COSINE",
-			"matchThreshold": 0.8,
+			"similarity": {
+				"algorithm": "COSINE",
+				"matchThreshold": 0.8
+			},
 			"exact": true
 		},
 		{
 			"name": "jaro-last-name",
 			"resourceType": "*",
 			"resourcePath": "name.family",
-			"metric": "JARO_WINKLER",
-			"matchThreshold": 0.8,
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.8
+			},
+			"exact": true
+		},
+		{
+			"name": "medicare-id",
+			"resourceType": "*",
+			"resourcePath": "identifier",
+			"matcher": {
+				"algorithm": "IDENTIFIER",
+				"identifierSystem": "http://hl7.org/fhir/sid/us-medicare"
+			},
 			"exact": true
 		}
 	],

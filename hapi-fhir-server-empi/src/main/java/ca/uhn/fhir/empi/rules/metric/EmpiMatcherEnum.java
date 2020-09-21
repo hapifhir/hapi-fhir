@@ -51,7 +51,10 @@ public enum EmpiMatcherEnum {
 
 	DATE(new HapiDateMatcher()),
 	NAME_ANY_ORDER(new NameMatcher(EmpiPersonNameMatchModeEnum.ANY_ORDER)),
-	NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.FIRST_AND_LAST));
+	NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.FIRST_AND_LAST)),
+
+	// FIXME KHS change this to use identifierSystem
+	IDENTIFIER(new HapiStringMatcher());
 
 	private final IEmpiFieldMatcher myEmpiFieldMetric;
 
