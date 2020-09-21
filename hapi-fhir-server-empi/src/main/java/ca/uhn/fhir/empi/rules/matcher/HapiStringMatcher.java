@@ -48,5 +48,4 @@ public class HapiStringMatcher extends BaseHapiStringMetric implements IEmpiFiel
 		}
 		return false;
 	}
-
 }

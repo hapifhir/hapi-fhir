@@ -47,15 +47,15 @@ public enum EmpiMatcherEnum {
 	NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.FIRST_AND_LAST)),
 
 	// FIXME KHS change this to use identifierSystem
-	IDENTIFIER(new HapiStringMatcher());
+	IDENTIFIER(new IdentifierMatcher());
 
-	private final IEmpiFieldMatcher myEmpiFieldMetric;
+	private final IEmpiFieldMatcher myEmpiFieldMatcher;
 
-	EmpiMatcherEnum(IEmpiFieldMatcher theEmpiFieldMetric) {
-		myEmpiFieldMetric = theEmpiFieldMetric;
+	EmpiMatcherEnum(IEmpiFieldMatcher theEmpiFieldMatcher) {
+		myEmpiFieldMatcher = theEmpiFieldMatcher;
 	}
 
 	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
-		return myEmpiFieldMetric.matches(theFhirContext, theLeftBase, theRightBase, theExact);
+		return myEmpiFieldMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact);
 	}
 }

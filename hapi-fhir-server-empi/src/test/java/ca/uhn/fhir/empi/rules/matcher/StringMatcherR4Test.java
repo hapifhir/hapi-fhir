@@ -125,7 +125,7 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 		assertFalse(match(EmpiMatcherEnum.SUBSTRING, new StringType("Fred"), new StringType("Friederik")));
 	}
 
-	private boolean match(EmpiMatcherEnum theMetric, StringType theLeft, StringType theRight) {
-		return theMetric.match(ourFhirContext, theLeft, theRight, false);
+	private boolean match(EmpiMatcherEnum theMatcher, StringType theLeft, StringType theRight) {
+		return theMatcher.match(ourFhirContext, theLeft, theRight, false);
 	}
 }
