@@ -53,12 +53,6 @@ public class EmpiFieldMatchJson implements IModelJson {
 	@JsonProperty(value = "similarity", required = false)
 	EmpiSimilarityJson mySimilarity;
 
-	/**
-	 * For String value types, should the values be normalized (case, accents) before they are compared
-	 */
-	@JsonProperty(value = "exact")
-	boolean myExact;
-
 	public String getResourceType() {
 		return myResourceType;
 	}
@@ -104,22 +98,13 @@ public class EmpiFieldMatchJson implements IModelJson {
 		return this;
 	}
 
-	public boolean getExact() {
-		return myExact;
-	}
-
-	public EmpiFieldMatchJson setExact(boolean theExact) {
-		myExact = theExact;
-		return this;
-	}
-
 	public EmpiMatchEvaluation match(FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
 		if (myMatcher != null) {
-			boolean result = myMatcher.myAlgorithm.match(theFhirContext, theLeftValue, theRightValue, myExact);
+			boolean result = myMatcher.match(theFhirContext, theLeftValue, theRightValue);
 			return new EmpiMatchEvaluation(result, result ? 1.0 : 0.0);
 		}
 		if (mySimilarity != null) {
-			return mySimilarity.myAlgorithm.match(theFhirContext, theLeftValue, theRightValue,myExact, mySimilarity.getMatchThreshold());
+			return mySimilarity.match(theFhirContext, theLeftValue, theRightValue);
 		}
 		throw new InternalErrorException("Field Match " + myName + " has neither a matcher nor a similarity.");
 	}

@@ -7,9 +7,9 @@
 		"resourceType" : "Patient",
 		"resourcePath" : "name.first",
 		"matcher" : {
-			"algorithm": "STRING"
-		},
-		"exact" : true
+			"algorithm": "STRING",
+			"exact" : true
+		}
 	}],
 	"matchResultMap" : {
 		"given-name" : "POSSIBLE_MATCH"

@@ -41,7 +41,7 @@ public class NameMatcher implements IEmpiFieldMatcher {
 	}
 
 	@Override
-	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
 		String leftFamilyName = NameUtil.extractFamilyName(theFhirContext, theLeftBase);
 		String rightFamilyName = NameUtil.extractFamilyName(theFhirContext, theRightBase);
 		if (StringUtils.isEmpty(leftFamilyName) || StringUtils.isEmpty(rightFamilyName)) {

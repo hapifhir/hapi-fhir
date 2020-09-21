@@ -43,7 +43,7 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateMatch(Date theDate, Date theSameMonth, TemporalPrecisionEnum theTheDay) {
-		return EmpiMatcherEnum.DATE.match(ourFhirContext, new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), true);
+		return EmpiMatcherEnum.DATE.match(ourFhirContext, new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), true, null);
 	}
 
 	@Test
@@ -83,6 +83,6 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean dateTimeMatch(Date theDate, Date theSameSecond, TemporalPrecisionEnum theTheDay, TemporalPrecisionEnum theTheDay2) {
-		return EmpiMatcherEnum.DATE.match(ourFhirContext, new DateTimeType(theDate, theTheDay), new DateTimeType(theSameSecond, theTheDay2), true);
+		return EmpiMatcherEnum.DATE.match(ourFhirContext, new DateTimeType(theDate, theTheDay), new DateTimeType(theSameSecond, theTheDay2), true, null);
 	}
 }

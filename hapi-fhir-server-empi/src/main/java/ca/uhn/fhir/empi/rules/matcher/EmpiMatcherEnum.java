@@ -55,7 +55,7 @@ public enum EmpiMatcherEnum {
 		myEmpiFieldMatcher = theEmpiFieldMatcher;
 	}
 
-	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
-		return myEmpiFieldMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact);
+	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
+		return myEmpiFieldMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact, theIdentifierSystem);
 	}
 }

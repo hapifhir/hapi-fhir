@@ -39,7 +39,7 @@ public class HapiStringMatcher extends BaseHapiStringMetric implements IEmpiFiel
 	}
 
 	@Override
-	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
+	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
 			String leftString = extractString((IPrimitiveType<?>) theLeftBase, theExact);
 			String rightString = extractString((IPrimitiveType<?>) theRightBase, theExact);

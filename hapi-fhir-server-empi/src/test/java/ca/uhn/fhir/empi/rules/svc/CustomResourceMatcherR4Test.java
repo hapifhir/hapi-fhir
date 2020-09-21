@@ -77,13 +77,12 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	}
 
 	private EmpiRulesJson buildNameRules(EmpiMatcherEnum theAlgorithm, boolean theExact) {
-		EmpiMatcherJson matcherJson = new EmpiMatcherJson().setAlgorithm(theAlgorithm);
+		EmpiMatcherJson matcherJson = new EmpiMatcherJson().setAlgorithm(theAlgorithm).setExact(theExact);
 		EmpiFieldMatchJson nameAnyOrderFieldMatch = new EmpiFieldMatchJson()
 			.setName(FIELD_EXACT_MATCH_NAME)
 			.setResourceType("Patient")
 			.setResourcePath("name")
-			.setMatcher(matcherJson)
-			.setExact(theExact);
+			.setMatcher(matcherJson);
 
 		EmpiRulesJson retval = new EmpiRulesJson();
 		retval.addMatchField(nameAnyOrderFieldMatch);

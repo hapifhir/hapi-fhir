@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringMatcherR4Test extends BaseMatcherR4Test {
+
 	@Test
 	public void testMetaphone() {
 		assertTrue(match(EmpiMatcherEnum.METAPHONE, new StringType("Durie"), new StringType("dury")));
@@ -50,25 +51,25 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 
 	@Test
 	public void testExactString() {
-		assertTrue(EmpiMatcherEnum.STRING.match(ourFhirContext, new StringType("Jilly"), new StringType("Jilly"), true));
+		assertTrue(EmpiMatcherEnum.STRING.match(ourFhirContext, new StringType("Jilly"), new StringType("Jilly"), true, null));
 
-		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new StringType("MCTAVISH"), new StringType("McTavish"), true));
-		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new StringType("Durie"), new StringType("dury"), true));
+		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new StringType("MCTAVISH"), new StringType("McTavish"), true, null));
+		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new StringType("Durie"), new StringType("dury"), true, null));
 	}
 
 	@Test
 	public void testExactBoolean() {
-		assertTrue(EmpiMatcherEnum.STRING.match(ourFhirContext, new BooleanType(true), new BooleanType(true), true));
+		assertTrue(EmpiMatcherEnum.STRING.match(ourFhirContext, new BooleanType(true), new BooleanType(true), true, null));
 
-		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new BooleanType(true), new BooleanType(false), true));
-		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new BooleanType(false), new BooleanType(true), true));
+		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new BooleanType(true), new BooleanType(false), true, null));
+		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new BooleanType(false), new BooleanType(true), true, null));
 	}
 
 	@Test
 	public void testExactDateString() {
-		assertTrue(EmpiMatcherEnum.STRING.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-08-09"), true));
+		assertTrue(EmpiMatcherEnum.STRING.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-08-09"), true, null));
 
-		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-09-08"), true));
+		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, new DateType("1965-08-09"), new DateType("1965-09-08"), true, null));
 	}
 
 
@@ -80,9 +81,9 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 		Enumeration<Enumerations.AdministrativeGender> female = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
 		female.setValue(Enumerations.AdministrativeGender.FEMALE);
 
-		assertTrue(EmpiMatcherEnum.STRING.match(ourFhirContext, male, male, true));
+		assertTrue(EmpiMatcherEnum.STRING.match(ourFhirContext, male, male, true, null));
 
-		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, male, female, true));
+		assertFalse(EmpiMatcherEnum.STRING.match(ourFhirContext, male, female, true, null));
 	}
 
 	@Test
@@ -126,6 +127,6 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean match(EmpiMatcherEnum theMatcher, StringType theLeft, StringType theRight) {
-		return theMatcher.match(ourFhirContext, theLeft, theRight, false);
+		return theMatcher.match(ourFhirContext, theLeft, theRight, false, null);
 	}
 }
