@@ -1,6 +1,6 @@
 package ca.uhn.fhir.empi.rules.json;
 
-import ca.uhn.fhir.empi.rules.metric.EmpiSimilarityEnum;
+import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.metric.matcher;
+package ca.uhn.fhir.empi.rules.matcher;
 
 /*-
  * #%L
@@ -20,12 +20,7 @@ package ca.uhn.fhir.empi.rules.metric.matcher;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.api.IBase;
-
-/**
- * Measure how similar two IBase (resource fields) are to one another.  1.0 means identical.  0.0 means completely different.
- */
-public interface IEmpiFieldMatcher {
-	boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact);
+public enum EmpiPersonNameMatchModeEnum {
+	ANY_ORDER,
+	FIRST_AND_LAST
 }

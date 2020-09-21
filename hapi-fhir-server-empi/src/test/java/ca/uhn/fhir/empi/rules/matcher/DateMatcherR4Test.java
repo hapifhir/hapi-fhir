@@ -1,6 +1,5 @@
-package ca.uhn.fhir.empi.rules.metric.matcher;
+package ca.uhn.fhir.empi.rules.matcher;
 
-import ca.uhn.fhir.empi.rules.metric.EmpiMatcherEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;

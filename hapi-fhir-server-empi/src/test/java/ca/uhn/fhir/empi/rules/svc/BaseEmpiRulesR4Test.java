@@ -7,7 +7,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.json.EmpiSimilarityJson;
-import ca.uhn.fhir.empi.rules.metric.EmpiSimilarityEnum;
+import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 

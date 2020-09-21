@@ -1,9 +1,7 @@
-package ca.uhn.fhir.empi.rules.metric;
+package ca.uhn.fhir.empi.rules.similarity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchEvaluation;
-import ca.uhn.fhir.empi.rules.metric.similarity.HapiStringSimilarity;
-import ca.uhn.fhir.empi.rules.metric.similarity.IEmpiFieldSimilarity;
 import info.debatty.java.stringsimilarity.Cosine;
 import info.debatty.java.stringsimilarity.Jaccard;
 import info.debatty.java.stringsimilarity.JaroWinkler;

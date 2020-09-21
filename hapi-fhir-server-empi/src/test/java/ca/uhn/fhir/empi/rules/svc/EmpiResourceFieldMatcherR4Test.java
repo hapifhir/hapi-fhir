@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiSimilarityJson;
-import ca.uhn.fhir.empi.rules.metric.EmpiSimilarityEnum;
+import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;

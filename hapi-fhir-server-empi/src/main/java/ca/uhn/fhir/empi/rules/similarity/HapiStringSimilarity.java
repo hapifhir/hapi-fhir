@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.metric.similarity;
+package ca.uhn.fhir.empi.rules.similarity;
 
 /*-
  * #%L
@@ -21,7 +21,7 @@ package ca.uhn.fhir.empi.rules.metric.similarity;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.rules.metric.matcher.BaseHapiStringMetric;
+import ca.uhn.fhir.empi.rules.matcher.BaseHapiStringMetric;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;

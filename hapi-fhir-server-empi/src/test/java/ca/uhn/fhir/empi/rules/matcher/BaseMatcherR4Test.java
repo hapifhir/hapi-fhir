@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.metric.matcher;
+package ca.uhn.fhir.empi.rules.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 

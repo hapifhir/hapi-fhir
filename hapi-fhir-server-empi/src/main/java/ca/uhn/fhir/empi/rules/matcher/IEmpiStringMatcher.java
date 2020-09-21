@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.metric.matcher;
+package ca.uhn.fhir.empi.rules.matcher;
 
 /*-
  * #%L
@@ -20,9 +20,6 @@ package ca.uhn.fhir.empi.rules.metric.matcher;
  * #L%
  */
 
-public class SubstringStringMatcher implements IEmpiStringMatcher {
-	@Override
-	public boolean matches(String theLeftString, String theRightString) {
-		return theLeftString.startsWith(theRightString) || theRightString.startsWith(theLeftString);
-	}
+public interface IEmpiStringMatcher {
+	boolean matches(String theLeftString, String theRightString);
 }

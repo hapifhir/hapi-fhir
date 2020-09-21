@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.metric;
+package ca.uhn.fhir.empi.rules.matcher;
 
 /*-
  * #%L
@@ -22,13 +22,6 @@ package ca.uhn.fhir.empi.rules.metric;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.empi.rules.metric.matcher.EmpiPersonNameMatchModeEnum;
-import ca.uhn.fhir.empi.rules.metric.matcher.HapiDateMatcher;
-import ca.uhn.fhir.empi.rules.metric.matcher.HapiStringMatcher;
-import ca.uhn.fhir.empi.rules.metric.matcher.IEmpiFieldMatcher;
-import ca.uhn.fhir.empi.rules.metric.matcher.NameMatcher;
-import ca.uhn.fhir.empi.rules.metric.matcher.PhoneticEncoderMatcher;
-import ca.uhn.fhir.empi.rules.metric.matcher.SubstringStringMatcher;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**

@@ -1,6 +1,5 @@
-package ca.uhn.fhir.empi.rules.metric.matcher;
+package ca.uhn.fhir.empi.rules.matcher;
 
-import ca.uhn.fhir.empi.rules.metric.EmpiMatcherEnum;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumeration;

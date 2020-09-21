@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.rules.metric.EmpiSimilarityEnum;
+import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import ca.uhn.fhir.empi.rules.svc.BaseEmpiRulesR4Test;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;

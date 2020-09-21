@@ -22,7 +22,7 @@ package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchEvaluation;
-import ca.uhn.fhir.empi.rules.metric.EmpiMatcherEnum;
+import ca.uhn.fhir.empi.rules.matcher.EmpiMatcherEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.annotation.JsonProperty;

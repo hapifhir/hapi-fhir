@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.rules.metric.matcher;
+package ca.uhn.fhir.empi.rules.matcher;
 
 /*-
  * #%L
@@ -20,12 +20,12 @@ package ca.uhn.fhir.empi.rules.metric.matcher;
  * #L%
  */
 
-import org.hl7.fhir.dstu3.model.BaseDateTimeType;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.BaseDateTimeType;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 
-public class HapiDateMatcherDstu3 {
+public class HapiDateMatcherR4 {
 	// TODO KHS code duplication (tried generalizing it with generics, but it got too convoluted)
 	public boolean match(IBase theLeftBase, IBase theRightBase) {
 		if (theLeftBase instanceof BaseDateTimeType && theRightBase instanceof BaseDateTimeType) {
