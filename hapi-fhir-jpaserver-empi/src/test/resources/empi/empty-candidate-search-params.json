@@ -15,9 +15,9 @@
 			"resourcePath": "name.given",
 			"similarity": {
 				"algorithm": "COSINE",
-				"matchThreshold": 0.8
-			},
-			"exact": true
+				"matchThreshold": 0.8,
+				"exact": true
+			}
 		},
 		{
 			"name": "jaro-last-name",
@@ -25,9 +25,9 @@
 			"resourcePath": "name.family",
 			"similarity": {
 				"algorithm": "JARO_WINKLER",
-				"matchThreshold": 0.8
-			},
-			"exact": true
+				"matchThreshold": 0.8,
+				"exact": true
+			}
 		},
 		{
 			"name": "medicare-id",
@@ -36,8 +36,7 @@
 			"matcher": {
 				"algorithm": "IDENTIFIER",
 				"identifierSystem": "http://hl7.org/fhir/sid/us-medicare"
-			},
-			"exact": true
+			}
 		}
 	],
 	"matchResultMap": {
