@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2083
+title: "The JPA search coordinator will now use worker threads sourced from a ThreadPoolTaskExecutor, in order to simplify
+  the addition of decorators to those threads. Thanks to Tue Toft Nørgård for the pull requets!"
+

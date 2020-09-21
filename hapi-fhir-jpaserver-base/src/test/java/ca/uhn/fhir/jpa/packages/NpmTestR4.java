@@ -384,6 +384,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
+
 		runInTransaction(() -> {
 			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
 			assertEquals(true, versionEntity.isCurrentVersion());

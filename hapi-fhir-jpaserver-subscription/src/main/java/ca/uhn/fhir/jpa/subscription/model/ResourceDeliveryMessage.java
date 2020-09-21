@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.subscription.model;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import ca.uhn.fhir.rest.server.messaging.IResourceMessage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -38,22 +40,10 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	private CanonicalSubscription mySubscription;
 	@JsonProperty("payload")
 	private String myPayloadString;
-	@JsonIgnore
-	private transient IBaseResource myPayload;
 	@JsonProperty("payloadId")
 	private String myPayloadId;
-	@JsonProperty("parentTransactionGuid")
-	private String myParentTransactionGuid;
-	@JsonProperty("operationType")
-	private ResourceModifiedMessage.OperationTypeEnum myOperationType;
-
-	public String getParentTransactionGuid() {
-		return myParentTransactionGuid;
-	}
-
-	public void setParentTransactionGuid(String theParentTransactionGuid) {
-		myParentTransactionGuid = theParentTransactionGuid;
-	}
+	@JsonIgnore
+	private transient IBaseResource myPayloadDecoded;
 
 	/**
 	 * Constructor
@@ -62,20 +52,12 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		super();
 	}
 
-	public ResourceModifiedMessage.OperationTypeEnum getOperationType() {
-		return myOperationType;
-	}
-
-	public void setOperationType(ResourceModifiedMessage.OperationTypeEnum theOperationType) {
-		myOperationType = theOperationType;
-	}
-
 	public IBaseResource getPayload(FhirContext theCtx) {
-		IBaseResource retVal = myPayload;
+		IBaseResource retVal = myPayloadDecoded;
 		if (retVal == null && isNotBlank(myPayloadString)) {
 			IParser parser = EncodingEnum.detectEncoding(myPayloadString).newParser(theCtx);
 			retVal = parser.parseResource(myPayloadString);
-			myPayload = retVal;
+			myPayloadDecoded = retVal;
 		}
 		return retVal;
 	}
@@ -133,9 +115,9 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		return new ToStringBuilder(this)
 			.append("mySubscription", mySubscription)
 			.append("myPayloadString", myPayloadString)
-			.append("myPayload", myPayload)
+			.append("myPayload", myPayloadDecoded)
 			.append("myPayloadId", myPayloadId)
-			.append("myOperationType", myOperationType)
+			.append("myOperationType", getOperationType())
 			.toString();
 	}
 
