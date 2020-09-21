@@ -1,12 +1,11 @@
 package ca.uhn.fhir.empi.util;
 
-import ca.uhn.fhir.model.primitive.IdentifierDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class IdentifierUtil {
-	public static IdentifierDt identifierDtFromIdentifier(IBase theIdentifier) {
-		IdentifierDt retval = new IdentifierDt();
+	public static CanonicalIdentifier identifierDtFromIdentifier(IBase theIdentifier) {
+		CanonicalIdentifier retval = new CanonicalIdentifier();
 
 		// TODO add other fields like "use" etc
 		if (theIdentifier instanceof org.hl7.fhir.dstu3.model.Identifier) {

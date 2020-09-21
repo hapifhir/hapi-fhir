@@ -1,8 +1,8 @@
 package ca.uhn.fhir.empi.rules.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.util.CanonicalIdentifier;
 import ca.uhn.fhir.empi.util.IdentifierUtil;
-import ca.uhn.fhir.model.primitive.IdentifierDt;
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class IdentifierMatcher implements IEmpiFieldMatcher {
@@ -14,13 +14,13 @@ public class IdentifierMatcher implements IEmpiFieldMatcher {
 	 */
 	@Override
 	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
-		IdentifierDt left = IdentifierUtil.identifierDtFromIdentifier(theLeftBase);
+		CanonicalIdentifier left = IdentifierUtil.identifierDtFromIdentifier(theLeftBase);
 		if (theIdentifierSystem != null) {
 			if (!theIdentifierSystem.equals(left.getSystemElement().getValueAsString())) {
 				return false;
 			}
 		}
-		IdentifierDt right = IdentifierUtil.identifierDtFromIdentifier(theRightBase);
+		CanonicalIdentifier right = IdentifierUtil.identifierDtFromIdentifier(theRightBase);
 		return left.equals(right);
 	}
 }

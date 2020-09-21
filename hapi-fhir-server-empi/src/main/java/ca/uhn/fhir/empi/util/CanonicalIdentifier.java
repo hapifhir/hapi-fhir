@@ -1,7 +1,9 @@
-package ca.uhn.fhir.model.primitive;
+package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -10,7 +12,7 @@ import java.util.List;
 /**
  * Version independent identifier
  */
-public class IdentifierDt extends BaseIdentifierDt {
+public class CanonicalIdentifier extends BaseIdentifierDt {
 	UriDt mySystem;
 	StringDt myValue;
 
@@ -25,13 +27,13 @@ public class IdentifierDt extends BaseIdentifierDt {
 	}
 
 	@Override
-	public IdentifierDt setSystem(String theUri) {
+	public CanonicalIdentifier setSystem(String theUri) {
 		mySystem = new UriDt((theUri));
 		return this;
 	}
 
 	@Override
-	public IdentifierDt setValue(String theString) {
+	public CanonicalIdentifier setValue(String theString) {
 		myValue = new StringDt(theString);
 		return this;
 	}
@@ -58,7 +60,7 @@ public class IdentifierDt extends BaseIdentifierDt {
 
 		if (theO == null || getClass() != theO.getClass()) return false;
 
-		IdentifierDt that = (IdentifierDt) theO;
+		CanonicalIdentifier that = (CanonicalIdentifier) theO;
 
 		return new EqualsBuilder()
 			.append(mySystem, that.mySystem)

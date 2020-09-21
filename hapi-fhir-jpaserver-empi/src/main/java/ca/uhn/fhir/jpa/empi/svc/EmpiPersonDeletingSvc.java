@@ -90,7 +90,7 @@ public class EmpiPersonDeletingSvc {
 	}
 
 	private void deleteCascade(Long pid, DeleteConflictList theDeleteConflictList) {
-		ourLog.debug("About to cascade delete: {}", pid);
+		ourLog.trace("About to cascade delete: Person/{}", pid);
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao("Person");
 		resourceDao.delete(new IdType("Person/" + pid), theDeleteConflictList, null, null);
 	}

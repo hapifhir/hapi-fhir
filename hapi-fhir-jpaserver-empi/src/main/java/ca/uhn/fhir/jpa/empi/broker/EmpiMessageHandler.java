@@ -57,7 +57,7 @@ public class EmpiMessageHandler implements MessageHandler {
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
-		ourLog.info("Handling resource modified message: {}", theMessage);
+		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
