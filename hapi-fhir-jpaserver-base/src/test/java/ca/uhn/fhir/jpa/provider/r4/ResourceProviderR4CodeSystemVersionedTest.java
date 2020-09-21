@@ -1,9 +1,16 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -12,7 +19,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +33,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemVersionedTest.class);
+	private long parentChildCs1Id;
+	private long parentChildCs2Id;
 
 	@BeforeEach
 	@Transactional
@@ -48,6 +56,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		CodeSystem parentChildCs = new CodeSystem();
 		parentChildCs.setUrl(SYSTEM_PARENTCHILD);
 		parentChildCs.setVersion("1");
+		parentChildCs.setName("Parent Child CodeSystem 1");
 		parentChildCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		parentChildCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		parentChildCs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
@@ -57,10 +66,12 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		parentA.addConcept().setCode("ParentC").setDisplay("Parent C");
 		parentChildCs.addConcept().setCode("ParentB").setDisplay("Parent B");
 
-		myCodeSystemDao.create(parentChildCs);
+		DaoMethodOutcome parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
+		parentChildCs1Id = ((ResourceTable)parentChildCsOutcome.getEntity()).getId();
 
 		parentChildCs = new CodeSystem();
 		parentChildCs.setVersion("2");
+		parentChildCs.setName("Parent Child CodeSystem 2");
 		parentChildCs.setUrl(SYSTEM_PARENTCHILD);
 		parentChildCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		parentChildCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
@@ -71,7 +82,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		parentA.addConcept().setCode("ParentB").setDisplay("Parent B v2");
 		parentChildCs.addConcept().setCode("ParentC").setDisplay("Parent C v2");
 
-		myCodeSystemDao.create(parentChildCs);
+		parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
+		parentChildCs2Id = ((ResourceTable)parentChildCsOutcome.getEntity()).getId();
 
 	}
 
@@ -768,6 +780,42 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
+	}
+
+	@Test
+	public void testUpdateCodeSystemName() throws IOException {
+
+		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
+		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
+		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
+		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(initialCodeSystem);
+		HttpPut putRequest = new HttpPut(ourServerBase + "/CodeSystem/" + parentChildCs1Id);
+		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+
+		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
+		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
+
+		initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
+		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
+		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
+		encoded = myFhirCtx.newJsonParser().encodeResourceToString(initialCodeSystem);
+		putRequest = new HttpPut(ourServerBase + "/CodeSystem/" + parentChildCs2Id);
+		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+
+		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
+		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());
 	}
 
 

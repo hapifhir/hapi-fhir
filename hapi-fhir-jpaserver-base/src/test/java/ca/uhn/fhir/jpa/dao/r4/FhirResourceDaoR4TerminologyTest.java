@@ -235,6 +235,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCodeSystemCreateDuplicateFails() {
+		// No version.
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -249,6 +250,25 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
+
+		// With version.
+		codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setVersion("1");
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
+		id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setVersion("1");
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
+		try {
+			myCodeSystemDao.create(codeSystem, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"1\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
+		}
+
 	}
 
 	@Test

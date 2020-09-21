@@ -71,7 +71,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
-	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
+	public void includeConceptWithDesignations(String theSystem, String theSystemVersion, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
 		TermValueSetConcept concept = saveConcept(theSystem, theCode, theDisplay);
 		if (theDesignations != null) {
 			for (TermConceptDesignation designation : theDesignations) {
@@ -81,7 +81,17 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
+	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
+		includeConceptWithDesignations(theSystem, null, theCode, theDisplay, theDesignations);
+	}
+
+	@Override
 	public void excludeConcept(String theSystem, String theCode) {
+		excludeConcept(theSystem, null, theCode);
+	}
+
+	@Override
+	public void excludeConcept(String theSystem, String theSystemVersion, String theCode) {
 		if (isAnyBlank(theSystem, theCode)) {
 			return;
 		}

@@ -46,6 +46,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		// Note: url is correct and identifier is not, but identifier was only added as
 		// of 3.1.0 so we'll leave url for now. See: https://groups.google.com/d/msgid/hapi-fhir/CAN2Cfy8kW%2BAOkgC6VjPsU3gRCpExCNZBmJdi-k5R_TWeyWH4tA%40mail.gmail.com?utm_medium=email&utm_source=footer
 		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
+		@OperationParam(name = "valueSetVersion", min = 0, max = 1) org.hl7.fhir.r4.model.StringType theValueSetVersion,
 		@OperationParam(name = "identifier", min = 0, max = 1) UriType theIdentifier,
 		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
 		@OperationParam(name = "offset", min = 0, max = 1) IntegerType theOffset,
@@ -60,6 +61,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 
 		boolean haveIdentifier = url != null && isNotBlank(url.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
+		boolean haveValueSetVersion = theValueSetVersion != null && !theValueSetVersion.isEmpty();
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
 			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request.");
@@ -99,7 +101,11 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 				if (haveId) {
 					return dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
 				} else if (haveIdentifier) {
-					return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter), offset, count);
+					if (haveValueSetVersion) {
+						return dao.expandByIdentifier(url.getValue(), theValueSetVersion.getValue(), toFilterString(theFilter), offset, count);
+					} else {
+						return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter), offset, count);
+					}
 				} else {
 					return dao.expand(theValueSet, toFilterString(theFilter), offset, count);
 				}
@@ -107,7 +113,11 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 				if (haveId) {
 					return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
 				} else if (haveIdentifier) {
-					return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter));
+					if (haveValueSetVersion) {
+						return dao.expandByIdentifier(url.getValue(), theValueSetVersion.getValue(), toFilterString(theFilter));
+					} else {
+						return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter));
+					}
 				} else {
 					return dao.expand(theValueSet, toFilterString(theFilter));
 				}

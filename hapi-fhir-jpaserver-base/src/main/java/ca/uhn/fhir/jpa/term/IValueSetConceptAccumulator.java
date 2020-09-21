@@ -33,7 +33,11 @@ public interface IValueSetConceptAccumulator {
 
 	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations);
 
+	void includeConceptWithDesignations(String theSystem, String theSystemVersion, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations);
+
 	void excludeConcept(String theSystem, String theCode);
+
+	void excludeConcept(String theSystem, String theSystemVersion, String theCode);
 
 	@Nullable
 	default Integer getCapacityRemaining() {

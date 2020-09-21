@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -69,14 +68,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
    @Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	private boolean myProcessDeferred = true;
-	private List<TermCodeSystem> myDefferedCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
-	private List<TermCodeSystemVersion> myDefferedCodeSystemVersionsDeletions = Collections.synchronizedList(new ArrayList<>());
-	private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
-	private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
-	private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
-	private List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
-	@Autowired
-	private DaoConfig myDaoConfig;
+	final private List<TermCodeSystem> myDefferedCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
+	final private List<TermCodeSystemVersion> myDefferedCodeSystemVersionsDeletions = Collections.synchronizedList(new ArrayList<>());
+	final private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
+	final private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
+	final private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
+	final private List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
@@ -121,9 +118,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@Override
 	@Transactional
 	public void deleteCodeSystemForResource(ResourceTable theCodeSystemToDelete) {
-		TermCodeSystemVersion codeSystemVersionToDelete = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getResourceId());
-		if (codeSystemVersionToDelete != null) {
-			myDefferedCodeSystemVersionsDeletions.add(codeSystemVersionToDelete);
+		List<TermCodeSystemVersion> codeSystemVersionsToDelete = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getResourceId());
+		for (TermCodeSystemVersion codeSystemVersionToDelete : codeSystemVersionsToDelete){
+			if (codeSystemVersionToDelete != null) {
+				myDefferedCodeSystemVersionsDeletions.add(codeSystemVersionToDelete);
+			}
 		}
 		TermCodeSystem codeSystemToDelete = myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getResourceId());
 		if (codeSystemToDelete != null) {
@@ -297,8 +296,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Override
 	public boolean isStorageQueueEmpty() {
-		boolean retVal = true;
-		retVal &= !isProcessDeferredPaused();
+		boolean retVal = !isProcessDeferredPaused();
 		retVal &= !isDeferredConcepts();
 		retVal &= !isConceptLinksToSaveLater();
 		retVal &= !isDeferredValueSets();
@@ -366,11 +364,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@VisibleForTesting
 	void setTransactionManagerForUnitTest(PlatformTransactionManager theTxManager) {
 		myTransactionMgr = theTxManager;
-	}
-
-	@VisibleForTesting
-	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
 	}
 
 	@VisibleForTesting

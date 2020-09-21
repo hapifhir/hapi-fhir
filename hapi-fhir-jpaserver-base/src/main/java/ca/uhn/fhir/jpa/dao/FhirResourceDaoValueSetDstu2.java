@@ -175,7 +175,17 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	}
 
 	@Override
+	public ValueSet expandByIdentifier(String theUri, String theValueSetVersion, String theFilter) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ValueSet expandByIdentifier(String theUri, String theValueSetVersion, String theFilter, int theOffset, int theCount) {
 		throw new UnsupportedOperationException();
 	}
 

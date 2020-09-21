@@ -44,6 +44,7 @@ public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<Val
 		@IdParam(optional = true) IdType theId,
 		@OperationParam(name = "valueSet", min = 0, max = 1) ValueSet theValueSet,
 		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
+		@OperationParam(name = "valueSetVersion", min = 0, max = 1) org.hl7.fhir.r4.model.StringType theValueSetVersion,
 		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
 		@OperationParam(name = "offset", min = 0, max = 1) IntegerType theOffset,
 		@OperationParam(name = "count", min = 0, max = 1) IntegerType theCount,
@@ -52,6 +53,7 @@ public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<Val
 		boolean haveId = theId != null && theId.hasIdPart();
 		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
+		boolean haveValueSetVersion = theValueSetVersion != null && !theValueSetVersion.isEmpty();
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
 			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
@@ -91,7 +93,11 @@ public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<Val
 				if (haveId) {
 					return dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
 				} else if (haveIdentifier) {
-					return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter), offset, count);
+					if (haveValueSetVersion) {
+						return dao.expandByIdentifier(theUrl.getValue(), theValueSetVersion.getValue(), toFilterString(theFilter), offset, count);
+					} else {
+						return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter), offset, count);
+					}
 				} else {
 					return dao.expand(theValueSet, toFilterString(theFilter), offset, count);
 				}
@@ -99,7 +105,11 @@ public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<Val
 				if (haveId) {
 					return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
 				} else if (haveIdentifier) {
-					return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter));
+					if (haveValueSetVersion) {
+						return dao.expandByIdentifier(theUrl.getValue(), theValueSetVersion.getValue(), toFilterString(theFilter));
+					} else {
+						return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter));
+					}
 				} else {
 					return dao.expand(theValueSet, toFilterString(theFilter));
 				}

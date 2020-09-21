@@ -73,12 +73,15 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
+	public void includeConceptWithDesignations(String theSystem, String theSystemVersion, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
 		incrementConceptsCount();
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
 		contains.setSystem(theSystem);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
+		if (theSystemVersion != null) {
+			contains.setVersion(theSystemVersion);
+		}
 		if (theDesignations != null) {
 			for (TermConceptDesignation termConceptDesignation : theDesignations) {
 				contains
@@ -91,6 +94,21 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 					.setDisplay(termConceptDesignation.getUseDisplay());
 			}
 		}
+	}
+
+	@Override
+	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
+		this.includeConceptWithDesignations(theSystem, null, theCode, theDisplay, theDesignations);
+	}
+
+	@Override
+	public void excludeConcept(String theSystem, String theSystemVersion, String theCode) {
+		this
+			.getContains()
+			.removeIf(t ->
+				theSystem.equals(t.getSystem()) &&
+					theCode.equals(t.getCode()) &&
+					theSystemVersion.equals(t.getVersion()));
 	}
 
 	@Override

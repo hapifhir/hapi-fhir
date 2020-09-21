@@ -351,32 +351,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		// Grab the existing version so we can delete it
-		TermCodeSystem existingCodeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
-		TermCodeSystemVersion existing = null;
-		if (existingCodeSystem != null) {
-			existing = getExistingTermCodeSystemVersion(existingCodeSystem.getPid(), theSystemVersionId);
-		}
-
-		/*
-		 * Get CodeSystem and validate CodeSystemVersion
-		 */
-		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId, theCodeSystemResourceTable);
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
 
 		/*
 		 * Delete version being replaced.
 		 */
 
-		if(existing != null) {
-			ourLog.info("Deleting old code system version {}", existing.getPid());
-			Long codeSystemVersionPid = existing.getPid();
+		for (TermCodeSystemVersion next : existing) {
+			ourLog.info("Deleting old code system version {}", next.getPid());
+			Long codeSystemVersionPid = next.getPid();
 			deleteCodeSystemVersion(codeSystemVersionPid);
-
 		}
 
 		/*
 		 * Do the upload
 		 */
 
+		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId, theCodeSystemResourceTable);
 		theCodeSystemVersion.setCodeSystem(codeSystem);
 
 		theCodeSystemVersion.setCodeSystemDisplayName(theSystemName);
@@ -687,13 +678,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}
+		} else {
+			checkForCodeSystemVersionDuplicate(codeSystem, theSystemUri, theSystemVersionId, theCodeSystemResourceTable);
 		}
 
 		codeSystem.setResource(theCodeSystemResourceTable);
 		codeSystem.setCodeSystemUri(theSystemUri);
 		codeSystem.setName(theSystemName);
 		codeSystem = myCodeSystemDao.save(codeSystem);
-		checkForCodeSystemVersionDuplicate(codeSystem,theSystemUri, theSystemVersionId, theCodeSystemResourceTable);
 		return codeSystem;
 	}
 
@@ -711,13 +703,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCodeSystem.getPid(), theSystemVersionId);
 			if (codeSystemVersionEntity != null) {
 				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrlAndVersion", theSystemUri,	theSystemVersionId, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-			} else {
-				// Check if a TermCodeSystemVersion entity already exists for this CodeSystem resource (i.e. with a different version or URL)
-				codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourceTable.getId());
-				if (codeSystemVersionEntity != null) {
-					msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotUpdateUrlOrVersionForCodeSystemResource", codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue(), theSystemUri, theSystemVersionId);
-					throw new UnprocessableEntityException(msg);
-				}
 			}
 		}
 		// Throw exception if the TermCodeSystemVersion is being duplicated.
