@@ -65,9 +65,6 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		boolean newJoin = false;
 
 		Map<String, From<?, ResourceIndexedSearchParamDate>> joinMap = myQueryStack.getJoinMap();
-		if (joinMap == null) {
-			joinMap = new HashMap<>();
-		}
 		String key = theResourceName + " " + paramName;
 
 		From<?, ResourceIndexedSearchParamDate> join = joinMap.get(key);
