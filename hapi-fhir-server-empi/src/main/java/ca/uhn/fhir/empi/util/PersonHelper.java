@@ -268,7 +268,7 @@ public class PersonHelper {
 				if (theAllowOverwriting || person.getName().isEmpty()) {
 					person.setName(patient.getName());
 				}
-				if (theAllowOverwriting || person.getName().isEmpty()) {
+				if (theAllowOverwriting || person.getAddress().isEmpty()) {
 					person.setAddress(patient.getAddress());
 				}
 				if (theAllowOverwriting || person.getTelecom().isEmpty()) {
