@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -127,6 +128,12 @@ public abstract class BaseStorageDao {
 
 	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
+
+		if (theEntity instanceof ResourceTable) {
+			if (((ResourceTable) theEntity).isUnchangedInCurrentOperation()) {
+				outcome.setNop(true);
+			}
+		}
 
 		IIdType id = null;
 		if (theResource.getIdElement().getValue() != null) {

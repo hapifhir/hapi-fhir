@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -35,7 +36,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -209,19 +209,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 			for (IBaseResource next : resources) {
 
-				List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(next, "status", IPrimitiveType.class);
-				if (statusTypes.size() > 0) {
-					if (statusTypes.get(0).getValueAsString().equals("active")) {
-
-						try {
-							next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
-							create(next, theOutcome);
-						} catch (Exception e) {
-							ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
-							throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e.toString()), e);
-						}
-
-					}
+				try {
+					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
+					create(next, theOutcome);
+				} catch (Exception e) {
+					ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
+					throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e.toString()), e);
 				}
 
 			}
@@ -330,10 +323,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			} else {
 
 				ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
-				theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
-				theResource.setId(searchResult.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless());
-				dao.update(theResource);
-
+				theResource.setId(searchResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+				DaoMethodOutcome outcome = dao.update(theResource);
+				if (!outcome.isNop()) {
+					theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
+				}
 			}
 
 		}
@@ -354,6 +348,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			}
 
 			if (SearchParameterUtil.getBaseAsStrings(myFhirContext, theResource).isEmpty()) {
+				return false;
+			}
+		}
+
+		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
+		if (statusTypes.size() > 0) {
+			if (!statusTypes.get(0).getValueAsString().equals("active")) {
 				return false;
 			}
 		}

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2099
+title: "Stored SearchParameter resources with a status of DRAFT will no longer override and disable existing built-in
+   search parameters. This is done in order to avoid issues caused by uploading NPM packages such as US Core that
+   contain a large number of draft parameters."
