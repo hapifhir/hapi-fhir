@@ -5,11 +5,26 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -27,7 +42,8 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceOperationComponent;
@@ -35,10 +51,18 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement.SystemRestfulInteraction;
 import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -49,6 +73,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -65,8 +90,12 @@ import static org.mockito.Mockito.when;
 
 public class ServerCapabilityStatementProviderR4Test {
 
-	private static FhirContext ourCtx;
+	public static final String PATIENT_SUB = "PatientSub";
+	public static final String PATIENT_SUB_SUB = "PatientSubSub";
+	public static final String PATIENT_SUB_SUB_2 = "PatientSubSub2";
+	public static final String PATIENT_TRIPLE_SUB = "PatientTripleSub";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProviderR4Test.class);
+	private static FhirContext ourCtx;
 	private static FhirValidator ourValidator;
 
 	static {
@@ -259,7 +288,9 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertNull(res.getConditionalUpdateElement().getValue());
 	}
 
-	/** See #379 */
+	/**
+	 * See #379
+	 */
 	@Test
 	public void testOperationAcrossMultipleTypes() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -513,10 +544,10 @@ public class ServerCapabilityStatementProviderR4Test {
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
-					SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-					SearchParameter param = (SearchParameter) binding.getParameters().get(25);
-					assertEquals("The organization at which this person is a patient", param.getDescription());
-					found = true;
+				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
+				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
+				assertEquals("The organization at which this person is a patient", param.getDescription());
+				found = true;
 			}
 		}
 		assertTrue(found);
@@ -569,7 +600,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	@Test
 	public void testSearchReferenceParameterWithList() throws Exception {
 
-		RestfulServer rsNoType = new RestfulServer(ourCtx){
+		RestfulServer rsNoType = new RestfulServer(ourCtx) {
 			@Override
 			public RestfulServerConfiguration createConfiguration() {
 				RestfulServerConfiguration retVal = super.createConfiguration();
@@ -586,7 +617,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		String confNoType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(confNoType);
 
-		RestfulServer rsWithType = new RestfulServer(ourCtx){
+		RestfulServer rsWithType = new RestfulServer(ourCtx) {
 			@Override
 			public RestfulServerConfiguration createConfiguration() {
 				RestfulServerConfiguration retVal = super.createConfiguration();
@@ -643,6 +674,46 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
 		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
+	}
+
+	@Test
+	public void testStaticIncludeChains() throws Exception {
+
+		class MyProvider implements IResourceProvider {
+
+			@Override
+			public Class<DiagnosticReport> getResourceType() {
+				return DiagnosticReport.class;
+			}
+
+			@Search
+			public List<IBaseResource> search(@RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_FAMILY) StringParam lastName,
+														 @RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_GIVEN) StringParam firstName,
+														 @RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_BIRTHDATE) DateParam dob,
+														 @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam range) {
+				return null;
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new MyProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider() {
+		};
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement opDef = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
+		ourLog.info(conf);
+
+		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().get(0);
+		assertEquals("DiagnosticReport", resource.getType());
+		List<String> searchParamNames = resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
+		assertThat(searchParamNames, containsInAnyOrder("patient", "date"));
 	}
 
 	@Test
@@ -729,8 +800,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(param.getUse(), is(OperationParameterUse.IN));
 
 		CapabilityStatementRestResourceComponent patientResource = restComponent.getResource().stream()
-				.filter(r -> patientResourceName.equals(r.getType()))
-				.findAny().get();
+			.filter(r -> patientResourceName.equals(r.getType()))
+			.findAny().get();
 		assertThat("Named query parameters should not appear in the resource search params", patientResource.getSearchParam(), is(empty()));
 	}
 
@@ -761,26 +832,26 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(opDef.getType(), is(true));
 		assertThat(opDef.getInstance(), is(false));
 	}
-    
-    @Test
-    public void testProfiledResourceStructureDefinitionLinks() throws Exception {
-        RestfulServer rs = new RestfulServer(ourCtx);
-        rs.setResourceProviders(new ProfiledPatientProvider(), new MultipleProfilesPatientProvider());
 
-        ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
-        rs.setServerConformanceProvider(sc);
+	@Test
+	public void testProfiledResourceStructureDefinitionLinks() throws Exception {
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setResourceProviders(new ProfiledPatientProvider(), new MultipleProfilesPatientProvider());
 
-        rs.init(createServletConfig());
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+		rs.setServerConformanceProvider(sc);
 
-        CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-        ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		rs.init(createServletConfig());
 
-        List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
-        CapabilityStatementRestResourceComponent patientResource = resources.stream()
-            .filter(resource -> "Patient".equals(resource.getType()))
-            .findFirst().get();
-        assertThat(patientResource.getProfile(), containsString(PATIENT_SUB));
-    }
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getProfile(), containsString(PATIENT_SUB));
+	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
@@ -815,11 +886,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		ourLog.info("Outcome: {}", outcome);
 
 		assertTrue(result.isSuccessful(), outcome);
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@SuppressWarnings("unused")
@@ -866,7 +932,7 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		@Search(type = Patient.class)
 		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier,
-				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
+											@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
 			return null;
 		}
 
@@ -942,7 +1008,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	@SuppressWarnings("unused")
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
-		@Operation(name = "plain", idempotent = true, returnParameters = { @OperationParam(min = 1, max = 2, name = "out1", type = StringType.class) })
+		@Operation(name = "plain", idempotent = true, returnParameters = {@OperationParam(min = 1, max = 2, name = "out1", type = StringType.class)})
 		public IBundleProvider everything(HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
 													 @OperationParam(name = "end") DateType theEnd) {
 			return null;
@@ -972,8 +1038,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId,
-				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
-				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
+																						 @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+																						 @IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
 
@@ -1004,7 +1070,7 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		@Search(type = Patient.class)
 		public Patient findPatient2(
-				@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = { Patient.class }) ReferenceAndListParam theLink) {
+			@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = {Patient.class}) ReferenceAndListParam theLink) {
 			return null;
 		}
 
@@ -1014,21 +1080,20 @@ public class ServerCapabilityStatementProviderR4Test {
 	public static class SearchProviderWithWhitelist {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = { "foo",
-				"bar" }) ReferenceAndListParam theIdentifier) {
+		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = {"foo",
+			"bar"}) ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
 	}
 
 	@SuppressWarnings("unused")
-	public static class SearchProviderWithListNoType  implements IResourceProvider {
+	public static class SearchProviderWithListNoType implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
-
 
 
 		@Search()
@@ -1039,7 +1104,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	}
 
 	@SuppressWarnings("unused")
-	public static class SearchProviderWithListWithType  implements IResourceProvider {
+	public static class SearchProviderWithListWithType implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -1047,15 +1112,13 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 
 
-
-		@Search(type=Patient.class)
+		@Search(type = Patient.class)
 		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
 	}
 
-	
 	public static class SystemHistoryProvider {
 
 		@History
@@ -1093,7 +1156,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 
 	}
-  
+
 	public static class TypeLevelOperationProvider implements IResourceProvider {
 
 		public static final String OPERATION_NAME = "op";
@@ -1139,49 +1202,53 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 
 	}
-    
-    public static class ProfiledPatientProvider implements IResourceProvider {
 
-    @Override
-    public Class<? extends IBaseResource> getResourceType() {
-      return PatientSubSub2.class;
-    }
-    
-    @Search
-    public List<PatientSubSub2> find() {
-      return null;
-    }
-  }
-  
-  public static class MultipleProfilesPatientProvider implements IResourceProvider {
+	public static class ProfiledPatientProvider implements IResourceProvider {
 
-    @Override
-    public Class<? extends IBaseResource> getResourceType() {
-      return PatientSubSub.class;
-    }
-    
-    @Read(type = PatientTripleSub.class)
-    public PatientTripleSub read(@IdParam IdType theId) {
-      return null;
-    }
-    
-  }
-  
-  public static final String PATIENT_SUB = "PatientSub";
-  public static final String PATIENT_SUB_SUB = "PatientSubSub";
-  public static final String PATIENT_SUB_SUB_2 = "PatientSubSub2";
-  public static final String PATIENT_TRIPLE_SUB = "PatientTripleSub";
-  
-  @ResourceDef(id = PATIENT_SUB)
-  public static class PatientSub extends Patient {}
-  
-  @ResourceDef(id = PATIENT_SUB_SUB)
-  public static class PatientSubSub extends PatientSub {}
-  
-  @ResourceDef(id = PATIENT_SUB_SUB_2)
-  public static class PatientSubSub2 extends PatientSub {}
-  
-  @ResourceDef(id = PATIENT_TRIPLE_SUB)
-  public static class PatientTripleSub extends PatientSubSub {}
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return PatientSubSub2.class;
+		}
+
+		@Search
+		public List<PatientSubSub2> find() {
+			return null;
+		}
+	}
+
+	public static class MultipleProfilesPatientProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return PatientSubSub.class;
+		}
+
+		@Read(type = PatientTripleSub.class)
+		public PatientTripleSub read(@IdParam IdType theId) {
+			return null;
+		}
+
+	}
+
+	@ResourceDef(id = PATIENT_SUB)
+	public static class PatientSub extends Patient {
+	}
+
+	@ResourceDef(id = PATIENT_SUB_SUB)
+	public static class PatientSubSub extends PatientSub {
+	}
+
+	@ResourceDef(id = PATIENT_SUB_SUB_2)
+	public static class PatientSubSub2 extends PatientSub {
+	}
+
+	@ResourceDef(id = PATIENT_TRIPLE_SUB)
+	public static class PatientTripleSub extends PatientSubSub {
+	}
+
+	@AfterAll
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 }
