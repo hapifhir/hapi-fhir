@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
@@ -8,6 +10,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,8 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
@@ -228,5 +233,26 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
+	@Test
+	public void unsupportedMethodsThrowException() {
+		IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> testFhirResourceDaoValueSet = new FhirResourceDaoValueSetDstu2();
+		// Multi-version lookupCode method
+		try {
+			testFhirResourceDaoValueSet.lookupCode(null, null, null, null, null);
+			fail();
+		} catch (UnsupportedOperationException theE) {
+			// Success
+		}
+
+		// Multi-version subsumes method
+		try {
+			testFhirResourceDaoValueSet.subsumes(null, null, null, null, null, null, null);
+			fail();
+		} catch (UnsupportedOperationException theE) {
+			// Success
+		}
+
+
+	}
 
 }

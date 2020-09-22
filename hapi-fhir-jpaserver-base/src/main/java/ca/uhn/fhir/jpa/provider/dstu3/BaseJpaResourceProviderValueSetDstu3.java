@@ -46,7 +46,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		// Note: url is correct and identifier is not, but identifier was only added as
 		// of 3.1.0 so we'll leave url for now. See: https://groups.google.com/d/msgid/hapi-fhir/CAN2Cfy8kW%2BAOkgC6VjPsU3gRCpExCNZBmJdi-k5R_TWeyWH4tA%40mail.gmail.com?utm_medium=email&utm_source=footer
 		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
-		@OperationParam(name = "valueSetVersion", min = 0, max = 1) org.hl7.fhir.r4.model.StringType theValueSetVersion,
+		@OperationParam(name = "valueSetVersion", min = 0, max = 1) StringType theValueSetVersion,
 		@OperationParam(name = "identifier", min = 0, max = 1) UriType theIdentifier,
 		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
 		@OperationParam(name = "offset", min = 0, max = 1) IntegerType theOffset,

@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -217,6 +218,29 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 		}
 
 	}
+
+	@Test
+	public void testExpandWithNoResultsInLocalValueSet() {
+		Set<String> valueSetConcepts = new HashSet<>();
+		valueSetConcepts.add("hello");
+		valueSetConcepts.add("goodbye");
+
+		createLocalCsAndVs("1", valueSetConcepts);
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM + "AA");
+		include.setVersion("1");
+		include.addConcept().setCode("A");
+
+		try {
+			myValueSetDao.expand(vs, null);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertEquals("Unknown CodeSystem URI \"http://example.com/my_code_systemAA\" referenced from ValueSet", e.getMessage());
+		}
+	}
+
 
 
 }

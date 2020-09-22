@@ -190,24 +190,6 @@ public interface IValidationSupport {
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theOptions               Provides options controlling the validation
-	 * @param theCodeSystem            The code system, e.g. "<code>http://loinc.org</code>"
-	 * @param theCode                  The code, e.g. "<code>1234-5</code>"
-	 * @param theDisplay               The display name, if it should also be validated
-	 * @param theSystemVersion         The code system version.
-	 * @return Returns a validation result object
-	 */
-	default CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, String theSystemVersion) {
-		return null;
-	}
-
-	/**
-	 * Validates that the given code exists and if possible returns a display
-	 * name. This method is called to check codes which are found in "example"
-	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
-	 *
-	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theCodeSystem            The code system, e.g. "<code>http://loinc.org</code>"
 	 * @param theCode                  The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay               The display name, if it should also be validated

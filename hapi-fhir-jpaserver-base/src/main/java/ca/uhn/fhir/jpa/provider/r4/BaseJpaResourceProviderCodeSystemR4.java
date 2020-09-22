@@ -63,7 +63,12 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-			IValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theVersion, theRequestDetails);
+			IValidationSupport.LookupCodeResult result;
+			if (theVersion != null) {
+				result = dao.lookupCode(theCode, theSystem, theCoding, theVersion, theRequestDetails);
+			} else {
+				result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+			}
 			result.throwNotFoundIfAppropriate();
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
 		} finally {
@@ -92,7 +97,12 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-			IFhirResourceDaoCodeSystem.SubsumesResult result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theVersion, theRequestDetails);
+			IFhirResourceDaoCodeSystem.SubsumesResult result;
+			if (theVersion != null || (theCodingA != null && theCodingA.hasVersion()) || (theCodingB != null &&theCodingB.hasVersion())) {
+				result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theVersion, theRequestDetails);
+			} else {
+				result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theRequestDetails);
+			}
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext());
 		} finally {
 			endRequest(theServletRequest);

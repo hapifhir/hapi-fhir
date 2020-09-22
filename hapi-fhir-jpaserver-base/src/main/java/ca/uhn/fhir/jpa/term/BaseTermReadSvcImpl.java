@@ -250,7 +250,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		String code = theConcept.getCode();
 		String display = theConcept.getDisplay();
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
-		addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, theCodeCounter, codeSystem, codeSystemVersion, code, display);
+		if (StringUtils.isNotEmpty(codeSystemVersion)) {
+			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, theCodeCounter, codeSystem, codeSystemVersion, code, display);
+		} else {
+			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, theCodeCounter, codeSystem, code, display);
+		}
 	}
 
 	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, Collection<TermConceptDesignation> theDesignations, boolean theAdd, AtomicInteger theCodeCounter, String theCodeSystem, String theCodeSystemVersion, String theCode, String theDisplay) {
@@ -771,7 +775,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 							// This will happen if we're expanding against a built-in (part of FHIR) ValueSet that
 							// isn't actually in the database anywhere
 							Collection<TermConceptDesignation> emptyCollection = Collections.emptyList();
-							addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, emptyCollection, theAdd, theCodeCounter, nextConcept.getSystem(), nextConcept.getCode(), nextConcept.getDisplay());
+							addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, emptyCollection, theAdd, theCodeCounter, nextConcept.getSystem(), nextConcept.getSystemVersion(), nextConcept.getCode(), nextConcept.getDisplay());
 						}
 					}
 					if (isNoneBlank(nextConcept.getSystem(), nextConcept.getCode()) && !theAdd && theAddedCodes.remove(nextConcept.getSystem() + "|" + nextConcept.getCode())) {
@@ -1251,7 +1255,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		if (theInclude.getConcept().isEmpty()) {
 			for (TermConcept next : theVersion.getConcepts()) {
-				addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, next.getCode(), next.getDisplay());
+				addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, theVersion.getCodeSystemVersionId(), next.getCode(), next.getDisplay());
 			}
 		}
 
@@ -1259,7 +1263,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			if (!theSystem.equals(theInclude.getSystem()) && isNotBlank(theSystem)) {
 				continue;
 			}
-			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, next.getCode(), next.getDisplay());
+			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, theVersion.getCodeSystemVersionId(), next.getCode(), next.getDisplay());
 		}
 
 
@@ -1862,6 +1866,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 
 	@Override
+	@Transactional
 	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,
 		IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
 		return subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, null, null, null);
@@ -2242,7 +2247,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-		public CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem) {
+	public CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem) {
 		IValidationSupport validationSupport = provideValidationSupport();
 		IBaseResource codeSystem = validationSupport.fetchCodeSystem(theSystem);
 		if (codeSystem != null) {
@@ -2463,21 +2468,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return new VersionIndependentConcept(system, code, null, systemVersion);
 	}
 
-/*	private static class VersionIndependentConceptWithSystemVersion extends VersionIndependentConcept {
-
-		String myCodeSystemVersion;
-
-		public VersionIndependentConceptWithSystemVersion(String theSystem, String theCode, String theSystemVersion) {
-			super(theSystem, theCode);
-			myCodeSystemVersion = theSystemVersion;
-		}
-
-		public String getCodeSystemVersion() {
-			return myCodeSystemVersion;
-		}
-
-	}
-*/
 	/**
 	 * This method is present only for unit tests, do not call from client code
 	 */

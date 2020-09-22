@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -13,31 +13,22 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
-import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
+import org.hl7.fhir.dstu3.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -50,8 +41,8 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Optional;
 
-import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
-import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
+import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM;
+import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_VALUE_SET;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -63,9 +54,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProviderR4Test {
+public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetVersionedTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3ValueSetVersionedTest.class);
 	private IIdType myExtensionalCsId_v1;
 	private IIdType myExtensionalCsId_v2;
 	private IIdType myExtensionalVsId_v1;
@@ -110,7 +101,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 		theCodeSystem.setId("CodeSystem/cs2");
 		theCodeSystem.setVersion("2");
-		for(CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent : theCodeSystem.getConcept()) {
+		for(ConceptDefinitionComponent conceptDefinitionComponent : theCodeSystem.getConcept()) {
 			conceptDefinitionComponent.setDisplay(conceptDefinitionComponent.getDisplay() + " v2");
 		}
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -275,7 +266,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		loadAndPersistCodeSystemAndValueSet();
 
 		// Test with v1 of ValueSet
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v1)
 			.named("expand")
@@ -300,7 +291,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertThat(resp, containsString("</expansion>"));
 
 		// Test with v2 of ValueSet
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v2)
 			.named("expand")
@@ -336,7 +327,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertEquals(2, page.getContent().size());
 
 		// Verify v1 ValueSet
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v1)
 			.named("expand")
@@ -361,7 +352,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertThat(resp, containsString("</expansion>"));
 
 		// Verify v2 ValueSet
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v2)
 			.named("expand")
@@ -392,7 +383,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		loadAndPersistCodeSystemAndValueSet();
 
 		// Verify ValueSet v1
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v1)
 			.named("expand")
@@ -406,7 +397,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
 
 		// Verify ValueSet v2
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v2)
 			.named("expand")
@@ -432,7 +423,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertEquals(2, page.getContent().size());
 
 		// Validate ValueSet v1
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v1)
 			.named("expand")
@@ -446,7 +437,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
 
 		// Validate ValueSet v2
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v2)
 			.named("expand")
@@ -466,7 +457,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		loadAndPersistCodeSystemAndValueSet();
 
 		// Check expansion of multi-versioned ValueSet with version 1
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -482,7 +473,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		// Check expansion of multi-versioned ValueSet with version set to null
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -498,7 +489,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 
 		// Check expansion of version 2
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -520,7 +511,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		loadAndPersistCodeSystemAndValueSet();
 
 		try {
-			myClient
+			ourClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -544,7 +535,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertEquals(2, page.getContent().size());
 
 		// Check expansion of multi-versioned ValueSet with version 1
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -560,7 +551,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		// Check expansion of multi-versioned ValueSet with version set to null
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -576,7 +567,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 
 		// Check expansion of version 2
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -601,7 +592,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		try {
-			myClient
+			ourClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -621,7 +612,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		// Test with no version specified
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -641,7 +632,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		toExpand.setId("ValueSet/vs1");
 		toExpand.getCompose().getInclude().get(0).setVersion("1");
 
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -662,7 +653,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		toExpand.setId("ValueSet/vs2");
 		toExpand.getCompose().getInclude().get(0).setVersion("2");
 
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -690,7 +681,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		// Test with no version specified
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -710,7 +701,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		toExpand.setId("ValueSet/vs1");
 		toExpand.getCompose().getInclude().get(0).setVersion("1");
 
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -731,7 +722,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		toExpand.setId("ValueSet/vs2");
 		toExpand.getCompose().getInclude().get(0).setVersion("2");
 
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -757,7 +748,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertNotNull(myLocalVs_v2);
 
 		myLocalVs_v1.setId("");
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -773,7 +764,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A1\"/>")));
 
 		myLocalVs_v2.setId("");
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -797,7 +788,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertNotNull(myLocalValueSetId_v2);
 
 		// Validate ValueSet v1
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myLocalValueSetId_v1)
 			.named("expand")
@@ -813,7 +804,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A1\"/>")));
 
 		// Validate ValueSet v2
-		respParam = myClient
+		respParam = ourClient
 			.operation()
 			.onInstance(myLocalValueSetId_v2)
 			.named("expand")
@@ -836,7 +827,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		assertNotNull(myLocalValueSetId_v1);
 		assertNotNull(myLocalValueSetId_v2);
 
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -865,15 +856,15 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		cs.setUrl("http://foo1");
 		cs.setVersion("1");
 		cs.addConcept().setCode("foo1").setDisplay("foo1");
-		myClient.update().resource(cs).execute();
+		ourClient.update().resource(cs).execute();
 
 		ValueSet vs = new ValueSet();
 		vs.setId("ValueSet/VS179789");
 		vs.setUrl("http://bar");
 		vs.getCompose().addInclude().setSystem("http://foo1").setVersion("1").addConcept().setCode("foo1");
-		myClient.update().resource(vs).execute();
+		ourClient.update().resource(vs).execute();
 
-		ValueSet expanded = myClient
+		ValueSet expanded = ourClient
 			.operation()
 			.onInstance(new IdType("ValueSet/VS179789"))
 			.named("$expand")
@@ -890,15 +881,15 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		cs.setUrl("http://foo2");
 		cs.setVersion("2");
 		cs.addConcept().setCode("foo2").setDisplay("foo2");
-		myClient.update().resource(cs).execute();
+		ourClient.update().resource(cs).execute();
 
 		vs = new ValueSet();
 		vs.setId("ValueSet/VS179789");
 		vs.setUrl("http://bar");
 		vs.getCompose().addInclude().setSystem("http://foo2").setVersion("2").addConcept().setCode("foo2");
-		myClient.update().resource(vs).execute();
+		ourClient.update().resource(vs).execute();
 
-		expanded = myClient
+		expanded = ourClient
 			.operation()
 			.onInstance(new IdType("ValueSet/VS179789"))
 			.named("$expand")
@@ -985,7 +976,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		ValueSet updatedValueSet_v1 = valueSet_v1;
 		updatedValueSet_v1.setName(valueSet_v1.getName().concat(" - MODIFIED"));
 
-		String url = myClient.getServerBase().concat("/").concat(myExtensionalVsId_v1.getValueAsString());
+		String url = ourClient.getServerBase().concat("/").concat(myExtensionalVsId_v1.getValueAsString());
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle
@@ -996,7 +987,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 			.setMethod(Bundle.HTTPVerb.PUT)
 			.setUrl(url);
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		myClient.transaction().withBundle(bundle).execute();
+		ourClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
 		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
@@ -1007,7 +998,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		ValueSet updatedValueSet_v2 = valueSet_v2;
 		updatedValueSet_v2.setName(valueSet_v2.getName().concat(" - MODIFIED"));
 
-		url = myClient.getServerBase().concat("/").concat(myExtensionalVsId_v2.getValueAsString());
+		url = ourClient.getServerBase().concat("/").concat(myExtensionalVsId_v2.getValueAsString());
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle
@@ -1018,7 +1009,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 			.setMethod(Bundle.HTTPVerb.PUT)
 			.setUrl(url);
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		myClient.transaction().withBundle(bundle).execute();
+		ourClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
 		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
@@ -1200,7 +1191,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 	public void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v1)
 			.named("validate-code")
@@ -1262,7 +1253,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 	public void testValidateCodeOperationByCodeAndSystemType() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v1)
 			.named("validate-code")
@@ -1281,7 +1272,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		loadAndPersistCodeSystemAndValueSet();
 
 		try {
-			myClient
+			ourClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("validate-code")
