@@ -208,13 +208,22 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			count[i] = resources.size();
 
 			for (IBaseResource next : resources) {
-				try {
-					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
-					create(next, theOutcome);
-				} catch (Exception e) {
-					ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
-					throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e.toString()), e);
+
+				List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(next, "status", IPrimitiveType.class);
+				if (statusTypes.size() > 0) {
+					if (statusTypes.get(0).getValueAsString().equals("active")) {
+
+						try {
+							next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
+							create(next, theOutcome);
+						} catch (Exception e) {
+							ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
+							throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e.toString()), e);
+						}
+
+					}
 				}
+
 			}
 
 		}

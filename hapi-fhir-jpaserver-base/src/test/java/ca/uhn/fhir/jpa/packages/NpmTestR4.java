@@ -49,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -113,6 +114,20 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		jpaPackageCache.addPackageServer("https://packages.fhir.org");
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.us.core").setVersion("3.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(true);
+		igInstaller.install(spec);
+
+		runInTransaction(()->{
+			SearchParameterMap map = SearchParameterMap.newSynchronous(SearchParameter.SP_BASE, new TokenParam("NamingSystem"));
+			IBundleProvider outcome = mySearchParameterDao.search(map);
+			List<IBaseResource> resources = outcome.getResources(0, outcome.sizeOrThrowNpe());
+			for (int i = 0; i < resources.size(); i++) {
+				ourLog.info("**************************************************************************");
+				ourLog.info("**************************************************************************");
+				ourLog.info("Res " + i);
+				ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(i)));
+			}
+		});
+
 		igInstaller.install(spec);
 	}
 
