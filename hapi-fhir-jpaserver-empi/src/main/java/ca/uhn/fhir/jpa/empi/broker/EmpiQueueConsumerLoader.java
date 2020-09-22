@@ -53,11 +53,12 @@ public class EmpiQueueConsumerLoader {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
 			config.setConcurrentConsumers(myEmpiSettings.getConcurrentConsumers());
 			myEmpiChannel = myChannelFactory.getOrCreateReceiver(IEmpiSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
-		}
-
-		if (myEmpiChannel != null) {
-			myEmpiChannel.subscribe(myEmpiMessageHandler);
-			ourLog.info("EMPI Matching Consumer subscribed to Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), myEmpiChannel.getName());
+			if (myEmpiChannel == null) {
+				ourLog.error("Unable to create receiver for {}", IEmpiSettings.EMPI_CHANNEL_NAME);
+			} else {
+				myEmpiChannel.subscribe(myEmpiMessageHandler);
+				ourLog.info("EMPI Matching Consumer subscribed to Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), myEmpiChannel.getName());
+			}
 		}
 	}
 
@@ -66,6 +67,7 @@ public class EmpiQueueConsumerLoader {
 	public void stop() {
 		if (myEmpiChannel != null) {
 			myEmpiChannel.unsubscribe(myEmpiMessageHandler);
+			ourLog.info("EMPI Matching Consumer unsubscribed from Matching Channel {} with name {}", myEmpiChannel.getClass().getName(), myEmpiChannel.getName());
 		}
 	}
 

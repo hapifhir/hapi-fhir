@@ -20,6 +20,8 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
  * This data object captures the final outcome of an EMPI match
  */
@@ -101,5 +103,16 @@ public final class EmpiMatchOutcome {
 	public EmpiMatchOutcome setEidMatch(boolean theEidMatch) {
 		myEidMatch = theEidMatch;
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("vector", vector)
+			.append("score", score)
+			.append("myNewPerson", myNewPerson)
+			.append("myEidMatch", myEidMatch)
+			.append("myMatchResultEnum", myMatchResultEnum)
+			.toString();
 	}
 }

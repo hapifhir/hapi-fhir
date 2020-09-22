@@ -60,11 +60,11 @@ public class EmpiRulesJsonR4Test extends BaseEmpiRulesR4Test {
 	public void getVector() {
 		VectorMatchResultMap vectorMatchResultMap = myRules.getVectorMatchResultMapForUnitTest();
 		assertEquals(1, vectorMatchResultMap.getVector(PATIENT_GIVEN));
-		assertEquals(2, vectorMatchResultMap.getVector(PATIENT_LAST));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_LAST)));
+		assertEquals(2, vectorMatchResultMap.getVector(PATIENT_FAMILY));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_FAMILY)));
 		try {
 			vectorMatchResultMap.getVector("bad");
 			fail();

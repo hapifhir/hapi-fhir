@@ -6,11 +6,33 @@ import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringMatcherR4Test extends BaseMatcherR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(StringMatcherR4Test.class);
+
+	@Test
+	public void testNamadega() {
+		assertTrue(match(EmpiMatcherEnum.COLOGNE, new StringType("namadega"), new StringType("namaedga")));
+		assertTrue(match(EmpiMatcherEnum.DOUBLE_METAPHONE, new StringType("namadega"), new StringType("namaedga")));
+		assertTrue(match(EmpiMatcherEnum.MATCH_RATING_APPROACH, new StringType("namadega"), new StringType("namaedga")));
+		assertTrue(match(EmpiMatcherEnum.METAPHONE, new StringType("namadega"), new StringType("namaedga")));
+		assertTrue(match(EmpiMatcherEnum.SOUNDEX, new StringType("namadega"), new StringType("namaedga")));
+		assertTrue(match(EmpiMatcherEnum.METAPHONE, new StringType("namadega"), new StringType("namaedga")));
+		assertTrue(match(EmpiMatcherEnum.METAPHONE, new StringType("namadega"), new StringType("namaedga")));
+		assertTrue(match(EmpiMatcherEnum.METAPHONE, new StringType("namadega"), new StringType("namaedga")));
+
+		assertFalse(match(EmpiMatcherEnum.CAVERPHONE1, new StringType("namadega"), new StringType("namaedga")));
+		assertFalse(match(EmpiMatcherEnum.CAVERPHONE2, new StringType("namadega"), new StringType("namaedga")));
+		assertFalse(match(EmpiMatcherEnum.NYSIIS, new StringType("namadega"), new StringType("namaedga")));
+		assertFalse(match(EmpiMatcherEnum.REFINED_SOUNDEX, new StringType("namadega"), new StringType("namaedga")));
+		assertFalse(match(EmpiMatcherEnum.STRING, new StringType("namadega"), new StringType("namaedga")));
+		assertFalse(match(EmpiMatcherEnum.SUBSTRING, new StringType("namadega"), new StringType("namaedga")));
+	}
 
 	@Test
 	public void testMetaphone() {

@@ -28,8 +28,9 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,14 +56,17 @@ public class EmpiPersonDeletingSvc {
 	 * Function which will delete all resources by their PIDs, and also delete any resources that were undeletable due to
 	 * VersionConflictException
 	 *
-	 * @param theLongs
+	 * @param theResourcePids
 	 */
 	@Transactional
-	public void deletePersonResourcesAndHandleConflicts(List<Long> theLongs) {
-		ourLog.info("Deleting {} Person resources...", theLongs.size());
+	public void deletePersonResourcesAndHandleConflicts(List<Long> theResourcePids) {
+		List<ResourcePersistentId> resourceIds = ResourcePersistentId.fromLongList(theResourcePids);
+		ourLog.info("Deleting {} Person resources...", resourceIds.size());
 		DeleteConflictList
 			deleteConflictList = new DeleteConflictList();
-		theLongs.stream().forEach(pid -> deleteCascade(pid, deleteConflictList));
+
+		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao("Person");
+		resourceDao.deletePidList(ProviderConstants.EMPI_CLEAR, resourceIds, deleteConflictList, null);
 
 		IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
 		int batchCount = 0;
@@ -73,7 +77,7 @@ public class EmpiPersonDeletingSvc {
 				throw new IllegalStateException("Person deletion seems to have entered an infinite loop. Aborting");
 			}
 		}
-		ourLog.info("Deleted {} Person resources in {} batches", theLongs.size(), batchCount);
+		ourLog.info("Deleted {} Person resources in {} batches", resourceIds.size(), batchCount);
 	}
 
 	/**
@@ -87,12 +91,6 @@ public class EmpiPersonDeletingSvc {
 		theLongs
 			.forEach(personId -> myExpungeService.expunge("Person", personId, null, options, null));
 		ourLog.info("Expunged historical versions of {} Person resources", theLongs.size());
-	}
-
-	private void deleteCascade(Long pid, DeleteConflictList theDeleteConflictList) {
-		ourLog.trace("About to cascade delete: Person/{}", pid);
-		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao("Person");
-		resourceDao.delete(new IdType("Person/" + pid), theDeleteConflictList, null, null);
 	}
 
 	private void deleteConflictBatch(DeleteConflictList theDcl, IFhirResourceDao<IBaseResource> theDao) {
