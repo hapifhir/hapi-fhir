@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2099
+title: "When using an NPM package spec in STORE_AND_INSTALL mode, conformance resources will only be stored if they
+  have a status of `active`. This fixes a bug wgere installing the US Core IG caused searches to stop working due to
+  draft Search Parameters."
