@@ -121,7 +121,12 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		if (myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system)) {
 			ourLog.debug("Code system {} is supported", system);
-			IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code, codeSystemVersion);
+			IValidationSupport.LookupCodeResult result;
+			if (codeSystemVersion != null) {
+				result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code, codeSystemVersion);
+			} else {
+				result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code);
+			}
 			if (result != null) {
 				return result;
 			}
