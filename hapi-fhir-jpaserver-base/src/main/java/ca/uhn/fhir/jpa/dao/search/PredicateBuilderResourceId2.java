@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-import javax.persistence.criteria.Predicate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderResourceId2 extends BasePredicateBuilder {
+class PredicateBuilderResourceId2 extends BasePredicateBuilder2 {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderResourceId2.class);
 
 	@Autowired
@@ -57,7 +56,7 @@ class PredicateBuilderResourceId2 extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	Condition addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		Condition predicate = createPredicate(theResourceName, theValues, theOperation, theRequestPartitionId);
 
@@ -65,7 +64,7 @@ class PredicateBuilderResourceId2 extends BasePredicateBuilder {
 			getSqlBuilder().addPredicate(predicate);
 		}
 
-		return null;
+		return predicate;
 	}
 
 	@Nullable

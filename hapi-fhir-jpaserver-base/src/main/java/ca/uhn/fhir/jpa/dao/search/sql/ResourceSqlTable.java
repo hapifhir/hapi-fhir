@@ -8,6 +8,7 @@ public class ResourceSqlTable extends BaseIndexTable {
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnResDeletedAt;
 	private final DbColumn myColumnResType;
+	private final DbColumn myColumnLastUpdated;
 
 	/**
 	 * Constructor
@@ -17,6 +18,7 @@ public class ResourceSqlTable extends BaseIndexTable {
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnResType = getTable().addColumn("RES_TYPE");
 		myColumnResDeletedAt = getTable().addColumn("RES_DELETED_AT");
+		myColumnLastUpdated = getTable().addColumn("RES_UPDATED");
 	}
 
 
@@ -28,5 +30,9 @@ public class ResourceSqlTable extends BaseIndexTable {
 	public void addResourceTypeAndNonDeletedPredicates() {
 		addCondition(BinaryCondition.equalTo(myColumnResType, getResourceType()));
 		addCondition(UnaryCondition.isNull(myColumnResDeletedAt));
+	}
+
+	public DbColumn getLastUpdatedColumn() {
+		return myColumnLastUpdated;
 	}
 }

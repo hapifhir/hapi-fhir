@@ -4,6 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.Join;
@@ -16,9 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchSqlBuilder {
 
@@ -36,6 +45,7 @@ public class SearchSqlBuilder {
 	private final SqlBuilderFactory mySqlBuilderFactory;
 	private BaseIndexTable myCurrentIndexTable;
 	private boolean myMatchNothing;
+	private ResourceSqlTable myResourceTableRoot;
 
 	/**
 	 * Constructor
@@ -201,11 +211,19 @@ public class SearchSqlBuilder {
 	 */
 	public BaseIndexTable getOrCreateQueryRootTable() {
 		if (myCurrentIndexTable == null) {
-			ResourceSqlTable resourceTable = new ResourceSqlTable(this);
-			resourceTable.addResourceTypeAndNonDeletedPredicates();
-			addTable(resourceTable);
+			getOrCreateResourceTableRoot();
 		}
 		return myCurrentIndexTable;
+	}
+
+	private ResourceSqlTable getOrCreateResourceTableRoot() {
+		if (myResourceTableRoot == null) {
+			ResourceSqlTable resourceTable = mySqlBuilderFactory.resourceTable(this);
+			resourceTable.addResourceTypeAndNonDeletedPredicates();
+			addTable(resourceTable);
+			myResourceTableRoot = resourceTable;
+		}
+		return myResourceTableRoot;
 	}
 
 	/**
@@ -258,6 +276,39 @@ public class SearchSqlBuilder {
 
 	public void addPredicate(Condition theCondition) {
 		mySelect.addCondition(theCondition);
+	}
+
+	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
+		ResourceSqlTable resourceTableRoot = getOrCreateResourceTableRoot();
+
+		List<Condition> conditions = new ArrayList<>(2);
+		if (theDateRange.getLowerBoundAsInstant() != null) {
+			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			conditions.add(condition);
+		}
+
+		if (theDateRange.getUpperBoundAsInstant() != null) {
+			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+			conditions.add(condition);
+		}
+
+		return ComboCondition.and(conditions.toArray(new Condition[0]));
+	}
+
+
+	public BinaryCondition createConditionForValueWithComparator(ParamPrefixEnum theComparator, DbColumn theColumn, Object theValue) {
+		switch (theComparator) {
+			case LESSTHAN:
+				return BinaryCondition.lessThan(theColumn, generatePlaceholder(theValue));
+			case LESSTHAN_OR_EQUALS:
+				return BinaryCondition.lessThanOrEq(theColumn, generatePlaceholder(theValue));
+			case GREATERTHAN:
+				return BinaryCondition.greaterThan(theColumn, generatePlaceholder(theValue));
+			case GREATERTHAN_OR_EQUALS:
+				return BinaryCondition.greaterThanOrEq(theColumn, generatePlaceholder(theValue));
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 
 

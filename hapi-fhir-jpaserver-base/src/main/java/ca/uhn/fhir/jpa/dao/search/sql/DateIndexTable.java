@@ -44,18 +44,8 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 				throw new IllegalArgumentException();
 		}
 
-		switch (theComparator) {
-			case LESSTHAN:
-				return BinaryCondition.lessThan(column, theValue);
-			case LESSTHAN_OR_EQUALS:
-				return BinaryCondition.lessThanOrEq(column, theValue);
-			case GREATERTHAN:
-				return BinaryCondition.greaterThan(column, theValue);
-			case GREATERTHAN_OR_EQUALS:
-				return BinaryCondition.greaterThanOrEq(column, theValue);
-			default:
-				throw new IllegalArgumentException();
-		}
+		return createConditionForValueWithComparator(theComparator, column, theValue);
+
 	}
 
 

@@ -69,7 +69,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderToken2 extends BasePredicateBuilder implements IPredicateBuilder2 {
+class PredicateBuilderToken2 extends BasePredicateBuilder2 implements IPredicateBuilder2 {
 	private final PredicateBuilder2 myPredicateBuilder;
 	@Autowired
 	private ITermReadSvc myTerminologySvc;

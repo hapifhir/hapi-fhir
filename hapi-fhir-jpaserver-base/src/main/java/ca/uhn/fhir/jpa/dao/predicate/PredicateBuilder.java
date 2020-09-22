@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
@@ -188,4 +189,6 @@ public class PredicateBuilder {
 					" is not supported: " + theResourceName + "." + theParamDef.getName());
 		}
 	}
+
+
 }

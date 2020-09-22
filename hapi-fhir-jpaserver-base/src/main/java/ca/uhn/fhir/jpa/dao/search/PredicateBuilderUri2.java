@@ -23,16 +23,10 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
-import ca.uhn.fhir.jpa.dao.predicate.IPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.search.sql.UriIndexTable;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +35,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderUri2 extends BasePredicateBuilder implements IPredicateBuilder2 {
+class PredicateBuilderUri2 extends BasePredicateBuilder2 implements IPredicateBuilder2 {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderUri2.class);
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
