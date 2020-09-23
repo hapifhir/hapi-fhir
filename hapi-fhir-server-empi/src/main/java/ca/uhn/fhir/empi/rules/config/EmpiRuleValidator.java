@@ -109,8 +109,6 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 		}
 	}
 
-	// FIXME KHS search for references to metric
-
 	private void validateSimilarity(EmpiFieldMatchJson theFieldMatch, EmpiSimilarityJson theSimilarity) {
 		if (theSimilarity.getMatchThreshold() == null) {
 			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " similarity " + theSimilarity.getAlgorithm() + " requires a matchThreshold");

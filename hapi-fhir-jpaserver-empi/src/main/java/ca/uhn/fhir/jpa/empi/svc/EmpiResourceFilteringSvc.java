@@ -36,7 +36,7 @@ public class EmpiResourceFilteringSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
-	private IEmpiSettings empiSettings;
+	private IEmpiSettings myEmpiSettings;
 	@Autowired
 	EmpiSearchParamSvc myEmpiSearchParamSvc;
 	@Autowired
@@ -56,9 +56,8 @@ public class EmpiResourceFilteringSvc {
 	 */
 	public boolean shouldBeProcessed(IAnyResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		List<EmpiResourceSearchParamJson> candidateSearchParams = empiSettings.getEmpiRules().getCandidateSearchParams();
+		List<EmpiResourceSearchParamJson> candidateSearchParams = myEmpiSettings.getEmpiRules().getCandidateSearchParams();
 
-		// FIXME KHS add a test for this
 		if (candidateSearchParams.isEmpty()) {
 			return true;
 		}

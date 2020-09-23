@@ -25,8 +25,8 @@ import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**
- * Enum for holding all the known distance metrics that we support in HAPI for
- * calculating differences between strings (https://en.wikipedia.org/wiki/String_metric)
+ * Enum for holding all the known FHIR Element matchers that we support in HAPI.  The string matchers first
+ * encode the string using an Apache Encoder before comparing them.  https://commons.apache.org/proper/commons-codec/userguide.html
  */
 public enum EmpiMatcherEnum {
 	CAVERPHONE1(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE1))),
@@ -46,7 +46,6 @@ public enum EmpiMatcherEnum {
 	NAME_ANY_ORDER(new NameMatcher(EmpiPersonNameMatchModeEnum.ANY_ORDER)),
 	NAME_FIRST_AND_LAST(new NameMatcher(EmpiPersonNameMatchModeEnum.FIRST_AND_LAST)),
 
-	// FIXME KHS change this to use identifierSystem
 	IDENTIFIER(new IdentifierMatcher());
 
 	private final IEmpiFieldMatcher myEmpiFieldMatcher;
@@ -55,6 +54,15 @@ public enum EmpiMatcherEnum {
 		myEmpiFieldMatcher = theEmpiFieldMatcher;
 	}
 
+	/**
+	 * Determines whether two FHIR elements match according using the provided IEmpiFieldMatcher
+	 * @param theFhirContext
+	 * @param theLeftBase left FHIR element to compare
+	 * @param theRightBase right FHIR element to compare
+	 * @param theExact used by String matchers.  If "false" then the string is normalized (case, accents) before comparing.  If "true" then an exact string comparison is performed.
+	 * @param theIdentifierSystem used optionally by the IDENTIFIER matcher, when present, only matches the identifiers if they belong to this system.
+	 * @return
+	 */
 	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
 		return myEmpiFieldMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact, theIdentifierSystem);
 	}
