@@ -34,8 +34,8 @@ public class NumberIndexTable extends BaseSearchParamIndexTable {
 	}
 
 	public Condition createPredicateNumeric(String theResourceName, String theParamName, NumberIndexTable theJoin, CriteriaBuilder theCriteriaBuilder, IQueryParameterType theNextOr, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, Object theO, String theInvalidMessageName, RequestPartitionId theRequestPartitionId) {
-		DbColumn columnValue = myColumnValue;
-		return createPredicateNumeric(this, theResourceName, theParamName, theOperation, theValue, theRequestPartitionId, columnValue);
+		Condition numericPredicate = createPredicateNumeric(this, theResourceName, theParamName, theOperation, theValue, theRequestPartitionId, myColumnValue);
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, numericPredicate, theRequestPartitionId);
 	}
 
 
@@ -47,22 +47,22 @@ public class NumberIndexTable extends BaseSearchParamIndexTable {
 		SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
 		switch (operation) {
 			case gt:
-				num = BinaryCondition.greaterThan(theColumn, theValue);
+				num = BinaryCondition.greaterThan(theColumn, theIndexTable.generatePlaceholder(theValue));
 				break;
 			case ge:
-				num = BinaryCondition.greaterThanOrEq(theColumn, theValue);
+				num = BinaryCondition.greaterThanOrEq(theColumn, theIndexTable.generatePlaceholder(theValue));
 				break;
 			case lt:
-				num = BinaryCondition.lessThan(theColumn, theValue);
+				num = BinaryCondition.lessThan(theColumn, theIndexTable.generatePlaceholder(theValue));
 				break;
 			case le:
-				num = BinaryCondition.lessThanOrEq(theColumn, theValue);
+				num = BinaryCondition.lessThanOrEq(theColumn, theIndexTable.generatePlaceholder(theValue));
 				break;
 			case eq:
-				num = BinaryCondition.equalTo(theColumn, theValue);
+				num = BinaryCondition.equalTo(theColumn, theIndexTable.generatePlaceholder(theValue));
 				break;
 			case ne:
-				num = BinaryCondition.notEqualTo(theColumn, theValue);
+				num = BinaryCondition.notEqualTo(theColumn, theIndexTable.generatePlaceholder(theValue));
 				break;
 			case ap:
 				BigDecimal mul = SearchFuzzUtil.calculateFuzzAmount(null, theValue);
@@ -79,6 +79,6 @@ public class NumberIndexTable extends BaseSearchParamIndexTable {
 				throw new InvalidRequestException(msg);
 		}
 
-		return theIndexTable.combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, num, theRequestPartitionId);
+		return num;
 	}
 }

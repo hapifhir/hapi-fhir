@@ -22,16 +22,13 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
-import ca.uhn.fhir.jpa.dao.search.PredicateBuilderCoords2;
-import ca.uhn.fhir.jpa.dao.search.PredicateBuilderDate2;
-import ca.uhn.fhir.jpa.dao.search.PredicateBuilderNumber2;
-import ca.uhn.fhir.jpa.dao.search.PredicateBuilderQuantity2;
 import ca.uhn.fhir.jpa.dao.search.SearchBuilder2;
 import ca.uhn.fhir.jpa.dao.search.sql.CoordsIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.DateIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.QuantityIndexTable;
-import ca.uhn.fhir.jpa.dao.search.sql.ReferenceIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.ResourceIdPredicateBuilder3;
+import ca.uhn.fhir.jpa.dao.search.sql.ResourceLinkIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceSqlTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresenceTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
@@ -45,7 +42,6 @@ import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -486,14 +482,20 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ReferenceIndexTable indexTableReference(SearchSqlBuilder theSearchBuilder) {
-		return new ReferenceIndexTable(theSearchBuilder);
+	public ResourceLinkIndexTable indexTableReference(SearchSqlBuilder theSearchBuilder) {
+		return new ResourceLinkIndexTable(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceSqlTable indexTableResource(SearchSqlBuilder theSearchBuilder) {
 		return new ResourceSqlTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceIdPredicateBuilder3 indexTableResourceId(SearchSqlBuilder theSearchBuilder) {
+		return new ResourceIdPredicateBuilder3(theSearchBuilder);
 	}
 
 	@Bean

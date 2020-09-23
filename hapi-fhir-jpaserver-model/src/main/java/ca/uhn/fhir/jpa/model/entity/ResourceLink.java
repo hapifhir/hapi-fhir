@@ -93,34 +93,6 @@ public class ResourceLink extends BaseResourceIndex {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
-	@OneToMany()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
-	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
-
-	@OneToMany()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
-	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
-
-	@OneToMany()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
-	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
-
-	@OneToMany()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
-	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
-
-	@OneToMany()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
-	private Collection<ResourceIndexedSearchParamString> myParamsString;
-
-	@OneToMany()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
-	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
-
-	@OneToMany()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "TARGET_RESOURCE_ID", nullable = false, insertable = false, updatable = false)
-	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
-
 	@Transient
 	private transient String myTargetResourceId;
 

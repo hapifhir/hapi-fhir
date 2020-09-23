@@ -1414,10 +1414,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 		ourLog.info("SQL Query:\n{}", sqlQuery);
-		assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id in"));
 		assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
-		assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_type='diagnosticreport'"));
-		assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_deleted_at is null"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport'"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at is null"));
 	}
 
 	@Test
@@ -3629,21 +3629,34 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myPatientDao.create(patient, mySrd);
 
 		patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
+		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam003");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		myPatientDao.create(patient, mySrd);
 
+		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam004");
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
+		myPatientDao.create(patient, mySrd);
+
+		runInTransaction(()->{
+			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("identifier")).map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
 		{
-			SearchParameterMap map = new SearchParameterMap();
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", null));
+			myCaptureQueriesListener.clear();
 			IBundleProvider retrieved = myPatientDao.search(map);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertEquals(2, retrieved.size().intValue());
 		}
 		{
-			SearchParameterMap map = new SearchParameterMap();
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", ""));
+			myCaptureQueriesListener.clear();
 			IBundleProvider retrieved = myPatientDao.search(map);
-			assertEquals(2, retrieved.size().intValue());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+			assertEquals(0, retrieved.size().intValue());
 		}
 	}
 
@@ -3787,8 +3800,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
 		map.add(Observation.SP_VALUE_QUANTITY, param);
+		myCaptureQueriesListener.clear();
 		found = myObservationDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains(id1));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(toUnqualifiedVersionlessIdValues(found).toString(), toUnqualifiedVersionlessIdValues(found), contains(id1));
+
+		String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		assertEquals(0, StringUtils.countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+		assertEquals(0, StringUtils.countMatches(searchQuery.toLowerCase(), "partition"), searchQuery);
+		assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
+		assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "sp_value"), searchQuery);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
@@ -4071,9 +4092,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(patients.toString(), patients, contains(obsId1));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
-			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
-			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
-			assertEquals(2, StringUtils.countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
+			assertEquals(0, StringUtils.countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal >= '20200605'"), searchQuery);
+			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal <= '20200606'"), searchQuery);
 		}
 
 		// Two AND instances of 1 SP and 1 instance of another
@@ -4089,7 +4110,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(patients.toString(), patients, contains(obsId1));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
-			assertEquals(2, StringUtils.countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(2, StringUtils.countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 			assertEquals(4, StringUtils.countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
@@ -4104,7 +4125,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(patients.toString(), patients, containsInAnyOrder(obsId3, obsId4));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
-			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(0, StringUtils.countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
@@ -5097,8 +5118,15 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Communication.SP_ENCOUNTER, new ReferenceParam("ge2020-09-14").setChain("date"));
 		map.add(Communication.SP_ENCOUNTER, new ReferenceParam("le2020-09-15").setChain("date"));
 
+		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myCommunicationDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
 		assertEquals(1, outcome.sizeOrThrowNpe());
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		assertEquals(1, StringUtils.countMatches(searchSql, "AAAAA"));
+
 	}
 
 

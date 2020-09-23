@@ -197,7 +197,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	public String logSelectQueriesForCurrentThread(int... theIndexes) {
 		List<String> queries = getSelectQueriesForCurrentThread()
 			.stream()
-			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.map(t -> "[Returned " + t.getSize() + "] " + CircularQueueCaptureQueriesListener.formatQueryAsSql(t))
 			.collect(Collectors.toList());
 
 		if (theIndexes != null && theIndexes.length > 0) {

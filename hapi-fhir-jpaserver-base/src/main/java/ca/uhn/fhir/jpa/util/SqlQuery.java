@@ -26,6 +26,7 @@ import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -45,6 +46,9 @@ public class SqlQuery {
 		myElapsedTime = theElapsedTime;
 		myStackTrace = theStackTraceElements;
 		mySize = theSize;
+
+		// FIXME: remove or make this only happen in unit tests
+		assert Pattern.compile(" = ['0-9]").matcher(mySql).find() == false : "Non-bound SQL parameter found: " + mySql;
 	}
 
 	public long getQueryTimestamp() {

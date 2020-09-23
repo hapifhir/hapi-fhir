@@ -28,7 +28,7 @@ public class ResourceSqlTable extends BaseIndexTable {
 	}
 
 	public void addResourceTypeAndNonDeletedPredicates() {
-		addCondition(BinaryCondition.equalTo(myColumnResType, getResourceType()));
+		addCondition(BinaryCondition.equalTo(myColumnResType, generatePlaceholder(getResourceType())));
 		addCondition(UnaryCondition.isNull(myColumnResDeletedAt));
 	}
 

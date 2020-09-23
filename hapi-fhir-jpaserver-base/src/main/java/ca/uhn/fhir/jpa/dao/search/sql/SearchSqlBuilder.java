@@ -4,8 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -22,12 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchSqlBuilder {
 
@@ -109,8 +104,8 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s REFERENCE search parameter
 	 */
-	public ReferenceIndexTable addReferenceSelector() {
-		ReferenceIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(this);
+	public ResourceLinkIndexTable addReferenceSelector() {
+		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(this);
 		addTable(retVal);
 		return retVal;
 	}
@@ -120,6 +115,15 @@ public class SearchSqlBuilder {
 	 */
 	public StringIndexTable addStringSelector() {
 		StringIndexTable retVal = mySqlBuilderFactory.stringIndexTable(this);
+		addTable(retVal);
+		return retVal;
+	}
+
+	/**
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
+	 */
+	public TagPredicateBuilder3 addTagSelector() {
+		TagPredicateBuilder3 retVal = mySqlBuilderFactory.tagIndexFactory(this);
 		addTable(retVal);
 		return retVal;
 	}
@@ -152,6 +156,11 @@ public class SearchSqlBuilder {
 	}
 
 
+	public ResourceIdPredicateBuilder3 newResourceIdBuilder() {
+		return mySqlBuilderFactory.resourceId(this);
+	}
+
+
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for an arbitrary table
 	 */
@@ -160,10 +169,18 @@ public class SearchSqlBuilder {
 			mySelect.addColumns(theIndexTable.getResourceIdColumn());
 			mySelect.addFromTable(theIndexTable.getTable());
 		} else {
-			Join join = new DbJoin(mySpec, myCurrentIndexTable.getTable(), theIndexTable.getTable(), new DbColumn[]{myCurrentIndexTable.getResourceIdColumn()}, new DbColumn[]{theIndexTable.getResourceIdColumn()});
-			mySelect.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
+			DbTable fromTable = myCurrentIndexTable.getTable();
+			DbTable toTable = theIndexTable.getTable();
+			DbColumn fromColumn = myCurrentIndexTable.getResourceIdColumn();
+			DbColumn toColumn = theIndexTable.getResourceIdColumn();
+			addJoin(fromTable, toTable, fromColumn, toColumn);
 		}
 		myCurrentIndexTable = theIndexTable;
+	}
+
+	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
+		Join join = new DbJoin(mySpec, theFromTable, theToTable, new DbColumn[]{theFromColumn}, new DbColumn[]{theToColumn});
+		mySelect.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
 	}
 
 	/**
@@ -310,6 +327,7 @@ public class SearchSqlBuilder {
 				throw new IllegalArgumentException();
 		}
 	}
+
 
 
 	/**

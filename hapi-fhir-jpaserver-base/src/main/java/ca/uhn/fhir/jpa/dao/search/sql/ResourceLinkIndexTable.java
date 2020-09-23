@@ -64,9 +64,8 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ReferenceIndexTable extends BaseIndexTable {
+public class ResourceLinkIndexTable extends BaseIndexTable {
 
-	private final SearchSqlBuilder mySearchSqlBuilder;
 	private final DbColumn myColumnSrcType;
 	private final DbColumn myColumnSrcPath;
 	private final DbColumn myColumnTargetResourceId;
@@ -89,9 +88,8 @@ public class ReferenceIndexTable extends BaseIndexTable {
 	/**
 	 * Constructor
 	 */
-	public ReferenceIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public ResourceLinkIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
-		mySearchSqlBuilder = theSearchSqlBuilder;
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
 		myColumnSrcPath = getTable().addColumn("SRC_PATH");
@@ -141,7 +139,7 @@ public class ReferenceIndexTable extends BaseIndexTable {
 					 * Handle chained search, e.g. Patient?organization.name=Kwik-e-mart
 					 */
 
-					return addPredicateReferenceWithChain(getResourceType(), theParamName, theReferenceOrParamList, ref, theRequest, theRequestPartitionId);
+					return addPredicateReferenceWithChain(getResourceType(), theParamName, theReferenceOrParamList, ref, theRequest);
 
 				}
 
@@ -156,7 +154,6 @@ public class ReferenceIndexTable extends BaseIndexTable {
 			addPartitionIdPredicate(getRequestPartitionId().getPartitionId());
 		}
 
-		List<Condition> codePredicates = new ArrayList<>();
 		for (IIdType next : targetIds) {
 			if (!next.hasResourceType()) {
 				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, null);
@@ -178,13 +175,13 @@ public class ReferenceIndexTable extends BaseIndexTable {
 			setMatchNothing();
 			return null;
 		} else {
-			return addPredicateReference(theParamName, inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
+			return addPredicateReference(inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
 		}
 
 	}
 
 
-	public Condition addPredicateReference(String theParamName, boolean theInverse, List<String> thePathsToMatch, List<Long> theTargetPidList, List<String> theTargetQualifiedUrls) {
+	private Condition addPredicateReference(boolean theInverse, List<String> thePathsToMatch, List<Long> theTargetPidList, List<String> theTargetQualifiedUrls) {
 
 		Condition targetPidCondition = null;
 		if (!theTargetPidList.isEmpty()) {
@@ -248,9 +245,8 @@ public class ReferenceIndexTable extends BaseIndexTable {
 	/**
 	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
 	 * on the device.
-	 * @return
 	 */
-	private Condition addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private Condition addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, ReferenceParam theReferenceParam, RequestDetails theRequest) {
 
 		/*
 		 * Which resource types can the given chained parameter actually link to? This might be a list
@@ -321,10 +317,24 @@ public class ReferenceIndexTable extends BaseIndexTable {
 				orValues.add(chainValue);
 			}
 
+			if (!foundChainMatch) {
+				throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+			}
+
+			if (candidateTargetTypes.size() > 1) {
+				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
+			}
+
+			RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
+
+
+
+			throw new UnsupportedOperationException();
+
 			// If this is false, we throw an exception below so no sense doing any further processing
-			if (foundChainMatch) {
+//			if (foundChainMatch) {
 				// FIXME KHS this is the part we need to change
-				RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
+//				RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
 
 
 
@@ -363,16 +373,10 @@ public class ReferenceIndexTable extends BaseIndexTable {
 //					theCodePredicates.add(andPredicate);
 //					candidateTargetTypes.add(nextType);
 //				}
-			}
+//			}
 		}
 
-		if (!foundChainMatch) {
-			throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
-		}
 
-		if (candidateTargetTypes.size() > 1) {
-			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
-		}
 
 		return null;
 //		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
@@ -506,7 +510,7 @@ public class ReferenceIndexTable extends BaseIndexTable {
 	}
 
 
-	List<String> createResourceLinkPathPredicate(String theResourceName, String theParamName) {
+	private List<String> createResourceLinkPathPredicate(String theResourceName, String theParamName) {
 		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResourceName);
 		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 		List<String> path = param.getPathsSplit();
@@ -882,5 +886,5 @@ public class ReferenceIndexTable extends BaseIndexTable {
 		throw new InvalidRequestException(msg);
 	}
 
-private static final Logger ourLog = LoggerFactory.getLogger(ReferenceIndexTable.class);
+private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkIndexTable.class);
 }

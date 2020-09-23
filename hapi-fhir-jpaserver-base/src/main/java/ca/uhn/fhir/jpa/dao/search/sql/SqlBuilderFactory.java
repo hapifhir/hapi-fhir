@@ -24,12 +24,16 @@ public class SqlBuilderFactory {
 		return myApplicationContext.getBean(QuantityIndexTable.class, theSearchSqlBuilder);
 	}
 
-	public ReferenceIndexTable referenceIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ReferenceIndexTable.class, theSearchSqlBuilder);
+	public ResourceLinkIndexTable referenceIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(ResourceLinkIndexTable.class, theSearchSqlBuilder);
 	}
 
 	public ResourceSqlTable resourceTable(SearchSqlBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(ResourceSqlTable.class, theSearchSqlBuilder);
+	}
+
+	public ResourceIdPredicateBuilder3 resourceId(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(ResourceIdPredicateBuilder3.class, theSearchSqlBuilder);
 	}
 
 	public SearchParamPresenceTable searchParamPresenceTable(SearchSqlBuilder theSearchSqlBuilder) {
@@ -48,4 +52,7 @@ public class SqlBuilderFactory {
 		return myApplicationContext.getBean(UriIndexTable.class, theSearchSqlBuilder);
 	}
 
+	public TagPredicateBuilder3 tagIndexFactory(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(TagPredicateBuilder3.class, theSearchSqlBuilder);
+	}
 }

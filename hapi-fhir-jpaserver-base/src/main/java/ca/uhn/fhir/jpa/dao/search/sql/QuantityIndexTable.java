@@ -39,6 +39,8 @@ public class QuantityIndexTable extends BaseSearchParamIndexTable {
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
 
+
+
 	public Condition createPredicateQuantity(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, QuantityIndexTable theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		String systemValue;
@@ -69,13 +71,13 @@ public class QuantityIndexTable extends BaseSearchParamIndexTable {
 		Condition hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
 			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, systemValue, unitsValue);
-			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentitySystemUnits, hash);
+			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentitySystemUnits, generatePlaceholder(hash));
 		} else if (!isBlank(unitsValue)) {
 			long hash = ResourceIndexedSearchParamQuantity.calculateHashUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
-			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentityUnits, hash);
+			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentityUnits, generatePlaceholder(hash));
 		} else {
 			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
-			hashPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), hash);
+			hashPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hash));
 		}
 
 		SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);

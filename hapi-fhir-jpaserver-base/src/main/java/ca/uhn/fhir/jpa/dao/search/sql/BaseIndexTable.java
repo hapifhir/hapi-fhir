@@ -17,34 +17,16 @@ import org.apache.commons.lang3.Validate;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public abstract class BaseIndexTable {
+public abstract class BaseIndexTable extends BasePredicateBuilder3 {
 
 	private final DbTable myTable;
 	private final DbColumn myColumnPartitionId;
-	private final SearchSqlBuilder mySearchSqlBuilder;
 
 	BaseIndexTable(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
-		mySearchSqlBuilder = theSearchSqlBuilder;
+		super(theSearchSqlBuilder);
 		myTable = theTable;
 		myColumnPartitionId = theTable.addColumn("PARTITION_ID");
 	}
-
-	PartitionSettings getPartitionSettings() {
-		return mySearchSqlBuilder.getPartitionSettings();
-	}
-
-	RequestPartitionId getRequestPartitionId() {
-		return mySearchSqlBuilder.getRequestPartitionId();
-	}
-
-	String getResourceType() {
-		return mySearchSqlBuilder.getResourceType();
-	}
-
-	ModelConfig getModelConfig() {
-		return mySearchSqlBuilder.getModelConfig();
-	}
-
 
 	DbTable getTable() {
 		return myTable;
@@ -85,33 +67,6 @@ public abstract class BaseIndexTable {
 
 	}
 
-	void addCondition(Condition theCondition) {
-		assert theCondition != null;
-		mySearchSqlBuilder.addCondition(theCondition);
-	}
-
-	@Nonnull
-	String generatePlaceholder(Object theInput) {
-		return mySearchSqlBuilder.generatePlaceholder(theInput);
-	}
-
-	@Nonnull
-	List<String> generatePlaceholders(List<?> theValues) {
-		return mySearchSqlBuilder.generatePlaceholders(theValues);
-	}
-
-	protected FhirContext getFhirContext() {
-		return mySearchSqlBuilder.getFhirContext();
-	}
-
-	protected void setMatchNothing() {
-		mySearchSqlBuilder.setMatchNothing();
-	}
-
-
-	protected BinaryCondition createConditionForValueWithComparator(ParamPrefixEnum theComparator, DbColumn theColumn, Object theValue) {
-		return mySearchSqlBuilder.createConditionForValueWithComparator(theComparator, theColumn, theValue);
-	}
 
 
 }

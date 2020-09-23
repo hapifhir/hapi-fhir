@@ -62,9 +62,6 @@ public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
 
 	public Condition combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, Condition thePredicate, RequestPartitionId theRequestPartitionId) {
 		List<Condition> andPredicates = new ArrayList<>();
-		if (theRequestPartitionId != null) {
-			andPredicates.add(createPartitionIdPredicate(theRequestPartitionId.getPartitionId()));
-		}
 
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);
 		String hashIdentityVal = generatePlaceholder(hashIdentity);

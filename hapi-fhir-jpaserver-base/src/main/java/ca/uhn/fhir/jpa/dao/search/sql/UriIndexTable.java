@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.dao.search.BasePredicateBuilder2.createLeftAndRightMatchLikeExpression;
-import static ca.uhn.fhir.jpa.dao.search.BasePredicateBuilder2.createLeftMatchLikeExpression;
-import static ca.uhn.fhir.jpa.dao.search.BasePredicateBuilder2.createRightMatchLikeExpression;
+import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createLeftAndRightMatchLikeExpression;
+import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createLeftMatchLikeExpression;
+import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createRightMatchLikeExpression;
 
 public class UriIndexTable extends BaseSearchParamIndexTable {
 

@@ -122,17 +122,6 @@ public abstract class BasePredicateBuilder2 {
 		throw new UnsupportedOperationException();
 	}
 
-	public static String createLeftAndRightMatchLikeExpression(String likeExpression) {
-		return "%" + likeExpression.replace("%", "[%]") + "%";
-	}
-
-	public static String createLeftMatchLikeExpression(String likeExpression) {
-		return likeExpression.replace("%", "[%]") + "%";
-	}
-
-	public static String createRightMatchLikeExpression(String likeExpression) {
-		return "%" + likeExpression.replace("%", "[%]");
-	}
 
 
 
