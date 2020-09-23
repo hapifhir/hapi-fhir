@@ -1,61 +1,13 @@
-package ca.uhn.fhir.jpa.subscription.module.cache;
+package ca.uhn.fhir.jpa.subscription.model;
 
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.model.DebeziumMessage;
-import ca.uhn.fhir.parser.DataFormatException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.compress.compressors.gzip.GzipUtils;
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.zip.GZIPInputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
-	@Test
-	public void updateSubscriptionReusesActiveSubscription() {
-		Subscription subscription = createSubscription();
-		assertRegistrySize(0);
-		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
-		assertRegistrySize(1);
-		ActiveSubscription origActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteriaString());
-
-		subscription.setCriteria(NEW_CRITERIA);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteriaString());
-		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
-		assertRegistrySize(1);
-		ActiveSubscription newActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(NEW_CRITERIA, newActiveSubscription.getCriteriaString());
-		// The same object
-		assertTrue(newActiveSubscription == origActiveSubscription);
-	}
-
-	@Test
-	public void updateSubscriptionDoesntReusesActiveSubscriptionWhenChannelChanges() {
-		Subscription subscription = createSubscription();
-		assertRegistrySize(0);
-		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
-		assertRegistrySize(1);
-
-		ActiveSubscription origActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteriaString());
-
-		setChannel(subscription, Subscription.SubscriptionChannelType.EMAIL);
-
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteriaString());
-		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
-		assertRegistrySize(1);
-
-		ActiveSubscription newActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		// A new object
-		assertFalse(newActiveSubscription == origActiveSubscription);
-	}
+class DebeziumMessageTest {
 
 	@Test
 	public void testMessageDeserializes() throws IOException {
@@ -68,79 +20,79 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 			"            \"fields\":[\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"PID\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int32\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"name\":\"io.debezium.time.Date\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"field\":\"PARTITION_DATE\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int32\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"PARTITION_ID\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"name\":\"io.debezium.time.NanoTimestamp\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"field\":\"RES_DELETED_AT\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"RES_VERSION\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"boolean\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"HAS_TAGS\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"name\":\"io.debezium.time.NanoTimestamp\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"field\":\"RES_PUBLISHED\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"name\":\"io.debezium.time.NanoTimestamp\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"field\":\"RES_UPDATED\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"RES_ENCODING\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"bytes\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"RES_TEXT\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"RES_ID\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"RES_TYPE\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"RES_VER\"\n" +
 			"               }\n" +
 			"            ],\n" +
-			"            \"optional\":true,\n" +
+			"            \"optional\":True,\n" +
 			"            \"name\":\"mssql_events.dbo.HFJ_RES_VER.Value\",\n" +
 			"            \"field\":\"before\"\n" +
 			"         },\n" +
@@ -149,79 +101,79 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 			"            \"fields\":[\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"PID\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int32\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"name\":\"io.debezium.time.Date\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"field\":\"PARTITION_DATE\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int32\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"PARTITION_ID\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"name\":\"io.debezium.time.NanoTimestamp\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"field\":\"RES_DELETED_AT\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"RES_VERSION\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"boolean\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"HAS_TAGS\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"name\":\"io.debezium.time.NanoTimestamp\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"field\":\"RES_PUBLISHED\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"name\":\"io.debezium.time.NanoTimestamp\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"field\":\"RES_UPDATED\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"RES_ENCODING\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"bytes\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"RES_TEXT\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"RES_ID\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"RES_TYPE\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"RES_VER\"\n" +
 			"               }\n" +
 			"            ],\n" +
-			"            \"optional\":true,\n" +
+			"            \"optional\":True,\n" +
 			"            \"name\":\"mssql_events.dbo.HFJ_RES_VER.Value\",\n" +
 			"            \"field\":\"after\"\n" +
 			"         },\n" +
@@ -230,27 +182,27 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 			"            \"fields\":[\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"version\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"connector\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"name\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"ts_ms\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"name\":\"io.debezium.data.Enum\",\n" +
 			"                  \"version\":1,\n" +
 			"                  \"parameters\":{\n" +
@@ -261,47 +213,47 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"db\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"schema\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"table\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"change_lsn\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"commit_lsn\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":true,\n" +
+			"                  \"optional\":True,\n" +
 			"                  \"field\":\"event_serial_no\"\n" +
 			"               }\n" +
 			"            ],\n" +
-			"            \"optional\":false,\n" +
+			"            \"optional\":False,\n" +
 			"            \"name\":\"io.debezium.connector.sqlserver.Source\",\n" +
 			"            \"field\":\"source\"\n" +
 			"         },\n" +
 			"         {\n" +
 			"            \"type\":\"string\",\n" +
-			"            \"optional\":false,\n" +
+			"            \"optional\":False,\n" +
 			"            \"field\":\"op\"\n" +
 			"         },\n" +
 			"         {\n" +
 			"            \"type\":\"int64\",\n" +
-			"            \"optional\":true,\n" +
+			"            \"optional\":True,\n" +
 			"            \"field\":\"ts_ms\"\n" +
 			"         },\n" +
 			"         {\n" +
@@ -309,36 +261,36 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 			"            \"fields\":[\n" +
 			"               {\n" +
 			"                  \"type\":\"string\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"id\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"total_order\"\n" +
 			"               },\n" +
 			"               {\n" +
 			"                  \"type\":\"int64\",\n" +
-			"                  \"optional\":false,\n" +
+			"                  \"optional\":False,\n" +
 			"                  \"field\":\"data_collection_order\"\n" +
 			"               }\n" +
 			"            ],\n" +
-			"            \"optional\":true,\n" +
+			"            \"optional\":True,\n" +
 			"            \"field\":\"transaction\"\n" +
 			"         }\n" +
 			"      ],\n" +
-			"      \"optional\":false,\n" +
+			"      \"optional\":False,\n" +
 			"      \"name\":\"mssql_events.dbo.HFJ_RES_VER.Envelope\"\n" +
 			"   },\n" +
 			"   \"payload\":{\n" +
-			"      \"before\":\"null\",\n" +
+			"      \"before\":\"None\",\n" +
 			"      \"after\":{\n" +
 			"         \"PID\":1624,\n" +
-			"         \"PARTITION_DATE\":\"null\",\n" +
-			"         \"PARTITION_ID\":\"null\",\n" +
-			"         \"RES_DELETED_AT\":\"null\",\n" +
+			"         \"PARTITION_DATE\":\"None\",\n" +
+			"         \"PARTITION_ID\":\"None\",\n" +
+			"         \"RES_DELETED_AT\":\"None\",\n" +
 			"         \"RES_VERSION\":\"R4\",\n" +
-			"         \"HAS_TAGS\":false,\n" +
+			"         \"HAS_TAGS\":False,\n" +
 			"         \"RES_PUBLISHED\":1598375747709000000,\n" +
 			"         \"RES_UPDATED\":1598375747709000000,\n" +
 			"         \"RES_ENCODING\":\"JSONC\",\n" +
@@ -368,29 +320,7 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 
 		ObjectMapper mapper = new ObjectMapper();
 		DebeziumMessage debeziumMessage = mapper.reader().readValue(s, DebeziumMessage.class);
-		byte[] theResourceBytes = Base64.getDecoder().decode(debeziumMessage.getResourceBytes());
-		System.out.println(decompress(theResourceBytes));
+		System.out.println(debeziumMessage.getResourceBytes());
 		assert debeziumMessage != null;
 	}
-
-	public static String decompress(byte[] theResource) {
-		GZIPInputStream is;
-		try {
-			is = new GZIPInputStream(new ByteArrayInputStream(theResource));
-			return IOUtils.toString(is, "UTF-8");
-		} catch (IOException e) {
-			throw new DataFormatException("Failed to decompress contents", e);
-		}
-	}
-
-	@Test
-	public void updateRemove() {
-		Subscription subscription = createSubscription();
-		assertRegistrySize(0);
-		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
-		assertRegistrySize(1);
-		mySubscriptionRegistry.unregisterSubscriptionIfRegistered(subscription.getId());
-		assertRegistrySize(0);
-	}
-
 }
