@@ -524,7 +524,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		IValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM), null, mySrd);
+		IValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM),null, mySrd);
 		assertEquals(true, lookupResults.isFound());
 
 		ValueSet vs = new ValueSet();

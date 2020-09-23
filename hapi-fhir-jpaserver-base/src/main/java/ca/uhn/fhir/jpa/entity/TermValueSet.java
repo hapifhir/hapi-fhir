@@ -46,7 +46,7 @@ public class TermValueSet implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
-	static final int MAX_VER_LENGTH = 200;
+	public static final int MAX_VER_LENGTH = 200;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")

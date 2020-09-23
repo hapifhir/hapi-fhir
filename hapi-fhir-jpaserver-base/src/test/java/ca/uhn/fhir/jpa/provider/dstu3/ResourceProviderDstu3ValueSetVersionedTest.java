@@ -178,12 +178,6 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 	}
 
-//	private void createExternalCsAndLocalVsWithUnknownCode() {
-//		String codeSystemUrl = createExternalCs();
-
-//		createLocalVsWithUnknownCode(codeSystemUrl);
-//	}
-
 	private void createLocalCs() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
