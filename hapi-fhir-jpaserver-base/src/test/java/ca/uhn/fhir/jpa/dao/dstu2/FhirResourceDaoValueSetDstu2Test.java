@@ -233,26 +233,4 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
-	@Test
-	public void unsupportedMethodsThrowException() {
-		IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> testFhirResourceDaoValueSet = new FhirResourceDaoValueSetDstu2();
-		// Multi-version lookupCode method
-		try {
-			testFhirResourceDaoValueSet.lookupCode(null, null, null, null, null);
-			fail();
-		} catch (UnsupportedOperationException theE) {
-			// Success
-		}
-
-		// Multi-version subsumes method
-		try {
-			testFhirResourceDaoValueSet.subsumes(null, null, null, null, null, null, null);
-			fail();
-		} catch (UnsupportedOperationException theE) {
-			// Success
-		}
-
-
-	}
-
 }

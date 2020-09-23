@@ -38,11 +38,7 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> exten
 
 	T expandByIdentifier(String theUri, String theFilter);
 
-	T expandByIdentifier(String theUri, String theValueSetVersion, String theFilter);
-
 	T expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount);
-
-	T expandByIdentifier(String theUri, String theValueSetVersion, String theFilter, int theOffset, int theCount);
 
 	void purgeCaches();
 

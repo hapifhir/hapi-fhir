@@ -95,7 +95,20 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			throw new InvalidRequestException("URI must not be blank or missing");
 		}
 
-		return doExpand(createSourceValueSet(theUri, null, theFilter));
+		ValueSet source = new ValueSet();
+		source.setUrl(theUri);
+
+		source.getCompose().addInclude().addValueSet(theUri);
+
+		if (isNotBlank(theFilter)) {
+			ConceptSetComponent include = source.getCompose().addInclude();
+			ValueSet.ConceptSetFilterComponent filter = include.addFilter();
+			filter.setProperty("display");
+			filter.setOp(Enumerations.FilterOperator.EQUAL);
+			filter.setValue(theFilter);
+		}
+
+		return doExpand(source);
 
 		// if (defaultValueSet != null) {
 		// source = getContext().newJsonParser().parseResource(ValueSet.class, getContext().newJsonParser().encodeResourceToString(defaultValueSet));
@@ -111,27 +124,15 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public ValueSet expandByIdentifier(String theUri, String theValueSetUri, String theFilter) {
+	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
 		if (isBlank(theUri)) {
 			throw new InvalidRequestException("URI must not be blank or missing");
 		}
 
-		return doExpand(createSourceValueSet(theUri, theValueSetUri, theFilter));
-
-	}
-
-	private ValueSet createSourceValueSet(String theUri, String theValueSetVersion, String theFilter) {
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
-		if (theValueSetVersion != null) {
-			source.setVersion(theValueSetVersion);
-		}
 
-		if (theValueSetVersion != null) {
-			source.getCompose().addInclude().addValueSet(theUri + "|" +theValueSetVersion);
-		} else {
-			source.getCompose().addInclude().addValueSet(theUri);
-		}
+		source.getCompose().addInclude().addValueSet(theUri);
 
 		if (isNotBlank(theFilter)) {
 			ValueSet.ConceptSetComponent include = source.getCompose().addInclude();
@@ -140,25 +141,8 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			filter.setOp(Enumerations.FilterOperator.EQUAL);
 			filter.setValue(theFilter);
 		}
-		return source;
-	}
 
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
-		if (isBlank(theUri)) {
-			throw new InvalidRequestException("URI must not be blank or missing");
-		}
-
-		return doExpand(createSourceValueSet(theUri, null, theFilter), theOffset, theCount);
-	}
-
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theValueSetVersion, String theFilter, int theOffset, int theCount) {
-		if (isBlank(theUri)) {
-			throw new InvalidRequestException("URI must not be blank or missing");
-		}
-
-		return doExpand(createSourceValueSet(theUri, theValueSetVersion, theFilter), theOffset, theCount);
+		return doExpand(source, theOffset, theCount);
 	}
 
 	@Override

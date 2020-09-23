@@ -904,7 +904,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		include.setSystem(CS_URL);
 
 		myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), anyString(), nullable(String.class), anyCollection());
+		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
 	}
 
 	@Test

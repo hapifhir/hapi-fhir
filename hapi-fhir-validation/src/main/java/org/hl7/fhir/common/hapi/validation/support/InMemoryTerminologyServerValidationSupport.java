@@ -309,44 +309,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theVersion) {
-		// The following code mostly duplicates the validateCode method, differing in that it includes the code system version in the generated ValueSet resource.
-		IBaseResource vs;
-		switch (myCtx.getVersion().getVersion()) {
-			case DSTU3:
-				vs = new org.hl7.fhir.dstu3.model.ValueSet()
-					.setCompose(new org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent()
-						.addInclude(new org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent().setSystem(theSystem).setVersion(theVersion)));
-				break;
-			case R4:
-				vs = new org.hl7.fhir.r4.model.ValueSet()
-					.setCompose(new org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent()
-						.addInclude(new org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent().setSystem(theSystem).setVersion(theVersion)));
-				break;
-			case R5:
-				vs = new org.hl7.fhir.r5.model.ValueSet()
-					.setCompose(new org.hl7.fhir.r5.model.ValueSet.ValueSetComposeComponent()
-						.addInclude(new org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent().setSystem(theSystem).setVersion(theVersion)));
-				break;
-			case DSTU2_HL7ORG:
-			case DSTU2:
-			case DSTU2_1:
-			default:
-				throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
-		}
-
-		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theValidationSupportContext, null, vs);
-		if (valueSetExpansionOutcome == null) {
-			return null;
-		}
-
-		IBaseResource expansion = valueSetExpansionOutcome.getValueSet();
-
-		return validateCodeInExpandedValueSet(theValidationSupportContext, new ConceptValidationOptions(), theSystem, theCode, null, expansion).asLookupCodeResult(theSystem, theCode);
-
-	}
-
-	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return validateCode(theValidationSupportContext, new ConceptValidationOptions(), theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
 	}

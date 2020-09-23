@@ -94,7 +94,7 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 					return dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
 				} else if (haveIdentifier) {
 					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(theUrl.getValue(), theValueSetVersion.getValue(), toFilterString(theFilter), offset, count);
+						return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter), offset, count);
 					} else {
 						return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter), offset, count);
 					}
@@ -106,7 +106,7 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 					return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
 				} else if (haveIdentifier) {
 					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(theUrl.getValue(), theValueSetVersion.getValue(), toFilterString(theFilter));
+						return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter));
 					} else {
 						return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter));
 					}

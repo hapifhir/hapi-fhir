@@ -42,11 +42,6 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 
 	SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CD theCodingA, CD theCodingB, RequestDetails theRequestDetails);
 
-	@Nonnull
-	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails);
-
-	SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CD theCodingA, CD theCodingB, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails);
-
 	class SubsumesResult {
 
 		private final ConceptSubsumptionOutcome myOutcome;

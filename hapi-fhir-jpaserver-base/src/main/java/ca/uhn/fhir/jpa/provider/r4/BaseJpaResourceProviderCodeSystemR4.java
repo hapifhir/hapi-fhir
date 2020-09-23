@@ -65,7 +65,10 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			IValidationSupport.LookupCodeResult result;
 			if (theVersion != null) {
-				result = dao.lookupCode(theCode, theSystem, theCoding, theVersion, theRequestDetails);
+				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theRequestDetails);
+			} else if (theCoding != null && theCoding.hasVersion()) {
+				Coding codingWithVersion = new Coding(theCoding.getSystem() + "|" + theCoding.getVersion(), theCoding.getCode(), theCoding.getDisplay());
+				result = dao.lookupCode(theCode, theSystem, codingWithVersion, theRequestDetails);
 			} else {
 				result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
 			}
@@ -98,11 +101,16 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			IFhirResourceDaoCodeSystem.SubsumesResult result;
-			if (theVersion != null || (theCodingA != null && theCodingA.hasVersion()) || (theCodingB != null &&theCodingB.hasVersion())) {
-				result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theVersion, theRequestDetails);
-			} else {
-				result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theRequestDetails);
+			if (theVersion != null) {
+				theSystem = new UriType(theSystem.asStringValue() + "|" + theVersion.toString());
 			}
+			if (theCodingA != null && theCodingA.hasVersion()) {
+				theCodingA.setSystem(theCodingA.getSystemElement().asStringValue() + "|" + theCodingA.getVersion());
+			}
+			if (theCodingB != null && theCodingB.hasVersion()) {
+				theCodingB.setSystem(theCodingB.getSystemElement().asStringValue() + "|" + theCodingB.getVersion());
+			}
+			result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theRequestDetails);
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext());
 		} finally {
 			endRequest(theServletRequest);

@@ -82,12 +82,6 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 	@Nonnull
 	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
-		return lookupCode(theCode, theSystem, theCoding, null, theRequestDetails);
-	}
-
-	@Nonnull
-	@Override
-	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -101,30 +95,20 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 
 		String code;
 		String system;
-		String codeSystemVersion = null;
 		if (haveCoding) {
 			code = theCoding.getCode();
 			system = theCoding.getSystem();
-			codeSystemVersion = theCoding.getVersion();
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();
-			if (theVersion != null) {
-				codeSystemVersion = theVersion.getValue();
-			}
 		}
 
-		ourLog.debug("Looking up {} / {}, version {}", system, code, codeSystemVersion);
+		ourLog.info("Looking up {} / {}", system, code);
 
 		if (myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system)) {
 
-			ourLog.debug("Code system {} is supported", system);
-			IValidationSupport.LookupCodeResult retVal;
-			if (codeSystemVersion != null) {
-				retVal = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code, codeSystemVersion);
-			} else {
-				retVal = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code);
-			}
+			ourLog.info("Code system {} is supported", system);
+			IValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code);
 			if (retVal != null) {
 				return retVal;
 			}
@@ -134,13 +118,6 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 		// We didn't find it..
 		return IValidationSupport.LookupCodeResult.notFound(system, code);
 
-	}
-
-	@Override
-	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, Coding theCodingA, Coding theCodingB, IPrimitiveType<String> theVersion, RequestDetails theRequestDetails) {
-		String codingBVersion = theCodingB != null ? theCodingB.getVersion() : null;
-		String codingAVersion = theCodingA != null ? theCodingA.getVersion() : null;
-		return myTerminologySvc.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theVersion, codingAVersion, codingBVersion);
 	}
 
 	@Override

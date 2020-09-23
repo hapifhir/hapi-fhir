@@ -213,19 +213,6 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Look up a code using the system, system version and code value
-	 *
-	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theSystem                The CodeSystem URL
-	 * @param theCode                  The code
-	 * @param theSystemVersion         The CodeSystem version
-	 */
-	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theSystemVersion) {
-		return null;
-	}
-
-	/**
 	 * Returns <code>true</code> if the given valueset can be validated by the given
 	 * validation support module
 	 *

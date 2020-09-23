@@ -52,6 +52,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -331,6 +332,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 		assertEquals(2, page.getContent().size());
@@ -426,6 +428,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
@@ -538,6 +541,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
@@ -930,6 +934,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		validateTermValueSetNotExpanded(initialValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
 		String initialValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(initialValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		validateTermValueSetExpandedAndChildrenV1(initialValueSetName_v1, codeSystem_v1);
 		validateTermValueSetExpandedAndChildrenV2(initialValueSetName_v2, codeSystem_v2);
@@ -979,6 +984,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 		String initialValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(initialValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		await().until(() -> clearDeferredStorageQueue());
 		validateTermValueSetExpandedAndChildrenV1(initialValueSetName_v1, codeSystem_v1);
 		validateTermValueSetExpandedAndChildrenV2(initialValueSetName_v2, codeSystem_v2);
 
@@ -1068,7 +1074,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|1", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
@@ -1090,7 +1096,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 			concept = termValueSet.getConcepts().get(1);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|1", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1100,7 +1106,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|1", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
@@ -1115,7 +1121,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 			concept = termValueSet.getConcepts().get(23);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|1", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1141,7 +1147,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|2", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration v2", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
@@ -1163,7 +1169,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 			concept = termValueSet.getConcepts().get(1);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|2", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter v2", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1173,7 +1179,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|2", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum v2", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
@@ -1188,7 +1194,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 			concept = termValueSet.getConcepts().get(23);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|2", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum v2", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1340,6 +1346,17 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 	}
 */
+
+	private boolean clearDeferredStorageQueue() {
+
+		if(!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return false;
+		} else {
+			return true;
+		}
+
+	}
 
 	@Test
 	public void testCreateDuplicatValueSetVersion() {

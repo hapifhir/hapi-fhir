@@ -146,12 +146,6 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theVersion) {
-		// For now Common Code Systems will not be versioned.
-		return lookupCode(theValidationSupportContext, theSystem, theCode);
-	}
-
-	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 
 		Map<String, String> map;

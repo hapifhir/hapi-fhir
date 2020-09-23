@@ -56,6 +56,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -246,6 +247,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 		assertEquals(1, page.getContent().size());
@@ -300,6 +302,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 		assertEquals(1, page.getContent().size());
@@ -361,6 +364,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 		assertEquals(1, page.getContent().size());
@@ -745,6 +749,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		validateTermValueSetExpandedAndChildren(initialValueSetName, codeSystem);
 
@@ -774,6 +779,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		validateTermValueSetExpandedAndChildren(initialValueSetName, codeSystem);
 
@@ -1055,6 +1061,17 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			ourLog.info("Response: {}", response);
 			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
 			assertEquals(false, output.getParameterBool("result"));
+		}
+
+	}
+
+	private boolean clearDeferredStorageQueue() {
+
+		if(!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return false;
+		} else {
+			return true;
 		}
 
 	}
