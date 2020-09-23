@@ -75,13 +75,13 @@ public abstract class BasePredicateBuilder2 {
 		return mySearchSqlBuilder;
 	}
 
-	void addPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
-
-		SearchParamPresenceTable join = getSqlBuilder().addSearchParamPresenceSelector();
-		addPartitionIdPredicate(theRequestPartitionId, join, null);
-		join.addPredicatePresence(theParamName, theMissing);
-
-	}
+//	void addPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
+//
+//		SearchParamPresenceTable join = getSqlBuilder().addSearchParamPresenceSelector();
+//		addPartitionIdPredicate(theRequestPartitionId, join, null);
+//		join.addPredicatePresence(theParamName, theMissing);
+//
+//	}
 
 	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, BaseSearchParamIndexTable theJoin, RequestPartitionId theRequestPartitionId) {
 		if (!theRequestPartitionId.isAllPartitions()) {

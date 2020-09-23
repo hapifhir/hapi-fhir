@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.search.querystack;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.search.sql.BaseIndexTable;
@@ -18,18 +19,26 @@ import ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.TagPredicateBuilder3;
 import ca.uhn.fhir.jpa.dao.search.sql.TokenIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.UriIndexTable;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.From;
@@ -38,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 public class QueryStack3 {
 
@@ -45,13 +55,16 @@ public class QueryStack3 {
 	private final FhirContext myFhirContext;
 	private final SearchSqlBuilder mySqlBuilder;
 	private final SearchParameterMap mySearchParameters;
+	private final ISearchParamRegistry mySearchParamRegistry;
+	private final PartitionSettings myPartitionSettings;
 	// FIXME: rename to add "date" to the name
 	private Map<String, DateIndexTable> myJoinMap;
 
 	/**
 	 * Constructor
 	 */
-	public QueryStack3(SearchParameterMap theSearchParameters, ModelConfig theModelConfig, FhirContext theFhirContext, SearchSqlBuilder theSqlBuilder) {
+	public QueryStack3(SearchParameterMap theSearchParameters, ModelConfig theModelConfig, FhirContext theFhirContext, SearchSqlBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 		assert theSearchParameters != null;
 		assert theModelConfig != null;
 		assert theFhirContext != null;
@@ -61,15 +74,17 @@ public class QueryStack3 {
 		myModelConfig = theModelConfig;
 		myFhirContext = theFhirContext;
 		mySqlBuilder = theSqlBuilder;
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	public Condition addPredicateCoords(String theResourceName,
+	public Condition addPredicateCoords(@Nullable DbColumn theSourceJoinColumn,
+													String theResourceName,
 													RuntimeSearchParam theSearchParam,
 													List<? extends IQueryParameterType> theList,
 													SearchFilterParser.CompareOperation theOperation,
-													From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+													RequestPartitionId theRequestPartitionId) {
 
-		CoordsIndexTable join = mySqlBuilder.addCoordsSelector();
+		CoordsIndexTable join = mySqlBuilder.addCoordsSelector(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -90,11 +105,12 @@ public class QueryStack3 {
 	}
 
 
-	public Condition addPredicateDate(String theResourceName,
+	public Condition addPredicateDate(@Nullable DbColumn theSourceJoinColumn,
+												 String theResourceName,
 												 RuntimeSearchParam theSearchParam,
 												 List<? extends IQueryParameterType> theList,
 												 SearchFilterParser.CompareOperation theOperation,
-												 From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+												 RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
 		boolean newJoin = false;
@@ -105,7 +121,7 @@ public class QueryStack3 {
 
 		DateIndexTable join = myJoinMap.get(key);
 		if (join == null) {
-			join = mySqlBuilder.addDateSelector();
+			join = mySqlBuilder.addDateSelector(theSourceJoinColumn);
 			myJoinMap.put(key, join);
 			newJoin = true;
 		}
@@ -136,13 +152,14 @@ public class QueryStack3 {
 	}
 
 
-	public Condition addPredicateNumber(String theResourceName,
+	public Condition addPredicateNumber(@Nullable DbColumn theSourceJoinColumn,
+													String theResourceName,
 													RuntimeSearchParam theSearchParam,
 													List<? extends IQueryParameterType> theList,
 													SearchFilterParser.CompareOperation theOperation,
-													From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+													RequestPartitionId theRequestPartitionId) {
 
-		NumberIndexTable join = mySqlBuilder.addNumberSelector();
+		NumberIndexTable join = mySqlBuilder.addNumberSelector(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -177,14 +194,14 @@ public class QueryStack3 {
 	}
 
 
-	public Condition addPredicateQuantity(String theResourceName,
+	public Condition addPredicateQuantity(@Nullable DbColumn theSourceJoinColumn,
+													  String theResourceName,
 													  RuntimeSearchParam theSearchParam,
 													  List<? extends IQueryParameterType> theList,
 													  SearchFilterParser.CompareOperation theOperation,
-													  From<?, ResourceLink> theLinkJoin,
 													  RequestPartitionId theRequestPartitionId) {
 
-		QuantityIndexTable join = mySqlBuilder.addQuantity();
+		QuantityIndexTable join = mySqlBuilder.addQuantity(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -207,7 +224,8 @@ public class QueryStack3 {
 	}
 
 
-	public Condition addPredicateReference(String theResourceName,
+	public Condition addPredicateReference(@Nullable DbColumn theSourceJoinColumn,
+														String theResourceName,
 														String theParamName,
 														List<? extends IQueryParameterType> theList,
 														SearchFilterParser.CompareOperation theOperation,
@@ -230,7 +248,7 @@ public class QueryStack3 {
 //			return null;
 		}
 
-		ResourceLinkIndexTable join = mySqlBuilder.addReferenceSelector();
+		ResourceLinkIndexTable join = mySqlBuilder.addReferenceSelector(this, theSourceJoinColumn);
 		return join.addPredicate(theRequest, theParamName, theList, theOperation, theRequestPartitionId);
 	}
 
@@ -249,13 +267,14 @@ public class QueryStack3 {
 	}
 
 
-	public Condition addPredicateString(String theResourceName,
+	public Condition addPredicateString(@Nullable DbColumn theSourceJoinColumn,
+													String theResourceName,
 													RuntimeSearchParam theSearchParam,
 													List<? extends IQueryParameterType> theList,
 													SearchFilterParser.CompareOperation theOperation,
-													From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+													RequestPartitionId theRequestPartitionId) {
 
-		StringIndexTable join = mySqlBuilder.addStringSelector();
+		StringIndexTable join = mySqlBuilder.addStringSelector(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -277,23 +296,24 @@ public class QueryStack3 {
 	}
 
 
-	public void addPredicateTag(List<List<IQueryParameterType>> theAndOrParams, String theParamName, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateTag(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams, String theParamName, RequestPartitionId theRequestPartitionId) {
 
-		TagPredicateBuilder3 join = mySqlBuilder.addTagSelector();
+		TagPredicateBuilder3 join = mySqlBuilder.addTagSelector(theSourceJoinColumn);
 		join.addPredicateTag(theAndOrParams, theParamName, theRequestPartitionId);
 
 
 	}
 
 
-	public Condition addPredicateToken(String theResourceName,
+	public Condition addPredicateToken(@Nullable DbColumn theSourceJoinColumn,
+												  String theResourceName,
 												  RuntimeSearchParam theSearchParam,
 												  List<? extends IQueryParameterType> theList,
 												  SearchFilterParser.CompareOperation theOperation,
 												  RequestPartitionId theRequestPartitionId) {
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), mySqlBuilder.addTokenSelector(), theRequestPartitionId);
+			addPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), mySqlBuilder.addTokenSelector(theSourceJoinColumn), theRequestPartitionId);
 			return null;
 		}
 
@@ -330,7 +350,7 @@ public class QueryStack3 {
 			return null;
 		}
 
-		TokenIndexTable join = mySqlBuilder.addTokenSelector();
+		TokenIndexTable join = mySqlBuilder.addTokenSelector(theSourceJoinColumn);
 		addPartitionIdPredicate(theRequestPartitionId, join);
 		Condition predicate = join.createPredicateToken(tokens, theResourceName, theSearchParam, null, join, theOperation, theRequestPartitionId);
 
@@ -342,14 +362,15 @@ public class QueryStack3 {
 	}
 
 
-	public Condition addPredicateUri(String theResourceName,
+	public Condition addPredicateUri(@Nullable DbColumn theSourceJoinColumn,
+												String theResourceName,
 												RuntimeSearchParam theSearchParam,
 												List<? extends IQueryParameterType> theList,
 												SearchFilterParser.CompareOperation theOperation,
-												From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+												RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
-		UriIndexTable join = mySqlBuilder.addUriSelector();
+		UriIndexTable join = mySqlBuilder.addUriSelector(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), join, theRequestPartitionId);
@@ -378,6 +399,183 @@ public class QueryStack3 {
 			Integer partitionId = theRequestPartitionId.getPartitionId();
 			theJoin.addPartitionIdPredicate(partitionId);
 		}
+	}
+
+
+	public void searchForIdsWithAndOr(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+
+		if (theAndOrParams.isEmpty()) {
+			return;
+		}
+
+		switch (theParamName) {
+			case IAnyResource.SP_RES_ID:
+				addPredicateResourceId(theAndOrParams, theResourceName, null, theRequestPartitionId);
+				break;
+
+			case IAnyResource.SP_RES_LANGUAGE:
+				// FIXME: implement
+//				addPredicateLanguage(theAndOrParams, null);
+				break;
+
+			case Constants.PARAM_HAS:
+				// FIXME: implement
+//				addPredicateHas(theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
+				break;
+
+			case Constants.PARAM_TAG:
+			case Constants.PARAM_PROFILE:
+			case Constants.PARAM_SECURITY:
+				addPredicateTag(theSourceJoinColumn, theAndOrParams, theParamName, theRequestPartitionId);
+				break;
+
+			case Constants.PARAM_SOURCE:
+				// FIXME: implement
+//				addPredicateSource(theAndOrParams, theRequest);
+				break;
+
+			default:
+
+				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+				if (nextParamDef != null) {
+
+					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
+						if (theRequestPartitionId.isAllPartitions()) {
+							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
+						}
+					}
+
+					switch (nextParamDef.getParamType()) {
+						case DATE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId);
+							}
+							break;
+						case QUANTITY:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								SearchFilterParser.CompareOperation operation = null;
+								if (nextAnd.size() > 0) {
+									QuantityParam param = (QuantityParam) nextAnd.get(0);
+									operation = toOperation(param.getPrefix());
+								}
+								addPredicateQuantity(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, operation, theRequestPartitionId);
+							}
+							break;
+						case REFERENCE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId);
+							}
+							break;
+						case STRING:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateString(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.sw,  theRequestPartitionId);
+							}
+							break;
+						case TOKEN:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								if ("Location.position".equals(nextParamDef.getPath())) {
+									addPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null,  theRequestPartitionId);
+								} else {
+									addPredicateToken(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId);
+								}
+							}
+							break;
+						case NUMBER:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateNumber(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null,  theRequestPartitionId);
+							}
+							break;
+						case COMPOSITE:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								// FIXME: implement
+//								addPredicateComposite(theResourceName, nextParamDef, nextAnd, theRequestPartitionId);
+							}
+							break;
+						case URI:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								addPredicateUri(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.eq,  theRequestPartitionId);
+							}
+							break;
+						case HAS:
+						case SPECIAL:
+							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+								if ("Location.position".equals(nextParamDef.getPath())) {
+									addPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null,  theRequestPartitionId);
+								}
+							}
+							break;
+					}
+				} else {
+					if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
+						// These are handled later
+					} else if (Constants.PARAM_FILTER.equals(theParamName)) {
+						// FIXME: implement
+//
+//						// Parse the predicates enumerated in the _filter separated by AND or OR...
+//						if (theAndOrParams.get(0).get(0) instanceof StringParam) {
+//							String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
+//							SearchFilterParser.Filter filter;
+//							try {
+//								filter = SearchFilterParser.parse(filterString);
+//							} catch (SearchFilterParser.FilterSyntaxException theE) {
+//								throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
+//							}
+//							if (filter != null) {
+//
+//								if (!myDaoConfig.isFilterParameterEnabled()) {
+//									throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+//								}
+//
+//								// TODO: we clear the predicates below because the filter builds up
+//								// its own collection of predicates. It'd probably be good at some
+//								// point to do something more fancy...
+//								ArrayList<Predicate> holdPredicates = new ArrayList<>(myQueryStack.getPredicates());
+//
+//								Condition filterPredicate = processFilter(filter, theResourceName, theRequest, theRequestPartitionId);
+//								myQueryStack.clearPredicates();
+//								myQueryStack.addPredicates(holdPredicates);
+//
+//								mySqlBuilder.addPredicate(filterPredicate);
+//
+//								// Because filters can have an OR at the root, we never know for sure that we haven't done an optimized
+//								// search that doesn't check the resource type. This could be improved in the future, but for now it's
+//								// safest to just clear this flag. The test "testRetrieveDifferentTypeEq" will fail if we don't clear
+//								// this here.
+//								myQueryStack.clearHasImplicitTypeSelection();
+//							}
+//						}
+
+					} else {
+						String validNames = new TreeSet<>(mySearchParamRegistry.getActiveSearchParams(theResourceName).keySet()).toString();
+						String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
+						throw new InvalidRequestException(msg);
+					}
+				}
+				break;
+		}
+	}
+
+
+	private static SearchFilterParser.CompareOperation toOperation(ParamPrefixEnum thePrefix) {
+		if (thePrefix != null) {
+			switch (thePrefix) {
+				case APPROXIMATE:
+					return SearchFilterParser.CompareOperation.ap;
+				case EQUAL:
+					return SearchFilterParser.CompareOperation.eq;
+				case GREATERTHAN:
+					return SearchFilterParser.CompareOperation.gt;
+				case GREATERTHAN_OR_EQUALS:
+					return SearchFilterParser.CompareOperation.ge;
+				case LESSTHAN:
+					return SearchFilterParser.CompareOperation.lt;
+				case LESSTHAN_OR_EQUALS:
+					return SearchFilterParser.CompareOperation.le;
+				case NOT_EQUAL:
+					return SearchFilterParser.CompareOperation.ne;
+			}
+		}
+		return SearchFilterParser.CompareOperation.eq;
 	}
 
 

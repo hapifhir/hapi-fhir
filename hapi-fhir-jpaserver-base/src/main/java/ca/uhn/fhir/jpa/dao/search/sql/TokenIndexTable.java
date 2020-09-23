@@ -174,7 +174,7 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 			return null;
 		}
 
-		return theFrom.createPredicateOrList(theSearchParam.getName(), sortedCodesList);
+		return theFrom.createPredicateOrList(theResourceName, theSearchParam.getName(), sortedCodesList);
 	}
 
 	private String determineSystemIfMissing(RuntimeSearchParam theSearchParam, String code, String theSystem) {
@@ -272,7 +272,7 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 	}
 
 
-	public ComboCondition createPredicateOrList(String theSearchParamName, List<VersionIndependentConcept> theCodes) {
+	public ComboCondition createPredicateOrList(String theResourceType, String theSearchParamName, List<VersionIndependentConcept> theCodes) {
 		Condition[] conditions = new Condition[theCodes.size()];
 		for (int i = 0; i < conditions.length; i++) {
 
@@ -280,13 +280,13 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 			long hash;
 			DbColumn column;
 			if (nextToken.getSystem() == null) {
-				hash = ResourceIndexedSearchParamToken.calculateHashValue(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theSearchParamName, nextToken.getCode());
+				hash = ResourceIndexedSearchParamToken.calculateHashValue(getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, nextToken.getCode());
 				column = myColumnHashValue;
 			} else if (nextToken.getCode() == null) {
-				hash = ResourceIndexedSearchParamToken.calculateHashSystem(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theSearchParamName, nextToken.getSystem());
+				hash = ResourceIndexedSearchParamToken.calculateHashSystem(getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, nextToken.getSystem());
 				column = myColumnHashSystem;
 			} else {
-				hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theSearchParamName, nextToken.getSystem(), nextToken.getCode());
+				hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, nextToken.getSystem(), nextToken.getCode());
 				column = myColumnHashSystemAndValue;
 			}
 

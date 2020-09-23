@@ -30,7 +30,7 @@ public class SearchSqlBuilderTest {
 	@Test
 	public void testSearchStringExact() {
 		SearchSqlBuilder builder = new SearchSqlBuilder(myFhirCtx, new ModelConfig(), new PartitionSettings(), null, "Patient", mySqlBuilderFactory);
-		StringIndexTable stringSelector = builder.addStringSelector();
+		StringIndexTable stringSelector = builder.addStringSelector(null);
 		stringSelector.addPredicateExact("family", "Smith");
 
 		SearchSqlBuilder.GeneratedSql output = builder.generate();
@@ -43,10 +43,10 @@ public class SearchSqlBuilderTest {
 	public void testSearchStringJoinedToToken() {
 		SearchSqlBuilder builder = new SearchSqlBuilder(myFhirCtx, new ModelConfig(), new PartitionSettings(), null, "Patient", mySqlBuilderFactory);
 
-		StringIndexTable stringSelector = builder.addStringSelector();
+		StringIndexTable stringSelector = builder.addStringSelector(null);
 		stringSelector.addPredicateExact("family", "Smith");
 
-		TokenIndexTable tokenSelector = builder.addTokenSelector();
+		TokenIndexTable tokenSelector = builder.addTokenSelector(null);
 		tokenSelector.addPredicateSystemAndValue("identifier", "http://foo", "12345");
 
 		SearchSqlBuilder.GeneratedSql output = builder.generate();
@@ -57,7 +57,7 @@ public class SearchSqlBuilderTest {
 	}
 
 	@ContextConfiguration
-	public class MyConfig {
+	public static class MyConfig {
 
 		@Bean
 		public SqlBuilderFactory sqlBuilderFactory() {

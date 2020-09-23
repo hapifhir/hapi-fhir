@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.search.sql;
 
+import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -24,8 +25,8 @@ public class SqlBuilderFactory {
 		return myApplicationContext.getBean(QuantityIndexTable.class, theSearchSqlBuilder);
 	}
 
-	public ResourceLinkIndexTable referenceIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ResourceLinkIndexTable.class, theSearchSqlBuilder);
+	public ResourceLinkIndexTable referenceIndexTable(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(ResourceLinkIndexTable.class, theQueryStack, theSearchSqlBuilder);
 	}
 
 	public ResourceSqlTable resourceTable(SearchSqlBuilder theSearchSqlBuilder) {

@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
@@ -56,6 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -66,12 +69,14 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkIndexTable extends BaseIndexTable {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkIndexTable.class);
 	private final DbColumn myColumnSrcType;
 	private final DbColumn myColumnSrcPath;
 	private final DbColumn myColumnTargetResourceId;
 	private final DbColumn myColumnTargetResourceUrl;
 	private final DbColumn myColumnSrcResourceId;
 	private final DbColumn myColumnTargetResourceType;
+	private final QueryStack3 myQueryStack;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
@@ -88,7 +93,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 	/**
 	 * Constructor
 	 */
-	public ResourceLinkIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public ResourceLinkIndexTable(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
@@ -96,6 +101,8 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
+
+		myQueryStack = theQueryStack;
 	}
 
 	@Override
@@ -139,7 +146,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 					 * Handle chained search, e.g. Patient?organization.name=Kwik-e-mart
 					 */
 
-					return addPredicateReferenceWithChain(getResourceType(), theParamName, theReferenceOrParamList, ref, theRequest);
+					return addPredicateReferenceWithChain(getResourceType(), theParamName, theReferenceOrParamList, ref, theRequest, theRequestPartitionId);
 
 				}
 
@@ -180,7 +187,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 
 	}
 
-
 	private Condition addPredicateReference(boolean theInverse, List<String> thePathsToMatch, List<Long> theTargetPidList, List<String> theTargetQualifiedUrls) {
 
 		Condition targetPidCondition = null;
@@ -216,7 +222,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		return condition;
 	}
 
-
 	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, @Nullable List<Class<? extends IBaseResource>> theCandidateTargetTypes) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("This search uses an unqualified resource(a parameter in a chain without a resource type). ");
@@ -239,149 +244,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(StorageProcessingMessage.class, msg);
 		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
-	}
-
-
-	/**
-	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
-	 * on the device.
-	 */
-	private Condition addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, ReferenceParam theReferenceParam, RequestDetails theRequest) {
-
-		/*
-		 * Which resource types can the given chained parameter actually link to? This might be a list
-		 * where the chain is unqualified, as in: Observation?subject.identifier=(...)
-		 * since subject can link to several possible target types.
-		 *
-		 * If the user has qualified the chain, as in: Observation?subject:Patient.identifier=(...)
-		 * this is just a simple 1-entry list.
-		 */
-		final List<Class<? extends IBaseResource>> resourceTypes = determineCandidateResourceTypesForChain(theResourceName, theParamName, theReferenceParam);
-
-		/*
-		 * Handle chain on _type
-		 */
-		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
-			InCondition condition = new InCondition(myColumnTargetResourceType, generatePlaceholders(resourceTypes));
-			addCondition(condition);
-			return condition;
-		}
-
-		boolean foundChainMatch = false;
-		List<Class<? extends IBaseResource>> candidateTargetTypes = new ArrayList<>();
-		for (Class<? extends IBaseResource> nextType : resourceTypes) {
-			String chain = theReferenceParam.getChain();
-
-			String remainingChain = null;
-			int chainDotIndex = chain.indexOf('.');
-			if (chainDotIndex != -1) {
-				remainingChain = chain.substring(chainDotIndex + 1);
-				chain = chain.substring(0, chainDotIndex);
-			}
-
-			RuntimeResourceDefinition typeDef = getFhirContext().getResourceDefinition(nextType);
-			String subResourceName = typeDef.getName();
-
-			IDao dao = myDaoRegistry.getResourceDao(nextType);
-			if (dao == null) {
-				ourLog.debug("Don't have a DAO for type {}", nextType.getSimpleName());
-				continue;
-			}
-
-			int qualifierIndex = chain.indexOf(':');
-			String qualifier = null;
-			if (qualifierIndex != -1) {
-				qualifier = chain.substring(qualifierIndex);
-				chain = chain.substring(0, qualifierIndex);
-			}
-
-			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
-			RuntimeSearchParam param = null;
-			if (!isMeta) {
-				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
-				if (param == null) {
-					ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
-					continue;
-				}
-			}
-
-			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
-
-			for (IQueryParameterType next : theList) {
-				String nextValue = next.getValueAsQueryToken(getFhirContext());
-				IQueryParameterType chainValue = mapReferenceChainToRawParamType(remainingChain, param, theParamName, qualifier, nextType, chain, isMeta, nextValue);
-				if (chainValue == null) {
-					continue;
-				}
-				foundChainMatch = true;
-				orValues.add(chainValue);
-			}
-
-			if (!foundChainMatch) {
-				throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
-			}
-
-			if (candidateTargetTypes.size() > 1) {
-				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
-			}
-
-			RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-
-
-
-			throw new UnsupportedOperationException();
-
-			// If this is false, we throw an exception below so no sense doing any further processing
-//			if (foundChainMatch) {
-				// FIXME KHS this is the part we need to change
-//				RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-
-
-
-				// FIXME KHS rather than all this exclusionary logic, refactor the predicate stuff out of the join code so we can reuse it in createPredicate() below
-//				if (canOptimizeToCrossJoin(resourceTypes, orValues, chainParamDef)) {
-					// FIXME hardcode token for now
-//					Join<ResourceLink, ResourceTable> linkTargetJoin = theLinkJoin.join("myParamsToken", JoinType.LEFT);
-
-					// JA RESTORE
-//					RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-//					Predicate valuesPredicate = myPredicateBuilder.addLinkPredicate(theResourceName, paramDef, orValues, null, theLinkJoin, theRequestPartitionId);
-//					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-//					theCodePredicates.add(pathPredicate);
-//					candidateTargetTypes.add(nextType);
-//					andPredicate = myCriteriaBuilder.and(pathPredicate, valuesPredicate);
-//
-
-
-//					From<?, ?> from = myQueryStack.addFromOrReturnNull(chainParamDef);
-//					if (from != null) {
-//						// Optimize search with a cross join
-//						Predicate valuePredicate = myPredicateBuilder.createPredicate(orValues, subResourceName, chainParamDef, myCriteriaBuilder, from, theRequestPartitionId);
-//						Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), from.get("myResourcePid"));
-//						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-//						andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, valuePredicate);
-//					}
-//				}
-
-//				if (andPredicate == null) {
-					// JA RESTORE
-//					Subquery<Long> subQ = createLinkSubquery(chain, subResourceName, orValues, theRequest, theRequestPartitionId);
-//
-//					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-//					Predicate pidPredicate = theLinkJoin.get("myTargetResourcePid").in(subQ);
-//					andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
-//					theCodePredicates.add(andPredicate);
-//					candidateTargetTypes.add(nextType);
-//				}
-//			}
-		}
-
-
-
-		return null;
-//		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
-//		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
-//		return predicate;
 	}
 
 
@@ -433,9 +295,162 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 //	}
 //
 
+	/**
+	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
+	 * on the device.
+	 */
+	private Condition addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+
+		/*
+		 * Which resource types can the given chained parameter actually link to? This might be a list
+		 * where the chain is unqualified, as in: Observation?subject.identifier=(...)
+		 * since subject can link to several possible target types.
+		 *
+		 * If the user has qualified the chain, as in: Observation?subject:Patient.identifier=(...)
+		 * this is just a simple 1-entry list.
+		 */
+		final List<String> resourceTypes = determineCandidateResourceTypesForChain(theResourceName, theParamName, theReferenceParam);
+
+		/*
+		 * Handle chain on _type
+		 */
+		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
+			BinaryCondition typeCondition = BinaryCondition.equalTo(myColumnSrcType, generatePlaceholder(theResourceName));
+			addCondition(typeCondition);
+
+			String typeValue = theReferenceParam.getValue();
+
+			try {
+				getFhirContext().getResourceDefinition(typeValue).getImplementingClass();
+			} catch (DataFormatException e) {
+				throw newInvalidResourceTypeException(typeValue);
+			}
+			if (!resourceTypes.contains(typeValue)) {
+				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
+			}
+
+			Condition condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theReferenceParam.getValue()));
+			addCondition(condition);
+			return condition;
+		}
+
+		boolean foundChainMatch = false;
+		List<Class<? extends IBaseResource>> candidateTargetTypes = new ArrayList<>();
+		for (String nextType : resourceTypes) {
+			String chain = theReferenceParam.getChain();
+
+			String remainingChain = null;
+			int chainDotIndex = chain.indexOf('.');
+			if (chainDotIndex != -1) {
+				remainingChain = chain.substring(chainDotIndex + 1);
+				chain = chain.substring(0, chainDotIndex);
+			}
+
+			RuntimeResourceDefinition typeDef = getFhirContext().getResourceDefinition(nextType);
+			String subResourceName = typeDef.getName();
+
+			IDao dao = myDaoRegistry.getResourceDao(nextType);
+			if (dao == null) {
+				ourLog.debug("Don't have a DAO for type {}", nextType);
+				continue;
+			}
+
+			int qualifierIndex = chain.indexOf(':');
+			String qualifier = null;
+			if (qualifierIndex != -1) {
+				qualifier = chain.substring(qualifierIndex);
+				chain = chain.substring(0, qualifierIndex);
+			}
+
+			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
+			RuntimeSearchParam param = null;
+			if (!isMeta) {
+				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
+				if (param == null) {
+					ourLog.debug("Type {} doesn't have search param {}", nextType, param);
+					continue;
+				}
+			}
+
+			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
+
+			for (IQueryParameterType next : theList) {
+				String nextValue = next.getValueAsQueryToken(getFhirContext());
+				IQueryParameterType chainValue = mapReferenceChainToRawParamType(remainingChain, param, theParamName, qualifier, nextType, chain, isMeta, nextValue);
+				if (chainValue == null) {
+					continue;
+				}
+				foundChainMatch = true;
+				orValues.add(chainValue);
+			}
+
+			if (!foundChainMatch) {
+				throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+			}
+
+			if (candidateTargetTypes.size() > 1) {
+				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
+			}
+
+			List<String> pathsToMatch = createResourceLinkPathPredicate(getResourceType(), theParamName);
+			InCondition pathPredicate = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
+			addCondition(pathPredicate);
+
+			myQueryStack.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, Collections.singletonList(orValues), theRequest, theRequestPartitionId);
+
+			// If this is false, we throw an exception below so no sense doing any further processing
+//			if (foundChainMatch) {
+			// FIXME KHS this is the part we need to change
+//				RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
+
+
+			// FIXME KHS rather than all this exclusionary logic, refactor the predicate stuff out of the join code so we can reuse it in createPredicate() below
+//				if (canOptimizeToCrossJoin(resourceTypes, orValues, chainParamDef)) {
+			// FIXME hardcode token for now
+//					Join<ResourceLink, ResourceTable> linkTargetJoin = theLinkJoin.join("myParamsToken", JoinType.LEFT);
+
+			// JA RESTORE
+//					RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
+//					Predicate valuesPredicate = myPredicateBuilder.addLinkPredicate(theResourceName, paramDef, orValues, null, theLinkJoin, theRequestPartitionId);
+//					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
+//					theCodePredicates.add(pathPredicate);
+//					candidateTargetTypes.add(nextType);
+//					andPredicate = myCriteriaBuilder.and(pathPredicate, valuesPredicate);
+//
+
+
+//					From<?, ?> from = myQueryStack.addFromOrReturnNull(chainParamDef);
+//					if (from != null) {
+//						// Optimize search with a cross join
+//						Predicate valuePredicate = myPredicateBuilder.createPredicate(orValues, subResourceName, chainParamDef, myCriteriaBuilder, from, theRequestPartitionId);
+//						Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), from.get("myResourcePid"));
+//						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
+//						andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, valuePredicate);
+//					}
+//				}
+
+//				if (andPredicate == null) {
+			// JA RESTORE
+//					Subquery<Long> subQ = createLinkSubquery(chain, subResourceName, orValues, theRequest, theRequestPartitionId);
+//
+//					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
+//					Predicate pidPredicate = theLinkJoin.get("myTargetResourcePid").in(subQ);
+//					andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
+//					theCodePredicates.add(andPredicate);
+//					candidateTargetTypes.add(nextType);
+//				}
+//			}
+		}
+
+
+		return null;
+//		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
+//		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
+//		return predicate;
+	}
 
 	@Nonnull
-	private List<Class<? extends IBaseResource>> determineCandidateResourceTypesForChain(String theResourceName, String theParamName, ReferenceParam theReferenceParam) {
+	private List<String> determineCandidateResourceTypesForChain(String theResourceName, String theParamName, ReferenceParam theReferenceParam) {
 		final List<Class<? extends IBaseResource>> resourceTypes;
 		if (!theReferenceParam.hasResourceType()) {
 
@@ -506,9 +521,12 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			}
 
 		}
-		return resourceTypes;
-	}
 
+		return resourceTypes
+			.stream()
+			.map(t -> getFhirContext().getResourceType(t))
+			.collect(Collectors.toList());
+	}
 
 	private List<String> createResourceLinkPathPredicate(String theResourceName, String theParamName) {
 		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResourceName);
@@ -530,30 +548,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		}
 
 		return path;
-	}
-
-
-
-	private IQueryParameterType mapReferenceChainToRawParamType(String remainingChain, RuntimeSearchParam param, String theParamName, String qualifier, Class<? extends IBaseResource> nextType, String chain, boolean isMeta, String resourceId) {
-		IQueryParameterType chainValue;
-		if (remainingChain != null) {
-			if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
-				ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", nextType.getSimpleName(), chain, remainingChain);
-				return null;
-			}
-
-			chainValue = new ReferenceParam();
-			chainValue.setValueAsQueryToken(getFhirContext(), theParamName, qualifier, resourceId);
-			((ReferenceParam) chainValue).setChain(remainingChain);
-		} else if (isMeta) {
-			IQueryParameterType type = myMatchUrlService.newInstanceType(chain);
-			type.setValueAsQueryToken(getFhirContext(), theParamName, qualifier, resourceId);
-			chainValue = type;
-		} else {
-			chainValue = toParameterType(param, qualifier, resourceId);
-		}
-
-		return chainValue;
 	}
 
 
@@ -585,6 +579,27 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 //
 //
 
+	private IQueryParameterType mapReferenceChainToRawParamType(String remainingChain, RuntimeSearchParam param, String theParamName, String qualifier, String nextType, String chain, boolean isMeta, String resourceId) {
+		IQueryParameterType chainValue;
+		if (remainingChain != null) {
+			if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", nextType, chain, remainingChain);
+				return null;
+			}
+
+			chainValue = new ReferenceParam();
+			chainValue.setValueAsQueryToken(getFhirContext(), theParamName, qualifier, resourceId);
+			((ReferenceParam) chainValue).setChain(remainingChain);
+		} else if (isMeta) {
+			IQueryParameterType type = myMatchUrlService.newInstanceType(chain);
+			type.setValueAsQueryToken(getFhirContext(), theParamName, qualifier, resourceId);
+			chainValue = type;
+		} else {
+			chainValue = toParameterType(param, qualifier, resourceId);
+		}
+
+		return chainValue;
+	}
 
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam) {
 		IQueryParameterType qp;
@@ -627,14 +642,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			default:
 				throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
 		}
-		return qp;
-	}
-
-
-	private IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
-		IQueryParameterType qp = toParameterType(theParam);
-
-		qp.setValueAsQueryToken(getFhirContext(), theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
 	}
 
@@ -872,19 +879,24 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 //		return retVal;
 //	}
 //
-//	@Nonnull
-//	private InvalidRequestException newInvalidTargetTypeForChainException(String theResourceName, String theParamName, String theTypeValue) {
-//		String searchParamName = theResourceName + ":" + theParamName;
-//		String msg = myContext.getLocalizer().getMessage(PredicateBuilderReference2.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
-//		return new InvalidRequestException(msg);
-//	}
 
+	@Nonnull
+	private InvalidRequestException newInvalidTargetTypeForChainException(String theResourceName, String theParamName, String theTypeValue) {
+		String searchParamName = theResourceName + ":" + theParamName;
+		String msg = getFhirContext().getLocalizer().getMessage(PredicateBuilderReference.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
+		return new InvalidRequestException(msg);
+	}
+
+	private IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
+		IQueryParameterType qp = toParameterType(theParam);
+
+		qp.setValueAsQueryToken(getFhirContext(), theParam.getName(), theQualifier, theValueAsQueryToken);
+		return qp;
+	}
 
 	@Nonnull
 	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
 		String msg = getFhirContext().getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
 		throw new InvalidRequestException(msg);
 	}
-
-private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkIndexTable.class);
 }

@@ -478,9 +478,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Patient").setChain(PARAM_TYPE));
+		myCaptureQueriesListener.clear();
 		results = myEncounterDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 		ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids, contains(enc1Id));
+		assertThat(ids.toString(), ids, contains(enc1Id));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		map = new SearchParameterMap();
@@ -558,7 +560,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ma.setMedication(new Reference(medId));
 		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualified();
 
-		SearchParameterMap map = new SearchParameterMap();
+		runInTransaction(() -> {
+			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		SearchParameterMap map =  SearchParameterMap.newSynchronous();
 		map.add(MedicationAdministration.SP_MEDICATION, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));
 
 		myCaptureQueriesListener.clear();
@@ -5101,9 +5108,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// Matches
 		Encounter e1 = new Encounter();
 		e1.setPeriod(new Period().setStartElement(new DateTimeType("2020-09-14T12:00:00Z")).setEndElement(new DateTimeType("2020-09-14T12:00:00Z")));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e1));
 		String e1Id = myEncounterDao.create(e1).getId().toUnqualifiedVersionless().getValue();
 		Communication c1 = new Communication();
 		c1.getEncounter().setReference(e1Id);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c1));
 		myCommunicationDao.create(c1);
 
 		// Doesn't match
@@ -5114,7 +5123,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		c2.getEncounter().setReference(e2Id);
 		myCommunicationDao.create(c2);
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		runInTransaction(()->{
+			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		SearchParameterMap map;
+
+		map = SearchParameterMap.newSynchronous();
 		map.add(Communication.SP_ENCOUNTER, new ReferenceParam("ge2020-09-14").setChain("date"));
 		map.add(Communication.SP_ENCOUNTER, new ReferenceParam("le2020-09-15").setChain("date"));
 
@@ -5125,7 +5141,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, outcome.sizeOrThrowNpe());
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(1, StringUtils.countMatches(searchSql, "AAAAA"));
+		assertEquals(2, StringUtils.countMatches(searchSql, "JOIN"));
 
 	}
 

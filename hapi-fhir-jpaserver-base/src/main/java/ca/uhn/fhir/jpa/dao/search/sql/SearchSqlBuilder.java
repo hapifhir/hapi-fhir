@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.search.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -19,6 +20,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -65,28 +67,30 @@ public class SearchSqlBuilder {
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s COORDS search parameter
+	 *
+	 * @param theSourceJoinColumn
 	 */
-	public CoordsIndexTable addCoordsSelector() {
+	public CoordsIndexTable addCoordsSelector(@Nullable DbColumn theSourceJoinColumn) {
 		CoordsIndexTable retVal = mySqlBuilderFactory.coordsIndexTable(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s DATE search parameter
 	 */
-	public DateIndexTable addDateSelector() {
+	public DateIndexTable addDateSelector(@Nullable DbColumn theSourceJoinColumn) {
 		DateIndexTable retVal = mySqlBuilderFactory.dateIndexTable(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s NUMBER search parameter
 	 */
-	public NumberIndexTable addNumberSelector() {
+	public NumberIndexTable addNumberSelector(@Nullable DbColumn theSourceJoinColumn) {
 		NumberIndexTable retVal = mySqlBuilderFactory.numberIndexTable(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
@@ -94,9 +98,9 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s QUANTITY search parameter
 	 */
-	public QuantityIndexTable addQuantity() {
+	public QuantityIndexTable addQuantity(@Nullable DbColumn theSourceJoinColumn) {
 		QuantityIndexTable retVal = mySqlBuilderFactory.quantityIndexTable(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
@@ -104,54 +108,54 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s REFERENCE search parameter
 	 */
-	public ResourceLinkIndexTable addReferenceSelector() {
-		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(this);
-		addTable(retVal);
+	public ResourceLinkIndexTable addReferenceSelector(QueryStack3 theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
+		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s STRING search parameter
 	 */
-	public StringIndexTable addStringSelector() {
+	public StringIndexTable addStringSelector(@Nullable DbColumn theSourceJoinColumn) {
 		StringIndexTable retVal = mySqlBuilderFactory.stringIndexTable(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
 	 */
-	public TagPredicateBuilder3 addTagSelector() {
+	public TagPredicateBuilder3 addTagSelector(@Nullable DbColumn theSourceJoinColumn) {
 		TagPredicateBuilder3 retVal = mySqlBuilderFactory.tagIndexFactory(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s TOKEN search parameter
 	 */
-	public TokenIndexTable addTokenSelector() {
+	public TokenIndexTable addTokenSelector(@Nullable DbColumn theSourceJoinColumn) {
 		TokenIndexTable retVal = mySqlBuilderFactory.tokenIndexTable(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>:missing</code> search parameter
 	 */
-	public SearchParamPresenceTable addSearchParamPresenceSelector() {
+	public SearchParamPresenceTable addSearchParamPresenceSelector(@Nullable DbColumn theSourceJoinColumn) {
 		SearchParamPresenceTable retVal = mySqlBuilderFactory.searchParamPresenceTable(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s URI search parameter
 	 */
-	public UriIndexTable addUriSelector() {
+	public UriIndexTable addUriSelector(@Nullable DbColumn theSourceJoinColumn) {
 		UriIndexTable retVal = mySqlBuilderFactory.uriIndexTable(this);
-		addTable(retVal);
+		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
@@ -164,8 +168,13 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for an arbitrary table
 	 */
-	private void addTable(BaseIndexTable theIndexTable) {
-		if (myCurrentIndexTable == null) {
+	private void addTable(BaseIndexTable theIndexTable, @Nullable DbColumn theSourceJoinColumn) {
+		if (theSourceJoinColumn != null) {
+			DbTable fromTable = theSourceJoinColumn.getTable();
+			DbTable toTable = theIndexTable.getTable();
+			DbColumn toColumn = theIndexTable.getResourceIdColumn();
+			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
+		} else if (myCurrentIndexTable == null) {
 			mySelect.addColumns(theIndexTable.getResourceIdColumn());
 			mySelect.addFromTable(theIndexTable.getTable());
 		} else {
@@ -237,7 +246,7 @@ public class SearchSqlBuilder {
 		if (myResourceTableRoot == null) {
 			ResourceSqlTable resourceTable = mySqlBuilderFactory.resourceTable(this);
 			resourceTable.addResourceTypeAndNonDeletedPredicates();
-			addTable(resourceTable);
+			addTable(resourceTable, null);
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;
@@ -327,7 +336,6 @@ public class SearchSqlBuilder {
 				throw new IllegalArgumentException();
 		}
 	}
-
 
 
 	/**

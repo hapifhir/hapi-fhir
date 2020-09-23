@@ -50,18 +50,6 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 													 DateIndexTable theFrom,
 													 SearchFilterParser.CompareOperation theOperation,
 													 RequestPartitionId theRequestPartitionId) {
-		Condition predicateDate = createPredicateDate(theParam,
-			theBuilder,
-			theFrom,
-			theOperation
-		);
-		return predicateDate;
-	}
-
-	private Condition createPredicateDate(IQueryParameterType theParam,
-													  CriteriaBuilder theBuilder,
-													  DateIndexTable theFrom,
-													  SearchFilterParser.CompareOperation theOperation) {
 
 		Condition p;
 		if (theParam instanceof DateParam) {
@@ -200,7 +188,7 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 		}
 	}
 
-	public Condition createPredicate(ColumnEnum theColumn, ParamPrefixEnum theComparator, Object theValue) {
+	private Condition createPredicate(ColumnEnum theColumn, ParamPrefixEnum theComparator, Object theValue) {
 
 		DbColumn column;
 		switch (theColumn) {

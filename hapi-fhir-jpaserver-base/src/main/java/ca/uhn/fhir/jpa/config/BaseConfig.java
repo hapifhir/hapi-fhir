@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.search.SearchBuilder2;
+import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import ca.uhn.fhir.jpa.dao.search.sql.CoordsIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.DateIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresenceTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SqlBuilderFactory;
 import ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.TagPredicateBuilder3;
 import ca.uhn.fhir.jpa.dao.search.sql.TokenIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.UriIndexTable;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -482,14 +484,20 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ResourceLinkIndexTable indexTableReference(SearchSqlBuilder theSearchBuilder) {
-		return new ResourceLinkIndexTable(theSearchBuilder);
+	public ResourceLinkIndexTable indexTableReference(QueryStack3 theQueryStack, SearchSqlBuilder theSearchBuilder) {
+		return new ResourceLinkIndexTable(theQueryStack, theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceSqlTable indexTableResource(SearchSqlBuilder theSearchBuilder) {
 		return new ResourceSqlTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public TagPredicateBuilder3 indexTableTag(SearchSqlBuilder theSearchBuilder) {
+		return new TagPredicateBuilder3(theSearchBuilder);
 	}
 
 	@Bean
