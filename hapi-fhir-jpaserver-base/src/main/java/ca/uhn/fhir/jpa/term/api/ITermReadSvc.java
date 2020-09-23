@@ -126,4 +126,9 @@ public interface ITermReadSvc extends IValidationSupport {
 	 */
 	boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet);
 
+	/**
+	 * Version independent
+	 */
+	CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theValueSetUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+
 }
