@@ -55,10 +55,10 @@ Ue the `$empi-query-links` operation to view empi links.  The results returned a
 
 ### Example
 
-Use an HTTP GET like `http://example.com/$empi-query-link?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:
+Use an HTTP GET like `http://example.com/$empi-query-links?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-query-link
+http://example.com/$empi-query-links
 ```
 
 The following request body could be used to find all POSSIBLE_MATCH links in the system:
