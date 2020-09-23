@@ -52,8 +52,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
-import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateCodeOptions;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
 
