@@ -560,7 +560,7 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "criteria": "",
+    "name": "criteria",
     "valueString": "birthDate=2020-07-28"
   } ]
 }
