@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
+import ca.uhn.fhir.empi.api.EmpiLinkJson;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
@@ -32,11 +33,16 @@ import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.List;
 
 public abstract class BaseEmpiProvider {
 
@@ -135,6 +141,7 @@ public abstract class BaseEmpiProvider {
 		return new EmpiTransactionContext(transactionLogMessages, EmpiTransactionContext.OperationType.MERGE_PERSONS);
 	}
 
+	// FIXME KHS consolidate
 	protected EmpiMatchResultEnum extractMatchResultOrNull(IPrimitiveType<String> theMatchResult) {
 		String matchResult = extractStringNull(theMatchResult);
 		if (matchResult == null) {
@@ -184,5 +191,24 @@ public abstract class BaseEmpiProvider {
 
 	private boolean hasVersionIdPart(String theId) {
 		return new IdDt(theId).hasVersionIdPart();
+	}
+
+	protected IBaseParameters parametersFromEmpiLinks(List<EmpiLinkJson> theEmpiLinks, boolean includeResultAndSource) {
+		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+
+		for (EmpiLinkJson empiLink : theEmpiLinks) {
+			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
+			ParametersUtil.addPartString(myFhirContext, resultPart, "personId", empiLink.getPersonId());
+			ParametersUtil.addPartString(myFhirContext, resultPart, "targetId", empiLink.getTargetId());
+
+			if (includeResultAndSource) {
+				ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", empiLink.getMatchResult().name());
+				ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", empiLink.getLinkSource().name());
+				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", empiLink.getEidMatch());
+				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "newPerson", empiLink.getNewPerson());
+				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", empiLink.getScore());
+			}
+		}
+		return retval;
 	}
 }

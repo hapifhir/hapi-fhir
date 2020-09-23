@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiLinkJson;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
@@ -51,6 +52,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public class EmpiProviderDstu3 extends BaseEmpiProvider {
@@ -137,12 +139,15 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		EmpiMatchResultEnum matchResult = extractMatchResultOrNull(theMatchResult);
 		EmpiLinkSourceEnum linkSource = extractLinkSourceOrNull(theLinkSource);
 
-		return (Parameters) myEmpiLinkQuerySvc.queryLinks(personId, targetId, matchResult, linkSource, createEmpiContext(theRequestDetails));
+
+		List<EmpiLinkJson> empiLinkJson = myEmpiLinkQuerySvc.queryLinks(personId, targetId, matchResult, linkSource, createEmpiContext(theRequestDetails));
+		return (Parameters) parametersFromEmpiLinks(empiLinkJson, true);
 	}
 
 	@Operation(name = ProviderConstants.EMPI_DUPLICATE_PERSONS)
 	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
-		return (Parameters) myEmpiLinkQuerySvc.getPossibleDuplicates(createEmpiContext(theRequestDetails));
+		List<EmpiLinkJson> possibleDuplicates = myEmpiLinkQuerySvc.getPossibleDuplicates(createEmpiContext(theRequestDetails));
+		return (Parameters) parametersFromEmpiLinks(possibleDuplicates, false);
 	}
 
 	@Operation(name = ProviderConstants.EMPI_NOT_DUPLICATE)

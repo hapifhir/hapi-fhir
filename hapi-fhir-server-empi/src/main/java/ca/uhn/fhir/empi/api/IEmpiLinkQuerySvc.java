@@ -21,12 +21,13 @@ package ca.uhn.fhir.empi.api;
  */
 
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-public interface IEmpiLinkQuerySvc {
-	IBaseParameters queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
+import java.util.List;
 
-	IBaseParameters getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
+public interface IEmpiLinkQuerySvc {
+	List<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
+
+	List<EmpiLinkJson>  getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
 
 }
