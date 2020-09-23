@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @Service
@@ -79,7 +80,7 @@ public class EmpiSearchParamSvc implements ISearchParamRetriever {
 	 *
 	 * @return the generated SearchParameterMap, or an empty one if there is no criteria.
 	 */
-	public SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, String theCriteria) {
+	public SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, @Nullable String theCriteria) {
 		SearchParameterMap spMap;
 		if (StringUtils.isBlank(theCriteria)) {
 			spMap = new SearchParameterMap();

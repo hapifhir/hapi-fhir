@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,7 +65,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 
 	@Override
 	@Transactional
-	public long runEmpiOnAllTargetTypes(String theCriteria) {
+	public long runEmpiOnAllTargetTypes(@Nullable String theCriteria) {
 		long submittedCount = 0;
 		submittedCount += runEmpiOnPatientType(theCriteria);
 		submittedCount += runEmpiOnPractitionerType(theCriteria);
@@ -73,8 +74,12 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 
 	@Override
 	@Transactional
-	public long runEmpiOnTargetType(String theTargetType, String theCriteria) {
-		ourLog.info("Submitting empi resources of type {} with criteria {}", theTargetType, theCriteria);
+	public long runEmpiOnTargetType(String theTargetType, @Nullable String theCriteria) {
+		if (theCriteria == null) {
+			ourLog.info("Submitting all resources of type {} to EMPI", theTargetType);
+		} else {
+			ourLog.info("Submitting resources of type {} with criteria {} to EMPI", theTargetType, theCriteria);
+		}
 		resolveTargetTypeOrThrowException(theTargetType);
 		SearchParameterMap spMap = myEmpiSearchParamSvc.getSearchParameterMapFromCriteria(theTargetType, theCriteria);
 		spMap.setLoadSynchronousUpTo(BUFFER_SIZE);
@@ -118,13 +123,13 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 
 	@Override
 	@Transactional
-	public long runEmpiOnPractitionerType(String theCriteria) {
+	public long runEmpiOnPractitionerType(@Nullable String theCriteria) {
 		return runEmpiOnTargetType("Practitioner", theCriteria);
 	}
 
 	@Override
 	@Transactional
-	public long runEmpiOnPatientType(String theCriteria) {
+	public long runEmpiOnPatientType(@Nullable String theCriteria) {
 		return runEmpiOnTargetType("Patient", theCriteria);
 	}
 

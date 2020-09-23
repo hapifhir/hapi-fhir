@@ -22,6 +22,8 @@ package ca.uhn.fhir.empi.api;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nullable;
+
 public interface IEmpiBatchSvc {
 
 	/**
@@ -34,7 +36,7 @@ public interface IEmpiBatchSvc {
 	 *
 	 * @return
 	 */
-	long runEmpiOnAllTargetTypes(String theCriteria);
+	long runEmpiOnAllTargetTypes(@Nullable String theCriteria);
 
 	/**
 	 * Given a type and a search criteria, submit all found resources for EMPI processing.

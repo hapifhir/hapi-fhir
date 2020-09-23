@@ -537,7 +537,7 @@ This operation takes a single optional criteria parameter unless it is called on
             <td>String</td>
             <td>0..1</td>
             <td>
-            The search critiera used to filter resources.
+            The search criteria used to filter resources.  An empty criteria will submit all resources.
             </td>
         </tr>
     </tbody>
