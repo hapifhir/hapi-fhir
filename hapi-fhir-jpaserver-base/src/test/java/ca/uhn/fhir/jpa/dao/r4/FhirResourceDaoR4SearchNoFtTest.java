@@ -72,6 +72,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
@@ -5072,6 +5073,34 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(crId));
 	}
+
+
+	@Test
+	public void testSearchWithTwoChainedDates() {
+		// Matches
+		Encounter e1 = new Encounter();
+		e1.setPeriod(new Period().setStartElement(new DateTimeType("2020-09-14T12:00:00Z")).setEndElement(new DateTimeType("2020-09-14T12:00:00Z")));
+		String e1Id = myEncounterDao.create(e1).getId().toUnqualifiedVersionless().getValue();
+		Communication c1 = new Communication();
+		c1.getEncounter().setReference(e1Id);
+		myCommunicationDao.create(c1);
+
+		// Doesn't match
+		Encounter e2 = new Encounter();
+		e2.setPeriod(new Period().setStartElement(new DateTimeType("2020-02-14T12:00:00Z")).setEndElement(new DateTimeType("2020-02-14T12:00:00Z")));
+		String e2Id = myEncounterDao.create(e2).getId().toUnqualifiedVersionless().getValue();
+		Communication c2 = new Communication();
+		c2.getEncounter().setReference(e2Id);
+		myCommunicationDao.create(c2);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Communication.SP_ENCOUNTER, new ReferenceParam("ge2020-09-14").setChain("date"));
+		map.add(Communication.SP_ENCOUNTER, new ReferenceParam("le2020-09-15").setChain("date"));
+
+		IBundleProvider outcome = myCommunicationDao.search(map);
+		assertEquals(1, outcome.sizeOrThrowNpe());
+	}
+
 
 	@Test
 	public void testCircularReferencesDontBreakRevIncludes() {

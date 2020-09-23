@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.dao.predicate.IndexJoins;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 
 import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -38,7 +39,9 @@ import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 abstract class QueryRootEntry {
@@ -46,6 +49,7 @@ abstract class QueryRootEntry {
 	private final IndexJoins myIndexJoins = new IndexJoins();
 	private final CriteriaBuilder myCriteriaBuilder;
 	private boolean myHasImplicitTypeSelection;
+	private Map<String, From<?, ResourceIndexedSearchParamDate>> myJoinMap;
 
 	QueryRootEntry(CriteriaBuilder theCriteriaBuilder) {
 		myCriteriaBuilder = theCriteriaBuilder;
@@ -107,6 +111,15 @@ abstract class QueryRootEntry {
 		}
 
 		return getQueryRoot();
+	}
+
+	public Map<String, From<?, ResourceIndexedSearchParamDate>> getJoinMap() {
+		Map<String, From<?, ResourceIndexedSearchParamDate>> retVal = myJoinMap;
+		if (retVal==null) {
+			retVal = new HashMap<>();
+			myJoinMap = retVal;
+		}
+		return retVal;
 	}
 
 	abstract void orderBy(List<Order> theOrders);

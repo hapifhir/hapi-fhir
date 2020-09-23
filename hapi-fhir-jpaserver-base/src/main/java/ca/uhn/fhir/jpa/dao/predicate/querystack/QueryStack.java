@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.lang3.Validate;
 
@@ -39,6 +40,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 
@@ -289,4 +291,9 @@ public class QueryStack {
 	public Predicate addNeverMatchingPredicate() {
 		return top().addNeverMatchingPredicate();
 	}
+
+	public Map<String, From<?, ResourceIndexedSearchParamDate>> getJoinMap() {
+		return top().getJoinMap();
+	}
+
 }
