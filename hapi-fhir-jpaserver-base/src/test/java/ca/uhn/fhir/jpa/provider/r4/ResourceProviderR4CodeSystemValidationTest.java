@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 
@@ -131,6 +132,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 
 		try {
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.",e.getMessage());
 		}
@@ -160,6 +162,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 
 		try {
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate.",e.getMessage());
 		}
@@ -175,6 +178,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 
 		try {
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: $validate-code can only validate (code) OR (coding) OR (codeableConcept)",e.getMessage());
 		}
@@ -189,6 +193,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 
 		try {
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
 		}
@@ -237,6 +242,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 
 		try {
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
 		}
@@ -367,6 +373,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 
 		try {
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
 		}
