@@ -64,6 +64,9 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 			IValidationSupport.LookupCodeResult result;
 			if (theVersion != null) {
 				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theRequestDetails);
+			} else if (theCoding != null && theCoding.hasVersion()) {
+				Coding codingWithVersion = new Coding(theCoding.getSystem() + "|" + theCoding.getVersion(), theCoding.getCode(), theCoding.getDisplay());
+				result = dao.lookupCode(theCode, theSystem, codingWithVersion, theRequestDetails);
 			} else {
 				result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
 			}
