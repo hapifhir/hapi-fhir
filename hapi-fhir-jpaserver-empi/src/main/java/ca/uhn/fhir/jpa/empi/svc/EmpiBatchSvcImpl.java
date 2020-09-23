@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
 import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
+import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
+	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -71,6 +74,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 	@Override
 	@Transactional
 	public long runEmpiOnTargetType(String theTargetType, String theCriteria) {
+		ourLog.info("Submitting empi resources of type {} with criteria {}", theTargetType, theCriteria);
 		resolveTargetTypeOrThrowException(theTargetType);
 		SearchParameterMap spMap = myEmpiSearchParamSvc.getSearchParameterMapFromCriteria(theTargetType, theCriteria);
 		spMap.setLoadSynchronousUpTo(BUFFER_SIZE);
@@ -88,8 +92,9 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 				total += loadPidsAndSubmitToEmpiChannel(theSearchBuilder, pidBatch);
 			} while (query.hasNext());
 		} catch (IOException theE) {
-			throw new InternalErrorException("Failure while attempting to query resources for " + ProviderConstants.OPERATION_EMPI_BATCH_RUN, theE);
+			throw new InternalErrorException("Failure while attempting to query resources for " + ProviderConstants.OPERATION_EMPI_SUBMIT, theE);
 		}
+		ourLog.info("EMPI Submit complete.  Submitted a total of {} resources.", total);
 		return total;
 	}
 
@@ -105,6 +110,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 	private long loadPidsAndSubmitToEmpiChannel(ISearchBuilder theSearchBuilder, Collection<ResourcePersistentId> thePidsToSubmit) {
 		List<IBaseResource> resourcesToSubmit = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePidsToSubmit, Collections.emptyList(), resourcesToSubmit, false, null);
+		ourLog.info("Submitting {} resources to EMPI", resourcesToSubmit.size());
 		resourcesToSubmit
 			.forEach(resource -> myEmpiChannelSubmitterSvc.submitResourceToEmpiChannel(resource));
 		return resourcesToSubmit.size();
@@ -134,7 +140,7 @@ public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
 
 	private void resolveTargetTypeOrThrowException(String theResourceType) {
 		if (!EmpiUtil.supportedTargetType(theResourceType)) {
-			throw new InvalidRequestException(ProviderConstants.OPERATION_EMPI_BATCH_RUN + " does not support resource type: " + theResourceType);
+			throw new InvalidRequestException(ProviderConstants.OPERATION_EMPI_SUBMIT + " does not support resource type: " + theResourceType);
 		}
 	}
 }

@@ -177,7 +177,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return (Parameters) myEmpiLinkUpdaterSvc.notDuplicatePerson(person, target, createEmpiContext(theRequestDetails));
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= IntegerType.class)
 	})
 	public Parameters empiBatchOnAllTargets(
@@ -192,7 +192,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return theCriteria == null ? null : theCriteria.getValueAsString();
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Patient.class, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatchPatientInstance(
@@ -202,7 +202,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Patient.class, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatchPatientType(
@@ -213,7 +213,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Practitioner.class, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatchPractitionerInstance(
@@ -223,7 +223,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN, idempotent = false, type = Practitioner.class, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatchPractitionerType(

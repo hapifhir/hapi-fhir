@@ -53,7 +53,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private EmpiResourceFilteringSvc myEmpiResourceFileringSvc;
+	private EmpiResourceFilteringSvc myEmpiResourceFilteringSvc;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -66,7 +66,7 @@ public class EmpiMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-			if (myEmpiResourceFileringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
+			if (myEmpiResourceFilteringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
 				matchEmpiAndUpdateLinks(msg);
 			}
 		} catch (Exception e) {

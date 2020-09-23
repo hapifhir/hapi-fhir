@@ -58,6 +58,11 @@ public class EmpiResourceFilteringSvc {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		List<EmpiResourceSearchParamJson> candidateSearchParams = empiSettings.getEmpiRules().getCandidateSearchParams();
 
+		// FIXME KHS add a test for this
+		if (candidateSearchParams.isEmpty()) {
+			return true;
+		}
+
 		boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
 			.filter(csp -> myEmpiSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
 			.flatMap(csp -> csp.getSearchParams().stream())
