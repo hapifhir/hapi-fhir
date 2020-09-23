@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2101
+title: "In some circumstances when using a Plain Server, the generated CapabilityStatement could have duplciate
+  Search Parameter definitions. This has been corrected."
