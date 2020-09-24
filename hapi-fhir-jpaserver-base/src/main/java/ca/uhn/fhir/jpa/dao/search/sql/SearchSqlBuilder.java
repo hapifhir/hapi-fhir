@@ -67,8 +67,6 @@ public class SearchSqlBuilder {
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s COORDS search parameter
-	 *
-	 * @param theSourceJoinColumn
 	 */
 	public CoordsIndexTable addCoordsSelector(@Nullable DbColumn theSourceJoinColumn) {
 		CoordsIndexTable retVal = mySqlBuilderFactory.coordsIndexTable(this);
@@ -104,12 +102,43 @@ public class SearchSqlBuilder {
 		return retVal;
 	}
 
+	// FIXME: remove
+	public ResourceLinkIndexTable addEverythingSelector(QueryStack3 theQueryStack, String theResourceName, Long theTargetPid) {
+		assert myCurrentIndexTable == null;
+
+//		if (theTargetPid != null) {
+		return addReferenceSelector(theQueryStack, null);
+//		} else {
+//			getOrCreateResourceTableRoot();
+//
+//			ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this);
+//			DbTable fromTable = myCurrentIndexTable.getTable();
+//			DbTable toTable = retVal.getTable();
+//			DbColumn fromColumn = myCurrentIndexTable.getResourceIdColumn();
+//			DbColumn toColumn = retVal.getColumnTargetResourceId();
+//			Join join = new DbJoin(mySpec, fromTable, toTable, new DbColumn[]{fromColumn}, new DbColumn[]{toColumn});
+//			mySelect.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
+//			mySelect.addColumns(retVal.getColumnSrcResourceId());
+//			return retVal;
+//		}
+	}
+
 
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on s REFERENCE search parameter
 	 */
 	public ResourceLinkIndexTable addReferenceSelector(QueryStack3 theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
-		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this);
+		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
+		addTable(retVal, theSourceJoinColumn);
+		return retVal;
+	}
+
+	/**
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a reosource link where the
+	 * source and target are reversed. This is used for _has queries.
+	 */
+	public ResourceLinkIndexTable addReferenceSelectorReversed(QueryStack3 theQueryStack, DbColumn theSourceJoinColumn) {
+		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -174,17 +203,19 @@ public class SearchSqlBuilder {
 			DbTable toTable = theIndexTable.getTable();
 			DbColumn toColumn = theIndexTable.getResourceIdColumn();
 			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
-		} else if (myCurrentIndexTable == null) {
-			mySelect.addColumns(theIndexTable.getResourceIdColumn());
-			mySelect.addFromTable(theIndexTable.getTable());
 		} else {
-			DbTable fromTable = myCurrentIndexTable.getTable();
-			DbTable toTable = theIndexTable.getTable();
-			DbColumn fromColumn = myCurrentIndexTable.getResourceIdColumn();
-			DbColumn toColumn = theIndexTable.getResourceIdColumn();
-			addJoin(fromTable, toTable, fromColumn, toColumn);
+			if (myCurrentIndexTable == null) {
+				mySelect.addColumns(theIndexTable.getResourceIdColumn());
+				mySelect.addFromTable(theIndexTable.getTable());
+			} else {
+				DbTable fromTable = myCurrentIndexTable.getTable();
+				DbTable toTable = theIndexTable.getTable();
+				DbColumn fromColumn = myCurrentIndexTable.getResourceIdColumn();
+				DbColumn toColumn = theIndexTable.getResourceIdColumn();
+				addJoin(fromTable, toTable, fromColumn, toColumn);
+			}
+			myCurrentIndexTable = theIndexTable;
 		}
-		myCurrentIndexTable = theIndexTable;
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
@@ -242,7 +273,7 @@ public class SearchSqlBuilder {
 		return myCurrentIndexTable;
 	}
 
-	private ResourceSqlTable getOrCreateResourceTableRoot() {
+	public ResourceSqlTable getOrCreateResourceTableRoot() {
 		if (myResourceTableRoot == null) {
 			ResourceSqlTable resourceTable = mySqlBuilderFactory.resourceTable(this);
 			resourceTable.addResourceTypeAndNonDeletedPredicates();

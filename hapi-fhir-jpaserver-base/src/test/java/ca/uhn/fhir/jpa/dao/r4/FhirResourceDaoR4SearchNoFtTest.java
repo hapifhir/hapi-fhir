@@ -722,30 +722,41 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		pat.getManagingOrganization().setReferenceElement(orgId);
 		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 
-		Patient pat2 = new Patient();
-		pat2.addAddress().addLine(methodName + "2");
-		pat2.getManagingOrganization().setReferenceElement(orgId);
-		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
-
 		MedicationRequest mo = new MedicationRequest();
 		mo.getSubject().setReferenceElement(patId);
 		mo.setMedication(new Reference(medId));
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
+		// Nothing links to this one
+		Patient pat2 = new Patient();
+		pat2.addAddress().addLine(methodName + "2");
+		pat2.getManagingOrganization().setReferenceElement(orgId);
+		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
+
 		runInTransaction(()->{
 			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
+		// All patient IDs
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		myCaptureQueriesListener.clear();
+		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, mySrd);
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
+		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
+		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
 		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
+
+		// Specific patient ID with no linked stuff
+		request = mock(HttpServletRequest.class);
+		resp = myPatientDao.patientInstanceEverything(request, patId2, null, null, null, null, null, null, mySrd);
+		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(patId2, orgId));
+
 	}
 
 	/**
@@ -911,7 +922,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
+		myCaptureQueriesListener.clear();
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 
 		// No targets exist
 		params = new SearchParameterMap();
@@ -2243,7 +2256,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			params.setLoadSynchronous(true);
 
 			params.add(IAnyResource.SP_RES_LANGUAGE, new StringParam("en_CA"));
+			myCaptureQueriesListener.clear();
 			List<IBaseResource> patients = toList(myPatientDao.search(params));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertEquals(1, patients.size());
 			assertEquals(id1.toUnqualifiedVersionless(), patients.get(0).getIdElement().toUnqualifiedVersionless());
 		}
@@ -2662,7 +2677,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		e2.addPrediction().setProbability(new DecimalType(4));
 		IIdType id2 = myRiskAssessmentDao.create(e2, mySrd).getId();
 		{
+			myCaptureQueriesListener.clear();
 			IBundleProvider found = myRiskAssessmentDao.search(new SearchParameterMap().setLoadSynchronous(true).add(RiskAssessment.SP_PROBABILITY, new NumberParam(">2")));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertEquals(2, found.size().intValue());
 			assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1.toUnqualifiedVersionless(), id2.toUnqualifiedVersionless()));
 		}
@@ -3031,8 +3048,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<IIdType> result;
 		SearchParameterMap params;
 
+		myCaptureQueriesListener.clear();
 		result = toUnqualifiedVersionlessIds(myObservationDao
 			.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypesXX"))));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 		assertThat(result, containsInAnyOrder(obsId01));
 		assertEquals(1, result.size());
 
@@ -3170,7 +3189,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		String resultingQueryNotFormatted = queries.get(0);
 
 		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE in ('3140583648400062149' , '4929264259256651518')"));
+		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE IN ('3140583648400062149','4929264259256651518')"));
 
 		// Ensure that the search actually worked
 		assertEquals(2, search.size().intValue());
@@ -3205,8 +3224,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 		String resultingQueryNotFormatted = queries.get(0);
 
-		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE in ('3140583648400062149' , '4929264259256651518')"));
+		assertEquals(2, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"), resultingQueryNotFormatted);
+		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_SYS"), resultingQueryNotFormatted);
 
 		// Ensure that the search actually worked
 		assertEquals(3, search.size().intValue());
@@ -3448,7 +3467,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		String searchQuery = queries.get(0);
 		assertEquals(1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"), searchQuery);
 		assertEquals(1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
-		assertEquals(2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"), searchQuery);
+		assertEquals(2, StringUtils.countMatches(searchQuery.toUpperCase(), "RES_UPDATED"), searchQuery);
 	}
 
 	@Disabled
@@ -4626,6 +4645,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
 			assertThat(patients, containsInAnyOrder(tag2id));
 		}
+
 		// TODO: get multiple/AND working
 		{
 			// And tags
@@ -5122,13 +5142,21 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c1));
 		myCommunicationDao.create(c1);
 
-		// Doesn't match
+		// Doesn't match (wrong date)
 		Encounter e2 = new Encounter();
 		e2.setPeriod(new Period().setStartElement(new DateTimeType("2020-02-14T12:00:00Z")).setEndElement(new DateTimeType("2020-02-14T12:00:00Z")));
 		String e2Id = myEncounterDao.create(e2).getId().toUnqualifiedVersionless().getValue();
 		Communication c2 = new Communication();
 		c2.getEncounter().setReference(e2Id);
 		myCommunicationDao.create(c2);
+
+		// Doesn't match (wrong field - Encounter.location.period is also indexed in the "location-period" SP)
+		Encounter e3 = new Encounter();
+		e3.addLocation().setPeriod(new Period().setStartElement(new DateTimeType("2020-09-14T12:00:00Z")).setEndElement(new DateTimeType("2020-09-14T12:00:00Z")));
+		String e3Id = myEncounterDao.create(e3).getId().toUnqualifiedVersionless().getValue();
+		Communication c3 = new Communication();
+		c3.getEncounter().setReference(e3Id);
+		myCommunicationDao.create(c3);
 
 		runInTransaction(()->{
 			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
@@ -5148,7 +5176,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, outcome.sizeOrThrowNpe());
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(2, StringUtils.countMatches(searchSql, "JOIN"));
+		assertEquals(3, StringUtils.countMatches(searchSql, "JOIN"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "SELECT"));
 
 	}
 

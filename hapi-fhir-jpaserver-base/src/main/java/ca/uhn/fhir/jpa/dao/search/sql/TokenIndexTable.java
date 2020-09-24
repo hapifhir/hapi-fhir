@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,9 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -272,8 +275,12 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 	}
 
 
-	public ComboCondition createPredicateOrList(String theResourceType, String theSearchParamName, List<VersionIndependentConcept> theCodes) {
+	public Condition createPredicateOrList(String theResourceType, String theSearchParamName, List<VersionIndependentConcept> theCodes) {
 		Condition[] conditions = new Condition[theCodes.size()];
+
+		Long[] hashes = new Long[theCodes.size()];
+		DbColumn[] columns = new DbColumn[theCodes.size()];
+		boolean haveMultipleColumns = false;
 		for (int i = 0; i < conditions.length; i++) {
 
 			VersionIndependentConcept nextToken = theCodes.get(i);
@@ -289,11 +296,26 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 				hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, nextToken.getSystem(), nextToken.getCode());
 				column = myColumnHashSystemAndValue;
 			}
-
-			String valuePlaceholder = generatePlaceholder(hash);
-			conditions[i] = BinaryCondition.equalTo(column, valuePlaceholder);
+			hashes[i] = hash;
+			columns[i] = column;
+			if (i > 0 && columns[0] != columns[i]) {
+				haveMultipleColumns = true;
+			}
 		}
 
-		return ComboCondition.or(conditions);
+		if (!haveMultipleColumns && conditions.length > 1) {
+			List<Long> values = Arrays.asList(hashes);
+			return new InCondition(columns[0], generatePlaceholders(values));
+		}
+
+		for (int i = 0; i < conditions.length; i++) {
+			String valuePlaceholder = generatePlaceholder(hashes[i]);
+			conditions[i] = BinaryCondition.equalTo(columns[i], valuePlaceholder);
+		}
+		if (conditions.length > 1) {
+			return ComboCondition.or(conditions);
+		} else {
+			return conditions[0];
+		}
 	}
 }

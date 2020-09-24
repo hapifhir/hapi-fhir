@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Date;
 
 public class DateIndexTable extends BaseSearchParamIndexTable {
@@ -46,7 +45,6 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 	public Condition createPredicateDate(IQueryParameterType theParam,
 													 String theResourceName,
 													 String theParamName,
-													 CriteriaBuilder theBuilder,
 													 DateIndexTable theFrom,
 													 SearchFilterParser.CompareOperation theOperation,
 													 RequestPartitionId theRequestPartitionId) {
@@ -56,14 +54,14 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 			DateParam date = (DateParam) theParam;
 			if (!date.isEmpty()) {
 				DateRangeParam range = new DateRangeParam(date);
-				p = createPredicateDateFromRange(theBuilder, theFrom, range, theOperation);
+				p = createPredicateDateFromRange(theFrom, range, theOperation);
 			} else {
 				// TODO: handle missing date param?
 				p = null;
 			}
 		} else if (theParam instanceof DateRangeParam) {
 			DateRangeParam range = (DateRangeParam) theParam;
-			p = createPredicateDateFromRange(theBuilder,
+			p = createPredicateDateFromRange(
 				theFrom,
 				range,
 				theOperation);
@@ -71,17 +69,16 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
 		}
 
-		return p;
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, p, theRequestPartitionId);
 	}
 
 	private boolean isNullOrDayPrecision(DateParam theDateParam) {
 		return theDateParam == null || theDateParam.getPrecision().ordinal() == TemporalPrecisionEnum.DAY.ordinal();
 	}
 
-	private Condition createPredicateDateFromRange(CriteriaBuilder theBuilder,
-																  DateIndexTable theFrom,
+	private Condition createPredicateDateFromRange(DateIndexTable theFrom,
 																  DateRangeParam theRange,
-																  SearchFilterParser.CompareOperation operation) {
+																  SearchFilterParser.CompareOperation theOperation) {
 		Date lowerBoundInstant = theRange.getLowerBoundAsInstant();
 		Date upperBoundInstant = theRange.getUpperBoundAsInstant();
 
@@ -116,37 +113,37 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 			genericUpperBound = upperBoundInstant;
 		}
 
-		if (operation == SearchFilterParser.CompareOperation.lt) {
+		if (theOperation == SearchFilterParser.CompareOperation.lt) {
 			if (lowerBoundInstant == null) {
-				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
+				throw new InvalidRequestException("lowerBound value not correctly specified for compare theOperation");
 			}
 			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
 			lb = theFrom.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN, genericLowerBound);
-		} else if (operation == SearchFilterParser.CompareOperation.le) {
+		} else if (theOperation == SearchFilterParser.CompareOperation.le) {
 			if (upperBoundInstant == null) {
-				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
+				throw new InvalidRequestException("upperBound value not correctly specified for compare theOperation");
 			}
 			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
 			lb = theFrom.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
-		} else if (operation == SearchFilterParser.CompareOperation.gt) {
+		} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
 			if (upperBoundInstant == null) {
-				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
+				throw new InvalidRequestException("upperBound value not correctly specified for compare theOperation");
 			}
 			lb = theFrom.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN, genericUpperBound);
-		} else if (operation == SearchFilterParser.CompareOperation.ge) {
+		} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
 			if (lowerBoundInstant == null) {
-				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
+				throw new InvalidRequestException("lowerBound value not correctly specified for compare theOperation");
 			}
 			lb = theFrom.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
-		} else if (operation == SearchFilterParser.CompareOperation.ne) {
+		} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
 			if ((lowerBoundInstant == null) ||
 				(upperBoundInstant == null)) {
-				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare operation");
+				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare theOperation");
 			}
 			lt = theFrom.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN, genericLowerBound);
 			gt = theFrom.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN, genericUpperBound);
 			lb = ComboCondition.or(lt, gt);
-		} else if ((operation == SearchFilterParser.CompareOperation.eq) || (operation == null)) {
+		} else if ((theOperation == SearchFilterParser.CompareOperation.eq) || (theOperation == null)) {
 			if (lowerBoundInstant != null) {
 				gt = theFrom.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
 				lt = theFrom.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
@@ -171,7 +168,7 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 			}
 		} else {
 			throw new InvalidRequestException(String.format("Unsupported operator specified, operator=%s",
-				operation.name()));
+				theOperation.name()));
 		}
 		if (isOrdinalComparison) {
 			ourLog.trace("Ordinal date range is {} - {} ", lowerBoundAsOrdinal, upperBoundAsOrdinal);

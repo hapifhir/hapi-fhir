@@ -498,7 +498,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * For synchronous queries, we load all the includes right away
 			 * since we're returning a static bundle with all the results
-			 * pre-loaded. This is ok because syncronous requests are not
+			 * pre-loaded. This is ok because synchronous requests are not
 			 * expected to be paged
 			 *
 			 * On the other hand for async queries we load includes/revincludes
@@ -506,7 +506,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 */
 			final Set<ResourcePersistentId> includedPids = new HashSet<>();
 			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
-			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
+
+			// FIXME: needed?
+//			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
 
 			List<IBaseResource> resources = new ArrayList<>();

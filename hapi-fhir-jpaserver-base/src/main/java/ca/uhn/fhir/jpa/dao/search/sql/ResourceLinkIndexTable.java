@@ -77,6 +77,8 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 	private final DbColumn myColumnSrcResourceId;
 	private final DbColumn myColumnTargetResourceType;
 	private final QueryStack3 myQueryStack;
+	private final boolean myReversed;
+
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
@@ -93,7 +95,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 	/**
 	 * Constructor
 	 */
-	public ResourceLinkIndexTable(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder) {
+	public ResourceLinkIndexTable(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
@@ -102,12 +104,33 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 
+		myReversed = theReversed;
 		myQueryStack = theQueryStack;
+	}
+
+	public DbColumn getColumnSourcePath() {
+		return myColumnSrcPath;
+	}
+
+	protected DbColumn getColumnTargetResourceId() {
+		return myColumnTargetResourceId;
+	}
+
+	public DbColumn getColumnSrcResourceId() {
+		return myColumnSrcResourceId;
+	}
+
+	protected DbColumn getColumnTargetResourceType() {
+		return myColumnTargetResourceType;
 	}
 
 	@Override
 	public DbColumn getResourceIdColumn() {
-		return myColumnSrcResourceId;
+		if (myReversed) {
+			return myColumnTargetResourceId;
+		} else {
+			return myColumnSrcResourceId;
+		}
 	}
 
 	public Condition addPredicate(RequestDetails theRequest, String theResourceType, String theParamName, List<? extends IQueryParameterType> theReferenceOrParamList, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
@@ -167,7 +190,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			}
 		}
 
-		List<String> pathsToMatch = createResourceLinkPathPredicate(theResourceType, theParamName);
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceType, theParamName);
 		boolean inverse;
 		if ((theOperation == null) || (theOperation == SearchFilterParser.CompareOperation.eq)) {
 			inverse = false;
@@ -316,7 +339,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		 */
 		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
 
-			List<String> pathsToMatch = createResourceLinkPathPredicate(theResourceName, theParamName);
+			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
 			Condition typeCondition = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
 			addCondition(typeCondition);
 
@@ -394,11 +417,13 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
 			}
 
-			List<String> pathsToMatch = createResourceLinkPathPredicate(theResourceName, theParamName);
+			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
 			InCondition pathPredicate = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
 			addCondition(pathPredicate);
 
 			myQueryStack.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, Collections.singletonList(orValues), theRequest, theRequestPartitionId);
+
+			break;
 
 			// If this is false, we throw an exception below so no sense doing any further processing
 //			if (foundChainMatch) {
@@ -530,7 +555,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			.collect(Collectors.toList());
 	}
 
-	private List<String> createResourceLinkPathPredicate(String theResourceName, String theParamName) {
+	public List<String> createResourceLinkPaths(String theResourceName, String theParamName) {
 		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResourceName);
 		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 		List<String> path = param.getPathsSplit();
@@ -647,45 +672,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		return qp;
 	}
 
-//	private Predicate addPredicateLanguage(List<List<IQueryParameterType>> theList,
-//														SearchFilterParser.CompareOperation operation) {
-//		for (List<? extends IQueryParameterType> nextList : theList) {
-//
-//			Set<String> values = new HashSet<>();
-//			for (IQueryParameterType next : nextList) {
-//				if (next instanceof StringParam) {
-//					String nextValue = ((StringParam) next).getValue();
-//					if (isBlank(nextValue)) {
-//						continue;
-//					}
-//					values.add(nextValue);
-//				} else {
-//					throw new InternalErrorException("Language parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
-//				}
-//			}
-//
-//			if (values.isEmpty()) {
-//				continue;
-//			}
-//
-//			Predicate predicate;
-//			if ((operation == null) ||
-//				(operation == SearchFilterParser.CompareOperation.eq)) {
-//				predicate = myQueryStack.get("myLanguage").as(String.class).in(values);
-//			} else if (operation == SearchFilterParser.CompareOperation.ne) {
-//				predicate = myQueryStack.get("myLanguage").as(String.class).in(values).not();
-//			} else {
-//				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
-//			}
-//			myQueryStack.addPredicate(predicate);
-//			if (operation != null) {
-//				return predicate;
-//			}
-//		}
-//
-//		return null;
-//	}
-//
 //	private void addPredicateSource(List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
 //		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 //			addPredicateSource(nextAnd, SearchFilterParser.CompareOperation.eq, theRequest);
@@ -725,99 +711,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 //		return retVal;
 //	}
 //
-//	private void addPredicateHas(String theResourceType, List<List<IQueryParameterType>> theHasParameters, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-//
-//		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
-//
-//			String targetResourceType = null;
-//			String paramReference = null;
-//			String parameterName = null;
-//
-//			String paramName = null;
-//			List<QualifiedParamList> parameters = new ArrayList<>();
-//			for (IQueryParameterType nextParam : nextOrList) {
-//				HasParam next = (HasParam) nextParam;
-//				targetResourceType = next.getTargetResourceType();
-//				paramReference = next.getReferenceFieldName();
-//				parameterName = next.getParameterName();
-//				paramName = parameterName.replaceAll("\\..*", "");
-//				parameters.add(QualifiedParamList.singleton(null, next.getValueAsQueryToken(myContext)));
-//			}
-//
-//			if (paramName == null) {
-//				continue;
-//			}
-//
-//			RuntimeResourceDefinition targetResourceDefinition;
-//			try {
-//				targetResourceDefinition = myContext.getResourceDefinition(targetResourceType);
-//			} catch (DataFormatException e) {
-//				throw new InvalidRequestException("Invalid resource type: " + targetResourceType);
-//			}
-//
-//			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
-//
-//			if (paramName.startsWith("_has:")) {
-//
-//				ourLog.trace("Handing double _has query: {}", paramName);
-//
-//				String qualifier = paramName.substring(4);
-//				paramName = Constants.PARAM_HAS;
-//				for (IQueryParameterType next : nextOrList) {
-//					HasParam nextHasParam = new HasParam();
-//					nextHasParam.setValueAsQueryToken(myContext, Constants.PARAM_HAS, qualifier, next.getValueAsQueryToken(myContext));
-//					orValues.add(nextHasParam);
-//				}
-//
-//			} else {
-//
-//				//Ensure that the name of the search param
-//				// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
-//				// exists on the target resource type.
-//				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
-//				if (owningParameterDef == null) {
-//					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
-//				}
-//
-//				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
-//				//exists on the target resource.
-//				owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramReference);
-//				if (owningParameterDef == null) {
-//					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
-//				}
-//
-//				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
-//				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myContext, paramDef, paramName, parameters);
-//
-//				for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
-//					orValues.addAll(next.getValuesAsQueryTokens());
-//				}
-//
-//			}
-//
-//			//Handle internal chain inside the has.
-//			if (parameterName.contains(".")) {
-//				String chainedPartOfParameter = getChainedPart(parameterName);
-//				orValues.stream()
-//					.filter(qp -> qp instanceof ReferenceParam)
-//					.map(qp -> (ReferenceParam) qp)
-//					.forEach(rp -> rp.setChain(getChainedPart(chainedPartOfParameter)));
-//			}
-//
-//			Subquery<Long> subQ = myPredicateBuilder.createLinkSubquery(paramName, targetResourceType, orValues, theRequest, theRequestPartitionId);
-//			Join<?, ResourceLink> join = (Join) myQueryStack.createJoin(SearchBuilderJoinEnum.HAS, "_has");
-//
-//			Predicate pathPredicate = myPredicateBuilder.createResourceLinkPathPredicate(targetResourceType, paramReference, join);
-//			Predicate sourceTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType"), theResourceType);
-//			Predicate sourcePidPredicate = join.get("mySourceResourcePid").in(subQ);
-//			Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, sourcePidPredicate, sourceTypePredicate);
-//			myQueryStack.addPredicate(andPredicate);
-//		}
-//	}
-//
-//	private String getChainedPart(String parameter) {
-//		return parameter.substring(parameter.indexOf(".") + 1);
-//	}
+
 //
 //	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
 //		// TODO: fail if missing is set for a composite query
@@ -900,5 +794,15 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
 		String msg = getFhirContext().getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
 		throw new InvalidRequestException(msg);
+	}
+
+	public void addEverythingPredicate(String theResourceName, Long theTargetPid) {
+		if (theTargetPid != null) {
+			BinaryCondition condition = BinaryCondition.equalTo(myColumnTargetResourceId, generatePlaceholder(theTargetPid));
+			addCondition(condition);
+		} else {
+			BinaryCondition condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
+			addCondition(condition);
+		}
 	}
 }

@@ -93,6 +93,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
@@ -102,6 +103,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -118,6 +121,8 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -129,6 +134,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -395,9 +401,14 @@ public class SearchBuilder2 implements ISearchBuilder {
 			}
 		}
 
-		if (myParams.getEverythingMode() != null) {
-			From<?, ResourceLink> join = myQueryStack.createJoin(SearchBuilderJoinEnum.REFERENCE, null);
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDataSource);
+		jdbcTemplate.setFetchSize(myFetchSize);
+		if (theMaximumResults != null) {
+			jdbcTemplate.setMaxRows(theMaximumResults);
+		}
 
+		if (myParams.getEverythingMode() != null) {
+			Long targetPid = null;
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
 				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
@@ -405,12 +416,25 @@ public class SearchBuilder2 implements ISearchBuilder {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
 				myAlsoIncludePids.add(pid);
-				myQueryStack.addPredicate(myCriteriaBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid.getIdAsLong()));
+				targetPid = pid.getIdAsLong();
 			} else {
-				Predicate targetTypePredicate = myCriteriaBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName);
-				Predicate sourceTypePredicate = myCriteriaBuilder.equal(myQueryStack.get("myResourceType").as(String.class), myResourceName);
-				myQueryStack.addPredicate(myCriteriaBuilder.or(sourceTypePredicate, targetTypePredicate));
+
+				// For Everything queries, we make the query root by the ResourceLink table, since this query
+				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
+				// the one problem with this approach is that it doesn't catch Patients that have absolutely
+				// nothing linked to them. So we do one additional query to make sure we catch those too.
+				SearchSqlBuilder sqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory);
+				SearchSqlBuilder.GeneratedSql allTargetsSql = sqlBuilder.generate();
+				String sql = allTargetsSql.getSql();
+				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
+				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
+				if (myAlsoIncludePids == null) {
+					myAlsoIncludePids = new ArrayList<>(output.size());
+				}
+				myAlsoIncludePids.addAll(ResourcePersistentId.fromLongList(output));
+
 			}
+			myQueryStack3.addPredicateEverythingOperation(myResourceName, targetPid);
 
 		} else {
 			// Normal search
@@ -438,12 +462,6 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		if (theMaximumResults != null) {
 			query.setMaxResults(theMaximumResults);
-		}
-
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDataSource);
-		jdbcTemplate.setFetchSize(myFetchSize);
-		if (theMaximumResults != null) {
-			jdbcTemplate.setMaxRows(theMaximumResults);
 		}
 
 		SearchSqlBuilder.GeneratedSql generatedSql = mySqlBuilder.generate();
@@ -1094,9 +1112,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 			}
 		} else if (searchParam.getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
-				// FIXME: implement
-				throw new UnsupportedOperationException();
-//				return addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),					theFilter.getOperation());
+				return myQueryStack3.addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),					theFilter.getOperation());
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
 			}

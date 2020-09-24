@@ -484,8 +484,8 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ResourceLinkIndexTable indexTableReference(QueryStack3 theQueryStack, SearchSqlBuilder theSearchBuilder) {
-		return new ResourceLinkIndexTable(theQueryStack, theSearchBuilder);
+	public ResourceLinkIndexTable indexTableReference(QueryStack3 theQueryStack, SearchSqlBuilder theSearchBuilder, boolean theReversed) {
+		return new ResourceLinkIndexTable(theQueryStack, theSearchBuilder, theReversed);
 	}
 
 	@Bean

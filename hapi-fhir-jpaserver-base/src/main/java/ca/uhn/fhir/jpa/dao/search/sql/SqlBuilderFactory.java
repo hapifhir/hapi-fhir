@@ -25,8 +25,8 @@ public class SqlBuilderFactory {
 		return myApplicationContext.getBean(QuantityIndexTable.class, theSearchSqlBuilder);
 	}
 
-	public ResourceLinkIndexTable referenceIndexTable(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ResourceLinkIndexTable.class, theQueryStack, theSearchSqlBuilder);
+	public ResourceLinkIndexTable referenceIndexTable(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
+		return myApplicationContext.getBean(ResourceLinkIndexTable.class, theQueryStack, theSearchSqlBuilder, theReversed);
 	}
 
 	public ResourceSqlTable resourceTable(SearchSqlBuilder theSearchSqlBuilder) {
