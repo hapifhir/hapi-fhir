@@ -107,6 +107,9 @@ public class EmpiControllerHelper {
 		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPerson);
 	}
 
+	public String toJson(IAnyResource theAnyResource) {
+		return myFhirContext.newJsonParser().encodeResourceToString(theAnyResource);
+	}
 
 	private void validateIsEmpiManaged(String theName, IAnyResource thePerson) {
 		if (!"Person".equals(myFhirContext.getResourceType(thePerson))) {
