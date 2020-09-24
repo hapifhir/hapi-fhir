@@ -33,7 +33,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 public abstract class BaseEmpiProvider {
 
@@ -125,10 +125,10 @@ public abstract class BaseEmpiProvider {
 //		return getTargetIdDtOrThrowException(theName, targetId);
 //	}
 
-	protected IBaseParameters parametersFromEmpiLinks(List<EmpiLinkJson> theEmpiLinks, boolean includeResultAndSource) {
+	protected IBaseParameters parametersFromEmpiLinks(Stream<EmpiLinkJson> theEmpiLinkStream, boolean includeResultAndSource) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 
-		for (EmpiLinkJson empiLink : theEmpiLinks) {
+		theEmpiLinkStream.forEach(empiLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
 			ParametersUtil.addPartString(myFhirContext, resultPart, "personId", empiLink.getPersonId());
 			ParametersUtil.addPartString(myFhirContext, resultPart, "targetId", empiLink.getTargetId());
@@ -140,7 +140,7 @@ public abstract class BaseEmpiProvider {
 				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "newPerson", empiLink.getNewPerson());
 				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", empiLink.getScore());
 			}
-		}
+		});
 		return retval;
 	}
 }

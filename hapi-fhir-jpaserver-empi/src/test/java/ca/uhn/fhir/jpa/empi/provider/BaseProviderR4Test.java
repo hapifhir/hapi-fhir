@@ -39,18 +39,17 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource(theString);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		((EmpiSettings)myEmpiSettings).getScriptText();
-		((EmpiSettings)myEmpiSettings).setScriptText(json);
+		myEmpiSettings.setScriptText(json);
 	}
 
 	@BeforeEach
 	public void before() {
-		myEmpiProviderR4 = new EmpiProviderR4(myFhirContext, myEmpiControllerSvc, myEmpiResetSvc, myEmpiBatchSvc);
-		defaultScript = ((EmpiSettings)myEmpiSettings).getScriptText();
+		myEmpiProviderR4 = new EmpiProviderR4(myFhirContext, myEmpiControllerSvc, myEmpiMatchFinderSvc, myEmpiResetSvc, myEmpiBatchSvc);
+		defaultScript = myEmpiSettings.getScriptText();
 	}
 	@AfterEach
 	public void after() throws IOException {
 		super.after();
-		((EmpiSettings)myEmpiSettings).setScriptText(defaultScript);
+		myEmpiSettings.setScriptText(defaultScript);
 	}
 }

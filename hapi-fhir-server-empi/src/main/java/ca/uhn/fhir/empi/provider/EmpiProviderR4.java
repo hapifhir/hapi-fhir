@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiLinkJson;
 import ca.uhn.fhir.empi.api.IEmpiControllerSvc;
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
+import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -49,11 +50,12 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class EmpiProviderR4 extends BaseEmpiProvider {
 	private final IEmpiControllerSvc myEmpiControllerSvc;
+	private final IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 	private final IEmpiExpungeSvc myEmpiExpungeSvc;
 	private final IEmpiSubmitSvc myEmpiSubmitSvc;
 
@@ -63,9 +65,10 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderR4(FhirContext theFhirContext, IEmpiControllerSvc theEmpiControllerSvc, IEmpiExpungeSvc theEmpiExpungeSvc, IEmpiSubmitSvc theEmpiSubmitSvc) {
+	public EmpiProviderR4(FhirContext theFhirContext, IEmpiControllerSvc theEmpiControllerSvc, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiExpungeSvc theEmpiExpungeSvc, IEmpiSubmitSvc theEmpiSubmitSvc) {
 		super(theFhirContext);
 		myEmpiControllerSvc = theEmpiControllerSvc;
+		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
 		myEmpiExpungeSvc = theEmpiExpungeSvc;
 		myEmpiSubmitSvc = theEmpiSubmitSvc;
 	}
@@ -76,7 +79,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 			throw new InvalidRequestException("resource may not be null");
 		}
 
-		Collection<IAnyResource> matches = myEmpiControllerSvc.findMatches("Patient", thePatient);
+		Collection<IAnyResource> matches = myEmpiMatchFinderSvc.findMatches("Patient", thePatient);
 
 		Bundle retVal = new Bundle();
 		retVal.setType(Bundle.BundleType.SEARCHSET);
@@ -133,13 +136,13 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1) StringType theLinkSource,
 									 ServletRequestDetails theRequestDetails) {
 
-		List<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(thePersonId), extractStringOrNull(theTargetId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.QUERY_LINKS));
+		Stream<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(thePersonId), extractStringOrNull(theTargetId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.QUERY_LINKS));
 		return (Parameters) parametersFromEmpiLinks(empiLinkJson, true);
 	}
 
 	@Operation(name = ProviderConstants.EMPI_DUPLICATE_PERSONS, idempotent = true)
 	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
-		List<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getPossibleDuplicates(createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.DUPLICATE_PERSONS));
+		Stream<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getPossibleDuplicates(createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.DUPLICATE_PERSONS));
 		return (Parameters) parametersFromEmpiLinks(possibleDuplicates, false);
 	}
 

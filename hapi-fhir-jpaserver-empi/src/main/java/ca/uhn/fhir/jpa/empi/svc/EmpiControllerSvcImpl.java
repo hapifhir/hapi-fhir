@@ -6,7 +6,6 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiControllerSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
-import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.provider.EmpiControllerHelper;
@@ -17,8 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 // FIXME KHS move other wrappers here
@@ -31,8 +29,6 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
 	@Autowired
 	IEmpiLinkUpdaterSvc myIEmpiLinkUpdaterSvc;
-	@Autowired
-	IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 
 	@Override
 	public IAnyResource mergePersons(String theFromPersonId, String theToPersonId, EmpiTransactionContext theEmpiTransactionContext) {
@@ -46,7 +42,7 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	}
 
 	@Override
-	public List<EmpiLinkJson> queryLinks(@Nullable String thePersonId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, EmpiTransactionContext theEmpiContext) {
+	public Stream<EmpiLinkJson> queryLinks(@Nullable String thePersonId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, EmpiTransactionContext theEmpiContext) {
 		IIdType personId = EmpiControllerHelper.extractPersonIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, thePersonId);
 		IIdType targetId = EmpiControllerHelper.extractTargetIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, theTargetId);
 		EmpiMatchResultEnum matchResult = EmpiControllerHelper.extractMatchResultOrNull(theMatchResult);
@@ -56,7 +52,7 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	}
 
 	@Override
-	public List<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext) {
+	public Stream<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext) {
 		return myEmpiLinkQuerySvc.getPossibleDuplicates(theEmpiContext);
 	}
 
@@ -77,11 +73,5 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 		IAnyResource target = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetPersonId);
 
 		myIEmpiLinkUpdaterSvc.notDuplicatePerson(person, target, theEmpiContext);
-
-	}
-
-	@Override
-	public Collection<IAnyResource> findMatches(String theResourceType, IAnyResource theResource) {
-		return myEmpiMatchFinderSvc.findMatches(theResourceType, theResource);
 	}
 }

@@ -23,9 +23,9 @@ package ca.uhn.fhir.empi.api;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 public interface IEmpiLinkQuerySvc {
-	List<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
-	List<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
+	Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
+	Stream<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
 }

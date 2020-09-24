@@ -34,9 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiLinkQuerySvcImpl.class);
@@ -47,21 +45,19 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 
 	@Override
-	public List<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext) {
+	public Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext) {
 		Example<EmpiLink> exampleLink = exampleLinkFromParameters(thePersonId, theTargetId, theMatchResult, theLinkSource);
-		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink).stream()
+		return myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink).stream()
 			.filter(empiLink -> empiLink.getMatchResult() != EmpiMatchResultEnum.POSSIBLE_DUPLICATE)
-			.collect(Collectors.toList());
-		// TODO KHS page results
-		return toJson(empiLinks);
+			.map(this::toJson);
 	}
 
-	private List<EmpiLinkJson> toJson(List<EmpiLink> theEmpiLinks) {
-		List<EmpiLinkJson> retval = new ArrayList<>();
-		for (EmpiLink link : theEmpiLinks) {
-			retval.add(toJson(link));
-		}
-		return retval;
+
+
+	@Override
+	public Stream<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext) {
+		Example<EmpiLink> exampleLink = exampleLinkFromParameters(null, null, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, null);
+		return myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink).stream().map(this::toJson);
 	}
 
 	private EmpiLinkJson toJson(EmpiLink theLink) {
@@ -80,15 +76,6 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 		retval.setVector(theLink.getVector());
 		retval.setVersion(theLink.getVersion());
 		return retval;
-	}
-
-	@Override
-	public List<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext) {
-		Example<EmpiLink> exampleLink = exampleLinkFromParameters(null, null, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, null);
-		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink);
-
-		// TODO RC1 page results
-		return toJson(empiLinks);
 	}
 
 	private Example<EmpiLink> exampleLinkFromParameters(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
