@@ -100,7 +100,11 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		String system;
 		if (haveCoding) {
 			code = theCoding.getCode();
-			system = theCoding.getSystem();
+			if (theCoding.hasVersion()) {
+				system = theCoding.getSystem() + "|" + theCoding.getVersion();
+			} else {
+				system = theCoding.getSystem();
+			}
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();

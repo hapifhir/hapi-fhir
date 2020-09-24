@@ -651,22 +651,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	 */
 	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull) {
 
-		String system = theIncludeOrExclude.getSystem();
-		boolean hasSystem = isNotBlank(system);
+		String includeOrExcludeSystemUrl = theIncludeOrExclude.getSystem();
+		boolean hasSystem = isNotBlank(includeOrExcludeSystemUrl);
 		boolean hasValueSet = theIncludeOrExclude.getValueSet().size() > 0;
 
 		if (hasSystem) {
 
-			if (theWantConceptOrNull != null && theWantConceptOrNull.getSystem() != null && !system.equals(theWantConceptOrNull.getSystem())) {
+			if (theWantConceptOrNull != null && theWantConceptOrNull.getSystem() != null && !includeOrExcludeSystemUrl.equals(theWantConceptOrNull.getSystem())) {
 				return false;
 			}
 
-			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
+			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), includeOrExcludeSystemUrl);
 
-			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(includeOrExcludeSystemUrl);
 			if (cs != null) {
 
-				return expandValueSetHandleIncludeOrExcludeUsingDatabase(theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, theAdd, theCodeCounter, theQueryIndex, theWantConceptOrNull, system, cs);
+				return expandValueSetHandleIncludeOrExcludeUsingDatabase(theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, theAdd, theCodeCounter, theQueryIndex, theWantConceptOrNull, includeOrExcludeSystemUrl, cs);
 
 			} else {
 
@@ -679,7 +679,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				}
 
 				// No CodeSystem matching the URL found in the database.
-				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(system);
+				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(includeOrExcludeSystemUrl);
 				if (codeSystemFromContext == null) {
 
 					// This is a last ditch effort.. We don't have a CodeSystem resource for the desired CS, and we don't have
@@ -704,7 +704,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						for (VersionIndependentConcept next : includedConcepts) {
 							String nextSystem = next.getSystem();
 							if (nextSystem == null) {
-								nextSystem = system;
+								nextSystem = includeOrExcludeSystemUrl;
 							}
 
 							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode());
@@ -720,7 +720,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						}
 					}
 
-					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
+					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", includeOrExcludeSystemUrl);
 					if (provideExpansionOptions(theExpansionOptions).isFailOnMissingCodeSystem()) {
 						throw new PreconditionFailedException(msg);
 					} else {
@@ -735,12 +735,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
 						String nextCode = next.getCode();
 						if (theWantConceptOrNull == null || theWantConceptOrNull.getCode().equals(nextCode)) {
-							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
+							if (isNoneBlank(includeOrExcludeSystemUrl, nextCode) && !theAddedCodes.contains(includeOrExcludeSystemUrl + "|" + nextCode)) {
 
 								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
 								if (code != null) {
 									String display = code.getDisplay();
-									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
+									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, includeOrExcludeSystemUrl, nextCode, display);
 								}
 
 							}
@@ -748,7 +748,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					}
 				} else {
 					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
-					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, system, concept, theAdd, theWantConceptOrNull);
+					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, includeOrExcludeSystemUrl, concept, theAdd, theWantConceptOrNull);
 				}
 
 				return false;
@@ -841,13 +841,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * Filters
 		 */
-		String canonicalSystem;
+		String codeSystemIdentifier;
 		if (codeSystemVersion != null) {
-			canonicalSystem = theSystem + "|" + codeSystemVersion;
+			codeSystemIdentifier = theSystem + "|" + codeSystemVersion;
 		} else {
-			canonicalSystem = theSystem;
+			codeSystemIdentifier = theSystem;
 		}
-		handleFilters(bool, canonicalSystem, qb, theIncludeOrExclude);
+		handleFilters(bool, codeSystemIdentifier, qb, theIncludeOrExclude);
 
 		Query luceneQuery = bool.createQuery();
 
@@ -956,15 +956,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void handleFilters(BooleanJunction<?> theBool, String theCanonicalSystem, QueryBuilder theQb, ValueSet.ConceptSetComponent theIncludeOrExclude) {
+	private void handleFilters(BooleanJunction<?> theBool, String theCodeSystemIdentifier, QueryBuilder theQb, ValueSet.ConceptSetComponent theIncludeOrExclude) {
 		if (theIncludeOrExclude.getFilter().size() > 0) {
 			for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
-				handleFilter(theCanonicalSystem, theQb, theBool, nextFilter);
+				handleFilter(theCodeSystemIdentifier, theQb, theBool, nextFilter);
 			}
 		}
 	}
 
-	private void handleFilter(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void handleFilter(String theCodeSystemIdentifier, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		if (isBlank(theFilter.getValue()) && theFilter.getOp() == null && isBlank(theFilter.getProperty())) {
 			return;
 		}
@@ -980,23 +980,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				break;
 			case "concept":
 			case "code":
-				handleFilterConceptAndCode(theSystem, theQb, theBool, theFilter);
+				handleFilterConceptAndCode(theCodeSystemIdentifier, theQb, theBool, theFilter);
 				break;
 			case "parent":
 			case "child":
-				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				isCodeSystemLoingOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
 				handleFilterLoincParentChild(theBool, theFilter);
 				break;
 			case "ancestor":
-				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
-				handleFilterLoincAncestor(theSystem, theBool, theFilter);
+				isCodeSystemLoingOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
+				handleFilterLoincAncestor(theCodeSystemIdentifier, theBool, theFilter);
 				break;
 			case "descendant":
-				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
-				handleFilterLoincDescendant(theSystem, theBool, theFilter);
+				isCodeSystemLoingOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
+				handleFilterLoincDescendant(theCodeSystemIdentifier, theBool, theFilter);
 				break;
 			case "copyright":
-				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				isCodeSystemLoingOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
 				handleFilterLoincCopyright(theBool, theFilter);
 				break;
 			default:
@@ -1005,8 +1005,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void isCodeSystemLoingOrThrowInvalidRequestException(String theSystem, String theProperty) {
-		String systemUrl = getSystemFromCanonicalUrl(theSystem);
+	private void isCodeSystemLoingOrThrowInvalidRequestException(String theSystemIdentifier, String theProperty) {
+		String systemUrl = getUrlFromIdentifier(theSystemIdentifier);
 		if (!isCodeSystemLoinc(systemUrl)) {
 			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + systemUrl);
 		}
@@ -1435,12 +1435,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nullable
-	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theUri) {
-		String myVersion = getVersionFromCanonicalUrl(theUri);
-		String key = theUri;
+	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+		String myVersion = getVersionFromIdentifier(theCodeSystemIdentifier);
+		String key = theCodeSystemIdentifier;
 		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(key.toString(), t -> myTxTemplate.execute(tx -> {
 			TermCodeSystemVersion csv = null;
-			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(getSystemFromCanonicalUrl(theUri));
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
 			if (cs != null) {
 				if (myVersion != null) {
 					csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), myVersion);
@@ -1460,7 +1460,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return retVal;
 	}
 
-	private String getVersionFromCanonicalUrl(String theUri) {
+	private String getVersionFromIdentifier(String theUri) {
 		String retVal = null;
 		if (StringUtils.isNotEmpty((theUri))) {
 			int versionSeparator = theUri.lastIndexOf('|');
@@ -1471,7 +1471,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return retVal;
 	}
 
-	private String getSystemFromCanonicalUrl(String theUri) {
+	private String getUrlFromIdentifier(String theUri) {
 		String retVal = theUri;
 		if (StringUtils.isNotEmpty((theUri))){
 			int versionSeparator = theUri.lastIndexOf('|');
@@ -1777,15 +1777,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetUrl, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+	public CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetIdentifier, String theCodeSystemIdentifierToValidate, String theCodeToValidate, String theDisplayToValidate, IBaseDatatype theCodingToValidate, IBaseDatatype theCodeableConceptToValidate) {
 
-		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
+		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConceptToValidate);
 		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
 
-		Coding coding = toCanonicalCoding(theCoding);
-		boolean haveCoding = coding != null && coding.isEmpty() == false;
+		Coding canonicalCodingToValidate = toCanonicalCoding(theCodingToValidate);
+		boolean haveCoding = canonicalCodingToValidate != null && canonicalCodingToValidate.isEmpty() == false;
 
-		boolean haveCode = theCode != null && theCode.isEmpty() == false;
+		boolean haveCode = theCodeToValidate != null && theCodeToValidate.isEmpty() == false;
 
 		if (!haveCodeableConcept && !haveCoding && !haveCode) {
 			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
@@ -1794,38 +1794,54 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			throw new InvalidRequestException("$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
 		}
 
-		boolean haveIdentifierParam = isNotBlank(theValueSetUrl);
-		String valueSetUrl;
+		boolean haveIdentifierParam = isNotBlank(theValueSetIdentifier);
+		String valueSetIdentifier;
 		if (theValueSetId != null) {
 			IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId);
-			valueSetUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet);
+			StringBuilder valueSetIdentifierBuilder = new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet));
+			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(valueSet);
+			if (valueSetVersion != null) {
+				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
+			}
+			valueSetIdentifier = valueSetIdentifierBuilder.toString();
+
 		} else if (haveIdentifierParam) {
-			valueSetUrl = theValueSetUrl;
+			valueSetIdentifier = theValueSetIdentifier;
 		} else {
 			throw new InvalidRequestException("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
 		}
 
 		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
 
-		String code = theCode;
-		String system = theSystem;
-		String display = theDisplay;
+		String codeValueToValidate = theCodeToValidate;
+		String codeSystemIdentifierValueToValidate = theCodeSystemIdentifierToValidate;
+		String codeDisplayValueToValidate = theDisplayToValidate;
 
 		if (haveCodeableConcept) {
 			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
-				CodeValidationResult nextValidation = validateCode(validationContext, theOptions, nextCoding.getSystem(), nextCoding.getCode(), nextCoding.getDisplay(), valueSetUrl);
+				String codeSystemIdentifier;
+				if (nextCoding.hasVersion()) {
+					codeSystemIdentifier = nextCoding.getSystem() + "|" + nextCoding.getVersion();
+				} else {
+					codeSystemIdentifier = nextCoding.getSystem();
+				}
+				CodeValidationResult nextValidation = validateCode(validationContext, theOptions, codeSystemIdentifier, nextCoding.getCode(), nextCoding.getDisplay(), valueSetIdentifier);
 				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
 					return nextValidation;
 				}
 			}
 		} else if (haveCoding) {
-			system = coding.getSystem();
-			code = coding.getCode();
-			display = coding.getDisplay();
+			if (canonicalCodingToValidate.hasVersion()) {
+				codeSystemIdentifierValueToValidate = canonicalCodingToValidate.getSystem() + "|" + canonicalCodingToValidate.getVersion();
+			} else {
+				codeSystemIdentifierValueToValidate = canonicalCodingToValidate.getSystem();
+			}
+			codeValueToValidate = canonicalCodingToValidate.getCode();
+			codeDisplayValueToValidate = canonicalCodingToValidate.getDisplay();
 		}
 
-		return validateCode(validationContext, theOptions, system, code, display, valueSetUrl);
+		return validateCode(validationContext, theOptions, codeSystemIdentifierValueToValidate, codeValueToValidate, codeDisplayValueToValidate, valueSetIdentifier);
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
@@ -1914,22 +1930,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			throw new InvalidRequestException("Unable to test subsumption across different code system versions");
 		}
 
-		String codeACanonicalUrl;
+		String codeASystemIdentifier;
 		if (StringUtils.isNotEmpty(conceptA.getSystemVersion())) {
-			 codeACanonicalUrl = conceptA.getSystem() + "|" + conceptA.getSystemVersion();
+			 codeASystemIdentifier = conceptA.getSystem() + "|" + conceptA.getSystemVersion();
 		} else {
-			codeACanonicalUrl = conceptA.getSystem();
+			codeASystemIdentifier = conceptA.getSystem();
 		}
-		TermConcept codeA = findCode(codeACanonicalUrl, conceptA.getCode())
+		TermConcept codeA = findCode(codeASystemIdentifier, conceptA.getCode())
 			.orElseThrow(() -> new InvalidRequestException("Unknown code: " + conceptA));
 
-		String codeBCanonicalUrl;
+		String codeBSystemIdentifier;
 		if (StringUtils.isNotEmpty(conceptB.getSystemVersion())) {
-			codeBCanonicalUrl = conceptB.getSystem() + "|" + conceptB.getSystemVersion();
+			codeBSystemIdentifier = conceptB.getSystem() + "|" + conceptB.getSystemVersion();
 		} else {
-			codeBCanonicalUrl = conceptB.getSystem();
+			codeBSystemIdentifier = conceptB.getSystem();
 		}
-		TermConcept codeB = findCode(codeBCanonicalUrl, conceptB.getCode())
+		TermConcept codeB = findCode(codeBSystemIdentifier, conceptB.getCode())
 			.orElseThrow(() -> new InvalidRequestException("Unknown code: " + conceptB));
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
@@ -2406,6 +2422,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	protected abstract Coding toCanonicalCoding(@Nullable IBaseDatatype theCoding);
 
 	@Nullable
+	protected abstract Coding toCanonicalCoding(@Nullable IBaseCoding theCoding);
+
+	@Nullable
 	protected abstract CodeableConcept toCanonicalCodeableConcept(@Nullable IBaseDatatype theCodeableConcept);
 
 	public static class Job implements HapiJob {
@@ -2496,14 +2515,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@NotNull
-	private VersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theSystemType, IBaseCoding theCodingType) {
+	private VersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theCodeSystemIdentifierType, IBaseCoding theCodingType) {
 		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
-		String system = theSystemType != null ? getSystemFromCanonicalUrl(theSystemType.getValueAsString()): null;
-		String systemVersion = theSystemType != null ? getVersionFromCanonicalUrl(theSystemType.getValueAsString()): null;
+		String system = theCodeSystemIdentifierType != null ? getUrlFromIdentifier(theCodeSystemIdentifierType.getValueAsString()): null;
+		String systemVersion = theCodeSystemIdentifierType != null ? getVersionFromIdentifier(theCodeSystemIdentifierType.getValueAsString()): null;
 		if (theCodingType != null) {
-			code = theCodingType.getCode();
-			system = getSystemFromCanonicalUrl(theCodingType.getSystem());
-			systemVersion = getVersionFromCanonicalUrl(theCodingType.getSystem());
+			Coding canonicalizedCoding = toCanonicalCoding(theCodingType);
+			code = canonicalizedCoding.getCode();
+			system = canonicalizedCoding.getSystem();
+			systemVersion = canonicalizedCoding.getVersion();
 		}
 		return new VersionIndependentConcept(system, code, null, systemVersion);
 	}

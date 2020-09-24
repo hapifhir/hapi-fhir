@@ -29,6 +29,10 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.dstu3.model.codesystems.HttpVerb;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -49,6 +53,7 @@ import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -116,21 +121,16 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 	private void loadAndPersistValueSet() throws IOException {
 		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		persistTwoVersionsOfValueSet(valueSet, HttpVerb.POST);
-	}
-
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	private void persistTwoVersionsOfValueSet(ValueSet theValueSet, HttpVerb theVerb) {
-		theValueSet.setVersion("1");
-		theValueSet.setId("ValueSet/vs1");
-		theValueSet.getCompose().getInclude().get(0).setVersion("1");
-		myExtensionalVsId_v1 = persistSingleValueSet(theValueSet, theVerb);
+		valueSet.setVersion("1");
+		valueSet.setId("ValueSet/vs1");
+		valueSet.getCompose().getInclude().get(0).setVersion("1");
+		myExtensionalVsId_v1 = persistSingleValueSet(valueSet, HttpVerb.POST);
 		myExtensionalVsIdOnResourceTable_v1 = myValueSetDao.readEntity(myExtensionalVsId_v1, null).getId();
 
-		theValueSet.setVersion("2");
-		theValueSet.setId("ValueSet/vs2");
-		theValueSet.getCompose().getInclude().get(0).setVersion("2");
-		myExtensionalVsId_v2 = persistSingleValueSet(theValueSet, theVerb);
+		valueSet.setVersion("2");
+		valueSet.setId("ValueSet/vs2");
+		valueSet.getCompose().getInclude().get(0).setVersion("2");
+		myExtensionalVsId_v2 = persistSingleValueSet(valueSet, HttpVerb.POST);
 		myExtensionalVsIdOnResourceTable_v2 = myValueSetDao.readEntity(myExtensionalVsId_v2, null).getId();
 
 	}
@@ -138,6 +138,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	private IIdType persistSingleValueSet(ValueSet theValueSet, HttpVerb theVerb) {
 		final IIdType[] vsId = new IIdType[1];
 		switch (theVerb) {
+			case GET:
+				break;
 			case POST:
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
@@ -154,6 +156,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 					}
 				});
 				break;
+			case DELETE:
+			case NULL:
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
@@ -1053,7 +1057,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|1", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
@@ -1075,7 +1079,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(1);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|1", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1085,7 +1089,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|1", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
@@ -1100,7 +1104,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(23);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|1", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1126,7 +1130,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|2", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration v2", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
@@ -1148,7 +1152,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(1);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|2", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter v2", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1158,7 +1162,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|2", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum v2", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
@@ -1173,161 +1177,16 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(23);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("http://acme.org|2", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum v2", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
 			assertEquals(23, concept.getOrder());
 		});
 	}
-/*
-	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
-		loadAndPersistCodeSystemAndValueSet();
-
-		Parameters respParam = ourClient
-			.operation()
-			.onInstance(myExtensionalVsId_v1)
-			.named("validate-code")
-			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-			.andParameter("system", new UriType("http://acme.org"))
-			.execute();
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnType() throws IOException {
-		createLocalCs();
-		createLocalVsWithIncludeConcept();
-
-		String url = ourServerBase +
-			"/ValueSet/" + myLocalValueSetId_v1.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
-
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
-
-			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
-	}
-
-	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
-		createLocalCs();
-		createLocalVsWithIncludeConcept();
-
-		String url = ourServerBase +
-			"/ValueSet/" + myLocalValueSetId_v1.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
-
-		ourLog.info("* Requesting: {}", url);
-
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
-
-			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
-	}
-
-	@Test
-	public void testValidateCodeOperationByCodeAndSystemType() throws Exception {
-		loadAndPersistCodeSystemAndValueSet();
-
-		Parameters respParam = ourClient
-			.operation()
-			.onInstance(myExtensionalVsId_v1)
-			.named("validate-code")
-			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
-			.andParameter("system", new UriType("http://acme.org"))
-			.execute();
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-	}
-
-	@Test
-	public void testValidateCodeOperationNoValueSetProvided() throws Exception {
-		loadAndPersistCodeSystemAndValueSet();
-
-		try {
-			ourClient
-				.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8450-9"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testValidateCodeOperationOnInstanceWithIsAExpansion() throws IOException {
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://mycs");
-		cs.setContent(CodeSystemContentMode.COMPLETE);
-		cs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
-		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		ConceptDefinitionComponent parentA = cs.addConcept().setCode("ParentA").setDisplay("Parent A");
-		parentA.addConcept().setCode("ChildAA").setDisplay("Child AA");
-		myCodeSystemDao.create(cs);
-
-		ValueSet vs = new ValueSet();
-		vs.setUrl("http://myvs");
-		vs.getCompose()
-			.addInclude()
-			.setSystem("http://mycs")
-			.addFilter()
-			.setOp(FilterOperator.ISA)
-			.setProperty("concept")
-			.setValue("ParentA");
-		IIdType vsId = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
-
-		HttpGet expandGet = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-		}
-
-		HttpGet validateCodeGet = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertEquals(true, output.getParameterBool("result"));
-		}
-
-		HttpGet validateCodeGet2 = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertEquals(false, output.getParameterBool("result"));
-		}
-
-	}
-*/
-
-	@Test
-	public void testCreateDuplicatValueSetVersion() {
+	public void testCreateDuplicateValueSetVersion() {
 		createExternalCsAndLocalVs();
 		try {
 			persistLocalVs(createLocalVs(URL_MY_CODE_SYSTEM, "1"));
@@ -1338,6 +1197,284 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 	}
 
+	@Test
+	public void testValidateCodeOperationByCodeAndSystem() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+
+		// With correct system version specified. Should pass.
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		// With incorrect version specified. Should fail.
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+	}
+
+	@Test
+	public void testValidateCodeOperationOnInstanceByCodeAndSystem() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+
+		// With correct system version specified. Should pass.
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		// With incorrect version specified. Should fail.
+		respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+	}
+
+	@Test
+	public void testValidateCodeOperationByCoding() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+
+		Coding codingToValidate_v1 = new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum");
+		codingToValidate_v1.setVersion("1");
+
+		Coding codingToValidate_v2 = new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum v2");
+		codingToValidate_v2.setVersion("2");
+
+		// With correct system version specified. Should pass.
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		// With incorrect version specified. Should fail.
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+	}
+
+	@Test
+	public void testValidateCodeOperationByCodeableConcept() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+
+		Coding codingToValidate = new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum");
+		codingToValidate.setVersion("1");
+		CodeableConcept codeableConceptToValidate_v1 = new CodeableConcept(codingToValidate);
+
+		codingToValidate = new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum v2");
+		codingToValidate.setVersion("2");
+		CodeableConcept codeableConceptToValidate_v2 = new CodeableConcept(codingToValidate);
+
+		// With correct system version specified. Should pass.
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		// With incorrect version specified. Should fail.
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
+	}
+	
 	@AfterEach
 	public void afterResetPreExpansionDefault() {
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());

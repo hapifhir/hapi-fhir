@@ -44,7 +44,7 @@ public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<Val
 		@IdParam(optional = true) IdType theId,
 		@OperationParam(name = "valueSet", min = 0, max = 1) ValueSet theValueSet,
 		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
-		@OperationParam(name = "valueSetVersion", min = 0, max = 1) org.hl7.fhir.r4.model.StringType theValueSetVersion,
+		@OperationParam(name = "valueSetVersion", min = 0, max = 1) StringType theValueSetVersion,
 		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
 		@OperationParam(name = "offset", min = 0, max = 1) IntegerType theOffset,
 		@OperationParam(name = "count", min = 0, max = 1) IntegerType theCount,
@@ -135,8 +135,10 @@ public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<Val
 		HttpServletRequest theServletRequest,
 		@IdParam(optional = true) IdType theId,
 		@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
+		@OperationParam(name = "valueSetVersion", min = 0, max = 1) StringType theValueSetVersion,
 		@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+		@OperationParam(name = "systemVersion", min = 0, max = 1) StringType theSystemVersion,
 		@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
 		@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
 		@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theCodeableConcept,
@@ -146,7 +148,19 @@ public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<Val
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			IValidationSupport.CodeValidationResult result = dao.validateCode(theValueSetUrl, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			UriType valueSetIdentifier;
+			if (theValueSetVersion != null) {
+				valueSetIdentifier = new UriType(theValueSetUrl.getValue() + "|" + theValueSetVersion);
+			} else {
+				valueSetIdentifier = theValueSetUrl;
+			}
+			UriType codeSystemIdentifier;
+			if (theSystemVersion != null) {
+				codeSystemIdentifier = new UriType(theSystem.getValue() + "|" + theSystemVersion);
+			} else {
+				codeSystemIdentifier = theSystem;
+			}
+			IValidationSupport.CodeValidationResult result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);

@@ -95,7 +95,11 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		String system;
 		if (haveCoding) {
 			code = theCoding.getCode();
-			system = theCoding.getSystem();
+			if (theCoding.hasVersion()) {
+				system = theCoding.getSystem() + "|" + theCoding.getVersion();
+			} else {
+				system = theCoding.getSystem();
+			}
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();

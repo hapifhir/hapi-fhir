@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -16,28 +16,22 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
+import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.UriType;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -66,9 +60,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProviderR4Test {
+public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProviderR5Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetVersionedTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR5ValueSetVersionedTest.class);
 	private IIdType myExtensionalCsId_v1;
 	private IIdType myExtensionalCsId_v2;
 	private IIdType myExtensionalVsId_v1;
@@ -113,7 +107,7 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 		theCodeSystem.setId("CodeSystem/cs2");
 		theCodeSystem.setVersion("2");
-		for(CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent : theCodeSystem.getConcept()) {
+		for(ConceptDefinitionComponent conceptDefinitionComponent : theCodeSystem.getConcept()) {
 			conceptDefinitionComponent.setDisplay(conceptDefinitionComponent.getDisplay() + " v2");
 		}
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -1458,8 +1452,8 @@ public class ResourceProviderR4ValueSetVersionedTest extends BaseResourceProvide
 
 	private boolean clearDeferredStorageQueue() {
 
-		if(!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
-			myTerminologyDeferredStorageSvc.saveAllDeferred();
+		if(!myTermDeferredStorageSvc.isStorageQueueEmpty()) {
+			myTermDeferredStorageSvc.saveAllDeferred();
 			return false;
 		} else {
 			return true;

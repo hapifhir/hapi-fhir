@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
@@ -109,6 +110,12 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	@Override
 	@Nullable
 	protected org.hl7.fhir.r4.model.Coding toCanonicalCoding(IBaseDatatype theCoding) {
+		return VersionConvertor_30_40.convertCoding((org.hl7.fhir.dstu3.model.Coding) theCoding);
+	}
+
+	@Override
+	@Nullable
+	protected org.hl7.fhir.r4.model.Coding toCanonicalCoding(IBaseCoding theCoding) {
 		return VersionConvertor_30_40.convertCoding((org.hl7.fhir.dstu3.model.Coding) theCoding);
 	}
 
