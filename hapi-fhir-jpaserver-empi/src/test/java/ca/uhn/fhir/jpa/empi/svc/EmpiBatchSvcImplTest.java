@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
-import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
+import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -17,7 +17,7 @@ import java.util.Date;
 class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 
 	@Autowired
-	IEmpiBatchSvc myEmpiBatchSvc;
+    IEmpiSubmitSvc myEmpiBatchSvc;
 
 	@Autowired
 	IInterceptorService myInterceptorService;

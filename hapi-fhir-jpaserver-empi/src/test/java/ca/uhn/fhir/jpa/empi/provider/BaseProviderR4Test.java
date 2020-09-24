@@ -1,16 +1,13 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
-import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
-import ca.uhn.fhir.empi.api.IEmpiResetSvc;
-import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
+import ca.uhn.fhir.empi.api.IEmpiControllerSvc;
+import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
-import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
 import ca.uhn.fhir.empi.provider.EmpiProviderR4;
 import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
-import ca.uhn.fhir.validation.IResourceLoader;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -26,19 +23,15 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 	@Autowired
 	private IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 	@Autowired
-	private IEmpiPersonMergerSvc myPersonMergerSvc;
+	private IEmpiControllerSvc myEmpiControllerSvc;
 	@Autowired
 	private IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
 	@Autowired
-	private IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
+	private IEmpiExpungeSvc myEmpiResetSvc;
 	@Autowired
-	private IResourceLoader myResourceLoader;
+	private IEmpiSubmitSvc myEmpiBatchSvc;
 	@Autowired
-	private IEmpiSettings myEmpiSettings;
-	@Autowired
-	private IEmpiResetSvc myEmpiExpungeSvc;
-	@Autowired
-	private IEmpiBatchSvc myEmpiBatchSvc;
+	private EmpiSettings myEmpiSettings;
 
 	private String defaultScript;
 
@@ -52,7 +45,7 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 
 	@BeforeEach
 	public void before() {
-		myEmpiProviderR4 = new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiExpungeSvc, myEmpiBatchSvc);
+		myEmpiProviderR4 = new EmpiProviderR4(myFhirContext, myEmpiControllerSvc, myEmpiResetSvc, myEmpiBatchSvc);
 		defaultScript = ((EmpiSettings)myEmpiSettings).getScriptText();
 	}
 	@AfterEach

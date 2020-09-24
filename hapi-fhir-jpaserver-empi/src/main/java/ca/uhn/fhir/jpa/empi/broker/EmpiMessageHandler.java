@@ -111,13 +111,13 @@ public class EmpiMessageHandler implements MessageHandler {
 		EmpiTransactionContext.OperationType empiOperation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
-				empiOperation = EmpiTransactionContext.OperationType.CREATE;
+				empiOperation = EmpiTransactionContext.OperationType.CREATE_RESOURCE;
 				break;
 			case UPDATE:
-				empiOperation = EmpiTransactionContext.OperationType.UPDATE;
+				empiOperation = EmpiTransactionContext.OperationType.UPDATE_RESOURCE;
 				break;
 			case MANUALLY_TRIGGERED:
-				empiOperation = EmpiTransactionContext.OperationType.BATCH;
+				empiOperation = EmpiTransactionContext.OperationType.SUBMIT_RESOURCES_TO_EMPI;
 				break;
 			case DELETE:
 			default:

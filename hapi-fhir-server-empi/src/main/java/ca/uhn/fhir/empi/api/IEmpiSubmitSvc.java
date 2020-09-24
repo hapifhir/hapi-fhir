@@ -24,7 +24,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nullable;
 
-public interface IEmpiBatchSvc {
+public interface IEmpiSubmitSvc {
 
 	/**
 	 * Submit all eligible resources for EMPI processing.

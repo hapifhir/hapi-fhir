@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.empi.api.IEmpiResetSvc;
+import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
@@ -35,7 +35,7 @@ import java.util.List;
  * This class is responsible for clearing out existing EMPI links, as well as deleting all persons related to those EMPI Links.
  *
  */
-public class EmpiClearSvcImpl implements IEmpiResetSvc {
+public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	final EmpiLinkDaoSvc myEmpiLinkDaoSvc;

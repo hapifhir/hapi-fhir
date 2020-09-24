@@ -27,7 +27,5 @@ import java.util.List;
 
 public interface IEmpiLinkQuerySvc {
 	List<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
-
-	List<EmpiLinkJson>  getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
-
+	List<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
 }

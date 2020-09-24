@@ -26,6 +26,7 @@ import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.provider.EmpiControllerHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
@@ -54,24 +55,26 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	IdHelperService myIdHelperService;
 	@Autowired
 	EmpiResourceDaoSvc myEmpiResourceDaoSvc;
+	@Autowired
+	EmpiControllerHelper myEmpiControllerHelper;
 
 	@Override
 	@Transactional
-	public IAnyResource mergePersons(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
+	public IAnyResource mergePersons(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theTheEmpiTransactionContext) {
 		Long toPersonPid = myIdHelperService.getPidOrThrowException(theToPerson);
 
 		myPersonHelper.mergePersonFields(theFromPerson, theToPerson);
-		mergeLinks(theFromPerson, theToPerson, toPersonPid, theEmpiTransactionContext);
+		mergeLinks(theFromPerson, theToPerson, toPersonPid, theTheEmpiTransactionContext);
 
-		refreshLinksAndUpdatePerson(theToPerson, theEmpiTransactionContext);
+		refreshLinksAndUpdatePerson(theToPerson, theTheEmpiTransactionContext);
 
 		Long fromPersonPid = myIdHelperService.getPidOrThrowException(theFromPerson);
 		addMergeLink(fromPersonPid, toPersonPid);
 		myPersonHelper.deactivatePerson(theFromPerson);
 
-		refreshLinksAndUpdatePerson(theFromPerson, theEmpiTransactionContext);
+		refreshLinksAndUpdatePerson(theFromPerson, theTheEmpiTransactionContext);
 
-		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
+		log(theTheEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
 		return theToPerson;
 	}
 

@@ -144,10 +144,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public void fromLinkToNoLink() {
 		createEmpiLink(myFromPerson, myTargetPatient1);
 
-		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
+		Person mergedPerson = mergePersons();
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(mergedPerson);
 		assertEquals(1, links.size());
-		assertThat(myToPerson, is(possibleLinkedTo(myTargetPatient1)));
+		assertThat(mergedPerson, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToPerson.getLink().size());
 	}
 
@@ -155,10 +155,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public void fromNoLinkToLink() {
 		createEmpiLink(myToPerson, myTargetPatient1);
 
-		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
+		Person mergedPerson = mergePersons();
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(mergedPerson);
 		assertEquals(1, links.size());
-		assertThat(myToPerson, is(possibleLinkedTo(myTargetPatient1)));
+		assertThat(mergedPerson, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToPerson.getLink().size());
 	}
 
@@ -335,10 +335,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		assertThat(myToPerson.getName(), hasSize(1));
 		assertThat(myToPerson.getName().get(0).getGiven(), hasSize(2));
 
-		mergePersons();
-		assertThat(myToPerson.getName(), hasSize(2));
-		assertThat(myToPerson.getName().get(0).getGiven(), hasSize(2));
-		assertThat(myToPerson.getName().get(1).getGiven(), hasSize(2));
+		Person mergedPerson = mergePersons();
+		assertThat(mergedPerson.getName(), hasSize(2));
+		assertThat(mergedPerson.getName().get(0).getGiven(), hasSize(2));
+		assertThat(mergedPerson.getName().get(1).getGiven(), hasSize(2));
 	}
 
 	@Test

@@ -20,7 +20,7 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-public interface IEmpiResetSvc {
+public interface IEmpiExpungeSvc {
 
 	/**
 	 * Given a resource type, delete the underlying EMPI links, and their related person objects.

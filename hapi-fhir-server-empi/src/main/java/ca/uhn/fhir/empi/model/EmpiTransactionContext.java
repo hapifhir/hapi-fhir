@@ -33,9 +33,13 @@ public class EmpiTransactionContext {
 
 
 	public enum OperationType {
-		CREATE,
-		UPDATE,
-		BATCH,
+		CREATE_RESOURCE,
+		UPDATE_RESOURCE,
+		SUBMIT_RESOURCES_TO_EMPI,
+		QUERY_LINKS,
+		UPDATE_LINK,
+		DUPLICATE_PERSONS,
+		NOT_DUPLICATE,
 		MERGE_PERSONS
 	}
 	public TransactionLogMessages getTransactionLogMessages() {

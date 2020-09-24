@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.empi.svc;
  * #L%
  */
 
-import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
 import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
+import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -49,7 +49,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class EmpiBatchSvcImpl implements IEmpiBatchSvc {
+public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired

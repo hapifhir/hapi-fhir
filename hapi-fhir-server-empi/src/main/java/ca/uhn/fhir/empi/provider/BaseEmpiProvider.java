@@ -21,25 +21,16 @@ package ca.uhn.fhir.empi.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkJson;
-import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import ca.uhn.fhir.empi.util.EmpiUtil;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.fhir.validation.IResourceLoader;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
@@ -47,45 +38,9 @@ import java.util.List;
 public abstract class BaseEmpiProvider {
 
 	protected final FhirContext myFhirContext;
-	private final IResourceLoader myResourceLoader;
 
-	public BaseEmpiProvider(FhirContext theFhirContext, IResourceLoader theResourceLoader) {
+	public BaseEmpiProvider(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
-		myResourceLoader = theResourceLoader;
-	}
-
-	protected IAnyResource getLatestPersonFromIdOrThrowException(String theParamName, String theId) {
-		IdDt personId = getPersonIdDtOrThrowException(theParamName, theId);
-		return loadResource(personId.toUnqualifiedVersionless());
-	}
-
-	private IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
-		IdDt personId = new IdDt(theId);
-		if (!"Person".equals(personId.getResourceType()) ||
-			personId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " must have form Person/<id> where <id> is the id of the person");
-		}
-		return personId;
-	}
-
-	protected IAnyResource getLatestTargetFromIdOrThrowException(String theParamName, String theId) {
-		IIdType targetId = getTargetIdDtOrThrowException(theParamName, theId);
-		return loadResource(targetId.toUnqualifiedVersionless());
-	}
-
-	protected IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
-		IdDt targetId = new IdDt(theId);
-		String resourceType = targetId.getResourceType();
-		if (!EmpiUtil.supportedTargetType(resourceType) ||
-			targetId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource");
-		}
-		return targetId;
-	}
-
-	protected IAnyResource loadResource(IIdType theResourceId) {
-		Class<? extends IBaseResource> resourceClass = myFhirContext.getResourceDefinition(theResourceId.getResourceType()).getImplementingClass();
-		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
 	}
 
 	protected void validateMergeParameters(IPrimitiveType<String> theFromPersonId, IPrimitiveType<String> theToPersonId) {
@@ -95,20 +50,6 @@ public abstract class BaseEmpiProvider {
 			throw new InvalidRequestException("fromPersonId must be different from toPersonId");
 		}
  	}
-
- 	protected void validateMergeResources(IAnyResource theFromPerson, IAnyResource theToPerson) {
-		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPerson);
-		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPerson);
-	}
-
-	private void validateIsEmpiManaged(String theName, IAnyResource thePerson) {
-		if (!"Person".equals(myFhirContext.getResourceType(thePerson))) {
-			throw new InvalidRequestException("Only Person resources can be merged.  The " + theName + " points to a " + myFhirContext.getResourceType(thePerson));
-		}
-		if (!EmpiUtil.isEmpiManaged(thePerson)) {
-			throw new InvalidRequestException("Only EMPI managed resources can be merged.  Empi managed resource have the " + EmpiConstants.CODE_HAPI_EMPI_MANAGED + " tag.");
-		}
-	}
 
 	private void validateNotNull(String theName, IPrimitiveType<String> theString) {
 		if (theString == null || theString.getValue() == null) {
@@ -136,62 +77,53 @@ public abstract class BaseEmpiProvider {
 		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
 	}
 
-	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails) {
+	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails, EmpiTransactionContext.OperationType theOperationType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
-		return new EmpiTransactionContext(transactionLogMessages, EmpiTransactionContext.OperationType.MERGE_PERSONS);
+		return new EmpiTransactionContext(transactionLogMessages, theOperationType);
 	}
 
-	// FIXME KHS consolidate
-	protected EmpiMatchResultEnum extractMatchResultOrNull(IPrimitiveType<String> theMatchResult) {
-		String matchResult = extractStringNull(theMatchResult);
-		if (matchResult == null) {
-			return null;
-		}
-		return EmpiMatchResultEnum.valueOf(matchResult);
-	}
-
-	protected EmpiLinkSourceEnum extractLinkSourceOrNull(IPrimitiveType<String> theLinkSource) {
-		String linkSource = extractStringNull(theLinkSource);
-		if (linkSource == null) {
-			return null;
-		}
-		return EmpiLinkSourceEnum.valueOf(linkSource);
-	}
-
-	private String extractStringNull(IPrimitiveType<String> theString) {
+	protected String extractStringOrNull(IPrimitiveType<String> theString) {
 		if (theString == null) {
 			return null;
 		}
 		return theString.getValue();
 	}
 
-	protected IIdType extractPersonIdDtOrNull(String theName, IPrimitiveType<String> thePersonId) {
-		String personId = extractStringNull(thePersonId);
-		if (personId == null) {
-			return null;
-		}
-		return getPersonIdDtOrThrowException(theName, personId);
-	}
-
-	protected IIdType extractTargetIdDtOrNull(String theName, IPrimitiveType<String> theTargetId) {
-		String targetId = extractStringNull(theTargetId);
-		if (targetId == null) {
-			return null;
-		}
-		return getTargetIdDtOrThrowException(theName, targetId);
-	}
-
-	protected void validateSameVersion(IAnyResource theResource, IPrimitiveType<String> theResourceId) {
-		String storedId = theResource.getIdElement().getValue();
-		String requestedId = theResourceId.getValue();
-		if (hasVersionIdPart(requestedId) && !storedId.equals(requestedId)) {
-			throw new ResourceVersionConflictException("Requested resource " + requestedId + " is not the latest version.  Latest version is " + storedId);
-		}
-	}
-
-	private boolean hasVersionIdPart(String theId) {
-		return new IdDt(theId).hasVersionIdPart();
-	}
+	// FIXME KHS
+//
+//	// FIXME KHS consolidate
+//	protected EmpiMatchResultEnum extractMatchResultOrNull(IPrimitiveType<String> theMatchResult) {
+//		String matchResult = extractStringNull(theMatchResult);
+//		if (matchResult == null) {
+//			return null;
+//		}
+//		return EmpiMatchResultEnum.valueOf(matchResult);
+//	}
+//
+//	protected EmpiLinkSourceEnum extractLinkSourceOrNull(IPrimitiveType<String> theLinkSource) {
+//		String linkSource = extractStringNull(theLinkSource);
+//		if (linkSource == null) {
+//			return null;
+//		}
+//		return EmpiLinkSourceEnum.valueOf(linkSource);
+//	}
+//
+//
+//	protected IIdType extractPersonIdDtOrNull(String theName, IPrimitiveType<String> thePersonId) {
+//		String personId = extractStringNull(thePersonId);
+//		if (personId == null) {
+//			return null;
+//		}
+//		return getPersonIdDtOrThrowException(theName, personId);
+//	}
+//
+//	protected IIdType extractTargetIdDtOrNull(String theName, IPrimitiveType<String> theTargetId) {
+//		String targetId = extractStringNull(theTargetId);
+//		if (targetId == null) {
+//			return null;
+//		}
+//		return getTargetIdDtOrThrowException(theName, targetId);
+//	}
 
 	protected IBaseParameters parametersFromEmpiLinks(List<EmpiLinkJson> theEmpiLinks, boolean includeResultAndSource) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
