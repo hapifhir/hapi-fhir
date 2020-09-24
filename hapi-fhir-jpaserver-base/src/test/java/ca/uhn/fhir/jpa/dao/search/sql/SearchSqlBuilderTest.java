@@ -31,7 +31,7 @@ public class SearchSqlBuilderTest {
 	public void testSearchStringExact() {
 		SearchSqlBuilder builder = new SearchSqlBuilder(myFhirCtx, new ModelConfig(), new PartitionSettings(), null, "Patient", mySqlBuilderFactory);
 		StringIndexTable stringSelector = builder.addStringSelector(null);
-		stringSelector.addPredicateExact("family", "Smith");
+		stringSelector.addPredicateExact("Patient", "family", "Smith");
 
 		SearchSqlBuilder.GeneratedSql output = builder.generate();
 		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE (t0.SP_VALUE_EXACT = ?)", output.getSql());
@@ -44,7 +44,7 @@ public class SearchSqlBuilderTest {
 		SearchSqlBuilder builder = new SearchSqlBuilder(myFhirCtx, new ModelConfig(), new PartitionSettings(), null, "Patient", mySqlBuilderFactory);
 
 		StringIndexTable stringSelector = builder.addStringSelector(null);
-		stringSelector.addPredicateExact("family", "Smith");
+		stringSelector.addPredicateExact("Patient", "family", "Smith");
 
 		TokenIndexTable tokenSelector = builder.addTokenSelector(null);
 		tokenSelector.addPredicateSystemAndValue("identifier", "http://foo", "12345");

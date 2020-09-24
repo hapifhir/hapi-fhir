@@ -249,7 +249,7 @@ public class QueryStack3 {
 		}
 
 		ResourceLinkIndexTable join = mySqlBuilder.addReferenceSelector(this, theSourceJoinColumn);
-		return join.addPredicate(theRequest, theParamName, theList, theOperation, theRequestPartitionId);
+		return join.addPredicate(theRequest, theResourceName, theParamName, theList, theOperation, theRequestPartitionId);
 	}
 
 

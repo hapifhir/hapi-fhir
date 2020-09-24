@@ -542,8 +542,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("CareTeam").setChain(PARAM_TYPE));
 		results = myDiagnosticReportDao.search(map);
 		ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids.toString(), ids, contains(drId1.getValue()));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids.toString(), ids, contains(drId1.getValue()));
 
 	}
 
@@ -732,9 +732,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		mo.setMedication(new Reference(medId));
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
+		runInTransaction(()->{
+			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
 		HttpServletRequest request = mock(HttpServletRequest.class);
+		myCaptureQueriesListener.clear();
 		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, mySrd);
-		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
 		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, mySrd);
@@ -1381,11 +1388,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, selectQueries.size());
 
 			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
-			ourLog.debug("SQL Query:\n{}", sqlQuery);
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+			ourLog.info("SQL Query:\n{}", sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id in"));
 			assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_type='diagnosticreport'"));
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_deleted_at is null"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport'"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at is null"));
 		}
 		// With an _id parameter and a standard search param
 		{
@@ -1400,11 +1407,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "resourceta0_.res_id in"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id in"));
 			assertEquals(1, StringUtils.countMatches(sqlQuery, "join"));
 			assertEquals(1, StringUtils.countMatches(sqlQuery, "hash_sys_and_value"));
-			assertEquals(0, StringUtils.countMatches(sqlQuery, "diagnosticreport"));
-			assertEquals(0, StringUtils.countMatches(sqlQuery, "res_deleted_at"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport")); // could be 0
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at")); // could be 0
 		}
 	}
 

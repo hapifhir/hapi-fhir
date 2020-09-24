@@ -51,8 +51,8 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 		return myColumnResId;
 	}
 
-	public void addPredicateExact(String theParamName, String theValueExact) {
-		addCondition(createPredicateExact(theParamName, theValueExact));
+	public void addPredicateExact(String theResourceName, String theParamName, String theValueExact) {
+		addCondition(createPredicateExact(theResourceName, theParamName, theValueExact));
 	}
 
 	public Condition createPredicateString(IQueryParameterType theParameter,
@@ -95,7 +95,7 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
 		if (exactMatch) {
 			// Exact match
-			return theFrom.createPredicateExact(paramName, rawSearchTerm);
+			return theFrom.createPredicateExact(theResourceName, paramName, rawSearchTerm);
 		} else {
 			// Normalized Match
 			String normalizedString = StringUtil.normalizeStringForSearchIndexing(rawSearchTerm);
@@ -122,13 +122,13 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 			Condition predicate;
 			if ((operation == null) ||
 				(operation == SearchFilterParser.CompareOperation.sw)) {
-				predicate = theFrom.createPredicateNormalLike(paramName, normalizedString, likeExpression);
+				predicate = theFrom.createPredicateNormalLike(theResourceName, paramName, normalizedString, likeExpression);
 			} else if ((operation == SearchFilterParser.CompareOperation.ew) || (operation == SearchFilterParser.CompareOperation.co)) {
-				predicate = theFrom.createPredicateLikeExpressionOnly(paramName, likeExpression, false);
+				predicate = theFrom.createPredicateLikeExpressionOnly(theResourceName, paramName, likeExpression, false);
 			} else if (operation == SearchFilterParser.CompareOperation.eq) {
-				predicate = theFrom.createPredicateNormal(paramName, normalizedString);
+				predicate = theFrom.createPredicateNormal(theResourceName, paramName, normalizedString);
 			} else if (operation == SearchFilterParser.CompareOperation.ne) {
-				predicate = theFrom.createPredicateLikeExpressionOnly(paramName, likeExpression, true);
+				predicate = theFrom.createPredicateLikeExpressionOnly(theResourceName, paramName, likeExpression, true);
 			} else {
 				throw new IllegalArgumentException("Don't yet know how to handle operation " + operation + " on a string");
 			}
@@ -138,31 +138,31 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 	}
 
 	@Nonnull
-	public Condition createPredicateExact(String theTheParamName, String theTheValueExact) {
-		long hash = ResourceIndexedSearchParamString.calculateHashExact(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theTheParamName, theTheValueExact);
+	public Condition createPredicateExact(String theResourceType, String theParamName, String theTheValueExact) {
+		long hash = ResourceIndexedSearchParamString.calculateHashExact(getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName, theTheValueExact);
 		String placeholderValue = generatePlaceholder(hash);
 		return BinaryCondition.equalTo(myColumnHashExact, placeholderValue);
 	}
 
 	@Nonnull
-	public Condition createPredicateNormalLike(String theParamName, String theNormalizedString, String theLikeExpression) {
-		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getModelConfig(), getResourceType(), theParamName, theNormalizedString);
+	public Condition createPredicateNormalLike(String theResourceType, String theParamName, String theNormalizedString, String theLikeExpression) {
+		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getModelConfig(), theResourceType, theParamName, theNormalizedString);
 		Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
 		Condition valuePredicate = BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
 	@Nonnull
-	public Condition createPredicateNormal(String theParamName, String theNormalizedString) {
-		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getModelConfig(), getResourceType(), theParamName, theNormalizedString);
+	public Condition createPredicateNormal(String theResourceType, String theParamName, String theNormalizedString) {
+		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getModelConfig(), theResourceType, theParamName, theNormalizedString);
 		Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
 		Condition valuePredicate = BinaryCondition.equalTo(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
 	@Nonnull
-	public Condition createPredicateLikeExpressionOnly(String theParamName, String theLikeExpression, boolean theInverse) {
-		long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);
+	public Condition createPredicateLikeExpressionOnly(String theResourceType, String theParamName, String theLikeExpression, boolean theInverse) {
+		long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
 		BinaryCondition identityPredicate = BinaryCondition.equalTo(myColumnHashIdentity, generatePlaceholder(hashIdentity));
 		BinaryCondition likePredicate = BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
 		Condition retVal = ComboCondition.and(identityPredicate, likePredicate);

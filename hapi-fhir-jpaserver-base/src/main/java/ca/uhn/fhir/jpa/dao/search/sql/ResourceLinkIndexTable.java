@@ -110,7 +110,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		return myColumnSrcResourceId;
 	}
 
-	public Condition addPredicate(RequestDetails theRequest, String theParamName, List<? extends IQueryParameterType> theReferenceOrParamList, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition addPredicate(RequestDetails theRequest, String theResourceType, String theParamName, List<? extends IQueryParameterType> theReferenceOrParamList, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		List<IIdType> targetIds = new ArrayList<>();
 		List<String> targetQualifiedUrls = new ArrayList<>();
@@ -146,7 +146,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 					 * Handle chained search, e.g. Patient?organization.name=Kwik-e-mart
 					 */
 
-					return addPredicateReferenceWithChain(getResourceType(), theParamName, theReferenceOrParamList, ref, theRequest, theRequestPartitionId);
+					return addPredicateReferenceWithChain(theResourceType, theParamName, theReferenceOrParamList, ref, theRequest, theRequestPartitionId);
 
 				}
 
@@ -167,7 +167,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			}
 		}
 
-		List<String> pathsToMatch = createResourceLinkPathPredicate(getResourceType(), theParamName);
+		List<String> pathsToMatch = createResourceLinkPathPredicate(theResourceType, theParamName);
 		boolean inverse;
 		if ((theOperation == null) || (theOperation == SearchFilterParser.CompareOperation.eq)) {
 			inverse = false;
@@ -315,7 +315,9 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		 * Handle chain on _type
 		 */
 		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
-			BinaryCondition typeCondition = BinaryCondition.equalTo(myColumnSrcType, generatePlaceholder(theResourceName));
+
+			List<String> pathsToMatch = createResourceLinkPathPredicate(theResourceName, theParamName);
+			Condition typeCondition = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
 			addCondition(typeCondition);
 
 			String typeValue = theReferenceParam.getValue();
@@ -392,7 +394,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
 			}
 
-			List<String> pathsToMatch = createResourceLinkPathPredicate(getResourceType(), theParamName);
+			List<String> pathsToMatch = createResourceLinkPathPredicate(theResourceName, theParamName);
 			InCondition pathPredicate = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
 			addCondition(pathPredicate);
 
@@ -483,7 +485,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 					}
 				}
 
-				Class<? extends IBaseResource> resourceType = getFhirContext().getResourceDefinition(getResourceType()).getImplementingClass();
+				Class<? extends IBaseResource> resourceType = getFhirContext().getResourceDefinition(theResourceName).getImplementingClass();
 				BaseRuntimeChildDefinition def = getFhirContext().newTerser().getDefinition(resourceType, paramPath);
 				if (def instanceof RuntimeChildChoiceDefinition) {
 					RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
