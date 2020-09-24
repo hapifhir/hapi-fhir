@@ -21,7 +21,7 @@ public class AfterPOJO extends BaseJsonMessage<String> {
 	@JsonProperty("RES_ID")
 	private int resId;
 	@JsonProperty("RES_DELETED_AT")
-	private int resDeletedAt;
+	private long resDeletedAt;
 	@JsonProperty("RES_TYPE")
 	private String resourceType;
 	@JsonIgnore
@@ -42,7 +42,7 @@ public class AfterPOJO extends BaseJsonMessage<String> {
 		return resId;
 	}
 
-	public int getResDeletedAt() {
+	public long getResDeletedAt() {
 		return resDeletedAt;
 	}
 
@@ -63,7 +63,7 @@ public class AfterPOJO extends BaseJsonMessage<String> {
 		this.resId = resId;
 	}
 
-	public void setResDeletedAt(int resDeletedAt) {
+	public void setResDeletedAt(long resDeletedAt) {
 		this.resDeletedAt = resDeletedAt;
 	}
 

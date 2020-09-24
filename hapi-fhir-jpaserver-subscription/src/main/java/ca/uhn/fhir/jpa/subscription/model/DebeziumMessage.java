@@ -40,7 +40,7 @@ public class DebeziumMessage extends BaseJsonMessage<PayloadPOJO> {
 		return myPayload.getPayload().getResId();
 	}
 
-	public int getResDeletedAt() {
+	public long getResDeletedAt() {
 		return myPayload.getPayload().getResDeletedAt();
 	}
 
