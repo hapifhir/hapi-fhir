@@ -122,7 +122,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		return myColumnSrcResourceId;
 	}
 
-	protected DbColumn getColumnTargetResourceType() {
+	public DbColumn getColumnTargetResourceType() {
 		return myColumnTargetResourceType;
 	}
 
@@ -417,7 +417,8 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			InCondition pathPredicate = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
 			andPredicates.add(pathPredicate);
 
-			andPredicates.add(myQueryStack.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, Collections.singletonList(orValues), theRequest, theRequestPartitionId));
+			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
+			andPredicates.add(myQueryStack.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, chainParamValues, theRequest, theRequestPartitionId));
 
 			orPredicates.add(toAndPredicate(andPredicates));
 
@@ -577,34 +578,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 	}
 
 
-	//	Subquery<Long> createLinkSubquery(String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-//
-//		/*
-//		 * We're doing a chain call, so push the current query root
-//		 * and predicate list down and put new ones at the top of the
-//		 * stack and run a subquery
-//		 */
-//		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theSubResourceName, theChain);
-//		if (nextParamDef != null && !theChain.startsWith("_")) {
-//			myQueryStack.pushIndexTableSubQuery();
-//		} else {
-//			myQueryStack.pushResourceTableSubQuery(theSubResourceName);
-//		}
-//
-//		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
-//		andOrParams.add(theOrValues);
-//
-//		searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest, theRequestPartitionId);
-//
-//		/*
-//		 * Pop the old query root and predicate list back
-//		 */
-//		return (Subquery<Long>) myQueryStack.pop();
-//
-//	}
-//
-//
-
 	private IQueryParameterType mapReferenceChainToRawParamType(String remainingChain, RuntimeSearchParam param, String theParamName, String qualifier, String nextType, String chain, boolean isMeta, String resourceId) {
 		IQueryParameterType chainValue;
 		if (remainingChain != null) {
@@ -671,109 +644,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		return qp;
 	}
 
-//	private void addPredicateSource(List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
-//		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-//			addPredicateSource(nextAnd, SearchFilterParser.CompareOperation.eq, theRequest);
-//		}
-//	}
-//
-//	private Predicate addPredicateSource(List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
-//		// Required for now
-//		assert theOperation == SearchFilterParser.CompareOperation.eq;
-//
-//		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
-//			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
-//			throw new InvalidRequestException(msg);
-//		}
-//
-//		From<?, ResourceHistoryProvenanceEntity> join = myQueryStack.createJoin(SearchBuilderJoinEnum.PROVENANCE, Constants.PARAM_SOURCE);
-//
-//		List<Predicate> codePredicates = new ArrayList<>();
-//
-//		for (IQueryParameterType nextParameter : theList) {
-//			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myContext));
-//			String sourceUri = sourceParameter.getSourceUri();
-//			String requestId = sourceParameter.getRequestId();
-//			Predicate sourceUriPredicate = myCriteriaBuilder.equal(join.get("mySourceUri"), sourceUri);
-//			Predicate requestIdPredicate = myCriteriaBuilder.equal(join.get("myRequestId"), requestId);
-//			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
-//				codePredicates.add(myCriteriaBuilder.and(sourceUriPredicate, requestIdPredicate));
-//			} else if (isNotBlank(sourceUri)) {
-//				codePredicates.add(sourceUriPredicate);
-//			} else if (isNotBlank(requestId)) {
-//				codePredicates.add(requestIdPredicate);
-//			}
-//		}
-//
-//		Predicate retVal = myCriteriaBuilder.or(toArray(codePredicates));
-//		myQueryStack.addPredicate(retVal);
-//		return retVal;
-//	}
-//
-
-//
-//	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
-//		// TODO: fail if missing is set for a composite query
-//
-//		IQueryParameterType or = theNextAnd.get(0);
-//		if (!(or instanceof CompositeParam<?, ?>)) {
-//			throw new InvalidRequestException("Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + or.getClass());
-//		}
-//		CompositeParam<?, ?> cp = (CompositeParam<?, ?>) or;
-//
-//		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
-//		IQueryParameterType leftValue = cp.getLeftValue();
-//		myQueryStack.addPredicate(createCompositeParamPart(theResourceName, myQueryStack.getRootForComposite(), left, leftValue, theRequestPartitionId));
-//
-//		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
-//		IQueryParameterType rightValue = cp.getRightValue();
-//		myQueryStack.addPredicate(createCompositeParamPart(theResourceName, myQueryStack.getRootForComposite(), right, rightValue, theRequestPartitionId));
-//
-//	}
-//
-//	private Predicate createCompositeParamPart(String theResourceName, Root<?> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue, RequestPartitionId theRequestPartitionId) {
-//		Predicate retVal = null;
-//
-//		// FIXME: implement composite
-////		switch (theParam.getParamType()) {
-////			case STRING: {
-////				From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> stringJoin = theRoot.join("myParamsString", JoinType.INNER);
-////				retVal = myPredicateBuilder.createPredicateString(leftValue, theResourceName, theParam, myCriteriaBuilder, stringJoin, theRequestPartitionId);
-////				break;
-////			}
-////			case TOKEN: {
-////				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
-////				List<IQueryParameterType> tokens = Collections.singletonList(leftValue);
-////				Collection<Predicate> tokenPredicates = myPredicateBuilder.createPredicateToken(tokens, theResourceName, theParam, myCriteriaBuilder, tokenJoin, theRequestPartitionId);
-////				retVal = myCriteriaBuilder.and(tokenPredicates.toArray(new Predicate[0]));
-////				break;
-////			}
-////			case DATE: {
-////				From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> dateJoin = theRoot.join("myParamsDate", JoinType.INNER);
-////				retVal = myPredicateBuilder.createPredicateDate(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, theRequestPartitionId);
-////				break;
-////			}
-////			case QUANTITY: {
-////				From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = theRoot.join("myParamsQuantity", JoinType.INNER);
-////				retVal = myPredicateBuilder.createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myCriteriaBuilder, dateJoin, theRequestPartitionId);
-////				break;
-////			}
-////			case COMPOSITE:
-////			case HAS:
-////			case NUMBER:
-////			case REFERENCE:
-////			case URI:
-////			case SPECIAL:
-////				break;
-////		}
-//
-//		if (retVal == null) {
-//			throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParam.getParamType());
-//		}
-//
-//		return retVal;
-//	}
-//
 
 	@Nonnull
 	private InvalidRequestException newInvalidTargetTypeForChainException(String theResourceName, String theParamName, String theTypeValue) {

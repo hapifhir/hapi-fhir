@@ -288,7 +288,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 
 		mySqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory);
-		myQueryStack3 = new QueryStack3(theParams, myDaoConfig.getModelConfig(), myContext, mySqlBuilder, mySearchParamRegistry, myPartitionSettings);
+		myQueryStack3 = new QueryStack3(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, mySqlBuilder, mySearchParamRegistry, myPartitionSettings);
 	}
 
 	private List<List<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,

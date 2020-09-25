@@ -46,9 +46,6 @@ public class SqlQuery {
 		myElapsedTime = theElapsedTime;
 		myStackTrace = theStackTraceElements;
 		mySize = theSize;
-
-		// FIXME: remove or make this only happen in unit tests
-		assert Pattern.compile(" = ['0-9]").matcher(mySql).find() == false : "Non-bound SQL parameter found: " + mySql;
 	}
 
 	public long getQueryTimestamp() {

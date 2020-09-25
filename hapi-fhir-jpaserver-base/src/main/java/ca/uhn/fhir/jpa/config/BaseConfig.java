@@ -33,9 +33,10 @@ import ca.uhn.fhir.jpa.dao.search.sql.ResourceLinkIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceSqlTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresenceTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.SourcePredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SqlBuilderFactory;
 import ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable;
-import ca.uhn.fhir.jpa.dao.search.sql.TagPredicateBuilder3;
+import ca.uhn.fhir.jpa.dao.search.sql.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.TokenIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.UriIndexTable;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -458,6 +459,8 @@ public abstract class BaseConfig {
 		return new SqlBuilderFactory();
 	}
 
+	// FIXME: rename these
+
 	@Bean
 	@Scope("prototype")
 	public CoordsIndexTable indexTableCoords(SearchSqlBuilder theSearchBuilder) {
@@ -496,8 +499,8 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public TagPredicateBuilder3 indexTableTag(SearchSqlBuilder theSearchBuilder) {
-		return new TagPredicateBuilder3(theSearchBuilder);
+	public TagPredicateBuilder indexTableTag(SearchSqlBuilder theSearchBuilder) {
+		return new TagPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
@@ -522,6 +525,12 @@ public abstract class BaseConfig {
 	@Scope("prototype")
 	public TokenIndexTable indexTableToken(SearchSqlBuilder theSearchBuilder) {
 		return new TokenIndexTable(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SourcePredicateBuilder sourcePredicateBuilder(SearchSqlBuilder theSearchBuilder) {
+		return new SourcePredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean

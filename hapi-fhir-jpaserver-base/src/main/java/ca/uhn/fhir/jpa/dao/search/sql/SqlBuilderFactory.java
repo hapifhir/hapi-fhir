@@ -9,6 +9,8 @@ public class SqlBuilderFactory {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
+	// FIXME: rename all these
+
 	public CoordsIndexTable coordsIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(CoordsIndexTable.class, theSearchSqlBuilder);
 	}
@@ -53,7 +55,11 @@ public class SqlBuilderFactory {
 		return myApplicationContext.getBean(UriIndexTable.class, theSearchSqlBuilder);
 	}
 
-	public TagPredicateBuilder3 tagIndexFactory(SearchSqlBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(TagPredicateBuilder3.class, theSearchSqlBuilder);
+	public TagPredicateBuilder newTagPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(TagPredicateBuilder.class, theSearchSqlBuilder);
+	}
+
+	public SourcePredicateBuilder newSourcePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(SourcePredicateBuilder.class, theSearchSqlBuilder);
 	}
 }

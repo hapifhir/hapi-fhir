@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderTokenModeEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -25,22 +24,20 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
+import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -76,29 +73,24 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 	public Condition createPredicateToken(Collection<IQueryParameterType> theParameters,
 													  String theResourceName,
 													  RuntimeSearchParam theSearchParam,
-													  CriteriaBuilder theBuilder,
-													  TokenIndexTable theFrom,
 													  RequestPartitionId theRequestPartitionId) {
 		return createPredicateToken(
 			theParameters,
 			theResourceName,
 			theSearchParam,
-			theBuilder,
-			theFrom,
 			null,
 			theRequestPartitionId);
 	}
 
-	// FIXME: remove unneeded params
 	public Condition createPredicateToken(Collection<IQueryParameterType> theParameters,
 													  String theResourceName,
 													  RuntimeSearchParam theSearchParam,
-													  CriteriaBuilder theBuilder,
-													  TokenIndexTable theFrom,
-													  SearchFilterParser.CompareOperation operation,
+													  SearchFilterParser.CompareOperation theOperation,
 													  RequestPartitionId theRequestPartitionId) {
 		final List<VersionIndependentConcept> codes = new ArrayList<>();
 		String paramName = theSearchParam.getName();
+
+		SearchFilterParser.CompareOperation operation = theOperation;
 
 		TokenParamModifier modifier = null;
 		for (IQueryParameterType nextParameter : theParameters) {
@@ -151,6 +143,9 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 				validateHaveSystemAndCodeForToken(paramName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else {
+				if (modifier == TokenParamModifier.NOT && operation == null) {
+					operation = SearchFilterParser.CompareOperation.ne;
+				}
 				codes.add(new VersionIndependentConcept(system, code));
 			}
 
@@ -169,7 +164,28 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 			return null;
 		}
 
-		return theFrom.createPredicateOrList(theResourceName, theSearchParam.getName(), sortedCodesList);
+
+		Condition predicate;
+		if (operation == SearchFilterParser.CompareOperation.ne) {
+
+			/*
+			 * For a token :not search, we look for index rows that have the right identity (i.e. it's the right resource and
+			 * param name) but not the actual provided token value.
+			 */
+
+			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
+			Condition hashIdentityPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
+
+			Condition hashValuePredicate = createPredicateOrList(theResourceName, theSearchParam.getName(), sortedCodesList, false);
+			predicate = toAndPredicate(hashIdentityPredicate, hashValuePredicate);
+
+		} else {
+
+			predicate = createPredicateOrList(theResourceName, theSearchParam.getName(), sortedCodesList, true);
+
+		}
+
+		return predicate;
 	}
 
 	private String determineSystemIfMissing(RuntimeSearchParam theSearchParam, String code, String theSystem) {
@@ -217,57 +233,8 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 		}
 	}
 
-	// FIXME: handle these and remove
-	private Predicate addPredicate(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, SearchBuilderTokenModeEnum theTokenMode, RequestPartitionId theRequestPartitionId) {
-		/*
-		 * Note: A null system value means "match any system", but
-		 * an empty-string system value means "match values that
-		 * explicitly have no system".
-		 */
-		Expression<Long> hashField;
-		List<Long> values;
-		switch (theTokenMode) {
-			case SYSTEM_ONLY:
-				hashField = theFrom.get("myHashSystem").as(Long.class);
-				values = theTokens
-					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystem(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, t.getSystem()))
-					.collect(Collectors.toList());
-				break;
-			case VALUE_ONLY:
-				hashField = theFrom.get("myHashValue").as(Long.class);
-				values = theTokens
-					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashValue(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, t.getCode()))
-					.collect(Collectors.toList());
-				break;
-			case SYSTEM_AND_VALUE:
-			default:
-				hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
-				values = theTokens
-					.stream()
-					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, t.getSystem(), t.getCode()))
-					.collect(Collectors.toList());
-				break;
-		}
 
-		/*
-		 * Note: At one point we had an IF-ELSE here that did an equals if there was only 1 value, and an IN if there
-		 * was more than 1. This caused a performance regression for some reason in Postgres though. So maybe simpler
-		 * is better..
-		 */
-		Predicate predicate = hashField.in(values);
-
-		if (theModifier == TokenParamModifier.NOT) {
-			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName));
-			Predicate disjunctionPredicate = theBuilder.not(predicate);
-			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
-		}
-		return predicate;
-	}
-
-
-	public Condition createPredicateOrList(String theResourceType, String theSearchParamName, List<VersionIndependentConcept> theCodes) {
+	private Condition createPredicateOrList(String theResourceType, String theSearchParamName, List<VersionIndependentConcept> theCodes, boolean theWantEquals) {
 		Condition[] conditions = new Condition[theCodes.size()];
 
 		Long[] hashes = new Long[theCodes.size()];
@@ -297,17 +264,30 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 
 		if (!haveMultipleColumns && conditions.length > 1) {
 			List<Long> values = Arrays.asList(hashes);
-			return new InCondition(columns[0], generatePlaceholders(values));
+			InCondition predicate = new InCondition(columns[0], generatePlaceholders(values));
+			if (!theWantEquals) {
+				predicate.setNegate(true);
+			}
+			return predicate;
 		}
 
 		for (int i = 0; i < conditions.length; i++) {
 			String valuePlaceholder = generatePlaceholder(hashes[i]);
-			conditions[i] = BinaryCondition.equalTo(columns[i], valuePlaceholder);
+			if (theWantEquals) {
+				conditions[i] = BinaryCondition.equalTo(columns[i], valuePlaceholder);
+			} else {
+				conditions[i] = BinaryCondition.notEqualTo(columns[i], valuePlaceholder);
+			}
 		}
 		if (conditions.length > 1) {
-			return ComboCondition.or(conditions);
+			if (theWantEquals) {
+				return toOrPredicate(conditions);
+			} else {
+				return toAndPredicate(conditions);
+			}
 		} else {
 			return conditions[0];
 		}
 	}
+
 }

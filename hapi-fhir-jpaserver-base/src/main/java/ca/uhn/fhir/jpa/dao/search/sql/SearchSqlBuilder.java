@@ -26,13 +26,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SearchSqlBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchSqlBuilder.class);
-	private final String myBindVariableSubstitutionBase = UUID.randomUUID().toString() + "-";
-	private final ArrayList<Object> myBindVariableValues = new ArrayList<>();
+	private final String myBindVariableSubstitutionBase;
+	private final ArrayList<Object> myBindVariableValues;
 	private final DbSpec mySpec;
 	private final DbSchema mySchema;
 	private final SelectQuery mySelect;
@@ -50,6 +51,13 @@ public class SearchSqlBuilder {
 	 * Constructor
 	 */
 	public SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory) {
+		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", new ArrayList<>());
+	}
+
+	/**
+	 * Constructor for child SQL Builders
+	 */
+	private SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory, String theBindVariableSubstitutionBase, ArrayList<Object> theBindVariableValues) {
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
 		myPartitionSettings = thePartitionSettings;
@@ -61,6 +69,8 @@ public class SearchSqlBuilder {
 		mySchema = mySpec.addDefaultSchema();
 		mySelect = new SelectQuery();
 
+		myBindVariableSubstitutionBase = theBindVariableSubstitutionBase;
+		myBindVariableValues = theBindVariableValues;
 	}
 
 	public FhirContext getFhirContext() {
@@ -68,7 +78,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on s COORDS search parameter
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a COORDS search parameter
 	 */
 	public CoordsIndexTable addCoordsSelector(@Nullable DbColumn theSourceJoinColumn) {
 		CoordsIndexTable retVal = mySqlBuilderFactory.coordsIndexTable(this);
@@ -77,7 +87,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on s DATE search parameter
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a DATE search parameter
 	 */
 	public DateIndexTable addDateSelector(@Nullable DbColumn theSourceJoinColumn) {
 		DateIndexTable retVal = mySqlBuilderFactory.dateIndexTable(this);
@@ -86,7 +96,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on s NUMBER search parameter
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a NUMBER search parameter
 	 */
 	public NumberIndexTable addNumberSelector(@Nullable DbColumn theSourceJoinColumn) {
 		NumberIndexTable retVal = mySqlBuilderFactory.numberIndexTable(this);
@@ -96,13 +106,23 @@ public class SearchSqlBuilder {
 
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on s QUANTITY search parameter
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
 	public QuantityIndexTable addQuantity(@Nullable DbColumn theSourceJoinColumn) {
 		QuantityIndexTable retVal = mySqlBuilderFactory.quantityIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
+
+	/**
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
+	 */
+	public SourcePredicateBuilder addSourcePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+		SourcePredicateBuilder retVal = mySqlBuilderFactory.newSourcePredicateBuilder(this);
+		addTable(retVal, theSourceJoinColumn);
+		return retVal;
+	}
+
 
 	// FIXME: remove
 	public ResourceLinkIndexTable addEverythingSelector(QueryStack3 theQueryStack, String theResourceName, Long theTargetPid) {
@@ -127,7 +147,7 @@ public class SearchSqlBuilder {
 
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on s REFERENCE search parameter
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a REFERENCE search parameter
 	 */
 	public ResourceLinkIndexTable addReferenceSelector(QueryStack3 theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
 		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
@@ -146,7 +166,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on s STRING search parameter
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a STRING search parameter
 	 */
 	public StringIndexTable addStringSelector(@Nullable DbColumn theSourceJoinColumn) {
 		StringIndexTable retVal = mySqlBuilderFactory.stringIndexTable(this);
@@ -157,14 +177,14 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
 	 */
-	public TagPredicateBuilder3 addTagSelector(@Nullable DbColumn theSourceJoinColumn) {
-		TagPredicateBuilder3 retVal = mySqlBuilderFactory.tagIndexFactory(this);
+	public TagPredicateBuilder addTagSelector(@Nullable DbColumn theSourceJoinColumn) {
+		TagPredicateBuilder retVal = mySqlBuilderFactory.newTagPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on s TOKEN search parameter
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a TOKEN search parameter
 	 */
 	public TokenIndexTable addTokenSelector(@Nullable DbColumn theSourceJoinColumn) {
 		TokenIndexTable retVal = mySqlBuilderFactory.tokenIndexTable(this);
@@ -182,7 +202,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on s URI search parameter
+	 * Add and return a join (or a root query if no root query exists yet) for selecting on a URI search parameter
 	 */
 	public UriIndexTable addUriSelector(@Nullable DbColumn theSourceJoinColumn) {
 		UriIndexTable retVal = mySqlBuilderFactory.uriIndexTable(this);
@@ -291,13 +311,13 @@ public class SearchSqlBuilder {
 	 * for its generated SQL. So we work around this by replacing our contents with a string in the SQL consisting
 	 * of <code>[random UUID]-[value index]</code> and then
 	 */
-	String generatePlaceholder(Object theValue) {
+	public String generatePlaceholder(Object theValue) {
 		String placeholder = myBindVariableSubstitutionBase + myBindVariableValues.size();
 		myBindVariableValues.add(theValue);
 		return placeholder;
 	}
 
-	List<String> generatePlaceholders(Collection<?> theValues) {
+	public List<String> generatePlaceholders(Collection<?> theValues) {
 		return theValues
 			.stream()
 			.map(t -> generatePlaceholder(t))
@@ -368,6 +388,15 @@ public class SearchSqlBuilder {
 		}
 	}
 
+	public SearchSqlBuilder newChildSqlBuilder() {
+		return new SearchSqlBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, myResourceType, mySqlBuilderFactory, myBindVariableSubstitutionBase, myBindVariableValues);
+	}
+
+	public SelectQuery getSelect() {
+		return mySelect;
+	}
+
+
 
 	/**
 	 * Represents the SQL generated by this query
@@ -378,6 +407,10 @@ public class SearchSqlBuilder {
 		private final boolean myMatchNothing;
 
 		public GeneratedSql(boolean theMatchNothing, String theSql, List<Object> theBindVariables) {
+			// FIXME: remove or make this only happen in unit tests
+			assert Pattern.compile("=['0-9]").matcher(theSql.replace(" ", "")).find() == false : "Non-bound SQL parameter found: " + theSql;
+			assert Pattern.compile("in\\(['0-9]").matcher(theSql.toLowerCase().replace(" ", "")).find() == false : "Non-bound SQL parameter found: " + theSql;
+
 			myMatchNothing = theMatchNothing;
 			mySql = theSql;
 			myBindVariables = theBindVariables;

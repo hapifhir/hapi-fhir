@@ -33,7 +33,7 @@ public abstract class BaseIndexTable extends BasePredicateBuilder3 {
 		return myTable;
 	}
 
-	abstract DbColumn getResourceIdColumn();
+	public abstract DbColumn getResourceIdColumn();
 
 	DbColumn getPartitionIdColumn() {
 		return myColumnPartitionId;

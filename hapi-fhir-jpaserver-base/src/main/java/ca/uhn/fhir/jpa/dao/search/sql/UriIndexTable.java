@@ -86,13 +86,13 @@ public class UriIndexTable extends BaseSearchParamIndexTable {
 						continue;
 					}
 
-					InCondition uriPredicate = new InCondition(myColumnUri, toFind);
+					InCondition uriPredicate = new InCondition(myColumnUri, generatePlaceholders(toFind));
 					Condition hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(getResourceType(), theParamName, uriPredicate, getRequestPartitionId());
 					codePredicates.add(hashAndUriPredicate);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
 
-					Condition uriPredicate = BinaryCondition.like(myColumnUri, createLeftMatchLikeExpression(value));
+					Condition uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftMatchLikeExpression(value)));
 					Condition hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(getResourceType(), theParamName, uriPredicate, getRequestPartitionId());
 					codePredicates.add(hashAndUriPredicate);
 
@@ -104,21 +104,21 @@ public class UriIndexTable extends BaseSearchParamIndexTable {
 						Condition hashPredicate = BinaryCondition.equalTo(myColumnHashUri, generatePlaceholder(hashUri));
 						codePredicates.add(hashPredicate);
 					} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
-						uriPredicate = BinaryCondition.greaterThanOrEq(myColumnUri, value);
+						uriPredicate = BinaryCondition.greaterThanOrEq(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.co) {
-						uriPredicate = BinaryCondition.like(myColumnUri, createLeftAndRightMatchLikeExpression(value));
+						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftAndRightMatchLikeExpression(value)));
 					} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
-						uriPredicate = BinaryCondition.greaterThan(myColumnUri, value);
+						uriPredicate = BinaryCondition.greaterThan(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
-						uriPredicate = BinaryCondition.lessThan(myColumnUri, value);
+						uriPredicate = BinaryCondition.lessThan(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
-						uriPredicate = BinaryCondition.greaterThanOrEq(myColumnUri, value);
+						uriPredicate = BinaryCondition.greaterThanOrEq(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.le) {
-						uriPredicate = BinaryCondition.lessThanOrEq(myColumnUri, value);
+						uriPredicate = BinaryCondition.lessThanOrEq(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.sw) {
-						uriPredicate = BinaryCondition.like(myColumnUri, createLeftMatchLikeExpression(value));
+						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftMatchLikeExpression(value)));
 					} else if (theOperation == SearchFilterParser.CompareOperation.ew) {
-						uriPredicate = BinaryCondition.like(myColumnUri, createRightMatchLikeExpression(value));
+						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createRightMatchLikeExpression(value)));
 					} else {
 						throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
 							theOperation.toString()));

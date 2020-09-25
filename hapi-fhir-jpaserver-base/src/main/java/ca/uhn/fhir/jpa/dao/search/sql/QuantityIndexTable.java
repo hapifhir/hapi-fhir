@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.search.sql;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -45,24 +46,20 @@ public class QuantityIndexTable extends BaseSearchParamIndexTable {
 
 		String systemValue;
 		String unitsValue;
-		ParamPrefixEnum cmpValue = null;
+		ParamPrefixEnum cmpValue;
 		BigDecimal valueValue;
 
 		if (theParam instanceof BaseQuantityDt) {
 			BaseQuantityDt param = (BaseQuantityDt) theParam;
 			systemValue = param.getSystemElement().getValueAsString();
 			unitsValue = param.getUnitsElement().getValueAsString();
-			if (theOperation == null) {
-				cmpValue = ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
-			}
+			cmpValue = ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
 			valueValue = param.getValueElement().getValue();
 		} else if (theParam instanceof QuantityParam) {
 			QuantityParam param = (QuantityParam) theParam;
 			systemValue = param.getSystem();
 			unitsValue = param.getUnits();
-			if (theOperation == null) {
-				cmpValue = param.getPrefix();
-			}
+			cmpValue = param.getPrefix();
 			valueValue = param.getValue();
 		} else {
 			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
@@ -80,7 +77,11 @@ public class QuantityIndexTable extends BaseSearchParamIndexTable {
 			hashPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hash));
 		}
 
-		SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
+		SearchFilterParser.CompareOperation operation = theOperation;
+		if (operation == null && cmpValue != null) {
+			operation = QueryStack3.toOperation(cmpValue);
+		}
+		operation = defaultIfNull(operation, SearchFilterParser.CompareOperation.eq);
 		Condition numericPredicate = NumberIndexTable.createPredicateNumeric(this, theResourceName, theParamName, operation, valueValue, theRequestPartitionId, myColumnValue);
 
 		return ComboCondition.and(hashPredicate, numericPredicate);

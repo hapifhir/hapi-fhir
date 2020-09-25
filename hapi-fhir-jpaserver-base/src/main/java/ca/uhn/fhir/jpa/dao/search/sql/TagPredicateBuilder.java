@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,8 +16,8 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class TagPredicateBuilder3 extends BaseIndexTable {
-	private static final Logger ourLog = LoggerFactory.getLogger(TagPredicateBuilder3.class);
+public class TagPredicateBuilder extends BaseIndexTable {
+	private static final Logger ourLog = LoggerFactory.getLogger(TagPredicateBuilder.class);
 
 	private final DbColumn myColumnResId;
 	private final DbTable myTagDefinitionTable;
@@ -28,7 +27,7 @@ public class TagPredicateBuilder3 extends BaseIndexTable {
 	private final DbColumn myColumnTagId;
 	private final DbColumn myTagDefinitionColumnTagType;
 
-	public TagPredicateBuilder3(SearchSqlBuilder theSearchSqlBuilder) {
+	public TagPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_TAG"));
 
 		myColumnResId = getTable().addColumn("RES_ID");
@@ -42,14 +41,11 @@ public class TagPredicateBuilder3 extends BaseIndexTable {
 	}
 
 
-	public Condition createPredicateTag(TagTypeEnum theTagType, List<Pair<String, String>> theTokens, boolean theParamInverted, String theParamName, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateTag(TagTypeEnum theTagType, List<Pair<String, String>> theTokens, String theParamName, RequestPartitionId theRequestPartitionId) {
 
 		addJoin(getTable(), myTagDefinitionTable, myColumnTagId, myTagDefinitionColumnTagId);
 
 		Condition tagListPredicate = createPredicateTagList(theTagType, theTokens);
-		if (theParamInverted) {
-			tagListPredicate = new NotCondition(tagListPredicate);
-		}
 
 		// FIXME: needed?
 //			if (theRequestPartitionId != null) {
@@ -78,7 +74,7 @@ public class TagPredicateBuilder3 extends BaseIndexTable {
 	}
 
 	@Override
-	DbColumn getResourceIdColumn() {
+	public DbColumn getResourceIdColumn() {
 		return myColumnResId;
 	}
 }

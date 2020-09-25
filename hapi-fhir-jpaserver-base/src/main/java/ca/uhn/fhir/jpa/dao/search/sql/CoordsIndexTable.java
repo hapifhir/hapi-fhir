@@ -14,16 +14,11 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.persistence.criteria.CriteriaBuilder;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class CoordsIndexTable extends BaseSearchParamIndexTable {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(CoordsIndexTable.class);
 	private final DbColumn myColumnLatitude;
 	private final DbColumn myColumnLongitude;
 
@@ -42,12 +37,11 @@ public class CoordsIndexTable extends BaseSearchParamIndexTable {
 														IQueryParameterType theParam,
 														String theResourceName,
 														RuntimeSearchParam theSearchParam,
-														CriteriaBuilder theBuilder,
 														CoordsIndexTable theFrom,
 														RequestPartitionId theRequestPartitionId) {
 		String latitudeValue;
 		String longitudeValue;
-		Double distanceKm = 0.0;
+		double distanceKm = 0.0;
 
 		if (theParam instanceof TokenParam) { // DSTU3
 			TokenParam param = (TokenParam) theParam;
@@ -80,7 +74,7 @@ public class CoordsIndexTable extends BaseSearchParamIndexTable {
 			if (parts.length >= 3) {
 				String distanceString = parts[2];
 				if (!isBlank(distanceString)) {
-					distanceKm = Double.valueOf(distanceString);
+					distanceKm = Double.parseDouble(distanceString);
 				}
 			}
 		} else {
@@ -110,30 +104,30 @@ public class CoordsIndexTable extends BaseSearchParamIndexTable {
 
 
 	public Condition createPredicateLatitudeExact(String theLatitudeValue) {
-		return BinaryCondition.equalTo(myColumnLatitude, theLatitudeValue);
+		return BinaryCondition.equalTo(myColumnLatitude, generatePlaceholder(theLatitudeValue));
 	}
 
 	public Condition createPredicateLongitudeExact(String theLongitudeValue) {
-		return BinaryCondition.equalTo(myColumnLongitude, theLongitudeValue);
+		return BinaryCondition.equalTo(myColumnLongitude, generatePlaceholder(theLongitudeValue));
 	}
 
 	public Condition createLatitudePredicateFromBox(SearchBox theBox) {
 		return ComboCondition.and(
-			BinaryCondition.greaterThanOrEq(myColumnLatitude, theBox.getSouthWest().getLatitude()),
-			BinaryCondition.lessThanOrEq(myColumnLatitude, theBox.getNorthEast().getLatitude())
+			BinaryCondition.greaterThanOrEq(myColumnLatitude, generatePlaceholder(theBox.getSouthWest().getLatitude())),
+			BinaryCondition.lessThanOrEq(myColumnLatitude, generatePlaceholder(theBox.getNorthEast().getLatitude()))
 		);
 	}
 
 	public Condition createLongitudePredicateFromBox(SearchBox theBox) {
 		if (theBox.crossesAntiMeridian()) {
 			return ComboCondition.or(
-				BinaryCondition.greaterThanOrEq(myColumnLongitude, theBox.getNorthEast().getLongitude()),
-				BinaryCondition.lessThanOrEq(myColumnLongitude, theBox.getSouthWest().getLongitude())
+				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.getNorthEast().getLongitude())),
+				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.getSouthWest().getLongitude()))
 			);
 		}
 		return ComboCondition.and(
-			BinaryCondition.greaterThanOrEq(myColumnLongitude, theBox.getSouthWest().getLongitude()),
-			BinaryCondition.lessThanOrEq(myColumnLongitude, theBox.getNorthEast().getLongitude())
+			BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.getSouthWest().getLongitude())),
+			BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.getNorthEast().getLongitude()))
 		);
 	}
 }

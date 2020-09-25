@@ -1713,7 +1713,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, val);
+			myCaptureQueriesListener.clear();
 			IBundleProvider result = myObservationDao.search(map);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
 		}
 		{
@@ -3719,20 +3721,69 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			female = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 		}
 
+		runInTransaction(()->{
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
 		List<String> patients;
 		SearchParameterMap params;
 
+		// Yes match - one value
 		params = new SearchParameterMap();
 		params.add(Patient.SP_GENDER, new TokenParam(null, "male"));
 		params.setLoadSynchronous(true);
 		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
 		assertThat(patients, contains(male));
 
+		// Yes match - two values
+		params = new SearchParameterMap();
+		params.add(Patient.SP_GENDER, new TokenOrListParam()
+			.addOr(new TokenParam(null, "male"))
+			.addOr(new TokenParam(null, "blah"))
+		);
+		params.setLoadSynchronous(true);
+		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
+		assertThat(patients, contains(male));
+
+		// Yes match - two values with different specificities
+		params = new SearchParameterMap();
+		params.add(Patient.SP_GENDER, new TokenOrListParam()
+			.addOr(new TokenParam(null, "male"))
+			.addOr(new TokenParam("http://help-im-a-bug", "blah"))
+		);
+		params.setLoadSynchronous(true);
+		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
+		assertThat(patients, contains(male));
+
+		// No match - one value
 		params = new SearchParameterMap();
 		params.add(Patient.SP_GENDER, new TokenParam(null, "male").setModifier(TokenParamModifier.NOT));
 		params.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(patients, contains(female));
+
+		// No match - two values
+		params = new SearchParameterMap();
+		params.add(Patient.SP_GENDER, new TokenOrListParam()
+			.addOr(new TokenParam(null, "male").setModifier(TokenParamModifier.NOT))
+			.addOr(new TokenParam(null, "blah").setModifier(TokenParamModifier.NOT))
+		);
+		params.setLoadSynchronous(true);
 		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
 		assertThat(patients, contains(female));
+
+		// No match - two values with different specificities
+		params = new SearchParameterMap();
+		params.add(Patient.SP_GENDER, new TokenOrListParam()
+			.addOr(new TokenParam(null, "male").setModifier(TokenParamModifier.NOT))
+			.addOr(new TokenParam("http://help-im-a-bug", "blah").setModifier(TokenParamModifier.NOT))
+		);
+		params.setLoadSynchronous(true);
+		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
+		assertThat(patients, contains(female));
+
 	}
 
 	@Test
@@ -4700,9 +4751,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		{
 			// One tag
-			SearchParameterMap params = new SearchParameterMap();
+			SearchParameterMap params = SearchParameterMap.newSynchronous();
 			params.add("_tag", new TokenParam("urn:taglist", methodName + "1a").setModifier(TokenParamModifier.NOT));
+			myCaptureQueriesListener.clear();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertThat(patients, containsInAnyOrder(tag2id));
 			assertThat(patients, not(containsInAnyOrder(tag1id)));
 		}
@@ -5146,7 +5199,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		Communication c1 = new Communication();
 		c1.getEncounter().setReference(e1Id);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c1));
-		myCommunicationDao.create(c1);
+		String c1Id = myCommunicationDao.create(c1).getId().toUnqualifiedVersionless().getValue();
 
 		// Doesn't match (wrong date)
 		Encounter e2 = new Encounter();
@@ -5179,6 +5232,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IBundleProvider outcome = myCommunicationDao.search(map);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 
+		assertThat(toUnqualifiedVersionlessIdValues(outcome).toString(), toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(c1Id));
 		assertEquals(1, outcome.sizeOrThrowNpe());
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
