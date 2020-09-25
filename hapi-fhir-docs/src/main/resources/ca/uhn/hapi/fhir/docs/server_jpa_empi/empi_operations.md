@@ -1,8 +1,8 @@
 # EMPI Operations
 
-Several operations exist that can be used to manage EMPI links. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [EmpiProvider](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/provider/EmpiProviderR4.html).
+EMPI links are managed by EMPI Operations. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [EmpiProvider](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/provider/EmpiProviderR4.html).
 
-In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Person/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This could be used to prevent update conflicts in an environment where multiple users are working on the same set of empi links.
+In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Person/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This feature can be used to prevent update conflicts in an environment where multiple users are working on the same set of empi links.
 
 ## Query links
 
@@ -188,7 +188,7 @@ This operation returns `Parameters` similar to `$empi-query-links`:
 ## Unduplicate Persons
 
 Use the `$empi-not-duplicate` operation to mark duplicate persons as not duplicates.    This operation takes the following parameters:
-                                                                                      
+
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
@@ -450,12 +450,12 @@ This might result in a response such as the following:
 
 ## Clearing EMPI Links
 
-The `$empi-clear` operation is used to batch-delete EMPI links and related persons from the database. This operation is meant to 
+The `$empi-clear` operation is used to batch-delete EMPI links and related persons from the database. This operation is meant to
 be used during the rules-tuning phase of the EMPI implementation so that you can quickly test your ruleset.
-It permits the user to reset the state of their EMPI system without manual deletion of all related links and Persons. 
+It permits the user to reset the state of their EMPI system without manual deletion of all related links and Persons.
 
-After the operation is complete, all targeted EMPI links are removed from the system, and their related Person resources are deleted and expunged 
-from the server. 
+After the operation is complete, all targeted EMPI links are removed from the system, and their related Person resources are deleted and expunged
+from the server.
 
 This operation takes a single optional Parameter.
 
@@ -500,7 +500,7 @@ The following request body could be used:
 }
 ```
 
-This operation returns the number of EMPI links that were cleared. The following is a sample response: 
+This operation returns the number of EMPI links that were cleared. The following is a sample response:
 
 ```json
 {
@@ -515,10 +515,10 @@ This operation returns the number of EMPI links that were cleared. The following
 ## Batch-creating EMPI Links
 
 Call the `$empi-submit` operation to submit patients and practitioners for EMPI processing. In the rules-tuning phase of your setup, you can use `$empi-submit` to apply EMPI rules across multiple Resources.
-An important thing to note is that this operation only submits the resources for processing. Actual EMPI processing is run asynchronously, and depending on the size 
+An important thing to note is that this operation only submits the resources for processing. Actual EMPI processing is run asynchronously, and depending on the size
 of the affected bundle of resources, may take some time to complete.
 
-After the operation is complete, all resources that matched the criteria will now have at least one EMPI link attached to them. 
+After the operation is complete, all resources that matched the criteria will now have at least one EMPI link attached to them.
 
 This operation takes a single optional criteria parameter unless it is called on a specific instance.
 
@@ -577,11 +577,10 @@ This operation returns the number of resources that were submitted for EMPI proc
 }
 ```
 
-This operation can also be done at the Instance level. When this is the case, the operations accepts no parameters. 
+This operation can also be done at the Instance level. When this is the case, the operations accepts no parameters.
 The following are examples of Instance level POSTs, which require no parameters.
 
 ```url
 http://example.com/Patient/123/$empi-submit
 http://example.com/Practitioner/456/$empi-submit
 ```
-

@@ -15,27 +15,27 @@ There are several resources that are used:
 
 # Automatic Linking
 
-With EMPI enabled, the basic default behavior of the EMPI is simply to create a new Person record for every Patient that is created such that there is a 1:1 relationship between them. Any relinking is then expected to be done manually (i.e. via the forthcoming empi operations).
+With EMPI enabled, the default behavior of the EMPI is to create a new Person record for every Patient that is created such that there is a 1:1 relationship between them. Any relinking is then expected to be done manually (i.e. via the forthcoming empi operations).
 
 In a typical configuration it is often desirable to have links be created automatically using matching rules. For example, you might decide that if a Patient shares the same name, gender, and date of birth as another Patient, you have at least a little confidence that they are the same Person.
 
 This automatic linking is done via configurable matching rules that create links between Patients and Persons.  Based on the strength of the match configured in these rules, the link will be set to either POSSIBLE_MATCH or MATCH.
 
-It is important to note that before a resource is to be processed by EMPI, it is first checked to ensure that it has at least one attribute that the EMPI system cares about, as defined in the `empi-rules.json` file. If the incoming resource has no attributes that the EMPI system cares about, EMPI processing does not occur on it. In this case, no Person is created for them. If in the future that Patient is updated to contain attributes the EMPI system does concern itself with, it will be processed at that time. 
+It is important to note that before a resource is processed by EMPI, it is first checked to ensure that it has at least one attribute that the EMPI system cares about, as defined in the `empi-rules.json` file. If the incoming resource has no such attributes, then EMPI processing does not occur on it. In this case, no Person is created for them. If in the future that Patient is updated to contain attributes the EMPI system does concern itself with, it will be processed at that time.
 
 ## Design
 
-Below are some simplifying principles HAPI EMPI enforces to reduce complexity and ensure data integrity.
+Below are some simplifying principles HAPI EMPI follows to reduce complexity and ensure data integrity.
 
-1. When EMPI is enabled on a HAPI FHIR server, any Person resource in the repository that has the "hapi-empi" tag is considered read-only via the FHIR endpoint.  These Person resources are managed exclusively by HAPI EMPI.  Users can only directly change them via special empi operations.  In most cases, users will indirectly change them by creating and updating Patient and Practitioner ("Patient") resources.  For the rest of this document, assume "Person" refers to a "hapi-empi" tagged Person resource.
+1. When EMPI is enabled on a HAPI FHIR server, any Person resource in the repository that has the "hapi-empi" tag is considered read-only by the FHIR endpoint.  These Person resources are managed exclusively by HAPI EMPI.  Users can only change them via [EMPI Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html).  In most cases, users will indirectly change them by creating and updating Patient and Practitioner ("Patient") resources.  For the rest of this document, assume "Person" refers to a "hapi-empi" tagged Person resource.
 
 1. Every Patient in the system has a MATCH link to at most one Person resource.
 
-1. Every Patient resource in the system that has been processed by EMPI has a MATCH link to a Person resource unless that Patient has the "no-empi" tag or it has POSSIBLE_MATCH links pending review.
+1. Every Patient resource in the system that has been processed by EMPI has a MATCH link to at most one Person resource unless that Patient has the "no-empi" tag or it has POSSIBLE_MATCH links pending review.
 
-1. The HAPI EMPI rules define a single identifier system that holds the external enterprise id ("EID").  If a Patient has an external EID, then the Person it links to always has the same EID. If a patient has no EID when it arrives, the person created from this patient is given an internal EID.
+1. The HAPI EMPI rules define a single identifier system that holds the external enterprise id ("EID").  If a Patient has an external EID, then the Person it links to always has the same EID. If a patient has no EID when it arrives, a unique UUID will be assigned as that Person's EID.
 
-1. A Person can have both an internal EID(auto-created by HAPI), and an external EID (provided by an external system).
+1. A Person can not have both an internal EID(auto-created by HAPI), and an external EID (provided by an external system).
 
 1. Two different Person resources cannot have the same EID.
 
@@ -61,15 +61,15 @@ Below are some simplifying principles HAPI EMPI enforces to reduce complexity an
 
 ### Possible rule match outcomes:
 
-When a new Patient resource is compared with all other resources of that type in the repository, there are four possible cases:
+When a new Patient resource is compared with all other resources of that type in the repository, there are four possible outcomes:
 
-* CASE 1: No MATCH and no POSSIBLE_MATCH outcomes -> a new Person resource is created and linked to that Patient as MATCH.  All fields are copied from the Patient to the Person.  If the incoming resource has an EID, it is copied to the Person.  Otherwise a new UUID is created and used as the internal EID.
+* CASE 1: No MATCH and no POSSIBLE_MATCH outcomes -> a new Person resource is created and linked to that Patient as MATCH.  All fields are copied from the Patient to the Person.  If the incoming resource has an EID, it is copied to the Person.  Otherwise a new UUID is generated and used as the internal EID.
 
 * CASE 2: All of the MATCH Patient resources are already linked to the same Person -> a new Link is created between the new Patient and that Person and is set to MATCH.
 
 * CASE 3: The MATCH Patient resources link to more than one Person -> Mark all links as POSSIBLE_MATCH.  All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.  These duplicates are manually reviewed later and either merged or marked as NO_MATCH and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICATE is the only link type that can have a Person as both the source and target of the link.
 
-* CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, new POSSIBLE_MATCH links are created and await manual assignment to either NO_MATCH or MATCH.
+* CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, new POSSIBLE_MATCH links are created and await manual reassignment to either NO_MATCH or MATCH.
 
 # HAPI EMPI Technical Details
 
@@ -77,5 +77,5 @@ When EMPI is enabled, the HAPI FHIR JPA Server does the following things on star
 
 1. It enables the MESSAGE subscription type and starts up the internal subscription engine.
 1. It creates two MESSAGE subscriptions, called 'empi-patient' and 'empi-practitioner' that match all incoming Patient and Practitioner resources and send them to an internal queue called "empi".  The JPA Server listens to this queue and links incoming resources to Persons.
-1. It registers the `Patient/$match` operation.  See [$match](https://www.hl7.org/fhir/operation-patient-match.html) for a description of this operation.
+1. It registers the [EMPI Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html).
 1. It registers a new dao interceptor that restricts access to EMPI managed Person records.

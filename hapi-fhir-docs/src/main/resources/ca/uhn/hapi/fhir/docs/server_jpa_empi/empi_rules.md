@@ -1,66 +1,103 @@
 # Rules
 
-HAPI EMPI rules are managed via a single json document.
+HAPI EMPI rules are defined in a single json document.
 
-Note that in all the following configuration, valid options for `resourceType` are `Patient`, `Practitioner`, and `*`. Use `*` if the criteria is identical across both resource types, and you would like to apply it to both practitioners and patients.
+Note that in all the following configuration, valid options for `resourceType` are `Patient`, `Practitioner`, and `*`. Use `*` if the criteria is identical across both resource types and you would like to apply it to both practitioners and patients.
 
 Here is an example of a full HAPI EMPI rules json document:
 
 ```json
 {
-	"candidateSearchParams": [
-		{
-			"resourceType": "Patient",
-			"searchParams": ["given", "family"]
-		},
-		{
-			"resourceType": "*",
-			"searchParams": ["identifier"]
-		},
-		{
-			"resourceType": "Patient",
-			"searchParams": ["general-practitioner"]
-		}
-	],
-	"candidateFilterSearchParams": [
-		{
-			"resourceType": "*",
-			"searchParam": "active",
-			"fixedValue": "true"
-		}
-	],
-	"matchFields": [
-		{
-			"name": "cosine-given-name",
-			"resourceType": "*",
-			"resourcePath": "name.given",
-			"metric": "COSINE",
-			"matchThreshold": 0.8,
-			"exact": true
-		},
-		{
-			"name": "jaro-last-name",
-			"resourceType": "*",
-			"resourcePath": "name.family",
-			"metric": "JARO_WINKLER",
-			"matchThreshold": 0.8
-		}
-	],
-	"matchResultMap": {
-		"cosine-given-name" : "POSSIBLE_MATCH",
-		"cosine-given-name,jaro-last-name" : "MATCH"
-	},
-	"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
+    "version": "1",
+"candidateSearchParams": [
+    {
+            "resourceType": "Patient",
+            "searchParams": ["phone"]
+        },
+            {
+            "resourceType": "Patient",
+            "searchParams": ["birthdate"]
+        },
+				{
+				"resourceType": "*",
+				"searchParams": ["identifier"]
+		}],
+"candidateFilterSearchParams": [],
+"matchFields": [
+    {
+    "name": "birthday",
+    "resourceType": "Patient",
+            "resourcePath": "birthDate",
+            "matcher": {
+                "algorithm": "STRING"
+            }
+    },
+    {
+    "name": "phone",
+    "resourceType": "Patient",
+            "resourcePath": "telecom.value",
+            "matcher": {
+                "algorithm": "STRING"
+            }
+    },
+    {
+    "name": "firstname-meta",
+    "resourceType": "Patient",
+            "resourcePath": "name.given",
+            "matcher": {
+                "algorithm": "METAPHONE"
+            }
+    },
+    {
+    "name": "lastname-meta",
+    "resourceType": "Patient",
+            "resourcePath": "name.family",
+            "matcher": {
+                "algorithm": "METAPHONE"
+            }
+    },
+        {
+    "name": "firstname-jaro",
+    "resourceType": "Patient",
+            "resourcePath": "name.given",
+            "similarity": {
+                "algorithm": "JARO_WINKLER",
+                "matchThreshold": 0.80
+            }
+    },
+    {
+    "name": "lastname-jaro",
+    "resourceType": "Patient",
+            "resourcePath": "name.family",
+            "similarity": {
+                "algorithm": "JARO_WINKLER",
+                "matchThreshold": 0.80
+            }
+    }
+],
+"matchResultMap": {
+        "firstname-meta,lastname-meta,birthday": "MATCH",
+        "firstname-meta,lastname-meta,phone": "MATCH",
+        "firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH",
+        "firstname-jaro,lastname-jaro,phone": "POSSIBLE_MATCH",
+        "lastname-jaro,phone,birthday": "POSSIBLE_MATCH",
+        "firstname-jaro,phone,birthday": "POSSIBLE_MATCH"
+
+}
 }
 ```
 
 Here is a description of how each section of this document is configured.
 
 ### candidateSearchParams
-These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday.  The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some EMPI systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).
+These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday or the same phone number.  The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some EMPI systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).  
+
+In if a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters.  In the following candidateSearchParams definition, hapi-fhir
+will extract given name, family name and identifiers from the incoming Patient and perform two separate
+searches, first for all Patient resources that have the same given `AND` the same family name as the incoming Patient, and second for all Patient resources that share at least one identifier as the incoming Patient.  Note that if the incoming Patient was missing any of these searchParam values, then that search would be skipped.  E.g. if the incoming Patient had a given name but no family name, then only a search for matching identifiers would be performed.
 
 ```json
-[ {
+"candidateSearchParams": [ {
     "resourceType" : "Patient",
     "searchParams" : ["given", "family"]
 }, {
@@ -70,7 +107,7 @@ These define fields which must have at least one exact match before two resource
 ```
 
 ### candidateFilterSearchParams
-When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients for which active=true.  Another way to think of these filters is all of them are "AND"ed with each candidateSearchParam above.
+When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients for which active=true.
 ```json
 [ {
     "resourceType" : "Patient",
@@ -102,23 +139,25 @@ For example, if the incoming patient looked like this:
 
 then the above `candidateSearchParams` and `candidateFilterSearchParams` would result in the following two consecutive searches for candidates:
 * `Patient?given=Peter,James&family=Chalmers&active=true`
-* `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true` 
- 
+* `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true`
+
 
 ### matchFields
 
-Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of metrics: `Matcher` and `Similarity`.  Matcher metrics return a `true` or `false` directly, whereas Similarity metrics return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 8.0.
+Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of matchFields: `matcher` and `similarity`.  `matcher` matchFields return a `true` or `false` directly, whereas `similarity` matchFields return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will only return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 8.0.
 
-By default, all matchFields have `exact=false` which means that they will have all diacritical marks removed and converted to upper case before matching.  `exact=true` can be added to any matchField to compare the strings as they are originally capitalized and accented.
+By default, all matchFields have `exact=false` which means that they will have all diacritical marks removed and all letters will be converted to upper case before matching.  `exact=true` can be added to any matchField to compare the strings as they are originally capitalized and accented.
 
 Here is a matcher matchField that uses the SOUNDEX matcher to determine whether two family names match.
 
 ```json
 {
-	"name": "family-name-double-metaphone",
-	"resourceType": "*",
+	"name": "familyname-soundex",
+  "resourceType": "*",
 	"resourcePath": "name.family",
-	"metric": "SOUNDEX"
+	"matcher": {
+			"algorithm": "SOUNDEX"
+	}
 }
 ```
 
@@ -126,32 +165,50 @@ Here is a matcher matchField that only matches when two family names are identic
 
 ```json
 {
-	"name": "family-name-exact",
-	"resourceType": "*",
+	"name": "familyname-exact",
+  "resourceType": "*",
 	"resourcePath": "name.family",
-	"metric": "STRING",
-    "exact": true
+	"matcher": {
+			"algorithm": "STRING",
+			"exact": true
+	}
 }
 ```
 
-Here is a similarity matchField that matches when two given names match with a JARO_WINKLER threshold >0 0.8.
+Special identifier matching is also available if you need to match on a particular identifier system:
+```json
+{
+	"name": "identifier-ssn",
+  "resourceType": "*",
+	"resourcePath": "identifier",
+	"matcher": {
+			"algorithm": "IDENTIFIER",
+			"identifierSystem": "http://hl7.org/fhir/sid/us-ssn"
+	}
+}
+```
+
+
+Here is a similarity matchField that matches when two given names match with a JARO_WINKLER threshold >= 0.8.
 
 ```json
 {
-    "name" : "given-name-jaro",
-    "resourceType" : "Patient",
-    "resourcePath" : "name.given",
-    "metric" : "JARO_WINKLER",
-    "matchThreshold" : 0.8
+	"name": "firstname-jaro",
+	"resourceType": "*",
+	"resourcePath": "name.given",
+	"similarity": {
+		"algorithm": "JARO_WINKLER",
+		"matchThreshold": 0.80
+	}
 }
 ```
 
-The following metrics are currently supported:
+The following algorithms are currently supported:
 
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
-            <th>Name</th>
+            <th>Algorithm</th>
             <th>Type</th>
             <th>Description</th>
             <th>Example</th>
@@ -270,6 +327,14 @@ The following metrics are currently supported:
             </td>
             <td>John Henry = John HENRY when exact=false, John Henry != Henry John</td>
         </tr>     
+				<tr>
+            <td>IDENTIFIER</td>
+            <td>matcher</td>
+            <td>
+               Matches when the system and value of the identifier are identical.
+            </td>
+            <td>If an optional "identifierSystem" is provided, then the identifiers only match when they belong to that system</td>
+        </tr>     
         <tr>
             <td>JARO_WINKLER</td>
             <td>similarity</td>
@@ -315,13 +380,13 @@ The following metrics are currently supported:
 
 ### matchResultMap
 
-These entries convert combinations of successful matchFields into an EMPI Match Result for overall matching of a given pair of resources.  MATCH results are evaluated take precedence over POSSIBLE_MATCH results.
+These entries convert combinations of successful matchFields into an EMPI Match Result for overall matching of a given pair of resources.  MATCH results are evaluated take precedence over POSSIBLE_MATCH results.  If the incoming resource matches ALL of the named matchFields listed, then a new match link is created with the assigned matchResult (`MATCH` or `POSSIBLE_MATCH`).
 
 ```json
 {
 	"matchResultMap": {
-		"cosine-given-name" : "POSSIBLE_MATCH",
-		"cosine-given-name,jaro-last-name" : "MATCH"
+		"firstname-meta,lastname-meta,birthday": "MATCH",
+		"firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH",
 	}
 }
 ```
