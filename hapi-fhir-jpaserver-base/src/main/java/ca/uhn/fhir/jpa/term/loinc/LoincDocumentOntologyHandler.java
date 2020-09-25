@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IRecordHandler {
@@ -57,7 +58,8 @@ public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IR
 		String partName = trim(theRecord.get("PartName"));
 
 		// RSNA Codes VS
-		ValueSet vs = getValueSet(DOCUMENT_ONTOLOGY_CODES_VS_ID, DOCUMENT_ONTOLOGY_CODES_VS_URI, DOCUMENT_ONTOLOGY_CODES_VS_NAME, null);
+		ValueSet vs = getValueSet(DOCUMENT_ONTOLOGY_CODES_VS_ID + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()),
+			DOCUMENT_ONTOLOGY_CODES_VS_URI, DOCUMENT_ONTOLOGY_CODES_VS_NAME, null);
 		addCodeAsIncludeToValueSet(vs, ITermLoaderSvc.LOINC_URI, loincNumber, null);
 
 		// Part Properties

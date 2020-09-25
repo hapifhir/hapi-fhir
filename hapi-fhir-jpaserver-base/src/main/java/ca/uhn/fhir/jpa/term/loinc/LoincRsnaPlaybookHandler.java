@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.*;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -174,7 +175,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		if (isNotBlank(rid)) {
 			addConceptMapEntry(
 				new ConceptMapping()
-					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID)
+					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))
 					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
 					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
@@ -191,7 +192,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		if (isNotBlank(rpid)) {
 			addConceptMapEntry(
 				new ConceptMapping()
-					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID)
+					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))
 					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
 					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)

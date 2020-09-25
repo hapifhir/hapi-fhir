@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IRecordHandler {
@@ -61,7 +62,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 		String targetCodeSystemUri = ITermLoaderSvc.IEEE_11073_10101_URI;
 		addConceptMapEntry(
 			new ConceptMapping()
-				.setConceptMapId(LOINC_IEEE_CM_ID)
+				.setConceptMapId(LOINC_IEEE_CM_ID + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))
 				.setConceptMapUri(LOINC_IEEE_CM_URI)
 				.setConceptMapName(LOINC_IEEE_CM_NAME)
 				.setSourceCodeSystem(sourceCodeSystemUri)

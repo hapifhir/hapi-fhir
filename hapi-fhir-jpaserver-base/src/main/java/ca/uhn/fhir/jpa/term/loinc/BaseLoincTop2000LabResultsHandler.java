@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class BaseLoincTop2000LabResultsHandler extends BaseLoincHandler implements IRecordHandler {
@@ -41,7 +42,7 @@ public class BaseLoincTop2000LabResultsHandler extends BaseLoincHandler implemen
 
 	public BaseLoincTop2000LabResultsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, String theValueSetId, String theValueSetUri, String theValueSetName, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
-		myValueSetId = theValueSetId;
+		myValueSetId = theValueSetId + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		myValueSetUri = theValueSetUri;
 		myValueSetName = theValueSetName;
 	}

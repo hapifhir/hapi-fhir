@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -128,7 +129,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 
 		addConceptMapEntry(
 			new ConceptMapping()
-				.setConceptMapId(loincPartMapId)
+				.setConceptMapId(loincPartMapId + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))
 				.setConceptMapUri(loincPartMapUri)
 				.setConceptMapName(loincPartMapName)
 				.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)

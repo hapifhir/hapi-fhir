@@ -52,7 +52,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 	private final List<ValueSet> myValueSets;
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 	private final Map<String, TermConcept> myCode2Concept;
-	private final Properties myUploadProperties;
+	final Properties myUploadProperties;
 
 	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		myValueSets = theValueSets;
@@ -191,6 +191,8 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 		String version = null;
 		if (isNotBlank(theVersionPropertyName)) {
 			version = myUploadProperties.getProperty(theVersionPropertyName);
+		} else {
+			version = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		}
 
 		ValueSet vs;

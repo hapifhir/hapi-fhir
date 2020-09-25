@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincParentGroupFileHandler extends BaseLoincHandler implements IRecordHandler {
@@ -41,7 +42,7 @@ public class LoincParentGroupFileHandler extends BaseLoincHandler implements IRe
 	@Override
 	public void accept(CSVRecord theRecord) {
 		// "ParentGroupId","ParentGroup","Status"
-		String parentGroupId = trim(theRecord.get("ParentGroupId"));
+		String parentGroupId = trim(theRecord.get("ParentGroupId")) + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		String parentGroupName = trim(theRecord.get("ParentGroup"));
 
 		getValueSet(parentGroupId, LoincGroupFileHandler.VS_URI_PREFIX + parentGroupId, parentGroupName, null);

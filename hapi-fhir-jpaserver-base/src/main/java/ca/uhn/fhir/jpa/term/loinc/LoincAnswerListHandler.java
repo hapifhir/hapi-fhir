@@ -50,7 +50,7 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 	public void accept(CSVRecord theRecord) {
 
 		// this is the code for the list (will repeat)
-		String answerListId = trim(theRecord.get("AnswerListId"));
+		String answerListId = trim(theRecord.get("AnswerListId")) + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		String answerListName = trim(theRecord.get("AnswerListName"));
 		String answerListOid = trim(theRecord.get("AnswerListOID"));
 		String externallyDefined = trim(theRecord.get("ExtDefinedYN"));

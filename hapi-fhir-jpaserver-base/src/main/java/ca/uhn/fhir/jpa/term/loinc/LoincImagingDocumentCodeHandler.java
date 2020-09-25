@@ -31,11 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincImagingDocumentCodeHandler extends BaseLoincHandler implements IRecordHandler {
 
-	public static final String VS_ID = "loinc-imaging-document-codes";
+	public final String VS_ID = "loinc-imaging-document-codes" + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 	public static final String VS_URI = "http://loinc.org/vs/loinc-imaging-document-codes";
 	public static final String VS_NAME = "LOINC Imaging Document Codes";
 

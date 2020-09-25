@@ -29,11 +29,12 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.*;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincUniversalOrderSetHandler extends BaseLoincHandler implements IRecordHandler {
 
-	public static final String VS_ID = "loinc-universal-order-set";
+	public final String VS_ID = "loinc-universal-order-set" + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 	public static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
 	public static final String VS_NAME = "LOINC Universal Order Set";
 
