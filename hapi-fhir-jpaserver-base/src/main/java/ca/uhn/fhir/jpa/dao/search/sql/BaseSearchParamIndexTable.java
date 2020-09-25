@@ -57,7 +57,6 @@ public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
 			// FIXME: deal with oracle here
 			BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
 		);
-		addCondition(condition);
 	}
 
 	public Condition combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, Condition thePredicate, RequestPartitionId theRequestPartitionId) {

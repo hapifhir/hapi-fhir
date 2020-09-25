@@ -11,6 +11,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.List;
 
 public class BasePredicateBuilder3 {
@@ -38,18 +39,13 @@ public class BasePredicateBuilder3 {
 		return mySearchSqlBuilder.getModelConfig();
 	}
 
-	void addCondition(Condition theCondition) {
-		assert theCondition != null;
-		mySearchSqlBuilder.addCondition(theCondition);
-	}
-
 	@Nonnull
 	String generatePlaceholder(Object theInput) {
 		return mySearchSqlBuilder.generatePlaceholder(theInput);
 	}
 
 	@Nonnull
-	List<String> generatePlaceholders(List<?> theValues) {
+	List<String> generatePlaceholders(Collection<?> theValues) {
 		return mySearchSqlBuilder.generatePlaceholders(theValues);
 	}
 

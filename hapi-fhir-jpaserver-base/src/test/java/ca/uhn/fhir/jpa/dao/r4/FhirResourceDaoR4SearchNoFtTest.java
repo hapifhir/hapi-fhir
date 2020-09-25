@@ -2178,6 +2178,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 
 		SearchParameterMap params;
+		List result;
+
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add("_id", new StringParam("TEST"));
@@ -2186,7 +2188,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add("_language", new StringParam("TEST"));
-		assertEquals(1, toList(myPatientDao.search(params)).size());
+		myCaptureQueriesListener.clear();
+		result = toList(myPatientDao.search(params));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertEquals(1, result.size());
 
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -4143,6 +4148,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(patients.toString(), patients, contains(obsId1));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
+			assertEquals(0, StringUtils.countMatches(searchQuery.toLowerCase(), "partition"), searchQuery);
 			assertEquals(1, StringUtils.countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(2, StringUtils.countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 			assertEquals(4, StringUtils.countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);

@@ -73,14 +73,6 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 		return myColumnResId;
 	}
 
-	public void addPredicateSystemAndValue(String theParamName, String theSystem, String theValue) {
-		long hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName, theSystem, theValue);
-		String placeholderValue = generatePlaceholder(hash);
-		Condition condition = BinaryCondition.equalTo(myColumnHashSystemAndValue, placeholderValue);
-		addCondition(condition);
-	}
-
-
 	public Condition createPredicateToken(Collection<IQueryParameterType> theParameters,
 													  String theResourceName,
 													  RuntimeSearchParam theSearchParam,

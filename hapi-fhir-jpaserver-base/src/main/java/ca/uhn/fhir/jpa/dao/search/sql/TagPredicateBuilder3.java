@@ -42,6 +42,24 @@ public class TagPredicateBuilder3 extends BaseIndexTable {
 	}
 
 
+	public Condition createPredicateTag(TagTypeEnum theTagType, List<Pair<String, String>> theTokens, boolean theParamInverted, String theParamName, RequestPartitionId theRequestPartitionId) {
+
+		addJoin(getTable(), myTagDefinitionTable, myColumnTagId, myTagDefinitionColumnTagId);
+
+		Condition tagListPredicate = createPredicateTagList(theTagType, theTokens);
+		if (theParamInverted) {
+			tagListPredicate = new NotCondition(tagListPredicate);
+		}
+
+		// FIXME: needed?
+//			if (theRequestPartitionId != null) {
+//				addPartitionIdPredicate(theRequestPartitionId, tagJoin, predicates);
+//			}
+
+		return tagListPredicate;
+
+	}
+
 	private Condition createPredicateTagList(TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
 		Condition typePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagType, generatePlaceholder(theTagType.ordinal()));
 
@@ -62,23 +80,5 @@ public class TagPredicateBuilder3 extends BaseIndexTable {
 	@Override
 	DbColumn getResourceIdColumn() {
 		return myColumnResId;
-	}
-
-	public void addPredicateTag(TagTypeEnum theTagType, List<Pair<String, String>> theTokens, boolean theParamInverted, String theParamName, RequestPartitionId theRequestPartitionId) {
-
-		addJoin(getTable(), myTagDefinitionTable, myColumnTagId, myTagDefinitionColumnTagId);
-
-		Condition tagListPredicate = createPredicateTagList(theTagType, theTokens);
-		if (theParamInverted) {
-			tagListPredicate = new NotCondition(tagListPredicate);
-		}
-
-		// FIXME: needed?
-//			if (theRequestPartitionId != null) {
-//				addPartitionIdPredicate(theRequestPartitionId, tagJoin, predicates);
-//			}
-
-		addCondition(tagListPredicate);
-
 	}
 }

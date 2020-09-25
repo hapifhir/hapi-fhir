@@ -20,8 +20,10 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -276,8 +278,9 @@ public class SearchSqlBuilder {
 	public ResourceSqlTable getOrCreateResourceTableRoot() {
 		if (myResourceTableRoot == null) {
 			ResourceSqlTable resourceTable = mySqlBuilderFactory.resourceTable(this);
-			resourceTable.addResourceTypeAndNonDeletedPredicates();
 			addTable(resourceTable, null);
+			Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
+			addPredicate_(typeAndDeletionPredicate);
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;
@@ -294,7 +297,7 @@ public class SearchSqlBuilder {
 		return placeholder;
 	}
 
-	List<String> generatePlaceholders(List<?> theValues) {
+	List<String> generatePlaceholders(Collection<?> theValues) {
 		return theValues
 			.stream()
 			.map(t -> generatePlaceholder(t))
@@ -304,11 +307,6 @@ public class SearchSqlBuilder {
 
 	public void setMatchNothing() {
 		myMatchNothing = true;
-	}
-
-	void addCondition(Condition theCondition) {
-		assert theCondition != null;
-		mySelect.addCondition(theCondition);
 	}
 
 	DbTable addTable(String theTableName) {
@@ -331,7 +329,9 @@ public class SearchSqlBuilder {
 		return myModelConfig;
 	}
 
-	public void addPredicate(Condition theCondition) {
+	// FIXME: rename _
+	public void addPredicate_(@Nonnull Condition theCondition) {
+		assert theCondition != null;
 		mySelect.addCondition(theCondition);
 	}
 

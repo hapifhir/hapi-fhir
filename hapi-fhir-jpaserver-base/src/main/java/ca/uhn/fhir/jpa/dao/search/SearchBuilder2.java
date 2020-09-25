@@ -30,7 +30,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -49,7 +48,6 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -81,19 +79,16 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
@@ -103,8 +98,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -121,8 +114,6 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -133,8 +124,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -241,13 +230,11 @@ public class SearchBuilder2 implements ISearchBuilder {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
-			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
+			Condition predicate = myQueryStack3.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
+			if (predicate != null) {
+				mySqlBuilder.addPredicate_(predicate);
+			}
 		}
-	}
-
-	private void searchForIdsWithAndOr(String theResourceName, String theNextParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
-		myQueryStack3.searchForIdsWithAndOr(null, theResourceName, theNextParamName, theAndOrParams, theRequest, myRequestPartitionId);
-//		myPredicateBuilder.searchForIdsWithAndOr(theResourceName, theNextParamName, theAndOrParams, theRequest, myRequestPartitionId);
 	}
 
 	/**
@@ -450,7 +437,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		DateRangeParam lu = myParams.getLastUpdated();
 		if (lu != null && !lu.isEmpty()) {
 			Condition lastUpdatedPredicates = createLastUpdatedPredicates(lu);
-			mySqlBuilder.addPredicate(lastUpdatedPredicates);
+			mySqlBuilder.addPredicate_(lastUpdatedPredicates);
 		}
 
 		/*
@@ -1106,13 +1093,13 @@ public class SearchBuilder2 implements ISearchBuilder {
 					null,
 					null,
 					theFilter.getValue());
-				return myQueryStack3.addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
+				return myQueryStack3.createPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
 			}
 		} else if (searchParam.getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
-				return myQueryStack3.addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),					theFilter.getOperation());
+				return myQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),					theFilter.getOperation());
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
 			}
@@ -1129,13 +1116,13 @@ public class SearchBuilder2 implements ISearchBuilder {
 		} else {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
-				return myQueryStack3.addPredicateUri(null, theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return myQueryStack3.createPredicateUri(null, theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
-				return myQueryStack3.addPredicateString(null, theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return myQueryStack3.createPredicateString(null, theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
-				return myQueryStack3.addPredicateDate(null, theResourceName, searchParam, Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(),  theRequestPartitionId);
+				return myQueryStack3.createPredicateDate(null, theResourceName, searchParam, Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(),  theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
-				return myQueryStack3.addPredicateNumber(null, theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return myQueryStack3.createPredicateNumber(null, theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
 				String paramName = theFilter.getParamPath().getName();
 				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
@@ -1143,9 +1130,9 @@ public class SearchBuilder2 implements ISearchBuilder {
 				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
 				String value = theFilter.getValue();
 				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
-				return myQueryStack3.addPredicateReference(null, theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
+				return myQueryStack3.createPredicateReference(null, theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
-				return myQueryStack3.addPredicateQuantity(null, theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return myQueryStack3.createPredicateQuantity(null, theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
 				throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
 			} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
@@ -1154,7 +1141,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 					null,
 					null,
 					theFilter.getValue());
-				return myQueryStack3.addPredicateToken(null, theResourceName, searchParam, Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
+				return myQueryStack3.createPredicateToken(null, theResourceName, searchParam, Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
 			}
 		}
 		return null;

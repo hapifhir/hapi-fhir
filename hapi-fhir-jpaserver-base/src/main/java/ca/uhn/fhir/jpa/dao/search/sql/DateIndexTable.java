@@ -42,12 +42,12 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 	}
 
 
-	public Condition createPredicateDate(IQueryParameterType theParam,
-													 String theResourceName,
-													 String theParamName,
-													 DateIndexTable theFrom,
-													 SearchFilterParser.CompareOperation theOperation,
-													 RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateDateWithoutIdentityPredicate(IQueryParameterType theParam,
+																					 String theResourceName,
+																					 String theParamName,
+																					 DateIndexTable theFrom,
+																					 SearchFilterParser.CompareOperation theOperation,
+																					 RequestPartitionId theRequestPartitionId) {
 
 		Condition p;
 		if (theParam instanceof DateParam) {
@@ -69,7 +69,7 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
 		}
 
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, p, theRequestPartitionId);
+		return p;
 	}
 
 	private boolean isNullOrDayPrecision(DateParam theDateParam) {

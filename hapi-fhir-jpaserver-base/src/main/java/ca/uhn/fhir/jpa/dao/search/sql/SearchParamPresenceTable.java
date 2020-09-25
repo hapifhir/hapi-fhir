@@ -29,7 +29,6 @@ public class SearchParamPresenceTable extends BaseIndexTable {
 		long hash = SearchParamPresent.calculateHashPresence(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName, thePresence);
 		String placeholderValue = generatePlaceholder(hash);
 		Condition condition = BinaryCondition.equalTo(myColumnHashPresence, placeholderValue);
-		addCondition(condition);
 	}
 
 

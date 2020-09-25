@@ -9,6 +9,8 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
+
 public class ResourceSqlTable extends BaseIndexTable {
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnResDeletedAt;
@@ -34,21 +36,22 @@ public class ResourceSqlTable extends BaseIndexTable {
 		return myColumnResId;
 	}
 
-	public void addResourceTypeAndNonDeletedPredicates() {
-		addCondition(BinaryCondition.equalTo(myColumnResType, generatePlaceholder(getResourceType())));
-		addCondition(UnaryCondition.isNull(myColumnResDeletedAt));
+	public Condition createResourceTypeAndNonDeletedPredicates() {
+		return toAndPredicate(
+			BinaryCondition.equalTo(myColumnResType, generatePlaceholder(getResourceType())),
+			UnaryCondition.isNull(myColumnResDeletedAt)
+		);
 	}
 
 	public DbColumn getLastUpdatedColumn() {
 		return myColumnLastUpdated;
 	}
 
-	public Condition addLanguagePredicate(Set<String> theValues, boolean theNegated) {
-		Condition condition = new InCondition(myColumnLanguage, theValues);
+	public Condition createLanguagePredicate(Set<String> theValues, boolean theNegated) {
+		Condition condition = new InCondition(myColumnLanguage, generatePlaceholders(theValues));
 		if (theNegated) {
 			condition = new NotCondition(condition);
 		}
-		addCondition(condition);
 		return condition;
 	}
 }

@@ -64,6 +64,8 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -133,7 +135,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		}
 	}
 
-	public Condition addPredicate(RequestDetails theRequest, String theResourceType, String theParamName, List<? extends IQueryParameterType> theReferenceOrParamList, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicate(RequestDetails theRequest, String theResourceType, String theParamName, List<? extends IQueryParameterType> theReferenceOrParamList, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		List<IIdType> targetIds = new ArrayList<>();
 		List<String> targetQualifiedUrls = new ArrayList<>();
@@ -179,11 +181,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 
 		}
 
-
-		if (getRequestPartitionId() != null) {
-			addPartitionIdPredicate(getRequestPartitionId().getPartitionId());
-		}
-
 		for (IIdType next : targetIds) {
 			if (!next.hasResourceType()) {
 				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, null);
@@ -205,12 +202,13 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			setMatchNothing();
 			return null;
 		} else {
-			return addPredicateReference(inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
+			Condition retVal = createPredicateReference(inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
+			return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), retVal);
 		}
 
 	}
 
-	private Condition addPredicateReference(boolean theInverse, List<String> thePathsToMatch, List<Long> theTargetPidList, List<String> theTargetQualifiedUrls) {
+	private Condition createPredicateReference(boolean theInverse, List<String> thePathsToMatch, List<Long> theTargetPidList, List<String> theTargetQualifiedUrls) {
 
 		Condition targetPidCondition = null;
 		if (!theTargetPidList.isEmpty()) {
@@ -241,18 +239,17 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			condition = joinedCondition;
 		}
 
-		addCondition(condition);
 		return condition;
 	}
 
-	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, @Nullable List<Class<? extends IBaseResource>> theCandidateTargetTypes) {
+	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, @Nullable List<String> theCandidateTargetTypes) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("This search uses an unqualified resource(a parameter in a chain without a resource type). ");
 		builder.append("This is less efficient than using a qualified type. ");
 		if (theCandidateTargetTypes != null) {
-			builder.append("[" + theParamName + "] resolves to [" + theCandidateTargetTypes.stream().map(Class::getSimpleName).collect(Collectors.joining(",")) + "].");
+			builder.append("[" + theParamName + "] resolves to [" + theCandidateTargetTypes.stream().collect(Collectors.joining(",")) + "].");
 			builder.append("If you know what you're looking for, try qualifying it using the form ");
-			builder.append(theCandidateTargetTypes.stream().map(cls -> "[" + cls.getSimpleName() + ":" + theParamName + "]").collect(Collectors.joining(" or ")));
+			builder.append(theCandidateTargetTypes.stream().map(cls -> "[" + cls + ":" + theParamName + "]").collect(Collectors.joining(" or ")));
 		} else {
 			builder.append("If you know what you're looking for, try qualifying it using the form: '");
 			builder.append(theParamName).append(":[resourceType]");
@@ -341,7 +338,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 
 			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
 			Condition typeCondition = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
-			addCondition(typeCondition);
 
 			String typeValue = theReferenceParam.getValue();
 
@@ -355,12 +351,13 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			}
 
 			Condition condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theReferenceParam.getValue()));
-			addCondition(condition);
-			return condition;
+
+			return toAndPredicate(typeCondition, condition);
 		}
 
 		boolean foundChainMatch = false;
-		List<Class<? extends IBaseResource>> candidateTargetTypes = new ArrayList<>();
+		List<String> candidateTargetTypes = new ArrayList<>();
+		List<Condition> orPredicates = new ArrayList<>();
 		for (String nextType : resourceTypes) {
 			String chain = theReferenceParam.getChain();
 
@@ -413,17 +410,16 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 				throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
 			}
 
-			if (candidateTargetTypes.size() > 1) {
-				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
-			}
-
+			candidateTargetTypes.add(nextType);
 			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
+
+			List<Condition> andPredicates = new ArrayList<>();
 			InCondition pathPredicate = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
-			addCondition(pathPredicate);
+			andPredicates.add(pathPredicate);
 
-			myQueryStack.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, Collections.singletonList(orValues), theRequest, theRequestPartitionId);
+			andPredicates.add(myQueryStack.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, Collections.singletonList(orValues), theRequest, theRequestPartitionId));
 
-			break;
+			orPredicates.add(toAndPredicate(andPredicates));
 
 			// If this is false, we throw an exception below so no sense doing any further processing
 //			if (foundChainMatch) {
@@ -469,8 +465,11 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 //			}
 		}
 
+		if (candidateTargetTypes.size() > 1) {
+			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
+		}
 
-		return null;
+		return toOrPredicate(orPredicates);
 //		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
 //		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
 //		return predicate;
@@ -796,13 +795,12 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		throw new InvalidRequestException(msg);
 	}
 
-	public void addEverythingPredicate(String theResourceName, Long theTargetPid) {
+	@Nonnull
+	public Condition createEverythingPredicate(String theResourceName, Long theTargetPid) {
 		if (theTargetPid != null) {
-			BinaryCondition condition = BinaryCondition.equalTo(myColumnTargetResourceId, generatePlaceholder(theTargetPid));
-			addCondition(condition);
+			return BinaryCondition.equalTo(myColumnTargetResourceId, generatePlaceholder(theTargetPid));
 		} else {
-			BinaryCondition condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
-			addCondition(condition);
+			return BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
 		}
 	}
 }

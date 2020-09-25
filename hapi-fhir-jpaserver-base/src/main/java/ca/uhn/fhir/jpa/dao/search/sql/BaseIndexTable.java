@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
@@ -38,16 +39,20 @@ public abstract class BaseIndexTable extends BasePredicateBuilder3 {
 		return myColumnPartitionId;
 	}
 
-	public void addPartitionIdPredicate(Integer thePartitionId) {
-		Condition condition = createPartitionIdPredicate(thePartitionId);
-		addCondition(condition);
+	public Condition combineWithRequestPartitionIdPredicate(RequestPartitionId theRequestPartitionId, Condition theCondition) {
+		if (theRequestPartitionId != null && !theRequestPartitionId.isAllPartitions()) {
+			return ComboCondition.and(createPartitionIdPredicate_(theRequestPartitionId.getPartitionId()), theCondition);
+		} else {
+			return theCondition;
+		}
 	}
 
+
 	@Nonnull
-	Condition createPartitionIdPredicate(Integer theThePartitionId) {
+	Condition createPartitionIdPredicate_(Integer thePartitionId) {
 		Condition condition;
-		if (theThePartitionId != null) {
-			Object placeholder = generatePlaceholder(theThePartitionId);
+		if (thePartitionId != null) {
+			Object placeholder = generatePlaceholder(thePartitionId);
 			condition = BinaryCondition.equalTo(getPartitionIdColumn(), placeholder);
 		} else {
 			condition = UnaryCondition.isNull(getPartitionIdColumn());

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.search.sql;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -20,7 +19,6 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.CriteriaBuilder;
 
 public class StringIndexTable extends BaseSearchParamIndexTable {
 
@@ -51,17 +49,11 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 		return myColumnResId;
 	}
 
-	public void addPredicateExact(String theResourceName, String theParamName, String theValueExact) {
-		addCondition(createPredicateExact(theResourceName, theParamName, theValueExact));
-	}
-
 	public Condition createPredicateString(IQueryParameterType theParameter,
 														String theResourceName,
 														RuntimeSearchParam theSearchParam,
-														CriteriaBuilder theBuilder999, // FIXME: remove
 														StringIndexTable theFrom,
-														SearchFilterParser.CompareOperation operation,
-														RequestPartitionId theRequestPartitionId) {
+														SearchFilterParser.CompareOperation operation) {
 		String rawSearchTerm;
 		String paramName = theSearchParam.getName();
 		if (theParameter instanceof TokenParam) {
