@@ -52,6 +52,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 	@Override
 	public void accept(CSVRecord theRecord) {
 
+		String loincIeeeCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String longCommonName = trim(theRecord.get("LOINC_LONG_COMMON_NAME"));
 		String ieeeCode = trim(theRecord.get("IEEE_CF_CODE10"));
@@ -64,6 +65,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 			new ConceptMapping()
 				.setConceptMapId(LOINC_IEEE_CM_ID + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))
 				.setConceptMapUri(LOINC_IEEE_CM_URI)
+				.setConceptMapVersion(loincIeeeCmVersion)
 				.setConceptMapName(LOINC_IEEE_CM_NAME)
 				.setSourceCodeSystem(sourceCodeSystemUri)
 				.setSourceCode(loincNumber)

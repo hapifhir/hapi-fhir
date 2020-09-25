@@ -176,6 +176,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
+	private static final int SINGLE_FETCH_SIZE = 1;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
 	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 	private static final TermCodeSystemVersion NO_CURRENT_VERSION = new TermCodeSystemVersion().setId(-1L);
@@ -1596,6 +1597,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		TermConceptMap termConceptMap = new TermConceptMap();
 		termConceptMap.setResource(theResourceTable);
 		termConceptMap.setUrl(theConceptMap.getUrl());
+		termConceptMap.setVersion(theConceptMap.getVersion());
 
 		String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
 		String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
@@ -1629,7 +1631,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 * Do the upload.
 		 */
 		String conceptMapUrl = termConceptMap.getUrl();
-		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
+		String conceptMapVersion = termConceptMap.getVersion();
+		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = null;
+		if (isBlank(conceptMapVersion)) {
+			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndNullVersion(conceptMapUrl);
+		} else {
+			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndVersion(conceptMapUrl, conceptMapVersion);
+		}
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
 				if (isNotBlank(source)) {
@@ -1710,13 +1718,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapByUrl.get();
 
-			String msg = myContext.getLocalizer().getMessage(
-				BaseTermReadSvcImpl.class,
-				"cannotCreateDuplicateConceptMapUrl",
-				conceptMapUrl,
-				existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			if (isBlank(conceptMapVersion)) {
+				String msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+					"cannotCreateDuplicateConceptMapUrl",
+					conceptMapUrl,
+					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
 
-			throw new UnprocessableEntityException(msg);
+			} else {
+				String msg = myContext.getLocalizer().getMessage(
+					BaseTermReadSvcImpl.class,
+				    "cannotCreateDuplicateConceptMapUrlAndVersion",
+				    conceptMapUrl, conceptMapVersion,
+				    existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
+			}
 		}
 
 		ourLog.info("Done storing TermConceptMap[{}] for {}", termConceptMap.getId(), theConceptMap.getIdElement().toVersionless().getValueAsString());
@@ -2049,6 +2066,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermConceptMapGroupElementTarget> cachedTargets;
 		ArrayList<Predicate> predicates;
 		Coding coding;
+
+		//-- get the latest ConceptMapVersion if theTranslationRequest has url, but ConceptMapVersion
+		String latestConceptMapVersion = null;
+		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
+			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
+
 		for (TranslationQuery translationQuery : translationQueries) {
 			cachedTargets = myTranslationCache.getIfPresent(translationQuery);
 			if (cachedTargets == null) {
@@ -2073,6 +2096,21 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				if (translationQuery.hasTargetSystem()) {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem().getValueAsString()));
+				}
+
+				if (translationQuery.hasUrl()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
+					if (translationQuery.hasConceptMapVersion()) {
+						// both url and conceptMapVersion
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					} else {
+						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
+							// only url and use latestConceptMapVersion
+							predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+						} else {
+							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
+						}
+					}
 				}
 
 				if (translationQuery.hasSource()) {
@@ -2132,6 +2170,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermConceptMapGroupElement> cachedElements;
 		ArrayList<Predicate> predicates;
 		Coding coding;
+
+		//-- get the latest ConceptMapVersion if theTranslationRequest has url, but ConceptMapVersion
+		String latestConceptMapVersion = null;
+		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
+			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
+
 		for (TranslationQuery translationQuery : translationQueries) {
 			cachedElements = myTranslationWithReverseCache.getIfPresent(translationQuery);
 			if (cachedElements == null) {
@@ -2156,6 +2200,21 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				if (coding.hasVersion()) {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
+				}
+
+				if (translationQuery.hasUrl()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
+					if (translationQuery.hasConceptMapVersion()) {
+						// both url and conceptMapVersion
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+					} else {
+						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
+							// only url and use latestConceptMapVersion
+							predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+						} else {
+							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
+						}
+					}
 				}
 
 				if (translationQuery.hasTargetSystem()) {
@@ -2222,6 +2281,20 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	void throwInvalidValueSet(String theValueSet) {
 		throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSet));
+	}
+
+	// Special case for the translate operation with url and without
+	// conceptMapVersion, find the latest conecptMapVersion
+	private String getLatestConceptMapVersion(TranslationRequest theTranslationRequest) {
+
+		Pageable page = PageRequest.of(0, 1);
+		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page,
+				theTranslationRequest.getUrl().asStringValue());
+		if (!theConceptMapList.isEmpty()) {
+			return theConceptMapList.get(0).getVersion();
+		}
+
+		return null;
 	}
 
 	@Override
@@ -2560,5 +2633,120 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return ourLastResultsFromTranslationWithReverseCache;
 	}
 
+	@Override
+	@Transactional
+	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 
+		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
+		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
+
+		Coding coding = toCanonicalCoding(theCoding);
+		boolean haveCoding = coding != null && coding.isEmpty() == false;
+
+		boolean haveCode = theCode != null && theCode.isEmpty() == false;
+
+		if (!haveCodeableConcept && !haveCoding && !haveCode) {
+			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate.");
+		}
+		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
+			throw new InvalidRequestException("$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
+		}
+
+		boolean haveIdentifierParam = isNotBlank(theCodeSystemUrl);
+		String codeSystemUrl;
+		if (theCodeSystemId != null) {
+			IBaseResource codeSystem = myDaoRegistry.getResourceDao("CodeSystem").read(theCodeSystemId);
+			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
+		} else if (haveIdentifierParam) {
+			codeSystemUrl = theCodeSystemUrl;
+		} else {
+			throw new InvalidRequestException("Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+		}
+
+
+		String code = theCode;
+		String version = theVersion;
+		String display = theDisplay;
+
+		if (haveCodeableConcept) {
+			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
+				Coding nextCoding = codeableConcept.getCoding().get(i);
+				if (nextCoding.hasSystem()) {
+					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
+						throw new InvalidRequestException("Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+					}
+					codeSystemUrl = nextCoding.getSystem();
+				}
+				code = nextCoding.getCode();
+				display = nextCoding.getDisplay();
+				CodeValidationResult nextValidation = codeSystemValidateCode(codeSystemUrl, version, code, display);
+				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
+					return nextValidation;
+				}
+			}
+		} else if (haveCoding) {
+			if (coding.hasSystem()) {
+				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
+					throw new InvalidRequestException("Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+				}
+			    codeSystemUrl = coding.getSystem();
+			}
+			code = coding.getCode();
+			display = coding.getDisplay();
+		}
+
+		return codeSystemValidateCode(codeSystemUrl, version, code, display);
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {
+
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TermConcept> query = criteriaBuilder.createQuery(TermConcept.class);
+		Root<TermConcept> root = query.from(TermConcept.class);
+
+		Fetch<TermCodeSystemVersion, TermConcept> systemVersionFetch = root.fetch("myCodeSystem", JoinType.INNER);
+		Join<TermCodeSystemVersion, TermConcept> systemVersionJoin = (Join<TermCodeSystemVersion, TermConcept>)systemVersionFetch;
+		Fetch<TermCodeSystem, TermCodeSystemVersion> systemFetch = systemVersionFetch.fetch("myCodeSystem", JoinType.INNER);
+		Join<TermCodeSystem, TermCodeSystemVersion> systemJoin = (Join<TermCodeSystem, TermCodeSystemVersion>)systemFetch;
+
+		ArrayList<Predicate> predicates = new ArrayList<>();
+
+		if (isNotBlank(theCode)) {
+			predicates.add(criteriaBuilder.equal(root.get("myCode"), theCode));
+		}
+
+		if (isNotBlank(theDisplay)) {
+			predicates.add(criteriaBuilder.equal(root.get("myDisplay"), theDisplay));
+		}
+
+		if (isNoneBlank(theCodeSystemUrl)) {
+			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
+		}
+
+		if (isNoneBlank(theCodeSystemVersion)) {
+			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
+		} else {
+			query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
+		}
+
+		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+		query.where(outerPredicate);
+
+		final TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
+		org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
+		hibernateQuery.setFetchSize(SINGLE_FETCH_SIZE);
+		List<TermConcept> resultsList = hibernateQuery.getResultList();
+
+		if (!resultsList.isEmpty()) {
+			TermConcept concept = resultsList.get(0);
+			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
+		}
+
+		if (isBlank(theDisplay))
+			return createFailureCodeValidationResult(theCodeSystemUrl, theCode);
+		else
+			return createFailureCodeValidationResult(theCodeSystemUrl, theCode, " - Concept Display : "  + theDisplay);
+	}
 }

@@ -23,11 +23,14 @@ package ca.uhn.fhir.jpa.api.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 
 public class TranslationQuery {
 	private Coding myCoding;
 	private Long myResourceId;
+	private UriType myUrl;
+	private StringType myConceptMapVersion;
 	private UriType mySource;
 	private UriType myTarget;
 	private UriType myTargetSystem;
@@ -58,6 +61,32 @@ public class TranslationQuery {
 		myResourceId = theResourceId;
 	}
 
+	//-- url
+	public boolean hasUrl() {
+		return myUrl != null && myUrl.hasValue();
+	}
+
+	public UriType getUrl() {
+		return myUrl;
+	}
+
+	public void setUrl(UriType theUrl) {
+		myUrl = theUrl;
+	}
+
+	//-- ConceptMapVersion
+	public boolean hasConceptMapVersion() {
+		return myConceptMapVersion != null && myConceptMapVersion.hasValue();
+	}
+
+	public StringType getConceptMapVersion() {
+		return myConceptMapVersion;
+	}
+
+	public void setConceptMapVersion(StringType theConceptMapVersion) {
+		myConceptMapVersion = theConceptMapVersion;
+	}
+	
 	public boolean hasSource() {
 		return mySource != null && mySource.hasValue();
 	}
@@ -107,6 +136,8 @@ public class TranslationQuery {
 			.append(getCoding().getSystem(), that.getCoding().getSystem())
 			.append(getCoding().getVersion(), that.getCoding().getVersion())
 			.append(getResourceId(), that.getResourceId())
+			.append(getUrl(), that.getUrl())
+			.append(getConceptMapVersion(), that.getConceptMapVersion())
 			.append(getSource(), that.getSource())
 			.append(getTarget(), that.getTarget())
 			.append(getTargetSystem(), that.getTargetSystem())
@@ -120,6 +151,8 @@ public class TranslationQuery {
 			.append(getCoding().getSystem())
 			.append(getCoding().getVersion())
 			.append(getResourceId())
+			.append(getUrl())
+			.append(getConceptMapVersion())
 			.append(getSource())
 			.append(getTarget())
 			.append(getTargetSystem())

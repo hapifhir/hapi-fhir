@@ -32,6 +32,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -39,6 +41,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -152,7 +155,11 @@ public class FhirResourceDaoConceptMapR4 extends BaseHapiFhirResourceDao<Concept
 					translationMatch.setSource(new UriType(element.getConceptMapUrl()));
 
 					if (element.getConceptMapGroupElementTargets().size() == 1) {
-						translationMatch.setEquivalence(new CodeType(element.getConceptMapGroupElementTargets().get(0).getEquivalence().toCode()));
+						
+						ConceptMapEquivalence eq = element.getConceptMapGroupElementTargets().get(0).getEquivalence();
+						if (eq != null) {
+							translationMatch.setEquivalence(new CodeType(eq.toCode()));
+						}
 					}
 
 					retVal.addMatch(translationMatch);

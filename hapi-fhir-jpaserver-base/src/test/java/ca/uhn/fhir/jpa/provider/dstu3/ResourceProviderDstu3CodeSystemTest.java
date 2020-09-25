@@ -330,6 +330,19 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		return ourCtx.newJsonParser().parseResource(theType, loadResource(theFilename));
 	}
 
+	@Test
+	public void testValidateCodeOperation() {
+		
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType("https://url"));
+		inParams.addParameter().setName("code").setValue(new CodeType("1"));
 
+		try {
+			ourClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[CodeSystem/$validate-code] with parameters [[]]", e.getMessage());
+		}
+	}
 
 }

@@ -326,6 +326,24 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return url;
 	}
 
+	public static String getCodeSystemUrl(@Nonnull IBaseResource theCodeSystem) {
+		String url;
+		switch (theCodeSystem.getStructureFhirVersionEnum()) {
+			case R4: {
+				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			}
+			case R5: {
+				url = ((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			}
+			case DSTU3:
+			default:
+				throw new IllegalArgumentException("Can not handle version: " + theCodeSystem.getStructureFhirVersionEnum());
+		}
+		return url;
+	}
+
 	public static String getValueSetVersion(@Nonnull IBaseResource theValueSet) {
 		String version;
 		switch (theValueSet.getStructureFhirVersionEnum()) {
