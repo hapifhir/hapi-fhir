@@ -54,7 +54,6 @@ public class EmpiControllerHelper {
 		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
 	}
 
-	// FIXME KHS consolidate with hapi
 	public static EmpiMatchResultEnum extractMatchResultOrNull(String theMatchResult) {
 		if (theMatchResult == null) {
 			return null;
