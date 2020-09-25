@@ -89,42 +89,6 @@ public abstract class BaseEmpiProvider {
 		return theString.getValue();
 	}
 
-	// FIXME KHS
-//
-//	// FIXME KHS consolidate
-//	protected EmpiMatchResultEnum extractMatchResultOrNull(IPrimitiveType<String> theMatchResult) {
-//		String matchResult = extractStringNull(theMatchResult);
-//		if (matchResult == null) {
-//			return null;
-//		}
-//		return EmpiMatchResultEnum.valueOf(matchResult);
-//	}
-//
-//	protected EmpiLinkSourceEnum extractLinkSourceOrNull(IPrimitiveType<String> theLinkSource) {
-//		String linkSource = extractStringNull(theLinkSource);
-//		if (linkSource == null) {
-//			return null;
-//		}
-//		return EmpiLinkSourceEnum.valueOf(linkSource);
-//	}
-//
-//
-//	protected IIdType extractPersonIdDtOrNull(String theName, IPrimitiveType<String> thePersonId) {
-//		String personId = extractStringNull(thePersonId);
-//		if (personId == null) {
-//			return null;
-//		}
-//		return getPersonIdDtOrThrowException(theName, personId);
-//	}
-//
-//	protected IIdType extractTargetIdDtOrNull(String theName, IPrimitiveType<String> theTargetId) {
-//		String targetId = extractStringNull(theTargetId);
-//		if (targetId == null) {
-//			return null;
-//		}
-//		return getTargetIdDtOrThrowException(theName, targetId);
-//	}
-
 	protected IBaseParameters parametersFromEmpiLinks(Stream<EmpiLinkJson> theEmpiLinkStream, boolean includeResultAndSource) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 

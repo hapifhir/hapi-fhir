@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.stream.Stream;
 
 @Service
-// FIXME KHS move other wrappers here
 public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	@Autowired
 	EmpiControllerHelper myEmpiControllerHelper;

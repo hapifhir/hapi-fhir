@@ -28,7 +28,6 @@ import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import ca.uhn.fhir.empi.provider.EmpiControllerHelper;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
@@ -57,13 +56,10 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 	EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 	@Autowired
 	EmpiMatchLinkSvc myEmpiMatchLinkSvc;
-	@Autowired
-	EmpiControllerHelper myEmpiControllerHelper;
 
 	@Transactional
 	@Override
 	public IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiTransactionContext theEmpiContext) {
-
 		String targetType = myFhirContext.getResourceType(theTarget);
 
 		validateUpdateLinkRequest(thePerson, theTarget, theMatchResult, targetType);
