@@ -55,7 +55,7 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 
 
 	@Override
-	public Stream<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext) {
+	public Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext) {
 		Example<EmpiLink> exampleLink = exampleLinkFromParameters(null, null, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, null);
 		return myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink).stream().map(this::toJson);
 	}

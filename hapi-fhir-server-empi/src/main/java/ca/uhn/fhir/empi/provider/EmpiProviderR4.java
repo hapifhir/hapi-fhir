@@ -142,7 +142,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 	@Operation(name = ProviderConstants.EMPI_DUPLICATE_PERSONS, idempotent = true)
 	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
-		Stream<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getPossibleDuplicates(createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.DUPLICATE_PERSONS));
+		Stream<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getDuplicatePersons(createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.DUPLICATE_PERSONS));
 		return (Parameters) parametersFromEmpiLinks(possibleDuplicates, false);
 	}
 

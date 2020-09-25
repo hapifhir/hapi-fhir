@@ -27,5 +27,5 @@ import java.util.stream.Stream;
 
 public interface IEmpiLinkQuerySvc {
 	Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
-	Stream<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
+	Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext);
 }

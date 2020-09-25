@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.empi.provider;
 
 import ca.uhn.fhir.empi.api.IEmpiControllerSvc;
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
-import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
 import ca.uhn.fhir.empi.provider.EmpiProviderR4;
@@ -24,8 +23,6 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 	private IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 	@Autowired
 	private IEmpiControllerSvc myEmpiControllerSvc;
-	@Autowired
-	private IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
 	@Autowired
 	private IEmpiExpungeSvc myEmpiResetSvc;
 	@Autowired

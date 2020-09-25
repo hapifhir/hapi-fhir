@@ -52,8 +52,8 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	}
 
 	@Override
-	public Stream<EmpiLinkJson> getPossibleDuplicates(EmpiTransactionContext theEmpiContext) {
-		return myEmpiLinkQuerySvc.getPossibleDuplicates(theEmpiContext);
+	public Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext) {
+		return myEmpiLinkQuerySvc.getDuplicatePersons(theEmpiContext);
 	}
 
 	@Override
