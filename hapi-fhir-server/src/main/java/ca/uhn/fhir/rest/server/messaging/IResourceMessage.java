@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.model;
+package ca.uhn.fhir.rest.server.messaging;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -19,6 +19,8 @@ package ca.uhn.fhir.jpa.subscription.model;
  * limitations under the License.
  * #L%
  */
+
+
 
 public interface IResourceMessage {
 	String getPayloadId();

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.model;
+package ca.uhn.fhir.rest.server.messaging;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,10 +20,13 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #L%
  */
 
+
+
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,8 +34,14 @@ import java.util.Optional;
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseResourceMessage implements IResourceMessage, IModelJson {
 
+	@JsonProperty("operationType")
+	protected BaseResourceModifiedMessage.OperationTypeEnum myOperationType;
+
 	@JsonProperty("attributes")
 	private Map<String, String> myAttributes;
+
+	@JsonProperty("transactionId")
+	private String myTransactionId;
 
 	/**
 	 * Returns an attribute stored in this message.
@@ -93,5 +102,53 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 			}
 			myAttributes.putAll(theMsg.myAttributes);
 		}
+	}
+
+	/**
+	 * Returns the {@link OperationTypeEnum} that is occurring to the Resource of the message
+	 *
+	 * @return the operation type.
+	 */
+	public BaseResourceModifiedMessage.OperationTypeEnum getOperationType() {
+		return myOperationType;
+	}
+
+	/**
+	 * Sets the {@link OperationTypeEnum} occuring to the resource of the message.
+	 *
+	 * @param theOperationType The operation type to set.
+	 */
+	public void setOperationType(BaseResourceModifiedMessage.OperationTypeEnum theOperationType) {
+		myOperationType = theOperationType;
+	}
+
+	/**
+	 * Retrieve the transaction ID related to this message.
+	 *
+	 * @return the transaction ID, or null.
+	 */
+	@Nullable
+	public String getTransactionId() {
+		return myTransactionId;
+	}
+
+	/**
+	 * Adds a transaction ID to this message. This ID can be used for many purposes. For example, performing tracing
+	 * across asynchronous hooks, tying data together, or downstream logging purposes.
+	 *
+	 * One current internal implementation uses this field to tie back EMPI processing results (which are asynchronous)
+	 * to the original transaction log that caused the EMPI processing to occur.
+	 *
+	 * @param theTransactionId An ID representing a transaction of relevance to this message.
+	 */
+	public void setTransactionId(String theTransactionId) {
+		myTransactionId = theTransactionId;
+	}
+
+	public enum OperationTypeEnum {
+		CREATE,
+		UPDATE,
+		DELETE,
+		MANUALLY_TRIGGERED
 	}
 }

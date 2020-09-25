@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.model;
+package ca.uhn.fhir.rest.server.messaging.json;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
@@ -20,35 +20,43 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
+import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
+public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperationMessage> {
+
 
 	@JsonProperty("payload")
-	private ResourceDeliveryMessage myPayload;
+	private ResourceOperationMessage myPayload;
 
 	/**
 	 * Constructor
 	 */
-	public ResourceDeliveryJsonMessage() {
+	public ResourceOperationJsonMessage() {
 		super();
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ResourceDeliveryJsonMessage(ResourceDeliveryMessage thePayload) {
+	public ResourceOperationJsonMessage(ResourceOperationMessage thePayload) {
 		myPayload = thePayload;
+		setDefaultRetryHeaders();
 	}
 
+	public ResourceOperationJsonMessage(HapiMessageHeaders theRetryMessageHeaders, ResourceOperationMessage thePayload) {
+		myPayload = thePayload;
+		setHeaders(theRetryMessageHeaders);
+	}
+
+
 	@Override
-	public ResourceDeliveryMessage getPayload() {
+	public ResourceOperationMessage getPayload() {
 		return myPayload;
 	}
 
-	public void setPayload(ResourceDeliveryMessage thePayload) {
+	public void setPayload(ResourceOperationMessage thePayload) {
 		myPayload = thePayload;
 	}
 

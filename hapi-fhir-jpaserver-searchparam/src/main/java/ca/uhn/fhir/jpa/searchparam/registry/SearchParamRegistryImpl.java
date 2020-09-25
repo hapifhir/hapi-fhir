@@ -291,6 +291,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 				if (runtimeSp == null) {
 					continue;
 				}
+				if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
+					continue;
+				}
 
 				for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myFhirContext, nextSp)) {
 					if (isBlank(nextBaseName)) {
