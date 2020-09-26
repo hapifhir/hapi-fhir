@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.*;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -174,11 +175,22 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 			code.addPropertyCoding(loincCodePropName, ITermLoaderSvc.LOINC_URI, partNumber, partName);
 		}
 
+		String partConceptMapId;
+		String termConceptMapId;
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		if (codeSystemVersionId != null) {
+			partConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID + "-" + codeSystemVersionId;
+			termConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + codeSystemVersionId;
+		} else {
+			partConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID;
+			termConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID;
+		}
+
 		// LOINC Part -> Radlex RID code mappings
 		if (isNotBlank(rid)) {
 			addConceptMapEntry(
 				new ConceptMapping()
-					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))
+					.setConceptMapId(partConceptMapId)
 					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
 					.setConceptMapVersion(loincRsnaCmVersion)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
@@ -196,7 +208,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		if (isNotBlank(rpid)) {
 			addConceptMapEntry(
 				new ConceptMapping()
-					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))
+					.setConceptMapId(termConceptMapId)
 					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
 					.setConceptMapVersion(loincRsnaCmVersion)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)

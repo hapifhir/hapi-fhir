@@ -480,7 +480,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		IOUtils.closeQuietly(theDescriptors);
 
-		valueSets.add(getValueSetLoincAll());
+		valueSets.add(getValueSetLoincAll(theUploadProperties));
 
 		for (Entry<String, TermConcept> next : code2concept.entrySet()) {
 			TermConcept nextConcept = next.getValue();
@@ -499,12 +499,20 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return new UploadStatistics(conceptCount, target);
 	}
 
-	private ValueSet getValueSetLoincAll() {
+	private ValueSet getValueSetLoincAll(Properties theUploadProperties) {
 		ValueSet retVal = new ValueSet();
 
-		retVal.setId("loinc-all");
+		String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		String valueSetId;
+		if (codeSystemVersionId != null) {
+			valueSetId = "loinc-all" + "-" + codeSystemVersionId;
+		} else {
+			valueSetId = "loinc-all";
+			codeSystemVersionId = "1.0.0";
+		}
+		retVal.setId(valueSetId);
 		retVal.setUrl("http://loinc.org/vs");
-		retVal.setVersion("1.0.0");
+		retVal.setVersion(codeSystemVersionId);
 		retVal.setName("All LOINC codes");
 		retVal.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		retVal.setDate(new Date());

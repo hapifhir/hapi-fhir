@@ -156,7 +156,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName trmValueSet = version.onTable("TRM_VALUESET");
 		trmValueSet.addColumn("20200923.2", "VER").nullable().type(ColumnTypeEnum.STRING, TermValueSet.MAX_VER_LENGTH);
 		trmValueSet.dropIndex("20200923.3", "IDX_VALUESET_URL");
-		trmValueSet.addIndex("20200923.4", "IDX_VALUESET_URL").unique(true).withColumns("URL", "VAR");
+		trmValueSet.addIndex("20200923.4", "IDX_VALUESET_URL").unique(true).withColumns("URL", "VER");
 	}
 
 	protected void init510_20200725() {

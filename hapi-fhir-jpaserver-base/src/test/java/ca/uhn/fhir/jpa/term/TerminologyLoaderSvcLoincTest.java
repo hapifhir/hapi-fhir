@@ -165,7 +165,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(1, group.getElement().get(0).getTarget().size());
 		assertEquals("420710006", group.getElement().get(0).getTarget().get(0).getCode());
 		assertEquals("Interferon beta (substance)", group.getElement().get(0).getTarget().get(0).getDisplay());
-		
+
 		// Document Ontology ValueSet
 		vs = valueSets.get(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_ID);
 		assertEquals(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_NAME, vs.getName());
@@ -274,7 +274,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
 
 		// Universal lab order VS
-		vs = valueSets.get(LoincUniversalOrderSetHandler.VS_ID);
+		vs = valueSets.get(LoincUniversalOrderSetHandler.VS_ID_BASE);
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
@@ -314,7 +314,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("MDC_CONC_GLU_VENOUS_PLASMA", conceptMap.getGroup().get(0).getElement().get(4).getTarget().get(0).getDisplay());
 
 		// Imaging Document Codes
-		vs = valueSets.get(LoincImagingDocumentCodeHandler.VS_ID);
+		vs = valueSets.get(LoincImagingDocumentCodeHandler.VS_ID_BASE);
 		assertEquals(LoincImagingDocumentCodeHandler.VS_URI, vs.getUrl());
 		assertEquals(LoincImagingDocumentCodeHandler.VS_NAME, vs.getName());
 		assertEquals(1, vs.getCompose().getInclude().size());

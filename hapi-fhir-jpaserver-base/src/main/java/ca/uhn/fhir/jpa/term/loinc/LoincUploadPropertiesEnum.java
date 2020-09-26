@@ -96,7 +96,7 @@ public enum LoincUploadPropertiesEnum {
 	/*
 	 * OPTIONAL
 	 */
-	// This is the version identifier for the answer list file
+	// This is the version identifier for the LOINC code system
 	LOINC_CODESYSTEM_VERSION("loinc.codesystem.version"),
 
 	// This is the version identifier for the answer list file

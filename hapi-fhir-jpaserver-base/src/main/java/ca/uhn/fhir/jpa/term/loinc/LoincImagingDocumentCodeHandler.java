@@ -31,12 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincImagingDocumentCodeHandler extends BaseLoincHandler implements IRecordHandler {
 
-	public final String VS_ID = "loinc-imaging-document-codes" + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+	public static final String VS_ID_BASE = "loinc-imaging-document-codes";
 	public static final String VS_URI = "http://loinc.org/vs/loinc-imaging-document-codes";
 	public static final String VS_NAME = "LOINC Imaging Document Codes";
 
@@ -49,7 +49,15 @@ public class LoincImagingDocumentCodeHandler extends BaseLoincHandler implements
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
 
-		ValueSet valueSet = getValueSet(VS_ID, VS_URI, VS_NAME,null);
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		String valueSetId;
+		if (codeSystemVersionId != null) {
+			valueSetId = VS_ID_BASE + "-" + codeSystemVersionId;
+		} else {
+			valueSetId = VS_ID_BASE;
+		}
+
+		ValueSet valueSet = getValueSet(valueSetId, VS_URI, VS_NAME,null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 

@@ -50,7 +50,7 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 	public void accept(CSVRecord theRecord) {
 
 		// this is the code for the list (will repeat)
-		String answerListId = trim(theRecord.get("AnswerListId")) + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		String answerListId = trim(theRecord.get("AnswerListId"));
 		String answerListName = trim(theRecord.get("AnswerListName"));
 		String answerListOid = trim(theRecord.get("AnswerListOID"));
 		String externallyDefined = trim(theRecord.get("ExtDefinedYN"));
@@ -74,7 +74,14 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 		}
 
 		// Answer list ValueSet
-		ValueSet vs = getValueSet(answerListId, "http://loinc.org/vs/" + answerListId, answerListName, LOINC_ANSWERLIST_VERSION.getCode());
+		String valueSetId;
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		if (codeSystemVersionId != null) {
+			valueSetId = answerListId + "-" + codeSystemVersionId;
+		} else {
+			valueSetId = answerListId;
+		}
+		ValueSet vs = getValueSet(valueSetId, "http://loinc.org/vs/" + answerListId, answerListName, LOINC_ANSWERLIST_VERSION.getCode());
 		if (vs.getIdentifier().isEmpty()) {
 			vs.addIdentifier()
 				.setSystem("urn:ietf:rfc:3986")

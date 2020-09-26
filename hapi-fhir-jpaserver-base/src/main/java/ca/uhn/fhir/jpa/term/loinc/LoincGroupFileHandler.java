@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincGroupFileHandler extends BaseLoincHandler implements IRecordHandler {
@@ -44,11 +44,22 @@ public class LoincGroupFileHandler extends BaseLoincHandler implements IRecordHa
 	@Override
 	public void accept(CSVRecord theRecord) {
 		//"ParentGroupId","GroupId","Group","Archetype","Status","VersionFirstReleased"
-		String parentGroupId = trim(theRecord.get("ParentGroupId")) + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		String parentGroupId = trim(theRecord.get("ParentGroupId"));
 		String groupId = trim(theRecord.get("GroupId"));
 		String groupName = trim(theRecord.get("Group"));
 
-		ValueSet parentValueSet = getValueSet(parentGroupId, VS_URI_PREFIX + parentGroupId, null, null);
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		String parentGroupValueSetId;
+		String groupValueSetId;
+		if (codeSystemVersionId != null) {
+			parentGroupValueSetId = parentGroupId + "-" + codeSystemVersionId;
+			groupValueSetId = groupId + "-" + codeSystemVersionId;
+		} else {
+			parentGroupValueSetId = parentGroupId;
+			groupValueSetId = groupId;
+		}
+
+		ValueSet parentValueSet = getValueSet(parentGroupValueSetId, VS_URI_PREFIX + parentGroupId, null, null);
 		parentValueSet
 			.getCompose()
 			.getIncludeFirstRep()
@@ -56,7 +67,7 @@ public class LoincGroupFileHandler extends BaseLoincHandler implements IRecordHa
 
 		// Create group to set its name (terms are added in a different
 		// handler)
-		getValueSet(groupId, VS_URI_PREFIX + groupId  + "-" + myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()), groupName, null);
+		getValueSet(groupValueSetId, VS_URI_PREFIX + groupId, groupName, null);
 	}
 
 
