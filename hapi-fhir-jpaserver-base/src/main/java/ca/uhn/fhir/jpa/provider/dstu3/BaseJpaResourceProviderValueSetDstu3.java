@@ -133,7 +133,6 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1),
 		@OperationParam(name = "message", type = StringType.class),
@@ -164,9 +163,9 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
 			UriType valueSetIdentifier;
 			if (theValueSetVersion != null) {
-				valueSetIdentifier = new UriType(theValueSetUrl.getValue() + "|" + theValueSetVersion);
+				valueSetIdentifier = new UriType(url.getValue() + "|" + theValueSetVersion);
 			} else {
-				valueSetIdentifier = theValueSetUrl;
+				valueSetIdentifier = url;
 			}
 			UriType codeSystemIdentifier;
 			if (theSystemVersion != null) {

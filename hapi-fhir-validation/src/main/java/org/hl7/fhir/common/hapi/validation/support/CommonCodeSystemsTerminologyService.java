@@ -363,7 +363,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
+				version=null;
 		}
 		return version;
 	}
