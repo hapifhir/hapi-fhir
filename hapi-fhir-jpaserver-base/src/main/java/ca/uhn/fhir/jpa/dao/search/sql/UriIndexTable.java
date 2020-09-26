@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createLeftAndRightMatchLikeExpression;
 import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createLeftMatchLikeExpression;
 import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createRightMatchLikeExpression;
@@ -86,14 +86,14 @@ public class UriIndexTable extends BaseSearchParamIndexTable {
 						continue;
 					}
 
-					InCondition uriPredicate = new InCondition(myColumnUri, generatePlaceholders(toFind));
-					Condition hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(getResourceType(), theParamName, uriPredicate, getRequestPartitionId());
+					Condition uriPredicate = toEqualToOrInPredicate(myColumnUri, generatePlaceholders(toFind));
+					Condition hashAndUriPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate, getRequestPartitionId());
 					codePredicates.add(hashAndUriPredicate);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
 
 					Condition uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftMatchLikeExpression(value)));
-					Condition hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(getResourceType(), theParamName, uriPredicate, getRequestPartitionId());
+					Condition hashAndUriPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate, getRequestPartitionId());
 					codePredicates.add(hashAndUriPredicate);
 
 				} else {
@@ -146,7 +146,7 @@ public class UriIndexTable extends BaseSearchParamIndexTable {
 		}
 
 		ComboCondition orPredicate = ComboCondition.or(codePredicates.toArray(new Condition[0]));
-		Condition outerPredicate = combineParamIndexPredicateWithParamNamePredicate(getResourceType(), theParamName, orPredicate, getRequestPartitionId());
+		Condition outerPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, orPredicate, getRequestPartitionId());
 		return outerPredicate;
 
 	}

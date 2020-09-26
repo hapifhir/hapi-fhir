@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.search.SearchBuilder2;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
+import ca.uhn.fhir.jpa.dao.search.sql.CompositeUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.CoordsIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.DateIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
@@ -31,7 +32,7 @@ import ca.uhn.fhir.jpa.dao.search.sql.QuantityIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceIdPredicateBuilder3;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceLinkIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceSqlTable;
-import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresenceTable;
+import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SourcePredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SqlBuilderFactory;
@@ -459,6 +460,13 @@ public abstract class BaseConfig {
 		return new SqlBuilderFactory();
 	}
 
+	@Bean
+	@Scope("prototype")
+	public CompositeUniqueSearchParameterPredicateBuilder compositeUniqueSearchParameterPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+		return new CompositeUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
+	}
+
+
 	// FIXME: rename these
 
 	@Bean
@@ -511,8 +519,8 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public SearchParamPresenceTable indexTableSearchParamPresence(SearchSqlBuilder theSearchBuilder) {
-		return new SearchParamPresenceTable(theSearchBuilder);
+	public SearchParamPresentPredicateBuilder searchParamPresentPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
+		return new SearchParamPresentPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean

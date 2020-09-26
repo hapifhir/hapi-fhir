@@ -10,6 +10,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
 
 public class ResourceSqlTable extends BaseIndexTable {
 	private final DbColumn myColumnResId;
@@ -48,7 +49,7 @@ public class ResourceSqlTable extends BaseIndexTable {
 	}
 
 	public Condition createLanguagePredicate(Set<String> theValues, boolean theNegated) {
-		Condition condition = new InCondition(myColumnLanguage, generatePlaceholders(theValues));
+		Condition condition = toEqualToOrInPredicate(myColumnLanguage, generatePlaceholders(theValues));
 		if (theNegated) {
 			condition = new NotCondition(condition);
 		}

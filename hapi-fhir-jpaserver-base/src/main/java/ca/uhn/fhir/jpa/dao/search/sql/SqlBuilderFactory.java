@@ -39,8 +39,8 @@ public class SqlBuilderFactory {
 		return myApplicationContext.getBean(ResourceIdPredicateBuilder3.class, theSearchSqlBuilder);
 	}
 
-	public SearchParamPresenceTable searchParamPresenceTable(SearchSqlBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(SearchParamPresenceTable.class, theSearchSqlBuilder);
+	public SearchParamPresentPredicateBuilder searchParamPresentPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(SearchParamPresentPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
 	public StringIndexTable stringIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
@@ -61,5 +61,9 @@ public class SqlBuilderFactory {
 
 	public SourcePredicateBuilder newSourcePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(SourcePredicateBuilder.class, theSearchSqlBuilder);
+	}
+
+	public CompositeUniqueSearchParameterPredicateBuilder newCompositeUniqueSearchParameterPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(CompositeUniqueSearchParameterPredicateBuilder.class, theSearchSqlBuilder);
 	}
 }

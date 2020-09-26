@@ -17,8 +17,10 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
+import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -57,6 +59,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,6 +70,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -212,12 +218,13 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 
 		Condition targetPidCondition = null;
 		if (!theTargetPidList.isEmpty()) {
-			targetPidCondition = new InCondition(myColumnTargetResourceId, generatePlaceholders(theTargetPidList));
+			List<String> placeholders = generatePlaceholders(theTargetPidList);
+			targetPidCondition = toEqualToOrInPredicate(myColumnTargetResourceId, placeholders);
 		}
 
 		Condition targetUrlsCondition = null;
 		if (!theTargetQualifiedUrls.isEmpty()) {
-			targetUrlsCondition = new InCondition(myColumnTargetResourceUrl, generatePlaceholders(theTargetQualifiedUrls));
+			targetUrlsCondition = toEqualToOrInPredicate(myColumnTargetResourceUrl, generatePlaceholders(theTargetQualifiedUrls));
 		}
 
 		Condition joinedCondition;
@@ -229,7 +236,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			joinedCondition = targetUrlsCondition;
 		}
 
-		InCondition pathPredicate = new InCondition(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
+		Condition pathPredicate = toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
 		joinedCondition = ComboCondition.and(pathPredicate, joinedCondition);
 
 		Condition condition;
@@ -267,54 +274,6 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 	}
 
 
-//
-//	private boolean canOptimizeToCrossJoin(List<Class<? extends IBaseResource>> theResourceTypes, ArrayList<IQueryParameterType> theOrValues, RuntimeSearchParam theChainParamDef) {
-//		if (theChainParamDef == null) {
-//			return false;
-//		}
-//		if (theResourceTypes.size() > 1) {
-//			return false;
-//		}
-//		if (theOrValues.size() != 1) {
-//			return false;
-//		}
-//		IQueryParameterType queryParam = theOrValues.get(0);
-//		if (queryParam instanceof TokenParam) {
-//			TokenParam tokenParam = (TokenParam) queryParam;
-//			if (tokenParam.isText()) {
-//				return false;
-//			}
-//		}
-//		if (queryParam.getMissing() != null) {
-//			return false;
-//		}
-//		return true;
-//	}
-//
-//	private Predicate createChainPredicateOnType(String theResourceName, String theParamName, From<?, ResourceLink> theJoin, ReferenceParam theReferenceParam, List<Class<? extends IBaseResource>> theResourceTypes) {
-//		String typeValue = theReferenceParam.getValue();
-//
-//		Class<? extends IBaseResource> wantedType;
-//		try {
-//			wantedType = myContext.getResourceDefinition(typeValue).getImplementingClass();
-//		} catch (DataFormatException e) {
-//			throw newInvalidResourceTypeException(typeValue);
-//		}
-//		if (!theResourceTypes.contains(wantedType)) {
-//			throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
-//		}
-//
-//		// JA RESTORE
-////		Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
-////		Predicate sourceTypeParameter = myCriteriaBuilder.equal(theJoin.get("mySourceResourceType"), myResourceName);
-////		Predicate targetTypeParameter = myCriteriaBuilder.equal(theJoin.get("myTargetResourceType"), typeValue);
-////
-////		Predicate composite = myCriteriaBuilder.and(pathPredicate, sourceTypeParameter, targetTypeParameter);
-////		myQueryStack.addPredicate(composite);
-//		return null;
-//	}
-//
-
 	/**
 	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
 	 * on the device.
@@ -337,7 +296,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
 
 			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
-			Condition typeCondition = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
+			Condition typeCondition = toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(pathsToMatch));
 
 			String typeValue = theReferenceParam.getValue();
 
@@ -414,7 +373,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
 
 			List<Condition> andPredicates = new ArrayList<>();
-			InCondition pathPredicate = new InCondition(myColumnSrcPath, generatePlaceholders(pathsToMatch));
+			Condition pathPredicate = toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(pathsToMatch));
 			andPredicates.add(pathPredicate);
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);

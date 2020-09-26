@@ -47,7 +47,6 @@ import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -232,7 +231,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
 			Condition predicate = myQueryStack3.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
 			if (predicate != null) {
-				mySqlBuilder.addPredicate_(predicate);
+				mySqlBuilder.addPredicate(predicate);
 			}
 		}
 	}
@@ -428,6 +427,15 @@ public class SearchBuilder2 implements ISearchBuilder {
 			searchForIdsWithAndOr(myParams, theRequest);
 		}
 
+		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
+		// partition ID predicate in that case.
+		if (!mySqlBuilder.haveAtLeastOnePredicate()) {
+			Condition partitionIdPredicate = mySqlBuilder.getOrCreateResourceTableRoot().createPartitionIdPredicate(myRequestPartitionId);
+			if (partitionIdPredicate != null) {
+				mySqlBuilder.addPredicate(partitionIdPredicate);
+			}
+		}
+
 		// Add PID list predicate for full text search and/or lastn operation
 		if (thePidList != null && thePidList.size() > 0) {
 			myQueryStack.addPredicate(myQueryStack.get("myId").as(Long.class).in(thePidList));
@@ -437,7 +445,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		DateRangeParam lu = myParams.getLastUpdated();
 		if (lu != null && !lu.isEmpty()) {
 			Condition lastUpdatedPredicates = createLastUpdatedPredicates(lu);
-			mySqlBuilder.addPredicate_(lastUpdatedPredicates);
+			mySqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 
 		/*
@@ -982,7 +990,10 @@ public class SearchBuilder2 implements ISearchBuilder {
 					.add(StorageProcessingMessage.class, msg);
 				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 
-				addPredicateCompositeStringUnique(theParams, indexString, myRequestPartitionId);
+				myQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
+
+				// Remove any empty parameters remaining after this
+				theParams.clean();
 			}
 		}
 	}
@@ -995,22 +1006,6 @@ public class SearchBuilder2 implements ISearchBuilder {
 				theListOfLists.set(i, newSubList);
 			}
 		}
-	}
-
-	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, RequestPartitionId theRequestPartitionId) {
-		From<?, ResourceIndexedCompositeStringUnique> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COMPOSITE_UNIQUE, null);
-
-		if (!theRequestPartitionId.isAllPartitions()) {
-			Integer partitionId = theRequestPartitionId.getPartitionId();
-			Predicate predicate = myCriteriaBuilder.equal(join.get("myPartitionIdValue").as(Integer.class), partitionId);
-			myQueryStack.addPredicate(predicate);
-		}
-
-		Predicate predicate = myCriteriaBuilder.equal(join.get("myIndexString"), theIndexedString);
-		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
-
-		// Remove any empty parameters remaining after this
-		theParams.clean();
 	}
 
 	@Override

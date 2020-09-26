@@ -46,6 +46,7 @@ public class SearchSqlBuilder {
 	private BaseIndexTable myCurrentIndexTable;
 	private boolean myMatchNothing;
 	private ResourceSqlTable myResourceTableRoot;
+	private boolean myHaveAtLeastOnePredicate;
 
 	/**
 	 * Constructor
@@ -78,7 +79,17 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a COORDS search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a Composite Unique search parameter
+	 */
+	public CompositeUniqueSearchParameterPredicateBuilder addCompositeUniquePredicateBuilder() {
+		CompositeUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newCompositeUniqueSearchParameterPredicateBuilder(this);
+		addTable(retVal, null);
+		return retVal;
+	}
+
+
+	/**
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a COORDS search parameter
 	 */
 	public CoordsIndexTable addCoordsSelector(@Nullable DbColumn theSourceJoinColumn) {
 		CoordsIndexTable retVal = mySqlBuilderFactory.coordsIndexTable(this);
@@ -87,7 +98,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a DATE search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a DATE search parameter
 	 */
 	public DateIndexTable addDateSelector(@Nullable DbColumn theSourceJoinColumn) {
 		DateIndexTable retVal = mySqlBuilderFactory.dateIndexTable(this);
@@ -96,7 +107,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a NUMBER search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a NUMBER search parameter
 	 */
 	public NumberIndexTable addNumberSelector(@Nullable DbColumn theSourceJoinColumn) {
 		NumberIndexTable retVal = mySqlBuilderFactory.numberIndexTable(this);
@@ -106,7 +117,7 @@ public class SearchSqlBuilder {
 
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
 	public QuantityIndexTable addQuantity(@Nullable DbColumn theSourceJoinColumn) {
 		QuantityIndexTable retVal = mySqlBuilderFactory.quantityIndexTable(this);
@@ -115,7 +126,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
 	 */
 	public SourcePredicateBuilder addSourcePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
 		SourcePredicateBuilder retVal = mySqlBuilderFactory.newSourcePredicateBuilder(this);
@@ -147,7 +158,7 @@ public class SearchSqlBuilder {
 
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a REFERENCE search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a REFERENCE search parameter
 	 */
 	public ResourceLinkIndexTable addReferenceSelector(QueryStack3 theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
 		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
@@ -156,7 +167,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a reosource link where the
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a reosource link where the
 	 * source and target are reversed. This is used for _has queries.
 	 */
 	public ResourceLinkIndexTable addReferenceSelectorReversed(QueryStack3 theQueryStack, DbColumn theSourceJoinColumn) {
@@ -166,7 +177,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a STRING search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a STRING search parameter
 	 */
 	public StringIndexTable addStringSelector(@Nullable DbColumn theSourceJoinColumn) {
 		StringIndexTable retVal = mySqlBuilderFactory.stringIndexTable(this);
@@ -175,7 +186,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
 	 */
 	public TagPredicateBuilder addTagSelector(@Nullable DbColumn theSourceJoinColumn) {
 		TagPredicateBuilder retVal = mySqlBuilderFactory.newTagPredicateBuilder(this);
@@ -184,7 +195,7 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a TOKEN search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a TOKEN search parameter
 	 */
 	public TokenIndexTable addTokenSelector(@Nullable DbColumn theSourceJoinColumn) {
 		TokenIndexTable retVal = mySqlBuilderFactory.tokenIndexTable(this);
@@ -193,16 +204,16 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a <code>:missing</code> search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>:missing</code> search parameter
 	 */
-	public SearchParamPresenceTable addSearchParamPresenceSelector(@Nullable DbColumn theSourceJoinColumn) {
-		SearchParamPresenceTable retVal = mySqlBuilderFactory.searchParamPresenceTable(this);
+	public SearchParamPresentPredicateBuilder addSearchParamPresentPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+		SearchParamPresentPredicateBuilder retVal = mySqlBuilderFactory.searchParamPresentPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for selecting on a URI search parameter
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a URI search parameter
 	 */
 	public UriIndexTable addUriSelector(@Nullable DbColumn theSourceJoinColumn) {
 		UriIndexTable retVal = mySqlBuilderFactory.uriIndexTable(this);
@@ -217,7 +228,7 @@ public class SearchSqlBuilder {
 
 
 	/**
-	 * Add and return a join (or a root query if no root query exists yet) for an arbitrary table
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for an arbitrary table
 	 */
 	private void addTable(BaseIndexTable theIndexTable, @Nullable DbColumn theSourceJoinColumn) {
 		if (theSourceJoinColumn != null) {
@@ -273,12 +284,14 @@ public class SearchSqlBuilder {
 
 		// FIXME: needed?
 		StringBuilder b = new StringBuilder(sql);
-		for (int i = 0; ; i++) {
-			int idx = b.indexOf("?");
+		for (int i = 0, startIdx = 0; ; i++) {
+			int idx = b.indexOf("?", startIdx);
 			if (idx == -1) {
 				break;
 			}
-			b.replace(idx, idx + 1, bindVariables.get(i).toString());
+			String nextValue = bindVariables.get(i).toString();
+			b.replace(idx, idx + 1, "'" + nextValue + "'");
+			startIdx = idx + nextValue.length();
 		}
 		ourLog.info("SQL: {}", b);
 
@@ -300,7 +313,7 @@ public class SearchSqlBuilder {
 			ResourceSqlTable resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
 			Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
-			addPredicate_(typeAndDeletionPredicate);
+			addPredicate(typeAndDeletionPredicate);
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;
@@ -349,10 +362,10 @@ public class SearchSqlBuilder {
 		return myModelConfig;
 	}
 
-	// FIXME: rename _
-	public void addPredicate_(@Nonnull Condition theCondition) {
+	public void addPredicate(@Nonnull Condition theCondition) {
 		assert theCondition != null;
 		mySelect.addCondition(theCondition);
+		myHaveAtLeastOnePredicate = true;
 	}
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
@@ -396,6 +409,9 @@ public class SearchSqlBuilder {
 		return mySelect;
 	}
 
+	public boolean haveAtLeastOnePredicate() {
+		return myHaveAtLeastOnePredicate;
+	}
 
 
 	/**

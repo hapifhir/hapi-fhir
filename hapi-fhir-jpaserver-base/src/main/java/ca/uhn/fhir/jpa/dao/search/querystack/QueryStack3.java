@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.search.sql.BaseIndexTable;
-import ca.uhn.fhir.jpa.dao.search.sql.BaseSearchParamIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.CompositeUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.CoordsIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.DateIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.dao.search.sql.QuantityIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceIdPredicateBuilder3;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceLinkIndexTable;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceSqlTable;
+import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SourcePredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable;
@@ -67,6 +68,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -167,7 +169,7 @@ public class QueryStack3 {
 		CoordsIndexTable join = mySqlBuilder.addCoordsSelector(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
-			return createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
+			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
 		List<Condition> codePredicates = new ArrayList<>();
@@ -208,7 +210,7 @@ public class QueryStack3 {
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
-			return createPredicateParamMissingForNonReference(theResourceName, paramName, missing, join, theRequestPartitionId);
+			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, missing, theRequestPartitionId);
 		}
 
 		List<Condition> codePredicates = new ArrayList<>();
@@ -221,7 +223,7 @@ public class QueryStack3 {
 		Condition predicate = toOrPredicate(codePredicates);
 
 		if (newJoin) {
-			predicate = join.combineParamIndexPredicateWithParamNamePredicate(theResourceName, paramName, predicate, theRequestPartitionId);
+			predicate = join.combineWithHashIdentityPredicate(theResourceName, paramName, predicate, theRequestPartitionId);
 			predicate = join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 		}
 
@@ -319,7 +321,7 @@ public class QueryStack3 {
 			ResourceLinkIndexTable join = mySqlBuilder.addReferenceSelectorReversed(this, theSourceJoinColumn);
 			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference);
 			Condition typePredicate = BinaryCondition.equalTo(join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
-			Condition pathPredicate = new InCondition(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
+			Condition pathPredicate = toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 			Condition linkedPredicate = searchForIdsWithAndOr(join.getColumnSrcResourceId(), targetResourceType, parameterName, Collections.singletonList(orValues), theRequest, theRequestPartitionId);
 			andPredicates.add(toAndPredicate(pathPredicate, typePredicate, linkedPredicate));
 		}
@@ -377,7 +379,7 @@ public class QueryStack3 {
 		NumberIndexTable join = mySqlBuilder.addNumberSelector(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
-			return createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
+			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
 		List<Condition> codePredicates = new ArrayList<>();
@@ -419,7 +421,7 @@ public class QueryStack3 {
 		QuantityIndexTable join = mySqlBuilder.addQuantity(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
-			return createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
+			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
 		List<Condition> codePredicates = new ArrayList<>();
@@ -450,10 +452,9 @@ public class QueryStack3 {
 		}
 
 		if (theList.get(0).getMissing() != null) {
-			// FIXME: implement
-			throw new UnsupportedOperationException();
-//			addPredicateParamMissingForReference(theResourceName, theParamName, theList.get(0).getMissing(), theRequestPartitionId);
-//			return null;
+			SearchParamPresentPredicateBuilder join = mySqlBuilder.addSearchParamPresentPredicateBuilder(theSourceJoinColumn);
+			return join.createPredicateParamMissingForReference(theResourceName, theParamName, theList.get(0).getMissing(), theRequestPartitionId);
+
 		}
 
 		ResourceLinkIndexTable join = mySqlBuilder.addReferenceSelector(this, theSourceJoinColumn);
@@ -520,7 +521,7 @@ public class QueryStack3 {
 		StringIndexTable join = mySqlBuilder.addStringSelector(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
-			return createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), join, theRequestPartitionId);
+			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
 		List<Condition> codePredicates = new ArrayList<>();
@@ -614,7 +615,7 @@ public class QueryStack3 {
 
 				SearchSqlBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagSelector(null);
-				sqlBuilder.addPredicate_(tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
+				sqlBuilder.addPredicate(tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
 				SelectQuery sql = sqlBuilder.getSelect();
 
 				join = mySqlBuilder.getOrCreateQueryRootTable();
@@ -639,10 +640,6 @@ public class QueryStack3 {
 													  List<? extends IQueryParameterType> theList,
 													  SearchFilterParser.CompareOperation theOperation,
 													  RequestPartitionId theRequestPartitionId) {
-
-		if (theList.get(0).getMissing() != null) {
-			return createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), mySqlBuilder.addTokenSelector(theSourceJoinColumn), theRequestPartitionId);
-		}
 
 		SearchFilterParser.CompareOperation operation = theOperation;
 		List<IQueryParameterType> tokens = new ArrayList<>();
@@ -677,6 +674,11 @@ public class QueryStack3 {
 		}
 
 		TokenIndexTable join = mySqlBuilder.addTokenSelector(theSourceJoinColumn);
+
+		if (theList.get(0).getMissing() != null) {
+			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
+		}
+
 		Condition predicate = join.createPredicateToken(tokens, theResourceName, theSearchParam, operation, theRequestPartitionId);
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
@@ -692,16 +694,11 @@ public class QueryStack3 {
 		UriIndexTable join = mySqlBuilder.addUriSelector(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
-			return createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), join, theRequestPartitionId);
+			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
 		Condition predicate = join.addPredicate(theList, paramName, theOperation);
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
-	}
-
-	private Condition createPredicateParamMissingForNonReference(String theResourceName, String theParamName, Boolean theMissing, BaseSearchParamIndexTable theJoin, RequestPartitionId theRequestPartitionId) {
-		// FIXME: implement
-		throw new UnsupportedOperationException();
 	}
 
 	@Nullable
@@ -852,12 +849,20 @@ public class QueryStack3 {
 		}
 	}
 
+	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
+		CompositeUniqueSearchParameterPredicateBuilder predicateBuilder = mySqlBuilder.addCompositeUniquePredicateBuilder();
+		Condition predicate = predicateBuilder.createPredicateIndexString(theRequestPartitionId, theIndexString);
+		mySqlBuilder.addPredicate(predicate);
+	}
+
+
 	public void addPredicateEverythingOperation(String theResourceName, Long theTargetPid) {
 		ResourceLinkIndexTable table = mySqlBuilder.addReferenceSelector(this, null);
 		Condition predicate = table.createEverythingPredicate(theResourceName, theTargetPid);
-		mySqlBuilder.addPredicate_(predicate);
+		mySqlBuilder.addPredicate(predicate);
 	}
 
+	@Nullable
 	public static Condition toAndPredicate(List<Condition> theAndPredicates) {
 		theAndPredicates.removeIf(t -> t == null);
 		if (theAndPredicates.size() == 0) {
@@ -869,6 +874,7 @@ public class QueryStack3 {
 		}
 	}
 
+	@Nullable
 	public static Condition toOrPredicate(List<Condition> theOrPredicates) {
 		theOrPredicates.removeIf(t -> t == null);
 		if (theOrPredicates.size() == 0) {
@@ -880,13 +886,24 @@ public class QueryStack3 {
 		}
 	}
 
+	@Nullable
 	public static Condition toOrPredicate(Condition... theOrPredicates) {
 		return toOrPredicate(Arrays.asList(theOrPredicates));
 	}
 
+	@Nullable
 	public static Condition toAndPredicate(Condition... theAndPredicates) {
 		return toAndPredicate(Arrays.asList(theAndPredicates));
 	}
+
+	@Nonnull
+	public static Condition toEqualToOrInPredicate(DbColumn theColumn, List<String> theValuePlaceholders) {
+		if (theValuePlaceholders.size() == 1) {
+			return BinaryCondition.equalTo(theColumn, theValuePlaceholders.get(0));
+		}
+		return new InCondition(theColumn, theValuePlaceholders);
+	}
+
 
 	public static SearchFilterParser.CompareOperation toOperation(ParamPrefixEnum thePrefix) {
 		if (thePrefix != null) {

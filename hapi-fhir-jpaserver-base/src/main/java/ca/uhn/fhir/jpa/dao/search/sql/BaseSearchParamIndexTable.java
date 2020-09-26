@@ -11,6 +11,8 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
+
 public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
 
 	private final DbColumn myColumnMissing;
@@ -50,16 +52,7 @@ public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
 		return myColumnResId;
 	}
 
-	public void addPartitionMissing(String theResourceName, String theParamName, boolean theMissing) {
-		ComboCondition condition = ComboCondition.and(
-			BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)),
-			BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)),
-			// FIXME: deal with oracle here
-			BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
-		);
-	}
-
-	public Condition combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, Condition thePredicate, RequestPartitionId theRequestPartitionId) {
+	public Condition combineWithHashIdentityPredicate(String theResourceName, String theParamName, Condition thePredicate, RequestPartitionId theRequestPartitionId) {
 		List<Condition> andPredicates = new ArrayList<>();
 
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), theResourceName, theParamName);
@@ -68,6 +61,17 @@ public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
 		andPredicates.add(hashIdentityPredicate);
 		andPredicates.add(thePredicate);
 
-		return ComboCondition.and(andPredicates.toArray(new Condition[0]));
+		return toAndPredicate(andPredicates);
+	}
+
+	public Condition createPredicateParamMissingForNonReference(String theResourceName, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
+		ComboCondition condition = ComboCondition.and(
+			BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)),
+			BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)),
+			// FIXME: deal with oracle here
+			BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
+		);
+		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, condition);
+
 	}
 }

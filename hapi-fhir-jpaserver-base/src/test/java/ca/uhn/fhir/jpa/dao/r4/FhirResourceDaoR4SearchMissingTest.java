@@ -31,11 +31,24 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testIndexMissingFieldsDisabledDontAllowInSearch() {
+	public void testIndexMissingFieldsDisabledDontAllowInSearch_NonReference() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 
 		SearchParameterMap params = new SearchParameterMap();
-		params.add("foo", new StringParam().setMissing(true));
+		params.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
+		try {
+			myPatientDao.search(params);
+		} catch (MethodNotAllowedException e) {
+			assertEquals(":missing modifier is disabled on this server", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testIndexMissingFieldsDisabledDontAllowInSearch_Reference() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Patient.SP_ORGANIZATION, new StringParam().setMissing(true));
 		try {
 			myPatientDao.search(params);
 		} catch (MethodNotAllowedException e) {

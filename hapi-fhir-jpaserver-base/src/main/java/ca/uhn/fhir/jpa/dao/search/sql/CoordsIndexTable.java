@@ -99,7 +99,7 @@ public class CoordsIndexTable extends BaseSearchParamIndexTable {
 			longitudePredicate = theFrom.createLongitudePredicateFromBox(box);
 		}
 		ComboCondition singleCode = ComboCondition.and(latitudePredicate, longitudePredicate);
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theSearchParam.getName(), singleCode, theRequestPartitionId);
+		return combineWithHashIdentityPredicate(theResourceName, theSearchParam.getName(), singleCode, theRequestPartitionId);
 	}
 
 

@@ -35,7 +35,7 @@ public class NumberIndexTable extends BaseSearchParamIndexTable {
 
 	public Condition createPredicateNumeric(String theResourceName, String theParamName, NumberIndexTable theJoin, CriteriaBuilder theCriteriaBuilder, IQueryParameterType theNextOr, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, Object theO, String theInvalidMessageName, RequestPartitionId theRequestPartitionId) {
 		Condition numericPredicate = createPredicateNumeric(this, theResourceName, theParamName, theOperation, theValue, theRequestPartitionId, myColumnValue);
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, numericPredicate, theRequestPartitionId);
+		return combineWithHashIdentityPredicate(theResourceName, theParamName, numericPredicate, theRequestPartitionId);
 	}
 
 
