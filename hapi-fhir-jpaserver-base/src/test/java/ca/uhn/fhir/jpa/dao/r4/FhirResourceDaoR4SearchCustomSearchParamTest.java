@@ -812,18 +812,19 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		String sql;
 
 		// Search by ref
-		// FIXME: restore
-//		map = SearchParameterMap.newSynchronous();
-//		map.add("sibling", new ReferenceParam(p1id.getValue()));
-//		myCaptureQueriesListener.clear();
-//		results = myPatientDao.search(map);
-//		foundResources = toUnqualifiedVersionlessIdValues(results);
-//		assertThat(foundResources, contains(p2id.getValue()));
-//		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-//		assertThat(sql, countMatches(sql, "JOIN"), equalTo(0));
+		map = SearchParameterMap.newSynchronous();
+		map.add("sibling", new ReferenceParam(p1id.getValue()));
+		myCaptureQueriesListener.clear();
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(0));
+		assertThat(sql, countMatches(sql, "t0.SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
+		assertThat(sql, countMatches(sql, "t0.TARGET_RESOURCE_ID = '"), equalTo(1));
 
 		// Search by chain
-		map = new SearchParameterMap().setLoadSynchronous(true);
+		map = SearchParameterMap.newSynchronous();
 		map.add("sibling", new ReferenceParam("name", "P1"));
 		myCaptureQueriesListener.clear();
 		results = myPatientDao.search(map);
@@ -831,13 +832,22 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		assertThat(foundResources, contains(p2id.getValue()));
 		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 		assertThat(sql, countMatches(sql, "JOIN"), equalTo(1));
+		assertThat(sql, countMatches(sql, "t0.SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
+		assertThat(sql, countMatches(sql, "t1.HASH_NORM_PREFIX = '"), equalTo(39));
+		assertThat(sql, countMatches(sql, "t1.SP_VALUE_NORMALIZED LIKE "), equalTo(39));
 
 		// Search by two level chain
-//		map = new SearchParameterMap();
-//		map.add("patient", new ReferenceParam("sibling.name", "P1"));
-//		results = myAppointmentDao.search(map);
-//		foundResources = toUnqualifiedVersionlessIdValues(results);
-//		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+		map = SearchParameterMap.newSynchronous();
+		map.add("patient", new ReferenceParam("sibling.name", "P1"));
+		myCaptureQueriesListener.clear();
+		results = myAppointmentDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(2));
+		assertThat(sql, countMatches(sql, "SRC_PATH = 'Appointment.participant.actor.where(resolve() is Patient)'"), equalTo(1));
+		assertThat(sql, countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
+		assertThat(sql, countMatches(sql, "SP_VALUE_NORMALIZED LIKE 'P1%'"), equalTo(39));
 
 	}
 

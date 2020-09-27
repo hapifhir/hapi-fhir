@@ -24,7 +24,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -47,6 +49,7 @@ public class SearchSqlBuilder {
 	private boolean myMatchNothing;
 	private ResourceSqlTable myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
+	private Map<String, Object> myJoinMap = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -411,6 +414,11 @@ public class SearchSqlBuilder {
 
 	public boolean haveAtLeastOnePredicate() {
 		return myHaveAtLeastOnePredicate;
+	}
+
+	public void wrapSqlInOuterSelect() {
+		SelectQuery select = new SelectQuery();
+		
 	}
 
 

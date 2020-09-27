@@ -47,9 +47,6 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 			ourMaxThreads = 1;
 		}
 
-		// FIXME: remove
-		ourMaxThreads = 1;
-
 	}
 
 	private Exception myLastStackTrace;

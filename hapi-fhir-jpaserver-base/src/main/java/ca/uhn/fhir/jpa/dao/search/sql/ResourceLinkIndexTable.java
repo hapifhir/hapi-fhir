@@ -317,6 +317,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		boolean foundChainMatch = false;
 		List<String> candidateTargetTypes = new ArrayList<>();
 		List<Condition> orPredicates = new ArrayList<>();
+		QueryStack3 childQueryFactory = myQueryStack.newChildQueryFactoryWithFullBuilderReuse();
 		for (String nextType : resourceTypes) {
 			String chain = theReferenceParam.getChain();
 
@@ -370,69 +371,24 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			}
 
 			candidateTargetTypes.add(nextType);
-			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
 
 			List<Condition> andPredicates = new ArrayList<>();
-			Condition pathPredicate = toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(pathsToMatch));
-			andPredicates.add(pathPredicate);
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
-			andPredicates.add(myQueryStack.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, chainParamValues, theRequest, theRequestPartitionId));
+			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, chainParamValues, theRequest, theRequestPartitionId));
 
 			orPredicates.add(toAndPredicate(andPredicates));
 
-			// If this is false, we throw an exception below so no sense doing any further processing
-//			if (foundChainMatch) {
-			// FIXME KHS this is the part we need to change
-//				RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-
-
-			// FIXME KHS rather than all this exclusionary logic, refactor the predicate stuff out of the join code so we can reuse it in createPredicate() below
-//				if (canOptimizeToCrossJoin(resourceTypes, orValues, chainParamDef)) {
-			// FIXME hardcode token for now
-//					Join<ResourceLink, ResourceTable> linkTargetJoin = theLinkJoin.join("myParamsToken", JoinType.LEFT);
-
-			// JA RESTORE
-//					RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-//					Predicate valuesPredicate = myPredicateBuilder.addLinkPredicate(theResourceName, paramDef, orValues, null, theLinkJoin, theRequestPartitionId);
-//					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-//					theCodePredicates.add(pathPredicate);
-//					candidateTargetTypes.add(nextType);
-//					andPredicate = myCriteriaBuilder.and(pathPredicate, valuesPredicate);
-//
-
-
-//					From<?, ?> from = myQueryStack.addFromOrReturnNull(chainParamDef);
-//					if (from != null) {
-//						// Optimize search with a cross join
-//						Predicate valuePredicate = myPredicateBuilder.createPredicate(orValues, subResourceName, chainParamDef, myCriteriaBuilder, from, theRequestPartitionId);
-//						Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), from.get("myResourcePid"));
-//						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-//						andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, valuePredicate);
-//					}
-//				}
-
-//				if (andPredicate == null) {
-			// JA RESTORE
-//					Subquery<Long> subQ = createLinkSubquery(chain, subResourceName, orValues, theRequest, theRequestPartitionId);
-//
-//					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-//					Predicate pidPredicate = theLinkJoin.get("myTargetResourcePid").in(subQ);
-//					andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
-//					theCodePredicates.add(andPredicate);
-//					candidateTargetTypes.add(nextType);
-//				}
-//			}
 		}
 
 		if (candidateTargetTypes.size() > 1) {
 			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
 		}
 
-		return toOrPredicate(orPredicates);
-//		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
-//		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
-//		return predicate;
+		Condition multiTypeOrPredicate = toOrPredicate(orPredicates);
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
+		Condition pathPredicate = toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(pathsToMatch));
+		return toAndPredicate(pathPredicate, multiTypeOrPredicate);
 	}
 
 	@Nonnull

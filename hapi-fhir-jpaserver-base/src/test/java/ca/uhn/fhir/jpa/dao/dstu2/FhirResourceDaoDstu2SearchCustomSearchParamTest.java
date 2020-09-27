@@ -485,14 +485,12 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		IBundleProvider results;
 		List<String> foundResources;
 
-		// FIXME: restore and remove synchronous
-
-//		// Search by ref
-//		map = new SearchParameterMap().setLoadSynchronous(true);
-//		map.add("sibling", new ReferenceParam(p1id.getValue()));
-//		results = myPatientDao.search(map);
-//		foundResources = toUnqualifiedVersionlessIdValues(results);
-//		assertThat(foundResources, contains(p2id.getValue()));
+		// Search by ref
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam(p1id.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
 
 		// Search by chain
 		myCaptureQueriesListener.clear();
@@ -503,12 +501,12 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 		assertThat(foundResources, contains(p2id.getValue()));
 
-//		// Search by two level chain
-//		map = new SearchParameterMap().setLoadSynchronous(true);
-//		map.add("patient", new ReferenceParam("sibling.name", "P1"));
-//		results = myAppointmentDao.search(map);
-//		foundResources = toUnqualifiedVersionlessIdValues(results);
-//		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+		// Search by two level chain
+		map = new SearchParameterMap().setLoadSynchronous(true);
+		map.add("patient", new ReferenceParam("sibling.name", "P1"));
+		results = myAppointmentDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
 
 
 	}

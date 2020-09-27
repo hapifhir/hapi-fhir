@@ -154,7 +154,6 @@ public class SearchBuilder2 implements ISearchBuilder {
 	protected IResourceTagDao myResourceTagDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-	private QueryStack2 myQueryStack;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
@@ -179,13 +178,10 @@ public class SearchBuilder2 implements ISearchBuilder {
 	private RequestPartitionId myRequestPartitionId;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-	private SearchSqlBuilder mySqlBuilder;
 	@Autowired
 	private DataSource myDataSource;
 	@Autowired
 	private SqlBuilderFactory mySqlBuilderFactory;
-	// FIXME: rename
-	private QueryStack3 myQueryStack3;
 
 	/**
 	 * Constructor
@@ -196,16 +192,12 @@ public class SearchBuilder2 implements ISearchBuilder {
 		myResourceType = theResourceType;
 	}
 
-	public SearchSqlBuilder getSearchSqlBuilder() {
-		return mySqlBuilder;
-	}
-
 	@Override
 	public void setMaxResultsToFetch(Integer theMaxResultsToFetch) {
 		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
-	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+	private void searchForIdsWithAndOr(SearchSqlBuilder theSearchSqlBuilder, QueryStack3 theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		myParams = theParams;
 
 		// Remove any empty parameters
@@ -218,7 +210,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		// Attempt to lookup via composite unique key.
 		if (isCompositeUniqueSpCandidate()) {
-			attemptCompositeUniqueSpProcessing(theParams, theRequest);
+			attemptCompositeUniqueSpProcessing(theQueryStack3, theParams, theRequest);
 		}
 
 		// Handle each parameter
@@ -229,9 +221,9 @@ public class SearchBuilder2 implements ISearchBuilder {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
-			Condition predicate = myQueryStack3.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
+			Condition predicate = theQueryStack3.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
 			if (predicate != null) {
-				mySqlBuilder.addPredicate(predicate);
+				theSearchSqlBuilder.addPredicate(predicate);
 			}
 		}
 	}
@@ -253,7 +245,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		List<List<Long>> queries = createQuery(null, null, true, theRequest, null);
+		List<List<Long>> queries = createQuery(myParams, null, null, true, theRequest, null);
 		return queries.get(0).iterator();
 	}
 
@@ -281,16 +273,12 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
-		myQueryStack = new QueryStack2(myCriteriaBuilder, myResourceName, theParams, theRequestPartitionId);
 		myParams = theParams;
 		mySearchUuid = theSearchUuid;
 		myRequestPartitionId = theRequestPartitionId;
-
-		mySqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory);
-		myQueryStack3 = new QueryStack3(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, mySqlBuilder, mySearchParamRegistry, myPartitionSettings);
 	}
 
-	private List<List<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+	private List<List<Long>> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
 													 SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
@@ -346,46 +334,24 @@ public class SearchBuilder2 implements ISearchBuilder {
 			if (theMaximumResults != null && pids.size() > theMaximumResults) {
 				pids.subList(0, theMaximumResults - 1);
 			}
-			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t -> doCreateChunkedQueries(t, sort, theCount, theRequest, queries));
+			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t -> doCreateChunkedQueries(theParams, t, sort, theCount, theRequest, queries));
 		} else {
-			queries.add(createChunkedQuery(sort, theMaximumResults, theCount, theRequest, null));
+			queries.add(createChunkedQuery(theParams, sort, theMaximumResults, theCount, theRequest, null));
 		}
 
 		return queries;
 	}
 
-	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<List<Long>> theQueries) {
+	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<List<Long>> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
 		}
-		theQueries.add(createChunkedQuery(sort, thePids.size(), theCount, theRequest, thePids));
+		theQueries.add(createChunkedQuery(theParams, sort, thePids.size(), theCount, theRequest, thePids));
 	}
 
-	private List<Long> createChunkedQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
-		/*
-		 * Sort
-		 *
-		 * If we have a sort, we wrap the criteria search (the search that actually
-		 * finds the appropriate resources) in an outer search which is then sorted
-		 */
-		if (sort != null) {
-			assert !theCount;
-
-			myQueryStack.pushResourceTableQuery();
-
-			List<Order> orders = createSort(myCriteriaBuilder, myQueryStack, sort);
-			if (orders.size() > 0) {
-				myQueryStack.orderBy(orders);
-			}
-
-		} else {
-
-			if (theCount) {
-				myQueryStack.pushResourceTableCountQuery();
-			} else {
-				myQueryStack.pushResourceTableQuery();
-			}
-		}
+	private List<Long> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
+		SearchSqlBuilder sqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory);
+		QueryStack3 queryStack3 = new QueryStack3(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDataSource);
 		jdbcTemplate.setFetchSize(myFetchSize);
@@ -409,8 +375,8 @@ public class SearchBuilder2 implements ISearchBuilder {
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
-				SearchSqlBuilder sqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory);
-				SearchSqlBuilder.GeneratedSql allTargetsSql = sqlBuilder.generate();
+				SearchSqlBuilder fetchPidsSqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory);
+				SearchSqlBuilder.GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate();
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
@@ -420,46 +386,58 @@ public class SearchBuilder2 implements ISearchBuilder {
 				myAlsoIncludePids.addAll(ResourcePersistentId.fromLongList(output));
 
 			}
-			myQueryStack3.addPredicateEverythingOperation(myResourceName, targetPid);
+			queryStack3.addPredicateEverythingOperation(myResourceName, targetPid);
 
 		} else {
 			// Normal search
-			searchForIdsWithAndOr(myParams, theRequest);
+			searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
 		}
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
-		if (!mySqlBuilder.haveAtLeastOnePredicate()) {
-			Condition partitionIdPredicate = mySqlBuilder.getOrCreateResourceTableRoot().createPartitionIdPredicate(myRequestPartitionId);
+		if (!sqlBuilder.haveAtLeastOnePredicate()) {
+			Condition partitionIdPredicate = sqlBuilder.getOrCreateResourceTableRoot().createPartitionIdPredicate(myRequestPartitionId);
 			if (partitionIdPredicate != null) {
-				mySqlBuilder.addPredicate(partitionIdPredicate);
+				sqlBuilder.addPredicate(partitionIdPredicate);
 			}
 		}
 
 		// Add PID list predicate for full text search and/or lastn operation
 		if (thePidList != null && thePidList.size() > 0) {
-			myQueryStack.addPredicate(myQueryStack.get("myId").as(Long.class).in(thePidList));
+		// FIXME: needed
+			throw new UnsupportedOperationException();
+//			myQueryStack.addPredicate(myQueryStack.get("myId").as(Long.class).in(thePidList));
 		}
 
 		// Last updated
 		DateRangeParam lu = myParams.getLastUpdated();
 		if (lu != null && !lu.isEmpty()) {
-			Condition lastUpdatedPredicates = createLastUpdatedPredicates(lu);
-			mySqlBuilder.addPredicate(lastUpdatedPredicates);
+			Condition lastUpdatedPredicates = createLastUpdatedPredicates(sqlBuilder, lu);
+			sqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
+
+		/*
+		 * Sort
+		 *
+		 * If we have a sort, we wrap the criteria search (the search that actually
+		 * finds the appropriate resources) in an outer search which is then sorted
+		 */
+		if (sort != null) {
+			assert !theCount;
+
+			sqlBuilder.wrapSqlInOuterSelect();
+			List<Order> orders = createSort(myCriteriaBuilder, myQueryStack, sort);
+			if (orders.size() > 0) {
+				myQueryStack.orderBy(orders);
+			}
+
+		}
+
 
 		/*
 		 * Now perform the search
 		 */
-		CriteriaQuery<Long> outerQuery = (CriteriaQuery<Long>) myQueryStack.pop();
-		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
-		assert myQueryStack.isEmpty();
-
-		if (theMaximumResults != null) {
-			query.setMaxResults(theMaximumResults);
-		}
-
-		SearchSqlBuilder.GeneratedSql generatedSql = mySqlBuilder.generate();
+		SearchSqlBuilder.GeneratedSql generatedSql = sqlBuilder.generate();
 		if (generatedSql.isMatchNothing()) {
 			return Collections.emptyList();
 		}
@@ -508,7 +486,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 	 * @return Returns {@literal true} if any search parameter sorts were found, or false if
 	 * no sorts were found, or only non-search parameters ones (e.g. _id, _lastUpdated)
 	 */
-	private List<Order> createSort(CriteriaBuilder theBuilder, QueryStack2 theQueryStack, SortSpec theSort) {
+	private List<Order> createSort(CriteriaBuilder theBuilder, QueryStack3 theQueryStack, SortSpec theSort) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return Collections.emptyList();
 		}
@@ -927,7 +905,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		}
 	}
 
-	private void attemptCompositeUniqueSpProcessing(@Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+	private void attemptCompositeUniqueSpProcessing(QueryStack3 theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		// Since we're going to remove elements below
 		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 
@@ -990,7 +968,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 					.add(StorageProcessingMessage.class, msg);
 				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 
-				myQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
+				theQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
 
 				// Remove any empty parameters remaining after this
 				theParams.clean();
@@ -1031,10 +1009,6 @@ public class SearchBuilder2 implements ISearchBuilder {
 		return myCriteriaBuilder;
 	}
 
-	public QueryStack2 getQueryStack() {
-		return myQueryStack;
-	}
-
 	public Class<? extends IBaseResource> getResourceType() {
 		return myResourceType;
 	}
@@ -1048,20 +1022,21 @@ public class SearchBuilder2 implements ISearchBuilder {
 		myDaoConfig = theDaoConfig;
 	}
 
-	private Condition createLastUpdatedPredicates(final DateRangeParam theLastUpdated) {
-		return mySqlBuilder.addPredicateLastUpdated(theLastUpdated);
+	// FIXME: inline?
+	private Condition createLastUpdatedPredicates(SearchSqlBuilder theSearchSqlBuilder, final DateRangeParam theLastUpdated) {
+		return theSearchSqlBuilder.addPredicateLastUpdated(theLastUpdated);
 	}
 
-	private Condition processFilter(SearchFilterParser.Filter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private Condition processFilter(QueryStack3 theQueryStack3, SearchFilterParser.Filter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
-			return processFilterParameter((SearchFilterParser.FilterParameter) theFilter, theResourceName, theRequest, theRequestPartitionId);
+			return processFilterParameter(theQueryStack3, (SearchFilterParser.FilterParameter) theFilter, theResourceName, theRequest, theRequestPartitionId);
 		} else if (theFilter instanceof SearchFilterParser.FilterLogical) {
 			// Left side
-			Condition xPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter1(), theResourceName, theRequest, theRequestPartitionId);
+			Condition xPredicate = processFilter(theQueryStack3, ((SearchFilterParser.FilterLogical) theFilter).getFilter1(), theResourceName, theRequest, theRequestPartitionId);
 
 			// Right side
-			Condition yPredicate = processFilter(((SearchFilterParser.FilterLogical) theFilter).getFilter2(), theResourceName, theRequest, theRequestPartitionId);
+			Condition yPredicate = processFilter(theQueryStack3, ((SearchFilterParser.FilterLogical) theFilter).getFilter2(), theResourceName, theRequest, theRequestPartitionId);
 
 			if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
 				return ComboCondition.and(xPredicate, yPredicate);
@@ -1069,12 +1044,12 @@ public class SearchBuilder2 implements ISearchBuilder {
 				return ComboCondition.or(xPredicate, yPredicate);
 			}
 		} else if (theFilter instanceof SearchFilterParser.FilterParameterGroup) {
-			return processFilter(((SearchFilterParser.FilterParameterGroup) theFilter).getContained(), theResourceName, theRequest, theRequestPartitionId);
+			return processFilter(theQueryStack3, ((SearchFilterParser.FilterParameterGroup) theFilter).getContained(), theResourceName, theRequest, theRequestPartitionId);
 		}
 		return null;
 	}
 
-	private Condition processFilterParameter(SearchFilterParser.FilterParameter theFilter,
+	private Condition processFilterParameter(QueryStack3 theQueryStack3, SearchFilterParser.FilterParameter theFilter,
 														  String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
@@ -1088,13 +1063,13 @@ public class SearchBuilder2 implements ISearchBuilder {
 					null,
 					null,
 					theFilter.getValue());
-				return myQueryStack3.createPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
 			}
 		} else if (searchParam.getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
-				return myQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),					theFilter.getOperation());
+				return theQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),					theFilter.getOperation());
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
 			}
@@ -1111,13 +1086,13 @@ public class SearchBuilder2 implements ISearchBuilder {
 		} else {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
-				return myQueryStack3.createPredicateUri(null, theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateUri(null, theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
-				return myQueryStack3.createPredicateString(null, theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateString(null, theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
-				return myQueryStack3.createPredicateDate(null, theResourceName, searchParam, Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(),  theRequestPartitionId);
+				return theQueryStack3.createPredicateDate(null, theResourceName, searchParam, Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(),  theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
-				return myQueryStack3.createPredicateNumber(null, theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateNumber(null, theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
 				String paramName = theFilter.getParamPath().getName();
 				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
@@ -1125,9 +1100,9 @@ public class SearchBuilder2 implements ISearchBuilder {
 				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
 				String value = theFilter.getValue();
 				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
-				return myQueryStack3.createPredicateReference(null, theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
+				return theQueryStack3.createPredicateReference(null, theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
-				return myQueryStack3.createPredicateQuantity(null, theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateQuantity(null, theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
 				throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
 			} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
@@ -1136,7 +1111,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 					null,
 					null,
 					theFilter.getValue());
-				return myQueryStack3.createPredicateToken(null, theResourceName, searchParam, Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateToken(null, theResourceName, searchParam, Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
 			}
 		}
 		return null;
@@ -1364,7 +1339,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
-				myQueryList = createQuery(mySort, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
+				myQueryList = createQuery(myParams, mySort, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
 			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
