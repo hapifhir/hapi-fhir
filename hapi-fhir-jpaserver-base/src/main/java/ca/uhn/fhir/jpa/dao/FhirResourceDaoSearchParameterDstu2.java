@@ -22,21 +22,12 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import org.hl7.fhir.convertors.conv10_40.SearchParameter10_40;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -67,7 +58,7 @@ public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao
 	}
 
 	@Override
-	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
+	public void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
 		super.preDelete(theResourceToDelete, theEntityToDelete);
 		markAffectedResources(theResourceToDelete);
 	}

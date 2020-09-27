@@ -20,7 +20,6 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
@@ -48,9 +47,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
-import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -112,7 +109,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -199,8 +195,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	protected IResourceTableDao myResourceTableDao;
-	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
 	protected DeleteConflictService myDeleteConflictService;
@@ -211,27 +205,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	ExpungeService myExpungeService;
 	@Autowired
-	private HistoryBuilderFactory myHistoryBuilderFactory;
-	@Autowired
 	private DaoConfig myConfig;
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired
-	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Autowired
@@ -984,7 +968,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return myContext.getResourceType(theResource);
 	}
 
-	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
+	public ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
 		Date updateTime = new Date();
 		return updateEntity(theRequest, null, entity, updateTime, true, true, theTransactionDetails, false, true);
 	}

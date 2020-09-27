@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -43,13 +43,13 @@ import java.util.Map;
  */
 
 public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
+
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
 	@Autowired
-	private PartitionSettings myPartitionSettings;
+	protected IResourceTableDao myResourceTableDao;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)

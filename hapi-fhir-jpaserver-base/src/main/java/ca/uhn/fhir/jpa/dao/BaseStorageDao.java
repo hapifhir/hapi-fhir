@@ -43,7 +43,6 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
@@ -54,7 +53,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -126,7 +123,7 @@ public abstract class BaseStorageDao {
 
 	}
 
-	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
+	public DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		if (theEntity instanceof ResourceTable) {
@@ -202,16 +199,6 @@ public abstract class BaseStorageDao {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
 		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode);
 		return oo;
-	}
-
-	@NotNull
-	protected ResourceGoneException createResourceGoneException(IBasePersistedResource theResourceEntity) {
-		StringBuilder b = new StringBuilder();
-		b.append("Resource was deleted at ");
-		b.append(new InstantType(theResourceEntity.getDeleted()).getValueAsString());
-		ResourceGoneException retVal = new ResourceGoneException(b.toString());
-		retVal.setResourceId(theResourceEntity.getIdDt());
-		return retVal;
 	}
 
 	/**

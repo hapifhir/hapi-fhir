@@ -28,14 +28,14 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -128,7 +128,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 	}
 
 	@Override
-	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
+	public void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
 		super.preDelete(theResourceToDelete, theEntityToDelete);
 
 		String codeSystemUrl = theResourceToDelete.getUrl();

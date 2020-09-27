@@ -1,18 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import org.hl7.fhir.convertors.conv30_40.SearchParameter30_40;
 import org.hl7.fhir.convertors.conv40_50.SearchParameter40_50;
-import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 /*
  * #%L
@@ -59,7 +54,7 @@ public class FhirResourceDaoSearchParameterR5 extends BaseHapiFhirResourceDao<Se
 	}
 
 	@Override
-	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
+	public void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
 		super.preDelete(theResourceToDelete, theEntityToDelete);
 		markAffectedResources(theResourceToDelete);
 	}
