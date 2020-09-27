@@ -126,8 +126,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			filter.setValue(theFilter);
 		}
 
-		ValueSet retVal = doExpand(source);
-		return retVal;
+		return doExpand(source);
 
 		// if (defaultValueSet != null) {
 		// source = getContext().newJsonParser().parseResource(ValueSet.class, getContext().newJsonParser().encodeResourceToString(defaultValueSet));
@@ -161,8 +160,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			filter.setValue(theFilter);
 		}
 
-		ValueSet retVal = doExpand(source, theOffset, theCount);
-		return retVal;
+		return doExpand(source, theOffset, theCount);
 	}
 
 	@Override

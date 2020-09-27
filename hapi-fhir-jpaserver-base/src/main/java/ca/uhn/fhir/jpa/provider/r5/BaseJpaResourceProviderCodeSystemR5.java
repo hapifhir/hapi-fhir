@@ -59,7 +59,7 @@ public class BaseJpaResourceProviderCodeSystemR5 extends JpaResourceProviderR5<C
 			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
 			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
-			@OperationParam(name="version", min=0, max=1) org.hl7.fhir.r4.model.StringType theVersion,
+			@OperationParam(name="version", min=0, max=1) StringType theVersion,
 			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
 			RequestDetails theRequestDetails
 			) {

@@ -40,6 +40,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r5.model.ValueSet.ConceptSetFilterComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 
 import java.util.Date;
@@ -102,13 +103,14 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 
 		if (isNotBlank(theFilter)) {
 			ConceptSetComponent include = source.getCompose().addInclude();
-			ValueSet.ConceptSetFilterComponent filter = include.addFilter();
+			ConceptSetFilterComponent filter = include.addFilter();
 			filter.setProperty("display");
 			filter.setOp(Enumerations.FilterOperator.EQUAL);
 			filter.setValue(theFilter);
 		}
 
-		return doExpand(source);
+		ValueSet retVal = doExpand(source);
+		return retVal;
 
 		// if (defaultValueSet != null) {
 		// source = getContext().newJsonParser().parseResource(ValueSet.class, getContext().newJsonParser().encodeResourceToString(defaultValueSet));
@@ -135,8 +137,8 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 		source.getCompose().addInclude().addValueSet(theUri);
 
 		if (isNotBlank(theFilter)) {
-			ValueSet.ConceptSetComponent include = source.getCompose().addInclude();
-			ValueSet.ConceptSetFilterComponent filter = include.addFilter();
+			ConceptSetComponent include = source.getCompose().addInclude();
+			ConceptSetFilterComponent filter = include.addFilter();
 			filter.setProperty("display");
 			filter.setOp(Enumerations.FilterOperator.EQUAL);
 			filter.setValue(theFilter);

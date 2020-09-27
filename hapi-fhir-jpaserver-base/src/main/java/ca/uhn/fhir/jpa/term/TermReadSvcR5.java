@@ -142,4 +142,10 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = toCanonicalValueSet(valueSet);
 		return super.isValueSetPreExpandedForCodeValidation(valueSetR4);
 	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+		return super.lookupCode(theSystem, theCode);
+	}
+
 }
