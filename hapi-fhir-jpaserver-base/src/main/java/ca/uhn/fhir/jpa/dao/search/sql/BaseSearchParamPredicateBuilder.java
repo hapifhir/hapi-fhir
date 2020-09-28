@@ -8,12 +8,13 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
 
-public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
+public abstract class BaseSearchParamPredicateBuilder extends BasePredicateBuilder {
 
 	private final DbColumn myColumnMissing;
 	private final DbColumn myColumnResType;
@@ -21,7 +22,7 @@ public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnHashIdentity;
 
-	public BaseSearchParamIndexTable(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
+	public BaseSearchParamPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder, theTable);
 
 		myColumnResId = getTable().addColumn("RES_ID");
@@ -55,13 +56,18 @@ public abstract class BaseSearchParamIndexTable extends BaseIndexTable {
 	public Condition combineWithHashIdentityPredicate(String theResourceName, String theParamName, Condition thePredicate, RequestPartitionId theRequestPartitionId) {
 		List<Condition> andPredicates = new ArrayList<>();
 
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), theResourceName, theParamName);
-		String hashIdentityVal = generatePlaceholder(hashIdentity);
-		Condition hashIdentityPredicate = BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal);
+		Condition hashIdentityPredicate = createHashIdentityPredicate(theResourceName, theParamName);
 		andPredicates.add(hashIdentityPredicate);
 		andPredicates.add(thePredicate);
 
 		return toAndPredicate(andPredicates);
+	}
+
+	@Nonnull
+	public Condition createHashIdentityPredicate(String theResourceType, String theParamName) {
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
+		String hashIdentityVal = generatePlaceholder(hashIdentity);
+		return BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal);
 	}
 
 	public Condition createPredicateParamMissingForNonReference(String theResourceName, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {

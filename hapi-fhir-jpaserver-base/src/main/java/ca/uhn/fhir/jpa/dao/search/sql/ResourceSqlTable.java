@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.search.sql;
 
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -12,7 +11,7 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
 
-public class ResourceSqlTable extends BaseIndexTable {
+public class ResourceSqlTable extends BasePredicateBuilder {
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnResDeletedAt;
 	private final DbColumn myColumnResType;
@@ -54,5 +53,9 @@ public class ResourceSqlTable extends BaseIndexTable {
 			condition = new NotCondition(condition);
 		}
 		return condition;
+	}
+
+	public DbColumn getColumnLastUpdated() {
+		return myColumnLastUpdated;
 	}
 }

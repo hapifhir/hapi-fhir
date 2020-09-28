@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
-public class StringIndexTable extends BaseSearchParamIndexTable {
+public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnValueExact;
@@ -34,7 +34,7 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 	/**
 	 * Constructor
 	 */
-	public StringIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public StringPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_STRING"));
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnValueExact = getTable().addColumn("SP_VALUE_EXACT");
@@ -42,6 +42,10 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 		myColumnHashNormPrefix = getTable().addColumn("HASH_NORM_PREFIX");
 		myColumnHashIdentity = getTable().addColumn("HASH_IDENTITY");
 		myColumnHashExact = getTable().addColumn("HASH_EXACT");
+	}
+
+	public DbColumn getColumnValueNormalized() {
+		return myColumnValueNormalized;
 	}
 
 	@Override
@@ -52,7 +56,7 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 	public Condition createPredicateString(IQueryParameterType theParameter,
 														String theResourceName,
 														RuntimeSearchParam theSearchParam,
-														StringIndexTable theFrom,
+														StringPredicateBuilder theFrom,
 														SearchFilterParser.CompareOperation operation) {
 		String rawSearchTerm;
 		String paramName = theSearchParam.getName();
@@ -121,6 +125,14 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 				predicate = theFrom.createPredicateNormal(theResourceName, paramName, normalizedString);
 			} else if (operation == SearchFilterParser.CompareOperation.ne) {
 				predicate = theFrom.createPredicateLikeExpressionOnly(theResourceName, paramName, likeExpression, true);
+			} else if (operation == SearchFilterParser.CompareOperation.gt) {
+				predicate = theFrom.createPredicateNormalGreaterThan(theResourceName, paramName, likeExpression);
+			} else if (operation == SearchFilterParser.CompareOperation.ge) {
+				predicate = theFrom.createPredicateNormalGreaterThanOrEqual(theResourceName, paramName, likeExpression);
+			} else if (operation == SearchFilterParser.CompareOperation.lt) {
+				predicate = theFrom.createPredicateNormalLessThan(theResourceName, paramName, likeExpression);
+			} else if (operation == SearchFilterParser.CompareOperation.le) {
+				predicate = theFrom.createPredicateNormalLessThanOrEqual(theResourceName, paramName, likeExpression);
 			} else {
 				throw new IllegalArgumentException("Don't yet know how to handle operation " + operation + " on a string");
 			}
@@ -152,16 +164,41 @@ public class StringIndexTable extends BaseSearchParamIndexTable {
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
+	private Condition createPredicateNormalGreaterThanOrEqual(String theResourceType, String theParamName, String theNormalizedString) {
+		Condition hashPredicate = createHashIdentityPredicate(theResourceType, theParamName);
+		Condition valuePredicate = BinaryCondition.greaterThanOrEq(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		return ComboCondition.and(hashPredicate, valuePredicate);
+	}
+
+	private Condition createPredicateNormalGreaterThan(String theResourceType, String theParamName, String theNormalizedString) {
+		Condition hashPredicate = createHashIdentityPredicate(theResourceType, theParamName);
+		Condition valuePredicate = BinaryCondition.greaterThan(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		return ComboCondition.and(hashPredicate, valuePredicate);
+	}
+
+	private Condition createPredicateNormalLessThanOrEqual(String theResourceType, String theParamName, String theNormalizedString) {
+		Condition hashPredicate = createHashIdentityPredicate(theResourceType, theParamName);
+		Condition valuePredicate = BinaryCondition.lessThanOrEq(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		return ComboCondition.and(hashPredicate, valuePredicate);
+	}
+
+	private Condition createPredicateNormalLessThan(String theResourceType, String theParamName, String theNormalizedString) {
+		Condition hashPredicate = createHashIdentityPredicate(theResourceType, theParamName);
+		Condition valuePredicate = BinaryCondition.lessThan(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		return ComboCondition.and(hashPredicate, valuePredicate);
+	}
+
 	@Nonnull
 	public Condition createPredicateLikeExpressionOnly(String theResourceType, String theParamName, String theLikeExpression, boolean theInverse) {
 		long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
 		BinaryCondition identityPredicate = BinaryCondition.equalTo(myColumnHashIdentity, generatePlaceholder(hashIdentity));
-		BinaryCondition likePredicate = BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
-		Condition retVal = ComboCondition.and(identityPredicate, likePredicate);
+		BinaryCondition likePredicate;
 		if (theInverse) {
-			retVal = new NotCondition(retVal);
+			likePredicate = BinaryCondition.notLike(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
+		} else {
+			likePredicate = BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
 		}
-		return retVal;
+		return ComboCondition.and(identityPredicate, likePredicate);
 	}
 
 	public static String createLeftAndRightMatchLikeExpression(String likeExpression) {

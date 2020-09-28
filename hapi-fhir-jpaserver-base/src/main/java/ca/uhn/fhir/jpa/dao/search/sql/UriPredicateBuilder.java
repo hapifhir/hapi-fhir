@@ -20,13 +20,13 @@ import java.util.Collection;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createLeftAndRightMatchLikeExpression;
-import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createLeftMatchLikeExpression;
-import static ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable.createRightMatchLikeExpression;
+import static ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder.createLeftAndRightMatchLikeExpression;
+import static ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder.createLeftMatchLikeExpression;
+import static ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder.createRightMatchLikeExpression;
 
-public class UriIndexTable extends BaseSearchParamIndexTable {
+public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(UriIndexTable.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(UriPredicateBuilder.class);
 	private final DbColumn myColumnUri;
 	private final DbColumn myColumnHashUri;
 
@@ -36,7 +36,7 @@ public class UriIndexTable extends BaseSearchParamIndexTable {
 	/**
 	 * Constructor
 	 */
-	public UriIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public UriPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_URI"));
 
 		myColumnUri = getTable().addColumn("SP_URI");
@@ -104,7 +104,7 @@ public class UriIndexTable extends BaseSearchParamIndexTable {
 						Condition hashPredicate = BinaryCondition.equalTo(myColumnHashUri, generatePlaceholder(hashUri));
 						codePredicates.add(hashPredicate);
 					} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
-						uriPredicate = BinaryCondition.greaterThanOrEq(myColumnUri, generatePlaceholder(value));
+						uriPredicate = BinaryCondition.notEqualTo(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.co) {
 						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftAndRightMatchLikeExpression(value)));
 					} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
@@ -149,5 +149,9 @@ public class UriIndexTable extends BaseSearchParamIndexTable {
 		Condition outerPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, orPredicate, getRequestPartitionId());
 		return outerPredicate;
 
+	}
+
+	public DbColumn getColumnValue() {
+		return myColumnUri;
 	}
 }

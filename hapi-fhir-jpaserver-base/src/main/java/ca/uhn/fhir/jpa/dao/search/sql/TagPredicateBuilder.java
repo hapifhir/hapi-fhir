@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class TagPredicateBuilder extends BaseIndexTable {
+public class TagPredicateBuilder extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(TagPredicateBuilder.class);
 
 	private final DbColumn myColumnResId;

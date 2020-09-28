@@ -79,7 +79,7 @@ public class ResourceIdPredicateBuilder3 extends BasePredicateBuilder3 {
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
 			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
 
-			BaseIndexTable queryRootTable = super.getOrCreateQueryRootTable();
+			BasePredicateBuilder queryRootTable = super.getOrCreateQueryRootTable();
 
 			switch (operation) {
 				default:

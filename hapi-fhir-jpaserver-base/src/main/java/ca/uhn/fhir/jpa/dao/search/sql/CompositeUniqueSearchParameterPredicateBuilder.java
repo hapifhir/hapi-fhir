@@ -5,7 +5,7 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
-public class CompositeUniqueSearchParameterPredicateBuilder extends BaseSearchParamIndexTable {
+public class CompositeUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	private final DbColumn myColumnString;
 

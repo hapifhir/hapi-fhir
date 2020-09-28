@@ -1629,13 +1629,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		myObservationDao.create(obs, mySrd);
 
-		List<Observation> found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityDt(111))));
+		List<Observation> found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityParam(111))));
 		assertEquals(1, found.size());
 
-		found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityDt(112))));
+		found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityParam(112))));
 		assertEquals(0, found.size());
 
-		found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityDt(212))));
+		found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityParam(212))));
 		assertEquals(0, found.size());
 
 	}
@@ -2112,14 +2112,14 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id4, id1, id2, id3));
+		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id4, id1, id2, id3));
+		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
@@ -2164,14 +2164,14 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.setSort(new SortSpec(BaseResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
-		assertThat(actual, contains(id1, id2, id3, id4, idMethodName));
+		assertThat(actual, contains(idMethodName, id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(BaseResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
-		assertThat(actual, contains(id1, id2, id3, id4, idMethodName));
+		assertThat(actual, contains(idMethodName, id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
@@ -2404,14 +2404,14 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.setSort(new SortSpec(Patient.SP_FAMILY));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id4, id1, id2, id3));
+		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id4, id1, id2, id3));
+		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));

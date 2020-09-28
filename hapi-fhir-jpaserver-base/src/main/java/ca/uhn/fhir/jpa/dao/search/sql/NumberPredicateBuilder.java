@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -19,27 +20,31 @@ import java.math.MathContext;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class NumberIndexTable extends BaseSearchParamIndexTable {
+public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(NumberIndexTable.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(NumberPredicateBuilder.class);
 	private final DbColumn myColumnValue;
 
 	/**
 	 * Constructor
 	 */
-	public NumberIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public NumberPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_NUMBER"));
 
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
 
-	public Condition createPredicateNumeric(String theResourceName, String theParamName, NumberIndexTable theJoin, CriteriaBuilder theCriteriaBuilder, IQueryParameterType theNextOr, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, Object theO, String theInvalidMessageName, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateNumeric(String theResourceName, String theParamName, NumberPredicateBuilder theJoin, CriteriaBuilder theCriteriaBuilder, IQueryParameterType theNextOr, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, Object theO, String theInvalidMessageName, RequestPartitionId theRequestPartitionId) {
 		Condition numericPredicate = createPredicateNumeric(this, theResourceName, theParamName, theOperation, theValue, theRequestPartitionId, myColumnValue);
 		return combineWithHashIdentityPredicate(theResourceName, theParamName, numericPredicate, theRequestPartitionId);
 	}
 
+	public DbColumn getColumnValue() {
+		return myColumnValue;
+	}
 
-	static Condition createPredicateNumeric(BaseSearchParamIndexTable theIndexTable, String theResourceName, String theParamName, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, RequestPartitionId theRequestPartitionId, DbColumn theColumn) {
+
+	static Condition createPredicateNumeric(BaseSearchParamPredicateBuilder theIndexTable, String theResourceName, String theParamName, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, RequestPartitionId theRequestPartitionId, DbColumn theColumn) {
 		Condition num;
 
 		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL operators below so as to
@@ -65,11 +70,11 @@ public class NumberIndexTable extends BaseSearchParamIndexTable {
 				num = BinaryCondition.notEqualTo(theColumn, theIndexTable.generatePlaceholder(theValue));
 				break;
 			case ap:
-				BigDecimal mul = SearchFuzzUtil.calculateFuzzAmount(null, theValue);
+				BigDecimal mul = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.APPROXIMATE, theValue);
 				BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
 				BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
-				Condition lowPred = BinaryCondition.greaterThanOrEq(theColumn, low);
-				Condition highPred = BinaryCondition.lessThanOrEq(theColumn, high);
+				Condition lowPred = BinaryCondition.greaterThanOrEq(theColumn, theIndexTable.generatePlaceholder(low));
+				Condition highPred = BinaryCondition.lessThanOrEq(theColumn, theIndexTable.generatePlaceholder(high));
 				num = ComboCondition.and(lowPred, highPred);
 				ourLog.trace("Searching for {} <= val <= {}", low, high);
 				break;

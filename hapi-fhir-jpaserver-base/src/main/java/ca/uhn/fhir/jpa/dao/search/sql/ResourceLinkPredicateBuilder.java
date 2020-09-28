@@ -17,10 +17,8 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -48,7 +46,6 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -59,9 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -75,9 +69,9 @@ import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ResourceLinkIndexTable extends BaseIndexTable {
+public class ResourceLinkPredicateBuilder extends BasePredicateBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkIndexTable.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkPredicateBuilder.class);
 	private final DbColumn myColumnSrcType;
 	private final DbColumn myColumnSrcPath;
 	private final DbColumn myColumnTargetResourceId;
@@ -103,7 +97,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 	/**
 	 * Constructor
 	 */
-	public ResourceLinkIndexTable(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
+	public ResourceLinkPredicateBuilder(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
@@ -120,7 +114,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		return myColumnSrcPath;
 	}
 
-	protected DbColumn getColumnTargetResourceId() {
+	public DbColumn getColumnTargetResourceId() {
 		return myColumnTargetResourceId;
 	}
 
@@ -219,12 +213,13 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		Condition targetPidCondition = null;
 		if (!theTargetPidList.isEmpty()) {
 			List<String> placeholders = generatePlaceholders(theTargetPidList);
-			targetPidCondition = toEqualToOrInPredicate(myColumnTargetResourceId, placeholders);
+			targetPidCondition = toEqualToOrInPredicate(myColumnTargetResourceId, placeholders, theInverse);
 		}
 
 		Condition targetUrlsCondition = null;
 		if (!theTargetQualifiedUrls.isEmpty()) {
-			targetUrlsCondition = toEqualToOrInPredicate(myColumnTargetResourceUrl, generatePlaceholders(theTargetQualifiedUrls));
+			List<String> placeholders = generatePlaceholders(theTargetQualifiedUrls);
+			targetUrlsCondition = toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
 		}
 
 		Condition joinedCondition;
@@ -236,18 +231,22 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 			joinedCondition = targetUrlsCondition;
 		}
 
-		Condition pathPredicate = toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
+		Condition pathPredicate = createPredicateSourcePaths(thePathsToMatch);
 		joinedCondition = ComboCondition.and(pathPredicate, joinedCondition);
 
-		Condition condition;
-		if (theInverse) {
-			condition = new NotCondition(joinedCondition);
-		} else {
-			condition = joinedCondition;
-		}
-
-		return condition;
+		return joinedCondition;
 	}
+
+	@Nonnull
+	private Condition createPredicateSourcePaths(List<String> thePathsToMatch) {
+		return toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
+	}
+
+	public Condition createPredicateSourcePaths(String theResourceName, String theParamName) {
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
+		return createPredicateSourcePaths(pathsToMatch);
+	}
+
 
 	private void warnAboutPerformanceOnUnqualifiedResources(String theParamName, RequestDetails theRequest, @Nullable List<String> theCandidateTargetTypes) {
 		StringBuilder builder = new StringBuilder();
@@ -296,7 +295,7 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
 
 			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
-			Condition typeCondition = toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(pathsToMatch));
+			Condition typeCondition = createPredicateSourcePaths(pathsToMatch);
 
 			String typeValue = theReferenceParam.getValue();
 
@@ -381,13 +380,17 @@ public class ResourceLinkIndexTable extends BaseIndexTable {
 
 		}
 
+		if (candidateTargetTypes.isEmpty()) {
+			throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+		}
+
 		if (candidateTargetTypes.size() > 1) {
 			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
 		}
 
 		Condition multiTypeOrPredicate = toOrPredicate(orPredicates);
 		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
-		Condition pathPredicate = toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(pathsToMatch));
+		Condition pathPredicate = createPredicateSourcePaths(pathsToMatch);
 		return toAndPredicate(pathPredicate, multiTypeOrPredicate);
 	}
 

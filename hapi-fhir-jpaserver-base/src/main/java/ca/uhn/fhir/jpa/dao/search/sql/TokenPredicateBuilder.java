@@ -21,10 +21,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.VersionIndependentConcept;
 import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
-import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
-import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +40,15 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class TokenIndexTable extends BaseSearchParamIndexTable {
+public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnHashSystemAndValue;
 	private final DbColumn myColumnHashSystem;
 	private final DbColumn myColumnHashValue;
+	private final DbColumn myColumnSystem;
+	private final DbColumn myColumnValue;
+
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -57,12 +58,14 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 	/**
 	 * Constructor
 	 */
-	public TokenIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public TokenPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_TOKEN"));
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnHashSystem = getTable().addColumn("HASH_SYS");
 		myColumnHashSystemAndValue = getTable().addColumn("HASH_SYS_AND_VALUE");
 		myColumnHashValue = getTable().addColumn("HASH_VALUE");
+		myColumnSystem = getTable().addColumn("SP_SYSTEM");
+		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
 
 	@Override
@@ -220,6 +223,14 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 		return retVal;
 	}
 
+	public DbColumn getColumnSystem() {
+		return myColumnSystem;
+	}
+
+	public DbColumn getColumnValue() {
+		return myColumnValue;
+	}
+
 	private void validateHaveSystemAndCodeForToken(String theParamName, String theCode, String theSystem) {
 		String systemDesc = defaultIfBlank(theSystem, "(missing)");
 		String codeDesc = defaultIfBlank(theCode, "(missing)");
@@ -289,5 +300,4 @@ public class TokenIndexTable extends BaseSearchParamIndexTable {
 			return conditions[0];
 		}
 	}
-
 }

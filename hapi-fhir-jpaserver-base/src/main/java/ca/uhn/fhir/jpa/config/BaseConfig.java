@@ -25,21 +25,22 @@ import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.search.SearchBuilder2;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import ca.uhn.fhir.jpa.dao.search.sql.CompositeUniqueSearchParameterPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.CoordsIndexTable;
-import ca.uhn.fhir.jpa.dao.search.sql.DateIndexTable;
-import ca.uhn.fhir.jpa.dao.search.sql.NumberIndexTable;
-import ca.uhn.fhir.jpa.dao.search.sql.QuantityIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.CoordsPredicateBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.DatePredicateBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.ForcedIdPredicateBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.NumberPredicateBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceIdPredicateBuilder3;
-import ca.uhn.fhir.jpa.dao.search.sql.ResourceLinkIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.ResourceSqlTable;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SourcePredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SqlBuilderFactory;
-import ca.uhn.fhir.jpa.dao.search.sql.StringIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.TagPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.TokenIndexTable;
-import ca.uhn.fhir.jpa.dao.search.sql.UriIndexTable;
+import ca.uhn.fhir.jpa.dao.search.sql.TokenPredicateBuilder;
+import ca.uhn.fhir.jpa.dao.search.sql.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
@@ -471,32 +472,38 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public CoordsIndexTable indexTableCoords(SearchSqlBuilder theSearchBuilder) {
-		return new CoordsIndexTable(theSearchBuilder);
+	public CoordsPredicateBuilder indexTableCoords(SearchSqlBuilder theSearchBuilder) {
+		return new CoordsPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public DateIndexTable indexTableDate(SearchSqlBuilder theSearchBuilder) {
-		return new DateIndexTable(theSearchBuilder);
+	public DatePredicateBuilder indexTableDate(SearchSqlBuilder theSearchBuilder) {
+		return new DatePredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public NumberIndexTable indexTableNumber(SearchSqlBuilder theSearchBuilder) {
-		return new NumberIndexTable(theSearchBuilder);
+	public ForcedIdPredicateBuilder forcedIdPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
+		return new ForcedIdPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public QuantityIndexTable indexTableQuantity(SearchSqlBuilder theSearchBuilder) {
-		return new QuantityIndexTable(theSearchBuilder);
+	public NumberPredicateBuilder indexTableNumber(SearchSqlBuilder theSearchBuilder) {
+		return new NumberPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public ResourceLinkIndexTable indexTableReference(QueryStack3 theQueryStack, SearchSqlBuilder theSearchBuilder, boolean theReversed) {
-		return new ResourceLinkIndexTable(theQueryStack, theSearchBuilder, theReversed);
+	public QuantityPredicateBuilder indexTableQuantity(SearchSqlBuilder theSearchBuilder) {
+		return new QuantityPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceLinkPredicateBuilder indexTableReference(QueryStack3 theQueryStack, SearchSqlBuilder theSearchBuilder, boolean theReversed) {
+		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
 	}
 
 	@Bean
@@ -525,14 +532,14 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public StringIndexTable indexTableString(SearchSqlBuilder theSearchBuilder) {
-		return new StringIndexTable(theSearchBuilder);
+	public StringPredicateBuilder indexTableString(SearchSqlBuilder theSearchBuilder) {
+		return new StringPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public TokenIndexTable indexTableToken(SearchSqlBuilder theSearchBuilder) {
-		return new TokenIndexTable(theSearchBuilder);
+	public TokenPredicateBuilder indexTableToken(SearchSqlBuilder theSearchBuilder) {
+		return new TokenPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
@@ -543,8 +550,8 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public UriIndexTable indexTableUri(SearchSqlBuilder theSearchBuilder) {
-		return new UriIndexTable(theSearchBuilder);
+	public UriPredicateBuilder indexTableUri(SearchSqlBuilder theSearchBuilder) {
+		return new UriPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean(name = SEARCH_BUILDER)

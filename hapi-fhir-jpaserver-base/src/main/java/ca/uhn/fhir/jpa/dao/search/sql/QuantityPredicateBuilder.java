@@ -22,9 +22,9 @@ import java.math.BigDecimal;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class QuantityIndexTable extends BaseSearchParamIndexTable {
+public class QuantityPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(QuantityIndexTable.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(QuantityPredicateBuilder.class);
 	private final DbColumn myColumnHashIdentitySystemUnits;
 	private final DbColumn myColumnHashIdentityUnits;
 	private final DbColumn myColumnValue;
@@ -32,7 +32,7 @@ public class QuantityIndexTable extends BaseSearchParamIndexTable {
 	/**
 	 * Constructor
 	 */
-	public QuantityIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public QuantityPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_QUANTITY"));
 
 		myColumnHashIdentitySystemUnits = getTable().addColumn("HASH_IDENTITY_SYS_UNITS");
@@ -42,7 +42,7 @@ public class QuantityIndexTable extends BaseSearchParamIndexTable {
 
 
 
-	public Condition createPredicateQuantity(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, QuantityIndexTable theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateQuantity(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, QuantityPredicateBuilder theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		String systemValue;
 		String unitsValue;
@@ -82,10 +82,13 @@ public class QuantityIndexTable extends BaseSearchParamIndexTable {
 			operation = QueryStack3.toOperation(cmpValue);
 		}
 		operation = defaultIfNull(operation, SearchFilterParser.CompareOperation.eq);
-		Condition numericPredicate = NumberIndexTable.createPredicateNumeric(this, theResourceName, theParamName, operation, valueValue, theRequestPartitionId, myColumnValue);
+		Condition numericPredicate = NumberPredicateBuilder.createPredicateNumeric(this, theResourceName, theParamName, operation, valueValue, theRequestPartitionId, myColumnValue);
 
 		return ComboCondition.and(hashPredicate, numericPredicate);
 	}
 
 
+	public DbColumn getColumnValue() {
+		return myColumnValue;
+	}
 }

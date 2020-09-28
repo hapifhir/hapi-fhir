@@ -5,7 +5,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -13,14 +12,12 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toOrPredicate;
 
-public class SearchParamPresentPredicateBuilder extends BaseIndexTable {
+public class SearchParamPresentPredicateBuilder extends BasePredicateBuilder {
 
 	private final DbColumn myColumnResourceId;
 	private final DbColumn myColumnHashPresence;

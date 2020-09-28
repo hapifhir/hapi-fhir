@@ -10,6 +10,8 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.InCondition;
+import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.Join;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -17,6 +19,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +27,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,11 +46,11 @@ public class SearchSqlBuilder {
 	private final ModelConfig myModelConfig;
 	private final FhirContext myFhirContext;
 	private final SqlBuilderFactory mySqlBuilderFactory;
-	private BaseIndexTable myCurrentIndexTable;
+	private BasePredicateBuilder myLastPredicateBuilder;
 	private boolean myMatchNothing;
 	private ResourceSqlTable myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
-	private Map<String, Object> myJoinMap = new HashMap<>();
+	private BasePredicateBuilder myFirstPredicateBuilder;
 
 	/**
 	 * Constructor
@@ -94,8 +95,8 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a COORDS search parameter
 	 */
-	public CoordsIndexTable addCoordsSelector(@Nullable DbColumn theSourceJoinColumn) {
-		CoordsIndexTable retVal = mySqlBuilderFactory.coordsIndexTable(this);
+	public CoordsPredicateBuilder addCoordsSelector(@Nullable DbColumn theSourceJoinColumn) {
+		CoordsPredicateBuilder retVal = mySqlBuilderFactory.coordsIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -103,17 +104,39 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a DATE search parameter
 	 */
-	public DateIndexTable addDateSelector(@Nullable DbColumn theSourceJoinColumn) {
-		DateIndexTable retVal = mySqlBuilderFactory.dateIndexTable(this);
+	public DatePredicateBuilder addDateSelector(@Nullable DbColumn theSourceJoinColumn) {
+		DatePredicateBuilder retVal = mySqlBuilderFactory.dateIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
 	/**
+	 * Add and return a predicate builder for selecting a forced ID. This is only intended for use with sorts so it can not
+	 * be the root query.
+	 */
+	public ForcedIdPredicateBuilder addForcedIdPredicateBuilder(@Nonnull DbColumn theSourceJoinColumn) {
+		Validate.isTrue(theSourceJoinColumn != null);
+
+		ForcedIdPredicateBuilder retVal = mySqlBuilderFactory.newForcedIdPredicateBuilder(this);
+		addTable(retVal, theSourceJoinColumn);
+		return retVal;
+	}
+
+
+	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a NUMBER search parameter
 	 */
-	public NumberIndexTable addNumberSelector(@Nullable DbColumn theSourceJoinColumn) {
-		NumberIndexTable retVal = mySqlBuilderFactory.numberIndexTable(this);
+	public NumberPredicateBuilder addNumberSelector(@Nullable DbColumn theSourceJoinColumn) {
+		NumberPredicateBuilder retVal = mySqlBuilderFactory.numberIndexTable(this);
+		addTable(retVal, theSourceJoinColumn);
+		return retVal;
+	}
+
+	/**
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
+	 */
+	public ResourceSqlTable addResourceTablePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+		ResourceSqlTable retVal = mySqlBuilderFactory.resourceTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -122,8 +145,8 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
-	public QuantityIndexTable addQuantity(@Nullable DbColumn theSourceJoinColumn) {
-		QuantityIndexTable retVal = mySqlBuilderFactory.quantityIndexTable(this);
+	public QuantityPredicateBuilder addQuantity(@Nullable DbColumn theSourceJoinColumn) {
+		QuantityPredicateBuilder retVal = mySqlBuilderFactory.quantityIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -139,8 +162,8 @@ public class SearchSqlBuilder {
 
 
 	// FIXME: remove
-	public ResourceLinkIndexTable addEverythingSelector(QueryStack3 theQueryStack, String theResourceName, Long theTargetPid) {
-		assert myCurrentIndexTable == null;
+	public ResourceLinkPredicateBuilder addEverythingSelector(QueryStack3 theQueryStack, String theResourceName, Long theTargetPid) {
+		assert myLastPredicateBuilder == null;
 
 //		if (theTargetPid != null) {
 		return addReferenceSelector(theQueryStack, null);
@@ -163,8 +186,8 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a REFERENCE search parameter
 	 */
-	public ResourceLinkIndexTable addReferenceSelector(QueryStack3 theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
-		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
+	public ResourceLinkPredicateBuilder addReferenceSelector(QueryStack3 theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
+		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -173,8 +196,8 @@ public class SearchSqlBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a reosource link where the
 	 * source and target are reversed. This is used for _has queries.
 	 */
-	public ResourceLinkIndexTable addReferenceSelectorReversed(QueryStack3 theQueryStack, DbColumn theSourceJoinColumn) {
-		ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
+	public ResourceLinkPredicateBuilder addReferenceSelectorReversed(QueryStack3 theQueryStack, DbColumn theSourceJoinColumn) {
+		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -182,8 +205,8 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a STRING search parameter
 	 */
-	public StringIndexTable addStringSelector(@Nullable DbColumn theSourceJoinColumn) {
-		StringIndexTable retVal = mySqlBuilderFactory.stringIndexTable(this);
+	public StringPredicateBuilder addStringSelector(@Nullable DbColumn theSourceJoinColumn) {
+		StringPredicateBuilder retVal = mySqlBuilderFactory.stringIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -200,8 +223,8 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a TOKEN search parameter
 	 */
-	public TokenIndexTable addTokenSelector(@Nullable DbColumn theSourceJoinColumn) {
-		TokenIndexTable retVal = mySqlBuilderFactory.tokenIndexTable(this);
+	public TokenPredicateBuilder addTokenSelector(@Nullable DbColumn theSourceJoinColumn) {
+		TokenPredicateBuilder retVal = mySqlBuilderFactory.tokenIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -218,8 +241,8 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a URI search parameter
 	 */
-	public UriIndexTable addUriSelector(@Nullable DbColumn theSourceJoinColumn) {
-		UriIndexTable retVal = mySqlBuilderFactory.uriIndexTable(this);
+	public UriPredicateBuilder addUriSelector(@Nullable DbColumn theSourceJoinColumn) {
+		UriPredicateBuilder retVal = mySqlBuilderFactory.uriIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -233,24 +256,27 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for an arbitrary table
 	 */
-	private void addTable(BaseIndexTable theIndexTable, @Nullable DbColumn theSourceJoinColumn) {
+	private void addTable(BasePredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
 		if (theSourceJoinColumn != null) {
 			DbTable fromTable = theSourceJoinColumn.getTable();
-			DbTable toTable = theIndexTable.getTable();
-			DbColumn toColumn = theIndexTable.getResourceIdColumn();
+			DbTable toTable = thePredicateBuilder.getTable();
+			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
 			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
 		} else {
-			if (myCurrentIndexTable == null) {
-				mySelect.addColumns(theIndexTable.getResourceIdColumn());
-				mySelect.addFromTable(theIndexTable.getTable());
+			if (myLastPredicateBuilder == null) {
+				mySelect.addColumns(thePredicateBuilder.getResourceIdColumn());
+				mySelect.addFromTable(thePredicateBuilder.getTable());
 			} else {
-				DbTable fromTable = myCurrentIndexTable.getTable();
-				DbTable toTable = theIndexTable.getTable();
-				DbColumn fromColumn = myCurrentIndexTable.getResourceIdColumn();
-				DbColumn toColumn = theIndexTable.getResourceIdColumn();
+				DbTable fromTable = myLastPredicateBuilder.getTable();
+				DbTable toTable = thePredicateBuilder.getTable();
+				DbColumn fromColumn = myLastPredicateBuilder.getResourceIdColumn();
+				DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
 				addJoin(fromTable, toTable, fromColumn, toColumn);
 			}
-			myCurrentIndexTable = theIndexTable;
+			myLastPredicateBuilder = thePredicateBuilder;
+			if (myFirstPredicateBuilder == null) {
+				myFirstPredicateBuilder = thePredicateBuilder;
+			}
 		}
 	}
 
@@ -264,7 +290,7 @@ public class SearchSqlBuilder {
 	 */
 	public GeneratedSql generate() {
 
-		getOrCreateQueryRootTable();
+		getOrCreateLastPredicateBuilder();
 
 		mySelect.validate();
 		String sql = mySelect.toString();
@@ -302,16 +328,26 @@ public class SearchSqlBuilder {
 	}
 
 	/**
-	 * If a query root already exists, return it. If none has been selected, create a root on HFJ_RESOURCE
+	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
 	 */
-	public BaseIndexTable getOrCreateQueryRootTable() {
-		if (myCurrentIndexTable == null) {
-			getOrCreateResourceTableRoot();
+	public BasePredicateBuilder getOrCreateFirstPredicateBuilder() {
+		if (myFirstPredicateBuilder == null) {
+			getOrCreateResourceTablePredicateBuilder();
 		}
-		return myCurrentIndexTable;
+		return myFirstPredicateBuilder;
 	}
 
-	public ResourceSqlTable getOrCreateResourceTableRoot() {
+	/**
+	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
+	 */
+	public BasePredicateBuilder getOrCreateLastPredicateBuilder() {
+		if (myLastPredicateBuilder == null) {
+			getOrCreateResourceTablePredicateBuilder();
+		}
+		return myLastPredicateBuilder;
+	}
+
+	public ResourceSqlTable getOrCreateResourceTablePredicateBuilder() {
 		if (myResourceTableRoot == null) {
 			ResourceSqlTable resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
@@ -372,7 +408,7 @@ public class SearchSqlBuilder {
 	}
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
-		ResourceSqlTable resourceTableRoot = getOrCreateResourceTableRoot();
+		ResourceSqlTable resourceTableRoot = getOrCreateResourceTablePredicateBuilder();
 
 		List<Condition> conditions = new ArrayList<>(2);
 		if (theDateRange.getLowerBoundAsInstant() != null) {
@@ -386,6 +422,13 @@ public class SearchSqlBuilder {
 		}
 
 		return ComboCondition.and(conditions.toArray(new Condition[0]));
+	}
+
+
+	public void addResourceIdsPredicate(List<Long> thePidList) {
+		DbColumn resourceIdColumn = getOrCreateLastPredicateBuilder().getResourceIdColumn();
+		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(thePidList));
+		addPredicate(predicate);
 	}
 
 
@@ -404,6 +447,7 @@ public class SearchSqlBuilder {
 		}
 	}
 
+	// FIXME: is this neeeded? no mutable state anymore
 	public SearchSqlBuilder newChildSqlBuilder() {
 		return new SearchSqlBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, myResourceType, mySqlBuilderFactory, myBindVariableSubstitutionBase, myBindVariableValues);
 	}
@@ -416,11 +460,12 @@ public class SearchSqlBuilder {
 		return myHaveAtLeastOnePredicate;
 	}
 
-	public void wrapSqlInOuterSelect() {
-		SelectQuery select = new SelectQuery();
-		
+	public void addSort(DbColumn theColumnValueNormalized, boolean theAscending) {
+		OrderObject.Dir direction = theAscending ? OrderObject.Dir.ASCENDING : OrderObject.Dir.DESCENDING;
+		OrderObject orderObject = new OrderObject(direction, theColumnValueNormalized);
+		orderObject.setNullOrder(OrderObject.NullOrder.LAST);
+		mySelect.addCustomOrderings(orderObject);
 	}
-
 
 	/**
 	 * Represents the SQL generated by this query

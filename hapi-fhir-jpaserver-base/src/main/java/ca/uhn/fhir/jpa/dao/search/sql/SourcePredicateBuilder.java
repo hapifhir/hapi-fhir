@@ -6,7 +6,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SourcePredicateBuilder extends BaseIndexTable {
+public class SourcePredicateBuilder extends BasePredicateBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SourcePredicateBuilder.class);
 	private final DbColumn myColumnSourceUri;

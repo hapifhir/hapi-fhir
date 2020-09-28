@@ -18,9 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-public class DateIndexTable extends BaseSearchParamIndexTable {
+public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(DateIndexTable.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(DatePredicateBuilder.class);
 	private final DbColumn myColumnValueHigh;
 	private final DbColumn myColumnValueLow;
 	private final DbColumn myColumnValueLowDateOrdinal;
@@ -32,7 +32,7 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 	/**
 	 * Constructor
 	 */
-	public DateIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public DatePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_DATE"));
 
 		myColumnValueLow = getTable().addColumn("SP_VALUE_LOW");
@@ -45,7 +45,7 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 	public Condition createPredicateDateWithoutIdentityPredicate(IQueryParameterType theParam,
 																					 String theResourceName,
 																					 String theParamName,
-																					 DateIndexTable theFrom,
+																					 DatePredicateBuilder theFrom,
 																					 SearchFilterParser.CompareOperation theOperation,
 																					 RequestPartitionId theRequestPartitionId) {
 
@@ -72,11 +72,7 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 		return p;
 	}
 
-	private boolean isNullOrDayPrecision(DateParam theDateParam) {
-		return theDateParam == null || theDateParam.getPrecision().ordinal() == TemporalPrecisionEnum.DAY.ordinal();
-	}
-
-	private Condition createPredicateDateFromRange(DateIndexTable theFrom,
+	private Condition createPredicateDateFromRange(DatePredicateBuilder theFrom,
 																  DateRangeParam theRange,
 																  SearchFilterParser.CompareOperation theOperation) {
 		Date lowerBoundInstant = theRange.getLowerBoundAsInstant();
@@ -98,17 +94,17 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 		Condition gt = null;
 		Condition lb = null;
 		Condition ub = null;
-		DateIndexTable.ColumnEnum lowValueField;
-		DateIndexTable.ColumnEnum highValueField;
+		DatePredicateBuilder.ColumnEnum lowValueField;
+		DatePredicateBuilder.ColumnEnum highValueField;
 
 		if (isOrdinalComparison) {
-			lowValueField = DateIndexTable.ColumnEnum.LOW_DATE_ORDINAL;
-			highValueField = DateIndexTable.ColumnEnum.HIGH_DATE_ORDINAL;
+			lowValueField = DatePredicateBuilder.ColumnEnum.LOW_DATE_ORDINAL;
+			highValueField = DatePredicateBuilder.ColumnEnum.HIGH_DATE_ORDINAL;
 			genericLowerBound = lowerBoundAsOrdinal;
 			genericUpperBound = upperBoundAsOrdinal;
 		} else {
-			lowValueField = DateIndexTable.ColumnEnum.LOW;
-			highValueField = DateIndexTable.ColumnEnum.HIGH;
+			lowValueField = DatePredicateBuilder.ColumnEnum.LOW;
+			highValueField = DatePredicateBuilder.ColumnEnum.HIGH;
 			genericLowerBound = lowerBoundInstant;
 			genericUpperBound = upperBoundInstant;
 		}
@@ -183,6 +179,14 @@ public class DateIndexTable extends BaseSearchParamIndexTable {
 		} else {
 			return (ub);
 		}
+	}
+
+	public DbColumn getColumnValueLow() {
+		return myColumnValueLow;
+	}
+
+	private boolean isNullOrDayPrecision(DateParam theDateParam) {
+		return theDateParam == null || theDateParam.getPrecision().ordinal() == TemporalPrecisionEnum.DAY.ordinal();
 	}
 
 	private Condition createPredicate(ColumnEnum theColumn, ParamPrefixEnum theComparator, Object theValue) {

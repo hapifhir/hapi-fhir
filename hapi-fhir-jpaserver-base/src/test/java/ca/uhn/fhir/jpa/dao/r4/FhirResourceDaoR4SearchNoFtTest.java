@@ -1402,10 +1402,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id in"));
-			assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport'"));
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at is null"));
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id = '123'"), sqlQuery);
+			assertEquals(0, StringUtils.countMatches(sqlQuery, "join"), sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport'"), sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at is null"), sqlQuery);
 		}
 		// With an _id parameter and a standard search param
 		{
@@ -1420,11 +1420,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id in"));
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "join"));
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "hash_sys_and_value"));
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport")); // could be 0
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at")); // could be 0
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id in"), sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "join"), sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "hash_sys_and_value"), sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport"), sqlQuery); // could be 0
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at"), sqlQuery); // could be 0
 		}
 	}
 
@@ -1441,10 +1441,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 		ourLog.info("SQL Query:\n{}", sqlQuery);
-		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id in"));
-		assertEquals(0, StringUtils.countMatches(sqlQuery, "join"));
-		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport'"));
-		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at is null"));
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id = '123'"), sqlQuery);
+		assertEquals(0, StringUtils.countMatches(sqlQuery, "join"), sqlQuery);
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport'"), sqlQuery);
+		assertEquals(1, StringUtils.countMatches(sqlQuery, "res_deleted_at is null"), sqlQuery);
 	}
 
 	@Test

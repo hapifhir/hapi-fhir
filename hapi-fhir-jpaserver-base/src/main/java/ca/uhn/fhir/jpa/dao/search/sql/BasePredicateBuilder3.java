@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
-import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
@@ -62,8 +61,8 @@ public class BasePredicateBuilder3 {
 		return mySearchSqlBuilder.createConditionForValueWithComparator(theComparator, theColumn, theValue);
 	}
 
-	protected BaseIndexTable getOrCreateQueryRootTable() {
-		return mySearchSqlBuilder.getOrCreateQueryRootTable();
+	protected BasePredicateBuilder getOrCreateQueryRootTable() {
+		return mySearchSqlBuilder.getOrCreateLastPredicateBuilder();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {

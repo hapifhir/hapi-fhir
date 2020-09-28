@@ -17,12 +17,12 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
 import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
 
-public abstract class BaseIndexTable extends BasePredicateBuilder3 {
+public abstract class BasePredicateBuilder extends BasePredicateBuilder3 {
 
 	private final DbTable myTable;
 	private final DbColumn myColumnPartitionId;
 
-	BaseIndexTable(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
+	BasePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder);
 		myTable = theTable;
 		myColumnPartitionId = theTable.addColumn("PARTITION_ID");

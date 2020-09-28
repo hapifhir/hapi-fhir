@@ -501,8 +501,9 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 		String resultingQueryNotFormatted = queries.get(0);
 
-		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "SP_VALUE"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, containsString("SP_VALUE in ('BAR' , 'FOO')"));
+		assertEquals(0, StringUtils.countMatches(resultingQueryNotFormatted, "SP_VALUE"), resultingQueryNotFormatted);
+		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"), resultingQueryNotFormatted);
+		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE IN ('3140583648400062149','4929264259256651518')"));
 
 		// Ensure that the search actually worked
 		assertEquals(2, search.size().intValue());

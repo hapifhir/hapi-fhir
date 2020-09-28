@@ -36,17 +36,12 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
-import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
-import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack2;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.dao.search.sql.SqlBuilderFactory;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -75,20 +70,14 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -108,8 +97,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
@@ -121,7 +108,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -389,14 +375,28 @@ public class SearchBuilder2 implements ISearchBuilder {
 			queryStack3.addPredicateEverythingOperation(myResourceName, targetPid);
 
 		} else {
+
+			/*
+			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
+			 * specific filters with ORs as their root from working around the natural resource type / deletion
+			 * status / partition IDs built into queries.
+			 */
+			if (theParams.containsKey(Constants.PARAM_FILTER)) {
+				Condition partitionIdPredicate = sqlBuilder.getOrCreateResourceTablePredicateBuilder().createPartitionIdPredicate(myRequestPartitionId);
+				if (partitionIdPredicate != null) {
+					sqlBuilder.addPredicate(partitionIdPredicate);
+				}
+			}
+
 			// Normal search
 			searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
+
 		}
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
 		if (!sqlBuilder.haveAtLeastOnePredicate()) {
-			Condition partitionIdPredicate = sqlBuilder.getOrCreateResourceTableRoot().createPartitionIdPredicate(myRequestPartitionId);
+			Condition partitionIdPredicate = sqlBuilder.getOrCreateResourceTablePredicateBuilder().createPartitionIdPredicate(myRequestPartitionId);
 			if (partitionIdPredicate != null) {
 				sqlBuilder.addPredicate(partitionIdPredicate);
 			}
@@ -404,15 +404,13 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		// Add PID list predicate for full text search and/or lastn operation
 		if (thePidList != null && thePidList.size() > 0) {
-		// FIXME: needed
-			throw new UnsupportedOperationException();
-//			myQueryStack.addPredicate(myQueryStack.get("myId").as(Long.class).in(thePidList));
+			sqlBuilder.addResourceIdsPredicate(thePidList);
 		}
 
 		// Last updated
 		DateRangeParam lu = myParams.getLastUpdated();
 		if (lu != null && !lu.isEmpty()) {
-			Condition lastUpdatedPredicates = createLastUpdatedPredicates(sqlBuilder, lu);
+			Condition lastUpdatedPredicates = sqlBuilder.addPredicateLastUpdated(lu);
 			sqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 
@@ -425,12 +423,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		if (sort != null) {
 			assert !theCount;
 
-			sqlBuilder.wrapSqlInOuterSelect();
-			List<Order> orders = createSort(myCriteriaBuilder, myQueryStack, sort);
-			if (orders.size() > 0) {
-				myQueryStack.orderBy(orders);
-			}
-
+			createSort(sqlBuilder, queryStack3, sort);
 		}
 
 
@@ -486,121 +479,70 @@ public class SearchBuilder2 implements ISearchBuilder {
 	 * @return Returns {@literal true} if any search parameter sorts were found, or false if
 	 * no sorts were found, or only non-search parameters ones (e.g. _id, _lastUpdated)
 	 */
-	private List<Order> createSort(CriteriaBuilder theBuilder, QueryStack3 theQueryStack, SortSpec theSort) {
+	private void createSort(SearchSqlBuilder theSqlBuilder, QueryStack3 theQueryStack, SortSpec theSort) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
-			return Collections.emptyList();
+			return;
 		}
 
-		List<Order> orders = new ArrayList<>(1);
-		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
-			From<?, ?> forcedIdJoin = theQueryStack.createJoin(SearchBuilderJoinEnum.FORCED_ID, null);
-			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
-				orders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
-				orders.add(theBuilder.asc(theQueryStack.get("myId")));
-			} else {
-				orders.add(theBuilder.desc(forcedIdJoin.get("myForcedId")));
-				orders.add(theBuilder.desc(theQueryStack.get("myId")));
-			}
-
-			orders.addAll(createSort(theBuilder, theQueryStack, theSort.getChain()));
-			return orders;
-		}
-
-		if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
-			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
-				orders.add(theBuilder.asc(theQueryStack.get("myUpdated")));
-			} else {
-				orders.add(theBuilder.desc(theQueryStack.get("myUpdated")));
-			}
-
-			orders.addAll(createSort(theBuilder, theQueryStack, theSort.getChain()));
-			return orders;
-		}
-
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
-		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theSort.getParamName());
-		if (param == null) {
-			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
-		}
-
-		String[] sortAttrName;
-		SearchBuilderJoinEnum joinType;
-
-		switch (param.getParamType()) {
-			case STRING:
-				sortAttrName = new String[]{"myValueExact"};
-				joinType = SearchBuilderJoinEnum.STRING;
-				break;
-			case DATE:
-				sortAttrName = new String[]{"myValueLow"};
-				joinType = SearchBuilderJoinEnum.DATE;
-				break;
-			case REFERENCE:
-				sortAttrName = new String[]{"myTargetResourcePid"};
-				joinType = SearchBuilderJoinEnum.REFERENCE;
-				break;
-			case TOKEN:
-				sortAttrName = new String[]{"mySystem", "myValue"};
-				joinType = SearchBuilderJoinEnum.TOKEN;
-				break;
-			case NUMBER:
-				sortAttrName = new String[]{"myValue"};
-				joinType = SearchBuilderJoinEnum.NUMBER;
-				break;
-			case URI:
-				sortAttrName = new String[]{"myUri"};
-				joinType = SearchBuilderJoinEnum.URI;
-				break;
-			case QUANTITY:
-				sortAttrName = new String[]{"myValue"};
-				joinType = SearchBuilderJoinEnum.QUANTITY;
-				break;
-			case SPECIAL:
-			case COMPOSITE:
-			case HAS:
-			default:
-				throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
-		}
-
-		/*
-		 * If we've already got a join for the specific parameter we're
-		 * sorting on, we'll also sort with it. Otherwise we need a new join.
-		 */
-		SearchBuilderJoinKey key = new SearchBuilderJoinKey(theSort.getParamName(), joinType);
-		Optional<Join<?, ?>> joinOpt = theQueryStack.getExistingJoin(key);
-
-		From<?, ?> join;
-		if (!joinOpt.isPresent()) {
-			join = theQueryStack.createJoin(joinType, theSort.getParamName());
-
-			if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-				theQueryStack.addPredicate(join.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
-			} else {
-				if (myDaoConfig.getDisableHashBasedSearches()) {
-					Predicate joinParam1 = theBuilder.equal(join.get("myParamName"), theSort.getParamName());
-					theQueryStack.addPredicate(joinParam1);
-				} else {
-					Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings, myRequestPartitionId, myResourceName, theSort.getParamName());
-					Predicate joinParam1 = theBuilder.equal(join.get("myHashIdentity"), hashIdentity);
-					theQueryStack.addPredicate(joinParam1);
-				}
-			}
+		boolean ascending;
+		if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
+			ascending = true;
 		} else {
-			ourLog.debug("Reusing join for {}", theSort.getParamName());
-			join = joinOpt.get();
+			ascending = false;
 		}
 
-		for (String next : sortAttrName) {
-			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
-				orders.add(theBuilder.asc(join.get(next)));
-			} else {
-				orders.add(theBuilder.desc(join.get(next)));
+
+		// FIXME: restore
+		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
+
+			theQueryStack.addSortOnResourceId(ascending);
+
+		} else if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
+
+			theQueryStack.addSortOnLastUpdated(ascending);
+
+		} else {
+
+			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
+			RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theSort.getParamName());
+			if (param == null) {
+				throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
 			}
+
+			switch (param.getParamType()) {
+				case STRING:
+					theQueryStack.addSortOnString(myResourceName, theSort.getParamName(), ascending);
+					break;
+				case DATE:
+					theQueryStack.addSortOnDate(myResourceName, theSort.getParamName(), ascending);
+					break;
+				case REFERENCE:
+					theQueryStack.addSortOnResourceLink(myResourceName, theSort.getParamName(), ascending);
+					break;
+				case TOKEN:
+					theQueryStack.addSortOnToken(myResourceName, theSort.getParamName(), ascending);
+					break;
+				case NUMBER:
+					theQueryStack.addSortOnNumber(myResourceName, theSort.getParamName(), ascending);
+					break;
+				case URI:
+					theQueryStack.addSortOnUri(myResourceName, theSort.getParamName(), ascending);
+					break;
+				case QUANTITY:
+					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
+					break;
+				case SPECIAL:
+				case COMPOSITE:
+				case HAS:
+				default:
+					throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+			}
+
 		}
 
-		orders.addAll(createSort(theBuilder, theQueryStack, theSort.getChain()));
+		// Recurse
+		createSort(theSqlBuilder, theQueryStack, theSort.getChain());
 
-		return orders;
 	}
 
 	private void doLoadPids(Collection<ResourcePersistentId> thePids, Collection<ResourcePersistentId> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation,
@@ -1020,101 +962,6 @@ public class SearchBuilder2 implements ISearchBuilder {
 	@VisibleForTesting
 	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
-	}
-
-	// FIXME: inline?
-	private Condition createLastUpdatedPredicates(SearchSqlBuilder theSearchSqlBuilder, final DateRangeParam theLastUpdated) {
-		return theSearchSqlBuilder.addPredicateLastUpdated(theLastUpdated);
-	}
-
-	private Condition processFilter(QueryStack3 theQueryStack3, SearchFilterParser.Filter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-
-		if (theFilter instanceof SearchFilterParser.FilterParameter) {
-			return processFilterParameter(theQueryStack3, (SearchFilterParser.FilterParameter) theFilter, theResourceName, theRequest, theRequestPartitionId);
-		} else if (theFilter instanceof SearchFilterParser.FilterLogical) {
-			// Left side
-			Condition xPredicate = processFilter(theQueryStack3, ((SearchFilterParser.FilterLogical) theFilter).getFilter1(), theResourceName, theRequest, theRequestPartitionId);
-
-			// Right side
-			Condition yPredicate = processFilter(theQueryStack3, ((SearchFilterParser.FilterLogical) theFilter).getFilter2(), theResourceName, theRequest, theRequestPartitionId);
-
-			if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
-				return ComboCondition.and(xPredicate, yPredicate);
-			} else if (((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.or) {
-				return ComboCondition.or(xPredicate, yPredicate);
-			}
-		} else if (theFilter instanceof SearchFilterParser.FilterParameterGroup) {
-			return processFilter(theQueryStack3, ((SearchFilterParser.FilterParameterGroup) theFilter).getContained(), theResourceName, theRequest, theRequestPartitionId);
-		}
-		return null;
-	}
-
-	private Condition processFilterParameter(QueryStack3 theQueryStack3, SearchFilterParser.FilterParameter theFilter,
-														  String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-
-		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
-
-		if (searchParam == null) {
-			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
-		} else if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
-				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null,
-					null,
-					null,
-					theFilter.getValue());
-				return theQueryStack3.createPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
-			}
-		} else if (searchParam.getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
-				return theQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),					theFilter.getOperation());
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
-			}
-		} else if (searchParam.getName().equals(Constants.PARAM_SOURCE)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
-				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
-				// FIXME: implement
-				throw new UnsupportedOperationException();
-//				return addPredicateSource(Collections.singletonList(param), theFilter.getOperation(), theRequest);
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
-			}
-		} else {
-			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
-			if (typeEnum == RestSearchParameterTypeEnum.URI) {
-				return theQueryStack3.createPredicateUri(null, theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
-				return theQueryStack3.createPredicateString(null, theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
-				return theQueryStack3.createPredicateDate(null, theResourceName, searchParam, Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(),  theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
-				return theQueryStack3.createPredicateNumber(null, theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
-				String paramName = theFilter.getParamPath().getName();
-				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
-				String resourceType = null; // The value can either have (Patient/123) or not have (123) a resource type, either way it's not needed here
-				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
-				String value = theFilter.getValue();
-				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
-				return theQueryStack3.createPredicateReference(null, theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
-				return theQueryStack3.createPredicateQuantity(null, theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
-				throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
-			} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
-				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null,
-					null,
-					null,
-					theFilter.getValue());
-				return theQueryStack3.createPredicateToken(null, theResourceName, searchParam, Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
-			}
-		}
-		return null;
 	}
 
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {

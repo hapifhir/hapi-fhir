@@ -17,7 +17,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class CoordsIndexTable extends BaseSearchParamIndexTable {
+public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	private final DbColumn myColumnLatitude;
 	private final DbColumn myColumnLongitude;
@@ -25,7 +25,7 @@ public class CoordsIndexTable extends BaseSearchParamIndexTable {
 	/**
 	 * Constructor
 	 */
-	public CoordsIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public CoordsPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_COORDS"));
 
 		myColumnLatitude = getTable().addColumn("SP_LATITUDE");
@@ -37,7 +37,7 @@ public class CoordsIndexTable extends BaseSearchParamIndexTable {
 														IQueryParameterType theParam,
 														String theResourceName,
 														RuntimeSearchParam theSearchParam,
-														CoordsIndexTable theFrom,
+														CoordsPredicateBuilder theFrom,
 														RequestPartitionId theRequestPartitionId) {
 		String latitudeValue;
 		String longitudeValue;
