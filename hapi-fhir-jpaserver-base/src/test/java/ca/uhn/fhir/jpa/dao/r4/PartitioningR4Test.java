@@ -28,6 +28,9 @@ import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -38,7 +41,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
@@ -51,6 +53,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -646,7 +650,6 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 
-
 	@Test
 	public void testCreateInTransaction_ServerId_WithPartition() {
 		createUniqueCompositeSp();
@@ -770,7 +773,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_TOKEN
-			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			assertEquals(3, myResourceIndexedSearchParamTokenDao.countForResourceId(patientId));
 		});
 
@@ -791,7 +794,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_TOKEN
-			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			assertEquals(3, myResourceIndexedSearchParamTokenDao.countForResourceId(patientId));
 
 			// HFJ_RES_VER
@@ -1560,6 +1563,45 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	@Test
+	public void testSearch_HasParam_SearchOnePartition() {
+		addReadPartition(1);
+		addCreatePartition(1, null);
+		Organization org = new Organization();
+		org.setId("ORG");
+		org.setName("ORG");
+		myOrganizationDao.update(org);
+
+		addReadPartition(1);
+		addCreatePartition(1, null);
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId("PRACT");
+		practitioner.addName().setFamily("PRACT");
+		myPractitionerDao.update(practitioner);
+
+		addReadPartition(1);
+		addCreatePartition(1, null);
+		PractitionerRole role = new PractitionerRole();
+		role.setId("ROLE");
+		role.getPractitioner().setReference("Practitioner/PRACT");
+		role.getOrganization().setReference("Organization/ORG");
+		myPractitionerRoleDao.update(role);
+
+		addReadPartition(1);
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		HasAndListParam value = new HasAndListParam();
+		value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "_id", "ROLE")));
+		params.add("_has", value);
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myPractitionerDao.search(params);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
+		assertEquals(1, outcome.getResources(0, 1).size());
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+	}
+
 
 	@Test
 	public void testSearch_StringParam_SearchAllPartitions() {
@@ -1733,11 +1775,11 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
 		map.add(Patient.SP_IDENTIFIER, new TokenParam("http://foo", "bar"));
 		map.setLoadSynchronous(true);
-		 results = myPatientDao.search(map);
-		 ids = toUnqualifiedVersionlessIds(results);
+		results = myPatientDao.search(map);
+		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, Matchers.contains(patientIdNull, patientId1));
 
-		 searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"), searchSql);

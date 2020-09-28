@@ -233,11 +233,14 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		observation.setEffective(new DateTimeType("1965-08-10"));
 		myObservationDao.create(observation).getId().toUnqualified();
 
+		myCaptureQueriesListener.clear();
 		Bundle output = myClient
 			.search()
 			.byUrl("Observation?_count=0")
 			.returnBundle(Bundle.class)
 			.execute();
+		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(2, output.getTotal());
 		assertEquals(0, output.getEntry().size());

@@ -75,6 +75,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -371,7 +372,7 @@ public class QueryStack3 {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null,					null,					null,					theFilter.getValue());
-				return theQueryStack3.createPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), theResourceName, theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateResourceId(null, Collections.singletonList(Collections.singletonList(param)), theResourceName, theFilter.getOperation(), theRequestPartitionId);
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
 			}
@@ -513,11 +514,13 @@ public class QueryStack3 {
 			}
 
 			ResourceLinkPredicateBuilder join = mySqlBuilder.addReferenceSelectorReversed(this, theSourceJoinColumn);
+			Condition partitionPredicate = join.createPartitionIdPredicate(theRequestPartitionId);
+
 			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference);
 			Condition typePredicate = BinaryCondition.equalTo(join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
 			Condition pathPredicate = toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 			Condition linkedPredicate = searchForIdsWithAndOr(join.getColumnSrcResourceId(), targetResourceType, parameterName, Collections.singletonList(orValues), theRequest, theRequestPartitionId);
-			andPredicates.add(toAndPredicate(pathPredicate, typePredicate, linkedPredicate));
+			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
 
 		return toAndPredicate(andPredicates);
@@ -652,9 +655,9 @@ public class QueryStack3 {
 	}
 
 	@Nullable
-	public Condition createPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateResourceId(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 		ResourceIdPredicateBuilder3 builder = mySqlBuilder.newResourceIdBuilder();
-		return builder.createPredicateResourceId(theResourceName, theValues, theOperation, theRequestPartitionId);
+		return builder.createPredicateResourceId(theSourceJoinColumn, theResourceName, theValues, theOperation, theRequestPartitionId);
 	}
 
 	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, String theResourceName, List<List<IQueryParameterType>> theAndOrParams) {
@@ -900,7 +903,7 @@ public class QueryStack3 {
 
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
-				return createPredicateResourceId(theAndOrParams, theResourceName, null, theRequestPartitionId);
+				return createPredicateResourceId(theSourceJoinColumn, theAndOrParams, theResourceName, null, theRequestPartitionId);
 
 			case IAnyResource.SP_RES_LANGUAGE:
 				return createPredicateLanguage(theAndOrParams, null);

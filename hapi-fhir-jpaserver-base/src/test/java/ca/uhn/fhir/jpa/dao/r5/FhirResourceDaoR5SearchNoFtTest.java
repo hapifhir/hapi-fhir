@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -95,11 +96,17 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		role.getOrganization().setReference("Organization/ORG");
 		myPractitionerRoleDao.update(role);
 
-		SearchParameterMap params = new SearchParameterMap();
+		runInTransaction(()->{
+			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		HasAndListParam value = new HasAndListParam();
 		value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "_id", "ROLE")));
 		params.add("_has", value);
+		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPractitionerDao.search(params);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
 		assertEquals(1, outcome.getResources(0, 1).size());
 	}
 

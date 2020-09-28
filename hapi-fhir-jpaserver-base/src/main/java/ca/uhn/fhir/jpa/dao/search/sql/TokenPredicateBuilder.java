@@ -259,7 +259,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			if (nextToken.getSystem() == null) {
 				hash = ResourceIndexedSearchParamToken.calculateHashValue(getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, nextToken.getCode());
 				column = myColumnHashValue;
-			} else if (nextToken.getCode() == null) {
+			} else if (isBlank(nextToken.getCode())) {
 				hash = ResourceIndexedSearchParamToken.calculateHashSystem(getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, nextToken.getSystem());
 				column = myColumnHashSystem;
 			} else {

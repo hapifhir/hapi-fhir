@@ -2363,36 +2363,38 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam1");
 		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
 			.setDisplay("testSearchTokenParamDisplay");
-		myPatientDao.create(patient, mySrd);
+		String id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
-		myPatientDao.create(patient, mySrd);
+		String id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue(null);
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
-		myPatientDao.create(patient, mySrd);
+		String id3 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
-		myPatientDao.create(patient, mySrd);
+		String id4 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		{
-			// Match system="urn:system" and value = *
-			SearchParameterMap map = new SearchParameterMap();
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", null));
-			IBundleProvider retrieved = myPatientDao.search(map);
-			assertEquals(2, retrieved.size().intValue());
+			myCaptureQueriesListener.clear();
+			List<String> values = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+			assertThat(values, containsInAnyOrder(id1, id2));
 		}
 		{
-			// Match system="urn:system" and value = ""
-			SearchParameterMap map = new SearchParameterMap();
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", ""));
-			IBundleProvider retrieved = myPatientDao.search(map);
-			assertEquals(2, retrieved.size().intValue());
+			myCaptureQueriesListener.clear();
+			List<String> values = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+			assertThat(values, containsInAnyOrder(id1, id2));
 		}
 	}
 

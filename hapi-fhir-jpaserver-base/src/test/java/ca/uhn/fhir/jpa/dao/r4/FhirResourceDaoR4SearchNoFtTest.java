@@ -1420,7 +1420,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id in"), sqlQuery);
+			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_id = '123'"), sqlQuery);
 			assertEquals(1, StringUtils.countMatches(sqlQuery, "join"), sqlQuery);
 			assertEquals(1, StringUtils.countMatches(sqlQuery, "hash_sys_and_value"), sqlQuery);
 			assertEquals(1, StringUtils.countMatches(sqlQuery, "res_type = 'diagnosticreport"), sqlQuery); // could be 0

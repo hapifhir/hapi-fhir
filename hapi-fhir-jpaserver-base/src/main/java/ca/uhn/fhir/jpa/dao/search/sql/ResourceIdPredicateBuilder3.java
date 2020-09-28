@@ -3,10 +3,12 @@ package ca.uhn.fhir.jpa.dao.search.sql;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +37,7 @@ public class ResourceIdPredicateBuilder3 extends BasePredicateBuilder3 {
 
 
 	@Nullable
-	public Condition createPredicateResourceId(String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateResourceId(@Nullable DbColumn theSourceJoinColumn, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		Set<ResourcePersistentId> allOrPids = null;
 
@@ -79,14 +81,18 @@ public class ResourceIdPredicateBuilder3 extends BasePredicateBuilder3 {
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
 			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
 
-			BasePredicateBuilder queryRootTable = super.getOrCreateQueryRootTable();
-
-			switch (operation) {
-				default:
-				case eq:
-					return queryRootTable.createPredicateResourceIds(false, ResourcePersistentId.toLongList(allOrPids));
-				case ne:
-					return queryRootTable.createPredicateResourceIds(true, ResourcePersistentId.toLongList(allOrPids));
+			List<Long> resourceIds = ResourcePersistentId.toLongList(allOrPids);
+			if (theSourceJoinColumn == null) {
+				BasePredicateBuilder queryRootTable = super.getOrCreateQueryRootTable();
+				switch (operation) {
+					default:
+					case eq:
+						return queryRootTable.createPredicateResourceIds(false, resourceIds);
+					case ne:
+						return queryRootTable.createPredicateResourceIds(true, resourceIds);
+				}
+			} else {
+				return QueryStack3.toEqualToOrInPredicate(theSourceJoinColumn, generatePlaceholders(resourceIds), operation == SearchFilterParser.CompareOperation.ne);
 			}
 
 		}

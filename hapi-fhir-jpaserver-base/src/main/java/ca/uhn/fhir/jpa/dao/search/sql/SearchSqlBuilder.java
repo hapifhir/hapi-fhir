@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
@@ -46,6 +47,7 @@ public class SearchSqlBuilder {
 	private final ModelConfig myModelConfig;
 	private final FhirContext myFhirContext;
 	private final SqlBuilderFactory mySqlBuilderFactory;
+	private final boolean myCountQuery;
 	private BasePredicateBuilder myLastPredicateBuilder;
 	private boolean myMatchNothing;
 	private ResourceSqlTable myResourceTableRoot;
@@ -55,20 +57,21 @@ public class SearchSqlBuilder {
 	/**
 	 * Constructor
 	 */
-	public SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory) {
-		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", new ArrayList<>());
+	public SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory, boolean theCountQuery) {
+		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", theCountQuery, new ArrayList<>());
 	}
 
 	/**
 	 * Constructor for child SQL Builders
 	 */
-	private SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory, String theBindVariableSubstitutionBase, ArrayList<Object> theBindVariableValues) {
+	private SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory, String theBindVariableSubstitutionBase, boolean theCountQuery, ArrayList<Object> theBindVariableValues) {
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
 		myPartitionSettings = thePartitionSettings;
 		myRequestPartitionId = theRequestPartitionId;
 		myResourceType = theResourceType;
 		mySqlBuilderFactory = theSqlBuilderFactory;
+		myCountQuery = theCountQuery;
 
 		mySpec = new DbSpec();
 		mySchema = mySpec.addDefaultSchema();
@@ -264,7 +267,11 @@ public class SearchSqlBuilder {
 			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
 		} else {
 			if (myLastPredicateBuilder == null) {
-				mySelect.addColumns(thePredicateBuilder.getResourceIdColumn());
+				if (myCountQuery) {
+					mySelect.addCustomColumns(FunctionCall.count().addColumnParams(thePredicateBuilder.getResourceIdColumn()));
+				} else {
+					mySelect.addColumns(thePredicateBuilder.getResourceIdColumn());
+				}
 				mySelect.addFromTable(thePredicateBuilder.getTable());
 			} else {
 				DbTable fromTable = myLastPredicateBuilder.getTable();
@@ -449,7 +456,7 @@ public class SearchSqlBuilder {
 
 	// FIXME: is this neeeded? no mutable state anymore
 	public SearchSqlBuilder newChildSqlBuilder() {
-		return new SearchSqlBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, myResourceType, mySqlBuilderFactory, myBindVariableSubstitutionBase, myBindVariableValues);
+		return new SearchSqlBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, myResourceType, mySqlBuilderFactory, myBindVariableSubstitutionBase, false, myBindVariableValues);
 	}
 
 	public SelectQuery getSelect() {
