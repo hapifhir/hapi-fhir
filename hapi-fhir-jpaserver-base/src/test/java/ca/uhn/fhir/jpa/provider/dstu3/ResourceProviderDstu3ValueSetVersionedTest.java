@@ -505,6 +505,61 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	}
 
 	@Test
+	public void testExpandByUrlAndVersionNoPreExpansion() throws Exception {
+		myDaoConfig.setPreExpandValueSets(false);
+		loadAndPersistCodeSystemAndValueSet();
+
+		// Check expansion of multi-versioned ValueSet with version 1
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
+		// Check expansion of multi-versioned ValueSet with version set to null
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
+		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		// Should return v2 as this was the last version loaded.
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+
+		// Check expansion of version 2
+		respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
+		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+
+	}
+
+	@Test
 	public void testExpandByUrlWithBogusVersion() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 

@@ -111,6 +111,26 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
 
+	@Test
+	public void testSubsumesOnCodings_Subsumes() {
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_SUBSUMES)
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(1, respParam.getParameter().size());
+		assertEquals("outcome", respParam.getParameter().get(0).getName());
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+	}
+
+
+
 	private void createCodeSystem(String url, String version, String code, String display) {
 		
 		CodeSystem codeSystem = new CodeSystem();

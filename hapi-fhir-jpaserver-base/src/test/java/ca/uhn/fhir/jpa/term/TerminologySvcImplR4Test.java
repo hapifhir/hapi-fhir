@@ -2068,4 +2068,12 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
 	}
+
+	@Test
+	public void testFindCodeInvalidCodeSystem() {
+		runInTransaction(() -> {
+			Optional<TermConcept> termConcept = myTermSvc.findCode("http://InvalidSystem", "mycode");
+			assertFalse(termConcept.isPresent());
+		});
+	}
 }

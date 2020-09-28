@@ -655,22 +655,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	 */
 	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull) {
 
-		String includeOrExcludeSystemUrl = theIncludeOrExclude.getSystem();
-		boolean hasSystem = isNotBlank(includeOrExcludeSystemUrl);
+		String system = theIncludeOrExclude.getSystem();
+		boolean hasSystem = isNotBlank(system);
 		boolean hasValueSet = theIncludeOrExclude.getValueSet().size() > 0;
 
 		if (hasSystem) {
 
-			if (theWantConceptOrNull != null && theWantConceptOrNull.getSystem() != null && !includeOrExcludeSystemUrl.equals(theWantConceptOrNull.getSystem())) {
+			if (theWantConceptOrNull != null && theWantConceptOrNull.getSystem() != null && !system.equals(theWantConceptOrNull.getSystem())) {
 				return false;
 			}
 
-			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), includeOrExcludeSystemUrl);
+			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
 
-			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(includeOrExcludeSystemUrl);
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 			if (cs != null) {
 
-				return expandValueSetHandleIncludeOrExcludeUsingDatabase(theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, theAdd, theCodeCounter, theQueryIndex, theWantConceptOrNull, includeOrExcludeSystemUrl, cs);
+				return expandValueSetHandleIncludeOrExcludeUsingDatabase(theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, theAdd, theCodeCounter, theQueryIndex, theWantConceptOrNull, system, cs);
 
 			} else {
 
@@ -683,7 +683,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				}
 
 				// No CodeSystem matching the URL found in the database.
-				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(includeOrExcludeSystemUrl);
+				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(system);
 				if (codeSystemFromContext == null) {
 
 					// This is a last ditch effort.. We don't have a CodeSystem resource for the desired CS, and we don't have
@@ -708,7 +708,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						for (VersionIndependentConcept next : includedConcepts) {
 							String nextSystem = next.getSystem();
 							if (nextSystem == null) {
-								nextSystem = includeOrExcludeSystemUrl;
+								nextSystem = system;
 							}
 
 							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode());
@@ -724,7 +724,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						}
 					}
 
-					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", includeOrExcludeSystemUrl);
+					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
 					if (provideExpansionOptions(theExpansionOptions).isFailOnMissingCodeSystem()) {
 						throw new PreconditionFailedException(msg);
 					} else {
@@ -739,12 +739,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
 						String nextCode = next.getCode();
 						if (theWantConceptOrNull == null || theWantConceptOrNull.getCode().equals(nextCode)) {
-							if (isNoneBlank(includeOrExcludeSystemUrl, nextCode) && !theAddedCodes.contains(includeOrExcludeSystemUrl + "|" + nextCode)) {
+							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
 
 								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
 								if (code != null) {
 									String display = code.getDisplay();
-									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, includeOrExcludeSystemUrl, nextCode, display);
+									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
 								}
 
 							}
@@ -752,7 +752,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					}
 				} else {
 					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
-					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, includeOrExcludeSystemUrl, concept, theAdd, theWantConceptOrNull);
+					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, system, concept, theAdd, theWantConceptOrNull);
 				}
 
 				return false;

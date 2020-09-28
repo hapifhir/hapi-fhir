@@ -401,6 +401,28 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
+	public void testExpandByUrlNoPreExpansion() throws Exception {
+		myDaoConfig.setPreExpandValueSets(false);
+
+		loadAndPersistCodeSystemAndValueSet();
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, Matchers.stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
+	}
+
+	@Test
 	public void testExpandByUrlWithBogusUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
