@@ -31,7 +31,7 @@ public class ResourceProviderR4CodeSystemValidationTest extends BaseResourceProv
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemValidationTest.class);
 
 	private IIdType myCsId;
-	private static final String CS_ACMS_URL = "http://acme.org";
+	private static final String CS_ACME_URL = "http://acme.org";
 
 	@BeforeEach
 	@Transactional

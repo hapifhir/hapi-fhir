@@ -886,7 +886,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testTranslateWithConcaptMapUrlAndVersion() {
+	public void testTranslateWithConceptMapUrlAndVersion() {
 		
 		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();
