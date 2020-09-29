@@ -90,7 +90,7 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
 		@OperationParam(name = "codingA", min = 0, max = 1) Coding theCodingA,
 		@OperationParam(name = "codingB", min = 0, max = 1) Coding theCodingB,
-		@OperationParam(name="version", min=0, max=1) StringType theVersion,
+		@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
 		RequestDetails theRequestDetails
 	) {
 
