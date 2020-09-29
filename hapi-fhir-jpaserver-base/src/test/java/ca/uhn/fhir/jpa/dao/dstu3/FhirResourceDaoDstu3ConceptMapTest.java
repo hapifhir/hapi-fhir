@@ -118,7 +118,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testConcaptMapTwoConceptMapWithSameUrlDifferentVersion() {
+	public void testConceptMapTwoConceptMapWithSameUrlDifferentVersion() {
 				
 		String theUrl = "http://loinc.org/property/analyte-suffix";
 		ConceptMap theConceptMap1 = new ConceptMap();
