@@ -9,6 +9,7 @@ import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.provider.EmpiControllerHelper;
+import ca.uhn.fhir.empi.provider.EmpiControllerUtil;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -45,10 +46,10 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 
 	@Override
 	public Stream<EmpiLinkJson> queryLinks(@Nullable String thePersonId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, EmpiTransactionContext theEmpiContext) {
-		IIdType personId = EmpiControllerHelper.extractPersonIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, thePersonId);
-		IIdType targetId = EmpiControllerHelper.extractTargetIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, theTargetId);
-		EmpiMatchResultEnum matchResult = EmpiControllerHelper.extractMatchResultOrNull(theMatchResult);
-		EmpiLinkSourceEnum linkSource = EmpiControllerHelper.extractLinkSourceOrNull(theLinkSource);
+		IIdType personId = EmpiControllerUtil.extractPersonIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, thePersonId);
+		IIdType targetId = EmpiControllerUtil.extractTargetIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, theTargetId);
+		EmpiMatchResultEnum matchResult = EmpiControllerUtil.extractMatchResultOrNull(theMatchResult);
+		EmpiLinkSourceEnum linkSource = EmpiControllerUtil.extractLinkSourceOrNull(theLinkSource);
 
 		return myEmpiLinkQuerySvc.queryLinks(personId, targetId, matchResult, linkSource, theEmpiContext);
 	}
@@ -60,7 +61,7 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 
 	@Override
 	public IAnyResource updateLink(String thePersonId, String theTargetId, String theMatchResult, EmpiTransactionContext theEmpiContext) {
-		EmpiMatchResultEnum matchResult = EmpiControllerHelper.extractMatchResultOrNull(theMatchResult);
+		EmpiMatchResultEnum matchResult = EmpiControllerUtil.extractMatchResultOrNull(theMatchResult);
 		IAnyResource person = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
 		IAnyResource target = myEmpiControllerHelper.getLatestTargetFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
 		myEmpiControllerHelper.validateSameVersion(person, thePersonId);

@@ -2,8 +2,6 @@ package ca.uhn.fhir.empi.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
-import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -39,66 +37,19 @@ public class EmpiControllerHelper {
 	}
 
 	public IAnyResource getLatestPersonFromIdOrThrowException(String theParamName, String theId) {
-		IdDt personId = getPersonIdDtOrThrowException(theParamName, theId);
+		IdDt personId = EmpiControllerUtil.getPersonIdDtOrThrowException(theParamName, theId);
 		return loadResource(personId.toUnqualifiedVersionless());
 	}
 
 
 	public IAnyResource getLatestTargetFromIdOrThrowException(String theParamName, String theId) {
-		IIdType targetId = getTargetIdDtOrThrowException(theParamName, theId);
+		IIdType targetId = EmpiControllerUtil.getTargetIdDtOrThrowException(theParamName, theId);
 		return loadResource(targetId.toUnqualifiedVersionless());
 	}
 
 	protected IAnyResource loadResource(IIdType theResourceId) {
 		Class<? extends IBaseResource> resourceClass = myFhirContext.getResourceDefinition(theResourceId.getResourceType()).getImplementingClass();
 		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
-	}
-
-	public static EmpiMatchResultEnum extractMatchResultOrNull(String theMatchResult) {
-		if (theMatchResult == null) {
-			return null;
-		}
-		return EmpiMatchResultEnum.valueOf(theMatchResult);
-	}
-
-	public static EmpiLinkSourceEnum extractLinkSourceOrNull(String theLinkSource) {
-		if (theLinkSource == null) {
-			return null;
-		}
-		return EmpiLinkSourceEnum.valueOf(theLinkSource);
-	}
-
-	public static IIdType extractPersonIdDtOrNull(String theName, String thePersonId) {
-		if (thePersonId == null) {
-			return null;
-		}
-		return getPersonIdDtOrThrowException(theName, thePersonId);
-	}
-
-	public static IIdType extractTargetIdDtOrNull(String theName, String theTargetId) {
-		if (theTargetId == null) {
-			return null;
-		}
-		return getTargetIdDtOrThrowException(theName, theTargetId);
-	}
-
-	private static IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
-		IdDt personId = new IdDt(theId);
-		if (!"Person".equals(personId.getResourceType()) ||
-			personId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form Person/<id> where <id> is the id of the person");
-		}
-		return personId;
-	}
-
-	public static IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
-		IdDt targetId = new IdDt(theId);
-		String resourceType = targetId.getResourceType();
-		if (!EmpiUtil.supportedTargetType(resourceType) ||
-			targetId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource");
-		}
-		return targetId;
 	}
 
 	public void validateMergeResources(IAnyResource theFromPerson, IAnyResource theToPerson) {
