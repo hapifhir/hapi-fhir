@@ -1155,7 +1155,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testConcaptMapFindTermConceptMapByUrl() {
+	public void testConceptMapFindTermConceptMapByUrl() {
 			
 		Pageable page = PageRequest.of(0, 1);
 		List<TermConceptMap> theExpConceptMapList = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, CM_URL);
