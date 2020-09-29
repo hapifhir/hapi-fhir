@@ -175,7 +175,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	}
 	
 	@Test
-	public void testTranslateWithVersionedConcaptMapUrl_v2() {
+	public void testTranslateWithVersionedConceptMapUrl_v2() {
 
 		String url = "http://url";
 		createConceptMap(url, "v1", "12222", "Target Code 12222");
