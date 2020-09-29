@@ -226,5 +226,5 @@ public class EmpiConsumerConfig {
 	EmpiControllerHelper empiProviderHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader) { return new EmpiControllerHelper(theFhirContext, theResourceLoader); }
 
 	@Bean
-	IEmpiControllerSvc myEmpiControllerSvc() {return new EmpiControllerSvcImpl(); }
+	IEmpiControllerSvc empiControllerSvc() {return new EmpiControllerSvcImpl(); }
 }

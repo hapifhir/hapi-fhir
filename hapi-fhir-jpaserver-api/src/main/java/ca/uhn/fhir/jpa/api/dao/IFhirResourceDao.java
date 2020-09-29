@@ -258,12 +258,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Delete a list of resource Pids
 	 * @param theUrl the original URL that triggered the delete
-	 * @param theResourceIds
-	 * @param theDeleteConflicts
-	 * @param theTheRequest
-	 * @return
+	 * @param theResourceIds the ids of the resources to be deleted
+	 * @param theDeleteConflicts out parameter of conflicts preventing deletion
+	 * @param theRequest the request that initiated the request
+	 * @return response back to the client
 	 */
-	DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theTheRequest);
+	DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest);
 
 	// /**
 	// * Invoke the everything operation

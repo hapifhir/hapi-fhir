@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.stream.Stream;
 
+/**
+ * This class acts as a layer between EmpiProviders and EMPI services to support a REST API that's not a FHIR Operation API.
+ */
 @Service
 public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	@Autowired

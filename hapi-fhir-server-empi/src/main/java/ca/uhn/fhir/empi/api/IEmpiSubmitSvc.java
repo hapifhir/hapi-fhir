@@ -36,7 +36,7 @@ public interface IEmpiSubmitSvc {
 	 *
 	 * @return
 	 */
-	long runEmpiOnAllTargetTypes(@Nullable String theCriteria);
+	long submitAllTargetTypesToEmpi(@Nullable String theCriteria);
 
 	/**
 	 * Given a type and a search criteria, submit all found resources for EMPI processing.
@@ -45,29 +45,29 @@ public interface IEmpiSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for EMPI processing..
 	 * @return the number of resources submitted for EMPI processing.
 	 */
-	long runEmpiOnTargetType(String theTargetType, String theCriteria);
+	long submitTargetTypeToEmpi(String theTargetType, String theCriteria);
 
 	/**
-	 * Convenience method that calls {@link #runEmpiOnTargetType(String, String)} with the type pre-populated.
+	 * Convenience method that calls {@link #submitTargetTypeToEmpi(String, String)} with the type pre-populated.
 	 *
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for EMPI processing.
 	 * @return the number of resources submitted for EMPI processing.
 	 */
-	long runEmpiOnPractitionerType(String theCriteria);
+	long submitPractitionerTypeToEmpi(String theCriteria);
 
 	/**
-	 * Convenience method that calls {@link #runEmpiOnTargetType(String, String)} with the type pre-populated.
+	 * Convenience method that calls {@link #submitTargetTypeToEmpi(String, String)} with the type pre-populated.
 	 *
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for EMPI processing.
 	 * @return the number of resources submitted for EMPI processing.
 	 */
-	long runEmpiOnPatientType(String theCriteria);
+	long submitPatientTypeToEmpi(String theCriteria);
 
 	/**
 	 * Given an ID and a target type valid for EMPI, manually submit the given ID for EMPI processing.
 	 * @param theId the ID of the resource to process for EMPI.
 	 * @return the constant `1`, as if this function returns successfully, it will have processed one resource for EMPI.
 	 */
-	long runEmpiOnTarget(IIdType theId);
+	long submitTargetToEmpi(IIdType theId);
 
 }

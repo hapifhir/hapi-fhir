@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 
 /**
  * Contains all business data for determining if a match exists on a particular field, given:
- * <p>
+ * <p></p>
  * 1. A {@link EmpiMatcherEnum} which determines the actual similarity values.
  * 2. A given resource type (e.g. Patient)
  * 3. A given FHIRPath expression for finding the particular primitive to be used for comparison. (e.g. name.given)

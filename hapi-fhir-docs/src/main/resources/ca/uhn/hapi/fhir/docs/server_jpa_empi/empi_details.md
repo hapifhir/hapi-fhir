@@ -15,7 +15,7 @@ There are several resources that are used:
 
 # Automatic Linking
 
-With EMPI enabled, the default behavior of the EMPI is to create a new Person record for every Patient that is created such that there is a 1:1 relationship between them. Any relinking is then expected to be done manually (i.e. via the forthcoming empi operations).
+With EMPI enabled, the default behavior of the EMPI is to create a new Person record for every Patient that is created such that there is a 1:1 relationship between them. Any relinking is then expected to be done manually via the [EMPI Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html).
 
 In a typical configuration it is often desirable to have links be created automatically using matching rules. For example, you might decide that if a Patient shares the same name, gender, and date of birth as another Patient, you have at least a little confidence that they are the same Person.
 
@@ -31,11 +31,11 @@ Below are some simplifying principles HAPI EMPI follows to reduce complexity and
 
 1. Every Patient in the system has a MATCH link to at most one Person resource.
 
-1. Every Patient resource in the system that has been processed by EMPI has a MATCH link to at most one Person resource unless that Patient has the "no-empi" tag or it has POSSIBLE_MATCH links pending review.
+1. The only Patient resources in the system that do not have a MATCH link are those that have the 'no-empi' tag or those that have POSSIBLE_MATCH links pending review.
 
 1. The HAPI EMPI rules define a single identifier system that holds the external enterprise id ("EID").  If a Patient has an external EID, then the Person it links to always has the same EID. If a patient has no EID when it arrives, a unique UUID will be assigned as that Person's EID.
 
-1. A Person can not have both an internal EID(auto-created by HAPI), and an external EID (provided by an external system).
+1. A Person can have both an internal EID(auto-created by HAPI), and an external EID (provided by an external system).
 
 1. Two different Person resources cannot have the same EID.
 
@@ -77,5 +77,5 @@ When EMPI is enabled, the HAPI FHIR JPA Server does the following things on star
 
 1. It enables the MESSAGE subscription type and starts up the internal subscription engine.
 1. It creates two MESSAGE subscriptions, called 'empi-patient' and 'empi-practitioner' that match all incoming Patient and Practitioner resources and send them to an internal queue called "empi".  The JPA Server listens to this queue and links incoming resources to Persons.
-1. It registers the [EMPI Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html).
+1. The [EMPI Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html) are registered with the server.
 1. It registers a new dao interceptor that restricts access to EMPI managed Person records.

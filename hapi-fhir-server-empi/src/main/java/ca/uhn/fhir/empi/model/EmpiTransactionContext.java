@@ -35,7 +35,7 @@ public class EmpiTransactionContext {
 	public enum OperationType {
 		CREATE_RESOURCE,
 		UPDATE_RESOURCE,
-		SUBMIT_RESOURCES_TO_EMPI,
+		SUBMIT_RESOURCE_TO_EMPI,
 		QUERY_LINKS,
 		UPDATE_LINK,
 		DUPLICATE_PERSONS,

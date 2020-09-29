@@ -65,16 +65,16 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 
 	@Override
 	@Transactional
-	public long runEmpiOnAllTargetTypes(@Nullable String theCriteria) {
+	public long submitAllTargetTypesToEmpi(@Nullable String theCriteria) {
 		long submittedCount = 0;
-		submittedCount += runEmpiOnPatientType(theCriteria);
-		submittedCount += runEmpiOnPractitionerType(theCriteria);
+		submittedCount += submitPatientTypeToEmpi(theCriteria);
+		submittedCount += submitPractitionerTypeToEmpi(theCriteria);
 		return submittedCount;
 	}
 
 	@Override
 	@Transactional
-	public long runEmpiOnTargetType(String theTargetType, @Nullable String theCriteria) {
+	public long submitTargetTypeToEmpi(String theTargetType, @Nullable String theCriteria) {
 		if (theCriteria == null) {
 			ourLog.info("Submitting all resources of type {} to EMPI", theTargetType);
 		} else {
@@ -123,19 +123,19 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 
 	@Override
 	@Transactional
-	public long runEmpiOnPractitionerType(@Nullable String theCriteria) {
-		return runEmpiOnTargetType("Practitioner", theCriteria);
+	public long submitPractitionerTypeToEmpi(@Nullable String theCriteria) {
+		return submitTargetTypeToEmpi("Practitioner", theCriteria);
 	}
 
 	@Override
 	@Transactional
-	public long runEmpiOnPatientType(@Nullable String theCriteria) {
-		return runEmpiOnTargetType("Patient", theCriteria);
+	public long submitPatientTypeToEmpi(@Nullable String theCriteria) {
+		return submitTargetTypeToEmpi("Patient", theCriteria);
 	}
 
 	@Override
 	@Transactional
-	public long runEmpiOnTarget(IIdType theId) {
+	public long submitTargetToEmpi(IIdType theId) {
 		resolveTargetTypeOrThrowException(theId.getResourceType());
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		IBaseResource read = resourceDao.read(theId);

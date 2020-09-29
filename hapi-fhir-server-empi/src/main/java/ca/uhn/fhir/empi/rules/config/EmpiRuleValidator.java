@@ -101,7 +101,7 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 			}
 			names.add(fieldMatch.getName());
 			if (fieldMatch.getSimilarity() != null) {
-				validateSimilarity(fieldMatch, fieldMatch.getSimilarity());
+				validateSimilarity(fieldMatch);
 			} else if (fieldMatch.getMatcher() == null) {
 				throw new ConfigurationException("MatchField " + fieldMatch.getName() + " has neither a similarity nor a matcher.  At least one must be present.");
 			}
@@ -109,9 +109,10 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 		}
 	}
 
-	private void validateSimilarity(EmpiFieldMatchJson theFieldMatch, EmpiSimilarityJson theSimilarity) {
-		if (theSimilarity.getMatchThreshold() == null) {
-			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " similarity " + theSimilarity.getAlgorithm() + " requires a matchThreshold");
+	private void validateSimilarity(EmpiFieldMatchJson theFieldMatch) {
+		EmpiSimilarityJson similarity = theFieldMatch.getSimilarity();
+		if (similarity.getMatchThreshold() == null) {
+			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " similarity " + similarity.getAlgorithm() + " requires a matchThreshold");
 		}
 	}
 

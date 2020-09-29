@@ -166,7 +166,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
 		ServletRequestDetails theRequestDetails) {
 		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount  = myEmpiSubmitSvc.runEmpiOnAllTargetTypes(criteria);
+		long submittedCount  = myEmpiSubmitSvc.submitAllTargetTypesToEmpi(criteria);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
@@ -180,7 +180,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	public Parameters empiBatchPatientInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myEmpiSubmitSvc.runEmpiOnTarget(theIdParam);
+		long submittedCount = myEmpiSubmitSvc.submitTargetToEmpi(theIdParam);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
@@ -191,7 +191,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount = myEmpiSubmitSvc.runEmpiOnPatientType(criteria);
+		long submittedCount = myEmpiSubmitSvc.submitPatientTypeToEmpi(criteria);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
@@ -201,7 +201,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	public Parameters empiBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myEmpiSubmitSvc.runEmpiOnTarget(theIdParam);
+		long submittedCount = myEmpiSubmitSvc.submitTargetToEmpi(theIdParam);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
@@ -212,7 +212,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount = myEmpiSubmitSvc.runEmpiOnPractitionerType(criteria);
+		long submittedCount = myEmpiSubmitSvc.submitPractitionerTypeToEmpi(criteria);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 

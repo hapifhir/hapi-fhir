@@ -8,82 +8,88 @@ Here is an example of a full HAPI EMPI rules json document:
 
 ```json
 {
-    "version": "1",
-"candidateSearchParams": [
-    {
-            "resourceType": "Patient",
-            "searchParams": ["phone"]
-        },
-            {
-            "resourceType": "Patient",
-            "searchParams": ["birthdate"]
-        },
-				{
-				"resourceType": "*",
-				"searchParams": ["identifier"]
-		}],
-"candidateFilterSearchParams": [],
-"matchFields": [
-    {
-    "name": "birthday",
-    "resourceType": "Patient",
-            "resourcePath": "birthDate",
-            "matcher": {
-                "algorithm": "STRING"
-            }
-    },
-    {
-    "name": "phone",
-    "resourceType": "Patient",
-            "resourcePath": "telecom.value",
-            "matcher": {
-                "algorithm": "STRING"
-            }
-    },
-    {
-    "name": "firstname-meta",
-    "resourceType": "Patient",
-            "resourcePath": "name.given",
-            "matcher": {
-                "algorithm": "METAPHONE"
-            }
-    },
-    {
-    "name": "lastname-meta",
-    "resourceType": "Patient",
-            "resourcePath": "name.family",
-            "matcher": {
-                "algorithm": "METAPHONE"
-            }
-    },
-        {
-    "name": "firstname-jaro",
-    "resourceType": "Patient",
-            "resourcePath": "name.given",
-            "similarity": {
-                "algorithm": "JARO_WINKLER",
-                "matchThreshold": 0.80
-            }
-    },
-    {
-    "name": "lastname-jaro",
-    "resourceType": "Patient",
-            "resourcePath": "name.family",
-            "similarity": {
-                "algorithm": "JARO_WINKLER",
-                "matchThreshold": 0.80
-            }
-    }
-],
-"matchResultMap": {
-        "firstname-meta,lastname-meta,birthday": "MATCH",
-        "firstname-meta,lastname-meta,phone": "MATCH",
-        "firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH",
-        "firstname-jaro,lastname-jaro,phone": "POSSIBLE_MATCH",
-        "lastname-jaro,phone,birthday": "POSSIBLE_MATCH",
-        "firstname-jaro,phone,birthday": "POSSIBLE_MATCH"
-
-}
+	"version": "1",
+	"candidateSearchParams": [
+		{
+			"resourceType": "Patient",
+			"searchParams": [
+				"phone"
+			]
+		},
+		{
+			"resourceType": "Patient",
+			"searchParams": [
+				"birthdate"
+			]
+		},
+		{
+			"resourceType": "*",
+			"searchParams": [
+				"identifier"
+			]
+		}
+	],
+	"candidateFilterSearchParams": [],
+	"matchFields": [
+		{
+			"name": "birthday",
+			"resourceType": "Patient",
+			"resourcePath": "birthDate",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		},
+		{
+			"name": "phone",
+			"resourceType": "Patient",
+			"resourcePath": "telecom.value",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		},
+		{
+			"name": "firstname-meta",
+			"resourceType": "Patient",
+			"resourcePath": "name.given",
+			"matcher": {
+				"algorithm": "METAPHONE"
+			}
+		},
+		{
+			"name": "lastname-meta",
+			"resourceType": "Patient",
+			"resourcePath": "name.family",
+			"matcher": {
+				"algorithm": "METAPHONE"
+			}
+		},
+		{
+			"name": "firstname-jaro",
+			"resourceType": "Patient",
+			"resourcePath": "name.given",
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.80
+			}
+		},
+		{
+			"name": "lastname-jaro",
+			"resourceType": "Patient",
+			"resourcePath": "name.family",
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.80
+			}
+		}
+	],
+	"matchResultMap": {
+		"firstname-meta,lastname-meta,birthday": "MATCH",
+		"firstname-meta,lastname-meta,phone": "MATCH",
+		"firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH",
+		"firstname-jaro,lastname-jaro,phone": "POSSIBLE_MATCH",
+		"lastname-jaro,phone,birthday": "POSSIBLE_MATCH",
+		"firstname-jaro,phone,birthday": "POSSIBLE_MATCH"
+	}
 }
 ```
 
@@ -92,7 +98,7 @@ Here is a description of how each section of this document is configured.
 ### candidateSearchParams
 These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday or the same phone number.  The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some EMPI systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).  
 
-In if a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters.  In the following candidateSearchParams definition, hapi-fhir
+If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters.  In the following candidateSearchParams definition, hapi-fhir
 will extract given name, family name and identifiers from the incoming Patient and perform two separate
 searches, first for all Patient resources that have the same given `AND` the same family name as the incoming Patient, and second for all Patient resources that share at least one identifier as the incoming Patient.  Note that if the incoming Patient was missing any of these searchParam values, then that search would be skipped.  E.g. if the incoming Patient had a given name but no family name, then only a search for matching identifiers would be performed.
 
@@ -153,7 +159,7 @@ Here is a matcher matchField that uses the SOUNDEX matcher to determine whether 
 ```json
 {
 	"name": "familyname-soundex",
-  "resourceType": "*",
+    "resourceType": "*",
 	"resourcePath": "name.family",
 	"matcher": {
 			"algorithm": "SOUNDEX"
@@ -166,7 +172,7 @@ Here is a matcher matchField that only matches when two family names are identic
 ```json
 {
 	"name": "familyname-exact",
-  "resourceType": "*",
+    "resourceType": "*",
 	"resourcePath": "name.family",
 	"matcher": {
 			"algorithm": "STRING",
@@ -179,7 +185,7 @@ Special identifier matching is also available if you need to match on a particul
 ```json
 {
 	"name": "identifier-ssn",
-  "resourceType": "*",
+    "resourceType": "*",
 	"resourcePath": "identifier",
 	"matcher": {
 			"algorithm": "IDENTIFIER",

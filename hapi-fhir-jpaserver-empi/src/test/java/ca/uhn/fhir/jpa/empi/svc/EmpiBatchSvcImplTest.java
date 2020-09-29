@@ -17,7 +17,7 @@ import java.util.Date;
 class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 
 	@Autowired
-    IEmpiSubmitSvc myEmpiBatchSvc;
+    IEmpiSubmitSvc myEmpiSubmitSvc;
 
 	@Autowired
 	IInterceptorService myInterceptorService;
@@ -49,7 +49,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterEmpiLatch.runWithExpectedCount(20, () -> myEmpiBatchSvc.runEmpiOnAllTargetTypes(null));
+		afterEmpiLatch.runWithExpectedCount(20, () -> myEmpiSubmitSvc.submitAllTargetTypesToEmpi(null));
 
 		assertLinkCount(20);
 	}
@@ -64,7 +64,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterEmpiLatch.runWithExpectedCount(10, () -> myEmpiBatchSvc.runEmpiOnTargetType("Patient", null));
+		afterEmpiLatch.runWithExpectedCount(10, () -> myEmpiSubmitSvc.submitTargetTypeToEmpi("Patient", null));
 
 		assertLinkCount(10);
 	}
@@ -79,7 +79,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterEmpiLatch.runWithExpectedCount(10, () -> myEmpiBatchSvc.runEmpiOnAllTargetTypes(null));
+		afterEmpiLatch.runWithExpectedCount(10, () -> myEmpiSubmitSvc.submitAllTargetTypesToEmpi(null));
 
 		assertLinkCount(10);
 	}
@@ -92,7 +92,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiBatchSvc.runEmpiOnAllTargetTypes("Patient?name=gary"));
+		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiSubmitSvc.submitAllTargetTypesToEmpi("Patient?name=gary"));
 
 		assertLinkCount(1);
 	}

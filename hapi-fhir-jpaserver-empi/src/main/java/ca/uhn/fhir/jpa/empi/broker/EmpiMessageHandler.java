@@ -117,7 +117,7 @@ public class EmpiMessageHandler implements MessageHandler {
 				empiOperation = EmpiTransactionContext.OperationType.UPDATE_RESOURCE;
 				break;
 			case MANUALLY_TRIGGERED:
-				empiOperation = EmpiTransactionContext.OperationType.SUBMIT_RESOURCES_TO_EMPI;
+				empiOperation = EmpiTransactionContext.OperationType.SUBMIT_RESOURCE_TO_EMPI;
 				break;
 			case DELETE:
 			default:

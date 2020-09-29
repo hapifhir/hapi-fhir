@@ -25,6 +25,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.stream.Stream;
 
+/**
+ * This service supports the EMPI Operation providers for those services that return multiple empi links.
+ */
 public interface IEmpiLinkQuerySvc {
 	Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
 	Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext);

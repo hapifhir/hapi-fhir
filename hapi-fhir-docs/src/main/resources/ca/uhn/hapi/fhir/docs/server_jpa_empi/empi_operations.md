@@ -518,7 +518,7 @@ Call the `$empi-submit` operation to submit patients and practitioners for EMPI 
 An important thing to note is that this operation only submits the resources for processing. Actual EMPI processing is run asynchronously, and depending on the size
 of the affected bundle of resources, may take some time to complete.
 
-After the operation is complete, all resources that matched the criteria will now have at least one EMPI link attached to them.
+After the operation is complete, all resources that matched the criteria will now have at least one empi link attached to them.
 
 This operation takes a single optional criteria parameter unless it is called on a specific instance.
 
