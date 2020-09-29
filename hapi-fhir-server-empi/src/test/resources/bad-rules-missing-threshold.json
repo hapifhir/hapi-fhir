@@ -6,7 +6,9 @@
 		"name" : "given-name",
 		"resourceType" : "*",
 		"resourcePath" : "name.given",
-		"metric" : "COSINE"
+		"similarity" : {
+			"algorithm": "COSINE"
+		}
 	}],
 	"matchResultMap" : {
 		"given-name" : "POSSIBLE_MATCH"

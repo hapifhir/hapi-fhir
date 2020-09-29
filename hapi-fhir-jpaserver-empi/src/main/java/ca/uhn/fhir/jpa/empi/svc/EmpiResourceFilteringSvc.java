@@ -36,7 +36,7 @@ public class EmpiResourceFilteringSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
-	private IEmpiSettings empiSettings;
+	private IEmpiSettings myEmpiSettings;
 	@Autowired
 	EmpiSearchParamSvc myEmpiSearchParamSvc;
 	@Autowired
@@ -56,7 +56,11 @@ public class EmpiResourceFilteringSvc {
 	 */
 	public boolean shouldBeProcessed(IAnyResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		List<EmpiResourceSearchParamJson> candidateSearchParams = empiSettings.getEmpiRules().getCandidateSearchParams();
+		List<EmpiResourceSearchParamJson> candidateSearchParams = myEmpiSettings.getEmpiRules().getCandidateSearchParams();
+
+		if (candidateSearchParams.isEmpty()) {
+			return true;
+		}
 
 		boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
 			.filter(csp -> myEmpiSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
@@ -64,7 +68,7 @@ public class EmpiResourceFilteringSvc {
 			.map(searchParam -> myEmpiSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
 			.anyMatch(valueList -> !valueList.isEmpty());
 
-		ourLog.debug("Is {} suitable for EMPI processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
+		ourLog.trace("Is {} suitable for EMPI processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
 		return containsValueForSomeSearchParam;
 	}
 }

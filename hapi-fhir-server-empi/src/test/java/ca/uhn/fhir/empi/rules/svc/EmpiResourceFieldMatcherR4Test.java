@@ -1,7 +1,8 @@
 package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
-import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
+import ca.uhn.fhir.empi.rules.json.EmpiSimilarityJson;
+import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
@@ -65,8 +66,7 @@ public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
 				.setName("patient-foo")
 				.setResourceType("Patient")
 				.setResourcePath("foo")
-				.setMetric(EmpiMetricEnum.COSINE)
-				.setMatchThreshold(NAME_THRESHOLD);
+				.setSimilarity(new EmpiSimilarityJson().setAlgorithm(EmpiSimilarityEnum.COSINE).setMatchThreshold(NAME_THRESHOLD));
 			EmpiResourceFieldMatcher comparator = new EmpiResourceFieldMatcher(ourFhirContext, matchField);
 			comparator.match(myJohn, myJohny);
 			fail();
