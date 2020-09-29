@@ -1198,7 +1198,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testConcaptMapTwoConceptMapWithSameUrlOneWithoutVersion() {
+	public void testConceptMapTwoConceptMapWithSameUrlOneWithoutVersion() {
 				
 		String theUrl = "http://loinc.org/property/analyte-suffix";
 		ConceptMap theConceptMap1 = new ConceptMap();
