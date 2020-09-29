@@ -1,4 +1,4 @@
-\---
+---
 type: fix
 issue: 2104
 title: "EMPI bug fixes. Special characters in search param values (e.g. space)
