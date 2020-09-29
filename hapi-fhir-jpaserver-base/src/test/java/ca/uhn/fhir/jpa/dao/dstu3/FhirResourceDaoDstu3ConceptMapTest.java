@@ -108,7 +108,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testConcaptMapFindTermConceptMapByUrl() {
+	public void testConceptMapFindTermConceptMapByUrl() {
 			
 		Pageable page = PageRequest.of(0, 1);
 		List<TermConceptMap> theExpConceptMapList = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page, CM_URL);
