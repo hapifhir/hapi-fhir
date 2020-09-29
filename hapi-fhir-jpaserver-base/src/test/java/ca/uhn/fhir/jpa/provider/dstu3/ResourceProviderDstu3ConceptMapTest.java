@@ -275,7 +275,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	}
 
 	@Test
-	public void testTranslateWithVersionedConcaptMapUrl_NoVersion() {
+	public void testTranslateWithVersionedConceptMapUrl_NoVersion() {
 
 		String url = "http://url";
 		createConceptMap(url, "v1", "12222", "Target Code 12222");
@@ -323,7 +323,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	}
 
 	@Test
-	public void testTranslateWithVersionedConcaptMapUrl_NoVersion_null_v1() {
+	public void testTranslateWithVersionedConceptMapUrl_NoVersion_null_v1() {
 
 		String url = "http://url";
 		createConceptMap(url, null, "12222", "Target Code 12222"); // first version is null
@@ -371,7 +371,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	}
 
 	@Test
-	public void testTranslateWithVersionedConcaptMapUrl_NoVersion_null_v2() {
+	public void testTranslateWithVersionedConceptMapUrl_NoVersion_null_v2() {
 
 		String url = "http://url";
 		createConceptMap(url, "v1", "12222", "Target Code 12222"); 
