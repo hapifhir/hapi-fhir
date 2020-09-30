@@ -845,13 +845,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * Filters
 		 */
-		String codeSystemIdentifier;
+		String codeSystemUrlAndVersion;
 		if (codeSystemVersion != null) {
-			codeSystemIdentifier = theSystem + "|" + codeSystemVersion;
+			codeSystemUrlAndVersion = theSystem + "|" + codeSystemVersion;
 		} else {
-			codeSystemIdentifier = theSystem;
+			codeSystemUrlAndVersion = theSystem;
 		}
-		handleFilters(bool, codeSystemIdentifier, qb, theIncludeOrExclude);
+		handleFilters(bool, codeSystemUrlAndVersion, qb, theIncludeOrExclude);
 
 		Query luceneQuery = bool.createQuery();
 
@@ -988,19 +988,19 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				break;
 			case "parent":
 			case "child":
-				isCodeSystemLoingOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
+				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
 				handleFilterLoincParentChild(theBool, theFilter);
 				break;
 			case "ancestor":
-				isCodeSystemLoingOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
+				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
 				handleFilterLoincAncestor(theCodeSystemIdentifier, theBool, theFilter);
 				break;
 			case "descendant":
-				isCodeSystemLoingOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
+				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
 				handleFilterLoincDescendant(theCodeSystemIdentifier, theBool, theFilter);
 				break;
 			case "copyright":
-				isCodeSystemLoingOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
+				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
 				handleFilterLoincCopyright(theBool, theFilter);
 				break;
 			default:
@@ -1009,7 +1009,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void isCodeSystemLoingOrThrowInvalidRequestException(String theSystemIdentifier, String theProperty) {
+	private void isCodeSystemLoincOrThrowInvalidRequestException(String theSystemIdentifier, String theProperty) {
 		String systemUrl = getUrlFromIdentifier(theSystemIdentifier);
 		if (!isCodeSystemLoinc(systemUrl)) {
 			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + systemUrl);
@@ -2070,7 +2070,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		ArrayList<Predicate> predicates;
 		Coding coding;
 
-		//-- get the latest ConceptMapVersion if theTranslationRequest has url, but ConceptMapVersion
+		//-- get the latest ConceptMapVersion if theTranslationRequest has ConceptMap url but no ConceptMap version
 		String latestConceptMapVersion = null;
 		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
 			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
@@ -2174,7 +2174,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		ArrayList<Predicate> predicates;
 		Coding coding;
 
-		//-- get the latest ConceptMapVersion if theTranslationRequest has url, but ConceptMapVersion
+		//-- get the latest ConceptMapVersion if theTranslationRequest has ConceptMap url but no ConceptMap version
 		String latestConceptMapVersion = null;
 		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
 			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);

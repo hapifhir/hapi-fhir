@@ -290,7 +290,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			createAndPersistConceptMap("v1");
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+			assertEquals("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
 		}
 
 	}

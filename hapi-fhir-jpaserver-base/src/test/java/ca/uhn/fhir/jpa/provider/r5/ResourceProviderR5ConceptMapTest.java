@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Coding;
@@ -26,7 +25,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5ConceptMapTest.class);
 
 	@Test
-	public void testTranslateWithConcaptMapUrlAndVersion() {
+	public void testTranslateWithConceptMapUrlAndVersion() {
 		
 		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();
@@ -109,7 +108,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 	}
 	
 	@Test
-	public void testTranslateWithReverseConcaptMapUrlAndVersion() {
+	public void testTranslateWithReverseConceptMapUrlAndVersion() {
 		
 		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();

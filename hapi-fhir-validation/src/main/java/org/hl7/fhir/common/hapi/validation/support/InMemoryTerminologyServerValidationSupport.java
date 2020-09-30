@@ -91,23 +91,23 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return new ValueSetExpansionOutcome(expansion, null);
 	}
 
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(ValidationSupportContext theValidationSupportContext, IBaseResource theValueSetToExpand, @Nullable String theWantSystemIdentifier, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(ValidationSupportContext theValidationSupportContext, IBaseResource theValueSetToExpand, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
 		switch (theValueSetToExpand.getStructureFhirVersionEnum()) {
 			case DSTU2: {
-				expansionR5 = expandValueSetDstu2(theValidationSupportContext, (ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand, theWantSystemIdentifier, theWantCode);
+				expansionR5 = expandValueSetDstu2(theValidationSupportContext, (ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand, theWantSystemUrlAndVersion, theWantCode);
 				break;
 			}
 			case DSTU2_HL7ORG: {
-				expansionR5 = expandValueSetDstu2Hl7Org(theValidationSupportContext, (ValueSet) theValueSetToExpand, theWantSystemIdentifier, theWantCode);
+				expansionR5 = expandValueSetDstu2Hl7Org(theValidationSupportContext, (ValueSet) theValueSetToExpand, theWantSystemUrlAndVersion, theWantCode);
 				break;
 			}
 			case DSTU3: {
-				expansionR5 = expandValueSetDstu3(theValidationSupportContext, (org.hl7.fhir.dstu3.model.ValueSet) theValueSetToExpand, theWantSystemIdentifier, theWantCode);
+				expansionR5 = expandValueSetDstu3(theValidationSupportContext, (org.hl7.fhir.dstu3.model.ValueSet) theValueSetToExpand, theWantSystemUrlAndVersion, theWantCode);
 				break;
 			}
 			case R4: {
-				expansionR5 = expandValueSetR4(theValidationSupportContext, (org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand, theWantSystemIdentifier, theWantCode);
+				expansionR5 = expandValueSetR4(theValidationSupportContext, (org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand, theWantSystemUrlAndVersion, theWantCode);
 				break;
 			}
 			case R5: {
@@ -153,15 +153,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 			switch (myCtx.getVersion().getVersion()) {
 				case DSTU2_HL7ORG:
-					if (codeSystemVersion != null) {
-						vs = new org.hl7.fhir.dstu2.model.ValueSet()
-							.setCompose(new org.hl7.fhir.dstu2.model.ValueSet.ValueSetComposeComponent()
-								.addInclude(new org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent().setSystem(codeSystemUrl).setVersion(codeSystemVersion)));
-					} else {
-						vs = new org.hl7.fhir.dstu2.model.ValueSet()
-							.setCompose(new org.hl7.fhir.dstu2.model.ValueSet.ValueSetComposeComponent()
-								.addInclude(new org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent().setSystem(theCodeSystem)));
-					}
+					vs = new org.hl7.fhir.dstu2.model.ValueSet()
+						.setCompose(new org.hl7.fhir.dstu2.model.ValueSet.ValueSetComposeComponent()
+							.addInclude(new org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent().setSystem(theCodeSystem)));
 					break;
 				case DSTU3:
 					if (codeSystemVersion != null) {
@@ -228,25 +222,25 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			case DSTU2_HL7ORG: {
 				ValueSet expansionVs = (ValueSet) theExpansion;
 				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
-				flattenAndConvertCodesDstu2(contains, codesInValueSetExpansion);
+				flattenAndConvertCodesDstu2(contains, codes);
 				break;
 			}
 			case DSTU3: {
 				org.hl7.fhir.dstu3.model.ValueSet expansionVs = (org.hl7.fhir.dstu3.model.ValueSet) theExpansion;
 				List<org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
-				flattenAndConvertCodesDstu3(contains, codesInValueSetExpansion);
+				flattenAndConvertCodesDstu3(contains, codes);
 				break;
 			}
 			case R4: {
 				org.hl7.fhir.r4.model.ValueSet expansionVs = (org.hl7.fhir.r4.model.ValueSet) theExpansion;
 				List<org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
-				flattenAndConvertCodesR4(contains, codesInValueSetExpansion);
+				flattenAndConvertCodesR4(contains, codes);
 				break;
 			}
 			case R5: {
 				org.hl7.fhir.r5.model.ValueSet expansionVs = (org.hl7.fhir.r5.model.ValueSet) theExpansion;
 				List<org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
-				flattenAndConvertCodesR5(contains, codesInValueSetExpansion);
+				flattenAndConvertCodesR5(contains, codes);
 				break;
 			}
 			case DSTU2:

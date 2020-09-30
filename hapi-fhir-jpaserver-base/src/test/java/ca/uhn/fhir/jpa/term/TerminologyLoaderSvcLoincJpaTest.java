@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TerminologyLoaderSvcLoincIntegratedTest extends BaseJpaR4Test {
+public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	private TermLoaderSvcImpl mySvc;
 
 	private ZipCollectionBuilder myFiles;

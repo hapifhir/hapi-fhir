@@ -20,12 +20,11 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class VersionIndependentConcept implements Comparable<VersionIndependentConcept> {
+public class FhirVersionIndependentConcept implements Comparable<FhirVersionIndependentConcept> {
 
 	private final String mySystem;
 	private final String mySystemVersion;
@@ -36,15 +35,15 @@ public class VersionIndependentConcept implements Comparable<VersionIndependentC
 	/**
 	 * Constructor
 	 */
-	public VersionIndependentConcept(String theSystem, String theCode) {
+	public FhirVersionIndependentConcept(String theSystem, String theCode) {
 		this(theSystem, theCode, null);
 	}
 
-	public VersionIndependentConcept(String theSystem, String theCode, String theDisplay) {
+	public FhirVersionIndependentConcept(String theSystem, String theCode, String theDisplay) {
 		this(theSystem, theCode, theDisplay, null);
 	}
 
-	public VersionIndependentConcept(String theSystem, String theCode, String theDisplay, String theSystemVersion) {
+	public FhirVersionIndependentConcept(String theSystem, String theCode, String theDisplay, String theSystemVersion) {
 		mySystem = theSystem;
 		mySystemVersion = theSystemVersion;
 		myCode = theCode;
@@ -81,7 +80,7 @@ public class VersionIndependentConcept implements Comparable<VersionIndependentC
 			return false;
 		}
 
-		VersionIndependentConcept that = (VersionIndependentConcept) theO;
+		FhirVersionIndependentConcept that = (FhirVersionIndependentConcept) theO;
 
 		return new EqualsBuilder()
 			.append(mySystem, that.mySystem)
@@ -95,7 +94,7 @@ public class VersionIndependentConcept implements Comparable<VersionIndependentC
 	}
 
 	@Override
-	public int compareTo(VersionIndependentConcept theOther) {
+	public int compareTo(FhirVersionIndependentConcept theOther) {
 		CompareToBuilder b = new CompareToBuilder();
 		b.append(mySystem, theOther.getSystem());
 		b.append(myCode, theOther.getCode());

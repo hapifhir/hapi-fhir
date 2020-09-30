@@ -4,8 +4,6 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import ca.uhn.fhir.jpa.provider.dstu3.ResourceProviderDstu3ValueSetTest;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.IOUtils;
@@ -21,7 +19,6 @@ import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
-//import org.hl7.fhir.dstu3.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
@@ -378,6 +375,48 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	}
 
 	@Test
+	public void testLookupOperationByCodeAndSystemBuiltInCode() {
+		// First test with no version specified (should return the one and only version defined).
+		Parameters respParam = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("N"))
+			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0243"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals("v2 Identity May Be Divulged", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2.8.2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("No", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+
+		// Repeat with version specified.
+		respParam = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("N"))
+			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0243"))
+			.andParameter("version", new StringType("2.8.2"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals("v2 Identity May Be Divulged", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2.8.2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("No", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+	}
+
+	@Test
 	public void testSubsumesOnCodes_Subsumes() {
 		// First test with no version specified (should return result for last version created).
 		Parameters respParam = ourClient
@@ -722,7 +761,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	}
 
 	@Test
-	public void testUpdateCodeSystemName() throws IOException {
+	public void testUpdateCodeSystemById() throws IOException {
 
 		CodeSystem initialCodeSystem = ourClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());

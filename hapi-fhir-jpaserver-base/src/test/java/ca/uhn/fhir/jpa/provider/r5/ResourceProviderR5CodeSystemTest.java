@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Coding;
@@ -28,11 +30,13 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5CodeSystemTest.class);
 	private Long parentChildCsId;
 
+	private IIdType myCsId;
+
 	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
-		myCodeSystemDao.create(cs, mySrd);
+		myCsId = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
 
 		CodeSystem parentChildCs = new CodeSystem();
 		parentChildCs.setUrl(SYSTEM_PARENTCHILD);
@@ -170,6 +174,68 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
+
+	@Test
+	public void testValidateCodeFoundByCodeWithId() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
+
+		Parameters respParam = myClient.operation().onInstance(myCsId).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testLookupOperationByCodeAndSystemBuiltInCode() {
+		// First test with no version specified (should return the one and only version defined).
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+
+		// Repeat with version specified.
+		respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
+			.andParameter("version", new StringType("2.9"))
+			.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+	}
+
 
 
 }

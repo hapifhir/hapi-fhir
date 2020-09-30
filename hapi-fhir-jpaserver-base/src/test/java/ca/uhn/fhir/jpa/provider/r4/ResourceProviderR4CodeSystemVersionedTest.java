@@ -783,7 +783,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 	}
 
 	@Test
-	public void testUpdateCodeSystemName() throws IOException {
+	public void testUpdateCodeSystemById() throws IOException {
 
 		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());

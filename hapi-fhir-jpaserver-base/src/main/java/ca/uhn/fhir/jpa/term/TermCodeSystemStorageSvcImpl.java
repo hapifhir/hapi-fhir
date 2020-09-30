@@ -235,7 +235,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Transactional(propagation = Propagation.NEVER)
 	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		// Delete TermCodeSystemVersion
-		ourLog.info(" * Deleting code system version {}", theCodeSystemVersion.getCodeSystemVersionId());
+		ourLog.info(" * Deleting TermCodeSystemVersion {}", theCodeSystemVersion.getCodeSystemVersionId());
 		deleteCodeSystemVersion(theCodeSystemVersion.getPid());
 
 	}
