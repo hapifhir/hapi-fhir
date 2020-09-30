@@ -10,9 +10,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.util.VersionIndependentConcept;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -21,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -71,21 +68,21 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
-	List<VersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet);
+	List<FhirVersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet);
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
-	List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
+	List<FhirVersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
 
-	List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode);
+	List<FhirVersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode);
 
 	Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
-	List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode);
+	List<FhirVersionIndependentConcept> findCodesBelow(String theSystem, String theCode);
 
-	List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode);
+	List<FhirVersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode);
 
 	CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem);
 

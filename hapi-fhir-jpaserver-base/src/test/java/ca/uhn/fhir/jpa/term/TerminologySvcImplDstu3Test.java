@@ -15,7 +15,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.VersionIndependentConcept;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -1719,7 +1719,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testFindCodesAboveBuiltInCodeSystem() {
-		List<VersionIndependentConcept> concepts;
+		List<FhirVersionIndependentConcept> concepts;
 		Set<String> codes;
 
 		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "active");
@@ -1765,7 +1765,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testFindCodesBelowBuiltInCodeSystem() {
-		List<VersionIndependentConcept> concepts;
+		List<FhirVersionIndependentConcept> concepts;
 		Set<String> codes;
 
 		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "inactive");

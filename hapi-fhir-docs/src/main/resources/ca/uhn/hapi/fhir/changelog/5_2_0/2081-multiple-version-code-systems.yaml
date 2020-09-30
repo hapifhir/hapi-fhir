@@ -1,5 +1,4 @@
 ---
 type: add
 issue: 2081
-title: "Terminology loader for LOINC and operations for CodeSystem, ValueSet and ConcepMap will now support
-   multiple CodeSystem versions."
+title: "Operations for CodeSystem, ValueSet and ConcepMap will now support multiple CodeSystem versions."

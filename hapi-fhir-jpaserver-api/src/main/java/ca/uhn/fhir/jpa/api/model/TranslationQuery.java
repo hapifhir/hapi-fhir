@@ -61,7 +61,6 @@ public class TranslationQuery {
 		myResourceId = theResourceId;
 	}
 
-	//-- url
 	public boolean hasUrl() {
 		return myUrl != null && myUrl.hasValue();
 	}
@@ -74,7 +73,6 @@ public class TranslationQuery {
 		myUrl = theUrl;
 	}
 
-	//-- ConceptMapVersion
 	public boolean hasConceptMapVersion() {
 		return myConceptMapVersion != null && myConceptMapVersion.hasValue();
 	}

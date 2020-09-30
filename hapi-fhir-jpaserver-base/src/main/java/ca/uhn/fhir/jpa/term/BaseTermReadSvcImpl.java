@@ -84,7 +84,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import ca.uhn.fhir.util.VersionIndependentConcept;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
@@ -301,7 +301,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd, VersionIndependentConcept theWantConceptOrNull) {
+	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd, FhirVersionIndependentConcept theWantConceptOrNull) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
 			if (isNoneBlank(theSystem, next.getCode())) {
 				if (theWantConceptOrNull == null || theWantConceptOrNull.getCode().equals(next.getCode())) {
@@ -388,7 +388,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		deleteValueSetForResource(theResourceTable);
 	}
 
-	private ValueSet expandValueSetInMemory(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, VersionIndependentConcept theWantConceptOrNull) {
+	private ValueSet expandValueSetInMemory(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, FhirVersionIndependentConcept theWantConceptOrNull) {
 
 		int maxCapacity = myDaoConfig.getMaximumExpansionSize();
 		ValueSetExpansionComponentWithConceptAccumulator expansionComponent = new ValueSetExpansionComponentWithConceptAccumulator(myContext, maxCapacity);
@@ -409,7 +409,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public List<VersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet) {
+	public List<FhirVersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet) {
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
 
 		ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(theValueSet);
@@ -554,7 +554,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	private void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator, AtomicInteger theCodeCounter, VersionIndependentConcept theWantConceptOrNull) {
+	private void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator, AtomicInteger theCodeCounter, FhirVersionIndependentConcept theWantConceptOrNull) {
 		Set<String> addedCodes = new HashSet<>();
 
 		StopWatch sw = new StopWatch();
@@ -640,12 +640,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return sb.toString();
 	}
 
-	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpandR4, VersionIndependentConcept theWantConceptOrNull) {
+	protected List<FhirVersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpandR4, FhirVersionIndependentConcept theWantConceptOrNull) {
 		org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = expandValueSetInMemory(theExpansionOptions, theValueSetToExpandR4, theWantConceptOrNull).getExpansion();
 
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
+		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : expandedR4.getContains()) {
-			retVal.add(new VersionIndependentConcept(nextContains.getSystem(), nextContains.getCode(), nextContains.getDisplay(), nextContains.getVersion()));
+			retVal.add(new FhirVersionIndependentConcept(nextContains.getSystem(), nextContains.getCode(), nextContains.getDisplay(), nextContains.getVersion()));
 		}
 		return retVal;
 	}
@@ -653,7 +653,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	/**
 	 * @return Returns true if there are potentially more results to process.
 	 */
-	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull) {
+	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, FhirVersionIndependentConcept theWantConceptOrNull) {
 
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
@@ -691,7 +691,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					// just in case there is a registered service that knows how to handle this. This can happen, for example,
 					// if someone creates a valueset that includes UCUM codes, since we don't have a CodeSystem resource for those
 					// but CommonCodeSystemsTerminologyService can validate individual codes.
-					List<VersionIndependentConcept> includedConcepts = null;
+					List<FhirVersionIndependentConcept> includedConcepts = null;
 					if (theWantConceptOrNull != null) {
 						includedConcepts = new ArrayList<>();
 						includedConcepts.add(theWantConceptOrNull);
@@ -699,13 +699,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						includedConcepts = theIncludeOrExclude
 							.getConcept()
 							.stream()
-							.map(t -> new VersionIndependentConcept(theIncludeOrExclude.getSystem(), t.getCode()))
+							.map(t -> new FhirVersionIndependentConcept(theIncludeOrExclude.getSystem(), t.getCode()))
 							.collect(Collectors.toList());
 					}
 
 					if (includedConcepts != null) {
 						int foundCount = 0;
-						for (VersionIndependentConcept next : includedConcepts) {
+						for (FhirVersionIndependentConcept next : includedConcepts) {
 							String nextSystem = next.getSystem();
 							if (nextSystem == null) {
 								nextSystem = system;
@@ -763,10 +763,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			for (CanonicalType nextValueSet : theIncludeOrExclude.getValueSet()) {
 				ourLog.debug("Starting {} expansion around ValueSet: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
 
-				List<VersionIndependentConcept> expanded = expandValueSet(theExpansionOptions, nextValueSet.getValueAsString());
+				List<FhirVersionIndependentConcept> expanded = expandValueSet(theExpansionOptions, nextValueSet.getValueAsString());
 				Map<String, TermCodeSystem> uriToCodeSystem = new HashMap<>();
 
-				for (VersionIndependentConcept nextConcept : expanded) {
+				for (FhirVersionIndependentConcept nextConcept : expanded) {
 					if (theAdd) {
 
 						if (!uriToCodeSystem.containsKey(nextConcept.getSystem())) {
@@ -811,7 +811,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nonnull
-	private Boolean expandValueSetHandleIncludeOrExcludeUsingDatabase(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, VersionIndependentConcept theWantConceptOrNull, String theSystem, TermCodeSystem theCs) {
+	private Boolean expandValueSetHandleIncludeOrExcludeUsingDatabase(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, FhirVersionIndependentConcept theWantConceptOrNull, String theSystem, TermCodeSystem theCs) {
 		String codeSystemVersion = theIncludeOrExclude.getVersion();
 		TermCodeSystemVersion csv;
 		if (isEmpty(codeSystemVersion)) {
@@ -1507,7 +1507,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Transactional
 	@Override
-	public List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
+	public List<FhirVersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		if (cs == null) {
 			return findCodesAboveUsingBuiltInSystems(theSystem, theCode);
@@ -1539,7 +1539,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Transactional
 	@Override
-	public List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
+	public List<FhirVersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		if (cs == null) {
 			return findCodesBelowUsingBuiltInSystems(theSystem, theCode);
@@ -1939,8 +1939,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Transactional
 	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,
 		IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
-		VersionIndependentConcept conceptA = toConcept(theCodeA, theSystem, theCodingA);
-		VersionIndependentConcept conceptB = toConcept(theCodeB, theSystem, theCodingB);
+		FhirVersionIndependentConcept conceptA = toConcept(theCodeA, theSystem, theCodingA);
+		FhirVersionIndependentConcept conceptB = toConcept(theCodeB, theSystem, theCodingB);
 
 		if (!StringUtils.equals(conceptA.getSystem(), conceptB.getSystem())) {
 			throw new InvalidRequestException("Unable to test subsumption across different code systems");
@@ -2044,10 +2044,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return null;
 	}
 
-	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>(codes.size());
+	private ArrayList<FhirVersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
+		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>(codes.size());
 		for (TermConcept next : codes) {
-			retVal.add(new VersionIndependentConcept(theSystem, next.getCode()));
+			retVal.add(new FhirVersionIndependentConcept(theSystem, next.getCode()));
 		}
 		return retVal;
 	}
@@ -2291,7 +2291,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private String getLatestConceptMapVersion(TranslationRequest theTranslationRequest) {
 
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByVersion(page,
+		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page,
 				theTranslationRequest.getUrl().asStringValue());
 		if (!theConceptMapList.isEmpty()) {
 			return theConceptMapList.get(0).getVersion();
@@ -2324,10 +2324,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		Optional<VersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> new VersionIndependentConcept(theCodeSystem, c.getCode())));
+		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> new FhirVersionIndependentConcept(theCodeSystem, c.getCode())));
 
 		if (codeOpt != null && codeOpt.isPresent()) {
-			VersionIndependentConcept code = codeOpt.get();
+			FhirVersionIndependentConcept code = codeOpt.get();
 			if (!theOptions.isValidateDisplay() || (isNotBlank(code.getDisplay()) && isNotBlank(theDisplay) && code.getDisplay().equals(theDisplay))) {
 				return new CodeValidationResult()
 					.setCode(code.getCode())
@@ -2429,7 +2429,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return myContext;
 	}
 
-	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		List<CodeSystem.ConceptDefinitionComponent> conceptList = theSystem.getConcept();
 		for (CodeSystem.ConceptDefinitionComponent next : conceptList) {
 			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
@@ -2437,8 +2437,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
+	public List<FhirVersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
 		CodeSystem system = fetchCanonicalCodeSystemFromCompleteContext(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
@@ -2446,12 +2446,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return retVal;
 	}
 
-	private void findCodesBelow(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+	private void findCodesBelow(CodeSystem theSystem, String theSystemString, String theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		List<CodeSystem.ConceptDefinitionComponent> conceptList = theSystem.getConcept();
 		findCodesBelow(theSystemString, theCode, theListToPopulate, conceptList);
 	}
 
-	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<CodeSystem.ConceptDefinitionComponent> conceptList) {
+	private void findCodesBelow(String theSystemString, String theCode, List<FhirVersionIndependentConcept> theListToPopulate, List<CodeSystem.ConceptDefinitionComponent> conceptList) {
 		for (CodeSystem.ConceptDefinitionComponent next : conceptList) {
 			if (theCode.equals(next.getCode())) {
 				addAllChildren(theSystemString, next, theListToPopulate);
@@ -2462,8 +2462,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
+	public List<FhirVersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
 		CodeSystem system = fetchCanonicalCodeSystemFromCompleteContext(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
@@ -2471,23 +2471,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return retVal;
 	}
 
-	private void addAllChildren(String theSystemString, CodeSystem.ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
+	private void addAllChildren(String theSystemString, CodeSystem.ConceptDefinitionComponent theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
-			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theCode.getCode()));
+			theListToPopulate.add(new FhirVersionIndependentConcept(theSystemString, theCode.getCode()));
 		}
 		for (CodeSystem.ConceptDefinitionComponent nextChild : theCode.getConcept()) {
 			addAllChildren(theSystemString, nextChild, theListToPopulate);
 		}
 	}
 
-	private boolean addTreeIfItContainsCode(String theSystemString, CodeSystem.ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+	private boolean addTreeIfItContainsCode(String theSystemString, CodeSystem.ConceptDefinitionComponent theNext, String theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		boolean foundCodeInChild = false;
 		for (CodeSystem.ConceptDefinitionComponent nextChild : theNext.getConcept()) {
 			foundCodeInChild |= addTreeIfItContainsCode(theSystemString, nextChild, theCode, theListToPopulate);
 		}
 
 		if (theCode.equals(theNext.getCode()) || foundCodeInChild) {
-			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theNext.getCode()));
+			theListToPopulate.add(new FhirVersionIndependentConcept(theSystemString, theNext.getCode()));
 			return true;
 		}
 
@@ -2591,7 +2591,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@NotNull
-	private VersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theCodeSystemIdentifierType, IBaseCoding theCodingType) {
+	private FhirVersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theCodeSystemIdentifierType, IBaseCoding theCodingType) {
 		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
 		String system = theCodeSystemIdentifierType != null ? getUrlFromIdentifier(theCodeSystemIdentifierType.getValueAsString()): null;
 		String systemVersion = theCodeSystemIdentifierType != null ? getVersionFromIdentifier(theCodeSystemIdentifierType.getValueAsString()): null;
@@ -2601,7 +2601,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			system = canonicalizedCoding.getSystem();
 			systemVersion = canonicalizedCoding.getVersion();
 		}
-		return new VersionIndependentConcept(system, code, null, systemVersion);
+		return new FhirVersionIndependentConcept(system, code, null, systemVersion);
 	}
 
 	/**
