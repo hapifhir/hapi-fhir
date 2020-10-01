@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -574,6 +575,32 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		assertThat(ids, empty());
 	}
+
+	@Test
+	public void testLastUpdatedWithDateOnly() {
+		SearchParameterMap map;
+		List<String> ids;
+
+		Organization org = new Organization();
+		org.setName("O1");
+		String orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless().getValue();
+
+		runInTransaction(()->{
+			ResourceTable resourceTable = myResourceTableDao.findAll().get(0);
+			resourceTable.setUpdated(new InstantDt("2019-01-14T21:53:53.147-05:00"));
+			myResourceTableDao.save(resourceTable);
+		});
+
+		RuntimeResourceDefinition resDef = myFhirCtx.getResourceDefinition("DiagnosticReport");
+		map = myMatchUrlService.translateMatchUrl("DiagnosticReport?_lastUpdated=gt2019-01-13&_lastUpdated=lt2019-01-15", resDef);
+		map.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(ids, contains(orgId));
+
+	}
+
 
 	/**
 	 * See #1053
