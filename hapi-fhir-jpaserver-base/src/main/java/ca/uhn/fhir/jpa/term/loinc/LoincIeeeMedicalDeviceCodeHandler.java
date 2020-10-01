@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IRecordHandler {
@@ -51,6 +53,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 	@Override
 	public void accept(CSVRecord theRecord) {
 
+		String loincIeeeCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String longCommonName = trim(theRecord.get("LOINC_LONG_COMMON_NAME"));
 		String ieeeCode = trim(theRecord.get("IEEE_CF_CODE10"));
@@ -59,10 +62,18 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 		// LOINC Part -> IEEE 11073:10101 Mappings
 		String sourceCodeSystemUri = ITermLoaderSvc.LOINC_URI;
 		String targetCodeSystemUri = ITermLoaderSvc.IEEE_11073_10101_URI;
+		String conceptMapId;
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		if (codeSystemVersionId != null) {
+			conceptMapId = LOINC_IEEE_CM_ID + "-" + codeSystemVersionId;
+		} else {
+			conceptMapId = LOINC_IEEE_CM_ID;
+		}
 		addConceptMapEntry(
 			new ConceptMapping()
-				.setConceptMapId(LOINC_IEEE_CM_ID)
+				.setConceptMapId(conceptMapId)
 				.setConceptMapUri(LOINC_IEEE_CM_URI)
+				.setConceptMapVersion(loincIeeeCmVersion)
 				.setConceptMapName(LOINC_IEEE_CM_NAME)
 				.setSourceCodeSystem(sourceCodeSystemUri)
 				.setSourceCode(loincNumber)
@@ -71,7 +82,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 				.setTargetCode(ieeeCode)
 				.setTargetDisplay(ieeeDisplayName)
 				.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
-			CM_COPYRIGHT);
+				CM_COPYRIGHT);
 
 	}
 

@@ -106,7 +106,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		ourLog.info(resp);
 
 		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
-		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9]+"));
+		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9\\.\\-]+"));
 
 		/*
 		 * Try uploading a second time

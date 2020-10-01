@@ -231,6 +231,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		});
 	}
 
+	@Override
+	@Transactional(propagation = Propagation.NEVER)
+	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		// Delete TermCodeSystemVersion
+		ourLog.info(" * Deleting TermCodeSystemVersion {}", theCodeSystemVersion.getCodeSystemVersionId());
+		deleteCodeSystemVersion(theCodeSystemVersion.getPid());
+
+	}
+
 	/**
 	 * Returns the number of saved concepts
 	 */
@@ -284,16 +293,19 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				ResourcePersistentId codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
 
 				/*
-				 * If this is a not-present codesystem, we don't want to store a new version if one
-				 * already exists, since that will wipe out the existing concepts. We do create or update
-				 * the TermCodeSystem table though, since that allows the DB to reject changes
-				 * that would result in duplicate CodeSysten.url values.
+				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
+				 * overwrite the existing version since that will wipe out the existing concepts. We do create
+				 * or update the TermCodeSystem table though, since that allows the DB to reject changes that would
+				 * result in duplicate CodeSystem.url values.
 				 */
 				if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-					TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystem.getUrl());
-					if (codeSystem != null) {
-						getOrCreateTermCodeSystem(codeSystemResourcePid, theCodeSystem.getUrl(), theCodeSystem.getUrl(), theResourceEntity);
-						return;
+					TermCodeSystem termCodeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystem.getUrl());
+					if (termCodeSystem != null) {
+						TermCodeSystemVersion codeSystemVersion = getExistingTermCodeSystemVersion(termCodeSystem.getPid(), theCodeSystem.getVersion());
+						if (codeSystemVersion != null) {
+							TermCodeSystem myCodeSystemEntity = getOrCreateDistinctTermCodeSystem(codeSystemResourcePid, theCodeSystem.getUrl(), theCodeSystem.getUrl(), theCodeSystem.getVersion(), theResourceEntity);
+							return;
+						}
 					}
 				}
 
@@ -338,11 +350,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
-		// Grab the existing versions so we can delete them later
+		// Grab the existing version so we can delete it
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
 
 		/*
-		 * For now we always delete old versions. At some point it would be nice to allow configuration to keep old versions.
+		 * Delete version being replaced.
 		 */
 
 		for (TermCodeSystemVersion next : existing) {
@@ -351,16 +363,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			deleteCodeSystemVersion(codeSystemVersionPid);
 		}
 
-		ourLog.debug("Flushing...");
-		myConceptDao.flush();
-		ourLog.debug("Done flushing");
-
 		/*
 		 * Do the upload
 		 */
 
-		TermCodeSystem codeSystem = getOrCreateTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theCodeSystemResourceTable);
-
+		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId, theCodeSystemResourceTable);
 		theCodeSystemVersion.setCodeSystem(codeSystem);
 
 		theCodeSystemVersion.setCodeSystemDisplayName(theSystemName);
@@ -406,6 +413,17 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (myDeferredStorageSvc.isStorageQueueEmpty() == false) {
 			ourLog.info("Note that some concept saving has been deferred");
 		}
+	}
+
+	private TermCodeSystemVersion getExistingTermCodeSystemVersion(Long theCodeSystemVersionPid, String theCodeSystemVersion) {
+		TermCodeSystemVersion existing;
+		if (theCodeSystemVersion == null) {
+			existing = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystemVersionPid);
+		} else {
+			existing = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCodeSystemVersionPid, theCodeSystemVersion);
+		}
+
+		return existing;
 	}
 
 	private void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
@@ -455,10 +473,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
 				codeSystem.setCurrentVersion(null);
 				myCodeSystemDao.save(codeSystem);
+				myCodeSystemDao.flush();
 			}
 
 			ourLog.info(" * Deleting code system version");
-			myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+			myCodeSystemVersionDao.delete(theCodeSystemVersionPid);
+			myCodeSystemVersionDao.flush();
 		});
 
 	}
@@ -651,26 +671,46 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Nonnull
-	private TermCodeSystem getOrCreateTermCodeSystem(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, ResourceTable theCodeSystemResourceTable) {
+	private TermCodeSystem getOrCreateDistinctTermCodeSystem(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
 			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid.getIdAsLong());
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}
-			codeSystem.setResource(theCodeSystemResourceTable);
 		} else {
-			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
-					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-				throw new UnprocessableEntityException(msg);
-			}
+			checkForCodeSystemVersionDuplicate(codeSystem, theSystemUri, theSystemVersionId, theCodeSystemResourceTable);
 		}
 
+		codeSystem.setResource(theCodeSystemResourceTable);
 		codeSystem.setCodeSystemUri(theSystemUri);
 		codeSystem.setName(theSystemName);
 		codeSystem = myCodeSystemDao.save(codeSystem);
 		return codeSystem;
+	}
+
+	private void checkForCodeSystemVersionDuplicate(TermCodeSystem theCodeSystem, String theSystemUri, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
+		TermCodeSystemVersion codeSystemVersionEntity;
+		String msg = null;
+		if (theSystemVersionId == null) {
+			// Check if a non-versioned TermCodeSystemVersion entity already exists for this TermCodeSystem.
+			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystem.getPid());
+			if (codeSystemVersionEntity != null) {
+				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			}
+		} else {
+			// Check if a TermCodeSystemVersion entity already exists for this TermCodeSystem and version.
+			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCodeSystem.getPid(), theSystemVersionId);
+			if (codeSystemVersionEntity != null) {
+				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrlAndVersion", theSystemUri,	theSystemVersionId, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			}
+		}
+		// Throw exception if the TermCodeSystemVersion is being duplicated.
+		if (codeSystemVersionEntity != null) {
+			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
+				throw new UnprocessableEntityException(msg);
+			}
+		}
 	}
 
 	private void populateCodeSystemVersionProperties(TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystemResource, ResourceTable theResourceTable) {
