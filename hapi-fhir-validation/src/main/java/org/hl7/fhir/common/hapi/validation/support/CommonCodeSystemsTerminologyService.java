@@ -326,6 +326,48 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return url;
 	}
 
+	public static String getCodeSystemUrl(@Nonnull IBaseResource theCodeSystem) {
+		String url;
+		switch (theCodeSystem.getStructureFhirVersionEnum()) {
+			case R4: {
+				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			}
+			case R5: {
+				url = ((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			}
+			case DSTU3:
+			default:
+				throw new IllegalArgumentException("Can not handle version: " + theCodeSystem.getStructureFhirVersionEnum());
+		}
+		return url;
+	}
+
+	public static String getValueSetVersion(@Nonnull IBaseResource theValueSet) {
+		String version;
+		switch (theValueSet.getStructureFhirVersionEnum()) {
+			case DSTU3: {
+				version = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case R4: {
+				version = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case R5: {
+				version = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+			default:
+				version=null;
+		}
+		return version;
+	}
+
 	private static HashMap<String, String> buildUspsCodes() {
 		HashMap<String, String> uspsCodes = new HashMap<>();
 		uspsCodes.put("AK", "Alaska");

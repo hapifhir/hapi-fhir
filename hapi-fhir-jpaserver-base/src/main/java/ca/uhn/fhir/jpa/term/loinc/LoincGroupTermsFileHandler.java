@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincGroupTermsFileHandler extends BaseLoincHandler implements IRecordHandler {
@@ -43,9 +45,16 @@ public class LoincGroupTermsFileHandler extends BaseLoincHandler implements IRec
 	public void accept(CSVRecord theRecord) {
 		//"Category","GroupId","Archetype","LoincNumber","LongCommonName"
 		String groupId = trim(theRecord.get("GroupId"));
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		String valueSetId;
+		if (codeSystemVersionId != null) {
+			valueSetId = groupId + "-" + codeSystemVersionId;
+		} else {
+			valueSetId = groupId;
+		}
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 
-		ValueSet valueSet = getValueSet(groupId, LoincGroupFileHandler.VS_URI_PREFIX + groupId, null, null);
+		ValueSet valueSet = getValueSet(valueSetId, LoincGroupFileHandler.VS_URI_PREFIX + groupId, null, null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, null);
 	}
 

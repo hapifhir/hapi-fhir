@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -67,7 +68,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	public void includeConcept(String theSystem, String theCode, String theDisplay) {
 		incrementConceptsCount();
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
-		contains.setSystem(theSystem);
+		setSystemAndVersion(theSystem, contains);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
 	}
@@ -76,7 +77,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
 		incrementConceptsCount();
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
-		contains.setSystem(theSystem);
+		setSystemAndVersion(theSystem, contains);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
 		if (theDesignations != null) {
@@ -95,11 +96,26 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 
 	@Override
 	public void excludeConcept(String theSystem, String theCode) {
-		this
-			.getContains()
-			.removeIf(t ->
-				theSystem.equals(t.getSystem()) &&
-					theCode.equals(t.getCode()));
+		String excludeSystem;
+		String excludeSystemVersion;
+		int versionSeparator = theSystem.indexOf("|");
+		if(versionSeparator > -1) {
+			excludeSystemVersion = theSystem.substring(versionSeparator + 1);
+			excludeSystem = theSystem.substring(0, versionSeparator);
+		} else {
+			excludeSystem = theSystem;
+			excludeSystemVersion = null;
+		}
+		if (excludeSystemVersion != null) {
+			this.getContains().removeIf(t ->
+				excludeSystem.equals(t.getSystem()) &&
+				theCode.equals(t.getCode()) &&
+				excludeSystemVersion.equals(t.getVersion()));
+		} else {
+			this.getContains().removeIf(t ->
+					theSystem.equals(t.getSystem()) &&
+						theCode.equals(t.getCode()));
+		}
 	}
 
 	private void incrementConceptsCount() {
@@ -108,4 +124,17 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			throw new ExpansionTooCostlyException(msg);
 		}
 	}
+
+	private void setSystemAndVersion(String theSystemAndVersion, ValueSet.ValueSetExpansionContainsComponent myComponent) {
+		if (StringUtils.isNotEmpty((theSystemAndVersion))) {
+			int versionSeparator = theSystemAndVersion.lastIndexOf('|');
+			if (versionSeparator != -1) {
+				myComponent.setVersion(theSystemAndVersion.substring(versionSeparator + 1));
+				myComponent.setSystem(theSystemAndVersion.substring(0,versionSeparator));
+			} else {
+				myComponent.setSystem(theSystemAndVersion);
+			}
+		}
+	}
+
 }

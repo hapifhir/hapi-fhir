@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
@@ -21,7 +22,10 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
@@ -228,5 +232,15 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
+	@Test
+	public void testValidateCodeForCodeSystemOperationNotSupported() {
+		try {
+			((IFhirResourceDaoCodeSystem)myValueSetDao).validateCode(null, null, null, null, null, null, null, null);
+			fail();
+		} catch (UnsupportedOperationException theE) {
+			assertNotNull(theE);
+		}
 
+	}
+	
 }

@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -13,6 +15,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import javax.annotation.Nonnull;
 
 public class CommonCodeSystemsTerminologyServiceTest {
 
@@ -113,5 +118,17 @@ public class CommonCodeSystemsTerminologyServiceTest {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem("http://foo");
 		assertEquals(null, cs);
 	}
+
+	@Test
+	public void testFetchCodeSystemUrlDstu3() {
+		try {
+			CommonCodeSystemsTerminologyService.getCodeSystemUrl(new org.hl7.fhir.dstu3.model.CodeSystem());
+
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Can not handle version: DSTU3", e.getMessage());
+		}
+	}
+
 
 }

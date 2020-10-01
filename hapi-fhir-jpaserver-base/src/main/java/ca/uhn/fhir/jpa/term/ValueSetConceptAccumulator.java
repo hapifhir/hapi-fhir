@@ -42,13 +42,12 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetConceptAccumulator.class);
 
 	private TermValueSet myTermValueSet;
-	private ITermValueSetDao myValueSetDao;
-	private ITermValueSetConceptDao myValueSetConceptDao;
-	private ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
+	final private ITermValueSetDao myValueSetDao;
+	final private ITermValueSetConceptDao myValueSetConceptDao;
+	final private ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
 	private int myConceptsSaved;
 	private int myDesignationsSaved;
 	private int myConceptsExcluded;
-	private int myCount;
 
 	public ValueSetConceptAccumulator(@Nonnull TermValueSet theTermValueSet, @Nonnull ITermValueSetDao theValueSetDao, @Nonnull ITermValueSetConceptDao theValueSetConceptDao, @Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
 		myTermValueSet = theTermValueSet;

@@ -46,6 +46,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		// Note: url is correct and identifier is not, but identifier was only added as
 		// of 3.1.0 so we'll leave url for now. See: https://groups.google.com/d/msgid/hapi-fhir/CAN2Cfy8kW%2BAOkgC6VjPsU3gRCpExCNZBmJdi-k5R_TWeyWH4tA%40mail.gmail.com?utm_medium=email&utm_source=footer
 		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
+		@OperationParam(name = "valueSetVersion", min = 0, max = 1) StringType theValueSetVersion,
 		@OperationParam(name = "identifier", min = 0, max = 1) UriType theIdentifier,
 		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
 		@OperationParam(name = "offset", min = 0, max = 1) IntegerType theOffset,
@@ -60,6 +61,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 
 		boolean haveIdentifier = url != null && isNotBlank(url.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
+		boolean haveValueSetVersion = theValueSetVersion != null && !theValueSetVersion.isEmpty();
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
 			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request.");
@@ -99,7 +101,11 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 				if (haveId) {
 					return dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
 				} else if (haveIdentifier) {
-					return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter), offset, count);
+					if (haveValueSetVersion) {
+						return dao.expandByIdentifier(url.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter), offset, count);
+					} else {
+						return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter), offset, count);
+					}
 				} else {
 					return dao.expand(theValueSet, toFilterString(theFilter), offset, count);
 				}
@@ -107,7 +113,11 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 				if (haveId) {
 					return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
 				} else if (haveIdentifier) {
-					return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter));
+					if (haveValueSetVersion) {
+						return dao.expandByIdentifier(url.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter));
+					} else {
+						return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter));
+					}
 				} else {
 					return dao.expand(theValueSet, toFilterString(theFilter));
 				}
@@ -123,7 +133,6 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1),
 		@OperationParam(name = "message", type = StringType.class),
@@ -134,8 +143,10 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		@IdParam(optional = true) IdType theId,
 		@OperationParam(name = "identifier", min = 0, max = 1) UriType theValueSetIdentifier,
 		@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
+		@OperationParam(name = "valueSetVersion", min = 0, max = 1) StringType theValueSetVersion,
 		@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+		@OperationParam(name = "systemVersion", min = 0, max = 1) StringType theSystemVersion,
 		@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
 		@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
 		@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theCodeableConcept,
@@ -150,7 +161,19 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			IValidationSupport.CodeValidationResult result = dao.validateCode(url, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			UriType valueSetIdentifier;
+			if (theValueSetVersion != null) {
+				valueSetIdentifier = new UriType(url.getValue() + "|" + theValueSetVersion);
+			} else {
+				valueSetIdentifier = url;
+			}
+			UriType codeSystemIdentifier;
+			if (theSystemVersion != null) {
+				codeSystemIdentifier = new UriType(theSystem.getValue() + "|" + theSystemVersion);
+			} else {
+				codeSystemIdentifier = theSystem;
+			}
+			IValidationSupport.CodeValidationResult result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);

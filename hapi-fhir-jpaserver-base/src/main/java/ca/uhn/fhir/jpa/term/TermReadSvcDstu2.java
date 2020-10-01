@@ -26,14 +26,14 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.util.VersionIndependentConcept;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -47,23 +47,23 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
-	private void addAllChildren(String theSystemString, org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
+	private void addAllChildren(String theSystemString, ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
-			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theCode.getCode()));
+			theListToPopulate.add(new FhirVersionIndependentConcept(theSystemString, theCode.getCode()));
 		}
-		for (org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent nextChild : theCode.getConcept()) {
+		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept nextChild : theCode.getConcept()) {
 			addAllChildren(theSystemString, nextChild, theListToPopulate);
 		}
 	}
 
-	private boolean addTreeIfItContainsCode(String theSystemString, org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+	private boolean addTreeIfItContainsCode(String theSystemString, ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept theNext, String theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		boolean foundCodeInChild = false;
-		for (org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent nextChild : theNext.getConcept()) {
+		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept nextChild : theNext.getConcept()) {
 			foundCodeInChild |= addTreeIfItContainsCode(theSystemString, nextChild, theCode, theListToPopulate);
 		}
 
 		if (theCode.equals(theNext.getCode()) || foundCodeInChild) {
-			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theNext.getCode()));
+			theListToPopulate.add(new FhirVersionIndependentConcept(theSystemString, theNext.getCode()));
 			return true;
 		}
 
@@ -95,30 +95,30 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 		throw new UnsupportedOperationException();
 	}
 
-	private void findCodesAbove(org.hl7.fhir.dstu2.model.ValueSet theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		List<org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent> conceptList = theSystem.getCodeSystem().getConcept();
-		for (org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent next : conceptList) {
+	private void findCodesAbove(ca.uhn.fhir.model.dstu2.resource.ValueSet theSystem, String theSystemString, String theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
+		List<ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept> conceptList = theSystem.getCodeSystem().getConcept();
+		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept next : conceptList) {
 			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
 		}
 	}
 
 	@Override
-	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		org.hl7.fhir.dstu2.model.ValueSet system = (org.hl7.fhir.dstu2.model.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
+	public List<FhirVersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
+		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
 		return retVal;
 	}
 
-	private void findCodesBelow(org.hl7.fhir.dstu2.model.ValueSet theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		List<org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent> conceptList = theSystem.getCodeSystem().getConcept();
+	private void findCodesBelow(ca.uhn.fhir.model.dstu2.resource.ValueSet theSystem, String theSystemString, String theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
+		List<ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept> conceptList = theSystem.getCodeSystem().getConcept();
 		findCodesBelow(theSystemString, theCode, theListToPopulate, conceptList);
 	}
 
-	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent> conceptList) {
-		for (org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent next : conceptList) {
+	private void findCodesBelow(String theSystemString, String theCode, List<FhirVersionIndependentConcept> theListToPopulate, List<ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept> conceptList) {
+		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept next : conceptList) {
 			if (theCode.equals(next.getCode())) {
 				addAllChildren(theSystemString, next, theListToPopulate);
 			} else {
@@ -128,9 +128,9 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	}
 
 	@Override
-	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		org.hl7.fhir.dstu2.model.ValueSet system = (org.hl7.fhir.dstu2.model.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
+	public List<FhirVersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
+		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -150,6 +150,17 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Nullable
 	@Override
+	protected Coding toCanonicalCoding(@Nullable IBaseCoding theCoding) {
+		Coding retVal = null;
+		if (theCoding != null) {
+			CodingDt coding = (CodingDt) theCoding;
+			retVal = new Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
+		}
+		return retVal;
+	}
+
+	@Nullable
+	@Override
 	protected CodeableConcept toCanonicalCodeableConcept(@Nullable IBaseDatatype theCodeableConcept) {
 		CodeableConcept outcome = null;
 		if (theCodeableConcept != null) {
@@ -157,7 +168,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 			CodeableConceptDt cc = (CodeableConceptDt) theCodeableConcept;
 			outcome.setText(cc.getText());
 			for (CodingDt next : cc.getCoding()) {
-				outcome.addCoding(toCanonicalCoding(next));
+				outcome.addCoding(toCanonicalCoding((IBaseDatatype)next));
 			}
 		}
 		return outcome;

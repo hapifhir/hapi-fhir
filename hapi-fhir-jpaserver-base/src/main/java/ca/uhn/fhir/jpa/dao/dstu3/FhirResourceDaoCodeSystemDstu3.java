@@ -22,11 +22,10 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -65,8 +64,6 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	@Autowired
-	private ITermCodeSystemDao myCsDao;
-	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private FhirContext myFhirContext;
@@ -104,7 +101,11 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		String system;
 		if (haveCoding) {
 			code = theCoding.getCode();
-			system = theCoding.getSystem();
+			if (theCoding.hasVersion()) {
+				system = theCoding.getSystem() + "|" + theCoding.getVersion();
+			} else {
+				system = theCoding.getSystem();
+			}
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();
@@ -133,13 +134,8 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
 		super.preDelete(theResourceToDelete, theEntityToDelete);
 
-		String codeSystemUrl = theResourceToDelete.getUrl();
-		if (isNotBlank(codeSystemUrl)) {
-			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
-			if (persCs != null) {
-				myTermDeferredStorageSvc.deleteCodeSystem(persCs);
-			}
-		}
+		myTermDeferredStorageSvc.deleteCodeSystemForResource(theEntityToDelete);
+
 	}
 
 	@Override
@@ -160,4 +156,10 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		return retVal;
 	}
 
+	@Override
+	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, 
+			IPrimitiveType<String> theDisplay, Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {	
+		throw new UnsupportedOperationException();
+	}
+	
 }

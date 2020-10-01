@@ -41,6 +41,8 @@ public interface ITermCodeSystemStorageSvc {
 
 	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 
+	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
+
 	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
 
 	/**

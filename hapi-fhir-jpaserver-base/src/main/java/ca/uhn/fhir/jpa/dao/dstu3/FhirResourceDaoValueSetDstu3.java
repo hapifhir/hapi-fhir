@@ -21,22 +21,18 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IntegerType;
@@ -49,9 +45,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
@@ -63,18 +56,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 
 public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoValueSetDstu3.class);
-
-	@Autowired
-	private ITermReadSvc myHapiTerminologySvc;
-
-	@Autowired
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	private IValidationSupport myValidationSupport;
-
-	@Autowired
-	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 
 	@Override
 	public void start() {
@@ -143,8 +126,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			filter.setValue(theFilter);
 		}
 
-		ValueSet retVal = doExpand(source);
-		return retVal;
+		return doExpand(source);
 
 		// if (defaultValueSet != null) {
 		// source = getContext().newJsonParser().parseResource(ValueSet.class, getContext().newJsonParser().encodeResourceToString(defaultValueSet));
@@ -178,8 +160,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			filter.setValue(theFilter);
 		}
 
-		ValueSet retVal = doExpand(source, theOffset, theCount);
-		return retVal;
+		return doExpand(source, theOffset, theCount);
 	}
 
 	@Override
@@ -217,6 +198,9 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 		ValueSet toExpand = new ValueSet();
 		toExpand.setId(theSource.getId());
 		toExpand.setUrl(theSource.getUrl());
+		if (theSource.getVersion() != null) {
+			toExpand.setVersion(theSource.getVersion());
+		}
 
 		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
 			toExpand.getCompose().addInclude(next);
@@ -283,12 +267,12 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 				try {
 					ValueSet valueSet = (ValueSet) theResource;
 					org.hl7.fhir.r4.model.ValueSet converted = convertValueSet(valueSet);
-					myHapiTerminologySvc.storeTermValueSet(retVal, converted);
+					myTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
 					throw new InternalErrorException(fe);
 				}
 			} else {
-				myHapiTerminologySvc.deleteValueSetAndChildren(retVal);
+				myTerminologySvc.deleteValueSetAndChildren(retVal);
 			}
 		}
 

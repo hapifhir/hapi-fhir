@@ -458,6 +458,27 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	@Test
+	public void testExpandByUrlNoPreExpand() throws Exception {
+		myDaoConfig.setPreExpandValueSets(false);
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
+	}
+
+	@Test
 	public void testExpandByUrlWithBogusUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
@@ -1405,6 +1426,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
