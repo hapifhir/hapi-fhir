@@ -40,7 +40,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.util.VersionIndependentConcept;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.google.common.collect.Sets;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPredicate;
@@ -163,7 +163,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 																		From<?, ResourceIndexedSearchParamToken> theFrom,
 																		SearchFilterParser.CompareOperation operation,
 																		RequestPartitionId theRequestPartitionId) {
-		final List<VersionIndependentConcept> codes = new ArrayList<>();
+		final List<FhirVersionIndependentConcept> codes = new ArrayList<>();
 		String paramName = theSearchParam.getName();
 
 		TokenParamModifier modifier = null;
@@ -217,12 +217,12 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				validateHaveSystemAndCodeForToken(paramName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else {
-				codes.add(new VersionIndependentConcept(system, code));
+				codes.add(new FhirVersionIndependentConcept(system, code));
 			}
 
 		}
 
-		List<VersionIndependentConcept> sortedCodesList = codes
+		List<FhirVersionIndependentConcept> sortedCodesList = codes
 			.stream()
 			.filter(t -> t.getCode() != null || t.getSystem() != null)
 			.sorted()
@@ -237,19 +237,19 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		List<Predicate> retVal = new ArrayList<>();
 
 		// System only
-		List<VersionIndependentConcept> systemOnlyCodes = sortedCodesList.stream().filter(t -> isBlank(t.getCode())).collect(Collectors.toList());
+		List<FhirVersionIndependentConcept> systemOnlyCodes = sortedCodesList.stream().filter(t -> isBlank(t.getCode())).collect(Collectors.toList());
 		if (!systemOnlyCodes.isEmpty()) {
 			retVal.add(addPredicate(theResourceName, paramName, theBuilder, theFrom, systemOnlyCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_ONLY, theRequestPartitionId));
 		}
 
 		// Code only
-		List<VersionIndependentConcept> codeOnlyCodes = sortedCodesList.stream().filter(t -> t.getSystem() == null).collect(Collectors.toList());
+		List<FhirVersionIndependentConcept> codeOnlyCodes = sortedCodesList.stream().filter(t -> t.getSystem() == null).collect(Collectors.toList());
 		if (!codeOnlyCodes.isEmpty()) {
 			retVal.add(addPredicate(theResourceName, paramName, theBuilder, theFrom, codeOnlyCodes, modifier, SearchBuilderTokenModeEnum.VALUE_ONLY, theRequestPartitionId));
 		}
 
 		// System and code
-		List<VersionIndependentConcept> systemAndCodeCodes = sortedCodesList.stream().filter(t -> isNotBlank(t.getCode()) && t.getSystem() != null).collect(Collectors.toList());
+		List<FhirVersionIndependentConcept> systemAndCodeCodes = sortedCodesList.stream().filter(t -> isNotBlank(t.getCode()) && t.getSystem() != null).collect(Collectors.toList());
 		if (!systemAndCodeCodes.isEmpty()) {
 			retVal.add(addPredicate(theResourceName, paramName, theBuilder, theFrom, systemAndCodeCodes, modifier, SearchBuilderTokenModeEnum.SYSTEM_AND_VALUE, theRequestPartitionId));
 		}
@@ -275,8 +275,8 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 					String valueSet = valueSetUris.iterator().next();
 					ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 						.setFailOnMissingCodeSystem(false);
-					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(options, valueSet);
-					for (VersionIndependentConcept nextCandidate : candidateCodes) {
+					List<FhirVersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(options, valueSet);
+					for (FhirVersionIndependentConcept nextCandidate : candidateCodes) {
 						if (nextCandidate.getCode().equals(code)) {
 							retVal = nextCandidate.getSystem();
 							break;
@@ -301,7 +301,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		}
 	}
 
-	private Predicate addPredicate(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, SearchBuilderTokenModeEnum theTokenMode, RequestPartitionId theRequestPartitionId) {
+	private Predicate addPredicate(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<FhirVersionIndependentConcept> theTokens, TokenParamModifier theModifier, SearchBuilderTokenModeEnum theTokenMode, RequestPartitionId theRequestPartitionId) {
 		if (myDontUseHashesForSearch) {
 			final Path<String> systemExpression = theFrom.get("mySystem");
 			final Path<String> valueExpression = theFrom.get("myValue");
@@ -320,7 +320,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 					orPredicates.add(orPredicate);
 					break;
 				case SYSTEM_AND_VALUE:
-					for (VersionIndependentConcept next : theTokens) {
+					for (FhirVersionIndependentConcept next : theTokens) {
 						orPredicates.add(theBuilder.and(
 							toEqualOrIsNullPredicate(systemExpression, next.getSystem()),
 							toEqualOrIsNullPredicate(valueExpression, next.getCode())

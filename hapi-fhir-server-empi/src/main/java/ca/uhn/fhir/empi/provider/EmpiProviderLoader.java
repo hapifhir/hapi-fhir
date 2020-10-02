@@ -22,14 +22,11 @@ package ca.uhn.fhir.empi.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
-import ca.uhn.fhir.empi.api.IEmpiResetSvc;
-import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
-import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
+import ca.uhn.fhir.empi.api.IEmpiControllerSvc;
+import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
+import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
-import ca.uhn.fhir.validation.IResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,25 +39,19 @@ public class EmpiProviderLoader {
 	@Autowired
 	private IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
 	@Autowired
-	private IEmpiPersonMergerSvc myPersonMergerSvc;
+	private IEmpiControllerSvc myEmpiControllerSvc;
 	@Autowired
-	private IEmpiLinkUpdaterSvc myEmpiLinkUpdaterSvc;
+	private IEmpiExpungeSvc myEmpiResetSvc;
 	@Autowired
-	private IEmpiLinkQuerySvc myEmpiLinkQuerySvc;
-	@Autowired
-	private IResourceLoader myResourceLoader;
-	@Autowired
-	private IEmpiResetSvc myEmpiResetSvc;
-	@Autowired
-	private IEmpiBatchSvc myEmpiBatchSvc;
+	private IEmpiSubmitSvc myEmpiBatchSvc;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiResetSvc, myEmpiBatchSvc));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderDstu3(myFhirContext, myEmpiControllerSvc, myEmpiMatchFinderSvc, myEmpiResetSvc, myEmpiBatchSvc));
 				break;
 			case R4:
-				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myFhirContext, myEmpiMatchFinderSvc, myPersonMergerSvc, myEmpiLinkUpdaterSvc, myEmpiLinkQuerySvc, myResourceLoader, myEmpiResetSvc, myEmpiBatchSvc));
+				myResourceProviderFactory.addSupplier(() -> new EmpiProviderR4(myFhirContext, myEmpiControllerSvc, myEmpiMatchFinderSvc, myEmpiResetSvc, myEmpiBatchSvc));
 				break;
 			default:
 				throw new ConfigurationException("EMPI not supported for FHIR version " + myFhirContext.getVersion().getVersion());

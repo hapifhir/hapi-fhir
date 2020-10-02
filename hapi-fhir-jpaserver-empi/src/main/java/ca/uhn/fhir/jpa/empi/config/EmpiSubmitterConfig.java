@@ -21,15 +21,15 @@ package ca.uhn.fhir.jpa.empi.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
 import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
+import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDeleteSvc;
 import ca.uhn.fhir.jpa.empi.interceptor.EmpiSubmitterInterceptorLoader;
-import ca.uhn.fhir.jpa.empi.svc.EmpiBatchSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiChannelSubmitterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonDeletingSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
+import ca.uhn.fhir.jpa.empi.svc.EmpiSubmitSvcImpl;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,7 +70,7 @@ public class EmpiSubmitterConfig {
 	}
 
 	@Bean
-	IEmpiBatchSvc empiBatchService() {
-		return new EmpiBatchSvcImpl();
+    IEmpiSubmitSvc empiBatchService() {
+		return new EmpiSubmitSvcImpl();
 	}
 }

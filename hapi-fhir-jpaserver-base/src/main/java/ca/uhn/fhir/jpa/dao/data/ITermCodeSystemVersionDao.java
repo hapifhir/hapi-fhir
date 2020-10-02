@@ -35,8 +35,18 @@ public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemV
 	@Query("DELETE FROM TermCodeSystemVersion csv WHERE csv.myCodeSystem = :cs")
 	void deleteForCodeSystem(@Param("cs") TermCodeSystem theCodeSystem);
 
+	@Modifying
+	@Query("DELETE FROM TermCodeSystemVersion csv WHERE csv.myId = :pid")
+	void delete(@Param("pid") Long codesystemversion_pid);
+
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid")
 	List<TermCodeSystemVersion> findByCodeSystemPid(@Param("codesystem_pid") Long theCodeSystemPid);
+
+	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId = :codesystem_version_id")
+	TermCodeSystemVersion findByCodeSystemPidAndVersion(@Param("codesystem_pid") Long theCodeSystemPid, @Param("codesystem_version_id") String theCodeSystemVersionId);
+
+	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId IS NULL")
+	TermCodeSystemVersion findByCodeSystemPidVersionIsNull(@Param("codesystem_pid") Long theCodeSystemPid);
 
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResourcePid = :resource_id")
 	List<TermCodeSystemVersion> findByCodeSystemResourcePid(@Param("resource_id") Long theCodeSystemResourcePid);

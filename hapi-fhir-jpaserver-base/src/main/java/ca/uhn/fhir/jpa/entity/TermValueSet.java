@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(name = "TRM_VALUESET", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VALUESET_URL", columnNames = {"URL"})
+	@UniqueConstraint(name = "IDX_VALUESET_URL", columnNames = {"URL", "VER"})
 })
 @Entity()
 public class TermValueSet implements Serializable {
@@ -46,6 +46,7 @@ public class TermValueSet implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
+	public static final int MAX_VER_LENGTH = 200;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
@@ -55,6 +56,9 @@ public class TermValueSet implements Serializable {
 
 	@Column(name = "URL", nullable = false, length = MAX_URL_LENGTH)
 	private String myUrl;
+
+	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
+	private String myVersion;
 
 	@OneToOne()
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
@@ -181,6 +185,17 @@ public class TermValueSet implements Serializable {
 
 	public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
 		myExpansionStatus = theExpansionStatus;
+	}
+
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public TermValueSet setVersion(String theVersion) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theVersion, MAX_VER_LENGTH,
+			"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
+		myVersion = theVersion;
+		return this;
 	}
 
 	@Override

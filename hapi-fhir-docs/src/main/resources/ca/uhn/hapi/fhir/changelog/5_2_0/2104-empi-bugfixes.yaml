@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 2104
+title: "EMPI bug fixes. Special characters in search param values (e.g. space)
+led to missed matches; these are now properly escaped so matches are accurately found.
+Candidates were failing to match when candidateSearchParams was empty; matches now
+work properly with empty candidateSearchParams.  matchResultMap entries were
+incorrectly resolving if any named matchFields matched; they now correctly
+resolve only when ALL matchFields match."

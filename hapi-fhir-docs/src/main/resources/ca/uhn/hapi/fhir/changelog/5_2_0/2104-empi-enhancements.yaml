@@ -1,0 +1,9 @@
+---
+type: add
+issue: 2104
+title: "EMPI enhancements.  Added new IDENTIFIER matcher rule type that defines
+a matcher where two resources share the same value for a particular identifier system,
+or if no system is indicated, defines a matcher where two resources share any matching system,values
+identifier.  Improved channel and batch troubleshooting logging.  Added new
+controller layer to support non-fhir apis.  Changed rule json format; replaced 'metric'
+with either matcher or simiarity that now have their own distinct subkeys."

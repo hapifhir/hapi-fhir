@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
-import ca.uhn.fhir.util.VersionIndependentConcept;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;

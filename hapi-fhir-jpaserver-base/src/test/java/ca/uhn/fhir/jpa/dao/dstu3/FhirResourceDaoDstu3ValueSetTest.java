@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -76,6 +77,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
 		assertEquals(false, validationOutcome.isOk());
 
+		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		runInTransaction(() -> {
@@ -95,6 +97,16 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
 	}
 
+	private boolean clearDeferredStorageQueue() {
+
+		if(!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return false;
+		} else {
+			return true;
+		}
+
+	}
 
 	@Test
 	@Disabled

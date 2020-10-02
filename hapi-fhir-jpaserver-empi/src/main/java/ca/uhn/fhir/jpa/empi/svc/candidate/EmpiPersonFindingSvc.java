@@ -50,9 +50,9 @@ public class EmpiPersonFindingSvc {
 	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Person with this EID, it automatically matches.
 	 * 1. First, check link table for any entries where this baseresource is the target of a person. If found, return.
 	 * 2. If none are found, attempt to find Person Resources which link to this theResource.
-	 * 3. If none are found, attempt to find Persons similar to our incoming resource based on the EMPI rules and similarity metrics.
+	 * 3. If none are found, attempt to find Person Resources similar to our incoming resource based on the EMPI rules and field matchers.
 	 * 4. If none are found, attempt to find Persons that are linked to Patients/Practitioners that are similar to our incoming resource based on the EMPI rules and
-	 * similarity metrics.
+	 * field matchers.
 	 *
 	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
 	 * @return A list of {@link MatchedPersonCandidate} indicating all potential Person matches.

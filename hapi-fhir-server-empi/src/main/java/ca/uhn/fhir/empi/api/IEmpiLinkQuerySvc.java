@@ -21,12 +21,14 @@ package ca.uhn.fhir.empi.api;
  */
 
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.stream.Stream;
+
+/**
+ * This service supports the EMPI Operation providers for those services that return multiple empi links.
+ */
 public interface IEmpiLinkQuerySvc {
-	IBaseParameters queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
-
-	IBaseParameters getPossibleDuplicates(EmpiTransactionContext theEmpiContext);
-
+	Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
+	Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext);
 }

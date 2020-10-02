@@ -1,5 +1,21 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.UriType;
+import org.springframework.beans.factory.annotation.Autowired;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -29,23 +45,9 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.BooleanType;
-import org.hl7.fhir.r5.model.CodeType;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.ConceptMap;
-import org.hl7.fhir.r5.model.StringType;
-import org.hl7.fhir.r5.model.UriType;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 
 public class FhirResourceDaoConceptMapR5 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
@@ -153,7 +155,11 @@ public class FhirResourceDaoConceptMapR5 extends BaseHapiFhirResourceDao<Concept
 					translationMatch.setSource(VersionConvertor_40_50.convertUri(new UriType(element.getConceptMapUrl())));
 
 					if (element.getConceptMapGroupElementTargets().size() == 1) {
-						translationMatch.setEquivalence(VersionConvertor_40_50.convertCode(new CodeType(element.getConceptMapGroupElementTargets().get(0).getEquivalence().toCode())));
+						
+						ConceptMapEquivalence eq = element.getConceptMapGroupElementTargets().get(0).getEquivalence();
+						if (eq != null) {
+							translationMatch.setEquivalence(VersionConvertor_40_50.convertCode(new CodeType(eq.toCode())));
+						}
 					}
 
 					retVal.addMatch(translationMatch);

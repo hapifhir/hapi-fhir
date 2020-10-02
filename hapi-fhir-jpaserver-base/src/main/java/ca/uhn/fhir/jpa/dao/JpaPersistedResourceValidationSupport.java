@@ -25,8 +25,11 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -121,18 +124,25 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					SearchParameterMap params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
 					params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
-					search = myDaoRegistry.getResourceDao("ValueSet").search(params);
+					search = myDaoRegistry.getResourceDao(resourceName).search(params);
 					if (search.size() == 0) {
 						params = new SearchParameterMap();
 						params.setLoadSynchronousUpTo(1);
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
-						search = myDaoRegistry.getResourceDao("ValueSet").search(params);
+						search = myDaoRegistry.getResourceDao(resourceName).search(params);
 					}
 				} else {
+					int versionSeparator = theUri.lastIndexOf('|');
 					SearchParameterMap params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
-					params.add(ValueSet.SP_URL, new UriParam(theUri));
-					search = myDaoRegistry.getResourceDao("ValueSet").search(params);
+					if (versionSeparator != -1) {
+						params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
+						params.add(ValueSet.SP_URL, new UriParam(theUri.substring(0,versionSeparator)));
+					} else {
+						params.add(ValueSet.SP_URL, new UriParam(theUri));
+					}
+					params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
+					search = myDaoRegistry.getResourceDao(resourceName).search(params);
 				}
 			} else if ("StructureDefinition".equals(resourceName)) {
 				// Don't allow the core FHIR definitions to be overwritten
@@ -156,9 +166,16 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				}
 				search = myDaoRegistry.getResourceDao("Questionnaire").search(params);
 			} else if ("CodeSystem".equals(resourceName)) {
+				int versionSeparator = theUri.lastIndexOf('|');
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
-				params.add(CodeSystem.SP_URL, new UriParam(theUri));
+				if (versionSeparator != -1) {
+					params.add(CodeSystem.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
+					params.add(CodeSystem.SP_URL, new UriParam(theUri.substring(0,versionSeparator)));
+				} else {
+					params.add(CodeSystem.SP_URL, new UriParam(theUri));
+				}
+				params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
 				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 			} else if ("ImplementationGuide".equals(resourceName)) {
 				SearchParameterMap params = new SearchParameterMap();

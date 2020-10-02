@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.empi.svc.candidate;
 
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.jpa.empi.svc.EmpiSearchParamSvc;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmpiCandidateSearchCriteriaBuilderSvc {
@@ -67,6 +69,9 @@ public class EmpiCandidateSearchCriteriaBuilderSvc {
 	}
 
 	private String buildResourceMatchQuery(String theSearchParamName, List<String> theResourceValues) {
-		return theSearchParamName + "=" + String.join(",", theResourceValues);
+		String nameValueOrList = theResourceValues.stream()
+			.map(UrlUtil::escapeUrlParam)
+			.collect(Collectors.joining(","));
+		return theSearchParamName + "=" + nameValueOrList;
 	}
 }
