@@ -162,21 +162,24 @@ public final class DateUtils {
 
 
 	public static Date getHighestInstantFromDate(Date theDateValue) {
-		return getInstantFromDateWithTimezone(theDateValue, TimeZone.getTimeZone("GMT+11:30"));
-
-	}
-	public static Date getLowestInstantFromDate(Date theDateValue) {
-		return getInstantFromDateWithTimezone(theDateValue, TimeZone.getTimeZone("GMT-11:30"));
-	}
-
-	public static Date getInstantFromDateWithTimezone(Date theDateValue, TimeZone theTimezone) {
 		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
-		cal.setTimeZone(theTimezone);
+		cal.setTimeZone(TimeZone.getTimeZone("GMT"));
 		cal = org.apache.commons.lang3.time.DateUtils.truncate(cal, Calendar.DATE);
-		return cal.getTime();
+		Date date = cal.getTime();
+		date = org.apache.commons.lang3.time.DateUtils.addHours(date, +14);
+		return date;
 	}
 
-	public static int convertDatetoDayInteger(final Date theDateValue) {
+	public static Date getLowestInstantFromDate(Date theDateValue) {
+		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
+		cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+		cal = org.apache.commons.lang3.time.DateUtils.truncate(cal, Calendar.DATE);
+		Date date = cal.getTime();
+		date = org.apache.commons.lang3.time.DateUtils.addHours(date, -12);
+		return date;
+	}
+
+	public static int convertDateToDayInteger(final Date theDateValue) {
 		notNull(theDateValue, "Date value");
 		SimpleDateFormat format = new SimpleDateFormat(PATTERN_INTEGER_DATE);
 		String theDateString = format.format(theDateValue);

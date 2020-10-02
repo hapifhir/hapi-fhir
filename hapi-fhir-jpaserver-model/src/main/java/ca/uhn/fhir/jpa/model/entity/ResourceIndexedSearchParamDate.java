@@ -324,7 +324,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		if (theDate == null) {
 			return null;
 		}
-		return (long) DateUtils.convertDatetoDayInteger(theDate);
+		return (long) DateUtils.convertDateToDayInteger(theDate);
 	}
 
 }

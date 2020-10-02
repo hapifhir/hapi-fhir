@@ -24,6 +24,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,8 +48,10 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DateRangeParamR4Test {
 
@@ -192,6 +195,25 @@ public class DateRangeParamR4Test {
 		assertEquals(parseUpperForDatePrecision("2012-01-02 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
 		assertEquals(null, ourLastDateRange.getLowerBound());
 		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, ourLastDateRange.getUpperBound().getPrefix());
+	}
+
+	@Test
+	public void testRangeWithDatePrecision() throws Exception {
+		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=gt2012-01-01&birthdate=lt2012-01-03");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		consumeResponse(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
+		Date lowerBoundInstant = ourLastDateRange.getLowerBoundAsInstant();
+		Date midnightLower = new InstantDt("2012-01-01T00:00:00Z").getValue();
+		assertTrue(lowerBoundInstant.after(midnightLower));
+
+		assertEquals("2012-01-03", ourLastDateRange.getUpperBound().getValueAsString());
+		Date upperBoundInstant = ourLastDateRange.getUpperBoundAsInstant();
+		Date midnightUpper = new InstantDt("2012-01-03T00:00:00Z").getValue();
+		assertTrue(upperBoundInstant.after(midnightUpper));
+
 	}
 
 	@Test
