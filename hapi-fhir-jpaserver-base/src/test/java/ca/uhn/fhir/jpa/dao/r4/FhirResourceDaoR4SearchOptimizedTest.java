@@ -757,7 +757,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		String resultingQueryNotFormatted = queries.get(0);
 		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, containsString("TARGET_RESOURCE_ID IN ('" + ids.get(0) + "' , '" + ids.get(1) + "' , '" + ids.get(2) + "' , '" + ids.get(3) + "' , '" + ids.get(4) + "')"));
+		assertThat(resultingQueryNotFormatted, containsString("TARGET_RESOURCE_ID IN ('" + ids.get(0) + "','" + ids.get(1) + "','" + ids.get(2) + "','" + ids.get(3) + "','" + ids.get(4) + "')"));
 
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());

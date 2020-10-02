@@ -37,8 +37,12 @@ public class ResourceSqlTable extends BasePredicateBuilder {
 	}
 
 	public Condition createResourceTypeAndNonDeletedPredicates() {
+		BinaryCondition typePredicate = null;
+		if (getResourceType() != null) {
+			typePredicate = BinaryCondition.equalTo(myColumnResType, generatePlaceholder(getResourceType()));
+		}
 		return toAndPredicate(
-			BinaryCondition.equalTo(myColumnResType, generatePlaceholder(getResourceType())),
+			typePredicate,
 			UnaryCondition.isNull(myColumnResDeletedAt)
 		);
 	}

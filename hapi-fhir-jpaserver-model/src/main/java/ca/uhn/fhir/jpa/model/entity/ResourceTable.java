@@ -575,6 +575,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("pid", myId);
 		b.append("resourceType", myResourceType);
+		b.append("lastUpdated", getPublished().getValueAsString());
 		if (getDeleted() != null) {
 			b.append("deleted");
 		}

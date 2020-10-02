@@ -3696,7 +3696,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			IBundleProvider retrieved = myPatientDao.search(map);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-			assertEquals(0, retrieved.size().intValue());
+			assertEquals(2, retrieved.size().intValue());
 		}
 	}
 

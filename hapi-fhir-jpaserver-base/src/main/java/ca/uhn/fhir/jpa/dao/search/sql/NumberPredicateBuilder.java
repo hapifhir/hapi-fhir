@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.search.sql;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
@@ -13,8 +14,8 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
@@ -24,6 +25,8 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NumberPredicateBuilder.class);
 	private final DbColumn myColumnValue;
+	@Autowired
+	private FhirContext myFhirContext;
 
 	/**
 	 * Constructor
@@ -34,8 +37,8 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
 
-	public Condition createPredicateNumeric(String theResourceName, String theParamName, NumberPredicateBuilder theJoin, CriteriaBuilder theCriteriaBuilder, IQueryParameterType theNextOr, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, Object theO, String theInvalidMessageName, RequestPartitionId theRequestPartitionId) {
-		Condition numericPredicate = createPredicateNumeric(this, theResourceName, theParamName, theOperation, theValue, theRequestPartitionId, myColumnValue);
+	public Condition createPredicateNumeric(String theResourceName, String theParamName, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, RequestPartitionId theRequestPartitionId, IQueryParameterType theActualParam) {
+		Condition numericPredicate = createPredicateNumeric(this, theOperation, theValue, myColumnValue, "invalidNumberPrefix", myFhirContext, theActualParam);
 		return combineWithHashIdentityPredicate(theResourceName, theParamName, numericPredicate, theRequestPartitionId);
 	}
 
@@ -44,7 +47,7 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	}
 
 
-	static Condition createPredicateNumeric(BaseSearchParamPredicateBuilder theIndexTable, String theResourceName, String theParamName, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, RequestPartitionId theRequestPartitionId, DbColumn theColumn) {
+	static Condition createPredicateNumeric(BaseSearchParamPredicateBuilder theIndexTable, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, DbColumn theColumn, String theInvalidValueKey, FhirContext theFhirContext, IQueryParameterType theActualParam) {
 		Condition num;
 
 		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL operators below so as to
@@ -79,8 +82,8 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				ourLog.trace("Searching for {} <= val <= {}", low, high);
 				break;
 			default:
-				// FIXME: does this happen in tests?
-				String msg = theIndexTable.getFhirContext().getLocalizer().getMessage(SearchBuilder.class, "invalidNumberPrefix", operation, "AAAAAAAA");
+				String paramValue = theActualParam.getValueAsQueryToken(theFhirContext);
+				String msg = theIndexTable.getFhirContext().getLocalizer().getMessage(SearchBuilder.class, theInvalidValueKey, operation, paramValue);
 				throw new InvalidRequestException(msg);
 		}
 

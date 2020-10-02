@@ -336,7 +336,8 @@ public class SearchBuilder2 implements ISearchBuilder {
 	}
 
 	private List<Long> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
-		SearchSqlBuilder sqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, theCount);
+		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
+		SearchSqlBuilder sqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, theCount);
 		QueryStack3 queryStack3 = new QueryStack3(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDataSource);

@@ -63,6 +63,7 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
+import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -175,7 +176,11 @@ public class QueryStack3 {
 	public void addSortOnResourceId(boolean theAscending) {
 		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ForcedIdPredicateBuilder sortPredicateBuilder = mySqlBuilder.addForcedIdPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), theAscending);
+		if (!theAscending) {
+			mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), theAscending, OrderObject.NullOrder.FIRST);
+		} else {
+			mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), theAscending);
+		}
 		mySqlBuilder.addSort(firstPredicateBuilder.getResourceIdColumn(), theAscending);
 
 	}
@@ -593,7 +598,7 @@ public class QueryStack3 {
 					operation = toOperation(param.getPrefix());
 				}
 
-				Condition predicate = join.createPredicateNumeric(theResourceName, theSearchParam.getName(), join, null, nextOr, operation, value, null, null, theRequestPartitionId);
+				Condition predicate = join.createPredicateNumeric(theResourceName, theSearchParam.getName(), operation, value, theRequestPartitionId, nextOr);
 				codePredicates.add(predicate);
 
 			} else {
@@ -834,28 +839,29 @@ public class QueryStack3 {
 		List<IQueryParameterType> tokens = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
-			if (nextOr instanceof TokenParam && !((TokenParam) nextOr).isEmpty()) {
-				TokenParam id = (TokenParam) nextOr;
-				if (id.isText()) {
+			if (nextOr instanceof TokenParam)
+				if (!((TokenParam) nextOr).isEmpty()) {
+					TokenParam id = (TokenParam) nextOr;
+					if (id.isText()) {
 
-					// Check whether the :text modifier is actually enabled here
-					boolean tokenTextIndexingEnabled = BaseSearchParamExtractor.tokenTextIndexingEnabledForSearchParam(myModelConfig, theSearchParam);
-					if (!tokenTextIndexingEnabled) {
-						String msg;
-						if (myModelConfig.isSuppressStringIndexingInTokens()) {
-							msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForServer");
-						} else {
-							msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
+						// Check whether the :text modifier is actually enabled here
+						boolean tokenTextIndexingEnabled = BaseSearchParamExtractor.tokenTextIndexingEnabledForSearchParam(myModelConfig, theSearchParam);
+						if (!tokenTextIndexingEnabled) {
+							String msg;
+							if (myModelConfig.isSuppressStringIndexingInTokens()) {
+								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForServer");
+							} else {
+								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
+							}
+							throw new MethodNotAllowedException(msg);
 						}
-						throw new MethodNotAllowedException(msg);
+
+						return createPredicateString(theSourceJoinColumn, theResourceName, theSearchParam, theList, null, theRequestPartitionId);
 					}
 
-					return createPredicateString(theSourceJoinColumn, theResourceName, theSearchParam, theList, null, theRequestPartitionId);
+					tokens.add(nextOr);
 				}
 
-			}
-
-			tokens.add(nextOr);
 		}
 
 		if (tokens.isEmpty()) {
@@ -1175,6 +1181,10 @@ public class QueryStack3 {
 					return SearchFilterParser.CompareOperation.le;
 				case NOT_EQUAL:
 					return SearchFilterParser.CompareOperation.ne;
+				case ENDS_BEFORE:
+					return SearchFilterParser.CompareOperation.eb;
+				case STARTS_AFTER:
+					return SearchFilterParser.CompareOperation.sa;
 			}
 		}
 		return SearchFilterParser.CompareOperation.eq;

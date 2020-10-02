@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.search.sql;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
@@ -13,8 +14,7 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.math.BigDecimal;
@@ -24,10 +24,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class QuantityPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(QuantityPredicateBuilder.class);
 	private final DbColumn myColumnHashIdentitySystemUnits;
 	private final DbColumn myColumnHashIdentityUnits;
 	private final DbColumn myColumnValue;
+	@Autowired
+	private FhirContext myFhirContext;
 
 	/**
 	 * Constructor
@@ -39,7 +40,6 @@ public class QuantityPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		myColumnHashIdentityUnits = getTable().addColumn("HASH_IDENTITY_AND_UNITS");
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
-
 
 
 	public Condition createPredicateQuantity(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, QuantityPredicateBuilder theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
@@ -82,7 +82,7 @@ public class QuantityPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			operation = QueryStack3.toOperation(cmpValue);
 		}
 		operation = defaultIfNull(operation, SearchFilterParser.CompareOperation.eq);
-		Condition numericPredicate = NumberPredicateBuilder.createPredicateNumeric(this, theResourceName, theParamName, operation, valueValue, theRequestPartitionId, myColumnValue);
+		Condition numericPredicate = NumberPredicateBuilder.createPredicateNumeric(this, operation, valueValue, myColumnValue, "invalidQuantityPrefix", myFhirContext, theParam);
 
 		return ComboCondition.and(hashPredicate, numericPredicate);
 	}

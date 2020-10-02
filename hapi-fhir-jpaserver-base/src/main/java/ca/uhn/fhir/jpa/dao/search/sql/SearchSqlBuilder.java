@@ -468,9 +468,14 @@ public class SearchSqlBuilder {
 	}
 
 	public void addSort(DbColumn theColumnValueNormalized, boolean theAscending) {
-		OrderObject.Dir direction = theAscending ? OrderObject.Dir.ASCENDING : OrderObject.Dir.DESCENDING;
-		OrderObject orderObject = new OrderObject(direction, theColumnValueNormalized);
-		orderObject.setNullOrder(OrderObject.NullOrder.LAST);
+		OrderObject.NullOrder nullOrder = OrderObject.NullOrder.LAST;
+		addSort(theColumnValueNormalized, theAscending, nullOrder);
+	}
+
+	public void addSort(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+		OrderObject.Dir direction = theTheAscending ? OrderObject.Dir.ASCENDING : OrderObject.Dir.DESCENDING;
+		OrderObject orderObject = new OrderObject(direction, theTheColumnValueNormalized);
+		orderObject.setNullOrder(theNullOrder);
 		mySelect.addCustomOrderings(orderObject);
 	}
 

@@ -601,8 +601,8 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(srId));
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
-			"SRC_PATH IN ('ServiceRequest.subject.where(resolve() is Patient)')",
-			"SRC_PATH IN ('ServiceRequest.performer')"
+			"SRC_PATH = 'ServiceRequest.subject.where(resolve() is Patient)'",
+			"SRC_PATH = 'ServiceRequest.performer'"
 		));
 		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
 		assertThat(unformattedSql, not(containsString(("RES_TYPE"))));

@@ -387,7 +387,9 @@ public class SearchFilterParser {
 		sb,
 		in,
 		re,
-		ap
+		ap,
+		sa,
+		eb
 	}
 
 	public enum FilterLogicalOperation {

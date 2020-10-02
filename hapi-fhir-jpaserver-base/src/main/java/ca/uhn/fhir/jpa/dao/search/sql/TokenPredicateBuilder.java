@@ -18,7 +18,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.VersionIndependentConcept;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -90,7 +90,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 													  RuntimeSearchParam theSearchParam,
 													  SearchFilterParser.CompareOperation theOperation,
 													  RequestPartitionId theRequestPartitionId) {
-		final List<VersionIndependentConcept> codes = new ArrayList<>();
+		final List<FhirVersionIndependentConcept> codes = new ArrayList<>();
 		String paramName = theSearchParam.getName();
 
 		SearchFilterParser.CompareOperation operation = theOperation;
@@ -149,12 +149,12 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				if (modifier == TokenParamModifier.NOT && operation == null) {
 					operation = SearchFilterParser.CompareOperation.ne;
 				}
-				codes.add(new VersionIndependentConcept(system, code));
+				codes.add(new FhirVersionIndependentConcept(system, code));
 			}
 
 		}
 
-		List<VersionIndependentConcept> sortedCodesList = codes
+		List<FhirVersionIndependentConcept> sortedCodesList = codes
 			.stream()
 			.filter(t -> t.getCode() != null || t.getSystem() != null)
 			.sorted()
@@ -210,8 +210,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					String valueSet = valueSetUris.iterator().next();
 					ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 						.setFailOnMissingCodeSystem(false);
-					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(options, valueSet);
-					for (VersionIndependentConcept nextCandidate : candidateCodes) {
+					List<FhirVersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(options, valueSet);
+					for (FhirVersionIndependentConcept nextCandidate : candidateCodes) {
 						if (nextCandidate.getCode().equals(code)) {
 							retVal = nextCandidate.getSystem();
 							break;
@@ -245,7 +245,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	}
 
 
-	private Condition createPredicateOrList(String theResourceType, String theSearchParamName, List<VersionIndependentConcept> theCodes, boolean theWantEquals) {
+	private Condition createPredicateOrList(String theResourceType, String theSearchParamName, List<FhirVersionIndependentConcept> theCodes, boolean theWantEquals) {
 		Condition[] conditions = new Condition[theCodes.size()];
 
 		Long[] hashes = new Long[theCodes.size()];
@@ -253,7 +253,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		boolean haveMultipleColumns = false;
 		for (int i = 0; i < conditions.length; i++) {
 
-			VersionIndependentConcept nextToken = theCodes.get(i);
+			FhirVersionIndependentConcept nextToken = theCodes.get(i);
 			long hash;
 			DbColumn column;
 			if (nextToken.getSystem() == null) {
