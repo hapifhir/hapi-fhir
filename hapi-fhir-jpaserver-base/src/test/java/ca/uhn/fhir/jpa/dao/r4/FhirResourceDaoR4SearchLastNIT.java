@@ -64,16 +64,16 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		assertEquals(4, queries.size());
 
 		// The first and third chunked queries should have a full complement of PIDs
-		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
+		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID IN \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex < 50; pidIndex++) {
 			firstQueryPattern.append(",'[0-9]+'");
 		}
 		firstQueryPattern.append("\\).*");
-		assertThat(queries.get(0), matchesPattern(firstQueryPattern.toString()));
-		assertThat(queries.get(2), matchesPattern(firstQueryPattern.toString()));
+		assertThat(queries.get(0).toUpperCase().replaceAll(" , ", ","), matchesPattern(firstQueryPattern.toString()));
+		assertThat(queries.get(2).toUpperCase().replaceAll(" , ", ","), matchesPattern(firstQueryPattern.toString()));
 
 		// the second and fourth chunked queries should be padded with "-1".
-		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
+		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID IN \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex < 25; pidIndex++) {
 			secondQueryPattern.append(",'[0-9]+'");
 		}
@@ -81,8 +81,8 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 			secondQueryPattern.append(",'-1'");
 		}
 		secondQueryPattern.append("\\).*");
-		assertThat(queries.get(1), matchesPattern(secondQueryPattern.toString()));
-		assertThat(queries.get(3), matchesPattern(secondQueryPattern.toString()));
+		assertThat(queries.get(1).toUpperCase().replaceAll(" , ", ","), matchesPattern(secondQueryPattern.toString()));
+		assertThat(queries.get(3).toUpperCase().replaceAll(" , ", ","), matchesPattern(secondQueryPattern.toString()));
 
 	}
 
