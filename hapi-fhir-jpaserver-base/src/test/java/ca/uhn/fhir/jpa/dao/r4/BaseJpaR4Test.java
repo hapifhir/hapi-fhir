@@ -72,6 +72,7 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -458,6 +459,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IdHelperService myIdHelperService;
 	@Autowired
 	protected IBatchJobSubmitter myBatchJobSubmitter;
+	@Autowired
+	protected ValidationSettings myValidationSettings;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -532,6 +535,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
 	}
 
 	@Override

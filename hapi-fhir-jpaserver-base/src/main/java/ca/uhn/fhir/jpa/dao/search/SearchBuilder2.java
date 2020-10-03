@@ -976,25 +976,25 @@ public class SearchBuilder2 implements ISearchBuilder {
 
 		IncludesIterator(Set<ResourcePersistentId> thePidSet, RequestDetails theRequest) {
 			myCurrentPids = new HashSet<>(thePidSet);
-			myCurrentIterator = EMPTY_LONG_LIST.iterator();
+			myCurrentIterator = null;
 			myRequest = theRequest;
 		}
 
 		private void fetchNext() {
 			while (myNext == null) {
 
-				if (myCurrentIterator.hasNext()) {
-					myNext = myCurrentIterator.next();
-					break;
+				if (myCurrentIterator == null) {
+					Set<Include> includes = Collections.singleton(new Include("*", true));
+					Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest);
+					myCurrentIterator = newPids.iterator();
 				}
 
-				Set<Include> includes = Collections.singleton(new Include("*", true));
-				Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest);
-				if (newPids.isEmpty()) {
+				if (myCurrentIterator.hasNext()) {
+					myNext = myCurrentIterator.next();
+				} else {
 					myNext = NO_MORE;
-					break;
 				}
-				myCurrentIterator = newPids.iterator();
+
 			}
 		}
 

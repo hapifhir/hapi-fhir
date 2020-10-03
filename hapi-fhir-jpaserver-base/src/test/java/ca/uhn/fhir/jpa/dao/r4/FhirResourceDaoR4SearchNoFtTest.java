@@ -745,7 +745,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
-		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
