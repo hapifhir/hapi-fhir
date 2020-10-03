@@ -2666,7 +2666,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
-		assertThat(actual.toString(), actual, contains(idMethodName, id4, id3, id2, id1));
+		assertThat(actual.toString(), actual, contains(id4, id3, id2, id1, idMethodName));
 	}
 
 	@Test

@@ -3137,7 +3137,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(6, actual.size());
-		assertThat(actual, contains(idMethodName2, idMethodName1, id4, id3, id2, id1));
+		assertThat(actual, contains(id4, id3, id2, id1, idMethodName2, idMethodName1));
 	}
 
 	@Test

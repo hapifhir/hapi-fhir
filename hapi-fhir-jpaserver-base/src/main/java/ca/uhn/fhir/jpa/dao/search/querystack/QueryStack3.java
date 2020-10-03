@@ -76,7 +76,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -376,7 +375,7 @@ public class QueryStack3 {
 		} else if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
 				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null,					null,					null,					theFilter.getValue());
+				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 				return theQueryStack3.createPredicateResourceId(null, Collections.singletonList(Collections.singletonList(param)), theResourceName, theFilter.getOperation(), theRequestPartitionId);
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
@@ -839,7 +838,7 @@ public class QueryStack3 {
 		List<IQueryParameterType> tokens = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
-			if (nextOr instanceof TokenParam)
+			if (nextOr instanceof TokenParam) {
 				if (!((TokenParam) nextOr).isEmpty()) {
 					TokenParam id = (TokenParam) nextOr;
 					if (id.isText()) {
@@ -860,7 +859,13 @@ public class QueryStack3 {
 					}
 
 					tokens.add(nextOr);
+
 				}
+
+			} else {
+
+				tokens.add(nextOr);
+			}
 
 		}
 

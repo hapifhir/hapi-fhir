@@ -136,8 +136,22 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid;
 		List<String> ids;
 
-		// Search with count only
-		params = new SearchParameterMap();
+		// Search with count only (synchronous)
+		params = new SearchParameterMap().setLoadSynchronous(true);
+		params.add(Patient.SP_NAME, new StringParam("FAM"));
+		params.setSummaryMode((SummaryEnum.COUNT));
+		myCaptureQueriesListener.clear();
+		results = myPatientDao.search(params);
+		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(sql, containsString("COUNT(DISTINCT t0.RES_ID)"));
+		uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
+		assertEquals(201, results.size().intValue());
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertThat(ids, empty());
+
+		// Search with count only (non-synchronous)
+		params = new SearchParameterMap().setLoadSynchronous(false);
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSummaryMode((SummaryEnum.COUNT));
 		results = myPatientDao.search(params);

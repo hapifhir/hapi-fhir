@@ -120,7 +120,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
-	public static final Integer INTEGER_0 = Integer.valueOf(0);
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 	@Autowired
@@ -468,6 +467,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			final List<ResourcePersistentId> pids = new ArrayList<>();
 
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
+
+			if (theParams.isWantOnlyCount()) {
+				Iterator<Long> countQuery = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, requestPartitionId);
+				Long size = countQuery.next();
+				return new SimpleBundleProvider(size.intValue());
+			}
+
 			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, requestPartitionId)) {
 				while (resultIter.hasNext()) {
 					pids.add(resultIter.next());
@@ -994,9 +1000,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 *
 			 * before doing anything else.
 			 */
-			boolean wantOnlyCount =
-				SummaryEnum.COUNT.equals(myParams.getSummaryMode())
-					| INTEGER_0.equals(myParams.getCount());
+			boolean wantOnlyCount = myParams.isWantOnlyCount();
 			boolean wantCount =
 				wantOnlyCount ||
 					SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||

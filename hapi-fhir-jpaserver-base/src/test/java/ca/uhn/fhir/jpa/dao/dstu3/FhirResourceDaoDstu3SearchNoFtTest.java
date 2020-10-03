@@ -3287,7 +3287,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			TokenParam param = new TokenParam();
 			param.setMissing(false);
 			params.add(Observation.SP_CODE, param);
+			myCaptureQueriesListener.clear();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
 		}

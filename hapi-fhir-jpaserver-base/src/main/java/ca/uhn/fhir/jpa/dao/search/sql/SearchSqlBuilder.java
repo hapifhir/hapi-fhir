@@ -268,7 +268,7 @@ public class SearchSqlBuilder {
 		} else {
 			if (myLastPredicateBuilder == null) {
 				if (myCountQuery) {
-					mySelect.addCustomColumns(FunctionCall.count().addColumnParams(thePredicateBuilder.getResourceIdColumn()));
+					mySelect.addCustomColumns(FunctionCall.count().setIsDistinct(true).addColumnParams(thePredicateBuilder.getResourceIdColumn()));
 				} else {
 					mySelect.addColumns(thePredicateBuilder.getResourceIdColumn());
 				}
@@ -317,19 +317,6 @@ public class SearchSqlBuilder {
 
 			sql = sql.substring(0, idx - 1) + "?" + sql.substring(endIdx + 1);
 		}
-
-		// FIXME: needed?
-		StringBuilder b = new StringBuilder(sql);
-		for (int i = 0, startIdx = 0; ; i++) {
-			int idx = b.indexOf("?", startIdx);
-			if (idx == -1) {
-				break;
-			}
-			String nextValue = bindVariables.get(i).toString();
-			b.replace(idx, idx + 1, "'" + nextValue + "'");
-			startIdx = idx + nextValue.length();
-		}
-		ourLog.info("SQL: {}", b);
 
 		return new GeneratedSql(myMatchNothing, sql, bindVariables);
 	}

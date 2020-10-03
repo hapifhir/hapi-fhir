@@ -677,7 +677,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
 		String findFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
 
-		Collection<ResourcePersistentId> nextRoundMatches = theMatches;
+		List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
 		HashSet<ResourcePersistentId> allAdded = new HashSet<>();
 		HashSet<ResourcePersistentId> original = new HashSet<>(theMatches);
 		ArrayList<Include> includes = new ArrayList<>(theRevIncludes);
@@ -783,14 +783,16 @@ public class SearchBuilder2 implements ISearchBuilder {
 					pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
 				}
 			}
+
+			nextRoundMatches.clear();
 			for (ResourcePersistentId next : pidsToInclude) {
 				if (original.contains(next) == false && allAdded.contains(next) == false) {
 					theMatches.add(next);
+					nextRoundMatches.add(next);
 				}
 			}
 
 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
-			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
 		allAdded.removeAll(original);
@@ -934,7 +936,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		myFetchSize = theFetchSize;
 	}
 
-	@VisibleForTesting
+	@VisibleForTesting // FIXME: remove
 	void setParamsForUnitTest(SearchParameterMap theParams) {
 		myParams = theParams;
 	}
@@ -943,7 +945,7 @@ public class SearchBuilder2 implements ISearchBuilder {
 		return myParams;
 	}
 
-	@VisibleForTesting
+	@VisibleForTesting // FIXME: remove
 	void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
 	}

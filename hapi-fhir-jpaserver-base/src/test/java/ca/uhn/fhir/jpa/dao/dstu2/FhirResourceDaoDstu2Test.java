@@ -1665,7 +1665,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		// found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "F"));
 		// assertEquals(0, found.size());
 
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "001testPersistSearchParams"));
 		map.add(Patient.SP_GENDER, new IdentifierDt("urn:some:wrong:system", AdministrativeGenderEnum.MALE.getCode()));
 		found = toList(myPatientDao.search(map));
@@ -2178,7 +2178,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.setSort(new SortSpec(BaseResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
-		assertThat(actual, contains(idMethodName, id4, id3, id2, id1));
+		assertThat(actual, contains(id4, id3, id2, id1, idMethodName));
 	}
 
 	@Test
