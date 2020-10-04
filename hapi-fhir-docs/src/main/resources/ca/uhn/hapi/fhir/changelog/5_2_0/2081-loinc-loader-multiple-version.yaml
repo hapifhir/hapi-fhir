@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2081
+title: "Terminology loader for LOINC will now support specifying version and loading multiple versions of LOINC."

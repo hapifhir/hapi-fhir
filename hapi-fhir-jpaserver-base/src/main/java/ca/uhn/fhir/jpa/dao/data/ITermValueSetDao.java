@@ -28,6 +28,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
@@ -35,10 +36,22 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
 	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
+	// Keeping for backwards compatibility but recommend using findTermValueSetByUrlAndNullVersion instead.
+	@Deprecated
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url")
 	Optional<TermValueSet> findByUrl(@Param("url") String theUrl);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status")
 	Slice<TermValueSet> findByExpansionStatus(Pageable pageable, @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
+
+	@Query(value="SELECT vs FROM TermValueSet vs INNER JOIN ResourceTable r ON r.myId = vs.myResourcePid WHERE vs.myUrl = :url ORDER BY r.myUpdated DESC")
+	List<TermValueSet> findTermValueSetByUrl(Pageable thePage, @Param("url") String theUrl);
+
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")
+	Optional<TermValueSet> findTermValueSetByUrlAndNullVersion(@Param("url") String theUrl);
+
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion = :version")
+	Optional<TermValueSet> findTermValueSetByUrlAndVersion(@Param("url") String theUrl, @Param("version") String theVersion);
+
 
 }

@@ -2,7 +2,7 @@ package ca.uhn.fhir.empi.rules.json;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
+import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import ca.uhn.fhir.empi.rules.svc.BaseEmpiRulesR4Test;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ public class EmpiRulesJsonR4Test extends BaseEmpiRulesR4Test {
 		assertEquals(EmpiMatchResultEnum.MATCH, rulesDeser.getMatchResult(myBothNameFields));
 		EmpiFieldMatchJson second = rulesDeser.get(1);
 		assertEquals("name.family", second.getResourcePath());
-		assertEquals(EmpiMetricEnum.JARO_WINKLER, second.getMetric());
+		assertEquals(EmpiSimilarityEnum.JARO_WINKLER, second.getSimilarity().getAlgorithm());
 	}
 
 	@Test
@@ -60,11 +60,11 @@ public class EmpiRulesJsonR4Test extends BaseEmpiRulesR4Test {
 	public void getVector() {
 		VectorMatchResultMap vectorMatchResultMap = myRules.getVectorMatchResultMapForUnitTest();
 		assertEquals(1, vectorMatchResultMap.getVector(PATIENT_GIVEN));
-		assertEquals(2, vectorMatchResultMap.getVector(PATIENT_LAST));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_LAST)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_LAST)));
+		assertEquals(2, vectorMatchResultMap.getVector(PATIENT_FAMILY));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_FAMILY)));
 		try {
 			vectorMatchResultMap.getVector("bad");
 			fail();

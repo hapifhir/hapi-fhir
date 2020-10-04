@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincParentGroupFileHandler extends BaseLoincHandler implements IRecordHandler {
@@ -42,9 +43,16 @@ public class LoincParentGroupFileHandler extends BaseLoincHandler implements IRe
 	public void accept(CSVRecord theRecord) {
 		// "ParentGroupId","ParentGroup","Status"
 		String parentGroupId = trim(theRecord.get("ParentGroupId"));
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		String valueSetId;
+		if (codeSystemVersionId != null) {
+			valueSetId = parentGroupId + "-" + codeSystemVersionId;
+		} else {
+			valueSetId = parentGroupId;
+		}
 		String parentGroupName = trim(theRecord.get("ParentGroup"));
 
-		getValueSet(parentGroupId, LoincGroupFileHandler.VS_URI_PREFIX + parentGroupId, parentGroupName, null);
+		getValueSet(valueSetId, LoincGroupFileHandler.VS_URI_PREFIX + parentGroupId, parentGroupName, null);
 	}
 
 

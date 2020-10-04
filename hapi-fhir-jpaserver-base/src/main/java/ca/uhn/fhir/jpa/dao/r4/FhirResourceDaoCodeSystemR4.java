@@ -22,11 +22,10 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -52,14 +51,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
+import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateCodeOptions;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemR4.class);
 
-	@Autowired
-	private ITermCodeSystemDao myCsDao;
 	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
@@ -99,7 +98,11 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		String system;
 		if (haveCoding) {
 			code = theCoding.getCode();
-			system = theCoding.getSystem();
+			if (theCoding.hasVersion()) {
+				system = theCoding.getSystem() + "|" + theCoding.getVersion();
+			} else {
+				system = theCoding.getSystem();
+			}
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();
@@ -131,13 +134,8 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 	public void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
 		super.preDelete(theResourceToDelete, theEntityToDelete);
 
-		String codeSystemUrl = theResourceToDelete.getUrl();
-		if (isNotBlank(codeSystemUrl)) {
-			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
-			if (persCs != null) {
-				myTermDeferredStorageSvc.deleteCodeSystem(persCs);
-			}
-		}
+		myTermDeferredStorageSvc.deleteCodeSystemForResource(theEntityToDelete);
+
 	}
 
 	@Override
@@ -155,5 +153,13 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		return retVal;
 	}
 
+	@Override
+	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl,
+			IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay,
+			Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
+
+		return myTerminologySvc.codeSystemValidateCode(theCodeSystemId, toStringOrNull(theCodeSystemUrl), toStringOrNull(theVersion), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
+
+	}
 
 }

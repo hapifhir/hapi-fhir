@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiBatchSvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
@@ -104,8 +103,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
-	@Autowired
-	private IEmpiBatchSvc myEmpiBatchService;
 
 	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
 
@@ -299,14 +296,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected EmpiTransactionContext createContextForCreate() {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
-		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE);
+		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE_RESOURCE);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
 	}
 
 	protected EmpiTransactionContext createContextForUpdate() {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
-		ctx.setRestOperation(EmpiTransactionContext.OperationType.UPDATE);
+		ctx.setRestOperation(EmpiTransactionContext.OperationType.UPDATE_RESOURCE);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
 	}

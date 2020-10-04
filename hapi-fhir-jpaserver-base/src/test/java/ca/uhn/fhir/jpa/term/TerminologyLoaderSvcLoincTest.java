@@ -17,12 +17,10 @@ import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -220,6 +218,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// RSNA Playbook - LOINC Part -> RadLex RID Mappings
 		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID);
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI, conceptMap.getUrl());
+		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
@@ -236,6 +235,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// RSNA Playbook - LOINC Term -> RadLex RPID Mappings
 		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID);
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI, conceptMap.getUrl());
+		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
@@ -274,7 +274,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
 
 		// Universal lab order VS
-		vs = valueSets.get(LoincUniversalOrderSetHandler.VS_ID);
+		vs = valueSets.get(LoincUniversalOrderSetHandler.VS_ID_BASE);
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
@@ -302,6 +302,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		ourLog.debug(FhirContext.forCached(FhirVersionEnum.R4).newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME, conceptMap.getName());
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI, conceptMap.getUrl());
+		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(1, conceptMap.getGroup().size());
 		assertEquals(ITermLoaderSvc.LOINC_URI, conceptMap.getGroup().get(0).getSource());
 		assertEquals(ITermLoaderSvc.IEEE_11073_10101_URI, conceptMap.getGroup().get(0).getTarget());
@@ -313,7 +314,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("MDC_CONC_GLU_VENOUS_PLASMA", conceptMap.getGroup().get(0).getElement().get(4).getTarget().get(0).getDisplay());
 
 		// Imaging Document Codes
-		vs = valueSets.get(LoincImagingDocumentCodeHandler.VS_ID);
+		vs = valueSets.get(LoincImagingDocumentCodeHandler.VS_ID_BASE);
 		assertEquals(LoincImagingDocumentCodeHandler.VS_URI, vs.getUrl());
 		assertEquals(LoincImagingDocumentCodeHandler.VS_NAME, vs.getName());
 		assertEquals(1, vs.getCompose().getInclude().size());
@@ -340,6 +341,37 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(2, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("17424-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("13006-2", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+	}
+
+	@Test
+	public void testLoadLoincMultipleVersions() throws IOException {
+
+		// Load LOINC marked as version 2.67
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		CodeSystem loincCS = mySystemCaptor.getValue();
+		assertEquals("2.67", loincCS.getVersion());
+
+		// Update LOINC marked as version 2.67
+		myFiles = new ZipCollectionBuilder();
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		loincCS = mySystemCaptor.getValue();
+		assertEquals("2.67", loincCS.getVersion());
+
+		// Load LOINC marked as version 2.68
+		myFiles = new ZipCollectionBuilder();
+		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc, times(3)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		loincCS = mySystemCaptor.getValue();
+		assertEquals("2.68", loincCS.getVersion());
+
 	}
 
 	@Test
@@ -382,7 +414,11 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		addLoincMandatoryFilesWithPropertiesFileToZip(theFiles, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+	}
+
+	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
+		theFiles.addFileZip("/loinc/", thePropertiesFile);
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
