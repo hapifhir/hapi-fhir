@@ -1917,7 +1917,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("resource with match URL \"Patient?"));
+			assertThat(e.getMessage(), containsString("Failed to delete 2 resources. Deleting more than one resource at a time is forbidden."));
 		}
 	}
 
