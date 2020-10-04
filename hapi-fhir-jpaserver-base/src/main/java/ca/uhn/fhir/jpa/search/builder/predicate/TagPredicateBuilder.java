@@ -43,18 +43,8 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 
 	public Condition createPredicateTag(TagTypeEnum theTagType, List<Pair<String, String>> theTokens, String theParamName, RequestPartitionId theRequestPartitionId) {
-
 		addJoin(getTable(), myTagDefinitionTable, myColumnTagId, myTagDefinitionColumnTagId);
-
-		Condition tagListPredicate = createPredicateTagList(theTagType, theTokens);
-
-		// FIXME: needed?
-//			if (theRequestPartitionId != null) {
-//				addPartitionIdPredicate(theRequestPartitionId, tagJoin, predicates);
-//			}
-
-		return tagListPredicate;
-
+		return createPredicateTagList(theTagType, theTokens);
 	}
 
 	private Condition createPredicateTagList(TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {

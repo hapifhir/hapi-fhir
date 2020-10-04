@@ -6,6 +6,9 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
 import java.io.Closeable;
@@ -55,8 +58,8 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 	@Override
 	public void close() {
 		IoUtil.closeQuietly(myResultSet);
-		IoUtil.closeQuietly(myStatement);
-		IoUtil.closeQuietly(myConnection);
+		JdbcUtils.closeStatement(myStatement);
+		DataSourceUtils.releaseConnection(myConnection, myDataSource);
 		myResultSet = null;
 		myStatement = null;
 		myConnection = null;
@@ -84,7 +87,13 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 
 			try {
 				if (!myQueryInitialized) {
-					myConnection = myDataSource.getConnection();
+
+					/*
+					 * Note that we use the spring managed connection, and the expectation is that a transaction that
+					 * is managed by Spring has been started before this method is called.
+					 */
+					assert TransactionSynchronizationManager.isSynchronizationActive();
+					myConnection = DataSourceUtils.getConnection(myDataSource);
 					myStatement = myConnection.prepareStatement(sql);
 
 					if (myMaxResultsToFetch != null) {

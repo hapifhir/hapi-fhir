@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
 import ca.uhn.fhir.jpa.dao.predicate.IndexJoins;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinKey;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 
 import javax.persistence.criteria.AbstractQuery;
@@ -126,7 +125,7 @@ abstract class QueryRootEntry {
 
 	abstract Expression<Date> getLastUpdatedColumn();
 
-	abstract <T> From<?, T> createJoin(From<?, ResourceLink> theLinkJoin, SearchBuilderJoinEnum theType, String theSearchParameterName);
+	abstract <T> From<?, T> createJoin(SearchBuilderJoinEnum theType, String theSearchParameterName);
 
 	abstract AbstractQuery<Long> getQueryRoot();
 

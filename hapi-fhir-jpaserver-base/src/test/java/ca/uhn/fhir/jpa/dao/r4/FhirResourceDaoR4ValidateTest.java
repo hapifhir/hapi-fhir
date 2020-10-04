@@ -528,18 +528,17 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		OperationOutcome oo;
 
-		// FIXME: restore
-//		// Non-existent target
-//		obs.setSubject(new Reference("Group/123"));
-//		OperationOutcome oo = validateAndReturnOutcome(obs);
-//		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-//		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
-//
-//		// Target of wrong type
-//		obs.setSubject(new Reference("Group/ABC"));
-//		oo = validateAndReturnOutcome(obs);
-//		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-//		assertEquals("Unable to find matching profile for Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		// Non-existent target
+		obs.setSubject(new Reference("Group/123"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+
+		// Target of wrong type
+		obs.setSubject(new Reference("Group/ABC"));
+		oo = validateAndReturnOutcome(obs);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertEquals("Unable to find matching profile for Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of right type
 		obs.setSubject(new Reference("Patient/DEF"));

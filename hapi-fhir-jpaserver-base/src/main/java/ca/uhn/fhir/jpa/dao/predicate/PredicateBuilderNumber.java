@@ -55,8 +55,8 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 	public Predicate addPredicate(String theResourceName,
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation theOperation,
-											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+											SearchFilterParser.CompareOperation operation,
+											RequestPartitionId theRequestPartitionId) {
 
 		From<?, ResourceIndexedSearchParamNumber> join = myQueryStack.createJoin(SearchBuilderJoinEnum.NUMBER, theSearchParam.getName());
 
@@ -80,19 +80,19 @@ class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateB
 
 				final Expression<BigDecimal> fromObj = join.get("myValue");
 				ParamPrefixEnum prefix = defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
-				if (theOperation == SearchFilterParser.CompareOperation.ne) {
+				if (operation == SearchFilterParser.CompareOperation.ne) {
 					prefix = ParamPrefixEnum.NOT_EQUAL;
-				} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
+				} else if (operation == SearchFilterParser.CompareOperation.lt) {
 					prefix = ParamPrefixEnum.LESSTHAN;
-				} else if (theOperation == SearchFilterParser.CompareOperation.le) {
+				} else if (operation == SearchFilterParser.CompareOperation.le) {
 					prefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
-				} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
+				} else if (operation == SearchFilterParser.CompareOperation.gt) {
 					prefix = ParamPrefixEnum.GREATERTHAN;
-				} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
+				} else if (operation == SearchFilterParser.CompareOperation.ge) {
 					prefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-				} else if (theOperation == SearchFilterParser.CompareOperation.eq) {
+				} else if (operation == SearchFilterParser.CompareOperation.eq) {
 					prefix = ParamPrefixEnum.EQUAL;
-				} else if (theOperation != null) {
+				} else if (operation != null) {
 					throw new IllegalArgumentException("Invalid operator specified for number type");
 				}
 

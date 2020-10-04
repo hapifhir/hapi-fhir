@@ -40,7 +40,7 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	public Condition createPredicateNumeric(String theResourceName, String theParamName, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, RequestPartitionId theRequestPartitionId, IQueryParameterType theActualParam) {
 		Condition numericPredicate = createPredicateNumeric(this, theOperation, theValue, myColumnValue, "invalidNumberPrefix", myFhirContext, theActualParam);
-		return combineWithHashIdentityPredicate(theResourceName, theParamName, numericPredicate, theRequestPartitionId);
+		return combineWithHashIdentityPredicate(theResourceName, theParamName, numericPredicate);
 	}
 
 	public DbColumn getColumnValue() {

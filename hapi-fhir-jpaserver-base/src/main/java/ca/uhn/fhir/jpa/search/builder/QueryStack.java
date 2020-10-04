@@ -335,7 +335,7 @@ public class QueryStack {
 		Condition predicate = toOrPredicate(codePredicates);
 
 		if (!cacheHit) {
-			predicate = predicateBuilder.combineWithHashIdentityPredicate(theResourceName, paramName, predicate, theRequestPartitionId);
+			predicate = predicateBuilder.combineWithHashIdentityPredicate(theResourceName, paramName, predicate);
 			predicate = predicateBuilder.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 		}
 
@@ -386,7 +386,7 @@ public class QueryStack {
 			}
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
-				return theQueryStack3.createPredicateUri(null, theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateUri(null, theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequest, theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
 				return theQueryStack3.createPredicateString(null, theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
@@ -856,6 +856,7 @@ public class QueryStack {
 													RuntimeSearchParam theSearchParam,
 													List<? extends IQueryParameterType> theList,
 													SearchFilterParser.CompareOperation theOperation,
+													RequestDetails theRequestDetails,
 													RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
@@ -865,7 +866,7 @@ public class QueryStack {
 			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
-		Condition predicate = join.addPredicate(theList, paramName, theOperation);
+		Condition predicate = join.addPredicate(theList, paramName, theOperation, theRequestDetails);
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 
@@ -957,7 +958,7 @@ public class QueryStack {
 							break;
 						case URI:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								andPredicates.add(createPredicateUri(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.eq, theRequestPartitionId));
+								andPredicates.add(createPredicateUri(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.eq, theRequest, theRequestPartitionId));
 							}
 							break;
 						case HAS:

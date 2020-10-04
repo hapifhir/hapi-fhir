@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
@@ -57,8 +56,8 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 	public Predicate addPredicate(String theResourceName,
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
-											SearchFilterParser.CompareOperation theOperation,
-											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+											SearchFilterParser.CompareOperation operation,
+											RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
 		From<?, ResourceIndexedSearchParamUri> join = myQueryStack.createJoin(SearchBuilderJoinEnum.URI, paramName);
@@ -126,29 +125,29 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 					} else {
 
 						Predicate uriPredicate = null;
-						if (theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq) {
+						if (operation == null || operation == SearchFilterParser.CompareOperation.eq) {
 							long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName, value);
 							Predicate hashPredicate = myCriteriaBuilder.equal(join.get("myHashUri"), hashUri);
 							codePredicates.add(hashPredicate);
-						} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
+						} else if (operation == SearchFilterParser.CompareOperation.ne) {
 							uriPredicate = myCriteriaBuilder.notEqual(join.get("myUri").as(String.class), value);
-						} else if (theOperation == SearchFilterParser.CompareOperation.co) {
+						} else if (operation == SearchFilterParser.CompareOperation.co) {
 							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftAndRightMatchLikeExpression(value));
-						} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
+						} else if (operation == SearchFilterParser.CompareOperation.gt) {
 							uriPredicate = myCriteriaBuilder.greaterThan(join.get("myUri").as(String.class), value);
-						} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
+						} else if (operation == SearchFilterParser.CompareOperation.lt) {
 							uriPredicate = myCriteriaBuilder.lessThan(join.get("myUri").as(String.class), value);
-						} else if (theOperation == SearchFilterParser.CompareOperation.ge) {
+						} else if (operation == SearchFilterParser.CompareOperation.ge) {
 							uriPredicate = myCriteriaBuilder.greaterThanOrEqualTo(join.get("myUri").as(String.class), value);
-						} else if (theOperation == SearchFilterParser.CompareOperation.le) {
+						} else if (operation == SearchFilterParser.CompareOperation.le) {
 							uriPredicate = myCriteriaBuilder.lessThanOrEqualTo(join.get("myUri").as(String.class), value);
-						} else if (theOperation == SearchFilterParser.CompareOperation.sw) {
+						} else if (operation == SearchFilterParser.CompareOperation.sw) {
 							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
-						} else if (theOperation == SearchFilterParser.CompareOperation.ew) {
+						} else if (operation == SearchFilterParser.CompareOperation.ew) {
 							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createRightMatchLikeExpression(value));
 						} else {
 							throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
-								theOperation.toString()));
+								operation.toString()));
 						}
 
 						if (uriPredicate != null) {
@@ -181,7 +180,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 			paramName,
 			join,
 			orPredicate,
-			theRequestPartitionId);
+                theRequestPartitionId);
 		myQueryStack.addPredicateWithImplicitTypeSelection(outerPredicate);
 		return outerPredicate;
 	}

@@ -747,7 +747,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
-		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
@@ -1402,11 +1402,11 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 			assertEquals(1, selectQueries.size());
 
-			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+			String sqlQuery = selectQueries.get(0).getSql(true, false).toLowerCase();
 			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertEquals(1, countMatches(sqlQuery, "res_id = '123'"), sqlQuery);
+			assertEquals(1, countMatches(sqlQuery, "res_id in ('123')"), sqlQuery);
 			assertEquals(0, countMatches(sqlQuery, "join"), sqlQuery);
-			assertEquals(1, countMatches(sqlQuery, "res_type = 'diagnosticreport'"), sqlQuery);
+			assertEquals(1, countMatches(sqlQuery, "res_type='diagnosticreport'"), sqlQuery);
 			assertEquals(1, countMatches(sqlQuery, "res_deleted_at is null"), sqlQuery);
 		}
 		// With an _id parameter and a standard search param
@@ -1420,13 +1420,11 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 			assertEquals(1, selectQueries.size());
 
-			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+			String sqlQuery = selectQueries.get(0).getSql(true, false).toLowerCase();
 			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertEquals(1, countMatches(sqlQuery, "res_id = '123'"), sqlQuery);
+			assertEquals(1, countMatches(sqlQuery, "res_id in ('123')"), sqlQuery);
 			assertEquals(1, countMatches(sqlQuery, "join"), sqlQuery);
 			assertEquals(1, countMatches(sqlQuery, "hash_sys_and_value"), sqlQuery);
-			assertEquals(1, countMatches(sqlQuery, "res_type = 'diagnosticreport"), sqlQuery); // could be 0
-			assertEquals(1, countMatches(sqlQuery, "res_deleted_at"), sqlQuery); // could be 0
 		}
 	}
 
@@ -1443,9 +1441,9 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 
 		String sqlQuery = selectQueries.get(0).getSql(true, false).toLowerCase();
 		ourLog.info("SQL Query:\n{}", sqlQuery);
-		assertEquals(1, countMatches(sqlQuery, "res_id in ( '123' )"), sqlQuery);
+		assertEquals(1, countMatches(sqlQuery, "res_id in ('123')"), sqlQuery);
 		assertEquals(0, countMatches(sqlQuery, "join"), sqlQuery);
-		assertEquals(1, countMatches(sqlQuery, "res_type = 'diagnosticreport'"), sqlQuery);
+		assertEquals(1, countMatches(sqlQuery, "res_type='diagnosticreport'"), sqlQuery);
 		assertEquals(1, countMatches(sqlQuery, "res_deleted_at is null"), sqlQuery);
 	}
 
@@ -3198,7 +3196,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		String resultingQueryNotFormatted = queries.get(0);
 
 		assertEquals(1, countMatches(resultingQueryNotFormatted, "HASH_VALUE"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE IN ('3140583648400062149','4929264259256651518')"));
+		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE in ('3140583648400062149' , '4929264259256651518')"));
 
 		// Ensure that the search actually worked
 		assertEquals(2, search.size().intValue());
@@ -3233,7 +3231,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 		String resultingQueryNotFormatted = queries.get(0);
 
-		assertEquals(2, countMatches(resultingQueryNotFormatted, "HASH_VALUE"), resultingQueryNotFormatted);
+		assertEquals(1, countMatches(resultingQueryNotFormatted, "HASH_VALUE"), resultingQueryNotFormatted);
 		assertEquals(1, countMatches(resultingQueryNotFormatted, "HASH_SYS"), resultingQueryNotFormatted);
 
 		// Ensure that the search actually worked
@@ -3776,16 +3774,6 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
 		assertThat(patients, contains(female));
 
-		// No match - two values with different specificities
-		params = new SearchParameterMap();
-		params.add(Patient.SP_GENDER, new TokenOrListParam()
-			.addOr(new TokenParam(null, "male").setModifier(TokenParamModifier.NOT))
-			.addOr(new TokenParam("http://help-im-a-bug", "blah").setModifier(TokenParamModifier.NOT))
-		);
-		params.setLoadSynchronous(true);
-		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
-		assertThat(patients, contains(female));
-
 	}
 
 	@Test
@@ -3897,7 +3885,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(found).toString(), toUnqualifiedVersionlessIdValues(found), contains(id1));
 
 		String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(0, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+		assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 		assertEquals(0, countMatches(searchQuery.toLowerCase(), "partition"), searchQuery);
 		assertEquals(1, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 		assertEquals(1, countMatches(searchQuery.toLowerCase(), "sp_value"), searchQuery);
@@ -4183,9 +4171,9 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 			assertThat(patients.toString(), patients, contains(obsId1));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
-			assertEquals(0, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
-			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal >= '20200605'"), searchQuery);
-			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal <= '20200606'"), searchQuery);
+			assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(1, countMatches(searchQuery.toLowerCase(), "sp_value_low_date_ordinal>='20200605'"), searchQuery);
+			assertEquals(1, countMatches(searchQuery.toLowerCase(), "sp_value_low_date_ordinal<='20200606'"), searchQuery);
 		}
 
 		// Two AND instances of 1 SP and 1 instance of another
@@ -4202,7 +4190,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
 			assertEquals(0, countMatches(searchQuery.toLowerCase(), "partition"), searchQuery);
-			assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(2, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(2, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 			assertEquals(4, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
@@ -4217,7 +4205,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 			assertThat(patients.toString(), patients, containsInAnyOrder(obsId3, obsId4));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
-			assertEquals(0, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
@@ -5242,8 +5230,8 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		assertEquals(1, outcome.sizeOrThrowNpe());
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(3, countMatches(searchSql, "JOIN"));
-		assertEquals(1, countMatches(searchSql, "SELECT"));
+		assertEquals(2, countMatches(searchSql, "join"), searchSql);
+		assertEquals(3, countMatches(searchSql, "select"), searchSql);
 
 	}
 

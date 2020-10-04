@@ -115,6 +115,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.getMaximumPageSize;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -124,15 +125,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * searches for resources
  */
 public class LegacySearchBuilder implements ISearchBuilder {
-
-	/**
-	 * See loadResourcesByPid
-	 * for an explanation of why we use the constant 800
-	 */
-	// NB: keep public
-	public static final int MAXIMUM_PAGE_SIZE = 800;
-	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
-	public static boolean myUseMaxPageSize50ForTest = false;
 
 	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(LegacySearchBuilder.class);
@@ -182,18 +174,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
-	}
-
-	public static int getMaximumPageSize() {
-		if (myUseMaxPageSize50ForTest) {
-			return MAXIMUM_PAGE_SIZE_FOR_TESTING;
-		} else {
-			return MAXIMUM_PAGE_SIZE;
-		}
-	}
-
-	public static void setMaxPageSize50ForTest(boolean theIsTest) {
-		myUseMaxPageSize50ForTest = theIsTest;
 	}
 
 	@Override

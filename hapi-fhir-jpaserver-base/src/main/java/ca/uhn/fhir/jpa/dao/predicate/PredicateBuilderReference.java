@@ -265,7 +265,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
 	 * on the device.
 	 */
-	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theLinkJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		/*
 		  * Which resource types can the given chained parameter actually link to? This might be a list
@@ -281,7 +281,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		 * Handle chain on _type
 		 */
 		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
-			return createChainPredicateOnType(theResourceName, theParamName, theLinkJoin, theReferenceParam, resourceTypes);
+			return createChainPredicateOnType(theResourceName, theParamName, theJoin, theReferenceParam, resourceTypes);
 		}
 
 		boolean foundChainMatch = false;
@@ -336,40 +336,13 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 			// If this is false, we throw an exception below so no sense doing any further processing
 			if (foundChainMatch) {
-				// FIXME KHS this is the part we need to change
-				RuntimeSearchParam chainParamDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-				Predicate andPredicate = null;
+				Subquery<Long> subQ = createLinkSubquery(chain, subResourceName, orValues, theRequest, theRequestPartitionId);
 
-				// FIXME KHS rather than all this exclusionary logic, refactor the predicate stuff out of the join code so we can reuse it in createPredicate() below
-				if (canOptimizeToCrossJoin(resourceTypes, orValues, chainParamDef)) {
-					// FIXME hardcode token for now
-//					Join<ResourceLink, ResourceTable> linkTargetJoin = theLinkJoin.join("myParamsToken", JoinType.LEFT);
-					RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
-					Predicate valuesPredicate = myPredicateBuilder.addLinkPredicate(theResourceName, paramDef, orValues, null, theLinkJoin, theRequestPartitionId);
-					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-					theCodePredicates.add(pathPredicate);
-					candidateTargetTypes.add(nextType);
-					andPredicate = myCriteriaBuilder.and(pathPredicate, valuesPredicate);
-//
-//					From<?, ?> from = myQueryStack.addFromOrReturnNull(chainParamDef);
-//					if (from != null) {
-//						// Optimize search with a cross join
-//						Predicate valuePredicate = myPredicateBuilder.createPredicate(orValues, subResourceName, chainParamDef, myCriteriaBuilder, from, theRequestPartitionId);
-//						Predicate pidPredicate = myCriteriaBuilder.equal(theLinkJoin.get("myTargetResourcePid"), from.get("myResourcePid"));
-//						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-//						andPredicate = myCriteriaBuilder.and(pidPredicate, pathPredicate, valuePredicate);
-//					}
-				}
-
-				if (andPredicate == null) {
-					Subquery<Long> subQ = createLinkSubquery(chain, subResourceName, orValues, theRequest, theRequestPartitionId);
-
-					Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theLinkJoin);
-					Predicate pidPredicate = theLinkJoin.get("myTargetResourcePid").in(subQ);
-					andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
-					theCodePredicates.add(andPredicate);
-					candidateTargetTypes.add(nextType);
-				}
+				Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
+				Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
+				Predicate andPredicate = myCriteriaBuilder.and(pathPredicate, pidPredicate);
+				theCodePredicates.add(andPredicate);
+				candidateTargetTypes.add(nextType);
 			}
 		}
 
@@ -384,29 +357,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		Predicate predicate = myCriteriaBuilder.or(toArray(theCodePredicates));
 		myQueryStack.addPredicateWithImplicitTypeSelection(predicate);
 		return predicate;
-	}
-
-	private boolean canOptimizeToCrossJoin(List<Class<? extends IBaseResource>> theResourceTypes, ArrayList<IQueryParameterType> theOrValues, RuntimeSearchParam theChainParamDef) {
-		if (theChainParamDef == null) {
-			return false;
-		}
-		if (theResourceTypes.size() > 1) {
-			return false;
-		}
-		if (theOrValues.size() != 1) {
-			return false;
-		}
-		IQueryParameterType queryParam = theOrValues.get(0);
-		if (queryParam instanceof TokenParam) {
-			TokenParam tokenParam = (TokenParam) queryParam;
-			if (tokenParam.isText()) {
-				return false;
-			}
-		}
-		if (queryParam.getMissing() != null) {
-			return false;
-		}
-		return true;
 	}
 
 	private Predicate createChainPredicateOnType(String theResourceName, String theParamName, From<?, ResourceLink> theJoin, ReferenceParam theReferenceParam, List<Class<? extends IBaseResource>> theResourceTypes) {

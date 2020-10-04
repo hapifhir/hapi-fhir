@@ -1,13 +1,20 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -33,6 +40,8 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Constructor
@@ -45,7 +54,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	}
 
 
-	public Condition addPredicate(List<? extends IQueryParameterType> theUriOrParameterList, String theParamName, SearchFilterParser.CompareOperation theOperation) {
+	public Condition addPredicate(List<? extends IQueryParameterType> theUriOrParameterList, String theParamName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequestDetails) {
 
 		List<Condition> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theUriOrParameterList) {
@@ -71,8 +80,18 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					 *
 					 * If we ever need to make this more efficient, lucene could certainly be used as an optimization.
 					 */
-					ourLog.info("Searching for candidate URI:above parameters for Resource[{}] param[{}]", getResourceType(), theParamName);
-					// FIXME: send perftrace warning?
+					String msg = "Searching for candidate URI:above parameters for Resource["+getResourceType()+"] param["+theParamName+"]";
+					ourLog.info(msg);
+
+					StorageProcessingMessage message = new StorageProcessingMessage();
+					ourLog.warn(msg);
+					message.setMessage(msg);
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(StorageProcessingMessage.class, message);
+					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+
 					Collection<String> candidates = myResourceIndexedSearchParamUriDao.findAllByResourceTypeAndParamName(getResourceType(), theParamName);
 					List<String> toFind = new ArrayList<>();
 					for (String next : candidates) {
@@ -88,13 +107,13 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					}
 
 					Condition uriPredicate = toEqualToOrInPredicate(myColumnUri, generatePlaceholders(toFind));
-					Condition hashAndUriPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate, getRequestPartitionId());
+					Condition hashAndUriPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate);
 					codePredicates.add(hashAndUriPredicate);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
 
 					Condition uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftMatchLikeExpression(value)));
-					Condition hashAndUriPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate, getRequestPartitionId());
+					Condition hashAndUriPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate);
 					codePredicates.add(hashAndUriPredicate);
 
 				} else {
@@ -147,7 +166,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		}
 
 		ComboCondition orPredicate = ComboCondition.or(codePredicates.toArray(new Condition[0]));
-		Condition outerPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, orPredicate, getRequestPartitionId());
+		Condition outerPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, orPredicate);
 		return outerPredicate;
 
 	}

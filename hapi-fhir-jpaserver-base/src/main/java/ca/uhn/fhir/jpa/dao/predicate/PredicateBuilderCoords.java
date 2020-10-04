@@ -150,7 +150,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
-											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 		From<?, ResourceIndexedSearchParamCoords> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COORDS, theSearchParam.getName());
 
 		if (theList.get(0).getMissing() != null) {

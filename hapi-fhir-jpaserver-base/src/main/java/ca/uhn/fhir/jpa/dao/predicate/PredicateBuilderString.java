@@ -53,7 +53,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 											RuntimeSearchParam theSearchParam,
 											List<? extends IQueryParameterType> theList,
 											SearchFilterParser.CompareOperation theOperation,
-											From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId) {
+											RequestPartitionId theRequestPartitionId) {
 
 		From<?, ResourceIndexedSearchParamString> join = myQueryStack.createJoin(SearchBuilderJoinEnum.STRING, theSearchParam.getName());
 
@@ -89,7 +89,7 @@ class PredicateBuilderString extends BasePredicateBuilder implements IPredicateB
 			theBuilder,
 			theFrom,
 			null,
-			theRequestPartitionId);
+                theRequestPartitionId);
 	}
 
 	private Predicate createPredicateString(IQueryParameterType theParameter,

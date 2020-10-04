@@ -54,7 +54,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		return myColumnResId;
 	}
 
-	public Condition combineWithHashIdentityPredicate(String theResourceName, String theParamName, Condition thePredicate, RequestPartitionId theRequestPartitionId) {
+	public Condition combineWithHashIdentityPredicate(String theResourceName, String theParamName, Condition thePredicate) {
 		List<Condition> andPredicates = new ArrayList<>();
 
 		Condition hashIdentityPredicate = createHashIdentityPredicate(theResourceName, theParamName);
@@ -75,7 +75,6 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		ComboCondition condition = ComboCondition.and(
 			BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)),
 			BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)),
-			// FIXME: deal with oracle here
 			BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
 		);
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, condition);

@@ -326,9 +326,6 @@ public class SearchBuilder implements ISearchBuilder {
 		ArrayList<SearchQueryExecutor> queries = new ArrayList<>();
 
 		if (!pids.isEmpty()) {
-			if (theMaximumResults != null && pids.size() > theMaximumResults) {
-				pids.subList(0, theMaximumResults - 1);
-			}
 			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t -> doCreateChunkedQueries(theParams, t, sort, theCount, theRequest, queries));
 		} else {
 			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theMaximumResults, theCount, theRequest, null);
@@ -934,20 +931,8 @@ public class SearchBuilder implements ISearchBuilder {
 		myFetchSize = theFetchSize;
 	}
 
-	@VisibleForTesting
-		// FIXME: remove
-	void setParamsForUnitTest(SearchParameterMap theParams) {
-		myParams = theParams;
-	}
-
 	public SearchParameterMap getParams() {
 		return myParams;
-	}
-
-	@VisibleForTesting
-		// FIXME: remove
-	void setEntityManagerForUnitTest(EntityManager theEntityManager) {
-		myEntityManager = theEntityManager;
 	}
 
 	public CriteriaBuilder getBuilder() {

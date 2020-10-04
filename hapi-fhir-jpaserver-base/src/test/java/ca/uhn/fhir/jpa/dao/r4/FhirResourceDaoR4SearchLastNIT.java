@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -25,7 +26,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
 	@AfterEach
 	public void resetMaximumPageSize() {
-		LegacySearchBuilder.setMaxPageSize50ForTest(false);
+		SearchBuilder.setMaxPageSize50ForTest(false);
 	}
 
 	@Test
@@ -48,7 +49,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
 		// Set chunk size to 50
-		LegacySearchBuilder.setMaxPageSize50ForTest(true);
+		SearchBuilder.setMaxPageSize50ForTest(true);
 
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));

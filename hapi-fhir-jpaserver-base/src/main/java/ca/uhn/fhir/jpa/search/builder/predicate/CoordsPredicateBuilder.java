@@ -100,7 +100,7 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			longitudePredicate = theFrom.createLongitudePredicateFromBox(box);
 		}
 		ComboCondition singleCode = ComboCondition.and(latitudePredicate, longitudePredicate);
-		return combineWithHashIdentityPredicate(theResourceName, theSearchParam.getName(), singleCode, theRequestPartitionId);
+		return combineWithHashIdentityPredicate(theResourceName, theSearchParam.getName(), singleCode);
 	}
 
 

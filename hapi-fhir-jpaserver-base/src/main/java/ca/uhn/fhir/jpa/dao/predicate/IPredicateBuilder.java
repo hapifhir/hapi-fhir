@@ -22,12 +22,9 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import com.healthmarketscience.sqlbuilder.Condition;
 
 import javax.annotation.Nullable;
-import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import java.util.List;
 
@@ -36,6 +33,6 @@ public interface IPredicateBuilder {
 	Predicate addPredicate(String theResourceName,
 								  RuntimeSearchParam theSearchParam,
 								  List<? extends IQueryParameterType> theList,
-								  SearchFilterParser.CompareOperation theOperation,
-								  From<?, ResourceLink> theLinkJoin, RequestPartitionId theRequestPartitionId);
+								  SearchFilterParser.CompareOperation operation,
+								  RequestPartitionId theRequestPartitionId);
 }
