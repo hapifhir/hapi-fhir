@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -23,7 +23,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnHashIdentity;
 
-	public BaseSearchParamPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
+	public BaseSearchParamPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder, theTable);
 
 		myColumnResId = getTable().addColumn("RES_ID");

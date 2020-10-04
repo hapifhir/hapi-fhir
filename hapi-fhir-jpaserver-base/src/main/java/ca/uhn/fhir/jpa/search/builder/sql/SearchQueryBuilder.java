@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.config.HibernateDialectProvider;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -37,20 +38,24 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.pagination.LimitHandler;
+import org.hibernate.engine.spi.RowSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class SearchSqlBuilder {
+public class SearchQueryBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchSqlBuilder.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryBuilder.class);
 	private final String myBindVariableSubstitutionBase;
 	private final ArrayList<Object> myBindVariableValues;
 	private final DbSpec mySpec;
@@ -63,6 +68,7 @@ public class SearchSqlBuilder {
 	private final FhirContext myFhirContext;
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
+	private final Dialect myDialect;
 	private BaseJoiningPredicateBuilder myLastPredicateBuilder;
 	private boolean myMatchNothing;
 	private ResourceTablePredicateBuilder myResourceTableRoot;
@@ -72,14 +78,14 @@ public class SearchSqlBuilder {
 	/**
 	 * Constructor
 	 */
-	public SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, boolean theCountQuery) {
-		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", theCountQuery, new ArrayList<>());
+	public SearchQueryBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, HibernateDialectProvider theDialectProvider, boolean theCountQuery) {
+		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", theDialectProvider.getDialect(), theCountQuery, new ArrayList<>());
 	}
 
 	/**
 	 * Constructor for child SQL Builders
 	 */
-	private SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, String theBindVariableSubstitutionBase, boolean theCountQuery, ArrayList<Object> theBindVariableValues) {
+	private SearchQueryBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, String theBindVariableSubstitutionBase, Dialect theDialect, boolean theCountQuery, ArrayList<Object> theBindVariableValues) {
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
 		myPartitionSettings = thePartitionSettings;
@@ -87,6 +93,7 @@ public class SearchSqlBuilder {
 		myResourceType = theResourceType;
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myCountQuery = theCountQuery;
+		myDialect = theDialect;
 
 		mySpec = new DbSpec();
 		mySchema = mySpec.addDefaultSchema();
@@ -177,29 +184,6 @@ public class SearchSqlBuilder {
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
-
-
-	// FIXME: remove
-	public ResourceLinkPredicateBuilder addEverythingSelector(QueryStack theQueryStack, String theResourceName, Long theTargetPid) {
-		assert myLastPredicateBuilder == null;
-
-//		if (theTargetPid != null) {
-		return addReferenceSelector(theQueryStack, null);
-//		} else {
-//			getOrCreateResourceTableRoot();
-//
-//			ResourceLinkIndexTable retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this);
-//			DbTable fromTable = myCurrentIndexTable.getTable();
-//			DbTable toTable = retVal.getTable();
-//			DbColumn fromColumn = myCurrentIndexTable.getResourceIdColumn();
-//			DbColumn toColumn = retVal.getColumnTargetResourceId();
-//			Join join = new DbJoin(mySpec, fromTable, toTable, new DbColumn[]{fromColumn}, new DbColumn[]{toColumn});
-//			mySelect.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
-//			mySelect.addColumns(retVal.getColumnSrcResourceId());
-//			return retVal;
-//		}
-	}
-
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a REFERENCE search parameter
@@ -310,7 +294,7 @@ public class SearchSqlBuilder {
 	/**
 	 * Generate and return the SQL generated by this builder
 	 */
-	public GeneratedSql generate() {
+	public GeneratedSql generate(@Nullable Integer theMaxResultsToFetch) {
 
 		getOrCreateLastPredicateBuilder();
 
@@ -331,6 +315,14 @@ public class SearchSqlBuilder {
 			bindVariables.add(myBindVariableValues.get(substitutionIndex));
 
 			sql = sql.substring(0, idx - 1) + "?" + sql.substring(endIdx + 1);
+		}
+
+		if (theMaxResultsToFetch != null) {
+			LimitHandler limitHandler = myDialect.getLimitHandler();
+			RowSelection selection = new RowSelection();
+			selection.setMaxRows(theMaxResultsToFetch);
+			sql = limitHandler.processSql(sql, selection);
+			bindVariables.add(theMaxResultsToFetch);
 		}
 
 		return new GeneratedSql(myMatchNothing, sql, bindVariables);
@@ -457,8 +449,8 @@ public class SearchSqlBuilder {
 	}
 
 	// FIXME: is this neeeded? no mutable state anymore
-	public SearchSqlBuilder newChildSqlBuilder() {
-		return new SearchSqlBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, myResourceType, mySqlBuilderFactory, myBindVariableSubstitutionBase, false, myBindVariableValues);
+	public SearchQueryBuilder newChildSqlBuilder() {
+		return new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, myResourceType, mySqlBuilderFactory, myBindVariableSubstitutionBase, myDialect, false, myBindVariableValues);
 	}
 
 	public SelectQuery getSelect() {

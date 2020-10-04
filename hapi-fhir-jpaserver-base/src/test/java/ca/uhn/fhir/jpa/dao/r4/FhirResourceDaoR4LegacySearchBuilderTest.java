@@ -119,7 +119,6 @@ import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -167,8 +166,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
-public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
+public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4LegacySearchBuilderTest.class);
 
 	@Autowired
 	MatchUrlService myMatchUrlService;
@@ -180,12 +179,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setUseLegacySearchBuilder(false);
 	}
 
 	@BeforeEach
 	public void beforeDisableCacheReuse() {
 		myModelConfig.setSuppressStringIndexingInTokens(new ModelConfig().isSuppressStringIndexingInTokens());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setUseLegacySearchBuilder(true);
 	}
 
 	@Test
@@ -597,16 +598,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> ids;
 
 		Date beforeAll = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
+		TestUtil.sleepOneClick();
 
 		Organization org = new Organization();
 		org.setName("O1");
 		org.setId("O1");
 		myOrganizationDao.update(org);
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
+		TestUtil.sleepOneClick();
 
 		Date beforePatient = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
+		TestUtil.sleepOneClick();
 
 		Patient p = new Patient();
 		p.setId("P1");
@@ -614,7 +615,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.setManagingOrganization(new Reference("Organization/O1"));
 		myPatientDao.update(p);
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
+		TestUtil.sleepOneClick();
 		Date afterAll = new Date();
 
 		// Search with between date (should still return Organization even though
@@ -662,7 +663,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myOrganizationDao.update(org);
 
 		Date beforeAll = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
+		TestUtil.sleepOneClick();
 
 		Patient p = new Patient();
 		p.setId("P1");
@@ -670,17 +671,17 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.setManagingOrganization(new Reference("Organization/O1"));
 		myPatientDao.update(p);
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
+		TestUtil.sleepOneClick();
 
 		Date beforeOrg = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
+		TestUtil.sleepOneClick();
 
 		org = new Organization();
 		org.setActive(true);
 		org.setId("O1");
 		myOrganizationDao.update(org);
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
+		TestUtil.sleepOneClick();
 		Date afterAll = new Date();
 
 		// Everything should come back
@@ -1440,9 +1441,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertEquals(1, selectQueries.size());
 
-		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+		String sqlQuery = selectQueries.get(0).getSql(true, false).toLowerCase();
 		ourLog.info("SQL Query:\n{}", sqlQuery);
-		assertEquals(1, countMatches(sqlQuery, "res_id = '123'"), sqlQuery);
+		assertEquals(1, countMatches(sqlQuery, "res_id in ( '123' )"), sqlQuery);
 		assertEquals(0, countMatches(sqlQuery, "join"), sqlQuery);
 		assertEquals(1, countMatches(sqlQuery, "res_type = 'diagnosticreport'"), sqlQuery);
 		assertEquals(1, countMatches(sqlQuery, "res_deleted_at is null"), sqlQuery);
@@ -4593,11 +4594,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			@Override
 			public IIdType doInTransaction(TransactionStatus theStatus) {
-				org.hl7.fhir.r4.model.Patient p = new org.hl7.fhir.r4.model.Patient();
+				Patient p = new Patient();
 				p.addName().setFamily(methodName);
 				IIdType pid = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
-				org.hl7.fhir.r4.model.Condition c = new org.hl7.fhir.r4.model.Condition();
+				Condition c = new Condition();
 				c.getSubject().setReferenceElement(pid);
 				myConditionDao.create(c);
 

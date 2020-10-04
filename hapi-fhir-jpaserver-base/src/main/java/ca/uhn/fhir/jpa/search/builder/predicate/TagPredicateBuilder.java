@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -28,7 +28,7 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnTagId;
 	private final DbColumn myTagDefinitionColumnTagType;
 
-	public TagPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public TagPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_TAG"));
 
 		myColumnResId = getTable().addColumn("RES_ID");

@@ -30,15 +30,13 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.config.HibernateDialectProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
-import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -46,6 +44,10 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -78,6 +80,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -108,6 +111,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -127,7 +131,6 @@ public class SearchBuilder implements ISearchBuilder {
 	// NB: keep public
 	public static final int MAXIMUM_PAGE_SIZE = 800;
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
-	private static final List<ResourcePersistentId> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
 	public static boolean myUseMaxPageSize50ForTest = false;
@@ -168,6 +171,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private DataSource myDataSource;
 	@Autowired
 	private SqlObjectFactory mySqlBuilderFactory;
+	@Autowired
+	private HibernateDialectProvider myDialectProvider;
 
 	/**
 	 * Constructor
@@ -183,7 +188,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
-	private void searchForIdsWithAndOr(SearchSqlBuilder theSearchSqlBuilder, QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+	private void searchForIdsWithAndOr(SearchQueryBuilder theSearchSqlBuilder, QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		myParams = theParams;
 
 		// Remove any empty parameters
@@ -224,6 +229,7 @@ public class SearchBuilder implements ISearchBuilder {
 			myParams.isAllParametersHaveNoModifier();
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Override
 	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
@@ -231,8 +237,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		List<List<Long>> queries = createQuery(myParams, null, null, true, theRequest, null);
-		return queries.get(0).iterator();
+		ArrayList<SearchQueryExecutor> queries = createQuery(myParams, null, null, true, theRequest, null);
+		try (SearchQueryExecutor queryExecutor = queries.get(0)) {
+			return Lists.newArrayList(queryExecutor.next()).iterator();
+		}
 	}
 
 	/**
@@ -243,6 +251,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myPidSet = new HashSet<>(thePidSet);
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Override
 	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
@@ -264,8 +273,8 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	private List<List<Long>> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
-													 SearchRuntimeDetails theSearchRuntimeDetails) {
+	private ArrayList<SearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+																		SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
 
@@ -314,7 +323,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
-		ArrayList<List<Long>> queries = new ArrayList<>();
+		ArrayList<SearchQueryExecutor> queries = new ArrayList<>();
 
 		if (!pids.isEmpty()) {
 			if (theMaximumResults != null && pids.size() > theMaximumResults) {
@@ -322,22 +331,24 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t -> doCreateChunkedQueries(theParams, t, sort, theCount, theRequest, queries));
 		} else {
-			queries.add(createChunkedQuery(theParams, sort, theMaximumResults, theCount, theRequest, null));
+			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theMaximumResults, theCount, theRequest, null);
+			query.ifPresent(t -> queries.add(t));
 		}
 
 		return queries;
 	}
 
-	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<List<Long>> theQueries) {
+	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
 		}
-		theQueries.add(createChunkedQuery(theParams, sort, thePids.size(), theCount, theRequest, thePids));
+		Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, thePids.size(), theCount, theRequest, thePids);
+		query.ifPresent(t -> theQueries.add(t));
 	}
 
-	private List<Long> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
+	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
-		SearchSqlBuilder sqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, theCount);
+		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDataSource);
@@ -362,8 +373,8 @@ public class SearchBuilder implements ISearchBuilder {
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
-				SearchSqlBuilder fetchPidsSqlBuilder = new SearchSqlBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, theCount);
-				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate();
+				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
+				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(myMaxResultsToFetch);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
@@ -431,16 +442,13 @@ public class SearchBuilder implements ISearchBuilder {
 		/*
 		 * Now perform the search
 		 */
-		GeneratedSql generatedSql = sqlBuilder.generate();
+		GeneratedSql generatedSql = sqlBuilder.generate(myMaxResultsToFetch);
 		if (generatedSql.isMatchNothing()) {
-			return Collections.emptyList();
+			return Optional.empty();
 		}
 
-		String sql = generatedSql.getSql();
-		Object[] args = generatedSql.getBindVariables().toArray(new Object[0]);
-		List<Long> outcome = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
-		ourLog.trace("Found {} results", outcome.size());
-		return outcome;
+		SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
+		return Optional.of(executor);
 	}
 
 	private List<Long> normalizeIdListForLastNInClause(List<Long> lastnResourceIds) {
@@ -477,21 +485,12 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	/**
-	 * @return Returns {@literal true} if any search parameter sorts were found, or false if
-	 * no sorts were found, or only non-search parameters ones (e.g. _id, _lastUpdated)
-	 */
 	private void createSort(QueryStack theQueryStack, SortSpec theSort) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
 		}
 
-		boolean ascending;
-		if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
-			ascending = true;
-		} else {
-			ascending = false;
-		}
+		boolean ascending = (theSort.getOrder() == null) || (theSort.getOrder() == SortOrderEnum.ASC);
 
 		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
 
@@ -935,7 +934,8 @@ public class SearchBuilder implements ISearchBuilder {
 		myFetchSize = theFetchSize;
 	}
 
-	@VisibleForTesting // FIXME: remove
+	@VisibleForTesting
+		// FIXME: remove
 	void setParamsForUnitTest(SearchParameterMap theParams) {
 		myParams = theParams;
 	}
@@ -944,7 +944,8 @@ public class SearchBuilder implements ISearchBuilder {
 		return myParams;
 	}
 
-	@VisibleForTesting // FIXME: remove
+	@VisibleForTesting
+		// FIXME: remove
 	void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
 	}
@@ -1024,12 +1025,12 @@ public class SearchBuilder implements ISearchBuilder {
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
 		private Iterator<ResourcePersistentId> myPreResultsIterator;
-		private Iterator<Long> myResultsIterator;
+		private SearchQueryExecutor myResultsIterator;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
 
-		private List<List<Long>> myQueryList = new ArrayList<>();
+		private ArrayList<SearchQueryExecutor> myQueryList = new ArrayList<>();
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
@@ -1200,11 +1201,11 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		private void retrieveNextIteratorQuery() {
+			close();
 			if (myQueryList != null && myQueryList.size() > 0) {
-				final List<Long> query = myQueryList.remove(0);
-				myResultsIterator = query.iterator();
+				myResultsIterator = myQueryList.remove(0);
 			} else {
-				myResultsIterator = null;
+				myResultsIterator = SearchQueryExecutor.EMPTY;
 			}
 
 		}
@@ -1247,42 +1248,12 @@ public class SearchBuilder implements ISearchBuilder {
 
 		@Override
 		public void close() {
-			// FIXME: we could do cleanup here
-		}
-
-	}
-
-	// FIXME: remove?
-	private static class CountQueryIterator implements Iterator<Long> {
-		private final TypedQuery<Long> myQuery;
-		private boolean myCountLoaded;
-		private Long myCount;
-
-		CountQueryIterator(TypedQuery<Long> theQuery) {
-			myQuery = theQuery;
-		}
-
-		@Override
-		public boolean hasNext() {
-			boolean retVal = myCount != null;
-			if (!retVal) {
-				if (myCountLoaded == false) {
-					myCount = myQuery.getSingleResult();
-					retVal = true;
-					myCountLoaded = true;
-				}
+			if (myResultsIterator != null) {
+				myResultsIterator.close();
 			}
-			return retVal;
+			myResultsIterator = null;
 		}
 
-		@Override
-		public Long next() {
-			Validate.isTrue(hasNext());
-			Validate.isTrue(myCount != null);
-			Long retVal = myCount;
-			myCount = null;
-			return retVal;
-		}
 	}
 
 	public static int getMaximumPageSize() {

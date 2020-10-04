@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -41,7 +41,7 @@ public class SearchParamPresentPredicateBuilder extends BaseJoiningPredicateBuil
 	/**
 	 * Constructor
 	 */
-	public SearchParamPresentPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public SearchParamPresentPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_PARAM_PRESENT"));
 		myColumnResourceId = getTable().addColumn("RES_ID");
 		myColumnHashPresence = getTable().addColumn("HASH_PRESENCE");

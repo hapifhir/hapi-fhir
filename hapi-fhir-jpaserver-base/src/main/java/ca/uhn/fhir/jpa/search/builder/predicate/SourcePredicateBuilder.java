@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
-import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -17,7 +17,7 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public SourcePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public SourcePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER_PROV"));
 
 		myResourceIdColumn = getTable().addColumn("RES_PID");

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
@@ -21,7 +21,7 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 	private final DbTable myTable;
 	private final DbColumn myColumnPartitionId;
 
-	BaseJoiningPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
+	BaseJoiningPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder);
 		myTable = theTable;
 		myColumnPartitionId = theTable.addColumn("PARTITION_ID");

@@ -24,63 +24,67 @@ public class SqlObjectFactory {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	public CompositeUniqueSearchParameterPredicateBuilder newCompositeUniqueSearchParameterPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public CompositeUniqueSearchParameterPredicateBuilder newCompositeUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(CompositeUniqueSearchParameterPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public CoordsPredicateBuilder coordsPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public CoordsPredicateBuilder coordsPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(CoordsPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public DatePredicateBuilder dateIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public DatePredicateBuilder dateIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(DatePredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public ForcedIdPredicateBuilder newForcedIdPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public ForcedIdPredicateBuilder newForcedIdPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(ForcedIdPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public NumberPredicateBuilder numberIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public NumberPredicateBuilder numberIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(NumberPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public QuantityPredicateBuilder quantityIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public QuantityPredicateBuilder quantityIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(QuantityPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public ResourceLinkPredicateBuilder referenceIndexTable(QueryStack theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
+	public ResourceLinkPredicateBuilder referenceIndexTable(QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
 		return myApplicationContext.getBean(ResourceLinkPredicateBuilder.class, theQueryStack, theSearchSqlBuilder, theReversed);
 	}
 
-	public ResourceTablePredicateBuilder resourceTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public ResourceIdPredicateBuilder resourceId(SearchSqlBuilder theSearchSqlBuilder) {
+	public ResourceIdPredicateBuilder resourceId(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(ResourceIdPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public SearchParamPresentPredicateBuilder searchParamPresentPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public SearchParamPresentPredicateBuilder searchParamPresentPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(SearchParamPresentPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public StringPredicateBuilder stringIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public StringPredicateBuilder stringIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(StringPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public TokenPredicateBuilder tokenIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public TokenPredicateBuilder tokenIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(TokenPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public UriPredicateBuilder uriIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public UriPredicateBuilder uriIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(UriPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public TagPredicateBuilder newTagPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public TagPredicateBuilder newTagPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(TagPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public SourcePredicateBuilder newSourcePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public SourcePredicateBuilder newSourcePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(SourcePredicateBuilder.class, theSearchSqlBuilder);
+	}
+
+	public SearchQueryExecutor newSearchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
+		return myApplicationContext.getBean(SearchQueryExecutor.class, theGeneratedSql, theMaxResultsToFetch);
 	}
 }

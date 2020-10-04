@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class ForcedIdPredicateBuilder extends BaseJoiningPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public ForcedIdPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
+	public ForcedIdPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_FORCED_ID"));
 
 		myColumnResourceId = getTable().addColumn("RESOURCE_PID");
