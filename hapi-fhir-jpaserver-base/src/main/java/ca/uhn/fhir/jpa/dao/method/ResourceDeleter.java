@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -194,18 +196,30 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 	}
 
 	@Nonnull
-	public DeleteMethodOutcome deletePidList(String theTheUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theTheRequest) {
+	public DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
+		return doDeletePidList(theUrl, false, theResourceIds, theDeleteConflicts, theRequest);
+	}
+
+	@Nonnull
+	public DeleteMethodOutcome deleteAndExpungePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
+		return doDeletePidList(theUrl, true, theResourceIds, theDeleteConflicts, theRequest);
+	}
+
+	@Nonnull
+	private DeleteMethodOutcome doDeletePidList(String theUrl, boolean theExpunge, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theTheRequest) {
 		StopWatch w = new StopWatch();
 		if (theResourceIds.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
-				throw new PreconditionFailedException(myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theTheUrl, theResourceIds.size()));
+				throw new PreconditionFailedException(myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, theResourceIds.size()));
 			}
 		}
 
 		TransactionDetails transactionDetails = new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
-		for (ResourcePersistentId pid : theResourceIds) {
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getId());
+
+		List<Long> pids = theResourceIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+		List<ResourceTable> entities = myResourceTableDao.findAllById(pids);
+		for (ResourceTable entity : entities) {
 			deletedResources.add(entity);
 
 			T resourceToDelete = myDao.toResource(getResourceType(), entity, null, false);
@@ -249,7 +263,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 		IBaseOperationOutcome oo;
 		if (deletedResources.isEmpty()) {
 			oo = OperationOutcomeUtil.newInstance(myFhirContext);
-			String message = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theTheUrl);
+			String message = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl);
 			String severity = "warning";
 			String code = "not-found";
 			OperationOutcomeUtil.addIssue(myFhirContext, oo, severity, message, null, code);
@@ -261,7 +275,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 			OperationOutcomeUtil.addIssue(myFhirContext, oo, severity, message, null, code);
 		}
 
-		ourLog.debug("Processed delete on {} (matched {} resource(s)) in {}ms", theTheUrl, deletedResources.size(), w.getMillis());
+		ourLog.debug("Processed delete on {} (matched {} resource(s)) in {}ms", theUrl, deletedResources.size(), w.getMillis());
 
 		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
 		retVal.setDeletedEntities(deletedResources);
