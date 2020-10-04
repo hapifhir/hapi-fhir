@@ -218,6 +218,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 		List<ResourceTable> deletedResources = new ArrayList<>();
 
 		List<Long> pids = theResourceIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+		// FIXME KHS first check for conflicts in HFJ_RES_LINK
 		List<ResourceTable> entities = myResourceTableDao.findAllById(pids);
 		for (ResourceTable entity : entities) {
 			deletedResources.add(entity);
