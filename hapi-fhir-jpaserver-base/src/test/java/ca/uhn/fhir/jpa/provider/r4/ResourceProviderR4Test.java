@@ -1329,7 +1329,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			//@formatter:on
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("HTTP 412 Precondition Failed: Failed to delete 2 resources. Deleting more than one resource at a time is forbidden.",
+			assertEquals("HTTP 412 Precondition Failed: Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources",
 				e.getMessage());
 		}
 
@@ -1374,7 +1374,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(response);
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			assertThat(response, containsString(
-				"<issue><severity value=\"warning\"/><code value=\"not-found\"/><diagnostics value=\"Unable to find resource. Deletion failed.\"/></issue>"));
+				"<issue><severity value=\"warning\"/><code value=\"not-found\"/><diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Deletion failed.\"/></issue>"));
 		}
 
 	}
@@ -1479,7 +1479,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, resp);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Unable to find resource. Deletion failed."));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Unable to find resource matching URL \"Patient?name=testDeleteResourceConditional1\". Deletion failed."));
 		} finally {
 			response.close();
 		}

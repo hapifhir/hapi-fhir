@@ -763,7 +763,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("Failed to delete 2 resources. Deleting more than one resource at a time is forbidden."));
+			assertThat(e.getMessage(), containsString("resource with match URL \"Patient?"));
 		}
 	}
 

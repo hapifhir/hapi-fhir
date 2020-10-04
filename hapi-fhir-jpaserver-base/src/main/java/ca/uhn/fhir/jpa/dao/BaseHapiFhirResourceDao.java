@@ -402,16 +402,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
-		if (theResourceIds.size() > 1) {
-			if (myDaoConfig.isAllowMultipleDelete() == false) {
-				throw new PreconditionFailedException(myContext.getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, theResourceIds.size()));
-			}
-		}
-
-		StopWatch w = new StopWatch();
-		DeleteMethodOutcome retval = myResourceDeleter.deletePidList(theResourceIds, theDeleteConflicts, theRequest);
-		ourLog.debug("Processed delete on {} (matched {} resource(s)) in {}ms", theUrl, retval.getDeletedEntities().size(), w.getMillis());
-		return retval;
+		return myResourceDeleter.deletePidList(theUrl, theResourceIds, theDeleteConflicts ,theRequest);
 	}
 
 	@PostConstruct

@@ -212,7 +212,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
-	protected FhirContext myContext;
+	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
 	@Autowired
 	private PartitionSettings myPartitionSettings;

@@ -657,7 +657,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			//@formatter:on
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("HTTP 412 Precondition Failed: Failed to delete 2 resources. Deleting more than one resource at a time is forbidden.",
+			assertEquals("HTTP 412 Precondition Failed: Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources",
 				e.getMessage());
 		}
 
