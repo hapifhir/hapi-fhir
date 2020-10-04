@@ -19,28 +19,28 @@ import ca.uhn.fhir.jpa.bulk.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
-import ca.uhn.fhir.jpa.dao.search.SearchBuilder2;
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
-import ca.uhn.fhir.jpa.dao.search.sql.CompositeUniqueSearchParameterPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.CoordsPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.ForcedIdPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.QuantityPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.ResourceIdPredicateBuilder3;
-import ca.uhn.fhir.jpa.dao.search.sql.ResourceLinkPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.ResourceSqlTable;
-import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.SourcePredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.SqlBuilderFactory;
-import ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.TagPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.TokenPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
+import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
@@ -457,8 +457,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public SqlBuilderFactory sqlBuilderFactory() {
-		return new SqlBuilderFactory();
+	public SqlObjectFactory sqlBuilderFactory() {
+		return new SqlObjectFactory();
 	}
 
 	@Bean
@@ -467,18 +467,15 @@ public abstract class BaseConfig {
 		return new CompositeUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
 	}
 
-
-	// FIXME: rename these
-
 	@Bean
 	@Scope("prototype")
-	public CoordsPredicateBuilder indexTableCoords(SearchSqlBuilder theSearchBuilder) {
+	public CoordsPredicateBuilder coordsPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
 		return new CoordsPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public DatePredicateBuilder indexTableDate(SearchSqlBuilder theSearchBuilder) {
+	public DatePredicateBuilder datePredicateBuilder(SearchSqlBuilder theSearchBuilder) {
 		return new DatePredicateBuilder(theSearchBuilder);
 	}
 
@@ -490,38 +487,38 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public NumberPredicateBuilder indexTableNumber(SearchSqlBuilder theSearchBuilder) {
+	public NumberPredicateBuilder numberPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
 		return new NumberPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public QuantityPredicateBuilder indexTableQuantity(SearchSqlBuilder theSearchBuilder) {
+	public QuantityPredicateBuilder quantityPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
 		return new QuantityPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public ResourceLinkPredicateBuilder indexTableReference(QueryStack3 theQueryStack, SearchSqlBuilder theSearchBuilder, boolean theReversed) {
+	public ResourceLinkPredicateBuilder resourceLinkPredicateBuilder(QueryStack theQueryStack, SearchSqlBuilder theSearchBuilder, boolean theReversed) {
 		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public ResourceSqlTable indexTableResource(SearchSqlBuilder theSearchBuilder) {
-		return new ResourceSqlTable(theSearchBuilder);
+	public ResourceTablePredicateBuilder resourceTablePredicateBuilder(SearchSqlBuilder theSearchBuilder) {
+		return new ResourceTablePredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public TagPredicateBuilder indexTableTag(SearchSqlBuilder theSearchBuilder) {
+	public TagPredicateBuilder tagPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
 		return new TagPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public ResourceIdPredicateBuilder3 indexTableResourceId(SearchSqlBuilder theSearchBuilder) {
-		return new ResourceIdPredicateBuilder3(theSearchBuilder);
+	public ResourceIdPredicateBuilder resourceIdPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
+		return new ResourceIdPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
@@ -532,13 +529,13 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public StringPredicateBuilder indexTableString(SearchSqlBuilder theSearchBuilder) {
+	public StringPredicateBuilder stringPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
 		return new StringPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public TokenPredicateBuilder indexTableToken(SearchSqlBuilder theSearchBuilder) {
+	public TokenPredicateBuilder tokenPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
 		return new TokenPredicateBuilder(theSearchBuilder);
 	}
 
@@ -550,7 +547,7 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Scope("prototype")
-	public UriPredicateBuilder indexTableUri(SearchSqlBuilder theSearchBuilder) {
+	public UriPredicateBuilder uriPredicateBuilder(SearchSqlBuilder theSearchBuilder) {
 		return new UriPredicateBuilder(theSearchBuilder);
 	}
 
@@ -559,9 +556,9 @@ public abstract class BaseConfig {
 	public ISearchBuilder persistedJpaSearchFirstPageBundleProvider(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		// FIXME: make configurable
 		if (false) {
-			return new SearchBuilder(theDao, theResourceName, theResourceType);
+			return new LegacySearchBuilder(theDao, theResourceName, theResourceType);
 		}
-		return new SearchBuilder2(theDao, theResourceName, theResourceType);
+		return new SearchBuilder(theDao, theResourceName, theResourceType);
 	}
 
 	@Bean

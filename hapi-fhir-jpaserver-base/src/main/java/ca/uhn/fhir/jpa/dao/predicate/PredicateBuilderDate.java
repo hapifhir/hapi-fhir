@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.healthmarketscience.sqlbuilder.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -42,7 +41,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +50,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
 
 
-	PredicateBuilderDate(SearchBuilder theSearchBuilder) {
+	PredicateBuilderDate(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

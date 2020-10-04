@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -74,7 +74,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	PredicateBuilderToken(SearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
+	PredicateBuilderToken(LegacySearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
 		super(theSearchBuilder);
 		myPredicateBuilder = thePredicateBuilder;
 	}
@@ -292,11 +292,11 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		String systemDesc = defaultIfBlank(theSystem, "(missing)");
 		String codeDesc = defaultIfBlank(theCode, "(missing)");
 		if (isBlank(theCode)) {
-			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
+			String msg = myContext.getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
 			throw new InvalidRequestException(msg);
 		}
 		if (isBlank(theSystem)) {
-			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
+			String msg = myContext.getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
 			throw new InvalidRequestException(msg);
 		}
 	}

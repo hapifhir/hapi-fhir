@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
-import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -10,25 +10,24 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
 
-public abstract class BasePredicateBuilder extends BasePredicateBuilder3 {
+public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	private final DbTable myTable;
 	private final DbColumn myColumnPartitionId;
 
-	BasePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
+	BaseJoiningPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder);
 		myTable = theTable;
 		myColumnPartitionId = theTable.addColumn("PARTITION_ID");
 	}
 
-	DbTable getTable() {
+	public DbTable getTable() {
 		return myTable;
 	}
 

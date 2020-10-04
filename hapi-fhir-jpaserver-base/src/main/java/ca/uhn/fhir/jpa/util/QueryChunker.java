@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -34,8 +34,8 @@ import java.util.function.Consumer;
 public class QueryChunker<T> {
 
 	public void chunk(List<T> theInput, Consumer<List<T>> theBatchConsumer) {
-		for (int i = 0; i < theInput.size(); i += SearchBuilder.getMaximumPageSize()) {
-			int to = i + SearchBuilder.getMaximumPageSize();
+		for (int i = 0; i < theInput.size(); i += LegacySearchBuilder.getMaximumPageSize()) {
+			int to = i + LegacySearchBuilder.getMaximumPageSize();
 			to = Math.min(to, theInput.size());
 			List<T> batch = theInput.subList(i, to);
 			theBatchConsumer.accept(batch);

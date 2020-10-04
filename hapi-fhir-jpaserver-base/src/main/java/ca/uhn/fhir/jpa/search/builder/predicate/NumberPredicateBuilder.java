@@ -1,10 +1,11 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -83,7 +84,7 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				break;
 			default:
 				String paramValue = theActualParam.getValueAsQueryToken(theFhirContext);
-				String msg = theIndexTable.getFhirContext().getLocalizer().getMessage(SearchBuilder.class, theInvalidValueKey, operation, paramValue);
+				String msg = theIndexTable.getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, theInvalidValueKey, operation, paramValue);
 				throw new InvalidRequestException(msg);
 		}
 

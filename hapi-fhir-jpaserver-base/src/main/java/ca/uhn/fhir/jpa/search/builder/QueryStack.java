@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.search.querystack;
+package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -6,29 +6,29 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.search.sql.BasePredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.CompositeUniqueSearchParameterPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.CoordsPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.ForcedIdPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.QuantityPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.ResourceIdPredicateBuilder3;
-import ca.uhn.fhir.jpa.dao.search.sql.ResourceLinkPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.ResourceSqlTable;
-import ca.uhn.fhir.jpa.dao.search.sql.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.SearchSqlBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.SourcePredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.TagPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.TokenPredicateBuilder;
-import ca.uhn.fhir.jpa.dao.search.sql.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -93,9 +93,9 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class QueryStack3 {
+public class QueryStack {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack3.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack.class);
 	private final ModelConfig myModelConfig;
 	private final FhirContext myFhirContext;
 	private final SearchSqlBuilder mySqlBuilder;
@@ -104,19 +104,19 @@ public class QueryStack3 {
 	private final PartitionSettings myPartitionSettings;
 	private final DaoConfig myDaoConfig;
 	private final EnumSet<PredicateBuilderTypeEnum> myReusePredicateBuilderTypes;
-	private Map<PredicateBuilderCacheKey, BasePredicateBuilder> myJoinMap;
+	private Map<PredicateBuilderCacheKey, BaseJoiningPredicateBuilder> myJoinMap;
 
 	/**
 	 * Constructor
 	 */
-	public QueryStack3(SearchParameterMap theSearchParameters, DaoConfig theDaoConfig, ModelConfig theModelConfig, FhirContext theFhirContext, SearchSqlBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings) {
+	public QueryStack(SearchParameterMap theSearchParameters, DaoConfig theDaoConfig, ModelConfig theModelConfig, FhirContext theFhirContext, SearchSqlBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings) {
 		this(theSearchParameters, theDaoConfig, theModelConfig, theFhirContext, theSqlBuilder, theSearchParamRegistry, thePartitionSettings, EnumSet.of(PredicateBuilderTypeEnum.DATE));
 	}
 
 	/**
 	 * Constructor
 	 */
-	private QueryStack3(SearchParameterMap theSearchParameters, DaoConfig theDaoConfig, ModelConfig theModelConfig, FhirContext theFhirContext, SearchSqlBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings, EnumSet<PredicateBuilderTypeEnum> theReusePredicateBuilderTypes) {
+	private QueryStack(SearchParameterMap theSearchParameters, DaoConfig theDaoConfig, ModelConfig theModelConfig, FhirContext theFhirContext, SearchSqlBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings, EnumSet<PredicateBuilderTypeEnum> theReusePredicateBuilderTypes) {
 		myPartitionSettings = thePartitionSettings;
 		assert theSearchParameters != null;
 		assert theDaoConfig != null;
@@ -134,7 +134,7 @@ public class QueryStack3 {
 	}
 
 	public void addSortOnDate(String theResourceName, String theParamName, boolean theAscending) {
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		DatePredicateBuilder sortPredicateBuilder = mySqlBuilder.addDateSelector(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
@@ -143,10 +143,10 @@ public class QueryStack3 {
 	}
 
 	public void addSortOnLastUpdated(boolean theAscending) {
-		ResourceSqlTable resourceTablePredicateBuilder;
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		if (firstPredicateBuilder instanceof ResourceSqlTable) {
-			resourceTablePredicateBuilder = (ResourceSqlTable) firstPredicateBuilder;
+		ResourceTablePredicateBuilder resourceTablePredicateBuilder;
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		if (firstPredicateBuilder instanceof ResourceTablePredicateBuilder) {
+			resourceTablePredicateBuilder = (ResourceTablePredicateBuilder) firstPredicateBuilder;
 		} else {
 			resourceTablePredicateBuilder = mySqlBuilder.addResourceTablePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 		}
@@ -155,7 +155,7 @@ public class QueryStack3 {
 
 
 	public void addSortOnNumber(String theResourceName, String theParamName, boolean theAscending) {
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		NumberPredicateBuilder sortPredicateBuilder = mySqlBuilder.addNumberSelector(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
@@ -164,7 +164,7 @@ public class QueryStack3 {
 	}
 
 	public void addSortOnQuantity(String theResourceName, String theParamName, boolean theAscending) {
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		QuantityPredicateBuilder sortPredicateBuilder = mySqlBuilder.addQuantity(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
@@ -173,19 +173,19 @@ public class QueryStack3 {
 	}
 
 	public void addSortOnResourceId(boolean theAscending) {
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ForcedIdPredicateBuilder sortPredicateBuilder = mySqlBuilder.addForcedIdPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 		if (!theAscending) {
-			mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), theAscending, OrderObject.NullOrder.FIRST);
+			mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), false, OrderObject.NullOrder.FIRST);
 		} else {
-			mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), theAscending);
+			mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), true);
 		}
 		mySqlBuilder.addSort(firstPredicateBuilder.getResourceIdColumn(), theAscending);
 
 	}
 
 	public void addSortOnResourceLink(String theResourceName, String theParamName, boolean theAscending) {
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ResourceLinkPredicateBuilder sortPredicateBuilder = mySqlBuilder.addReferenceSelector(this, firstPredicateBuilder.getResourceIdColumn());
 
 		Condition pathPredicate = sortPredicateBuilder.createPredicateSourcePaths(theResourceName, theParamName);
@@ -195,7 +195,7 @@ public class QueryStack3 {
 
 
 	public void addSortOnString(String theResourceName, String theParamName, boolean theAscending) {
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		StringPredicateBuilder sortPredicateBuilder = mySqlBuilder.addStringSelector(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
@@ -204,7 +204,7 @@ public class QueryStack3 {
 	}
 
 	public void addSortOnToken(String theResourceName, String theParamName, boolean theAscending) {
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		TokenPredicateBuilder sortPredicateBuilder = mySqlBuilder.addTokenSelector(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
@@ -214,7 +214,7 @@ public class QueryStack3 {
 	}
 
 	public void addSortOnUri(String theResourceName, String theParamName, boolean theAscending) {
-		BasePredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		UriPredicateBuilder sortPredicateBuilder = mySqlBuilder.addUriSelector(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
@@ -224,9 +224,9 @@ public class QueryStack3 {
 
 
 	@SuppressWarnings("unchecked")
-	private <T extends BasePredicateBuilder> PredicateBuilderCacheLookupResult<T> createOrReusePredicateBuilder(PredicateBuilderTypeEnum theType, DbColumn theSourceJoinColumn, String theResourceName, String theParamName, Supplier<T> theFactoryMethod) {
+	private <T extends BaseJoiningPredicateBuilder> PredicateBuilderCacheLookupResult<T> createOrReusePredicateBuilder(PredicateBuilderTypeEnum theType, DbColumn theSourceJoinColumn, String theParamName, Supplier<T> theFactoryMethod) {
 		boolean cacheHit = false;
-		BasePredicateBuilder retVal;
+		BaseJoiningPredicateBuilder retVal;
 		if (myReusePredicateBuilderTypes.contains(theType)) {
 			PredicateBuilderCacheKey key = new PredicateBuilderCacheKey(theSourceJoinColumn, theType, theParamName);
 			if (myJoinMap == null) {
@@ -290,10 +290,9 @@ public class QueryStack3 {
 														String theResourceName,
 														RuntimeSearchParam theSearchParam,
 														List<? extends IQueryParameterType> theList,
-														SearchFilterParser.CompareOperation theOperation,
 														RequestPartitionId theRequestPartitionId) {
 
-		CoordsPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.COORDS, theSourceJoinColumn, theResourceName, theSearchParam.getName(), () -> mySqlBuilder.addCoordsSelector(theSourceJoinColumn)).getResult();
+		CoordsPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.COORDS, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addCoordsSelector(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return predicateBuilder.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -317,7 +316,7 @@ public class QueryStack3 {
 
 		String paramName = theSearchParam.getName();
 
-		PredicateBuilderCacheLookupResult<DatePredicateBuilder> predicateBuilderLookupResult = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.DATE, theSourceJoinColumn, theResourceName, paramName, () -> mySqlBuilder.addDateSelector(theSourceJoinColumn));
+		PredicateBuilderCacheLookupResult<DatePredicateBuilder> predicateBuilderLookupResult = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.DATE, theSourceJoinColumn, paramName, () -> mySqlBuilder.addDateSelector(theSourceJoinColumn));
 		DatePredicateBuilder predicateBuilder = predicateBuilderLookupResult.getResult();
 		boolean cacheHit = predicateBuilderLookupResult.isCacheHit();
 
@@ -344,7 +343,7 @@ public class QueryStack3 {
 
 	}
 
-	private Condition createPredicateFilter(QueryStack3 theQueryStack3, SearchFilterParser.Filter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private Condition createPredicateFilter(QueryStack theQueryStack3, SearchFilterParser.Filter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
 			return createPredicateFilter(theQueryStack3, (SearchFilterParser.FilterParameter) theFilter, theResourceName, theRequest, theRequestPartitionId);
@@ -366,37 +365,25 @@ public class QueryStack3 {
 		return null;
 	}
 
-	private Condition createPredicateFilter(QueryStack3 theQueryStack3, SearchFilterParser.FilterParameter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private Condition createPredicateFilter(QueryStack theQueryStack3, SearchFilterParser.FilterParameter theFilter, String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
-		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
+		String paramName = theFilter.getParamPath().getName();
 
-		if (searchParam == null) {
-			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
-		} else if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
-				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
-				return theQueryStack3.createPredicateResourceId(null, Collections.singletonList(Collections.singletonList(param)), theResourceName, theFilter.getOperation(), theRequestPartitionId);
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
-			}
-		} else if (searchParam.getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
+		if (paramName.equals(IAnyResource.SP_RES_ID)) {
+			TokenParam param = new TokenParam();
+			param.setValueAsQueryToken(null, null, null, theFilter.getValue());
+			return theQueryStack3.createPredicateResourceId(null, Collections.singletonList(Collections.singletonList(param)), theResourceName, theFilter.getOperation(), theRequestPartitionId);
+		} else if (paramName.equals(IAnyResource.SP_RES_LANGUAGE)) {
 				return theQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))), theFilter.getOperation());
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
-			}
-		} else if (searchParam.getName().equals(Constants.PARAM_SOURCE)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
+		} else if (paramName.equals(Constants.PARAM_SOURCE)) {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
-				// FIXME: implement
-				throw new UnsupportedOperationException();
-//				return addPredicateSource(Collections.singletonList(param), theFilter.getOperation(), theRequest);
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
-			}
+				return createPredicateSource(null, Collections.singletonList(param));
 		} else {
+			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramName);
+			if (searchParam == null) {
+				throw new InvalidRequestException("Invalid search parameter specified, " + paramName + ", for resource type " + theResourceName);
+			}
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
 				return theQueryStack3.createPredicateUri(null, theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
@@ -407,7 +394,6 @@ public class QueryStack3 {
 			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
 				return theQueryStack3.createPredicateNumber(null, theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
-				String paramName = theFilter.getParamPath().getName();
 				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
 				String resourceType = null; // The value can either have (Patient/123) or not have (123) a resource type, either way it's not needed here
 				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
@@ -468,7 +454,6 @@ public class QueryStack3 {
 				ourLog.trace("Handing double _has query: {}", paramName);
 
 				String qualifier = paramName.substring(4);
-				paramName = Constants.PARAM_HAS;
 				for (IQueryParameterType next : nextOrList) {
 					HasParam nextHasParam = new HasParam();
 					nextHasParam.setValueAsQueryToken(myFhirContext, Constants.PARAM_HAS, qualifier, next.getValueAsQueryToken(myFhirContext));
@@ -493,9 +478,9 @@ public class QueryStack3 {
 				}
 
 				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
-				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myFhirContext, paramDef, paramName, parameters);
+				IQueryParameterAnd<?> parsedParam = ParameterUtil.parseQueryParams(myFhirContext, paramDef, paramName, parameters);
 
-				for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
+				for (IQueryParameterOr<?> next : parsedParam.getValuesAsQueryTokens()) {
 					orValues.addAll(next.getValuesAsQueryTokens());
 				}
 
@@ -532,7 +517,7 @@ public class QueryStack3 {
 
 	public Condition createPredicateLanguage(List<List<IQueryParameterType>> theList, Object theOperation) {
 
-		ResourceSqlTable rootTable = mySqlBuilder.getOrCreateResourceTablePredicateBuilder();
+		ResourceTablePredicateBuilder rootTable = mySqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
 		List<Condition> predicates = new ArrayList<>();
 		for (List<? extends IQueryParameterType> nextList : theList) {
@@ -575,7 +560,7 @@ public class QueryStack3 {
 														SearchFilterParser.CompareOperation theOperation,
 														RequestPartitionId theRequestPartitionId) {
 
-		NumberPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.NUMBER, theSourceJoinColumn, theResourceName, theSearchParam.getName(), () -> mySqlBuilder.addNumberSelector(theSourceJoinColumn)).getResult();
+		NumberPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.NUMBER, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addNumberSelector(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -616,7 +601,7 @@ public class QueryStack3 {
 														  SearchFilterParser.CompareOperation theOperation,
 														  RequestPartitionId theRequestPartitionId) {
 
-		QuantityPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theResourceName, theSearchParam.getName(), () -> mySqlBuilder.addQuantity(theSourceJoinColumn)).getResult();
+		QuantityPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantity(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -654,34 +639,31 @@ public class QueryStack3 {
 
 		}
 
-		ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.REFERENCE, theSourceJoinColumn, theResourceName, theParamName, () -> mySqlBuilder.addReferenceSelector(this, theSourceJoinColumn)).getResult();
+		ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.REFERENCE, theSourceJoinColumn, theParamName, () -> mySqlBuilder.addReferenceSelector(this, theSourceJoinColumn)).getResult();
 		return predicateBuilder.createPredicate(theRequest, theResourceName, theParamName, theList, theOperation, theRequestPartitionId);
 	}
 
 	@Nullable
 	public Condition createPredicateResourceId(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
-		ResourceIdPredicateBuilder3 builder = mySqlBuilder.newResourceIdBuilder();
+		ResourceIdPredicateBuilder builder = mySqlBuilder.newResourceIdBuilder();
 		return builder.createPredicateResourceId(theSourceJoinColumn, theResourceName, theValues, theOperation, theRequestPartitionId);
 	}
 
-	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, String theResourceName, List<List<IQueryParameterType>> theAndOrParams) {
+	private Condition createPredicateSourceForAndList(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
 		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
 		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-			andPredicates.add(createPredicateSource(theSourceJoinColumn, theResourceName, nextAnd, SearchFilterParser.CompareOperation.eq));
+			andPredicates.add(createPredicateSource(theSourceJoinColumn, nextAnd));
 		}
 		return toAndPredicate(andPredicates);
 	}
 
-	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, String theResourceName, List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation) {
-		// Required for now
-		assert theOperation == SearchFilterParser.CompareOperation.eq;
-
+	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, List<? extends IQueryParameterType> theList) {
 		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
-			String msg = myFhirContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
+			String msg = myFhirContext.getLocalizer().getMessage(LegacySearchBuilder.class, "sourceParamDisabled");
 			throw new InvalidRequestException(msg);
 		}
 
-		SourcePredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.SOURCE, theSourceJoinColumn, theResourceName, Constants.PARAM_SOURCE, () -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn)).getResult();
+		SourcePredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.SOURCE, theSourceJoinColumn, Constants.PARAM_SOURCE, () -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn)).getResult();
 
 		List<Condition> orPredicates = new ArrayList<>();
 		for (IQueryParameterType nextParameter : theList) {
@@ -710,7 +692,7 @@ public class QueryStack3 {
 														SearchFilterParser.CompareOperation theOperation,
 														RequestPartitionId theRequestPartitionId) {
 
-		StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, theResourceName, theSearchParam.getName(), () -> mySqlBuilder.addStringSelector(theSourceJoinColumn)).getResult();
+		StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addStringSelector(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -725,7 +707,7 @@ public class QueryStack3 {
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, ComboCondition.or(codePredicates.toArray(new Condition[0])));
 	}
 
-	public Condition createPredicateTag(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theList, String theResourceName, String theParamName, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateTag(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theList, String theParamName, RequestPartitionId theRequestPartitionId) {
 		TagTypeEnum tagType;
 		if (Constants.PARAM_TAG.equals(theParamName)) {
 			tagType = TagTypeEnum.TAG;
@@ -735,20 +717,6 @@ public class QueryStack3 {
 			tagType = TagTypeEnum.SECURITY_LABEL;
 		} else {
 			throw new IllegalArgumentException("Param name: " + theParamName); // shouldn't happen
-		}
-
-		List<Pair<String, String>> notTags = Lists.newArrayList();
-		for (List<? extends IQueryParameterType> nextAndParams : theList) {
-			for (IQueryParameterType nextOrParams : nextAndParams) {
-				if (nextOrParams instanceof TokenParam) {
-					TokenParam param = (TokenParam) nextOrParams;
-					if (param.getModifier() == TokenParamModifier.NOT) {
-						if (isNotBlank(param.getSystem()) || isNotBlank(param.getValue())) {
-							notTags.add(Pair.of(param.getSystem(), param.getValue()));
-						}
-					}
-				}
-			}
 		}
 
 		List<Condition> andPredicates = new ArrayList<>();
@@ -801,7 +769,7 @@ public class QueryStack3 {
 			}
 
 			Condition tagPredicate;
-			BasePredicateBuilder join;
+			BaseJoiningPredicateBuilder join;
 			if (paramInverted) {
 
 				SearchSqlBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
@@ -817,7 +785,7 @@ public class QueryStack3 {
 				// Tag table can't be a query root because it will include deleted resources, and can't select by resource type
 				mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
-				TagPredicateBuilder tagJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TAG, theSourceJoinColumn, theResourceName, theParamName, () -> mySqlBuilder.addTagSelector(theSourceJoinColumn)).getResult();
+				TagPredicateBuilder tagJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TAG, theSourceJoinColumn, theParamName, () -> mySqlBuilder.addTagSelector(theSourceJoinColumn)).getResult();
 				tagPredicate = tagJoin.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId);
 				join = tagJoin;
 			}
@@ -873,7 +841,7 @@ public class QueryStack3 {
 			return null;
 		}
 
-		TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, theResourceName, theSearchParam.getName(), () -> mySqlBuilder.addTokenSelector(theSourceJoinColumn)).getResult();
+		TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addTokenSelector(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -901,8 +869,8 @@ public class QueryStack3 {
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 
-	public QueryStack3 newChildQueryFactoryWithFullBuilderReuse() {
-		return new QueryStack3(mySearchParameters, myDaoConfig, myModelConfig, myFhirContext, mySqlBuilder, mySearchParamRegistry, myPartitionSettings, EnumSet.allOf(PredicateBuilderTypeEnum.class));
+	public QueryStack newChildQueryFactoryWithFullBuilderReuse() {
+		return new QueryStack(mySearchParameters, myDaoConfig, myModelConfig, myFhirContext, mySqlBuilder, mySearchParamRegistry, myPartitionSettings, EnumSet.allOf(PredicateBuilderTypeEnum.class));
 	}
 
 	@Nullable
@@ -925,10 +893,10 @@ public class QueryStack3 {
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
-				return createPredicateTag(theSourceJoinColumn, theAndOrParams, theResourceName, theParamName, theRequestPartitionId);
+				return createPredicateTag(theSourceJoinColumn, theAndOrParams, theParamName, theRequestPartitionId);
 
 			case Constants.PARAM_SOURCE:
-				return createPredicateSource(theSourceJoinColumn, theResourceName, theAndOrParams);
+				return createPredicateSourceForAndList(theSourceJoinColumn, theAndOrParams);
 
 			default:
 
@@ -971,7 +939,7 @@ public class QueryStack3 {
 						case TOKEN:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 								if ("Location.position".equals(nextParamDef.getPath())) {
-									andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
+									andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, theRequestPartitionId));
 								} else {
 									andPredicates.add(createPredicateToken(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
 								}
@@ -996,40 +964,43 @@ public class QueryStack3 {
 						case SPECIAL:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 								if ("Location.position".equals(nextParamDef.getPath())) {
-									andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
+									andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, theRequestPartitionId));
 								}
 							}
 							break;
 					}
 				} else {
-					if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
-						// These are handled later
-					} else if (Constants.PARAM_FILTER.equals(theParamName)) {
+					// These are handled later
+					if (!Constants.PARAM_CONTENT.equals(theParamName) && !Constants.PARAM_TEXT.equals(theParamName)) {
+						if (Constants.PARAM_FILTER.equals(theParamName)) {
 
-						// Parse the predicates enumerated in the _filter separated by AND or OR...
-						if (theAndOrParams.get(0).get(0) instanceof StringParam) {
-							String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
-							SearchFilterParser.Filter filter;
-							try {
-								filter = SearchFilterParser.parse(filterString);
-							} catch (SearchFilterParser.FilterSyntaxException theE) {
-								throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
-							}
-							if (filter != null) {
-
-								if (!myDaoConfig.isFilterParameterEnabled()) {
-									throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+							// Parse the predicates enumerated in the _filter separated by AND or OR...
+							if (theAndOrParams.get(0).get(0) instanceof StringParam) {
+								String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
+								SearchFilterParser.Filter filter;
+								try {
+									filter = SearchFilterParser.parse(filterString);
+								} catch (SearchFilterParser.FilterSyntaxException theE) {
+									throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
 								}
+								if (filter != null) {
 
-								Condition predicate = createPredicateFilter(this, filter, theResourceName, theRequest, theRequestPartitionId);
-								mySqlBuilder.addPredicate(predicate);
+									if (!myDaoConfig.isFilterParameterEnabled()) {
+										throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+									}
+
+									Condition predicate = createPredicateFilter(this, filter, theResourceName, theRequest, theRequestPartitionId);
+									if (predicate != null) {
+										mySqlBuilder.addPredicate(predicate);
+									}
+								}
 							}
-						}
 
-					} else {
-						String validNames = new TreeSet<>(mySearchParamRegistry.getActiveSearchParams(theResourceName).keySet()).toString();
-						String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
-						throw new InvalidRequestException(msg);
+						} else {
+							String validNames = new TreeSet<>(mySearchParamRegistry.getActiveSearchParams(theResourceName).keySet()).toString();
+							String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
+							throw new InvalidRequestException(msg);
+						}
 					}
 				}
 
@@ -1054,7 +1025,7 @@ public class QueryStack3 {
 		DATE, COORDS, NUMBER, QUANTITY, REFERENCE, SOURCE, STRING, TOKEN, TAG
 	}
 
-	private static class PredicateBuilderCacheLookupResult<T extends BasePredicateBuilder> {
+	private static class PredicateBuilderCacheLookupResult<T extends BaseJoiningPredicateBuilder> {
 		private final boolean myCacheHit;
 		private final T myResult;
 

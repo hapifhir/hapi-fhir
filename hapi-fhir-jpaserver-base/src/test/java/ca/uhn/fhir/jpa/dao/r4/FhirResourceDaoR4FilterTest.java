@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -17,8 +18,12 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -158,6 +163,41 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("(subject eq " + ptId.getIdPart() + ") or (performer eq " + ptId2.getValue() + ")"));
 		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
 		assertThat(found, containsInAnyOrder(cpId, cpId2));
+
+	}
+private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4FilterTest.class);
+	@Autowired
+	private IResourceProvenanceDao myResourceProvenanceDao;
+
+	@Test
+	public void testSourceComparatorEq() {
+		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+
+		Patient p = new Patient();
+		p.getMeta().setSource("http://source");
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setActive(true);
+		String ptId = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		p = new Patient();
+		p.addName().setFamily("Smith").addGiven("John2");
+		p.setActive(true);
+		myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		runInTransaction(() -> {
+			ourLog.info("Provenance:\n * {}", myResourceProvenanceDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("_source eq http://source"));
+		myCaptureQueriesListener.clear();
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(found, containsInAnyOrder(ptId));
 
 	}
 

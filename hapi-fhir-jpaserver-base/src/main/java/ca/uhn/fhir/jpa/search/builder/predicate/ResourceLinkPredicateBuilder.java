@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -18,8 +18,9 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -46,7 +47,6 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -63,13 +63,13 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toOrPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ResourceLinkPredicateBuilder extends BasePredicateBuilder {
+public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkPredicateBuilder.class);
 	private final DbColumn myColumnSrcType;
@@ -78,7 +78,7 @@ public class ResourceLinkPredicateBuilder extends BasePredicateBuilder {
 	private final DbColumn myColumnTargetResourceUrl;
 	private final DbColumn myColumnSrcResourceId;
 	private final DbColumn myColumnTargetResourceType;
-	private final QueryStack3 myQueryStack;
+	private final QueryStack myQueryStack;
 	private final boolean myReversed;
 
 	@Autowired
@@ -97,7 +97,7 @@ public class ResourceLinkPredicateBuilder extends BasePredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public ResourceLinkPredicateBuilder(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
+	public ResourceLinkPredicateBuilder(QueryStack theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
@@ -316,7 +316,7 @@ public class ResourceLinkPredicateBuilder extends BasePredicateBuilder {
 		boolean foundChainMatch = false;
 		List<String> candidateTargetTypes = new ArrayList<>();
 		List<Condition> orPredicates = new ArrayList<>();
-		QueryStack3 childQueryFactory = myQueryStack.newChildQueryFactoryWithFullBuilderReuse();
+		QueryStack childQueryFactory = myQueryStack.newChildQueryFactoryWithFullBuilderReuse();
 		for (String nextType : resourceTypes) {
 			String chain = theReferenceParam.getChain();
 

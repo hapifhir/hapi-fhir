@@ -21,8 +21,20 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.rest.api.Constants;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 @Table(name = "HFJ_RES_VER_PROV", indexes = {
 	@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
@@ -43,6 +55,8 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"), nullable = false)
 	private ResourceTable myResourceTable;
+	@Column(name = "RES_PID", insertable = false, updatable = false)
+	private Long myResourceId;
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
@@ -53,6 +67,15 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	 */
 	public ResourceHistoryProvenanceEntity() {
 		super();
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceId", myResourceId);
+		b.append("sourceUri", mySourceUri);
+		b.append("requestId", myRequestId);
+		return b.toString();
 	}
 
 	public void setResourceTable(ResourceTable theResourceTable) {

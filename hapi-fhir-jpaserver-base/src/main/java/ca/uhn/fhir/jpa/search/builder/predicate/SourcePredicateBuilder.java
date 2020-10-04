@@ -1,12 +1,13 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SourcePredicateBuilder extends BasePredicateBuilder {
+public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SourcePredicateBuilder.class);
 	private final DbColumn myColumnSourceUri;

@@ -1,15 +1,16 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -34,8 +35,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toOrPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -235,11 +236,11 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		String systemDesc = defaultIfBlank(theSystem, "(missing)");
 		String codeDesc = defaultIfBlank(theCode, "(missing)");
 		if (isBlank(theCode)) {
-			String msg = getFhirContext().getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
+			String msg = getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
 			throw new InvalidRequestException(msg);
 		}
 		if (isBlank(theSystem)) {
-			String msg = getFhirContext().getLocalizer().getMessage(SearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
+			String msg = getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
 			throw new InvalidRequestException(msg);
 		}
 	}

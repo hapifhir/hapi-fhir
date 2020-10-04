@@ -1,9 +1,10 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
@@ -19,10 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder.createLeftAndRightMatchLikeExpression;
-import static ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder.createLeftMatchLikeExpression;
-import static ca.uhn.fhir.jpa.dao.search.sql.StringPredicateBuilder.createRightMatchLikeExpression;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftAndRightMatchLikeExpression;
+import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
+import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createRightMatchLikeExpression;
 
 public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 

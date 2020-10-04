@@ -1,9 +1,10 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -13,11 +14,11 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 
-public class BasePredicateBuilder3 {
+public class BasePredicateBuilder {
 
 	private final SearchSqlBuilder mySearchSqlBuilder;
 
-	public BasePredicateBuilder3(SearchSqlBuilder theSearchSqlBuilder) {
+	public BasePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		mySearchSqlBuilder = theSearchSqlBuilder;
 	}
 
@@ -61,7 +62,7 @@ public class BasePredicateBuilder3 {
 		return mySearchSqlBuilder.createConditionForValueWithComparator(theComparator, theColumn, theValue);
 	}
 
-	protected BasePredicateBuilder getOrCreateQueryRootTable() {
+	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable() {
 		return mySearchSqlBuilder.getOrCreateLastPredicateBuilder();
 	}
 

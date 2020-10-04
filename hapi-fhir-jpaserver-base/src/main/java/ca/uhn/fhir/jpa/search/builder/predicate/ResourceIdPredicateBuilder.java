@@ -1,9 +1,10 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -22,8 +23,8 @@ import java.util.Set;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ResourceIdPredicateBuilder3 extends BasePredicateBuilder3 {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdPredicateBuilder3.class);
+public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdPredicateBuilder.class);
 
 	@Autowired
 	private IdHelperService myIdHelperService;
@@ -31,7 +32,7 @@ public class ResourceIdPredicateBuilder3 extends BasePredicateBuilder3 {
 	/**
 	 * Constructor
 	 */
-	public ResourceIdPredicateBuilder3(SearchSqlBuilder theSearchSqlBuilder) {
+	public ResourceIdPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder);
 	}
 
@@ -83,7 +84,7 @@ public class ResourceIdPredicateBuilder3 extends BasePredicateBuilder3 {
 
 			List<Long> resourceIds = ResourcePersistentId.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
-				BasePredicateBuilder queryRootTable = super.getOrCreateQueryRootTable();
+				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable();
 				switch (operation) {
 					default:
 					case eq:
@@ -92,7 +93,7 @@ public class ResourceIdPredicateBuilder3 extends BasePredicateBuilder3 {
 						return queryRootTable.createPredicateResourceIds(true, resourceIds);
 				}
 			} else {
-				return QueryStack3.toEqualToOrInPredicate(theSourceJoinColumn, generatePlaceholders(resourceIds), operation == SearchFilterParser.CompareOperation.ne);
+				return QueryStack.toEqualToOrInPredicate(theSourceJoinColumn, generatePlaceholders(resourceIds), operation == SearchFilterParser.CompareOperation.ne);
 			}
 
 		}

@@ -1,7 +1,8 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class TagPredicateBuilder extends BasePredicateBuilder {
+public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(TagPredicateBuilder.class);
 
 	private final DbColumn myColumnResId;

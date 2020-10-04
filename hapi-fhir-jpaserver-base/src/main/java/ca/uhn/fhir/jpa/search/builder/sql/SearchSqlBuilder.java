@@ -1,10 +1,26 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -30,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SearchSqlBuilder {
@@ -46,25 +61,25 @@ public class SearchSqlBuilder {
 	private final String myResourceType;
 	private final ModelConfig myModelConfig;
 	private final FhirContext myFhirContext;
-	private final SqlBuilderFactory mySqlBuilderFactory;
+	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
-	private BasePredicateBuilder myLastPredicateBuilder;
+	private BaseJoiningPredicateBuilder myLastPredicateBuilder;
 	private boolean myMatchNothing;
-	private ResourceSqlTable myResourceTableRoot;
+	private ResourceTablePredicateBuilder myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
-	private BasePredicateBuilder myFirstPredicateBuilder;
+	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
 
 	/**
 	 * Constructor
 	 */
-	public SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory, boolean theCountQuery) {
+	public SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, boolean theCountQuery) {
 		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", theCountQuery, new ArrayList<>());
 	}
 
 	/**
 	 * Constructor for child SQL Builders
 	 */
-	private SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlBuilderFactory theSqlBuilderFactory, String theBindVariableSubstitutionBase, boolean theCountQuery, ArrayList<Object> theBindVariableValues) {
+	private SearchSqlBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, String theBindVariableSubstitutionBase, boolean theCountQuery, ArrayList<Object> theBindVariableValues) {
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
 		myPartitionSettings = thePartitionSettings;
@@ -99,7 +114,7 @@ public class SearchSqlBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a COORDS search parameter
 	 */
 	public CoordsPredicateBuilder addCoordsSelector(@Nullable DbColumn theSourceJoinColumn) {
-		CoordsPredicateBuilder retVal = mySqlBuilderFactory.coordsIndexTable(this);
+		CoordsPredicateBuilder retVal = mySqlBuilderFactory.coordsPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -138,8 +153,8 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
-	public ResourceSqlTable addResourceTablePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
-		ResourceSqlTable retVal = mySqlBuilderFactory.resourceTable(this);
+	public ResourceTablePredicateBuilder addResourceTablePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+		ResourceTablePredicateBuilder retVal = mySqlBuilderFactory.resourceTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -165,7 +180,7 @@ public class SearchSqlBuilder {
 
 
 	// FIXME: remove
-	public ResourceLinkPredicateBuilder addEverythingSelector(QueryStack3 theQueryStack, String theResourceName, Long theTargetPid) {
+	public ResourceLinkPredicateBuilder addEverythingSelector(QueryStack theQueryStack, String theResourceName, Long theTargetPid) {
 		assert myLastPredicateBuilder == null;
 
 //		if (theTargetPid != null) {
@@ -189,7 +204,7 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a REFERENCE search parameter
 	 */
-	public ResourceLinkPredicateBuilder addReferenceSelector(QueryStack3 theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
+	public ResourceLinkPredicateBuilder addReferenceSelector(QueryStack theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
 		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -199,7 +214,7 @@ public class SearchSqlBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a reosource link where the
 	 * source and target are reversed. This is used for _has queries.
 	 */
-	public ResourceLinkPredicateBuilder addReferenceSelectorReversed(QueryStack3 theQueryStack, DbColumn theSourceJoinColumn) {
+	public ResourceLinkPredicateBuilder addReferenceSelectorReversed(QueryStack theQueryStack, DbColumn theSourceJoinColumn) {
 		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -251,7 +266,7 @@ public class SearchSqlBuilder {
 	}
 
 
-	public ResourceIdPredicateBuilder3 newResourceIdBuilder() {
+	public ResourceIdPredicateBuilder newResourceIdBuilder() {
 		return mySqlBuilderFactory.resourceId(this);
 	}
 
@@ -259,7 +274,7 @@ public class SearchSqlBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for an arbitrary table
 	 */
-	private void addTable(BasePredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
+	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
 		if (theSourceJoinColumn != null) {
 			DbTable fromTable = theSourceJoinColumn.getTable();
 			DbTable toTable = thePredicateBuilder.getTable();
@@ -324,7 +339,7 @@ public class SearchSqlBuilder {
 	/**
 	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
 	 */
-	public BasePredicateBuilder getOrCreateFirstPredicateBuilder() {
+	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder() {
 		if (myFirstPredicateBuilder == null) {
 			getOrCreateResourceTablePredicateBuilder();
 		}
@@ -334,16 +349,16 @@ public class SearchSqlBuilder {
 	/**
 	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
 	 */
-	public BasePredicateBuilder getOrCreateLastPredicateBuilder() {
+	public BaseJoiningPredicateBuilder getOrCreateLastPredicateBuilder() {
 		if (myLastPredicateBuilder == null) {
 			getOrCreateResourceTablePredicateBuilder();
 		}
 		return myLastPredicateBuilder;
 	}
 
-	public ResourceSqlTable getOrCreateResourceTablePredicateBuilder() {
+	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder() {
 		if (myResourceTableRoot == null) {
-			ResourceSqlTable resourceTable = mySqlBuilderFactory.resourceTable(this);
+			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
 			Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
 			addPredicate(typeAndDeletionPredicate);
@@ -375,23 +390,23 @@ public class SearchSqlBuilder {
 		myMatchNothing = true;
 	}
 
-	DbTable addTable(String theTableName) {
+	public DbTable addTable(String theTableName) {
 		return mySchema.addTable(theTableName);
 	}
 
-	PartitionSettings getPartitionSettings() {
+	public PartitionSettings getPartitionSettings() {
 		return myPartitionSettings;
 	}
 
-	RequestPartitionId getRequestPartitionId() {
+	public RequestPartitionId getRequestPartitionId() {
 		return myRequestPartitionId;
 	}
 
-	String getResourceType() {
+	public String getResourceType() {
 		return myResourceType;
 	}
 
-	ModelConfig getModelConfig() {
+	public ModelConfig getModelConfig() {
 		return myModelConfig;
 	}
 
@@ -402,7 +417,7 @@ public class SearchSqlBuilder {
 	}
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
-		ResourceSqlTable resourceTableRoot = getOrCreateResourceTablePredicateBuilder();
+		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder();
 
 		List<Condition> conditions = new ArrayList<>(2);
 		if (theDateRange.getLowerBoundAsInstant() != null) {
@@ -466,34 +481,4 @@ public class SearchSqlBuilder {
 		mySelect.addCustomOrderings(orderObject);
 	}
 
-	/**
-	 * Represents the SQL generated by this query
-	 */
-	public static class GeneratedSql {
-		private final String mySql;
-		private final List<Object> myBindVariables;
-		private final boolean myMatchNothing;
-
-		public GeneratedSql(boolean theMatchNothing, String theSql, List<Object> theBindVariables) {
-			// FIXME: remove or make this only happen in unit tests
-			assert Pattern.compile("=['0-9]").matcher(theSql.replace(" ", "")).find() == false : "Non-bound SQL parameter found: " + theSql;
-			assert Pattern.compile("in\\(['0-9]").matcher(theSql.toLowerCase().replace(" ", "")).find() == false : "Non-bound SQL parameter found: " + theSql;
-
-			myMatchNothing = theMatchNothing;
-			mySql = theSql;
-			myBindVariables = theBindVariables;
-		}
-
-		public boolean isMatchNothing() {
-			return myMatchNothing;
-		}
-
-		public List<Object> getBindVariables() {
-			return myBindVariables;
-		}
-
-		public String getSql() {
-			return mySql;
-		}
-	}
 }

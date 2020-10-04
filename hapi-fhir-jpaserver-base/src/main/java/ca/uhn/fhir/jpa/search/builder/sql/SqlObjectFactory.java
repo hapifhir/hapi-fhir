@@ -1,21 +1,34 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.sql;
 
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-public class SqlBuilderFactory {
+public class SqlObjectFactory {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
-
-	// FIXME: rename all these
 
 	public CompositeUniqueSearchParameterPredicateBuilder newCompositeUniqueSearchParameterPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(CompositeUniqueSearchParameterPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public CoordsPredicateBuilder coordsIndexTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public CoordsPredicateBuilder coordsPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(CoordsPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
@@ -35,16 +48,16 @@ public class SqlBuilderFactory {
 		return myApplicationContext.getBean(QuantityPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public ResourceLinkPredicateBuilder referenceIndexTable(QueryStack3 theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
+	public ResourceLinkPredicateBuilder referenceIndexTable(QueryStack theQueryStack, SearchSqlBuilder theSearchSqlBuilder, boolean theReversed) {
 		return myApplicationContext.getBean(ResourceLinkPredicateBuilder.class, theQueryStack, theSearchSqlBuilder, theReversed);
 	}
 
-	public ResourceSqlTable resourceTable(SearchSqlBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ResourceSqlTable.class, theSearchSqlBuilder);
+	public ResourceTablePredicateBuilder resourceTable(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public ResourceIdPredicateBuilder3 resourceId(SearchSqlBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ResourceIdPredicateBuilder3.class, theSearchSqlBuilder);
+	public ResourceIdPredicateBuilder resourceId(SearchSqlBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(ResourceIdPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
 	public SearchParamPresentPredicateBuilder searchParamPresentPredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {

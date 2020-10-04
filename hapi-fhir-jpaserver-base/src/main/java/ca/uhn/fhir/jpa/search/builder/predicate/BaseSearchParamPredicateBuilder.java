@@ -1,7 +1,8 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -12,9 +13,9 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
 
-public abstract class BaseSearchParamPredicateBuilder extends BasePredicateBuilder {
+public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	private final DbColumn myColumnMissing;
 	private final DbColumn myColumnResType;

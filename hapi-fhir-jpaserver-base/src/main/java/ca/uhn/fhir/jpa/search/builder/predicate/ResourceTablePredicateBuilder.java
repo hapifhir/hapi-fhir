@@ -1,5 +1,6 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
@@ -8,10 +9,10 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toAndPredicate;
-import static ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
 
-public class ResourceSqlTable extends BasePredicateBuilder {
+public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnResDeletedAt;
 	private final DbColumn myColumnResType;
@@ -21,7 +22,7 @@ public class ResourceSqlTable extends BasePredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public ResourceSqlTable(SearchSqlBuilder theSearchSqlBuilder) {
+	public ResourceTablePredicateBuilder(SearchSqlBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RESOURCE"));
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnResType = getTable().addColumn("RES_TYPE");

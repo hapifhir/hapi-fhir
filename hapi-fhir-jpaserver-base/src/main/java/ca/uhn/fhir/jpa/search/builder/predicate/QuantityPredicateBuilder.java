@@ -1,11 +1,12 @@
-package ca.uhn.fhir.jpa.dao.search.sql;
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.search.querystack.QueryStack3;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchSqlBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -79,7 +80,7 @@ public class QuantityPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 		SearchFilterParser.CompareOperation operation = theOperation;
 		if (operation == null && cmpValue != null) {
-			operation = QueryStack3.toOperation(cmpValue);
+			operation = QueryStack.toOperation(cmpValue);
 		}
 		operation = defaultIfNull(operation, SearchFilterParser.CompareOperation.eq);
 		Condition numericPredicate = NumberPredicateBuilder.createPredicateNumeric(this, operation, valueValue, myColumnValue, "invalidQuantityPrefix", myFhirContext, theParam);
