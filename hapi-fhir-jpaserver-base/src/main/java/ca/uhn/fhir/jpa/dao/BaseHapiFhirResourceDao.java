@@ -399,6 +399,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myResourceDeleter.deleteByUrl(theUrl, theDeleteConflicts, theRequestDetails);
 	}
 
+
+	@Override
+	public DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
+		return myResourceDeleter.deletePidList(theUrl, theResourceIds, theDeleteConflicts ,theRequest);
+	}
+
 	@PostConstruct
 	public void detectSearchDaoDisabled() {
 		if (mySearchDao != null && mySearchDao.isDisabled()) {

@@ -3,10 +3,16 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Collection;
 
 /*
  * #%L
