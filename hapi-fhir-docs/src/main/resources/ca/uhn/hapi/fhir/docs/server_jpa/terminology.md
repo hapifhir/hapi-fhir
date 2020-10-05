@@ -4,9 +4,9 @@ HAPI FHIR JPA Server includes an `IValidationSupport` class, `JpaPersistedResour
 
 # Versioning of Terminology
 
-CodeSystem resources can be versioned as described in the FHIR specification [here](http://hl7.org/fhir/codesystem.html#versioning). Similarly ValueSet and ConceptMap resources that are defined with a versioned CodeSystem can also be versioned.
+Code systems can be versioned as described in the FHIR specification [here](http://hl7.org/fhir/codesystem.html#versioning). Similarly, value sets and concept maps that are defined with a versioned code system can also be versioned.
 
-Versions of a given CodeSystem, ValueSet or ConceptMap are differentiated from each other by the CodeSystem.version, ValueSet.version and ConceptMap.version properties respectively. Each version of a given CodeSystem, ValueSet and ConceptMap resource will have a separate resource entity.
+Versions of a given code system, value set or concept map are differentiated from each other by the CodeSystem.version, ValueSet.version and ConceptMap.version properties respectively. Each version of a given code system, value set and concept map will have a separate resource entity. This version should not be confused with the resource version (i.e. Resource.meta.versionId).
 
 When queries or operations are requested with a specific CodeSystem, ValueSet, or ConceptMap url and version specified, the JPA Server will act on the resource(s) specified by or linked to the version. If the same request is submitted with no version specified, the JPA Server will instead act on the current (i.e. most recently updated) version of the resource identified by the URL.
 
@@ -14,19 +14,19 @@ Delta Add and Remove modes in the [upload-terminology](/hapi-fhir/docs/tools/hap
 
 # Terminology Schemas
 
-This page provides the schema of tables that are used to complement the CodeSystem, ValueSet and ConceptMap resources and which map the relationships between these resources and various properties that are used or referenced by terminology operations.
+This page provides the schema of tables that are used to complement the CodeSystem, ValueSet and ConceptMap resources, and which map the relationships between these resources and various properties that are used or referenced by terminology operations.
 
 ## CodeSystem Tables
 
 <img src="/hapi-fhir/docs/images/termcodesystem_schema.svg" alt="Resources" style="width: 100%; max-width: 600px;"/>
 
-The TRM_CODESYSTEM_VER table represents a single CodeSystem resource with a specific URL and version. It is used to map terminology concepts, represented by various TRM_CONCEPT_* tables to a single CodeSystem resource.
+The TRM_CODESYSTEM_VER table represents a single CodeSystem resource with a specific URL and version. It is used to map terminology concepts represented by various TRM_CONCEPT_* tables to a single CodeSystem resource.
 
 The TRM_CODESYSTEM table represents the canonical representation of a CodeSystem resource with a specific URL and maps to a single TRM_CODESYSTEM_VER row which is treated as the current version of the CodeSystem (i.e. the resource referenced if no version is specified). For example, two CodeSystem resources `CodeSystem/loinc-2.67` and `CodeSystem/loinc-2.68` might have the same CodeSystem.url, e.g. `http://loinc.org` but different CodeSystem.version values. In this case each will each have exactly one row in the TRM_CODESYSTEM_VER table, but there will be only one row in the TRM_CODESYSTEM table which will link only to the more recently updated TRM_CODESYSTEM_VER resource.
 
 ### Columns
 
-The following list are the main key columns in the TRM_CODESYSTEM_VER table that are used to join to the TRM_CODESYSTEM table and TRM_CONCEPT_* tables.
+The following are the main key columns in the TRM_CODESYSTEM_VER table that are used to join to the TRM_CODESYSTEM table and TRM_CONCEPT_* tables.
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -80,7 +80,7 @@ The following list are the main key columns in the TRM_CODESYSTEM_VER table that
 
 The TRM_CODESYSTEM_VER table will have exactly one row for each unique combination of CODESYSTEM_PID and CS_VERSION_ID.
 
-The following list are the main key columns in the TRM_CODESYSTEM table.
+The following are the main key columns in the TRM_CODESYSTEM table.
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -151,7 +151,7 @@ The TRM_VALUESET table represents a single ValueSet resource with a specific URL
 
 ### Columns
 
-The following list are the main key columns in the TRM_VALUESET table that are used to join to the TRM_VALUESET_CONCEPT and TRM_VALUESET_C_DESIGNATION tables.
+The following are the main key columns in the TRM_VALUESET table that are used to join to the TRM_VALUESET_CONCEPT and TRM_VALUESET_C_DESIGNATION tables.
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -213,7 +213,7 @@ The TRM_CONCEPTMAP table represents a single ConceptMap resource with a specific
 
 ### Columns
 
-The following list are the main key columns in the TRM_CONCEPTMAP table that are used to join to the TRM_CONCEPTMAP_* tables.
+The following are the main key columns in the TRM_CONCEPTMAP table that are used to join to the TRM_CONCEPTMAP_* tables.
 
 <table class="table table-striped table-condensed">
     <thead>
