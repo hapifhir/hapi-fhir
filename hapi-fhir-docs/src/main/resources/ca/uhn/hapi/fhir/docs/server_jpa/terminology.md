@@ -10,7 +10,7 @@ Versions of a given CodeSystem, ValueSet or ConceptMap are differentiated from e
 
 When queries or operations are requested with a specific CodeSystem, ValueSet, or ConceptMap url and version specified, the JPA Server will act on the resource(s) specified by or linked to the version. If the same request is submitted with no version specified, the JPA Server will instead act on the current (i.e. most recently updated) version of the resource identified by the URL.
 
-Delta Add and Remove modes in [upload-terminology](/hapi-fhir/docs/tools/hapi_fhir_cli.html#upload-terminology) command will only be applied to the most recently updated version.
+Delta Add and Remove modes in the [upload-terminology](/hapi-fhir/docs/tools/hapi_fhir_cli.html#upload-terminology) command will only be applied to the most recently updated version.
 
 # Terminology Schemas
 
@@ -22,7 +22,7 @@ This page provides the schema of tables that are used to complement the CodeSyst
 
 The TRM_CODESYSTEM_VER table represents a single CodeSystem resource with a specific URL and version. It is used to map terminology concepts, represented by various TRM_CONCEPT_* tables to a single CodeSystem resource.
 
-The TRM_CODESYSTEM table represents the canonical representation of a CodeSystem resource with a specific URL and maps to a single TRM_CODESYSTEM_VER row which is treated as the current version of the CodeSystem (i.e. the version selected if no version is specified). For example, two CodeSystem resources `CodeSystem/loinc-2.67` and `CodeSystem/loinc-2.68` might have the same CodeSystem.url, e.g. `http://loinc.org` but different CodeSystem.version values. In this case each will each have exactly one row in the TRM_CODESYSTEM_VER table, but there will be only one row in the TRM_CODESYSTEM table which will link only to the most recently updated TRM_CODESYSTEM_VER resource.
+The TRM_CODESYSTEM table represents the canonical representation of a CodeSystem resource with a specific URL and maps to a single TRM_CODESYSTEM_VER row which is treated as the current version of the CodeSystem (i.e. the resource referenced if no version is specified). For example, two CodeSystem resources `CodeSystem/loinc-2.67` and `CodeSystem/loinc-2.68` might have the same CodeSystem.url, e.g. `http://loinc.org` but different CodeSystem.version values. In this case each will each have exactly one row in the TRM_CODESYSTEM_VER table, but there will be only one row in the TRM_CODESYSTEM table which will link only to the more recently updated TRM_CODESYSTEM_VER resource.
 
 ### Columns
 
