@@ -4,23 +4,25 @@ HAPI FHIR JPA Server includes an `IValidationSupport` class, `JpaPersistedResour
 
 # Versioning of Terminology
 
-CodeSystem resources can be versioned as described in the FHIR specification [here](http://hl7.org/fhir/codesystem.html#versioning). Similarly, for ValueSet and ConceptMap resources that are defined with a versioned CodeSystem can also be versioned.
+CodeSystem resources can be versioned as described in the FHIR specification [here](http://hl7.org/fhir/codesystem.html#versioning). Similarly ValueSet and ConceptMap resources that are defined with a versioned CodeSystem can also be versioned.
 
-Versions for CodeSystem, ValueSet and ConceptMap resources are differentiated from each other by the CodeSystem.version, ValueSet.version and ConceptMap.version properties respectively. Each version of a given CodeSystem, ValueSet and ConceptMap resource will have a separate resource entity.
+Versions of a given CodeSystem, ValueSet or ConceptMap are differentiated from each other by the CodeSystem.version, ValueSet.version and ConceptMap.version properties respectively. Each version of a given CodeSystem, ValueSet and ConceptMap resource will have a separate resource entity.
 
-When queries or operations are performed involving CodeSystem, ValueSet, or ConceptMap resources that are versioned and no version parameter is provided, the JPA Server will reference the most recently updated version.
+When queries or operations are requested with a specific CodeSystem, ValueSet, or ConceptMap url and version specified, the JPA Server will act on the resource(s) specified by or linked to the version. If the same request is submitted with no version specified, the JPA Server will instead act on the current (i.e. most recently updated) version of the resource identified by the URL.
 
-Delta Add and Remove modes in hapi-fhir-cli upload-terminology command will only apply to most recently updated version. Import from csv and export to csv hapi-fhir-cli commands will only apply to most recently updated version.
+Delta Add and Remove modes in [upload-terminology](/hapi-fhir/docs/tools/hapi_fhir_cli.html#upload-terminology) command will only be applied to the most recently updated version.
 
 # Terminology Schemas
 
-This page provides schema for tables that are used to complement and to map relationships between the CodeSystem, ValueSet, and ConceptMap resources and the various properties associated with these resources that are used or referenced by terminology operations.
+This page provides the schema of tables that are used to complement the CodeSystem, ValueSet and ConceptMap resources and which map the relationships between these resources and various properties that are used or referenced by terminology operations.
 
 ## CodeSystem Tables
 
 <img src="/hapi-fhir/docs/images/termcodesystem_schema.svg" alt="Resources" style="width: 100%; max-width: 600px;"/>
 
-The TRM_CODESYSTEM_VER table indicates a single CodeSystem resource with a specific version. It can be used to map terminology concepts, represented by various TRM_CONCEPT_* tables to a single CodeSystem version. The TRM_CODESYSTEM table is used to model the canonical representation of a single CodeSystem and maps to a single TRM_CODESYSTEM_VER row which is treated as the current version of the CodeSystem (i.e. the version selected if no version is specified). For example, two CodeSystem resources `CodeSystem/loinc-2.67` and `CodeSystem/loinc-2.68` might have the same CodeSystem.url, e.g. `http://loinc.org` but different CodeSystem.version values. In this case each will each have exactly one row in the TRM_CODESYSTEM_VER table, but there will be only one row in the TRM_CODESYSTEM table which will link only to the most recently updated TRM_CODESYSTEM_VER resource.
+The TRM_CODESYSTEM_VER table represents a single CodeSystem resource with a specific URL and version. It is used to map terminology concepts, represented by various TRM_CONCEPT_* tables to a single CodeSystem resource.
+
+The TRM_CODESYSTEM table represents the canonical representation of a CodeSystem resource with a specific URL and maps to a single TRM_CODESYSTEM_VER row which is treated as the current version of the CodeSystem (i.e. the version selected if no version is specified). For example, two CodeSystem resources `CodeSystem/loinc-2.67` and `CodeSystem/loinc-2.68` might have the same CodeSystem.url, e.g. `http://loinc.org` but different CodeSystem.version values. In this case each will each have exactly one row in the TRM_CODESYSTEM_VER table, but there will be only one row in the TRM_CODESYSTEM table which will link only to the most recently updated TRM_CODESYSTEM_VER resource.
 
 ### Columns
 
@@ -61,7 +63,7 @@ The following list are the main key columns in the TRM_CODESYSTEM_VER table that
             <td>Long</td>
             <td>Nullable</td>
             <td>
-                Persistent ID of the TRM_CODESYSTEM row for canonical CodeSystem.
+                Persistent ID of the TRM_CODESYSTEM row for the canonical representation of this CodeSystem resource.
             </td>
         </tr>
         <tr>
@@ -70,7 +72,7 @@ The following list are the main key columns in the TRM_CODESYSTEM_VER table that
             <td>Long</td>
             <td>Nullable</td>
             <td>
-                This is the optional CodeSystem.version of the CodeSystem resource.
+                CodeSystem.version of the CodeSystem resource.
             </td>
         </tr>
     </tbody>
@@ -115,7 +117,7 @@ The following list are the main key columns in the TRM_CODESYSTEM table.
             <td>Long</td>
             <td>Nullable</td>
             <td>
-                Persistent ID of the TRM_CODESYSTEM_VER row for current version of the CodeSystem.
+                Persistent ID of the TRM_CODESYSTEM_VER row for the most recently updated version of the CodeSystem resource for this URL.
             </td>
         </tr>
         <tr>
@@ -133,7 +135,7 @@ The following list are the main key columns in the TRM_CODESYSTEM table.
             <td>Long</td>
             <td>Nullable</td>
             <td>
-                Persistent ID of the current version CodeSystem resource in the HFJ_RESOURCE table.
+                Persistent ID of the most recently updated version of the CodeSystem resource for this URL in the HFJ_RESOURCE table.
             </td>
         </tr>
     </tbody>
@@ -145,7 +147,7 @@ The TRM_CODESYSTEM table will have exactly one row for each unique CODE_SYSTEM_U
 
 <img src="/hapi-fhir/docs/images/termvalueset_schema.svg" alt="Resources" style="width: 100%; max-width: 600px;"/>
 
-The TRM_VALUESET table indicates a single ValueSet resource with a specific version. It can be used to map terminology concepts, represented by the TRM_VALUESET_CONCEPT and TRM_VALUESET_C_DESIGNATION tables to a single ValueSet resource.
+The TRM_VALUESET table represents a single ValueSet resource with a specific URL and version. It can be used to map terminology concepts represented by the TRM_VALUESET_CONCEPT and TRM_VALUESET_C_DESIGNATION tables to a single ValueSet resource.
 
 ### Columns
 
@@ -175,7 +177,7 @@ The following list are the main key columns in the TRM_VALUESET table that are u
             <td>RES_ID</td>
             <td></td>
             <td>Long</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 Persistent ID of the ValueSet resource in the HFJ_RESOURCE table.
             </td>
@@ -186,7 +188,7 @@ The following list are the main key columns in the TRM_VALUESET table that are u
             <td>String</td>
             <td></td>
             <td>
-                Canonical URL for ValueSet.
+                Canonical URL for the ValueSet resource.
             </td>
         </tr>
         <tr>
@@ -195,7 +197,7 @@ The following list are the main key columns in the TRM_VALUESET table that are u
             <td>String</td>
             <td>Nullable</td>
             <td>
-                Version ID for this ValueSet resource.
+                ValueSet.version for this ValueSet resource.
             </td>
         </tr>
     </tbody>
@@ -207,7 +209,7 @@ The TRM_VALUESET table will have exactly one row for each unique combination of 
 
 <img src="/hapi-fhir/docs/images/termconceptmap_schema.svg" alt="Resources" style="width: 100%; max-width: 600px;"/>
 
-The TRM_CONCEPTMAP table indicates a single ConceptMap resource with a specific version. It can be used to map terminology concepts to one another in groups.
+The TRM_CONCEPTMAP table represents a single ConceptMap resource with a specific URL and version. It can be used to map terminology concepts to one another in groups.
 
 ### Columns
 
@@ -237,7 +239,7 @@ The following list are the main key columns in the TRM_CONCEPTMAP table that are
             <td>RES_ID</td>
             <td></td>
             <td>Long</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 Persistent ID of the ConceptMap resource in the HFJ_RESOURCE table.
             </td>
@@ -248,7 +250,7 @@ The following list are the main key columns in the TRM_CONCEPTMAP table that are
             <td>String</td>
             <td>Nullable</td>
             <td>
-                URL of source ValueSet to be mapped.
+                URL of the source ValueSet to be mapped.
             </td>
         </tr>
         <tr>
@@ -257,7 +259,7 @@ The following list are the main key columns in the TRM_CONCEPTMAP table that are
             <td>String</td>
             <td>Nullable</td>
             <td>
-                URL of target ValueSet to be mapped.
+                URL of the target ValueSet to be mapped.
             </td>
         </tr>
         <tr>
@@ -266,7 +268,7 @@ The following list are the main key columns in the TRM_CONCEPTMAP table that are
             <td>String</td>
             <td></td>
             <td>
-                Canonical URL for ConceptMap.
+                Canonical URL for the ConceptMap resource.
             </td>
         </tr>
         <tr>
@@ -275,7 +277,7 @@ The following list are the main key columns in the TRM_CONCEPTMAP table that are
             <td>String</td>
             <td>Nullable</td>
             <td>
-                Version ID for this ConceptMap resource.
+                ConceptMap.version for this ConceptMap resource.
             </td>
         </tr>
     </tbody>
