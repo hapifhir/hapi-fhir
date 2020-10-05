@@ -77,6 +77,9 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -171,6 +174,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
@@ -592,6 +596,55 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 
+	protected void assertGone(IIdType theId) {
+		try {
+			assertNotGone(theId);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+	}
+
+	protected void assertExpunged(IIdType theId) {
+		try {
+			getDao(theId).read(theId);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+	}
+
+	protected IFhirResourceDao<?> getDao(IIdType theId) {
+		IFhirResourceDao<?> dao;
+		switch (theId.getResourceType()) {
+			case "Patient":
+				dao = myPatientDao;
+				break;
+			case "Observation":
+				dao = myObservationDao;
+				break;
+			default:
+				fail("Restype: " + theId.getResourceType());
+				dao = myPatientDao;
+		}
+		return dao;
+	}
+
+	/**
+	 * This gets called from assertGone too! Careful about exceptions...
+	 */
+	protected void assertNotGone(IIdType theId) {
+		if ("Patient".equals(theId.getResourceType())) {
+			myPatientDao.read(theId, mySrd);
+		} else if ("Organization".equals(theId.getResourceType())) {
+			myOrganizationDao.read(theId, mySrd);
+		} else if ("CodeSystem".equals(theId.getResourceType())) {
+			myCodeSystemDao.read(theId, mySrd);
+		} else {
+			fail("Can't handle type: " + theId.getResourceType());
+		}
+	}
+
 	protected void assertHierarchyContains(String... theStrings) {
 		List<String> hierarchy = runInTransaction(() -> {
 			List<String> hierarchyHolder = new ArrayList<>();
@@ -607,6 +660,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		} else {
 			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
 		}
+	}
+
+
+	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
+		assertThat(e.getMessage(), matchesPattern(
+			"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource " + theResourceType + "/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
+
 	}
 
 	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {

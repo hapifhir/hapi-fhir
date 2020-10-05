@@ -29,12 +29,14 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -55,6 +57,8 @@ public class DeleteConflictService {
 	public static String MAX_RETRY_ATTEMPTS_EXCEEDED_MSG = "Requested delete operation stopped before all conflicts were handled. May need to increase the configured Maximum Delete Conflict Query Count.";
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;
+	@Autowired
+	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -173,5 +177,25 @@ public class DeleteConflictService {
 	@VisibleForTesting
 	static void setMaxRetryAttempts(Integer theMaxRetryAttempts) {
 		MAX_RETRY_ATTEMPTS = theMaxRetryAttempts;
+	}
+
+	public void validateOkToDeletePidsOrThrowException(List<Long> thePids) {
+		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
+			long deleteCount = myResourceLinkDao.deleteByTargetPids(thePids);
+			ourLog.debug("Deleted {} resource dependencies which can no longer be satisfied", deleteCount);
+			return;
+		}
+
+		List<Long> conflictSourcePids = myResourceLinkDao.findSourcePidWithTargetPidIn(thePids);
+		// FIXME KHS test
+		// We don't care about references from resources we're about to delete
+		conflictSourcePids.removeAll(thePids);
+
+		if (conflictSourcePids.isEmpty()) {
+			return;
+		}
+
+		ResourceTable firstConflict = myResourceTableDao.getOne(conflictSourcePids.get(0));
+		throw new InvalidRequestException("Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " + firstConflict.getIdDt().getValue());
 	}
 }

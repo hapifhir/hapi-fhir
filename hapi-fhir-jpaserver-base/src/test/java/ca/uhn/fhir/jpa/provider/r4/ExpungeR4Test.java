@@ -64,24 +64,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setExpungeEnabled(true);
 	}
 
-	private void assertExpunged(IIdType theId) {
-		try {
-			getDao(theId).read(theId);
-			fail();
-		} catch (ResourceNotFoundException e) {
-			// good
-		}
-	}
-
-	private void assertGone(IIdType theId) {
-		try {
-			getDao(theId).read(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
 	private void assertStillThere(IIdType theId) {
 		getDao(theId).read(theId);
 	}
@@ -155,22 +137,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		myDeletedObservationId = myObservationDao.create(o).getId();
 		myDeletedObservationId = myObservationDao.delete(myDeletedObservationId).getId();
-	}
-
-	private IFhirResourceDao<?> getDao(IIdType theId) {
-		IFhirResourceDao<?> dao;
-		switch (theId.getResourceType()) {
-			case "Patient":
-				dao = myPatientDao;
-				break;
-			case "Observation":
-				dao = myObservationDao;
-				break;
-			default:
-				fail("Restype: " + theId.getResourceType());
-				dao = myPatientDao;
-		}
-		return dao;
 	}
 
 	@Test

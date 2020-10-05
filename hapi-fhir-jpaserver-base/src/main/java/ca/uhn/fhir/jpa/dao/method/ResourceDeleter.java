@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.method;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -9,8 +10,13 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeResourceService;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -24,10 +30,10 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
+import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +67,10 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
+	@Autowired
+	private ExpungeResourceService myExpungeResourceService;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	protected ResourceDeleter(BaseHapiFhirResourceDao<T> theDao) {
 		super(theDao);
@@ -192,7 +202,18 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 	private DeleteMethodOutcome doDeleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequest) {
 
 		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, getResourceType(), theRequest);
-		return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
+		if (isExpungeDelete(theUrl)) {
+			return deleteAndExpungePidList(theUrl, resourceIds, deleteConflicts, theRequest);
+		} else {
+			return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
+		}
+	}
+
+	private boolean isExpungeDelete(String theUrl) {
+		// FIXME KHS can we avoid doing this twice?
+		List<NameValuePair> params = myMatchUrlService.translateMatchUrl(theUrl);
+		// FIXME KHS constant
+		return params.stream().anyMatch(param -> "_expunge".equals(param.getName()) && "true".equals(param.getValue()));
 	}
 
 	@Nonnull
@@ -206,8 +227,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 	}
 
 	@Nonnull
-	private DeleteMethodOutcome doDeletePidList(String theUrl, boolean theExpunge, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theTheRequest) {
-		StopWatch w = new StopWatch();
+	private DeleteMethodOutcome doDeletePidList(String theUrl, boolean theExpunge, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
 		if (theResourceIds.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
 				throw new PreconditionFailedException(myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, theResourceIds.size()));
@@ -215,11 +235,39 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 		}
 
 		TransactionDetails transactionDetails = new TransactionDetails();
-		List<ResourceTable> deletedResources = new ArrayList<>();
 
 		List<Long> pids = theResourceIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
-		// FIXME KHS first check for conflicts in HFJ_RES_LINK
-		List<ResourceTable> entities = myResourceTableDao.findAllById(pids);
+
+		if (theExpunge) {
+			return deleteAndExpungeResources(pids);
+		} else {
+			return deleteResourcesOneAtATime(theUrl, pids, theDeleteConflicts, theRequest, transactionDetails);
+		}
+	}
+
+	private DeleteMethodOutcome deleteAndExpungeResources(List<Long> thePids) {
+		StopWatch w = new StopWatch();
+
+		myDeleteConflictService.validateOkToDeletePidsOrThrowException(thePids);
+
+		Long count = myExpungeResourceService.deleteByResourcePids(thePids);
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+		String message = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", count, w.getMillis());
+		String severity = "information";
+		String code = "informational";
+		OperationOutcomeUtil.addIssue(myFhirContext, oo, severity, message, null, code);
+		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
+		retVal.setOperationOutcome(oo);
+		return retVal;
+	}
+
+	private DeleteMethodOutcome deleteResourcesOneAtATime(String theUrl, List<Long> thePids, DeleteConflictList theDeleteConflicts, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		StopWatch w = new StopWatch();
+
+		List<ResourceTable> deletedResources = new ArrayList<>();
+
+		List<ResourceTable> entities = myResourceTableDao.findAllById(thePids);
 		for (ResourceTable entity : entities) {
 			deletedResources.add(entity);
 
@@ -228,23 +276,23 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 			// Notify IServerOperationInterceptors about pre-action call
 			HookParams hooks = new HookParams()
 				.add(IBaseResource.class, resourceToDelete)
-				.add(RequestDetails.class, theTheRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theTheRequest)
-				.add(TransactionDetails.class, transactionDetails);
-			doCallHooks(theTheRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(TransactionDetails.class, theTransactionDetails);
+			doCallHooks(theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
 
-			myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theTheRequest, transactionDetails);
+			myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theRequest, theTransactionDetails);
 
 			// Notify interceptors
 			IdDt idToDelete = entity.getIdDt();
-			if (theTheRequest != null) {
-				IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theTheRequest, idToDelete.getResourceType(), idToDelete);
+			if (theRequest != null) {
+				IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequest, idToDelete.getResourceType(), idToDelete);
 				myDao.notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
 			}
 
 			// Perform delete
 
-			myDao.updateEntityForDelete(theTheRequest, transactionDetails, entity);
+			myDao.updateEntityForDelete(theRequest, theTransactionDetails, entity);
 			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
@@ -253,10 +301,10 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 				public void beforeCommit(boolean readOnly) {
 					HookParams hookParams = new HookParams()
 						.add(IBaseResource.class, resourceToDelete)
-						.add(RequestDetails.class, theTheRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theTheRequest)
-						.add(TransactionDetails.class, transactionDetails);
-					doCallHooks(theTheRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest)
+						.add(TransactionDetails.class, theTransactionDetails);
+					doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 				}
 			});
 		}

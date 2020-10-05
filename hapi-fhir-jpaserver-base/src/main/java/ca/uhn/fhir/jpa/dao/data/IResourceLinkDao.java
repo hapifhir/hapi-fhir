@@ -36,4 +36,16 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long> {
 
 	@Query("SELECT t FROM ResourceLink t WHERE t.mySourceResourcePid = :resId")
 	List<ResourceLink> findAllForResourceId(@Param("resId") Long thePatientId);
+
+	// FIXME KHS test
+	@Query("SELECT t.mySourceResourcePid FROM ResourceLink t WHERE t.myTargetResourcePid in :resIds")
+   List<Long> findSourcePidWithTargetPidIn(@Param("resIds") List<Long> thePids);
+
+	@Modifying
+	@Query("DELETE FROM ResourceLink t WHERE t.myTargetResourcePid in :resIds")
+	int deleteByTargetPids(@Param("resIds") List<Long> thePids);
+
+	@Modifying
+	@Query("DELETE FROM ResourceLink t WHERE t.mySourceResourcePid in :resIds")
+	int deleteBySourcePids(@Param("resIds") List<Long> thePids);
 }

@@ -30,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public abstract class ExpungeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);

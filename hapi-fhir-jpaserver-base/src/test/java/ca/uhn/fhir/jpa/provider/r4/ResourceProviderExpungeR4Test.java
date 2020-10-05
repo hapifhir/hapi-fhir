@@ -34,24 +34,6 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 	}
 
-	private void assertExpunged(IIdType theId) {
-		try {
-			getDao(theId).read(theId);
-			fail();
-		} catch (ResourceNotFoundException e) {
-			// good
-		}
-	}
-
-	private void assertGone(IIdType theId) {
-		try {
-			getDao(theId).read(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
 	private void assertStillThere(IIdType theId) {
 		getDao(theId).read(theId);
 	}
@@ -109,22 +91,6 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEnableExpunge() {
 		myDaoConfig.setExpungeEnabled(true);
-	}
-
-	private IFhirResourceDao<?> getDao(IIdType theId) {
-		IFhirResourceDao<?> dao;
-		switch (theId.getResourceType()) {
-			case "Patient":
-				dao = myPatientDao;
-				break;
-			case "Observation":
-				dao = myObservationDao;
-				break;
-			default:
-				fail("Restype: " + theId.getResourceType());
-				dao = myPatientDao;
-		}
-		return dao;
 	}
 
 	@Test
