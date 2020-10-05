@@ -199,7 +199,7 @@ public class InMemoryResourceMatcher {
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
 					} else {
-						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theModelConfig, theResourceName, theParamName, theParamDef, nextAnd, theSearchParams, myModelConfig.getUseOrdinalDatesForDayPrecisionSearches())));
+						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theModelConfig, theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
 					}
 				case COMPOSITE:
 				case HAS:
@@ -216,8 +216,8 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams,boolean theUseOrdinalDatesForDayComparison) {
-		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, paramDef, token, theUseOrdinalDatesForDayComparison));
+	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
+		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, paramDef, token));
 	}
 
 	private boolean hasChain(List<List<IQueryParameterType>> theAndOrParams) {

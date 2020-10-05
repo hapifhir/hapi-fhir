@@ -253,7 +253,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	@Override
-	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
+	public boolean matches(IQueryParameterType theParam) {
 		if (!(theParam instanceof TokenParam)) {
 			return false;
 		}

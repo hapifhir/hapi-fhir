@@ -262,7 +262,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
+	public boolean matches(IQueryParameterType theParam) {
 		if (!(theParam instanceof DateParam)) {
 			return false;
 		}
@@ -271,9 +271,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 
 		boolean result;
-		if (theUseOrdinalDatesForDayComparison) {
+		if (dateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			result = matchesOrdinalDateBounds(range);
-			result = matchesDateBounds(range);
 		} else {
 			result = matchesDateBounds(range);
 		}
