@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -180,13 +181,19 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		String locId = myLocationDao.create(new Location(), mySrd).getId().toUnqualifiedVersionless().getValue();
 		String locId2 = myLocationDao.create(new Location().setPosition(new Location.LocationPositionComponent(new DecimalType(10), new DecimalType(10))), mySrd).getId().toUnqualifiedVersionless().getValue();
 
+		runInTransaction(()->{
+			ourLog.info("Coords:\n * {}", myResourceIndexedSearchParamCoordsDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronous(true);
 			TokenParam param = new TokenParam();
 			param.setMissing(true);
 			params.add(Location.SP_NEAR, param);
+			myCaptureQueriesListener.clear();
 			List<String> patients = toUnqualifiedVersionlessIdValues(myLocationDao.search(params));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertThat(patients, containsInRelativeOrder(locId));
 			assertThat(patients, not(containsInRelativeOrder(locId2)));
 		}

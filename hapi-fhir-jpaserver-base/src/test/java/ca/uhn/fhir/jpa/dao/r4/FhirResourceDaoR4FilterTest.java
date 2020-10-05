@@ -34,6 +34,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4FilterTest.class);
+	@Autowired
+	private IResourceProvenanceDao myResourceProvenanceDao;
+
 	@AfterEach
 	public void after() {
 		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
@@ -165,9 +169,6 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		assertThat(found, containsInAnyOrder(cpId, cpId2));
 
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4FilterTest.class);
-	@Autowired
-	private IResourceProvenanceDao myResourceProvenanceDao;
 
 	@Test
 	public void testSourceComparatorEq() {
@@ -344,6 +345,30 @@ private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4Fi
 		assertThat(found, empty());
 
 	}
+
+
+	@Test
+	public void testLanguageComparatorEq() {
+
+		Patient p = new Patient();
+		p.setLanguage("en");
+		p.addName().setFamily("Smith").addGiven("John");
+		p.setBirthDateElement(new DateType("1955-01-01"));
+		p.setActive(true);
+		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map;
+		List<String> found;
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("_language eq en"));
+		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(found, containsInAnyOrder(id1));
+
+	}
+
+
 
 	@Test
 	public void testStringComparatorCo() {
@@ -1215,6 +1240,18 @@ private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4Fi
 			new StringParam("url ew ba")));
 		assertThat(toUnqualifiedVersionlessIds(result), empty());
 
+	}
+
+	@Test
+	public void testUnknownSearchParam() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("foo eq smith"));
+		try {
+			myPatientDao.search(map);
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+		}
 	}
 
 

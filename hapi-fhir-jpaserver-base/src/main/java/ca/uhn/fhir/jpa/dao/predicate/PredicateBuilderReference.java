@@ -683,7 +683,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 						}
 
 					} else {
-						String validNames = new TreeSet<>(mySearchParamRegistry.getActiveSearchParams(theResourceName).keySet()).toString();
+						Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
 						String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
 						throw new InvalidRequestException(msg);
 					}

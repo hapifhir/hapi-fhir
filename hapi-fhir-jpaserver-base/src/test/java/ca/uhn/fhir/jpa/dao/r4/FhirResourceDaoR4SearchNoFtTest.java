@@ -1388,6 +1388,37 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+
+	@Test
+	public void testSearchByIdParamInverse() {
+		String id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+		}
+		String id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+		}
+
+		SearchParameterMap params;
+
+		// inverse
+		params = SearchParameterMap.newSynchronous();
+		params.add("_id", new TokenParam(id1).setModifier(TokenParamModifier.NOT));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id2));
+
+		// Non-inverse
+		params = SearchParameterMap.newSynchronous();
+		params.add("_id", new TokenParam(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
+
+	}
+
+
 	@Test
 	public void testSearchByIdParam_QueryIsMinimal() {
 		// With only an _id parameter

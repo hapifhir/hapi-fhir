@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -41,6 +43,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 	public Condition createPredicateResourceId(@Nullable DbColumn theSourceJoinColumn, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		Set<ResourcePersistentId> allOrPids = null;
+		SearchFilterParser.CompareOperation defaultOperation = SearchFilterParser.CompareOperation.eq;
 
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<ResourcePersistentId> orPids = new HashSet<>();
@@ -62,6 +65,13 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 						ourLog.debug("Resource ID {} was requested but does not exist", valueAsId.getIdPart());
 					}
 				}
+
+				if (next instanceof TokenParam) {
+					if (((TokenParam) next).getModifier() == TokenParamModifier.NOT) {
+						defaultOperation = SearchFilterParser.CompareOperation.ne;
+					}
+				}
+
 			}
 			if (haveValue) {
 				if (allOrPids == null) {
@@ -79,7 +89,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 		} else if (allOrPids != null) {
 
-			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
+			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
 			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
 
 			List<Long> resourceIds = ResourcePersistentId.toLongList(allOrPids);
