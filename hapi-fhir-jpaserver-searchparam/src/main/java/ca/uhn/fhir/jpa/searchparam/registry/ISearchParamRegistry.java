@@ -24,11 +24,15 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.rest.api.Constants;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public interface ISearchParamRegistry {
 
@@ -68,4 +72,16 @@ public interface ISearchParamRegistry {
 	 * @since 5.1.0
 	 */
 	void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder);
+
+	/**
+	 * Returns a collection containing all of the valid active search parameters. This method is intended for
+	 * creating error messages for users as opposed to actual search processing. It will include meta parameters
+	 * such as <code>_id</code> and <code>_lastUpdated</code>.
+	 */
+	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
+		TreeSet<String> retVal = new TreeSet<>(getActiveSearchParams().get(theResourceName).keySet());
+		retVal.add(IAnyResource.SP_RES_ID);
+		retVal.add(Constants.PARAM_LASTUPDATED);
+		return retVal;
+	}
 }

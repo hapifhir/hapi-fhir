@@ -86,7 +86,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 		Comparable genericLowerBound;
 		Comparable genericUpperBound;
 		/**
-		 * If all present search parameters are of DAY precision, and {@link DaoConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
+		 * If all present search parameters are of DAY precision, and {@link ca.uhn.fhir.jpa.model.entity.ModelConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
 		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
 		 */
 		boolean isOrdinalComparison = isNullOrDayPrecision(lowerBound) && isNullOrDayPrecision(upperBound) && myDaoConfig.getModelConfig().getUseOrdinalDatesForDayPrecisionSearches();

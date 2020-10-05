@@ -436,24 +436,6 @@ public abstract class BaseConfig {
 		return new PersistedJpaBundleProviderFactory();
 	}
 
-	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER)
-	@Scope("prototype")
-	public PersistedJpaBundleProvider persistedJpaBundleProvider(RequestDetails theRequest, String theUuid) {
-		return new PersistedJpaBundleProvider(theRequest, theUuid);
-	}
-
-	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
-	@Scope("prototype")
-	public PersistedJpaBundleProvider persistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
-		return new PersistedJpaBundleProvider(theRequest, theSearch);
-	}
-
-	@Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
-	@Scope("prototype")
-	public PersistedJpaSearchFirstPageBundleProvider persistedJpaSearchFirstPageBundleProvider(RequestDetails theRequest, Search theSearch, SearchCoordinatorSvcImpl.SearchTask theSearchTask, ISearchBuilder theSearchBuilder) {
-		return new PersistedJpaSearchFirstPageBundleProvider(theSearch, theSearchTask, theSearchBuilder, theRequest);
-	}
-
 	@Bean
 	public SearchBuilderFactory searchBuilderFactory() {
 		return new SearchBuilderFactory();
@@ -462,111 +444,6 @@ public abstract class BaseConfig {
 	@Bean
 	public SqlObjectFactory sqlBuilderFactory() {
 		return new SqlObjectFactory();
-	}
-
-	@Bean
-	@Scope("prototype")
-	public CompositeUniqueSearchParameterPredicateBuilder compositeUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		return new CompositeUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public CoordsPredicateBuilder coordsPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new CoordsPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public DatePredicateBuilder datePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new DatePredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ForcedIdPredicateBuilder forcedIdPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ForcedIdPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public NumberPredicateBuilder numberPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new NumberPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public QuantityPredicateBuilder quantityPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new QuantityPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ResourceLinkPredicateBuilder resourceLinkPredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
-		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ResourceTablePredicateBuilder resourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceTablePredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public TagPredicateBuilder tagPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new TagPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ResourceIdPredicateBuilder resourceIdPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceIdPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public SearchParamPresentPredicateBuilder searchParamPresentPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new SearchParamPresentPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public StringPredicateBuilder stringPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new StringPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public TokenPredicateBuilder tokenPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new TokenPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public SourcePredicateBuilder sourcePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new SourcePredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public UriPredicateBuilder uriPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new UriPredicateBuilder(theSearchBuilder);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public SearchQueryExecutor searchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
-		return new SearchQueryExecutor(theGeneratedSql, theMaxResultsToFetch);
-	}
-
-	@Bean(name = SEARCH_BUILDER)
-	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
-		if (theDaoConfig.isUseLegacySearchBuilder()) {
-			return new LegacySearchBuilder(theDao, theResourceName, theResourceType);
-		}
-		return new SearchBuilder(theDao, theResourceName, theResourceType);
 	}
 
 	@Bean
@@ -579,9 +456,136 @@ public abstract class BaseConfig {
 		return new HistoryBuilderFactory();
 	}
 
+	/* **************************************************************** *
+	 * Prototype Beans Below                                            *
+	 * **************************************************************** */
+
+	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER)
+	@Scope("prototype")
+	public PersistedJpaBundleProvider newPersistedJpaBundleProvider(RequestDetails theRequest, String theUuid) {
+		return new PersistedJpaBundleProvider(theRequest, theUuid);
+	}
+
+	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
+	@Scope("prototype")
+	public PersistedJpaBundleProvider newPersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
+		return new PersistedJpaBundleProvider(theRequest, theSearch);
+	}
+
+	@Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
+	@Scope("prototype")
+	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(RequestDetails theRequest, Search theSearch, SearchCoordinatorSvcImpl.SearchTask theSearchTask, ISearchBuilder theSearchBuilder) {
+		return new PersistedJpaSearchFirstPageBundleProvider(theSearch, theSearchTask, theSearchBuilder, theRequest);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public CompositeUniqueSearchParameterPredicateBuilder newCompositeUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		return new CompositeUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public CoordsPredicateBuilder newCoordsPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new CoordsPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public DatePredicateBuilder newDatePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new DatePredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ForcedIdPredicateBuilder newForcedIdPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new ForcedIdPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public NumberPredicateBuilder newNumberPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new NumberPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public QuantityPredicateBuilder newQuantityPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new QuantityPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
+		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new ResourceTablePredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public TagPredicateBuilder newTagPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new TagPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceIdPredicateBuilder newResourceIdPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new ResourceIdPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SearchParamPresentPredicateBuilder newSearchParamPresentPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new SearchParamPresentPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public StringPredicateBuilder newStringPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new StringPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public TokenPredicateBuilder newTokenPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new TokenPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SourcePredicateBuilder newSourcePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new SourcePredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public UriPredicateBuilder newUriPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new UriPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SearchQueryExecutor newSearchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
+		return new SearchQueryExecutor(theGeneratedSql, theMaxResultsToFetch);
+	}
+
+	@Bean(name = SEARCH_BUILDER)
+	@Scope("prototype")
+	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
+		if (theDaoConfig.isUseLegacySearchBuilder()) {
+			return new LegacySearchBuilder(theDao, theResourceName, theResourceType);
+		}
+		return new SearchBuilder(theDao, theResourceName, theResourceType);
+	}
+
 	@Bean(name = HISTORY_BUILDER)
 	@Scope("prototype")
-	public HistoryBuilder persistedJpaSearchFirstPageBundleProvider(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
+	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 

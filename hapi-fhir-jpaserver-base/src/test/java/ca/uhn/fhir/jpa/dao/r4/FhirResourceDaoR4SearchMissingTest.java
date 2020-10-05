@@ -176,6 +176,33 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchWithMissingCoords() {
+		String locId = myLocationDao.create(new Location(), mySrd).getId().toUnqualifiedVersionless().getValue();
+		String locId2 = myLocationDao.create(new Location().setPosition(new Location.LocationPositionComponent(new DecimalType(10), new DecimalType(10))), mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			TokenParam param = new TokenParam();
+			param.setMissing(true);
+			params.add(Location.SP_NEAR, param);
+			List<String> patients = toUnqualifiedVersionlessIdValues(myLocationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(locId));
+			assertThat(patients, not(containsInRelativeOrder(locId2)));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			TokenParam param = new TokenParam();
+			param.setMissing(false);
+			params.add(Location.SP_NEAR, param);
+			List<String> patients = toUnqualifiedVersionlessIdValues(myLocationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(locId2));
+			assertThat(patients, not(containsInRelativeOrder(locId)));
+		}
+	}
+
+	@Test
 	public void testSearchWithMissingDate2() {
 		MedicationRequest mr1 = new MedicationRequest();
 		mr1.addCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");

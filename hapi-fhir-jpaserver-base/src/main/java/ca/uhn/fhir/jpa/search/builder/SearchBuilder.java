@@ -31,6 +31,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.HibernateDialectProvider;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -502,7 +503,8 @@ public class SearchBuilder implements ISearchBuilder {
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
 			RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theSort.getParamName());
 			if (param == null) {
-				throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
+				String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
+				throw new InvalidRequestException(msg);
 			}
 
 			switch (param.getParamType()) {

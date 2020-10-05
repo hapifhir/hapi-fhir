@@ -68,7 +68,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_ERROR;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_INFO;
@@ -243,7 +242,7 @@ public abstract class BaseStorageDao {
 			QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(nextParamName);
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), new TreeSet<>(searchParams.keySet()));
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
 				throw new InvalidRequestException(msg);
 			}
 

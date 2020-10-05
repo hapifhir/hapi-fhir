@@ -98,7 +98,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.UriType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -3084,6 +3083,20 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSortByInvalidParameter() {
+
+		SearchParameterMap pm = SearchParameterMap.newSynchronous();
+		pm.setSort(new SortSpec("hello", SortOrderEnum.DESC));
+		try {
+			myObservationDao.search(pm);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown _sort parameter value \"hello\" for resource type \"Observation\" (Note: sort parameters values must use a valid Search Parameter). Valid values for this search are: [_id, _language, _lastUpdated, based-on, category, code, code-value-concept, code-value-date, code-value-quantity, code-value-string, combo-code, combo-code-value-concept, combo-code-value-quantity, combo-data-absent-reason, combo-value-concept, combo-value-quantity, component-code, component-code-value-concept, component-code-value-quantity, component-data-absent-reason, component-value-concept, component-value-quantity, data-absent-reason, date, derived-from, device, encounter, focus, has-member, identifier, method, part-of, patient, performer, specimen, status, subject, value-concept, value-date, value-quantity, value-string]", e.getMessage());
+		}
+	}
+
+
+	@Test
 	public void testSortById() {
 		String methodName = "testSortBTyId";
 
@@ -3241,7 +3254,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testSortByQuantity() {
 		Observation res;
 
@@ -3263,13 +3275,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY));
-		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY, SortOrderEnum.ASC));
-		actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
+		actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id1, id2, id3, id4));
 
@@ -3512,32 +3524,31 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testSortByUri() {
 		ConceptMap res = new ConceptMap();
-		res.addGroup().setSource("http://foo2");
+		res.setUrl("http://foo2");
 		IIdType id2 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addGroup().setSource("http://foo1");
+		res.setUrl("http://foo1");
 		IIdType id1 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addGroup().setSource("http://bar3");
+		res.setUrl("http://foo3");
 		IIdType id3 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addGroup().setSource("http://bar4");
+		res.setUrl("http://foo4");
 		IIdType id4 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(ConceptMap.SP_SOURCE));
+		pm.setSort(new SortSpec(ConceptMap.SP_URL));
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(Encounter.SP_LENGTH, SortOrderEnum.DESC));
+		pm.setSort(new SortSpec(ConceptMap.SP_URL, SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1));

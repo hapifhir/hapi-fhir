@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
@@ -24,7 +23,6 @@ import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 

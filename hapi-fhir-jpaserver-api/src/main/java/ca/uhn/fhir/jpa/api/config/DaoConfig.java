@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.api.config;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
@@ -1018,44 +1017,6 @@ public class DaoConfig {
 	 */
 	public void setAllowExternalReferences(boolean theAllowExternalReferences) {
 		myModelConfig.setAllowExternalReferences(theAllowExternalReferences);
-	}
-
-	/**
-	 * <p>
-	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
-	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
-	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
-	 * <p>
-	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
-	 * integer representing the ordinal date {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
-	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
-	 * </p>
-	 * Default is {@literal true} beginning in HAPI FHIR 5.0
-	 * </p>
-	 *
-	 * @since 5.0
-	 */
-	public boolean getUseOrdinalDatesForDayPrecisionSearches() {
-		return myModelConfig.getUseOrdinalDatesForDayPrecisionSearches();
-	}
-
-	/**
-	 * <p>
-	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
-	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
-	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
-	 * <p>
-	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
-	 * ordinal {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
-	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
-	 * </p>
-	 * Default is {@literal true} beginning in HAPI FHIR 5.0
-	 * </p>
-	 *
-	 * @since 5.0
-	 */
-	public void setUseOrdinalDatesForDayPrecisionSearches(boolean theUseOrdinalDates) {
-		myModelConfig.setUseOrdinalDatesForDayPrecisionSearches(theUseOrdinalDates);
 	}
 
 	/**

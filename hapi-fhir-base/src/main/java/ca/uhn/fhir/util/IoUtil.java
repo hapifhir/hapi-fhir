@@ -10,9 +10,6 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.io.Closeable;
-import java.io.IOException;
-
 public class IoUtil {
 
 	/**
