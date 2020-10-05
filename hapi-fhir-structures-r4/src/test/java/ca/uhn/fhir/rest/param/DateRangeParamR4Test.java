@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -69,10 +70,10 @@ public class DateRangeParamR4Test {
 
 	static {
 		ourFmtLower = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
-		ourFmtLower.setTimeZone(TimeZone.getTimeZone("GMT-12:00"));
+		ourFmtLower.setTimeZone(TimeZone.getTimeZone("GMT-10:00"));
 
 		ourFmtUpper = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
-		ourFmtUpper.setTimeZone(TimeZone.getTimeZone("GMT+10:00"));
+		ourFmtUpper.setTimeZone(TimeZone.getTimeZone("GMT+12:00"));
 
 		ourFmtLowerForTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
 		ourFmtUpperForTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
