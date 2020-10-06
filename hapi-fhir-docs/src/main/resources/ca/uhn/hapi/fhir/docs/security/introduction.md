@@ -23,7 +23,7 @@ Server security is divided into three topics:
 The [Server Interceptor](/docs/interceptors/server_interceptors.html) framework can provide an easy way to test for credentials. The following example shows a simple custom interceptor which tests for HTTP Basic Auth.
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/SecurityInterceptors.java|basicAuthInterceptor}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/SecurityInterceptors.java|basicAuthInterceptorExample}}
 ``` 
 
 ## HTTP Basic Auth
