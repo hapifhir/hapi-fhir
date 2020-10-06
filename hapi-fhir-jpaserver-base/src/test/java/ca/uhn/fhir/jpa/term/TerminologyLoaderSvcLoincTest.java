@@ -68,9 +68,54 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	@Test
-	public void testLoadLoinc() throws Exception {
+	public void testLoadLoincWithSplitPartLink() throws Exception {
 		addLoincMandatoryFilesToZip(myFiles);
+		verifyLoadLoinc();
+	}
 
+	@Test
+	public void testLoadLoincWithSinglePartLink() throws Exception {
+		addLoincMandatoryFilesAndSinglePartLinkToZip(myFiles);
+		verifyLoadLoinc();
+	}
+
+	@Test
+	public void testLoadLoincInvalidPartLinkFiles() throws IOException {
+
+		// Missing all PartLinkFiles
+		addBaseLoincMandatoryFilesToZip(myFiles);
+		myFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+
+		try {
+			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] or [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+		}
+
+		// Missing LoincPartLink_Supplementary
+		myFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+		try {
+			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] or [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+		}
+
+		// Both Split and Single PartLink files
+		myFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
+		myFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		try {
+			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]", e.getMessage());
+		}
+
+	}
+
+
+	private void verifyLoadLoinc() throws Exception {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
@@ -413,12 +458,27 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		}
 	}
 
+	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles);
+		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
+	}
+
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addLoincMandatoryFilesWithPropertiesFileToZip(theFiles, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		addBaseLoincMandatoryFilesToZip(theFiles);
+		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
 	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
 		theFiles.addFileZip("/loinc/", thePropertiesFile);
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
+		addBaseLoincMandatoryFilesToZip(theFiles);
+	}
+
+	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException{
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
@@ -430,8 +490,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.io.FileUtils;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -137,6 +139,24 @@ public class LoadedFileDescriptors implements Closeable {
 		List<String> notFound = notFound(theExpectedFilenameFragments);
 		if (!notFound.isEmpty()) {
 			ourLog.warn("Could not find the following optional files: " + notFound);
+		}
+	}
+
+	void verifyPartLinkFilesExist(List<String> theMultiPartLinkFiles, String theSinglePartLinkFile) {
+		List<String> notFoundMulti = notFound(theMultiPartLinkFiles);
+		List<String> notFoundSingle = notFound(Arrays.asList(theSinglePartLinkFile));
+		// Expect all of the files in theMultiPartLinkFiles to be found and theSinglePartLinkFile to not be found,
+		// or none of the files in theMultiPartLinkFiles to be found and the SinglePartLinkFile to be found.
+		boolean multiPartFilesFound = notFoundMulti.isEmpty();
+		boolean singlePartFilesFound = notFoundSingle.isEmpty();
+		if (!LogicUtil.multiXor(multiPartFilesFound, singlePartFilesFound)) {
+			String msg;
+			if (!multiPartFilesFound && !singlePartFilesFound) {
+				msg = "Could not find any of the PartLink files: " + notFoundMulti + " or " + notFoundSingle;
+			} else {
+				msg = "Found both the single PartLink file, " + theSinglePartLinkFile + ", and the split PartLink files: " + theMultiPartLinkFiles;
+			}
+			throw new UnprocessableEntityException(msg);
 		}
 	}
 
