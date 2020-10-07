@@ -152,7 +152,7 @@ public class LoadedFileDescriptors implements Closeable {
 		if (!LogicUtil.multiXor(multiPartFilesFound, singlePartFilesFound)) {
 			String msg;
 			if (!multiPartFilesFound && !singlePartFilesFound) {
-				msg = "Could not find any of the PartLink files: " + notFoundMulti + " or " + notFoundSingle;
+				msg = "Could not find any of the PartLink files: " + notFoundMulti + " nor " + notFoundSingle;
 			} else {
 				msg = "Found both the single PartLink file, " + theSinglePartLinkFile + ", and the split PartLink files: " + theMultiPartLinkFiles;
 			}
